@@ -42,6 +42,9 @@ import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataListener
 import org.jetbrains.anko.alert
 import timber.log.Timber
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
 private const val LOCATION_PERMISSION_REQUEST_CODE = 2
@@ -100,6 +103,10 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
         navView.setupWithNavController(navController)
+
+        startConnection()
+        Connection.init(this)
+        WatchDataListener.init()
     }
 
     override fun onResume() {
@@ -108,15 +115,15 @@ class MainActivity : AppCompatActivity() {
         if (!bluetoothAdapter.isEnabled) {
             promptEnableBluetooth()
         }
-        startConnection()
-
-        Connection.init(this)
-        WatchDataListener.init()
     }
 
     override fun onPause() {
         super.onPause()
-        Connection.teardownConnection(this.device)
+    }
+
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        InactivityWatcher.resetTimer(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -266,15 +273,21 @@ class MainActivity : AppCompatActivity() {
                         // We have collected all data from watch.
                         // Send initializer data to watch, se we can set time later
                         WatchDataCollector.runInitCommands()
+                        InactivityWatcher.start(this)
                     }
                     ProgressEvents.Events.Disconnect -> {
                         Timber.i("onDisconnect")
+                        InactivityWatcher.cancel()
+
                         Utils.toast(this, "Disconnected from watch!")
                         val device = ProgressEvents.Events.Disconnect.payload as BluetoothDevice
                         Connection.teardownConnection(device)
 
-                        // restart
-                        startConnection()
+                        // restart after 5 seconds
+                        val reconnectScheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+                        reconnectScheduler.schedule({
+                            startConnection()
+                        }, 5L, TimeUnit.SECONDS)
                     }
                 }
             },

@@ -46,13 +46,33 @@
             app:layout_constraintBottom_toBottomOf="parent"
             >
 
-            <org.avmedia.gShockPhoneSync.customComponents.HomeLocation
-                android:id="@+id/home_location"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:layout_gravity="bottom"
                 android:layout_weight="1"
-                />
+                app:layout_constraintBottom_toBottomOf="parent"
+                >
+
+                <TextView
+                    android:id="@+id/home_time_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="Home Time"
+                    />
+
+                <org.avmedia.gShockPhoneSync.customComponents.HomeTime
+                    android:id="@+id/home_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:textSize="18dp"
+                    android:textFontWeight="1000"
+                    />
+
+            </LinearLayout>
 
             <org.avmedia.gShockPhoneSync.customComponents.BatteryView
                 android:id="@+id/battery_view"

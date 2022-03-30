@@ -13,12 +13,12 @@ import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 
 
-class HomeLocation @JvmOverloads constructor(
+class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     init {
-        text = "Home Location\n" + WatchDataCollector.homeCity
+        text = WatchDataCollector.homeCity
         createAppEventsSubscription()
     }
 
