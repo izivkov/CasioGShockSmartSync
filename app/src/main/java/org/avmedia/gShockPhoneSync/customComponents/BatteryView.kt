@@ -60,7 +60,6 @@ class BatteryView @JvmOverloads constructor(
 
     init {
         init(attrs)
-        chargingBitmap = getBitmap(R.drawable.ic_charging)
         percent = WatchDataCollector.batteryLevel
     }
 

@@ -6,9 +6,7 @@
 
 package org.avmedia.gShockPhoneSync
 
-import android.app.Notification
 import android.content.Context
-import android.os.Handler
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.Utils
 import java.util.concurrent.Executors
@@ -18,23 +16,21 @@ import java.util.concurrent.TimeUnit
 
 object InactivityWatcher {
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private const val TIMEOUT:Long = 60*3
-    private lateinit var futureTask: ScheduledFuture<*>
+    private const val TIMEOUT: Long = 60 * 3
+    private var futureTask: ScheduledFuture<*>? = null
 
-    fun start (context: Context) {
+    fun start(context: Context) {
         futureTask = scheduler.schedule({
             Connection.disconnect(context)
         }, TIMEOUT, TimeUnit.SECONDS)
     }
 
-    fun cancel () {
-        if (futureTask != null) {
-            futureTask.cancel(true)
-        }
+    fun cancel() {
+        futureTask?.cancel(true)
     }
 
-    fun resetTimer (context: Context) {
-        cancel ()
+    fun resetTimer(context: Context) {
+        cancel()
 
         futureTask = scheduler.schedule({
             Connection.disconnect(context)

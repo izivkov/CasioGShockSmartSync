@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 1:41 p.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-30, 1:41 p.m.
+  -->
+
+<resources>
+    <color name="ic_launcher_background">#D1E7DB</color>
+</resources>

@@ -8,7 +8,6 @@ package org.avmedia.gShockPhoneSync.ble
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
-import org.avmedia.gShockPhoneSync.BleTestActivity
 import timber.log.Timber
 import java.util.UUID
 
@@ -29,20 +28,6 @@ object DeviceCharacteristics {
             Timber.i("servicesOnDevice $service ...")
             service.characteristics ?: listOf()
         } ?: listOf()
-    }
-
-    val characteristicProperties by lazy {
-        characteristics.associateWith { characteristic ->
-            mutableListOf<BleTestActivity.CharacteristicProperty>().apply {
-                if (characteristic.isNotifiable()) add(BleTestActivity.CharacteristicProperty.Notifiable)
-                if (characteristic.isIndicatable()) add(BleTestActivity.CharacteristicProperty.Indicatable)
-                if (characteristic.isReadable()) add(BleTestActivity.CharacteristicProperty.Readable)
-                if (characteristic.isWritable()) add(BleTestActivity.CharacteristicProperty.Writable)
-                if (characteristic.isWritableWithoutResponse()) {
-                    add(BleTestActivity.CharacteristicProperty.WritableWithoutResponse)
-                }
-            }.toList()
-        }
     }
 
     fun findCharacteristic(uuid: UUID?): BluetoothGattCharacteristic {

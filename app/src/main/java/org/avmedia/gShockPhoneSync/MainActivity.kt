@@ -71,17 +71,6 @@ class MainActivity : AppCompatActivity() {
     private var isScanning = false
 
     private val scanResults = mutableListOf<ScanResult>()
-    private val scanResultAdapter: ScanResultAdapter by lazy {
-        ScanResultAdapter(scanResults) { result ->
-            if (isScanning) {
-                stopBleScan()
-            }
-            with(result.device) {
-                Timber.w("Connecting to $address")
-                Connection.connect(this, this@MainActivity)
-            }
-        }
-    }
 
     private val isLocationPermissionGranted
         get() = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -170,9 +159,6 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !isLocationPermissionGranted) {
             requestLocationPermission()
         } else {
-            scanResults.clear()
-            scanResultAdapter.notifyDataSetChanged()
-
             var device: BluetoothDevice? = null
             val cachedDeviceAddr: String? = LocalDataStorage.get("cached device", this)
             if (cachedDeviceAddr != null) {
@@ -233,19 +219,19 @@ class MainActivity : AppCompatActivity() {
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            val indexQuery = scanResults.indexOfFirst { it.device.address == result.device.address }
-
-            if (indexQuery != -1) { // A scan result already exists with the same address
-                scanResults[indexQuery] = result
-                scanResultAdapter.notifyItemChanged(indexQuery)
-            } else {
-                with(result.device) {
-                    Timber.i("Found BLE device! Name: ${name ?: "Unnamed"}, address: $address")
-                    connect(result.device, this@MainActivity)
-                }
-                scanResults.add(result)
-                scanResultAdapter.notifyItemInserted(scanResults.size - 1)
-            }
+//            val indexQuery = scanResults.indexOfFirst { it.device.address == result.device.address }
+//
+//            if (indexQuery != -1) { // A scan result already exists with the same address
+//                scanResults[indexQuery] = result
+//                scanResultAdapter.notifyItemChanged(indexQuery)
+//            } else {
+//                with(result.device) {
+//                    Timber.i("Found BLE device! Name: ${name ?: "Unnamed"}, address: $address")
+//                    connect(result.device, this@MainActivity)
+//                }
+//                scanResults.add(result)
+//                scanResultAdapter.notifyItemInserted(scanResults.size - 1)
+//            }
 
             if (LocalDataStorage.get("cached device", this@MainActivity) == null) {
                 LocalDataStorage.put("cached device", result.device.address, this@MainActivity)
