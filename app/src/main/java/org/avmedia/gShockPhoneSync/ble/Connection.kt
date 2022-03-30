@@ -152,7 +152,10 @@ object Connection : IConnection {
     }
 
     fun enableNotifications() {
-        enableNotifications(device, DeviceCharacteristics.findCharacteristic(CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID))
+        enableNotifications(
+            device,
+            DeviceCharacteristics.findCharacteristic(CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID)
+        )
     }
 
     fun enableNotifications(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic) {

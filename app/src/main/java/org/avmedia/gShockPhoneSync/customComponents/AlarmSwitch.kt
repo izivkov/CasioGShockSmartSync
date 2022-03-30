@@ -8,14 +8,10 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import timber.log.Timber
 
 class AlarmSwitch @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs, defStyleAttr)
-{
+) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs, defStyleAttr) {
 
     init {
 //        onSelectionChanged(1, 2)

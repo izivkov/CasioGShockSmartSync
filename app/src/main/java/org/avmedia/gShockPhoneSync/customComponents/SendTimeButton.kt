@@ -11,7 +11,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.utils.Utils
-import java.net.InetAddress
 import java.util.Date
 
 class SendTimeButton @JvmOverloads constructor(
@@ -27,7 +26,7 @@ class SendTimeButton @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
                     sendTimeToWatch()
-                    Utils.toast(context,"Time Sent to Watch")
+                    Utils.toast(context, "Time Sent to Watch")
                 }
             }
             return false

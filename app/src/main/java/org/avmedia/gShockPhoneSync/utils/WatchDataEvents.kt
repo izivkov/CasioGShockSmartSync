@@ -11,7 +11,7 @@ import io.reactivex.subjects.PublishSubject
 
 object WatchDataEvents {
     private val subjects = HashMap<String, PublishSubject<String?>>()
-    private val subscribers = HashMap<String, LinkedHashSet<String>> ()
+    private val subscribers = HashMap<String, LinkedHashSet<String>>()
 
     fun addSubject(name: String) {
         if (subjects[name] != null) {
@@ -27,7 +27,7 @@ object WatchDataEvents {
             subscribers[subscriber] = subjectsForThisSubscriber
         }
 
-        val subjectsForThisSubscriber =  subscribers[subscriber]
+        val subjectsForThisSubscriber = subscribers[subscriber]
         if (!subjectsForThisSubscriber?.contains(subject)!!) {
             subjectsForThisSubscriber?.add(subject)
         }
@@ -52,7 +52,12 @@ object WatchDataEvents {
         }
     }
 
-    fun subscribe(subscriberName: String, subject: String, onNext: Consumer<in String?>, onError: Consumer<in Throwable>) {
+    fun subscribe(
+        subscriberName: String,
+        subject: String,
+        onNext: Consumer<in String?>,
+        onError: Consumer<in Throwable>
+    ) {
         if (!subscriberAlreadySubscribed(subscriberName, subject)) {
             getProcessor(subject)?.subscribe(onNext, onError)
             addSubscriberAndSubject(subscriberName, subject)

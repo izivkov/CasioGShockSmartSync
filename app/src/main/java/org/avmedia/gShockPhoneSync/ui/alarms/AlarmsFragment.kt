@@ -6,18 +6,13 @@
 
 package org.avmedia.gShockPhoneSync.ui.alarms
 
-import android.content.Intent
 import android.os.Bundle
-import android.provider.AlarmClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import org.avmedia.gShockPhoneSync.databinding.FragmentAlarmsBinding
-import timber.log.Timber
-import java.util.Calendar
 
 class AlarmsFragment : Fragment() {
 

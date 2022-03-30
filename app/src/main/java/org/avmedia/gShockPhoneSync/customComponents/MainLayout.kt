@@ -23,7 +23,7 @@ import org.avmedia.gShockPhoneSync.IHideableLayout
 
 class MainLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) , IHideableLayout {
+) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
     }

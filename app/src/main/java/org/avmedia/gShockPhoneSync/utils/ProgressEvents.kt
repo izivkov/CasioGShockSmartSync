@@ -11,7 +11,6 @@ import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.processors.PublishProcessor
-import java.util.*
 
 object ProgressEvents {
 
@@ -22,12 +21,13 @@ object ProgressEvents {
     class Subscriber {
         private val subscribers: Set<String> = LinkedHashSet<String>()
 
-        fun start (name: String, onNext:Consumer<in Events>, onError: Consumer<in Throwable>) {
+        fun start(name: String, onNext: Consumer<in Events>, onError: Consumer<in Throwable>) {
             if (subscribers.contains(name)) {
                 return // do not allow multiple subscribers with same name
             }
 
-            eventProcessor.observeOn(AndroidSchedulers.mainThread()).doOnNext(onNext).doOnError(onError).subscribe({},onError )
+            eventProcessor.observeOn(AndroidSchedulers.mainThread()).doOnNext(onNext)
+                .doOnError(onError).subscribe({}, onError)
             (subscribers as LinkedHashSet).add(name)
         }
 
@@ -36,6 +36,7 @@ object ProgressEvents {
             (subscribers as LinkedHashSet).remove(name)
         }
     }
+
     val connectionEventFlowable = (eventProcessor as Flowable<Events>)
 
     init {
@@ -53,7 +54,7 @@ object ProgressEvents {
 
         object Init : Events()
 
-        object ConnectionStarted: Events()
+        object ConnectionStarted : Events()
         object ConnectionSetupComplete : Events()
         object Disconnect : Events()
         object DescriptorRead : Events()

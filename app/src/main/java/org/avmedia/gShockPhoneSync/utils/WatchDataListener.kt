@@ -9,7 +9,6 @@ package org.avmedia.gShockPhoneSync.utils
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.IDataReceived
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
-import timber.log.Timber
 
 /*
 This class listens for status data from the Bot and emits events.

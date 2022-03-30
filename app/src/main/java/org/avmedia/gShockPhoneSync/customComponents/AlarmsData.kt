@@ -10,11 +10,11 @@ import com.google.gson.Gson
 
 object AlarmsData {
 
-    public class Alarm (var hour:Int, var minute:Int, var enabled:Boolean) {}
+    public class Alarm(var hour: Int, var minute: Int, var enabled: Boolean) {}
 
-    val alarms = ArrayList<Alarm> ()
+    val alarms = ArrayList<Alarm>()
 
-    fun clear () {
+    fun clear() {
         alarms.clear()
     }
 
@@ -23,7 +23,7 @@ object AlarmsData {
     }
 
     @Synchronized
-    fun fromJson(jsonStr:String) {
+    fun fromJson(jsonStr: String) {
         val gson = Gson()
         val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
         alarms.addAll(alarmArr)

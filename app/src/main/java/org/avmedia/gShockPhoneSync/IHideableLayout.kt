@@ -6,8 +6,6 @@
 
 package org.avmedia.gShockPhoneSync
 
-import android.widget.RelativeLayout
-
 interface IHideableLayout {
 
     fun show()

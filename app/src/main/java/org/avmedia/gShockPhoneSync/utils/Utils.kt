@@ -6,10 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.utils
 
-import android.R
 import android.content.Context
-import android.graphics.Color
-import android.view.View
 import android.widget.Toast
 import java.util.Locale
 
@@ -18,10 +15,12 @@ object Utils {
     public fun String.hexToBytes() =
         this.chunked(2).map { it.uppercase(Locale.US).toInt(16).toByte() }.toByteArray()
 
-    public fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
-    public fun byteArray(vararg bytes: Byte) = ByteArray(bytes.size) { pos -> bytes[pos]}
+    public fun byteArrayOfInts(vararg ints: Int) =
+        ByteArray(ints.size) { pos -> ints[pos].toByte() }
 
-    public fun toast (context:Context, message: String) {
+    public fun byteArray(vararg bytes: Byte) = ByteArray(bytes.size) { pos -> bytes[pos] }
+
+    public fun toast(context: Context, message: String) {
         val toast: Toast = Toast.makeText(context, message, Toast.LENGTH_LONG)
         toast.show()
     }
@@ -57,7 +56,7 @@ object Utils {
         return asciiStr
     }
 
-    fun toCompactString (hexStr: String): String {
+    fun toCompactString(hexStr: String): String {
         var compactString = ""
         val strArray = hexStr.split(' ')
         strArray.forEach {

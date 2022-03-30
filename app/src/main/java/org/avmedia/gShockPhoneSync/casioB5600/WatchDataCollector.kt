@@ -11,14 +11,13 @@ import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
-import timber.log.Timber
 import java.util.Locale
 
 object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
     private val dstWatchState: ArrayList<String> = ArrayList<String>()
     private val worldCities: ArrayList<String> = ArrayList<String>()
-    var unmatchedCmdCount:Int = -1
+    var unmatchedCmdCount: Int = -1
 
     var batteryLevel: Int = 0
     var watchName: String = ""
@@ -67,7 +66,7 @@ object WatchDataCollector {
         })
     }
 
-    fun start () {
+    fun start() {
         unmatchedCmdCount = -1
         dstSettings.clear()
         dstWatchState.clear()
@@ -103,7 +102,7 @@ object WatchDataCollector {
         writeCmd(0xC, "28")
     }
 
-    fun runInitCommands () {
+    fun runInitCommands() {
         dstSettings.forEach { command ->
             writeCmd(0xe, command)
         }
@@ -115,7 +114,7 @@ object WatchDataCollector {
         }
     }
 
-    private fun writeCmd (handle: Int, cmd: String) {
+    private fun writeCmd(handle: Int, cmd: String) {
         if (unmatchedCmdCount == -1) {
             unmatchedCmdCount = 0
         }

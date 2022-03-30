@@ -10,9 +10,9 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import org.avmedia.gShockPhoneSync.ble.printProperties
 import kotlinx.android.synthetic.main.row_characteristic.view.characteristic_properties
 import kotlinx.android.synthetic.main.row_characteristic.view.characteristic_uuid
+import org.avmedia.gShockPhoneSync.ble.printProperties
 import org.jetbrains.anko.layoutInflater
 
 class CharacteristicAdapter(

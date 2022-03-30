@@ -11,7 +11,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
@@ -86,7 +85,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // setContentView(R.layout.activity_main)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -259,7 +257,8 @@ class MainActivity : AppCompatActivity() {
             {
                 when (it) {
                     ProgressEvents.Events.ConnectionSetupComplete -> {
-                        val device = ProgressEvents.Events.ConnectionSetupComplete.payload as BluetoothDevice
+                        val device =
+                            ProgressEvents.Events.ConnectionSetupComplete.payload as BluetoothDevice
                         DeviceCharacteristics.init(device)
                         CasioSupport.init()
                     }

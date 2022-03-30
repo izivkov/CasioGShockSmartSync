@@ -23,7 +23,11 @@ import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 
-class BatteryView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+class BatteryView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) :
     View(context, attrs, defStyleAttr) {
     private var radius: Float = 0f
     private var isCharging: Boolean = false
@@ -146,7 +150,8 @@ class BatteryView @JvmOverloads constructor(context: Context, attrs: AttributeSe
 
     private fun drawProgress(canvas: Canvas, percent: Int) {
         percentPaint.color = getPercentColor(percent)
-        percentRect.top = percentRectTopMin + (percentRect.bottom - percentRectTopMin) * (100 - percent) / 100
+        percentRect.top =
+            percentRectTopMin + (percentRect.bottom - percentRectTopMin) * (100 - percent) / 100
         canvas.drawRect(percentRect, percentPaint)
     }
 
@@ -164,7 +169,11 @@ class BatteryView @JvmOverloads constructor(context: Context, attrs: AttributeSe
         }
     }
 
-    private fun getBitmap(drawableId: Int, desireWidth: Int? = null, desireHeight: Int? = null): Bitmap? {
+    private fun getBitmap(
+        drawableId: Int,
+        desireWidth: Int? = null,
+        desireHeight: Int? = null
+    ): Bitmap? {
         val drawable = AppCompatResources.getDrawable(context, drawableId) ?: return null
         val bitmap = Bitmap.createBitmap(
             desireWidth ?: drawable.intrinsicWidth,

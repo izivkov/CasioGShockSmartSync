@@ -94,7 +94,8 @@ object CasioSupport {
                 CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code
             ) -> {
                 jsonResponse.put("WATCH_INFO_DATA", command)
-            } else -> {
+            }
+            else -> {
                 jsonResponse.put("WATCH_INFO_DATA", command)
             }
         }

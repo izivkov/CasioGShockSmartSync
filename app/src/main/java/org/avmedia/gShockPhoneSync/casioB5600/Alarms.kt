@@ -55,7 +55,8 @@ object Alarms {
     }
 
     private fun createSecondaryAlarm(alarms: List<Alarm>): ByteArray {
-        var allAlarms = Utils.byteArrayOfInts(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code)
+        var allAlarms =
+            Utils.byteArrayOfInts(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code)
 
         for (alarm in alarms) {
             allAlarms += Utils.byteArrayOfInts(

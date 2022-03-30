@@ -6,19 +6,16 @@
 
 package org.avmedia.gShockPhoneSync
 
-import android.annotation.SuppressLint
 import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import timber.log.Timber
-import java.util.*
-
 
 object ScreenSelector {
     private const val TAG = "ScreenSelector"
 
     private class NamedScreen(var name: String, var layout: IHideableLayout)
+
     private var screens: MutableList<NamedScreen> = ArrayList()
 
     init {

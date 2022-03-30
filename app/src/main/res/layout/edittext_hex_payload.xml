@@ -1,15 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
   ~ Copyright (c) 2022 . All rights reserved.
   ~ Last modified 2022-03-07, 8:44 p.m.
   -->
 
-<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+<EditText
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:maxLines="1"
-    android:hint="Enter payload in hex (0-9, a-f, A-F)"
     android:digits="0123456789abcdefABCDEF"
+    android:hint="Enter payload in hex (0-9, a-f, A-F)"
     android:importantForAutofill="no"
-    android:inputType="text" />
+    android:inputType="text"
+    android:maxLines="1"
+    />

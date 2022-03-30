@@ -17,7 +17,6 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
-import org.jetbrains.anko.attr
 import timber.log.Timber
 import java.text.ParseException
 import java.util.Date
@@ -58,8 +57,8 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsData.Alarm>) :
             alarmEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
                 alarm.enabled = isChecked
             })
-            (viewHolder.itemView as AlarmItem).setAlarmData (alarm)
-            (viewHolder.itemView as AlarmItem).setOnDataChange (::notifyDataSetChanged)
+            (viewHolder.itemView as AlarmItem).setAlarmData(alarm)
+            (viewHolder.itemView as AlarmItem).setOnDataChange(::notifyDataSetChanged)
         } catch (e: ParseException) {
             e.printStackTrace()
         }

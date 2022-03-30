@@ -6,7 +6,6 @@
 
 package org.avmedia.gShockPhoneSync.ble
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 
 interface IConnection {
@@ -17,6 +16,6 @@ interface IConnection {
     fun disconnect(context: Context? = null)
     fun isConnected(): Boolean
     fun sendMessage(message: String)
-    fun start ()
-    fun stop ()
+    fun start()
+    fun stop()
 }

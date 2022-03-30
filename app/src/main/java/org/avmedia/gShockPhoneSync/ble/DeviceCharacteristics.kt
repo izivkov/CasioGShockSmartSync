@@ -9,19 +9,18 @@ package org.avmedia.gShockPhoneSync.ble
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import org.avmedia.gShockPhoneSync.BleTestActivity
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 import java.util.UUID
 
 object DeviceCharacteristics {
 
-    lateinit var device:BluetoothDevice
+    lateinit var device: BluetoothDevice
 
     private val characteristicMap by lazy {
         characteristics.associateBy { it.uuid }.toMap()
     }
 
-    fun init (device: BluetoothDevice) {
+    fun init(device: BluetoothDevice) {
         this.device = device
     }
 
@@ -46,7 +45,7 @@ object DeviceCharacteristics {
         }
     }
 
-    fun findCharacteristic(uuid: UUID?) :BluetoothGattCharacteristic {
+    fun findCharacteristic(uuid: UUID?): BluetoothGattCharacteristic {
         return characteristicMap[uuid]!!
     }
 
