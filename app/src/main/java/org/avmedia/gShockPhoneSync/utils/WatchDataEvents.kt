@@ -4,15 +4,6 @@
  * Last modified 2022-03-27, 9:37 p.m.
  */
 
-/*
- * Developed for the OpenBot project (https://openbot.org) by:
- *
- * Ivo Zivkov
- * izivkov@gmail.com
- *
- * Date: 2020-12-27, 10:59 p.m.
- */
-
 package org.avmedia.gShockPhoneSync.utils
 
 import io.reactivex.functions.Consumer

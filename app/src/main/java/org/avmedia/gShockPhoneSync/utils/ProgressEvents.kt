@@ -4,15 +4,6 @@
  * Last modified 2022-03-28, 3:48 p.m.
  */
 
-/*
- * Developed for the OpenBot project (https://openbot.org) by:
- *
- * Ivo Zivkov
- * izivkov@gmail.com
- *
- * Date: 2020-12-27, 10:58 p.m.
- */
-
 package org.avmedia.gShockPhoneSync.utils
 
 import android.util.Log

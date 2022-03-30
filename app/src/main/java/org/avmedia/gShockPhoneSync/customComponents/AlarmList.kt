@@ -3,16 +3,6 @@
  * Copyright (c) 2022 . All rights reserved.
  * Last modified 2022-03-20, 9:42 p.m.
  */
-
-/*
- * Developed for the OpenBot project (https://openbot.org) by:
- *
- * Ivo Zivkov
- * izivkov@gmail.com
- *
- * Date: 2020-12-27, 10:56 p.m.
- */
-
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.annotation.SuppressLint
