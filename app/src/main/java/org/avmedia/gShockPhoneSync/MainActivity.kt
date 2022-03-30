@@ -93,6 +93,8 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
         navView.setupWithNavController(navController)
 
+        createAppEventsSubscription()
+
         startConnection()
         Connection.init(this)
         WatchDataListener.init()
@@ -100,7 +102,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        createAppEventsSubscription()
         if (!bluetoothAdapter.isEnabled) {
             promptEnableBluetooth()
         }
@@ -218,20 +219,6 @@ class MainActivity : AppCompatActivity() {
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
-
-//            val indexQuery = scanResults.indexOfFirst { it.device.address == result.device.address }
-//
-//            if (indexQuery != -1) { // A scan result already exists with the same address
-//                scanResults[indexQuery] = result
-//                scanResultAdapter.notifyItemChanged(indexQuery)
-//            } else {
-//                with(result.device) {
-//                    Timber.i("Found BLE device! Name: ${name ?: "Unnamed"}, address: $address")
-//                    connect(result.device, this@MainActivity)
-//                }
-//                scanResults.add(result)
-//                scanResultAdapter.notifyItemInserted(scanResults.size - 1)
-//            }
 
             if (LocalDataStorage.get("cached device", this@MainActivity) == null) {
                 LocalDataStorage.put("cached device", result.device.address, this@MainActivity)

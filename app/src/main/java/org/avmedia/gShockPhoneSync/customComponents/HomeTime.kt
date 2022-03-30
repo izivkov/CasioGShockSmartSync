@@ -12,7 +12,6 @@ import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 
-
 class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
