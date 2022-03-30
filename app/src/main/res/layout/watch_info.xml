@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-29, 8:03 p.m.
+  -->
+
+<org.avmedia.gShockPhoneSync.customComponents.WatchInfo
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/watch_info"
+    style="@style/CardViewStyle"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:clickable="false"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/exact_time"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="12dp"
+        android:paddingBottom="20dp"
+        android:orientation="horizontal"
+        >
+
+        <org.avmedia.gShockPhoneSync.customComponents.WatchName
+            android:id="@+id/watch_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20pt"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            >
+
+            <org.avmedia.gShockPhoneSync.customComponents.HomeLocation
+                android:id="@+id/home_location"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                />
+
+            <org.avmedia.gShockPhoneSync.customComponents.BatteryView
+                android:id="@+id/battery_view"
+                android:layout_width="40dp"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</org.avmedia.gShockPhoneSync.customComponents.WatchInfo>

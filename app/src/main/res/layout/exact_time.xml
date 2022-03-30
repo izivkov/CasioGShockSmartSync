@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-28, 10:09 p.m.
+  -->
+
+<org.avmedia.gShockPhoneSync.customComponents.ExactTime
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/CardViewStyle"
+    android:id="@+id/exact_time"
+    android:clickable="true"
+    android:layout_height="wrap_content"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    >
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        >
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingRight="12dp"
+            android:paddingLeft="12dp"
+            android:paddingTop="30dp"
+            android:paddingBottom="30dp"
+            >
+
+            <TextView
+                android:id="@+id/watchTimeTitle"
+                android:layout_gravity="left"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Exact Time"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="20dp"
+                />
+
+            <TextClock
+                android:format12Hour="h:mm:ss a"
+                android:id="@+id/textClock"
+                android:layout_gravity="left"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textSize="34dp"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <org.avmedia.gShockPhoneSync.customComponents.SendTimeButton
+                style="@style/buttonStyle"
+                android:background="@drawable/button"
+                android:id="@+id/SendTime"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_width="wrap_content"
+                android:text="Send to Watch"
+                tools:ignore="MissingConstraints"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</org.avmedia.gShockPhoneSync.customComponents.ExactTime>

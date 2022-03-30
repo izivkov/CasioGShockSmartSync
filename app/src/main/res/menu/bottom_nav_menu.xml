@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-12, 9:46 a.m.
+  -->
+
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_watch_later_black_24dp"
+        android:title="@string/time"
+        />
+
+    <item
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/ic_alarm_black_24dp"
+        android:title="@string/alarms"
+        />
+
+    <item
+        android:id="@+id/navigation_notifications"
+        android:icon="@drawable/ic_event_black_24dp"
+        android:title="@string/events"
+        />
+
+</menu>
