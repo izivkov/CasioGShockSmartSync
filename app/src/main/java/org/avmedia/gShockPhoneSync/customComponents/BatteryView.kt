@@ -34,14 +34,14 @@ class BatteryView @JvmOverloads constructor(
 
     // Top
     private var topPaint =
-        PaintDrawable(Color.BLUE) // I only want to corner top-left and top-right so I use PaintDrawable instead of Paint
+        PaintDrawable(Color.BLACK) // I only want to corner top-left and top-right so I use PaintDrawable instead of Paint
     private var topRect = Rect()
     private var topPaintWidthPercent = 50
     private var topPaintHeightPercent = 8
 
     // Border
     private var borderPaint = Paint().apply {
-        color = Color.BLUE
+        color = Color.BLACK
         style = Paint.Style.STROKE
     }
     private var borderRect = RectF()
@@ -89,7 +89,7 @@ class BatteryView @JvmOverloads constructor(
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val measureWidth = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
-        val measureHeight = (measureWidth * 1.8f).toInt()
+        val measureHeight = (measureWidth * 2.5f).toInt()
         setMeasuredDimension(measureWidth, measureHeight)
 
         radius = borderStroke / 2
@@ -156,7 +156,7 @@ class BatteryView @JvmOverloads constructor(
 
     // todo change color
     private fun getPercentColor(percent: Int): Int {
-        if (percent > 15) {
+        if (percent > 20) {
             return Color.GREEN
         }
         return Color.RED

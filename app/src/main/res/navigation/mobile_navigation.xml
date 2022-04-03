@@ -28,8 +28,8 @@
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="org.avmedia.gShockPhoneSync.ui.events.EventsFragment"
+        android:name="org.avmedia.gShockPhoneSync.ui.remainders.RemindersFragment"
         android:label="@string/title_events"
-        tools:layout="@layout/fragment_events"
+        tools:layout="@layout/fragment_reminders"
         />
 </navigation>

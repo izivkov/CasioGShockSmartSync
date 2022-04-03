@@ -129,6 +129,8 @@ object CasioConstants {
         CASIO_SETTING_FOR_BASIC(0x13),
         CASIO_CURRENT_TIME_MANAGER(0x39),
         CASIO_WORLD_CITIES(0x1f),
+        CASIO_REMINDER_TITLE(0x30),
+        CASIO_REMINDER_TIME(0x31),
     }
 
     enum class Model {

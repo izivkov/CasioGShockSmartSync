@@ -17,4 +17,5 @@
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
     <string name="send_alarms_to_phone">Send to Phone</string>
+    <string name="reminders">Reminders</string>
 </resources>

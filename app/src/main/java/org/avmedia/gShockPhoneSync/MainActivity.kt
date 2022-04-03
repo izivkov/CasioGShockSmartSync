@@ -95,12 +95,12 @@ class MainActivity : AppCompatActivity() {
 
         createAppEventsSubscription()
 
-        startConnection()
         Connection.init(this)
         WatchDataListener.init()
     }
 
     override fun onResume() {
+        startConnection()
         super.onResume()
         if (!bluetoothAdapter.isEnabled) {
             promptEnableBluetooth()
@@ -157,6 +157,9 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun startConnection() {
+        if (Connection.isConnected()) {
+            return
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !isLocationPermissionGranted) {
             requestLocationPermission()
         } else {

@@ -8,7 +8,10 @@ package org.avmedia.gShockPhoneSync.utils
 
 import android.content.Context
 import android.widget.Toast
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.Locale
+import kotlin.math.max
 
 
 object Utils {
@@ -17,6 +20,37 @@ object Utils {
 
     public fun byteArrayOfInts(vararg ints: Int) =
         ByteArray(ints.size) { pos -> ints[pos].toByte() }
+
+    public fun byteArrayOfIntArray(intArray: IntArray) =
+        ByteArray(intArray.size) { pos -> intArray[pos].toByte() }
+
+    public fun toByteArray(string: String):ByteArray {
+        val charset = Charsets.UTF_8
+        return string.toByteArray(charset)
+    }
+
+    public fun toByteArray(string: String, maxLen: Int):ByteArray {
+        val charset = Charsets.UTF_8
+        var retArr = string.toByteArray(charset)
+        if (retArr.size > maxLen) {
+            return retArr.take(maxLen).toByteArray()
+        }
+        if (retArr.size < maxLen) {
+            return retArr + ByteArray(maxLen - retArr.size)
+        }
+
+        return retArr
+    }
+
+    fun toHexStr (asciiStr: String) : String {
+        var byteArr = toByteArray(asciiStr)
+        var hexStr = ""
+        byteArr.forEach {
+            // hexStr += it.toString(16)
+            hexStr += "%02x".format(it)
+        }
+        return hexStr
+    }
 
     public fun byteArray(vararg bytes: Byte) = ByteArray(bytes.size) { pos -> bytes[pos] }
 
@@ -68,5 +102,41 @@ object Utils {
         }
 
         return compactString
+    }
+
+    // JSON safe functions, prevent throwing exceptions
+    public fun JSONObject.getStringSafe(name: String): String? {
+        if (!has(name)) {
+            return null
+        }
+        return getString(name)
+    }
+
+    public fun JSONObject.getBooleanSafe(name: String): Boolean? {
+        if (!has(name)) {
+            return null
+        }
+        return getBoolean(name)
+    }
+
+    public fun JSONObject.getJSONObjectSafe(name: String): JSONObject? {
+        if (!has(name)) {
+            return null
+        }
+        return getJSONObject(name)
+    }
+
+    public fun JSONObject.getJSONArraySafe(name: String): JSONArray? {
+        if (!has(name)) {
+            return null
+        }
+        return getJSONArray(name)
+    }
+
+    public fun JSONObject.getIntSafe(name: String): Int? {
+        if (!has(name)) {
+            return null
+        }
+        return getInt(name)
     }
 }

@@ -57,11 +57,11 @@ object Connection : IConnection {
     }
 
     override fun isConnected(): Boolean {
-        return device.isConnected()
+        return this::device.isInitialized && device.isConnected()
     }
 
     override fun sendMessage(message: String) {
-        CasioSupport.callWriter(device, message)
+        CasioSupport.callWriter(message)
     }
 
     override fun start() {

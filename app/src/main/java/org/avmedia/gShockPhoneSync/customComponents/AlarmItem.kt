@@ -17,7 +17,6 @@ import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.R
 import kotlin.reflect.KFunction
 
-
 class AlarmItem @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {

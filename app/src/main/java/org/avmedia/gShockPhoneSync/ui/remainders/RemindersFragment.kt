@@ -4,7 +4,7 @@
  * Last modified 2022-03-14, 1:48 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.ui.events
+package org.avmedia.gShockPhoneSync.ui.remainders
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,11 +13,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import org.avmedia.gShockPhoneSync.databinding.FragmentEventsBinding
+import org.avmedia.gShockPhoneSync.databinding.FragmentRemindersBinding
 
-class EventsFragment : Fragment() {
+class RemindersFragment : Fragment() {
 
-    private var _binding: FragmentEventsBinding? = null
+    private var _binding: FragmentRemindersBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -29,15 +29,11 @@ class EventsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val notificationsViewModel =
-            ViewModelProvider(this).get(EventsViewModel::class.java)
+            ViewModelProvider(this).get(RemindersViewModel::class.java)
 
-        _binding = FragmentEventsBinding.inflate(inflater, container, false)
+        _binding = FragmentRemindersBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textEvents
-        notificationsViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
         return root
     }
 

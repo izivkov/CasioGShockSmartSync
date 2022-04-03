@@ -8,7 +8,7 @@ package org.avmedia.gShockPhoneSync.utils
 
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.IDataReceived
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.casioB5600.AlarmEncoder
 
 /*
 This class listens for status data from the Bot and emits events.
@@ -23,7 +23,7 @@ object WatchDataListener {
                 if (command == null) {
                     return
                 }
-                val dataJson = CasioSupport.toJson(command)
+                val dataJson = AlarmEncoder.toJson(command)
 
                 for (key in dataJson.keys()) {
                     val value: String = dataJson.getString(key)
