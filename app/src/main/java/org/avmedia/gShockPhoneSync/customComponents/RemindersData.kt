@@ -17,7 +17,57 @@ object RemindersData {
 
     private val reminders = ArrayList<Reminder>()
 
-    init {
+    init {}
+
+    enum class RepeatPeriod(val periodDuration: String) {
+        NEVER("NEVER"),
+        WEEKLY("WEEKLY"),
+        MONTHLY("MONTHLY"),
+        YEARLY("YEARLY")
+    }
+
+    class ReminderDate(var year: Int?, val month: Month?, val day: Int?) {
+        // TODO: Validate parameters
+    }
+
+    class Reminder(
+        val title: String,
+        private val startDate: ReminderDate?,
+        private var endDate: ReminderDate?,
+        val repeatPeriod: RepeatPeriod,
+        val daysOfWeek: ArrayList<DayOfWeek>?,
+        var enabled:Boolean = true
+    ) {
+        init {
+            if (endDate == null) {
+                endDate = startDate
+            }
+        }
+        // TODO: Validate parameters
+    }
+
+    fun clear() {
+        reminders.clear()
+    }
+
+    fun isEmpty(): Boolean {
+        return reminders.size == 0
+    }
+
+    @Synchronized
+    fun fromJson(jsonStr: String) {
+        val gson = Gson()
+        val reminderArr = gson.fromJson(jsonStr, Array<Reminder>::class.java)
+        reminders.addAll(reminderArr)
+    }
+
+    @Synchronized
+    fun toJson(): String {
+        val gson = Gson()
+        return gson.toJson(reminders)
+    }
+
+    private fun test() {
         // make up some test data
         reminders.add(
             Reminder(
@@ -68,53 +118,5 @@ object RemindersData {
                 null
             )
         )
-    }
-
-    enum class RepeatPeriod(val periodDuration: String) {
-        NEVER("NEVER"),
-        WEEKLY("WEEKLY"),
-        MONTHLY("MONTHLY"),
-        YEARLY("YEARLY")
-    }
-
-    class ReminderDate(var year: Int?, val month: Month?, val day: Int?) {
-        // TODO: Validate parameters
-    }
-
-    class Reminder(
-        val title: String,
-        private val startDate: ReminderDate?,
-        private var endDate: ReminderDate?,
-        val repeatPeriod: RepeatPeriod,
-        val daysOfWeek: ArrayList<DayOfWeek>?,
-        var enabled:Boolean = true
-    ) {
-        init {
-            if (endDate == null) {
-                endDate = startDate
-            }
-        }
-        // TODO: Validate parameters
-    }
-
-    fun clear() {
-        reminders.clear()
-    }
-
-    fun isEmpty(): Boolean {
-        return reminders.size == 0
-    }
-
-    @Synchronized
-    fun fromJson(jsonStr: String) {
-        val gson = Gson()
-        val reminderArr = gson.fromJson(jsonStr, Array<Reminder>::class.java)
-        reminders.addAll(reminderArr)
-    }
-
-    @Synchronized
-    fun toJson(): String {
-        val gson = Gson()
-        return gson.toJson(reminders)
     }
 }
