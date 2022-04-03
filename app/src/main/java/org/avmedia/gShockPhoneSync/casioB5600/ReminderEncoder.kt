@@ -24,19 +24,19 @@ object ReminderEncoder {
         02 22 03 31 22 05 01 00 00
     */
 
-    val YEARLY_MASK = 0b00000000
-    val NONTHLY_MASK = 0b00000010
-    val WEEKLY_MASK = 0b00000100
+    val YEARLY_MASK =       0b00001000
+    val NONTHLY_MASK =      0b00010000
+    val WEEKLY_MASK =       0b00000100
 
-    val SUNDAY_MASK = 0b00000001
-    val MONDAY_MASK = 0b00000010
-    val TUESDAY_MASK = 0b00000100
-    val WEDNESSDAY_MASK = 0b00001000
-    val THURSDAY_MASK = 0b00010000
-    val FRIDAY_MASK = 0b00100000
-    val SATURDAY_MASK = 0b01000000
+    val SUNDAY_MASK =       0b00000001
+    val MONDAY_MASK =       0b00000010
+    val TUESDAY_MASK =      0b00000100
+    val WEDNESSDAY_MASK =   0b00001000
+    val THURSDAY_MASK =     0b00010000
+    val FRIDAY_MASK =       0b00100000
+    val SATURDAY_MASK =     0b01000000
 
-    val ENABLED_MASK = 0b00000001
+    val ENABLED_MASK =      0b00000001
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun reminderTimeFromJson(reminderJson: JSONObject): IntArray {
@@ -66,6 +66,11 @@ object ReminderEncoder {
 
         when (repeatPeriod) {
             "NEVER" -> {
+                // Once only, Jun 3
+                // 31 01 01 22 06 03 22 06 03 00 00
+                // 31 04 09 22 06 02 22 06 02 00 00
+
+                encodeDate (timeDetail, startDate, endDate)
             }
             "WEEKLY" -> {
                 /*
@@ -74,7 +79,6 @@ object ReminderEncoder {
             05 01 01 01 01 01 01 02 00 - evey monday
             00011001 - Sun, Wed, Thu
             */
-
                 timeDetail[0] = 1
                 timeDetail[1] = 1
                 timeDetail[2] = 1
@@ -101,8 +105,9 @@ object ReminderEncoder {
                 timeDetail[7] = 0
             }
             "MONTHLY" -> {
-                // for monthly, should be 02 and 03 if enabled
-                // timeDetail += 11
+                // Monthly, may 3
+                // 31 05 11 22 05 03 22 05 03 00 00
+                encodeDate (timeDetail, startDate, endDate)
             }
             "YEARLY" -> {
                 /*
@@ -112,23 +117,25 @@ object ReminderEncoder {
             01 22 04 01 22 04 01 00 00 - only once, apr 1
             01 22 04 18 22 04 18 00 00 - once only, apr 18
              */
-                timeDetail[0] = encodeDateField(
-                    startDate!!.getInt("year").rem(2000)
-                ) // take the last 2 digits only
-                timeDetail[1] = encodeDateField(monthStrToInt(startDate.getString("month")))
-                timeDetail[2] = encodeDateField(startDate.getInt("day"))
-
-                timeDetail[3] = encodeDateField(endDate!!.getInt("year").rem(2000))
-                timeDetail[4] = encodeDateField(monthStrToInt(endDate.getString("month")))
-                timeDetail[5] = encodeDateField(endDate.getInt("day"))
-
-                timeDetail[6] = 0
-                timeDetail[7] = 0
+                encodeDate (timeDetail, startDate, endDate)
             }
         }
         return timeDetail
     }
 
+    private fun encodeDate (timeDetail: IntArray, startDate: JSONObject?, endDate: JSONObject?) {
+        // take the last 2 digits only
+        timeDetail[0] = encodeDateField(startDate!!.getInt("year").rem(2000))
+        timeDetail[1] = encodeDateField(monthStrToInt(startDate.getString("month")))
+        timeDetail[2] = encodeDateField(startDate.getInt("day"))
+
+        timeDetail[3] = encodeDateField(endDate!!.getInt("year").rem(2000))
+        timeDetail[4] = encodeDateField(monthStrToInt(endDate.getString("month")))
+        timeDetail[5] = encodeDateField(endDate.getInt("day"))
+
+        timeDetail[6] = 0
+        timeDetail[7] = 0
+    }
     private fun encodeDateField(dateField: Int): Int {
         // Values are stored in hex numbers, that look like decimals, i.e.
         // 22 04 18 represents 2022, Apr 18. So, we must convert the decimal
@@ -163,7 +170,7 @@ object ReminderEncoder {
         }
         when (repeatPeriod) {
             "WEEKLY" -> timePeriod = timePeriod or WEEKLY_MASK
-            "MONTHLY" -> timePeriod = timePeriod or MONDAY_MASK
+            "MONTHLY" -> timePeriod = timePeriod or NONTHLY_MASK
             "YEARLY" -> timePeriod = timePeriod or YEARLY_MASK
         }
         return timePeriod

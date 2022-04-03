@@ -40,10 +40,10 @@ object RemindersData {
 
         reminders.add(
             Reminder(
-                "Period, this is a very long string",
+                "Period, 22/06/23->23/07/2",
                 ReminderDate(2022, Month.JUNE, 23),
                 ReminderDate(2023, Month.JULY, 2),
-                RepeatPeriod.YEARLY,
+                RepeatPeriod.NEVER,
                 null,
                 false
             )
@@ -62,7 +62,7 @@ object RemindersData {
         reminders.add(
             Reminder(
                 "Monthly",
-                ReminderDate(null, null, 2),
+                ReminderDate(2022, Month.APRIL, 15),
                 null,
                 RepeatPeriod.MONTHLY,
                 null
