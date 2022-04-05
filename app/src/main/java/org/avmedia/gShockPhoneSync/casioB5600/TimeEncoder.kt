@@ -6,28 +6,21 @@
 
 package org.avmedia.gShockPhoneSync.casioB5600
 
-import java.util.Calendar
-import java.util.Date
-import java.util.concurrent.TimeUnit
+import java.time.LocalDateTime
 
 object TimeEncoder {
-    fun prepareCurrentTime(date: Date): ByteArray {
+    fun prepareCurrentTime(date: LocalDateTime): ByteArray {
         val arr = ByteArray(10)
-        val cal = Calendar.getInstance()
-        cal.time = date
-        val year = cal[Calendar.YEAR]
+        val year = date.year
         arr[0] = (year ushr 0 and 0xff).toByte()
         arr[1] = (year ushr 8 and 0xff).toByte()
-        arr[2] = (1 + cal[Calendar.MONTH]).toByte()
-        arr[3] = cal[Calendar.DAY_OF_MONTH].toByte()
-        arr[4] = cal[Calendar.HOUR_OF_DAY].toByte()
-        arr[5] = cal[Calendar.MINUTE].toByte()
-        arr[6] = (1 + cal[Calendar.SECOND]).toByte()
-        var dayOfWk = (cal[Calendar.DAY_OF_WEEK] - 1).toByte()
-        if (dayOfWk.toInt() == 0) dayOfWk = 7
-        arr[7] = dayOfWk
-        arr[8] = TimeUnit.MILLISECONDS.toSeconds((256 * cal[Calendar.MILLISECOND]).toLong())
-            .toInt().toByte()
+        arr[2] = date.month.value.toByte()
+        arr[3] = date.dayOfMonth.toByte()
+        arr[4] = date.hour.toByte()
+        arr[5] = date.minute.toByte()
+        arr[6] = date.second.toByte()
+        arr[7] = date.dayOfWeek.value.toByte()
+        arr[8] = (date.nano/1000).toByte()
         arr[9] = 1 // or 0?
         return arr
     }

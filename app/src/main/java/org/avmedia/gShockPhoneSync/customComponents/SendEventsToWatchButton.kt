@@ -14,7 +14,7 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import org.avmedia.gShockPhoneSync.utils.Utils
 
-class SendRemindersToWatchButton @JvmOverloads constructor(
+class SendEventsToWatchButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : Button(context, attrs, defStyleAttr) {
 
@@ -28,8 +28,8 @@ class SendRemindersToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    sendMessage("{action: \"SET_REMINDERS\", value: ${RemindersData.toJson()}}")
-                    Utils.toast(context, "Reminders Sent to Watch")
+                    sendMessage("{action: \"SET_REMINDERS\", value: ${EventsData.getEvents(context)}}")
+                    Utils.toast(context, "Events Sent to Watch")
                 }
             }
             return false

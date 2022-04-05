@@ -73,6 +73,8 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+
+    implementation 'com.github.PhilJay:RRule:1.0.3'
 }
 
 task ktlint(type: JavaExec, group: "verification") {

@@ -8,21 +8,14 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import android.widget.TextView
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
-import org.avmedia.gShockPhoneSync.MainActivity
-import org.avmedia.gShockPhoneSync.R
 import kotlin.reflect.KFunction
 
-class ReminderItem @JvmOverloads constructor(
+class EventItem @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
     private lateinit var onDataChanged: KFunction<Unit>
-    private lateinit var reminder: RemindersData.Reminder
+    private lateinit var event: EventsData.Event
 
     init {}
 }

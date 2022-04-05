@@ -24,19 +24,19 @@ object ReminderEncoder {
         02 22 03 31 22 05 01 00 00
     */
 
-    val YEARLY_MASK =       0b00001000
-    val NONTHLY_MASK =      0b00010000
-    val WEEKLY_MASK =       0b00000100
+    private const val YEARLY_MASK = 0b00001000
+    private const val MONTHLY_MASK = 0b00010000
+    private const val WEEKLY_MASK = 0b00000100
 
-    val SUNDAY_MASK =       0b00000001
-    val MONDAY_MASK =       0b00000010
-    val TUESDAY_MASK =      0b00000100
-    val WEDNESSDAY_MASK =   0b00001000
-    val THURSDAY_MASK =     0b00010000
-    val FRIDAY_MASK =       0b00100000
-    val SATURDAY_MASK =     0b01000000
+    private const val SUNDAY_MASK = 0b00000001
+    private const val MONDAY_MASK = 0b00000010
+    private const val TUESDAY_MASK = 0b00000100
+    private const val WEDNESDAY_MASK = 0b00001000
+    private const val THURSDAY_MASK = 0b00010000
+    private const val FRIDAY_MASK = 0b00100000
+    private const val SATURDAY_MASK = 0b01000000
 
-    val ENABLED_MASK =      0b00000001
+    private const val ENABLED_MASK = 0b00000001
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun reminderTimeFromJson(reminderJson: JSONObject): IntArray {
@@ -70,7 +70,7 @@ object ReminderEncoder {
                 // 31 01 01 22 06 03 22 06 03 00 00
                 // 31 04 09 22 06 02 22 06 02 00 00
 
-                encodeDate (timeDetail, startDate, endDate)
+                encodeDate(timeDetail, startDate, endDate)
             }
             "WEEKLY" -> {
                 /*
@@ -94,7 +94,7 @@ object ReminderEncoder {
                             "SUNDAY" -> dayOfWeek = dayOfWeek or SUNDAY_MASK
                             "MONDAY" -> dayOfWeek = dayOfWeek or MONDAY_MASK
                             "TUESDAY" -> dayOfWeek = dayOfWeek or TUESDAY_MASK
-                            "WEDNESDAY" -> dayOfWeek = dayOfWeek or WEDNESSDAY_MASK
+                            "WEDNESDAY" -> dayOfWeek = dayOfWeek or WEDNESDAY_MASK
                             "THURSDAY" -> dayOfWeek = dayOfWeek or THURSDAY_MASK
                             "FRIDAY" -> dayOfWeek = dayOfWeek or FRIDAY_MASK
                             "SATURDAY" -> dayOfWeek = dayOfWeek or SATURDAY_MASK
@@ -107,7 +107,7 @@ object ReminderEncoder {
             "MONTHLY" -> {
                 // Monthly, may 3
                 // 31 05 11 22 05 03 22 05 03 00 00
-                encodeDate (timeDetail, startDate, endDate)
+                encodeDate(timeDetail, startDate, endDate)
             }
             "YEARLY" -> {
                 /*
@@ -117,29 +117,30 @@ object ReminderEncoder {
             01 22 04 01 22 04 01 00 00 - only once, apr 1
             01 22 04 18 22 04 18 00 00 - once only, apr 18
              */
-                encodeDate (timeDetail, startDate, endDate)
+                encodeDate(timeDetail, startDate, endDate)
             }
         }
         return timeDetail
     }
 
-    private fun encodeDate (timeDetail: IntArray, startDate: JSONObject?, endDate: JSONObject?) {
+    private fun encodeDate(timeDetail: IntArray, startDate: JSONObject?, endDate: JSONObject?) {
         // take the last 2 digits only
-        timeDetail[0] = encodeDateField(startDate!!.getInt("year").rem(2000))
-        timeDetail[1] = encodeDateField(monthStrToInt(startDate.getString("month")))
-        timeDetail[2] = encodeDateField(startDate.getInt("day"))
+        timeDetail[0] = decToHex(startDate!!.getInt("year").rem(2000))
+        timeDetail[1] = decToHex(monthStrToInt(startDate.getString("month")))
+        timeDetail[2] = decToHex(startDate.getInt("day"))
 
-        timeDetail[3] = encodeDateField(endDate!!.getInt("year").rem(2000))
-        timeDetail[4] = encodeDateField(monthStrToInt(endDate.getString("month")))
-        timeDetail[5] = encodeDateField(endDate.getInt("day"))
+        timeDetail[3] = decToHex(endDate!!.getInt("year").rem(2000)) // get the last 2 gits only
+        timeDetail[4] = decToHex(monthStrToInt(endDate.getString("month")))
+        timeDetail[5] = decToHex(endDate.getInt("day"))
 
         timeDetail[6] = 0
         timeDetail[7] = 0
     }
-    private fun encodeDateField(dateField: Int): Int {
+
+    private fun decToHex(dateField: Int): Int {
         // Values are stored in hex numbers, that look like decimals, i.e.
         // 22 04 18 represents 2022, Apr 18. So, we must convert the decimal
-        // numbers from the Json to hex (i.e 0x22 0x04 0x18).
+        // numbers from the JSON to hex (i.e 0x22 0x04 0x18).
         return Integer.parseInt(dateField.toString(), 16)
     }
 
@@ -170,7 +171,7 @@ object ReminderEncoder {
         }
         when (repeatPeriod) {
             "WEEKLY" -> timePeriod = timePeriod or WEEKLY_MASK
-            "MONTHLY" -> timePeriod = timePeriod or NONTHLY_MASK
+            "MONTHLY" -> timePeriod = timePeriod or MONTHLY_MASK
             "YEARLY" -> timePeriod = timePeriod or YEARLY_MASK
         }
         return timePeriod

@@ -10,7 +10,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.remainders.RemindersFragment"
+    tools:context=".ui.events.EventsFragment"
     >
 
     <LinearLayout
@@ -22,7 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         >
 
-        <org.avmedia.gShockPhoneSync.customComponents.SendRemindersToWatchButton
+        <org.avmedia.gShockPhoneSync.customComponents.SendEventsToWatchButton
             android:id="@+id/SendRemindersButton"
             style="@style/buttonStyle"
             android:layout_width="wrap_content"

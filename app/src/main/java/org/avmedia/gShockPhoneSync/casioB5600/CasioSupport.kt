@@ -18,10 +18,9 @@ import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfInts
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.Calendar
-import java.util.Date
+import java.time.Instant
+import java.time.ZoneId
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
 object CasioSupport {
 
@@ -103,7 +102,10 @@ object CasioSupport {
 
             "SET_TIME" -> {
                 var dateTimeMs: Long = JSONObject(message).get("value") as Long
-                val dateTime: Date = Date(dateTimeMs)
+
+                val dateTime =
+                    Instant.ofEpochMilli(dateTimeMs).atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
 
                 val timeData = TimeEncoder.prepareCurrentTime(dateTime)
                 var timeCommand =

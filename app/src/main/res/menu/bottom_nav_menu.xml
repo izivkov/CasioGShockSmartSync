@@ -21,8 +21,8 @@
 
     <item
         android:id="@+id/navigation_notifications"
-        android:icon="@drawable/ic_reminder"
-        android:title="@string/reminders"
+        android:icon="@drawable/ic_event_black_24dp"
+        android:title="@string/events"
         />
 
 </menu>

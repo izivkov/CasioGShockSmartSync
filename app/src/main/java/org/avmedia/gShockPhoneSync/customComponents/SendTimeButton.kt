@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.utils.Utils
+import java.time.Clock
 import java.util.Date
 
 class SendTimeButton @JvmOverloads constructor(
@@ -33,7 +34,7 @@ class SendTimeButton @JvmOverloads constructor(
         }
 
         private fun sendTimeToWatch() {
-            sendMessage("{action: \"SET_TIME\", value: ${Date().time} }")
+            sendMessage("{action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()} }")
         }
     }
 }

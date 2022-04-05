@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
@@ -13,27 +14,28 @@ import java.time.DayOfWeek
 import java.time.Month
 
 @RequiresApi(Build.VERSION_CODES.O)
-object RemindersData {
+object EventsData {
 
-    private val reminders = ArrayList<Reminder>()
+    private lateinit var events: ArrayList<Event>
 
     init {}
 
     enum class RepeatPeriod(val periodDuration: String) {
         NEVER("NEVER"),
+        DAILY("DAILY"),
         WEEKLY("WEEKLY"),
         MONTHLY("MONTHLY"),
         YEARLY("YEARLY")
     }
 
-    class ReminderDate(var year: Int?, val month: Month?, val day: Int?) {
+    class EventDate(var year: Int?, val month: Month?, val day: Int?) {
         // TODO: Validate parameters
     }
 
-    class Reminder(
+    class Event(
         val title: String,
-        private val startDate: ReminderDate?,
-        private var endDate: ReminderDate?,
+        private val startDate: EventDate?,
+        private var endDate: EventDate?,
         val repeatPeriod: RepeatPeriod,
         val daysOfWeek: ArrayList<DayOfWeek>?,
         var enabled:Boolean = true
@@ -46,40 +48,32 @@ object RemindersData {
         // TODO: Validate parameters
     }
 
-    fun clear() {
-        reminders.clear()
-    }
-
-    fun isEmpty(): Boolean {
-        return reminders.size == 0
-    }
-
     @Synchronized
-    fun fromJson(jsonStr: String) {
+    fun toJson(events: ArrayList<Event>): String {
         val gson = Gson()
-        val reminderArr = gson.fromJson(jsonStr, Array<Reminder>::class.java)
-        reminders.addAll(reminderArr)
+        return gson.toJson(events)
     }
 
-    @Synchronized
-    fun toJson(): String {
-        val gson = Gson()
-        return gson.toJson(reminders)
+    fun getEvents (context: Context): String {
+        if (!this::events.isInitialized) {
+            events = CalenderEvents.getDataFromEventTable(context)
+        }
+        return toJson(events)
     }
 
     private fun test() {
         // make up some test data
-        reminders.add(
-            Reminder(
+        events.add(
+            Event(
                 "Once only",
-                ReminderDate(2022, Month.APRIL, 23),
+                EventDate(2022, Month.APRIL, 23),
                 null,
                 RepeatPeriod.NEVER,
                 null
             )
         )
-        reminders.add(
-            Reminder(
+        events.add(
+            Event(
                 "Mon, Thr",
                 null,
                 null,
@@ -88,31 +82,31 @@ object RemindersData {
             )
         )
 
-        reminders.add(
-            Reminder(
+        events.add(
+            Event(
                 "Period, 22/06/23->23/07/2",
-                ReminderDate(2022, Month.JUNE, 23),
-                ReminderDate(2023, Month.JULY, 2),
+                EventDate(2022, Month.JUNE, 23),
+                EventDate(2023, Month.JULY, 2),
                 RepeatPeriod.NEVER,
                 null,
                 false
             )
         )
 
-        reminders.add(
-            Reminder(
+        events.add(
+            Event(
                 "once per year",
-                ReminderDate(2022, Month.JUNE, 2),
+                EventDate(2022, Month.JUNE, 2),
                 null,
                 RepeatPeriod.YEARLY,
                 null
             )
         )
 
-        reminders.add(
-            Reminder(
+        events.add(
+            Event(
                 "Monthly",
-                ReminderDate(2022, Month.APRIL, 15),
+                EventDate(2022, Month.APRIL, 15),
                 null,
                 RepeatPeriod.MONTHLY,
                 null
