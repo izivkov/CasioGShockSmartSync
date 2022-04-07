@@ -6,19 +6,32 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.util.Preconditions.checkArgument
 import com.google.gson.Gson
+import timber.log.Timber
 import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
 import java.time.Month
+import java.time.ZoneId
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 object EventsData {
 
-    private lateinit var events: ArrayList<Event>
+    const val MAX_REMINDERS = 5
+
+    lateinit var events: ArrayList<Event>
 
     init {}
+
+    fun init(context: Context) {
+        events = CalenderEvents.getDataFromEventTable(context)
+    }
 
     enum class RepeatPeriod(val periodDuration: String) {
         NEVER("NEVER"),
@@ -29,23 +42,119 @@ object EventsData {
     }
 
     class EventDate(var year: Int?, val month: Month?, val day: Int?) {
-        // TODO: Validate parameters
+        fun equals(eventDate: EventDate): Boolean {
+            return eventDate.year == year && eventDate.month == month && eventDate.day == day
+        }
     }
 
     class Event(
         val title: String,
         private val startDate: EventDate?,
-        private var endDate: EventDate?,
-        val repeatPeriod: RepeatPeriod,
-        val daysOfWeek: ArrayList<DayOfWeek>?,
-        var enabled:Boolean = true
+        var endDate: EventDate?,
+        private val repeatPeriod: RepeatPeriod,
+        private val daysOfWeek: ArrayList<DayOfWeek>?,
+        var enabled: Boolean,
+        val incompatible: Boolean,
+        var selected: Boolean
     ) {
+        // TODO: Validate parameters
+
         init {
             if (endDate == null) {
                 endDate = startDate
             }
         }
-        // TODO: Validate parameters
+
+        fun getPeriodFormatted(): String {
+            var period = ""
+            val thisYear = LocalDate.now().year
+
+            if (startDate != null) {
+                period += "${
+                    capitalizeFirstAndTrim(
+                        startDate.month.toString(),
+                        3
+                    )
+                }-${startDate.day}"
+                if (thisYear != startDate.year) {
+                    period += ", ${startDate.year}"
+                }
+            }
+            if (endDate != null && !startDate!!.equals(endDate!!)) {
+                period += " to ${
+                    capitalizeFirstAndTrim(
+                        endDate!!.month.toString(),
+                        3
+                    )
+                }-${endDate!!.day}"
+                if (thisYear != endDate!!.year) {
+                    period += ", ${endDate!!.year}"
+                }
+            }
+            return period
+        }
+
+        private fun getDaysOfWeekFormatted(): String {
+            var daysOfWeekStr = ""
+            if (daysOfWeek != null && daysOfWeek.size > 0) {
+                daysOfWeek.forEach {
+                    daysOfWeekStr += "${capitalizeFirstAndTrim(it.name, 3)},"
+                }
+            } else {
+                return ""
+            }
+
+            return daysOfWeekStr.dropLast(1)
+        }
+
+        fun getFrequencyFormatted(): String {
+            var formattedFreq = ""
+            when (repeatPeriod) {
+                RepeatPeriod.WEEKLY -> {
+                    formattedFreq = getDaysOfWeekFormatted()
+                }
+                RepeatPeriod.YEARLY -> {
+                    formattedFreq = "${
+                        capitalizeFirstAndTrim(
+                            startDate?.month.toString(),
+                            3
+                        )
+                    }-${startDate?.day}${getDayOfMonthSuffix(startDate?.day!!.toInt())} each year"
+                }
+                RepeatPeriod.MONTHLY -> {
+                    formattedFreq =
+                        "${startDate?.day}${getDayOfMonthSuffix(startDate?.day!!.toInt())} each month"
+                }
+            }
+            return formattedFreq
+        }
+
+        private fun capitalizeFirstAndTrim(inStr: String, len: Int): String {
+            return inStr.lowercase(Locale.getDefault())
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                .substring(0, 3)
+        }
+
+        @SuppressLint("RestrictedApi")
+        fun getDayOfMonthSuffix(n: Int): String? {
+            checkArgument(n in 1..31, "illegal day of month: $n")
+            return if (n in 11..13) {
+                "th"
+            } else when (n % 10) {
+                1 -> "st"
+                2 -> "nd"
+                3 -> "rd"
+                else -> "th"
+            }
+        }
+    }
+
+    fun clear() {
+        events.clear()
+    }
+
+    fun isEmpty(): Boolean {
+        return events.size == 0
     }
 
     @Synchronized
@@ -54,63 +163,27 @@ object EventsData {
         return gson.toJson(events)
     }
 
-    fun getEvents (context: Context): String {
-        if (!this::events.isInitialized) {
-            events = CalenderEvents.getDataFromEventTable(context)
-        }
+    fun getEvents(): String {
         return toJson(events)
     }
 
-    private fun test() {
-        // make up some test data
-        events.add(
-            Event(
-                "Once only",
-                EventDate(2022, Month.APRIL, 23),
-                null,
-                RepeatPeriod.NEVER,
-                null
-            )
-        )
-        events.add(
-            Event(
-                "Mon, Thr",
-                null,
-                null,
-                RepeatPeriod.WEEKLY,
-                arrayListOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)
-            )
-        )
+    fun getSelectedEvents(): String {
+        val selectedEvents = events.filter { it.selected } as ArrayList<Event>
+        return toJson(selectedEvents)
+    }
 
-        events.add(
-            Event(
-                "Period, 22/06/23->23/07/2",
-                EventDate(2022, Month.JUNE, 23),
-                EventDate(2023, Month.JULY, 2),
-                RepeatPeriod.NEVER,
-                null,
-                false
-            )
-        )
+    fun getSelectedCount(): Int {
+        return (events.filter { it.selected } as ArrayList<Event>).size
+    }
 
-        events.add(
-            Event(
-                "once per year",
-                EventDate(2022, Month.JUNE, 2),
-                null,
-                RepeatPeriod.YEARLY,
-                null
-            )
-        )
-
-        events.add(
-            Event(
-                "Monthly",
-                EventDate(2022, Month.APRIL, 15),
-                null,
-                RepeatPeriod.MONTHLY,
-                null
-            )
+    fun createEventDate(timeMs: Long, zone: ZoneId): EventsData.EventDate {
+        val start: LocalDate =
+            Instant.ofEpochMilli(timeMs).atZone(zone)
+                .toLocalDate()
+        return EventsData.EventDate(
+            start.year,
+            start.month,
+            start.dayOfMonth
         )
     }
 }

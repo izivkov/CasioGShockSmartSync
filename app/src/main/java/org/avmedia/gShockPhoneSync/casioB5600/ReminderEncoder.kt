@@ -15,6 +15,7 @@ import org.avmedia.gShockPhoneSync.utils.Utils.getJSONObjectSafe
 import org.avmedia.gShockPhoneSync.utils.Utils.getStringSafe
 import org.json.JSONArray
 import org.json.JSONObject
+import timber.log.Timber
 
 object ReminderEncoder {
     /* Reminders
@@ -79,12 +80,7 @@ object ReminderEncoder {
             05 01 01 01 01 01 01 02 00 - evey monday
             00011001 - Sun, Wed, Thu
             */
-                timeDetail[0] = 1
-                timeDetail[1] = 1
-                timeDetail[2] = 1
-                timeDetail[3] = 1
-                timeDetail[4] = 1
-                timeDetail[5] = 1
+                encodeDate(timeDetail, startDate, endDate)
 
                 var dayOfWeek = 0
 
@@ -118,6 +114,9 @@ object ReminderEncoder {
             01 22 04 18 22 04 18 00 00 - once only, apr 18
              */
                 encodeDate(timeDetail, startDate, endDate)
+            }
+            else -> {
+                Timber.d("Cannot handle Repeat Period: $repeatPeriod!!!")
             }
         }
         return timeDetail

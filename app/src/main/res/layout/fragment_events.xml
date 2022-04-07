@@ -13,7 +13,31 @@
     tools:context=".ui.events.EventsFragment"
     >
 
+    <TextView
+        android:id="@+id/title_events"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="2pt"
+        android:text="Google Calender Events"
+        android:textSize="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <org.avmedia.gShockPhoneSync.customComponents.EventList
+        android:id="@+id/eventList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_events"
+        app:layout_constraintBottom_toTopOf="@+id/send_reminders_button_layout"
+        />
+
     <LinearLayout
+        android:id="@+id/send_reminders_button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -23,13 +47,13 @@
         >
 
         <org.avmedia.gShockPhoneSync.customComponents.SendEventsToWatchButton
-            android:id="@+id/SendRemindersButton"
+            android:id="@+id/send_reminders_button"
             style="@style/buttonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:background="@drawable/button"
-            android:text="@string/send_alarms_to_watch"
+            android:text="@string/send_events_to_watch"
             tools:ignore="MissingConstraints"
             />
 

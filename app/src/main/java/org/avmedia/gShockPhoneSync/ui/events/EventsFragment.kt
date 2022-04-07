@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import org.avmedia.gShockPhoneSync.customComponents.CalenderEvents
+import org.avmedia.gShockPhoneSync.customComponents.EventsData
 import org.avmedia.gShockPhoneSync.databinding.FragmentEventsBinding
 
 class EventsFragment : Fragment() {
@@ -28,13 +29,13 @@ class EventsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        EventsData.init(requireContext())
+
         val notificationsViewModel =
             ViewModelProvider(this).get(EventsViewModel::class.java)
 
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
-        // CalenderEvents.getDataFromEventTable(requireContext())
         return root
     }
 

@@ -18,4 +18,5 @@
     <string name="disabled">Disabled</string>
     <string name="send_alarms_to_phone">Send to Phone</string>
     <string name="reminders">Reminders</string>
+    <string name="send_events_to_watch">Send to Watch Reminders</string>
 </resources>

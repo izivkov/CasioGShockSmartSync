@@ -8,6 +8,8 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
+import android.widget.TextView
+import org.avmedia.gShockPhoneSync.R
 import kotlin.reflect.KFunction
 
 class EventItem @JvmOverloads constructor(
@@ -16,6 +18,15 @@ class EventItem @JvmOverloads constructor(
 
     private lateinit var onDataChanged: KFunction<Unit>
     private lateinit var event: EventsData.Event
+    private lateinit var eventTitle: TextView
 
     init {}
+
+    fun setEventData(event: EventsData.Event) {
+        this.event = event
+    }
+
+    fun setOnDataChange(onDataChanged: KFunction<Unit>) {
+        this.onDataChanged = onDataChanged
+    }
 }

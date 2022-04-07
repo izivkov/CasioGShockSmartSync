@@ -9,7 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 
-class SetPhoneAparmClockButton @JvmOverloads constructor(
+class SetPhoneAlarmClockButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : Button(context, attrs, defStyleAttr) {
 
