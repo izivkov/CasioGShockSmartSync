@@ -10,7 +10,7 @@ import com.google.gson.Gson
 
 object AlarmsData {
 
-    public class Alarm(var hour: Int, var minute: Int, var enabled: Boolean) {}
+    public class Alarm(var hour: Int, var minute: Int, var enabled: Boolean, var hasHourlyChime: Boolean = false) {}
 
     val alarms = ArrayList<Alarm>()
 

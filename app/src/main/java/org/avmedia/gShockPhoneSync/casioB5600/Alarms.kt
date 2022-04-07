@@ -13,13 +13,15 @@ import org.json.JSONObject
 
 object Alarms {
 
-    private const val ENABLED = 0x40
     private const val DISABLED = 0
+    const val HOURLY_CHIME_MASK = 0b10000000
+    const val ENABLED_MASK =      0b01000000
 
     private const val ALARM_CONSTANT_VALUE = 0x40
     private const val ALARMS_COUNT = 5
 
-    class Alarm(val hour: Int, val minute: Int, val enabled: Boolean)
+    class Alarm(val hour: Int, val minute: Int, val enabled: Boolean, val hasHourlyChime:Boolean) {
+    }
 
     private fun createEmptyAlarm(): ByteArray {
         return Utils.byteArrayOfInts(0, ALARM_CONSTANT_VALUE, 0, 0)
@@ -34,9 +36,13 @@ object Alarms {
 
     private fun createFirstAlarm(alarm: Alarm): ByteArray {
 
+        var flag = 0
+        if (alarm.enabled) flag = flag or ENABLED_MASK
+        if (alarm.hasHourlyChime) flag = flag or HOURLY_CHIME_MASK
+
         return Utils.byteArrayOfInts(
             CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code,
-            if (alarm.enabled) ENABLED else DISABLED,
+            flag,
             ALARM_CONSTANT_VALUE,
             alarm.hour,
             alarm.minute
@@ -59,8 +65,12 @@ object Alarms {
             Utils.byteArrayOfInts(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code)
 
         for (alarm in alarms) {
+            var flag = 0
+            if (alarm.enabled) flag = flag or ENABLED_MASK
+            if (alarm.hasHourlyChime) flag = flag or HOURLY_CHIME_MASK
+
             allAlarms += Utils.byteArrayOfInts(
-                if (alarm.enabled) ENABLED else DISABLED,
+                flag,
                 ALARM_CONSTANT_VALUE,
                 alarm.hour,
                 alarm.minute

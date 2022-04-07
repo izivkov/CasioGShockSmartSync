@@ -7,12 +7,15 @@
 package org.avmedia.gShockPhoneSync.casioB5600
 
 import com.google.gson.Gson
+import org.avmedia.gShockPhoneSync.casioB5600.Alarms.ENABLED_MASK
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 
 object AlarmEncoder {
+    private const val HOURLY_CHIME_MASK = 0b10000000
+
     fun toJson(command: String): JSONObject {
         val jsonResponse = JSONObject()
         val intArray = Utils.toIntArray(command)
@@ -53,7 +56,8 @@ object AlarmEncoder {
         var alarm = Alarms.Alarm(
             intArray[2],
             intArray[3],
-            intArray[0] == 0x40
+            intArray[0] and ENABLED_MASK != 0,
+            intArray[0] and HOURLY_CHIME_MASK != 0
         )
         val gson = Gson()
         return JSONObject(gson.toJson(alarm))

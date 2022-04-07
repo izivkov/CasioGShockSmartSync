@@ -87,8 +87,7 @@ class MainActivity : AppCompatActivity() {
         ScreenSelector.add("connect screen", binding.connectionLayout)
         ScreenSelector.add("g-shock screen", binding.mainLayout)
 
-        // ScreenSelector.showScreen("connect screen")
-        ScreenSelector.showScreen("g-shock screen")
+        ScreenSelector.showScreen("connect screen")
 
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)

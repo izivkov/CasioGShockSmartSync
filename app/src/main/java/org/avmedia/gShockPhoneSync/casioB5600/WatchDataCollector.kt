@@ -22,6 +22,8 @@ object WatchDataCollector {
     var batteryLevel: Int = 0
     var watchName: String = ""
     var homeCity: String = ""
+    private var hourChime: String = ""
+    var hourChime2: String = ""
 
     init {
         subscribe("WATCH_INFO_DATA", ::onDataReceived)
@@ -112,28 +114,6 @@ object WatchDataCollector {
         worldCities.forEach { command ->
             writeCmd(0xe, command)
         }
-
-        /*
-        // reminders test
-        writeCmd(0xe, "3001312E204576657279204D6F6E64617920616E")
-        writeCmd(0xe, "3101050101010101011200")
-
-        // 2. once, May 5
-        writeCmd(0xe, "3002322E206F6E63652C204D6179203500000000")
-        writeCmd(0xe, "3102092205052205050000")
-
-        // 3. Period: mar3-Jun2
-        writeCmd(0xe, "3003332E20506572696F643A206D6172332D4A75")
-        writeCmd(0xe, "3103032203032206020000")
-
-        // 4. apr 2, off
-        writeCmd(0xe, "3004342E2061707220322C206F66660000000000")
-        writeCmd(0xe, "3104002204022204020000")
-
-        // 5. Not Set.
-        writeCmd(0xe, "3005352E204E6F74205365742E00000000000000")
-        writeCmd(0xe, "3105000000000000000000")
-         */
     }
 
     private fun writeCmd(handle: Int, cmd: String) {
