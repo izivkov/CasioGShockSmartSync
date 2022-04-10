@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -18,6 +19,7 @@ import android.graphics.drawable.PaintDrawable
 import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
@@ -30,18 +32,18 @@ class BatteryView @JvmOverloads constructor(
 ) :
     View(context, attrs, defStyleAttr) {
     private var radius: Float = 0f
-    private var isCharging: Boolean = false
 
     // Top
     private var topPaint =
-        PaintDrawable(Color.BLACK) // I only want to corner top-left and top-right so I use PaintDrawable instead of Paint
+        PaintDrawable(ContextCompat.getColor(context, R.color.grey_500))
+
     private var topRect = Rect()
     private var topPaintWidthPercent = 50
     private var topPaintHeightPercent = 8
 
     // Border
     private var borderPaint = Paint().apply {
-        color = Color.BLACK
+        color = ContextCompat.getColor(context, R.color.grey_500)
         style = Paint.Style.STROKE
     }
     private var borderRect = RectF()
@@ -53,14 +55,12 @@ class BatteryView @JvmOverloads constructor(
     private var percentRect = RectF()
     private var percentRectTopMin = 0f
     private var percent: Int = 0
-
-    // Charging
-    private var chargingRect = RectF()
-    private var chargingBitmap: Bitmap? = null
+    private var percentageBitmap: Bitmap? = null
 
     init {
         init(attrs)
-        percent = WatchDataCollector.batteryLevel
+        percentageBitmap = getBitmap(R.drawable.stripes)
+        setPercent(WatchDataCollector.batteryLevel)
     }
 
     private fun init(attrs: AttributeSet?) {
@@ -89,11 +89,11 @@ class BatteryView @JvmOverloads constructor(
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val measureWidth = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
-        val measureHeight = (measureWidth * 2.5f).toInt()
+        val measureHeight = (measureWidth * 3f).toInt()
         setMeasuredDimension(measureWidth, measureHeight)
 
         radius = borderStroke / 2
-        borderStroke = (borderStrokeWidthPercent * measureWidth).toFloat() / 100
+        borderStroke = (borderStrokeWidthPercent * measureWidth).toFloat() / 50
 
         // Top
         val topLeft = measureWidth * ((100 - topPaintWidthPercent) / 2) / 100
@@ -114,26 +114,12 @@ class BatteryView @JvmOverloads constructor(
         val progressRight = measureWidth - borderStroke
         val progressBottom = measureHeight - borderStroke
         percentRect = RectF(progressLeft, percentRectTopMin, progressRight, progressBottom)
-
-        // Charging Image
-        val chargingLeft = borderStroke
-        var chargingTop = topBottom + borderStroke
-        val chargingRight = measureWidth - borderStroke
-        var chargingBottom = measureHeight - borderStroke
-        val diff = ((chargingBottom - chargingTop) - (chargingRight - chargingLeft))
-        chargingTop += diff / 2
-        chargingBottom -= diff / 2
-        chargingRect = RectF(chargingLeft, chargingTop, chargingRight, chargingBottom)
     }
 
     override fun onDraw(canvas: Canvas) {
         drawTop(canvas)
         drawBody(canvas)
-        if (!isCharging) {
-            drawProgress(canvas, percent)
-        } else {
-            drawCharging(canvas)
-        }
+        drawProgress(canvas, percent)
     }
 
     private fun drawTop(canvas: Canvas) {
@@ -148,23 +134,12 @@ class BatteryView @JvmOverloads constructor(
     }
 
     private fun drawProgress(canvas: Canvas, percent: Int) {
-        percentPaint.color = getPercentColor(percent)
         percentRect.top =
             percentRectTopMin + (percentRect.bottom - percentRectTopMin) * (100 - percent) / 100
-        canvas.drawRect(percentRect, percentPaint)
-    }
 
-    // todo change color
-    private fun getPercentColor(percent: Int): Int {
-        if (percent > 20) {
-            return Color.GREEN
-        }
-        return Color.RED
-    }
-
-    private fun drawCharging(canvas: Canvas) {
-        chargingBitmap?.let {
-            canvas.drawBitmap(it, null, chargingRect, null)
+        val pctRect = RectF(percentRect.left, percentRect.top, percentRect.right, percentRect.bottom)
+        percentageBitmap?.let {
+            canvas.drawBitmap(it, null, pctRect, null)
         }
     }
 
@@ -185,25 +160,8 @@ class BatteryView @JvmOverloads constructor(
         return bitmap
     }
 
-    fun charge() {
-        isCharging = true
-        invalidate() // can improve by invalidate(Rect)
-    }
-
-    fun unCharge() {
-        isCharging = false
-        invalidate()
-    }
-
-    fun setPercent(percent: Int) {
-        if (percent > 100 || percent < 0) {
-            return
-        }
+    private fun setPercent(percent: Int) {
         this.percent = percent
         invalidate()
-    }
-
-    fun getPercent(): Int {
-        return percent
     }
 }

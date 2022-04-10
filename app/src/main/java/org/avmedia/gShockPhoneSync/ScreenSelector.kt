@@ -10,6 +10,7 @@ import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import timber.log.Timber
 
 object ScreenSelector {
     private const val TAG = "ScreenSelector"
@@ -40,7 +41,7 @@ object ScreenSelector {
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.Events.PhoneDataCollected -> {
+                    ProgressEvents.Events.PhoneInitializationCompleted -> {
                         showScreen("g-shock screen")
                     }
                     ProgressEvents.Events.Disconnect -> {
@@ -50,11 +51,5 @@ object ScreenSelector {
             }
             .subscribe(
                 { },
-                { throwable ->
-                    Log.d(
-                        "EventsSubscription",
-                        "Got error on subscribe: $throwable"
-                    )
-                })
-
+                { throwable -> Timber.i("Got error on subscribe: $throwable") })
 }

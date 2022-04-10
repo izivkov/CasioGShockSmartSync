@@ -61,10 +61,13 @@ object ProgressEvents {
         object DescriptorWrite : Events()
         object CharacteristicChanged : Events()
         object CharacteristicRead : Events()
-        object CharacteristicWrite : Events()
+        object AlarmDataLoaded : Events()
         object NotificationsEnabled : Events()
         object NotificationsDisabled : Events()
         object MtuChanged : Events()
         object PhoneDataCollected : Events()
+        object PhoneInitializationCompleted : ProgressEvents.Events() {
+
+        }
     }
 }

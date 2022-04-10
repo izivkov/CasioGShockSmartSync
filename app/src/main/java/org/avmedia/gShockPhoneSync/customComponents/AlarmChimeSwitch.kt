@@ -8,12 +8,34 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
+import android.widget.CompoundButton
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import timber.log.Timber
 
-class AlarmSwitch @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs, defStyleAttr) {
+class AlarmChimeSwitch @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null
+) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs) {
 
     init {
-//        onSelectionChanged(1, 2)
+        createAppEventsSubscription()
+
+        setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            AlarmsData.alarms[0].hasHourlyChime = isChecked
+        })
+    }
+
+    private fun createAppEventsSubscription() {
+        ProgressEvents.subscriber.start(
+            this.javaClass.simpleName,
+
+            {
+                when (it) {
+                    ProgressEvents.Events.AlarmDataLoaded -> {
+                        isChecked = AlarmsData.alarms[0].hasHourlyChime
+                    }
+                }
+            },
+            { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
 }

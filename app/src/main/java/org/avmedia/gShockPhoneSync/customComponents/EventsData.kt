@@ -163,10 +163,6 @@ object EventsData {
         return gson.toJson(events)
     }
 
-    fun getEvents(): String {
-        return toJson(events)
-    }
-
     fun getSelectedEvents(): String {
         val selectedEvents = events.filter { it.selected } as ArrayList<Event>
         return toJson(selectedEvents)

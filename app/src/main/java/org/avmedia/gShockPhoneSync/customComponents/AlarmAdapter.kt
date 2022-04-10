@@ -38,6 +38,7 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsData.Alarm>) :
         val context = parent.context
         val inflater = LayoutInflater.from(context)
         val alarmView = inflater.inflate(R.layout.alarm_item, parent, false)
+
         return ViewHolder(alarmView)
     }
 
@@ -59,6 +60,8 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsData.Alarm>) :
             })
             (viewHolder.itemView as AlarmItem).setAlarmData(alarm)
             (viewHolder.itemView as AlarmItem).setOnDataChange(::notifyDataSetChanged)
+
+
         } catch (e: ParseException) {
             e.printStackTrace()
         }

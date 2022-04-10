@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.avmedia.gShockPhoneSync.ble.Connection
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.jetbrains.anko.runOnUiThread
 import org.json.JSONObject
@@ -33,6 +34,7 @@ class AlarmList @JvmOverloads constructor(
         AlarmsData.fromJson(data)
         context.runOnUiThread {
             adapter?.notifyDataSetChanged()
+            ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)
         }
     }
 

@@ -32,12 +32,11 @@ class ConnectionSpinner @JvmOverloads constructor(
                     ProgressEvents.Events.ConnectionStarted -> {
                         visibility = View.VISIBLE
                     }
-                    ProgressEvents.Events.PhoneDataCollected -> {
+                    ProgressEvents.Events.PhoneInitializationCompleted -> {
                         visibility = View.INVISIBLE
                     }
                 }
             },
             { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
-
 }

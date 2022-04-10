@@ -23,6 +23,9 @@ import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 private const val GATT_MIN_MTU_SIZE = 23
 
@@ -38,9 +41,11 @@ object Connection : IConnection {
     private var pendingOperation: BleOperationType? = null
     var dataReceivedCallback: IDataReceived? = null
     var oneTimeLock = false
+    lateinit var applicationContext: Context
 
     // Interface
     override fun init(context: Context) {
+        applicationContext = context.applicationContext
         CasioSupport.setWriter(::writeCharacteristic)
     }
 
@@ -248,7 +253,6 @@ object Connection : IConnection {
                 Timber.w("Disconnecting from ${device.address}")
                 gatt.close()
                 deviceGattMap.remove(device)
-                // listeners.forEach { it.get()?.onDisconnect?.invoke(device) }
                 ProgressEvents.Events.Disconnect.payload = device
                 ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
 
@@ -353,6 +357,8 @@ object Connection : IConnection {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             val deviceAddress = gatt.device.address
             Connection.device = gatt.device
+
+            Timber.i(">>>>>>>>>>>>>>>>>>> onConnectionStateChange: new state: ${newState}")
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {

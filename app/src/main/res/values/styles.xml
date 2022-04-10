@@ -6,9 +6,14 @@
 
 <resources>
 
+    <!--
+        parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
+        parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        -->
+
     <!-- Base application theme. -->
     <style name="AppTheme"
-        parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
+        parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -63,8 +68,6 @@
         parent="ThemeOverlay.MaterialComponents.TimePicker"></style>
 
     <declare-styleable name="BatteryView">
-        <attr name="bv_charging"
-            format="boolean" />
         <attr name="bv_percent"
             format="integer" />
     </declare-styleable>
