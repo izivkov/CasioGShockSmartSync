@@ -36,6 +36,6 @@ such as `every second Thursday of the month`. Count events are simulated on the 
 matching the event start time, count and frequency. In case the calendar event cannot be adopted to a watch reminder, 
 the app will display the event as `Incompatible`.
 
-##Credits
+## Credits
 - The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
 - Some if the Casio specific code is loosely based on the `Gadgetbridge` https://github.com/Freeyourgadget/Gadgetbridge project
