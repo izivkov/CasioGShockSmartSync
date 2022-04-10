@@ -4,9 +4,8 @@ This app integrates the Casio G-shock Bluetooth-enabled watch, model GW-B5600, w
 like `Google Calendar` events and `Google Alarm Clock`. It also allows you to set your watch's time.
 
 ## General
-The app works by sending commands to the watch via Bluetooth (BLE). The app does not keep any information on the phone. 
-Instead, watch settings are read and displayed on the app. Then any changes are sent back to the watch, 
-only when the `Send to Watch...` button is pressed.  
+The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
+a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch...` button is pressed.  
 
 ## Setting Time
 The time can be set from the main screen by pressing the `Send to Watch` button next to the current time display. 
