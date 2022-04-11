@@ -9,20 +9,24 @@ a connection is established. Any changes on the app are sent back to the watch, 
 
 ## Setting Time
 ![Time Screen](images/TimeScreen.png)
+
 The time can be set from the main screen by pressing the `Send to Watch` button next to the current time display. 
 This screen also shows your `Home Time` location and battery level.
 ## Alarms
 ![Alarms Screen](images/AlarmsScreen.png)
+
 The GW-B5600 has 5 alarms and a `Signal` or `chime` setting. They are first read from the watch, 
 and displayed in the app. The alarms can be updated by pressing on the time display of each alarm. 
 A dialog will appear which allows you to select the time.
 ![Set Alarm Screen](images/SetAlarmScreen.png)
+
 Once the alarms have been set, you can send them to the watch, or send them to the `Alarm Clock` app on the phone. 
 Unfortunately, there is currently no way to read the alarms from the `Alarm Clock` app programmatically, 
 so we cannot set the watch alarms from this app. However, we can set the `Alarm Clock` app with the watch's alarms.
 
 ## Events
 ![Events Screen](images/EventsScreen.png)
+
 This screens displays `Events` set in your `Google Calendar` and allows you to send these events to the watch's `reminders`. 
 (*don't confuse these with `reminders` in the Google Calendar app. These reminders are special features and are not accessible programmatically*).
 
