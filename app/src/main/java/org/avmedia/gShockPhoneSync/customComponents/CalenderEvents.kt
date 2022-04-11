@@ -16,28 +16,22 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
 import androidx.core.app.ActivityCompat
+import org.avmedia.gShockPhoneSync.PermissionManager
+import org.avmedia.gShockPhoneSync.utils.Utils
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
 
 object CalenderEvents {
-    private const val CALENDAR_PERMISSION_REQUEST_CODE = 3
+    private var permissionGranted:Boolean = false
 
     @SuppressLint("Range")
     fun getDataFromEventTable(context: Context): ArrayList<EventsData.Event> {
-        val events: ArrayList<EventsData.Event> = ArrayList()
+        return getEvents(context)
+    }
 
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_CALENDAR
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(Manifest.permission.READ_CALENDAR),
-                CALENDAR_PERMISSION_REQUEST_CODE
-            )
-        }
+    private fun getEvents (context: Context): ArrayList<EventsData.Event> {
+        val events: ArrayList<EventsData.Event> = ArrayList()
 
         var cur: Cursor? = null
         val cr: ContentResolver = context.contentResolver
@@ -118,5 +112,9 @@ object CalenderEvents {
         }
 
         return events
+    }
+
+    fun setGrated(grantResults: IntArray) {
+        permissionGranted = grantResults[0] == 1
     }
 }

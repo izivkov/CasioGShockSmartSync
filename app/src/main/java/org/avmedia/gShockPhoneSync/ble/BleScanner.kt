@@ -42,7 +42,6 @@ data class BleScanner(val context: Context) {
     private var isScanning = false
     private val scanResults = mutableListOf<ScanResult>()
 
-    @SuppressLint("MissingPermission")
     fun startConnection() {
         if (Connection.isConnected()) {
             return

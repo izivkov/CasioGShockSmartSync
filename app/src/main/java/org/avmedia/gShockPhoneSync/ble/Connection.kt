@@ -358,8 +358,6 @@ object Connection : IConnection {
             val deviceAddress = gatt.device.address
             Connection.device = gatt.device
 
-            Timber.i(">>>>>>>>>>>>>>>>>>> onConnectionStateChange: new state: ${newState}")
-
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     ProgressEvents.onNext(ProgressEvents.Events.ConnectionStarted)
