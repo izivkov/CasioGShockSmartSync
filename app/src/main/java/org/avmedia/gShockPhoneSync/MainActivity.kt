@@ -6,9 +6,6 @@
 
 package org.avmedia.gShockPhoneSync
 
-import android.Manifest
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.Manifest.permission.READ_CALENDAR
 import android.bluetooth.BluetoothDevice
 import android.os.Build
 import android.os.Bundle
@@ -23,7 +20,6 @@ import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
-import org.avmedia.gShockPhoneSync.customComponents.CalenderEvents
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -71,15 +67,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        bleScanner.startConnection()
         super.onResume()
-        if (!bleScanner.bluetoothAdapter.isEnabled) {
-            // permissionManager.promptEnableBluetooth()
-        }
-    }
 
-    override fun onPause() {
-        super.onPause()
+        if (permissionManager.hasAllPermissions()) {
+            bleScanner.startConnection()
+        }
+        if (!bleScanner.bluetoothAdapter.isEnabled) {
+            permissionManager.promptEnableBluetooth()
+        }
     }
 
     override fun onUserInteraction() {
@@ -87,13 +82,29 @@ class MainActivity : AppCompatActivity() {
         InactivityWatcher.resetTimer(this)
     }
 
-    private fun onSuccess () {
-        Timber.i ("Permission granted...")
+    private fun onSuccess() {
+        Timber.i("Permission granted...")
     }
 
-    private fun onFail () {
-        Timber.i ("Permission failed...")
+    private fun onFail() {
+        Timber.i("Permission failed...")
         Utils.toast(this, "Permission not granted...exiting")
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (grantResults.all { it == 0 }) {
+            bleScanner.startConnection()
+        } else {
+            Timber.i("Not all permissions granted...")
+            Utils.toast(this, "Not all permissions granted, exiting...")
+            val reconnectScheduler: ScheduledExecutorService =
+                Executors.newSingleThreadScheduledExecutor()
+            reconnectScheduler.schedule({ finish() }, 1L, TimeUnit.SECONDS)
+        }
     }
 
     private fun createAppEventsSubscription() {

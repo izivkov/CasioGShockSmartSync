@@ -54,7 +54,11 @@ data class BleScanner(val context: Context) {
         }
 
         if (device == null || device.type == BluetoothDevice.DEVICE_TYPE_UNKNOWN) {
+            if (isScanning) {
+                return
+            }
             bleScanner.startScan(createFilters(), scanSettings, scanCallback)
+            isScanning = true
         } else {
             Connection.connect(device, context)
         }
@@ -81,8 +85,12 @@ data class BleScanner(val context: Context) {
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            if (LocalDataStorage.get("cached device", context) == null) {
+            Timber.i ("onScanResult: result: $result")
+
+            val cachedDevice = LocalDataStorage.get("cached device", context)
+            if (cachedDevice == null || cachedDevice != result.device.address) {
                 LocalDataStorage.put("cached device", result.device.address, context)
+                Connection.connect(result.device, context)
             }
         }
 

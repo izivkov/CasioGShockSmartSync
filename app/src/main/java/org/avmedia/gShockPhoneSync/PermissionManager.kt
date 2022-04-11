@@ -19,6 +19,7 @@ import timber.log.Timber
 
 data class PermissionManager(val context: Context) {
 
+    private var ENABLE_BLUETOOTH_REQUEST_CODE = 3
     private var PERMISSION_ALL = 1
     private var PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -34,4 +35,14 @@ data class PermissionManager(val context: Context) {
         }
     }
 
+    public fun hasAllPermissions () : Boolean {
+        return hasPermissions(context, PERMISSIONS)
+    }
+
+    fun promptEnableBluetooth() {
+        if (!(context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter.isEnabled) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            (context as Activity).startActivityForResult(enableBtIntent, ENABLE_BLUETOOTH_REQUEST_CODE)
+        }
+    }
 }
