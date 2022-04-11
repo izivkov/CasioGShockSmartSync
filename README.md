@@ -18,6 +18,7 @@ This screen also shows your `Home Time` location and battery level.
 The GW-B5600 has 5 alarms and a `Signal` or `chime` setting. They are first read from the watch, 
 and displayed in the app. The alarms can be updated by pressing on the time display of each alarm. 
 A dialog will appear which allows you to select the time.
+
 ![Set Alarm Screen](images/SetAlarmScreen.png)
 
 Once the alarms have been set, you can send them to the watch, or send them to the `Alarm Clock` app on the phone. 
