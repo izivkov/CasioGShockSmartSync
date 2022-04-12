@@ -59,7 +59,7 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsData.Alarm>) :
                 alarm.enabled = isChecked
             })
             (viewHolder.itemView as AlarmItem).setAlarmData(alarm)
-            (viewHolder.itemView as AlarmItem).setOnDataChange(::notifyDataSetChanged)
+            viewHolder.itemView.setOnDataChange(::notifyDataSetChanged)
 
 
         } catch (e: ParseException) {

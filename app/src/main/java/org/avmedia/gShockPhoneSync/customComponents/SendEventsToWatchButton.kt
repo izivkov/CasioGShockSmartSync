@@ -23,7 +23,7 @@ class SendEventsToWatchButton @JvmOverloads constructor(
         onState()
     }
 
-    inner class OnTouchListener() : View.OnTouchListener {
+    inner class OnTouchListener : View.OnTouchListener {
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {

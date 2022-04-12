@@ -66,8 +66,6 @@ object ProgressEvents {
         object NotificationsDisabled : Events()
         object MtuChanged : Events()
         object PhoneDataCollected : Events()
-        object PhoneInitializationCompleted : ProgressEvents.Events() {
-
-        }
+        object PhoneInitializationCompleted : ProgressEvents.Events()
     }
 }

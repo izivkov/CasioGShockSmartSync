@@ -29,13 +29,13 @@ data class PermissionManager(val context: Context) {
         ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    public fun setupPermissions(){
+    fun setupPermissions(){
         if (!hasPermissions(context, PERMISSIONS)) {
-            ActivityCompat.requestPermissions(context as Activity, PERMISSIONS, PERMISSION_ALL);
+            ActivityCompat.requestPermissions(context as Activity, PERMISSIONS, PERMISSION_ALL)
         }
     }
 
-    public fun hasAllPermissions () : Boolean {
+    fun hasAllPermissions () : Boolean {
         return hasPermissions(context, PERMISSIONS)
     }
 

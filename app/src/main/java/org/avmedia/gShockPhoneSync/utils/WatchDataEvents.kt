@@ -29,7 +29,7 @@ object WatchDataEvents {
 
         val subjectsForThisSubscriber = subscribers[subscriber]
         if (!subjectsForThisSubscriber?.contains(subject)!!) {
-            subjectsForThisSubscriber?.add(subject)
+            subjectsForThisSubscriber.add(subject)
         }
     }
 

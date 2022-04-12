@@ -15,21 +15,21 @@ import kotlin.math.max
 
 
 object Utils {
-    public fun String.hexToBytes() =
+    fun String.hexToBytes() =
         this.chunked(2).map { it.uppercase(Locale.US).toInt(16).toByte() }.toByteArray()
 
-    public fun byteArrayOfInts(vararg ints: Int) =
+    fun byteArrayOfInts(vararg ints: Int) =
         ByteArray(ints.size) { pos -> ints[pos].toByte() }
 
-    public fun byteArrayOfIntArray(intArray: IntArray) =
+    fun byteArrayOfIntArray(intArray: IntArray) =
         ByteArray(intArray.size) { pos -> intArray[pos].toByte() }
 
-    public fun toByteArray(string: String):ByteArray {
+    fun toByteArray(string: String):ByteArray {
         val charset = Charsets.UTF_8
         return string.toByteArray(charset)
     }
 
-    public fun toByteArray(string: String, maxLen: Int):ByteArray {
+    fun toByteArray(string: String, maxLen: Int):ByteArray {
         val charset = Charsets.UTF_8
         var retArr = string.toByteArray(charset)
         if (retArr.size > maxLen) {
@@ -52,9 +52,9 @@ object Utils {
         return hexStr
     }
 
-    public fun byteArray(vararg bytes: Byte) = ByteArray(bytes.size) { pos -> bytes[pos] }
+    fun byteArray(vararg bytes: Byte) = ByteArray(bytes.size) { pos -> bytes[pos] }
 
-    public fun toast(context: Context, message: String) {
+    fun toast(context: Context, message: String) {
         val toast: Toast = Toast.makeText(context, message, Toast.LENGTH_LONG)
         toast.show()
     }
@@ -105,35 +105,35 @@ object Utils {
     }
 
     // JSON safe functions, prevent throwing exceptions
-    public fun JSONObject.getStringSafe(name: String): String? {
+    fun JSONObject.getStringSafe(name: String): String? {
         if (!has(name)) {
             return null
         }
         return getString(name)
     }
 
-    public fun JSONObject.getBooleanSafe(name: String): Boolean? {
+    fun JSONObject.getBooleanSafe(name: String): Boolean? {
         if (!has(name)) {
             return null
         }
         return getBoolean(name)
     }
 
-    public fun JSONObject.getJSONObjectSafe(name: String): JSONObject? {
+    fun JSONObject.getJSONObjectSafe(name: String): JSONObject? {
         if (!has(name)) {
             return null
         }
         return getJSONObject(name)
     }
 
-    public fun JSONObject.getJSONArraySafe(name: String): JSONArray? {
+    fun JSONObject.getJSONArraySafe(name: String): JSONArray? {
         if (!has(name)) {
             return null
         }
         return getJSONArray(name)
     }
 
-    public fun JSONObject.getIntSafe(name: String): Int? {
+    fun JSONObject.getIntSafe(name: String): Int? {
         if (!has(name)) {
             return null
         }

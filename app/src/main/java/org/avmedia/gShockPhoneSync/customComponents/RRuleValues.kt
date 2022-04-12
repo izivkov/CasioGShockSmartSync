@@ -40,7 +40,7 @@ object RRuleValues {
 
             fun notCompatible(rruleObj: RRule): Boolean {
                 val validNumberOnly = listOf<Int>(0)
-                val numberArr = rruleObj?.byDay?.map { it.number }
+                val numberArr = rruleObj.byDay.map { it.number }
 
                 val validByMonth = rruleObj.byMonth.isEmpty()
                 val validByDay = rruleObj.byDay.isEmpty() || validNumberOnly.containsAll(numberArr)

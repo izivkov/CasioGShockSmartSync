@@ -20,8 +20,7 @@ object Alarms {
     private const val ALARM_CONSTANT_VALUE = 0x40
     private const val ALARMS_COUNT = 5
 
-    class Alarm(val hour: Int, val minute: Int, val enabled: Boolean, val hasHourlyChime:Boolean) {
-    }
+    class Alarm(val hour: Int, val minute: Int, val enabled: Boolean, val hasHourlyChime:Boolean)
 
     private fun createEmptyAlarm(): ByteArray {
         return Utils.byteArrayOfInts(0, ALARM_CONSTANT_VALUE, 0, 0)

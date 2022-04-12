@@ -21,7 +21,7 @@ class SendAlarmsToWatchButton @JvmOverloads constructor(
         onState()
     }
 
-    inner class OnTouchListener() : View.OnTouchListener {
+    inner class OnTouchListener : View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
