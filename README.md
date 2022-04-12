@@ -6,19 +6,20 @@ with Google services such as `Google Calendar` events and `Google Alarm Clock`. 
 G-shock into a sami-smart watch.
 
 ## General
-<img src="images/ConnectionScreen.png"
+
+<img src="images/ConnectingScreen.png"
 alt="Connection Screen"
 width=200
-style="float: left; margin: 10px;" />
+style="margin: 10px;" />
 
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
-a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch...` button is pressed.  
+a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch` button is pressed.  
 
 ## Setting Time
 <img src="images/TimeScreen.png"
 alt="Time Screen"
 width=200
-style="float: left; margin: 10px;" />
+style="margin: 10px;" />
 
 The time can be set from the main screen by pressing the `Send to Watch` button next to the current time display. 
 This screen also shows your `Home Time` location and battery level.
@@ -33,7 +34,7 @@ style="float: left; margin: 10px;" />
 <img src="images/SetAlarmScreen.png"
 alt="Set Alarm Screen"
 width=200
-style="float: left; margin: 10px;" />
+style="margin: 10px;" />
 
 The GW-B5600 has 5 alarms and a `Signal` or `chime` setting. They are first read from the watch, 
 and displayed in the app. The alarms can be updated by pressing on the time display of each alarm. 
@@ -47,7 +48,7 @@ so we cannot set the watch alarms from this app. However, we can set the `Alarm 
 <img src="images/EventsScreen.png"
 alt="Events Screen"
 width=200
-style="float: left; margin: 10px;" />
+style="margin: 10px;" />
 
 This screens displays `Events` set in your `Google Calendar` and allows you to send these events to the watch's `reminders`. 
 (*don't confuse these with `reminders` in the Google Calendar app. These reminders are special features and are not accessible programmatically*).
