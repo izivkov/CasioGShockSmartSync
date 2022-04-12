@@ -42,18 +42,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginRight="25dp"
             android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             >
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
+                android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 >
 
@@ -70,18 +70,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:textSize="18dp"
                     android:textFontWeight="1000"
+                    android:textSize="18dp"
                     />
 
             </LinearLayout>
+            <!-- The battery view is not shown until we figure out how to get the charge level value -->
+            <!-- Currently we are using command 0x28, but that does not produce an meaningful result. -->
+            <!-- The return value is something like 0x28 0x0f 0f17 0x00 -->
 
-            <org.avmedia.gShockPhoneSync.customComponents.BatteryView
-                android:id="@+id/battery_view"
-                android:layout_width="20dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                />
+            <!--            <org.avmedia.gShockPhoneSync.customComponents.BatteryView-->
+            <!--                android:id="@+id/battery_view"-->
+            <!--                android:layout_width="20dp"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_gravity="center"-->
+            <!--                />-->
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
