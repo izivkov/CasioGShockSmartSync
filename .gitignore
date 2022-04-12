@@ -16,7 +16,7 @@ bin/
 gen/
 out/
 release/
-keystore/
+app/keystore/
 
 # Gradle files
 .gradle/
