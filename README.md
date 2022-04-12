@@ -1,7 +1,9 @@
 # Casio G-Shock Phone Sync
 
 This app integrates the Casio G-shock [B5600 series bluetooth watches](https://world.g-shock.com/asia-mea/en/products/standard_digital/gw-b5600/), 
-with Google services like `Google Calendar` events and `Google Alarm Clock`. It also allows you to set your watch's time.
+with Google services like `Google Calendar` events and `Google Alarm Clock`. It is not meant to replace the 
+[official](https://play.google.com/store/apps/details?id=com.casio.gshockconnected&hl=en_CA&gl=US) Casio app. Instead it converts your traditional 
+G-shock into a sami-smart watch.
 
 ## General
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
@@ -12,13 +14,15 @@ a connection is established. Any changes on the app are sent back to the watch, 
 
 The time can be set from the main screen by pressing the `Send to Watch` button next to the current time display. 
 This screen also shows your `Home Time` location and battery level.
+
 ## Alarms
+
 ![Alarms Screen](images/AlarmsScreen.png)
+![Set Alarm Screen](images/SetAlarmScreen.png)
 
 The GW-B5600 has 5 alarms and a `Signal` or `chime` setting. They are first read from the watch, 
 and displayed in the app. The alarms can be updated by pressing on the time display of each alarm. 
 A dialog will appear which allows you to select the time.
-![Set Alarm Screen](images/SetAlarmScreen.png)
 
 Once the alarms have been set, you can send them to the watch, or send them to the `Alarm Clock` app on the phone. 
 Unfortunately, there is currently no way to read the alarms from the `Alarm Clock` app programmatically, 
