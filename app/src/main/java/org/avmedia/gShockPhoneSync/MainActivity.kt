@@ -70,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         if (permissionManager.hasAllPermissions()) {
+            ProgressEvents.onNext(ProgressEvents.Events.AllPermissionsAccepted)
             bleScanner.startConnection()
         }
         if (!bleScanner.bluetoothAdapter.isEnabled) {
@@ -97,6 +98,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (grantResults.all { it == 0 }) {
+            ProgressEvents.onNext(ProgressEvents.Events.AllPermissionsAccepted)
             bleScanner.startConnection()
         } else {
             Timber.i("Not all permissions granted...")

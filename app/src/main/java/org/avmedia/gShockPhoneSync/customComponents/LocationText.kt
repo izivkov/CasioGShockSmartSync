@@ -19,6 +19,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 import java.util.Locale
 
@@ -32,7 +34,21 @@ class LocationText @JvmOverloads constructor(
     init {
         text = ""
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        getLastLocation()
+        createAppEventsSubscription()
+    }
+
+    private fun createAppEventsSubscription() {
+        ProgressEvents.subscriber.start(
+            this.javaClass.simpleName,
+
+            {
+                when (it) {
+                    ProgressEvents.Events.AllPermissionsAccepted -> {
+                        getLastLocation()
+                    }
+                }
+            },
+            { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
 
     @SuppressLint("MissingPermission")
