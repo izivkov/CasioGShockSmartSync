@@ -64,6 +64,11 @@ the app will display the event as `Incompatible`. Only future events and recurri
 The watch only supports `all-day reminders`. However, if the Google calender event has a specific time,
 it will still be used as a day reminder on the watch.
 
+## Playstore
+https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync
+
 ## Credits
 - The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
 - Some if the Casio specific code is loosely based on the `Gadgetbridge` https://github.com/Freeyourgadget/Gadgetbridge project
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](izivkov@gmail.com)

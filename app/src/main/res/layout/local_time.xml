@@ -6,7 +6,7 @@
   ~ Last modified 2022-03-28, 10:09 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.customComponents.ExactTime
+<org.avmedia.gShockPhoneSync.customComponents.LocalTime
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -31,9 +31,9 @@
             android:layout_weight="1.5"
             android:orientation="vertical"
             android:paddingLeft="12dp"
-            android:paddingTop="30dp"
+            android:paddingTop="20dp"
             android:paddingRight="12dp"
-            android:paddingBottom="30dp"
+            android:paddingBottom="20dp"
             >
 
             <TextView
@@ -41,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
-                android:text="Exact Time"
+                android:text="Local Time"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="20dp"
                 />
@@ -54,6 +54,15 @@
                 android:format12Hour="h:mm:ss a"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textSize="34dp"
+                />
+
+            <org.avmedia.gShockPhoneSync.customComponents.LocationText
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="16dp"
                 />
 
         </LinearLayout>
@@ -81,4 +90,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</org.avmedia.gShockPhoneSync.customComponents.ExactTime>
+</org.avmedia.gShockPhoneSync.customComponents.LocalTime>

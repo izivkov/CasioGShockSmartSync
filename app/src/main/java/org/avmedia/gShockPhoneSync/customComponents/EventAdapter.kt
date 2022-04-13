@@ -49,7 +49,7 @@ class EventAdapter(private val events: ArrayList<EventsData.Event>) :
         try {
             viewHolder.titleView.text = event.title
             if (event.incompatible) {
-                viewHolder.periodView.text = "Event not compatible with watch"
+                viewHolder.periodView.text = "Incompatible with watch's reminders"
                 viewHolder.frequencyView.text = ""
                 viewHolder.selectedView.isChecked = false
                 viewHolder.selectedView.isEnabled = false

@@ -58,6 +58,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.4.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.4.1'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
 
     ktlint "com.pinterest:ktlint:0.36.0"
 

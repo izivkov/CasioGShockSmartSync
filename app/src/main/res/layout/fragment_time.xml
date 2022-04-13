@@ -14,7 +14,7 @@
     tools:context=".ui.time.TimeFragment"
     >
 
-    <include layout="@layout/exact_time" />
+    <include layout="@layout/local_time" />
 
     <include layout="@layout/watch_info" />
 
