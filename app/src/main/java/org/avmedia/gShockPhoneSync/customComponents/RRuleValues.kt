@@ -34,11 +34,8 @@ object RRuleValues {
         if (rrule != null && rrule.isNotEmpty()) {
 
             val rruleObj = RRule(rrule)
-            val rfc5545String = rruleObj.toRFC5545String()
-            Timber.i("rfc5545String $rfc5545String")
-            Timber.i("RRULE ${rruleObj.freq}, ${rruleObj.interval}, ${rruleObj.byDay}, ${rruleObj.until}")
 
-            fun notCompatible(rruleObj: RRule): Boolean {
+            fun isCompatible(rruleObj: RRule): Boolean {
                 val validNumberOnly = listOf<Int>(0)
                 val numberArr = rruleObj.byDay.map { it.number }
 
@@ -49,7 +46,7 @@ object RRuleValues {
                 return validByMonth && validByDay && validInterval
             }
 
-            if (!notCompatible(rruleObj)) {
+            if (!isCompatible(rruleObj)) {
                 rruleValues.incompatible = true
                 Timber.i("Event not compatible with Watch")
             }
