@@ -22,7 +22,7 @@ width=200
 style="margin: 10px;" />
 
 The local time can be set from the main screen by pressing the `Send to Watch` button next to the current time display. The app uses your current location to get the local lime.
-You can then set the watch time accordingly, without having to chage your `World Time` selection on the watch.
+You can then set the watch time accordingly, without having to change your `World Time` selection on the watch.
 
 This screen also shows your `Home Time` location and battery level.
 
