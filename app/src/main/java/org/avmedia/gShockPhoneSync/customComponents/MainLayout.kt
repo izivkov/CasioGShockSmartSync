@@ -19,14 +19,37 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import timber.log.Timber
 
 class MainLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
+        hide()
+        createAppEventsSubscription ()
     }
+
+    private fun createAppEventsSubscription(): Disposable =
+        ProgressEvents.connectionEventFlowable
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                when (it) {
+                    ProgressEvents.Events.PhoneInitializationCompleted -> {
+                        show()
+                    }
+                    ProgressEvents.Events.Disconnect -> {
+                        hide()
+                    }
+                }
+            }
+            .subscribe(
+                { },
+                { throwable -> Timber.i("Got error on subscribe: $throwable") })
 
     override fun show() {
         visibility = View.VISIBLE
