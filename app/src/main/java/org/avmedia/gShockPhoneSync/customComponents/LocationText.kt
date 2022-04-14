@@ -19,7 +19,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 import java.util.Locale
@@ -31,10 +30,16 @@ class LocationText @JvmOverloads constructor(
 
     lateinit var mFusedLocationClient: FusedLocationProviderClient
 
+    private object LastLocation {
+        var cachedLocation: String = ""
+    }
+
     init {
-        text = ""
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        createAppEventsSubscription()
+        text = LastLocation.cachedLocation
+        if (text.isEmpty()) {
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            createAppEventsSubscription()
+        }
     }
 
     private fun createAppEventsSubscription() {
@@ -61,9 +66,11 @@ class LocationText @JvmOverloads constructor(
                     requestNewLocationData()
                 } else {
                     val geoCoder = Geocoder(context, Locale.getDefault())
-                    val addresses: List<Address> = geoCoder.getFromLocation(location.latitude, location.longitude, 1)
+                    val addresses: List<Address> =
+                        geoCoder.getFromLocation(location.latitude, location.longitude, 1)
                     if (addresses.isNotEmpty()) {
                         text = addresses[0].locality
+                        LastLocation.cachedLocation = addresses[0].locality
                     }
                 }
             }
@@ -86,8 +93,9 @@ class LocationText @JvmOverloads constructor(
     }
 
     private val mLocationCallback = object : LocationCallback() {
-        fun callBack () {
-            Timber.d("mLocationCallback called...")}
+        fun callBack() {
+            Timber.d("mLocationCallback called...")
+        }
     }
 
     private fun isLocationEnabled(): Boolean {
