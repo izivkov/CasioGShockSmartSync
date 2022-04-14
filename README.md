@@ -70,5 +70,3 @@ https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync
 ## Credits
 - The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
 - Some if the Casio specific code is loosely based on the `Gadgetbridge` https://github.com/Freeyourgadget/Gadgetbridge project
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](izivkov@gmail.com)
