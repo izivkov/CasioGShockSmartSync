@@ -13,9 +13,9 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import timber.log.Timber
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 
 data class PermissionManager(val context: Context) {
 
@@ -25,24 +25,46 @@ data class PermissionManager(val context: Context) {
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.READ_CALENDAR,
     )
-    private fun hasPermissions(context: Context, permissions: Array<String>): Boolean = permissions.all {
-        ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-    }
 
-    fun setupPermissions(){
-        if (!hasPermissions(context, PERMISSIONS)) {
-            ActivityCompat.requestPermissions(context as Activity, PERMISSIONS, PERMISSION_ALL)
+    init {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PERMISSIONS += Manifest.permission.BLUETOOTH_SCAN
+            PERMISSIONS += Manifest.permission.BLUETOOTH_CONNECT
         }
     }
 
-    fun hasAllPermissions () : Boolean {
+    private fun hasPermissions(context: Context, permissions: Array<String>): Boolean =
+        permissions.all {
+            ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+
+    fun setupPermissions() {
+        if (!hasPermissions(context, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(context as Activity, PERMISSIONS, PERMISSION_ALL)
+        } else {
+            ProgressEvents.onNext(ProgressEvents.Events.AllPermissionsAccepted)
+        }
+    }
+
+    fun hasAllPermissions(): Boolean {
         return hasPermissions(context, PERMISSIONS)
     }
 
     fun promptEnableBluetooth() {
         if (!(context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            (context as Activity).startActivityForResult(enableBtIntent, ENABLE_BLUETOOTH_REQUEST_CODE)
+            (context as Activity).startActivityForResult(
+                enableBtIntent,
+                ENABLE_BLUETOOTH_REQUEST_CODE
+            )
+        }
+    }
+
+    fun onRequestPermissionsResult(
+        grantResults: IntArray
+    ) {
+        if (grantResults.all { it == 0 }) {
+            ProgressEvents.onNext(ProgressEvents.Events.AllPermissionsAccepted)
         }
     }
 }

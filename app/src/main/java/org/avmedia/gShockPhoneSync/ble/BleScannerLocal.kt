@@ -10,6 +10,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
@@ -21,7 +22,7 @@ import org.avmedia.gShockPhoneSync.casioB5600.CasioConstants
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import timber.log.Timber
 
-data class BleScanner(val context: Context) {
+data class BleScannerLocal(val context: Context) {
     lateinit var device: BluetoothDevice
 
     val bluetoothAdapter: BluetoothAdapter by lazy {

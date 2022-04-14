@@ -6,7 +6,11 @@
 
 package org.avmedia.gShockPhoneSync
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -15,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import org.avmedia.gShockPhoneSync.ble.BleScanner
+import org.avmedia.gShockPhoneSync.ble.BleScannerLocal
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
@@ -29,11 +33,12 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
+
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var bleScanner: BleScanner
+    private lateinit var bleScannerLocal: BleScannerLocal
     private lateinit var permissionManager: PermissionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         createAppEventsSubscription()
 
-        bleScanner = BleScanner(this)
+        bleScannerLocal = BleScannerLocal(this)
         Connection.init(this)
         WatchDataListener.init()
     }
@@ -69,12 +74,13 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        if (permissionManager.hasAllPermissions()) {
-            ProgressEvents.onNext(ProgressEvents.Events.AllPermissionsAccepted)
-            bleScanner.startConnection()
-        }
-        if (!bleScanner.bluetoothAdapter.isEnabled) {
+        if (!bleScannerLocal.bluetoothAdapter.isEnabled) {
             permissionManager.promptEnableBluetooth()
+            return
+        }
+
+        if (permissionManager.hasAllPermissions()) {
+            bleScannerLocal.startConnection()
         }
     }
 
@@ -97,15 +103,14 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionManager.onRequestPermissionsResult(grantResults)
+
         if (grantResults.all { it == 0 }) {
-            ProgressEvents.onNext(ProgressEvents.Events.AllPermissionsAccepted)
-            bleScanner.startConnection()
+            bleScannerLocal.startConnection()
         } else {
             Timber.i("Not all permissions granted...")
             Utils.toast(this, "Not all permissions granted, exiting...")
-            val reconnectScheduler: ScheduledExecutorService =
-                Executors.newSingleThreadScheduledExecutor()
-            reconnectScheduler.schedule({ finish() }, 1L, TimeUnit.SECONDS)
+            finish()
         }
     }
 
@@ -140,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                         val reconnectScheduler: ScheduledExecutorService =
                             Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
-                            bleScanner.startConnection()
+                            bleScannerLocal.startConnection()
                         }, 5L, TimeUnit.SECONDS)
                     }
                 }
