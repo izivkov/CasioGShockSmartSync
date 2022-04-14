@@ -61,7 +61,7 @@ such as `every second Thursday of the month`. Count events are simulated on the 
 matching the event start time, count and frequency. In case the calendar event cannot be adopted to a watch reminder, 
 the app will display the event as `Incompatible`. Only future events and recurring events which have not expired are displayed.
 
-The watch only supports `all-day reminders`. However, if the Google calender event has a specific time,
+The watch only supports `all-day reminders`. However, if the Google calendar event has a specific time,
 it will still be used as a day reminder on the watch.
 
 ## Playstore
