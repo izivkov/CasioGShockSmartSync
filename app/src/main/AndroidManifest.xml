@@ -36,10 +36,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         >
-        <activity
-            android:name="org.avmedia.gShockPhoneSync.BleTestActivity"
-            android:screenOrientation="portrait"
-            />
 
         <activity
             android:name="org.avmedia.gShockPhoneSync.MainActivity"
