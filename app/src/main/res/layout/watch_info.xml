@@ -75,16 +75,13 @@
                     />
 
             </LinearLayout>
-            <!-- The battery view is not shown until we figure out how to get the charge level value -->
-            <!-- Currently we are using command 0x28, but that does not produce an meaningful result. -->
-            <!-- The return value is something like 0x28 0x0f 0f17 0x00 -->
 
-            <!--            <org.avmedia.gShockPhoneSync.customComponents.BatteryView-->
-            <!--                android:id="@+id/battery_view"-->
-            <!--                android:layout_width="20dp"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_gravity="center"-->
-            <!--                />-->
+            <org.avmedia.gShockPhoneSync.customComponents.BatteryView
+                android:id="@+id/battery_view"
+                android:layout_width="20dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

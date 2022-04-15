@@ -11,6 +11,7 @@ import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import timber.log.Timber
 import java.util.Locale
 
 object WatchDataCollector {
@@ -50,7 +51,27 @@ object WatchDataCollector {
                 }
             }
             "23" -> watchName = Utils.toAsciiString(command, 1)
-            "28" -> batteryLevel = command.split(' ')[2].toInt(16)
+            "28" -> {
+                batteryLevel = 0
+                var cmdInts = Utils.toIntArray(command)
+                // command looks like 0x28 13 1E 00.
+                // 50% level is obtain from the second Int 13:
+                // 0x13 = 0b00010011
+                // take MSB 0b0001. If it is not 0, we have 50% charge
+                val MASK_50_PERCENT = 0b00010000
+                batteryLevel += if (cmdInts[1] or MASK_50_PERCENT != 0) 50 else 0
+
+                // Fine value is obtained from the 3rd integer, 0x1E. The LSB (0xE) represents
+                // the fine value between 0 and 0xf, which is the other 50%. So, to
+                // get this value, we have 50% * 0xe / 0xf. We add this to the previous battery level.
+                // So, for command 0x28 13 1E 00, our battery level would be:
+                // 50% (from 0x13) + 47 = 97%
+                // The 47 number was obtained from 50 * 0xe / 0xf or 50 * 14/15 = 46.66
+
+                val MASK_FINE_VALUE = 0xf
+                val fineValue = cmdInts[2] and MASK_FINE_VALUE
+                batteryLevel += 50 * fineValue / 15
+            }
         }
     }
 
