@@ -35,15 +35,6 @@ object AlarmEncoder {
                 }
                 jsonResponse.put("ALARMS", alarms)
             }
-            in listOf(
-                CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code,
-                CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code,
-                CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code,
-                CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code,
-                CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code,
-            ) -> {
-                jsonResponse.put("WATCH_INFO_DATA", command)
-            }
             else -> {
                 Timber.d("Unhandled Command [$command]")
             }

@@ -39,7 +39,7 @@ class ConnectionLayout @JvmOverloads constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.Events.PhoneInitializationCompleted -> {
+                    ProgressEvents.Events.WatchInitializationCompleted -> {
                         hide()
                     }
                     ProgressEvents.Events.Disconnect -> {

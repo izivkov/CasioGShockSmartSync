@@ -6,11 +6,7 @@
 
 package org.avmedia.gShockPhoneSync
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -121,11 +117,11 @@ class MainActivity : AppCompatActivity() {
                         DeviceCharacteristics.init(device)
                         CasioSupport.init()
                     }
-                    ProgressEvents.Events.PhoneDataCollected -> {
+                    ProgressEvents.Events.WatchDataCollected -> {
                         // We have collected all data from watch.
                         // Send initializer data to watch, se we can set time later
                         WatchDataCollector.runInitCommands()
-                        ProgressEvents.onNext(ProgressEvents.Events.PhoneInitializationCompleted)
+                        ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
                         InactivityWatcher.start(this)
                     }
                     ProgressEvents.Events.Disconnect -> {

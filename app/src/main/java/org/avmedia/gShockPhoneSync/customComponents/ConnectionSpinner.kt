@@ -32,7 +32,7 @@ class ConnectionSpinner @JvmOverloads constructor(
                     ProgressEvents.Events.ConnectionStarted -> {
                         visibility = View.VISIBLE
                     }
-                    ProgressEvents.Events.PhoneInitializationCompleted -> {
+                    ProgressEvents.Events.WatchInitializationCompleted -> {
                         visibility = View.INVISIBLE
                     }
                 }

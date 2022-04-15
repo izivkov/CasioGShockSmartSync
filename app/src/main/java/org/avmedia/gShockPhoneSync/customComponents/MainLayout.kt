@@ -39,7 +39,7 @@ class MainLayout @JvmOverloads constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.Events.PhoneInitializationCompleted -> {
+                    ProgressEvents.Events.WatchInitializationCompleted -> {
                         show()
                     }
                     ProgressEvents.Events.Disconnect -> {

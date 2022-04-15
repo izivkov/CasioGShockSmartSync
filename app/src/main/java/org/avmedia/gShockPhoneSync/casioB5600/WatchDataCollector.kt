@@ -11,7 +11,7 @@ import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
-import timber.log.Timber
+import org.json.JSONObject
 import java.util.Locale
 
 object WatchDataCollector {
@@ -20,14 +20,17 @@ object WatchDataCollector {
     private val worldCities: ArrayList<String> = ArrayList<String>()
     var unmatchedCmdCount: Int = -1
 
-    var batteryLevel: Int = 0
     var watchName: String = ""
     var homeCity: String = ""
     private var hourChime: String = ""
     var hourChime2: String = ""
 
     init {
-        subscribe("WATCH_INFO_DATA", ::onDataReceived)
+        subscribe("CASIO_DST_SETTING", ::onDataReceived)
+        subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
+        subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
+        subscribe("CASIO_WATCH_NAME", ::onDataReceived)
+        subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
     }
 
     private fun onDataReceived(data: String) {
@@ -35,7 +38,14 @@ object WatchDataCollector {
         --unmatchedCmdCount
     }
 
-    fun add(command: String) {
+    fun toJson(command: String): JSONObject {
+        val jsonObject = JSONObject()
+        jsonObject.put("WATCH_INFO_DATA", command)
+        return jsonObject
+    }
+
+    private fun
+        add(command: String) {
         val shortStr = Utils.toCompactString(command)
         when (shortStr.substring(0, 2).uppercase(Locale.getDefault())) {
             "1E" -> dstSettings.add(shortStr)
@@ -50,28 +60,6 @@ object WatchDataCollector {
                     }
                 }
             }
-            "23" -> watchName = Utils.toAsciiString(command, 1)
-            "28" -> {
-                batteryLevel = 0
-                var cmdInts = Utils.toIntArray(command)
-                // command looks like 0x28 13 1E 00.
-                // 50% level is obtain from the second Int 13:
-                // 0x13 = 0b00010011
-                // take MSB 0b0001. If it is not 0, we have 50% charge
-                val MASK_50_PERCENT = 0b00010000
-                batteryLevel += if (cmdInts[1] or MASK_50_PERCENT != 0) 50 else 0
-
-                // Fine value is obtained from the 3rd integer, 0x1E. The LSB (0xE) represents
-                // the fine value between 0 and 0xf, which is the other 50%. So, to
-                // get this value, we have 50% * 0xe / 0xf. We add this to the previous battery level.
-                // So, for command 0x28 13 1E 00, our battery level would be:
-                // 50% (from 0x13) + 47 = 97%
-                // The 47 number was obtained from 50 * 0xe / 0xf or 50 * 14/15 = 46.66
-
-                val MASK_FINE_VALUE = 0xf
-                val fineValue = cmdInts[2] and MASK_FINE_VALUE
-                batteryLevel += 50 * fineValue / 15
-            }
         }
     }
 
@@ -84,7 +72,7 @@ object WatchDataCollector {
             onDataReceived(it as String)
 
             if (isComplete()) {
-                ProgressEvents.onNext(ProgressEvents.Events.PhoneDataCollected)
+                ProgressEvents.onNext(ProgressEvents.Events.WatchDataCollected)
             }
         })
     }
@@ -117,12 +105,6 @@ object WatchDataCollector {
         writeCmd(0xC, "1f03")
         writeCmd(0xC, "1f04")
         writeCmd(0xC, "1f05")
-
-        // watch name
-        writeCmd(0xC, "23")
-
-        // battery level
-        writeCmd(0xC, "28")
     }
 
     fun runInitCommands() {

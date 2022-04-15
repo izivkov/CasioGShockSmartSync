@@ -149,4 +149,40 @@ object CasioSupport {
     private fun lookupHandle(handle: Int): BluetoothGattCharacteristic {
         return DeviceCharacteristics.findCharacteristic(handlesToCharacteristicsMap[handle])
     }
+
+    fun toJson(data: String): JSONObject {
+        val intArray = Utils.toIntArray(data)
+        val json = JSONObject()
+        when (intArray[0]) {
+            in listOf(
+                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code,
+                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code
+            ) -> {
+                return AlarmEncoder.toJson(data)
+            }
+
+            // Add subjects so the right component will receive data
+            CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code -> {json.put("CASIO_DST_SETTING", data)}
+            CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code -> {
+                json.put("CASIO_WORLD_CITIES", data)
+            }
+            CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code -> {json.put("CASIO_DST_WATCH_STATE", data)}
+            CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code -> {json.put("CASIO_WATCH_NAME", data)}
+            CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code -> {json.put("CASIO_WATCH_CONDITION", data)}
+        }
+
+        return json
+    }
+
+    fun requestWatchName() {
+        writeCmd(0xC, byteArrayOfInts(0x23))
+    }
+
+    fun requestBatteryLevel() {
+        writeCmd(0xC, byteArrayOfInts(0x28))
+    }
+
+    fun requestHomeTime() {
+        writeCmd(0xC, byteArrayOfInts(0x1f, 0x0))
+    }
 }

@@ -23,9 +23,6 @@ import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 
 private const val GATT_MIN_MTU_SIZE = 23
 
@@ -473,6 +470,7 @@ object Connection : IConnection {
             with(characteristic) {
                 ProgressEvents.Events.CharacteristicChanged.payload = value.toHexString()
                 ProgressEvents.onNext(ProgressEvents.Events.CharacteristicChanged)
+
                 dataReceivedCallback?.dataReceived(value.toHexString())
             }
         }
