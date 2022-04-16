@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
@@ -18,9 +19,9 @@ import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 
-open abstract class Text @JvmOverloads constructor(
+open abstract class CacheableSubscribableView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr) {
 
     init {
         createAppEventsSubscription()
@@ -52,9 +53,7 @@ open abstract class Text @JvmOverloads constructor(
 
     protected open fun onDataReceived(data: String, name: String) {
         context.runOnUiThread {
-            val textStr = Utils.toAsciiString(data, 1)
-            text = textStr
-            ValueCache.put(name, textStr)
+            ValueCache.put(name, data)
         }
     }
 

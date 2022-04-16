@@ -8,10 +8,8 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
@@ -20,23 +18,15 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
-import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
-import org.jetbrains.anko.runOnUiThread
-import timber.log.Timber
 
 class BatteryView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) :
-    View(context, attrs, defStyleAttr) {
+) : CacheableSubscribableView (context, attrs, defStyleAttr) {
     private var radius: Float = 0f
 
     // Top
@@ -63,44 +53,20 @@ class BatteryView @JvmOverloads constructor(
     private var percent: Int = 0
     private var percentageBitmap: Bitmap? = null
 
-    object CashedPercent {
-        var percent = 0
-        var isSet = false
-    }
-
     init {
         percentageBitmap = getBitmap(R.drawable.stripes)
-        if (!CashedPercent.isSet) {
-            subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
+        val percentStr = get(this.javaClass.simpleName)
+        percent = percentStr?.toInt() ?: 0
+        if (percentStr == null) { // if already cached, no need to subscribe again.
+            subscribe(this.javaClass.simpleName, "CASIO_WATCH_CONDITION")
         }
-        setPercent(CashedPercent.percent)
-        createAppEventsSubscription()
     }
 
-    private fun createAppEventsSubscription(): Disposable =
-        ProgressEvents.connectionEventFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                when (it) {
-                    ProgressEvents.Events.WatchInitializationCompleted -> {
-                        CasioSupport.requestBatteryLevel()
-                    }
-                }
-            }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
-
-
-    @SuppressLint("CheckResult")
-    private fun subscribe(subject: String, onDataReceived: (String) -> Unit) {
-        WatchDataEvents.addSubject(subject)
-        WatchDataEvents.subscribe(this.javaClass.simpleName, subject, onNext = {
-            onDataReceived(it as String)
-        })
+    override fun init() {
+        CasioSupport.requestBatteryLevel()
     }
 
-    private fun onDataReceived(data: String) {
+    override fun onDataReceived(data: String, name: String) {
         percent = 0
         var cmdInts = Utils.toIntArray(data)
         // command looks like 0x28 13 1E 00.
@@ -121,9 +87,9 @@ class BatteryView @JvmOverloads constructor(
         val fineValue = cmdInts[2] and MASK_FINE_VALUE
         percent += 50 * fineValue / 15
 
-        CashedPercent.percent = percent
-        CashedPercent.isSet = true
         setPercent(percent)
+
+        super.onDataReceived(percent.toString(), name)
     }
 
     @SuppressLint("DrawAllocation")
