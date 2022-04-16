@@ -8,7 +8,6 @@ package org.avmedia.gShockPhoneSync.utils
 
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.IDataReceived
-import org.avmedia.gShockPhoneSync.casioB5600.AlarmEncoder
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 
 /*
@@ -20,18 +19,18 @@ object WatchDataListener {
 
     fun init() {
         val dataReceived: IDataReceived = object : IDataReceived {
-            override fun dataReceived(command: String?) {
-                if (command == null) {
+            override fun dataReceived(data: String?) {
+                if (data == null) {
                     return
                 }
-                val dataJson = CasioSupport.toJson(command)
+                val dataJson = CasioSupport.toJson(data)
 
                 for (key in dataJson.keys()) {
                     val value: String = dataJson.getString(key)
 
                     /*
-                    Send an event on a particular subject.
-                    The custom components are listening on their subject.
+                       The key is the TOPIC on which components are subscribed.
+                       Send the value to them
                     */
                     WatchDataEvents.emitEvent(key, value)
                 }
