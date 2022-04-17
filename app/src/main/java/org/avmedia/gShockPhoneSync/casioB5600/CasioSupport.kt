@@ -168,7 +168,7 @@ object CasioSupport {
             }
             CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code -> {json.put("CASIO_DST_WATCH_STATE", data)}
             CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code -> {json.put("CASIO_WATCH_NAME", data)}
-            CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code -> {json.put("CASIO_WATCH_CONDITION", data)}
+            CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code -> {json.put("CASIO_WATCH_CONDITION", BatteryLevelDecoder.decodeValue(data))}
         }
 
         return json
