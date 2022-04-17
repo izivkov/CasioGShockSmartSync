@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.jetbrains.anko.runOnUiThread
 
 class BatteryView @JvmOverloads constructor(
     context: Context,
@@ -55,20 +56,16 @@ class BatteryView @JvmOverloads constructor(
 
     init {
         percentageBitmap = getBitmap(R.drawable.stripes)
-        val percentStr = get(this.javaClass.simpleName)
-        setPercent(percentStr?.toInt() ?: 0)
-        if (percentStr == null) { // if already cached, no need to subscribe again.
-            subscribe(this.javaClass.simpleName, "CASIO_WATCH_CONDITION")
-        }
-    }
-
-    override fun init() {
-        CasioSupport.requestBatteryLevel()
+        val percentStr = get (this.javaClass.simpleName) ?: "0"
+        setPercent(percentStr.toInt())
+        subscribe(this.javaClass.simpleName, "CASIO_WATCH_CONDITION")
     }
 
     override fun onDataReceived(data: String, name: String) {
-        setPercent(data?.toInt() ?: 0)
-        super.onDataReceived(data, name)
+        context.runOnUiThread {
+            setPercent(data.toInt())
+            super.onDataReceived(data, name)
+        }
     }
 
     @SuppressLint("DrawAllocation")

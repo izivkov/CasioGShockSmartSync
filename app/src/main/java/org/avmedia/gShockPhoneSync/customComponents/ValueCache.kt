@@ -24,4 +24,6 @@ object ValueCache {
         val value = valueMap[name] ?: return false
         return value.isSet
     }
+
+    public fun clear () {valueMap.clear()}
 }

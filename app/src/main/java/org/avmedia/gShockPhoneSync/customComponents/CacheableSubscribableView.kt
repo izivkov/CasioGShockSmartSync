@@ -24,24 +24,7 @@ open abstract class CacheableSubscribableView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     init {
-        createAppEventsSubscription()
     }
-
-    protected abstract fun init()
-
-    private fun createAppEventsSubscription(): Disposable =
-        ProgressEvents.connectionEventFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                when (it) {
-                    ProgressEvents.Events.WatchInitializationCompleted -> {
-                        init()
-                    }
-                }
-            }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
 
     @SuppressLint("CheckResult")
     fun subscribe(name: String, subject: String) {
@@ -51,13 +34,15 @@ open abstract class CacheableSubscribableView @JvmOverloads constructor(
         })
     }
 
-    protected open fun onDataReceived(data: String, name: String) {
-        context.runOnUiThread {
-            ValueCache.put(name, data)
-        }
+    protected open fun onDataReceived(value: String, name:String) {
+        put(name, value)
     }
 
     protected fun get(name: String): String? {
         return ValueCache.get(name)
+    }
+
+    private fun put(name: String, value:String) {
+        return ValueCache.put(name, value)
     }
 }

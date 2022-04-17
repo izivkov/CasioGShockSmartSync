@@ -29,7 +29,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class MainActivity : AppCompatActivity() {
 
@@ -75,18 +74,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+    }
+
     override fun onUserInteraction() {
         super.onUserInteraction()
         InactivityWatcher.resetTimer(this)
-    }
-
-    private fun onSuccess() {
-        Timber.i("Permission granted...")
-    }
-
-    private fun onFail() {
-        Timber.i("Permission failed...")
-        Utils.toast(this, "Permission not granted...exiting")
     }
 
     override fun onRequestPermissionsResult(

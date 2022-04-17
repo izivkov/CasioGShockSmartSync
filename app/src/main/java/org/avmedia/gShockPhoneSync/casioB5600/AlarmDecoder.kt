@@ -13,7 +13,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 
-object AlarmEncoder {
+object AlarmDecoder {
     private const val HOURLY_CHIME_MASK = 0b10000000
 
     fun toJson(command: String): JSONObject {

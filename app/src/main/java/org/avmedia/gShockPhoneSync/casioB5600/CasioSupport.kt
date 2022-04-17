@@ -158,12 +158,18 @@ object CasioSupport {
                 CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code,
                 CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code
             ) -> {
-                return AlarmEncoder.toJson(data)
+                return AlarmDecoder.toJson(data)
             }
 
-            // Add subjects so the right component will receive data
+            // Add topics so the right component will receive data
             CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code -> {json.put("CASIO_DST_SETTING", data)}
             CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code -> {
+                val intArray = Utils.toIntArray(data)
+                if (intArray[1] == 0) {
+                    // 0x1F 00 ... Only the first World City contains the home time.
+                    // Send this data on topic "HOME_TIME" to be received by HomeTime custom component.
+                    json.put("HOME_TIME", data)
+                }
                 json.put("CASIO_WORLD_CITIES", data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code -> {json.put("CASIO_DST_WATCH_STATE", data)}

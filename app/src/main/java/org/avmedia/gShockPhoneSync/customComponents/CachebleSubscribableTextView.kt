@@ -23,24 +23,7 @@ open abstract class CacheableSubscribableTextView @JvmOverloads constructor(
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     init {
-        createAppEventsSubscription()
     }
-
-    protected abstract fun init()
-
-    private fun createAppEventsSubscription(): Disposable =
-        ProgressEvents.connectionEventFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                when (it) {
-                    ProgressEvents.Events.WatchInitializationCompleted -> {
-                        init()
-                    }
-                }
-            }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
 
     @SuppressLint("CheckResult")
     fun subscribe(name: String, subject: String) {
@@ -50,15 +33,16 @@ open abstract class CacheableSubscribableTextView @JvmOverloads constructor(
         })
     }
 
-    protected open fun onDataReceived(data: String, name: String) {
-        context.runOnUiThread {
-            val textStr = Utils.toAsciiString(data, 1)
-            text = textStr
-            ValueCache.put(name, textStr)
-        }
+    protected open fun onDataReceived(value: String, name:String) {
+        put(name, value)
+        text = value
     }
 
     protected fun get(name: String): String? {
         return ValueCache.get(name)
+    }
+
+    private fun put(name: String, value:String) {
+        return ValueCache.put(name, value)
     }
 }

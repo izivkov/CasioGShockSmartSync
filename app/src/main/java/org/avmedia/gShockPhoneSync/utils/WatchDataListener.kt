@@ -25,14 +25,9 @@ object WatchDataListener {
                 }
                 val dataJson = CasioSupport.toJson(data)
 
-                for (key in dataJson.keys()) {
-                    val value: String = dataJson.getString(key)
-
-                    /*
-                       The key is the TOPIC on which components are subscribed.
-                       Send the value to them
-                    */
-                    WatchDataEvents.emitEvent(key, value)
+                for (topic in dataJson.keys()) {
+                    val value: String = dataJson.getString(topic)
+                    WatchDataEvents.emitEvent(topic, value)
                 }
             }
         }

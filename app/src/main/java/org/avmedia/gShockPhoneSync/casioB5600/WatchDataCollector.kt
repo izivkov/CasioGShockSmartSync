@@ -20,6 +20,7 @@ object WatchDataCollector {
     private val worldCities: ArrayList<String> = ArrayList<String>()
     var unmatchedCmdCount: Int = -1
 
+    var batteryLevel: Int = 0
     var watchName: String = ""
     var homeCity: String = ""
     private var hourChime: String = ""
@@ -59,6 +60,13 @@ object WatchDataCollector {
                         homeCity = Utils.toAsciiString(command, 2)
                     }
                 }
+            }
+            "23" -> {
+                watchName = Utils.toAsciiString(command, 1)
+
+            }
+            "28" -> {
+                batteryLevel = BatteryLevelDecoder.decodeValue (command).toInt()
             }
         }
     }
@@ -105,6 +113,12 @@ object WatchDataCollector {
         writeCmd(0xC, "1f03")
         writeCmd(0xC, "1f04")
         writeCmd(0xC, "1f05")
+
+        // watch name
+        writeCmd(0xC, "23")
+
+        // battery level
+        writeCmd(0xC, "28")
     }
 
     fun runInitCommands() {

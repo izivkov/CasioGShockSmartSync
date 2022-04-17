@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.utils.Utils
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -16,21 +17,10 @@ open class HomeTime @JvmOverloads constructor(
 
     init {
         text = get(this.javaClass.simpleName)
-    }
-
-    override fun init() {
-        CasioSupport.requestHomeTime()
-    }
-
-    init {
-        subscribe(this.javaClass.simpleName, "CASIO_WORLD_CITIES")
+        subscribe(this.javaClass.simpleName, "HOME_TIME")
     }
 
     override fun onDataReceived(data: String, name: String) {
-        // only the first city is the home time location, handle 0x1f, 0x0 only.
-        if (data.split(" ")[1].toInt() != 0) {
-            return
-        }
-        super.onDataReceived(data, name)
+        super.onDataReceived(Utils.toAsciiString(data, 1), name)
     }
 }

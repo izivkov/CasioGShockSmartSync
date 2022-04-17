@@ -19,22 +19,21 @@ import timber.log.Timber
 
 object ReminderEncoder {
     /* Reminders
-        30 01 50 61 79 20 52 68 6f 64 6f 72 61 2e 00 00 00 00 00 00 // Title, Pay Rhodora
         31 01 05 01 01 01 01 01 01 02 00 // set frequency
         00 00 00 00 00 00 00 00 00 - not set
         02 22 03 31 22 05 01 00 00
     */
 
-    private const val YEARLY_MASK = 0b00001000
-    private const val MONTHLY_MASK = 0b00010000
-    private const val WEEKLY_MASK = 0b00000100
+    private const val YEARLY_MASK   = 0b00001000
+    private const val MONTHLY_MASK  = 0b00010000
+    private const val WEEKLY_MASK   = 0b00000100
 
-    private const val SUNDAY_MASK = 0b00000001
-    private const val MONDAY_MASK = 0b00000010
-    private const val TUESDAY_MASK = 0b00000100
-    private const val WEDNESDAY_MASK = 0b00001000
+    private const val SUNDAY_MASK   = 0b00000001
+    private const val MONDAY_MASK   = 0b00000010
+    private const val TUESDAY_MASK  = 0b00000100
+    private const val WEDNESDAY_MASK= 0b00001000
     private const val THURSDAY_MASK = 0b00010000
-    private const val FRIDAY_MASK = 0b00100000
+    private const val FRIDAY_MASK   = 0b00100000
     private const val SATURDAY_MASK = 0b01000000
 
     private const val ENABLED_MASK = 0b00000001
