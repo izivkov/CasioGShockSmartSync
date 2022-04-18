@@ -8,7 +8,6 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.Utils
 
 open class HomeTime @JvmOverloads constructor(

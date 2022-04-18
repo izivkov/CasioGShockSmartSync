@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import org.avmedia.gShockPhoneSync.customComponents.CalenderEvents
 import org.avmedia.gShockPhoneSync.customComponents.EventsData
 import org.avmedia.gShockPhoneSync.databinding.FragmentEventsBinding
 

@@ -12,7 +12,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.util.Preconditions.checkArgument
 import com.google.gson.Gson
-import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate

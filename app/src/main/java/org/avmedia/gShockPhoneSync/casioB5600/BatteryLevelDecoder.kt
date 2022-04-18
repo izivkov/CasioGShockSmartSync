@@ -7,7 +7,6 @@
 package org.avmedia.gShockPhoneSync.casioB5600
 
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.json.JSONObject
 
 object BatteryLevelDecoder {
 

@@ -10,14 +10,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
-import org.jetbrains.anko.runOnUiThread
-import timber.log.Timber
 
 open abstract class CacheableSubscribableView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,7 +27,7 @@ open abstract class CacheableSubscribableView @JvmOverloads constructor(
         })
     }
 
-    protected open fun onDataReceived(value: String, name:String) {
+    protected open fun onDataReceived(value: String, name: String) {
         put(name, value)
     }
 
@@ -42,7 +35,7 @@ open abstract class CacheableSubscribableView @JvmOverloads constructor(
         return ValueCache.get(name)
     }
 
-    private fun put(name: String, value:String) {
+    private fun put(name: String, value: String) {
         return ValueCache.put(name, value)
     }
 }

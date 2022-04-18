@@ -19,8 +19,6 @@ import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
-import org.avmedia.gShockPhoneSync.utils.Utils
 import org.jetbrains.anko.runOnUiThread
 
 class BatteryView @JvmOverloads constructor(

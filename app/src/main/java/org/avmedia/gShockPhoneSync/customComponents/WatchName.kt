@@ -8,9 +8,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.jetbrains.anko.runOnUiThread
 
 class WatchName @JvmOverloads constructor(

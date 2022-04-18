@@ -12,7 +12,6 @@ import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.utils.Utils
 import java.time.Clock
-import java.util.Date
 
 class SendTimeButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

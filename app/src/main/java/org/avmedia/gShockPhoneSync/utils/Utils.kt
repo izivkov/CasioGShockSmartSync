@@ -11,7 +11,6 @@ import android.widget.Toast
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
-import kotlin.math.max
 
 
 object Utils {

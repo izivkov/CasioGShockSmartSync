@@ -6,8 +6,6 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.app.Activity
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,8 +13,6 @@ import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
-import com.google.android.material.internal.ContextUtils.getActivity
-import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber

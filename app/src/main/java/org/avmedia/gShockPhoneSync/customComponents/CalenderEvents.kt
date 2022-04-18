@@ -12,7 +12,6 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
-import android.provider.CalendarContract.Instances.BEGIN
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
