@@ -9,20 +9,17 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.jetbrains.anko.runOnUiThread
 
 class WatchName @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
 
     init {
-        text = get (this.javaClass.simpleName)
+        text = get(this.javaClass.simpleName)
         subscribe(this.javaClass.simpleName, "CASIO_WATCH_NAME")
     }
 
     override fun onDataReceived(data: String, name: String) {
-        context.runOnUiThread {
-            super.onDataReceived(Utils.toAsciiString(data, 1), name)
-        }
+        super.onDataReceived(Utils.toAsciiString(data, 1), name)
     }
 }

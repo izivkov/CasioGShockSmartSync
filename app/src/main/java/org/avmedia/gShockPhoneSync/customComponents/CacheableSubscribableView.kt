@@ -16,9 +16,6 @@ open abstract class CacheableSubscribableView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    init {
-    }
-
     @SuppressLint("CheckResult")
     fun subscribe(name: String, subject: String) {
         WatchDataEvents.addSubject(subject)

@@ -10,6 +10,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import org.jetbrains.anko.runOnUiThread
 
 open abstract class CacheableSubscribableTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -27,8 +28,10 @@ open abstract class CacheableSubscribableTextView @JvmOverloads constructor(
     }
 
     protected open fun onDataReceived(value: String, name: String) {
-        text = value
-        put(name, value)
+        context.runOnUiThread {
+            text = value
+            put(name, value)
+        }
     }
 
     protected fun get(name: String): String? {
