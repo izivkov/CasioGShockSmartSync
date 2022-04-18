@@ -21,6 +21,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
+import java.io.IOException
 import java.util.Locale
 
 
@@ -66,11 +67,15 @@ class LocationText @JvmOverloads constructor(
                     requestNewLocationData()
                 } else {
                     val geoCoder = Geocoder(context, Locale.getDefault())
-                    val addresses: List<Address> =
-                        geoCoder.getFromLocation(location.latitude, location.longitude, 1)
-                    if (addresses.isNotEmpty()) {
-                        text = addresses[0].locality
-                        LastLocation.cachedLocation = addresses[0].locality
+                    try {
+                        val addresses: List<Address> =
+                            geoCoder.getFromLocation(location.latitude, location.longitude, 1)
+                        if (addresses.isNotEmpty()) {
+                            text = addresses[0].locality
+                            LastLocation.cachedLocation = addresses[0].locality
+                        }
+                    } catch (e: IOException) {
+                        text = ""
                     }
                 }
             }
