@@ -7,8 +7,12 @@
 package org.avmedia.gShockPhoneSync
 
 import android.bluetooth.BluetoothDevice
+import android.content.Context
+import android.content.Intent
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +28,10 @@ import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataListener
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.okButton
+import org.jetbrains.anko.yesButton
 import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -66,6 +74,11 @@ class MainActivity : AppCompatActivity() {
 
         if (!bleScannerLocal.bluetoothAdapter.isEnabled) {
             permissionManager.promptEnableBluetooth()
+            return
+        }
+
+        if (!isLocationEnabled(this)) {
+            showLocationIsDisabledAlert()
             return
         }
 
@@ -137,4 +150,25 @@ class MainActivity : AppCompatActivity() {
             },
             { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
+
+    // location
+    private fun isLocationEnabled(mContext: Context): Boolean {
+        val lm = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || lm.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun showLocationIsDisabledAlert() {
+        alert("This app requires your location setting to be enabled. Select \"SETTINGS\" to enable it.") {
+            neutralPressed("Settings") {
+                startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS))
+            }
+            noButton {
+                Utils.toast(this@MainActivity, "Not all permissions granted, exiting...")
+                finish()
+            }
+        }.show()
+    }
+
 }
+
