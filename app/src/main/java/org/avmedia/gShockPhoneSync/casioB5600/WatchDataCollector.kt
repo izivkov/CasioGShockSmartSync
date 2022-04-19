@@ -45,8 +45,7 @@ object WatchDataCollector {
         return jsonObject
     }
 
-    private fun
-        add(command: String) {
+    private fun add(command: String) {
         val shortStr = Utils.toCompactString(command)
         when (shortStr.substring(0, 2).uppercase(Locale.getDefault())) {
             "1E" -> dstSettings.add(shortStr)
@@ -63,10 +62,9 @@ object WatchDataCollector {
             }
             "23" -> {
                 watchName = Utils.toAsciiString(command, 1)
-
             }
             "28" -> {
-                batteryLevel = BatteryLevelDecoder.decodeValue (command).toInt()
+                batteryLevel = BatteryLevelDecoder.decodeValue(command).toInt()
             }
         }
     }

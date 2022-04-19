@@ -76,7 +76,6 @@ object CasioSupport {
                 var alarmCasio: ByteArray = Alarms.fromJsonAlarmSecondaryAlarms(alarmsJsonArr)
                 writeCmd(0x000e, alarmCasio)
             }
-
             "SET_REMINDERS" -> {
                 val remindersJsonArr: JSONArray = JSONObject(message).get("value") as JSONArray
                 (0 until remindersJsonArr.length()).forEachIndexed { index, element ->
