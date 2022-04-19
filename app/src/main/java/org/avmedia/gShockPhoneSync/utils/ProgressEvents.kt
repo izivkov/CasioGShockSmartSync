@@ -11,6 +11,7 @@ import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.processors.PublishProcessor
+import timber.log.Timber
 
 object ProgressEvents {
 
@@ -46,7 +47,7 @@ object ProgressEvents {
         if (eventProcessor.hasSubscribers()) {
             return eventProcessor.onNext(e)
         } else {
-            Log.d("EventProcessor:onNext", "----------- No subscribers")
+            Timber.d("EventProcessor:onNext", "----------- No subscribers")
         }
     }
 

@@ -13,18 +13,12 @@ import org.json.JSONObject
 
 object Alarms {
 
-    private const val DISABLED = 0
-    const val HOURLY_CHIME_MASK = 0b10000000
+    private const val HOURLY_CHIME_MASK = 0b10000000
     const val ENABLED_MASK =      0b01000000
 
     private const val ALARM_CONSTANT_VALUE = 0x40
-    private const val ALARMS_COUNT = 5
 
     class Alarm(val hour: Int, val minute: Int, val enabled: Boolean, val hasHourlyChime:Boolean)
-
-    private fun createEmptyAlarm(): ByteArray {
-        return Utils.byteArrayOfInts(0, ALARM_CONSTANT_VALUE, 0, 0)
-    }
 
     fun fromJsonAlarmFirstAlarm(alarmJson: JSONObject): ByteArray {
         val gson = Gson()
