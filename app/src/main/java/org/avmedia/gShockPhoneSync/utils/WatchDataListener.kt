@@ -11,9 +11,9 @@ import org.avmedia.gShockPhoneSync.ble.IDataReceived
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 
 /*
-This class listens for status data from the Bot and emits events.
-These events are received by various custom components which update their UI accordingly.
-For example, a right indicator will start blinking if the status on the bot is set.
+This class accepts data from the watch and sends it via "emitEvent()" to whatever
+component is interested in it. Components would subscribe to receive
+data by "topic". The "topic" is the key of the JSON object of the data.
  */
 object WatchDataListener {
 
