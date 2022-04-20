@@ -3,7 +3,7 @@
 This app integrates the Casio G-shock [B5600 series bluetooth watches](https://world.g-shock.com/asia-mea/en/products/standard_digital/gw-b5600/), 
 with Google services such as `Google Calendar` events and `Google Alarm Clock`. It is not meant to replace the 
 [official](https://play.google.com/store/apps/details?id=com.casio.gshockconnected&hl=en_CA&gl=US) Casio app. Instead it converts your traditional 
-G-shock into a sami-smart watch.
+G-shock into a semi-smart watch.
 
 ## General
 
