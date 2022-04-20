@@ -87,10 +87,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun onUserInteraction() {
         super.onUserInteraction()
         InactivityWatcher.resetTimer(this)
@@ -169,6 +165,5 @@ class MainActivity : AppCompatActivity() {
             }
         }.show()
     }
-
 }
 

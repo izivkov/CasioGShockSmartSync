@@ -32,3 +32,13 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task checkStyle(type:Exec) {
+    workingDir 'utils'
+    commandLine './checkStyle.sh'
+}
+
+task applyStyle(type:Exec) {
+    workingDir 'utils'
+    commandLine './applyStyle.sh'
+}

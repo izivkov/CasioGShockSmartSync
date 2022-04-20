@@ -17,17 +17,14 @@ import java.time.ZoneId
 import java.util.Calendar
 
 object CalenderEvents {
-    private var permissionGranted: Boolean = false
-
-    @SuppressLint("Range")
     fun getDataFromEventTable(context: Context): ArrayList<EventsData.Event> {
         return getEvents(context)
     }
 
+    @SuppressLint("Range")
     private fun getEvents(context: Context): ArrayList<EventsData.Event> {
         val events: ArrayList<EventsData.Event> = ArrayList()
-
-        var cur: Cursor? = null
+        val cur: Cursor?
         val cr: ContentResolver = context.contentResolver
 
         val mProjection = arrayOf(
@@ -40,13 +37,13 @@ object CalenderEvents {
             CalendarContract.Events.ALL_DAY,
         )
 
-        var calendar: Calendar = Calendar.getInstance()
+        val calendar: Calendar = Calendar.getInstance()
         calendar.set(Calendar.MILLISECOND, 0)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.HOUR, 0)
 
-        val selection: String =
+        val selection =
             """
             ${CalendarContract.Events.HAS_ALARM} = "1"
             and (${CalendarContract.Events.DTSTART} >= ${calendar.timeInMillis}
@@ -65,13 +62,9 @@ object CalenderEvents {
 
         while (cur!!.moveToNext()) {
             val title: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
-            val dateStart: String? =
-                cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
-            var dateEnd: String? =
-                cur.getString(cur.getColumnIndex(CalendarContract.Events.DTEND))
+            val dateStart: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
             val rrule: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
-            val allDay: String? =
-                cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
+            val allDay: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
 
             var zone = ZoneId.systemDefault()
             if (allDay == "1") {
@@ -81,7 +74,7 @@ object CalenderEvents {
             val startDate = EventsData.createEventDate(dateStart!!.toLong(), zone)
             var endDate = startDate
 
-            var (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
+            val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
                 RRuleValues.getValues(rrule, startDate, zone)
 
             if (localEndDate != null) {
@@ -101,7 +94,7 @@ object CalenderEvents {
             if (title != null) {
                 events.add(
                     EventsData.Event(
-                        title!!,
+                        title,
                         startDate,
                         endDate,
                         repeatPeriod,
@@ -113,11 +106,8 @@ object CalenderEvents {
                 )
             }
         }
+        cur.close()
 
         return events
-    }
-
-    fun setGrated(grantResults: IntArray) {
-        permissionGranted = grantResults[0] == 1
     }
 }

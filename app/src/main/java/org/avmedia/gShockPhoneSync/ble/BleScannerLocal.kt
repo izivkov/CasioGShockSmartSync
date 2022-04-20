@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.ble
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -41,6 +42,7 @@ data class BleScannerLocal(val context: Context) {
     private var isScanning = false
     private val scanResults = mutableListOf<ScanResult>()
 
+    @SuppressLint("MissingPermission")
     fun startConnection() {
         if (Connection.isConnected()) {
             return
@@ -76,6 +78,7 @@ data class BleScannerLocal(val context: Context) {
         return filters
     }
 
+    @SuppressLint("MissingPermission")
     private fun stopBleScan() {
         bleScanner.stopScan(scanCallback)
         isScanning = false

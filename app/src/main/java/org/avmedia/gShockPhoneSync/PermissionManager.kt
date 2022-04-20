@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -50,6 +51,7 @@ data class PermissionManager(val context: Context) {
         return hasPermissions(context, PERMISSIONS)
     }
 
+    @SuppressLint("MissingPermission")
     fun promptEnableBluetooth() {
         if (!(context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)

@@ -46,8 +46,6 @@ object ProgressEvents {
     fun onNext(e: Events) {
         if (eventProcessor.hasSubscribers()) {
             return eventProcessor.onNext(e)
-        } else {
-            Timber.d("EventProcessor:onNext", "----------- No subscribers")
         }
     }
 
