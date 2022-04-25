@@ -36,10 +36,7 @@ class InfoButton @JvmOverloads constructor(
         }
 
         setOnTouchListener(OnTouchListener())
-        val a = attrs
-        Timber.i("Attrs: $attrs.infoText")
     }
-
 
     inner class OnTouchListener : View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -47,7 +44,6 @@ class InfoButton @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     val dialogBuilder = AlertDialog.Builder(context)
 
-                    Timber.i("Attrs: $@InfoButtonConnection.attrs")
                     dialogBuilder.setMessage(infoText)
                         .setCancelable(false)
                         .setPositiveButton("OK", DialogInterface.OnClickListener { dialog, id ->
