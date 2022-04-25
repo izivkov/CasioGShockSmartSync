@@ -42,6 +42,19 @@
             app:layout_constraintTop_toTopOf="parent"
             />
 
+        <org.avmedia.gShockPhoneSync.customComponents.InfoButton
+            android:id="@+id/info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Info"
+            android:layout_margin="20dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_info_24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:infoText="@string/connection_screen_info"
+            />
+
     </org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout>
 
     <org.avmedia.gShockPhoneSync.customComponents.MainLayout

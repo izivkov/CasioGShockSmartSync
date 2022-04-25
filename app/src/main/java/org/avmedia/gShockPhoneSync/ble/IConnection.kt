@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.ble
 
 import android.content.Context
+import kotlin.reflect.KFunction
 
 interface IConnection {
 

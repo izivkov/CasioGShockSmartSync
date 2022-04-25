@@ -72,4 +72,7 @@
             format="integer" />
     </declare-styleable>
 
+    <declare-styleable name="InfoButton">
+        <attr name="infoText" format="string|reference"/>
+    </declare-styleable>
 </resources>

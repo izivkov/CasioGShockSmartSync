@@ -14,6 +14,8 @@
         <entry key="app/src/main/res/drawable/ic_alarm_black_24dp.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_charging.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_event_black_24dp.xml" value="0.1925" />
+        <entry key="app/src/main/res/drawable/ic_info_24px.xml" value="0.2565" />
+        <entry key="app/src/main/res/drawable/ic_info_black_24dp.xml" value="0.2565" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_watch_later_black_24dp.xml" value="0.1925" />

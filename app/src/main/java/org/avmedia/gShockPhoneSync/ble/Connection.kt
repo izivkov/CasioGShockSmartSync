@@ -24,6 +24,7 @@ import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.reflect.KFunction
 
 private const val GATT_MIN_MTU_SIZE = 23
 
@@ -361,8 +362,8 @@ object Connection : IConnection {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     ProgressEvents.onNext(ProgressEvents.Events.ConnectionStarted)
-
                     Timber.w("onConnectionStateChange: connected to $deviceAddress")
+
                     deviceGattMap[gatt.device] = gatt
 
                     Handler(Looper.getMainLooper()).post {

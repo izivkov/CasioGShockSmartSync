@@ -57,6 +57,19 @@
             tools:ignore="MissingConstraints"
             />
 
+        <org.avmedia.gShockPhoneSync.customComponents.InfoButton
+            android:id="@+id/info_events"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Info"
+            android:layout_margin="5dp"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_info_24dp"
+            app:infoText="@string/events_screen_info"
+            />
+
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

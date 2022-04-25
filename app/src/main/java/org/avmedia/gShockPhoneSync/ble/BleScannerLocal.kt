@@ -23,6 +23,7 @@ import timber.log.Timber
 
 data class BleScannerLocal(val context: Context) {
     lateinit var device: BluetoothDevice
+    private val cacheDevice = false
 
     val bluetoothAdapter: BluetoothAdapter by lazy {
         val bluetoothManager =
@@ -48,7 +49,11 @@ data class BleScannerLocal(val context: Context) {
             return
         }
         var device: BluetoothDevice? = null
-        val cachedDeviceAddr: String? = LocalDataStorage.get("cached device", context)
+        var cachedDeviceAddr: String? = null
+        if (cacheDevice) {
+            cachedDeviceAddr = LocalDataStorage.get("cached device", context)
+        }
+
         if (cachedDeviceAddr != null) {
             device = bluetoothAdapter.getRemoteDevice(cachedDeviceAddr)
             this.device = device
@@ -79,7 +84,7 @@ data class BleScannerLocal(val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    private fun stopBleScan() {
+    fun stopBleScan() {
         bleScanner.stopScan(scanCallback)
         isScanning = false
     }
@@ -87,13 +92,17 @@ data class BleScannerLocal(val context: Context) {
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            Timber.i ("onScanResult: result: $result")
+            Timber.i("onScanResult: result: $result")
+            stopBleScan()
 
-            val cachedDevice = LocalDataStorage.get("cached device", context)
-            if (cachedDevice == null || cachedDevice != result.device.address) {
-                LocalDataStorage.put("cached device", result.device.address, context)
-                Connection.connect(result.device, context)
+            if (cacheDevice) {
+                val cachedDevice = LocalDataStorage.get("cached device", context)
+                if (cachedDevice == null || cachedDevice != result.device.address) {
+                    LocalDataStorage.put("cached device", result.device.address, context)
+                }
             }
+
+            Connection.connect(result.device, context)
         }
 
         override fun onScanFailed(errorCode: Int) {
