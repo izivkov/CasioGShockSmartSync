@@ -10,23 +10,22 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.R
-import timber.log.Timber
 
 class InfoButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : androidx.appcompat.widget.AppCompatImageButton(context, attrs, defStyleAttr) {
 
-    private var infoText:String? = ""
+    private var infoText: String? = ""
 
     init {
         context.obtainStyledAttributes(
             attrs,
             R.styleable.InfoButton,
-            defStyleAttr, 0).apply {
+            defStyleAttr, 0
+        ).apply {
 
             try {
                 infoText = getString(R.styleable.InfoButton_infoText)

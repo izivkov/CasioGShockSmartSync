@@ -17,6 +17,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gShockPhoneSync.utils.Utils
 
 data class PermissionManager(val context: Context) {
 
@@ -55,10 +56,15 @@ data class PermissionManager(val context: Context) {
     fun promptEnableBluetooth() {
         if (!(context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            (context as Activity).startActivityForResult(
-                enableBtIntent,
-                ENABLE_BLUETOOTH_REQUEST_CODE
-            )
+            try {
+                (context as Activity).startActivityForResult(
+                    enableBtIntent,
+                    ENABLE_BLUETOOTH_REQUEST_CODE
+                )
+            } catch(e: SecurityException) {
+                Utils.toast(context, "Please turn on BlueTooth and restart the app...")
+                (context as Activity).finish()
+            }
         }
     }
 
