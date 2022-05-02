@@ -36,6 +36,28 @@ object CasioSupport {
         WatchDataCollector.start()
     }
 
+    /*
+    I/BleExtensionsKt: Service 00001801-0000-1000-8000-00805f9b34fb
+    Characteristics:
+    |--
+I/BleExtensionsKt: Service 00001800-0000-1000-8000-00805f9b34fb
+    Characteristics:
+    |--00002a00-0000-1000-8000-00805f9b34fb: READABLE
+    |--00002a01-0000-1000-8000-00805f9b34fb: READABLE
+I/BleExtensionsKt: Service 00001804-0000-1000-8000-00805f9b34fb
+    Characteristics:
+    |--00002a07-0000-1000-8000-00805f9b34fb: READABLE
+I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
+    Characteristics:
+    |--26eb002c-b012-49a8-b1f8-394fb2032b0f: WRITABLE WITHOUT RESPONSE
+    |--26eb002d-b012-49a8-b1f8-394fb2032b0f: WRITABLE, NOTIFIABLE
+    |------00002902-0000-1000-8000-00805f9b34fb: EMPTY
+    |--26eb0023-b012-49a8-b1f8-394fb2032b0f: WRITABLE, NOTIFIABLE
+    |------00002902-0000-1000-8000-00805f9b34fb: EMPTY
+    |--26eb0024-b012-49a8-b1f8-394fb2032b0f: WRITABLE WITHOUT RESPONSE, NOTIFIABLE
+    |------00002902-0000-1000-8000-00805f9b34fb: EMPTY
+     */
+
     private fun initHandlesMap() {
         handlesToCharacteristicsMap[0x04] = CasioConstants.CASIO_GET_DEVICE_NAME
         handlesToCharacteristicsMap[0x06] = CasioConstants.CASIO_APPEARANCE

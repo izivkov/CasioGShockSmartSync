@@ -109,7 +109,7 @@ object Connection : IConnection {
         }
     }
 
-    fun writeCharacteristic(
+    private fun writeCharacteristic(
         device: BluetoothDevice,
         characteristic: BluetoothGattCharacteristic,
         payload: ByteArray
@@ -160,9 +160,14 @@ object Connection : IConnection {
             device,
             DeviceCharacteristics.findCharacteristic(CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID)
         )
+
+        enableNotifications(
+            device,
+            DeviceCharacteristics.findCharacteristic(CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID)
+        )
     }
 
-    fun enableNotifications(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic) {
+    private fun enableNotifications(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic) {
         if (device.isConnected() &&
             (characteristic.isIndicatable() || characteristic.isNotifiable())
         ) {
@@ -271,6 +276,7 @@ object Connection : IConnection {
             }
             is CharacteristicRead -> with(operation) {
                 gatt.findCharacteristic(characteristicUuid)?.let { characteristic ->
+                    Timber.d ("==============> characteristic: $characteristic")
                     gatt.readCharacteristic(characteristic)
 
                 } ?: this@Connection.run {
@@ -289,6 +295,7 @@ object Connection : IConnection {
             }
             is DescriptorRead -> with(operation) {
                 gatt.findDescriptor(descriptorUuid)?.let { descriptor ->
+                    Timber.d ("==============> descriptor: $descriptor")
                     gatt.readDescriptor(descriptor)
                 } ?: this@Connection.run {
                     Timber.e("Cannot find $descriptorUuid to read from")
@@ -424,7 +431,6 @@ object Connection : IConnection {
                 when (status) {
                     BluetoothGatt.GATT_SUCCESS -> {
                         Timber.i("Read characteristic $uuid | value: ${value.toHexString()}")
-
                         ProgressEvents.Events.CharacteristicRead.payload = value.toHexString()
                         ProgressEvents.onNext(ProgressEvents.Events.CharacteristicRead)
                     }
@@ -474,7 +480,6 @@ object Connection : IConnection {
             with(characteristic) {
                 ProgressEvents.Events.CharacteristicChanged.payload = value.toHexString()
                 ProgressEvents.onNext(ProgressEvents.Events.CharacteristicChanged)
-
                 dataReceivedCallback?.dataReceived(value.toHexString())
             }
         }
@@ -488,7 +493,6 @@ object Connection : IConnection {
                 when (status) {
                     BluetoothGatt.GATT_SUCCESS -> {
                         Timber.i("Read descriptor $uuid | value: ${value.toHexString()}")
-                        // listeners.forEach { it.get()?.onDescriptorRead?.invoke(gatt.device, this) }
                         ProgressEvents.Events.DescriptorRead.payload = value.toHexString()
                         ProgressEvents.onNext(ProgressEvents.Events.DescriptorRead)
                     }

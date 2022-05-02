@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.utils
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.IDataReceived
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import timber.log.Timber
 
 /*
 This class accepts data from the watch and sends it via "emitEvent()" to whatever

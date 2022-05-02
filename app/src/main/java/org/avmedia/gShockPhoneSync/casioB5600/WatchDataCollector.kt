@@ -118,7 +118,6 @@ object WatchDataCollector {
         // battery level
         writeCmd(0xC, "28")
     }
-
     fun runInitCommands() {
         dstSettings.forEach { command ->
             writeCmd(0xe, command)

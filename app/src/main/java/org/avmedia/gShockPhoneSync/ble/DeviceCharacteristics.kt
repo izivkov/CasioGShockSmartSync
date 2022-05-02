@@ -25,7 +25,7 @@ object DeviceCharacteristics {
 
     val characteristics by lazy {
         Connection.servicesOnDevice(device)?.flatMap { service ->
-            Timber.i("servicesOnDevice $service ...")
+            Timber.i("servicesOnDevice ${service.characteristics}, ${service.includedServices} ...")
             service.characteristics ?: listOf()
         } ?: listOf()
     }

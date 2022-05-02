@@ -1,0 +1,8 @@
+Characteristics:
+handle: 0x0003, char properties: 0x02, char value handle: 0x0004, uuid: 00002a00-0000-1000-8000-00805f9b34fb
+handle: 0x0005, char properties: 0x02, char value handle: 0x0006, uuid: 00002a01-0000-1000-8000-00805f9b34fb
+handle: 0x0008, char properties: 0x02, char value handle: 0x0009, uuid: 00002a07-0000-1000-8000-00805f9b34fb
+handle: 0x000b, char properties: 0x04, char value handle: 0x000c, uuid: 26eb002c-b012-49a8-b1f8-394fb2032b0f
+handle: 0x000d, char properties: 0x18, char value handle: 0x000e, uuid: 26eb002d-b012-49a8-b1f8-394fb2032b0f
+handle: 0x0010, char properties: 0x18, char value handle: 0x0011, uuid: 26eb0023-b012-49a8-b1f8-394fb2032b0f
+handle: 0x0013, char properties: 0x14, char value handle: 0x0014, uuid: 26eb0024-b012-49a8-b1f8-394fb2032b0f
