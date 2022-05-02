@@ -70,11 +70,11 @@ class LocationText @JvmOverloads constructor(
                     try {
                         val addresses: List<Address> =
                             geoCoder.getFromLocation(location.latitude, location.longitude, 1)
-                        if (addresses.isNotEmpty()) {
+                        if (addresses.isNotEmpty() && addresses[0] != null && addresses[0].locality != null) {
                             text = addresses[0].locality
                             LastLocation.cachedLocation = addresses[0].locality
                         }
-                    } catch (e: IOException) {
+                    } catch (e: Exception) {
                         text = ""
                     }
                 }
