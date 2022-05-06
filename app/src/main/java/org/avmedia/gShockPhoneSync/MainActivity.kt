@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity() {
                         CasioSupport.init()
                     }
                     ProgressEvents.Events.WatchDataCollected -> {
+
                         // We have collected all data from watch.
                         // Send initializer data to watch, se we can set time later
                         WatchDataCollector.runInitCommands()

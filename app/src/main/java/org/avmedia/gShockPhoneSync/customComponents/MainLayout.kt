@@ -15,13 +15,17 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.navigation.findNavController
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
+import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 
@@ -40,6 +44,14 @@ class MainLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.WatchInitializationCompleted -> {
+                        val navController = (context as Activity).findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+                        val watchButtonPressed = CasioSupport.getPressedWatchButton()
+                        if (watchButtonPressed == CasioSupport.WATCH_BUTTON.LOWER_RIGHT) {
+                            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
+                        } else {
+                            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
+                        }
+
                         show()
                     }
                     ProgressEvents.Events.Disconnect -> {

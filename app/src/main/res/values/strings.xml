@@ -23,4 +23,6 @@
     <string name="alarms_screen_info">The GW-B5600 has 5 alarms and a "signal" (hourly chime) settings shown here. The alarms can be updated by pressing on the time value of each alarm. A new dialog will appear, which allows you to set the alarm\'s time. Once the alarms have been set, you can send them to the watch, or send them to the Alarm Clock app on the phone.</string>
     <string name="events_screen_info">This screen displays Events from your Google Calendar and allows you to send them to the watch\'s reminders.\n\nIf no events appear, make sure you have future events, or non-expired repeating events in your Google calender. Also, make sure you have set your phone to auto-sync to your Google account.
 </string>
+    <string name="actions">Actions</string>
+    <string name="title_actions">Actions</string>
 </resources>

@@ -28,6 +28,10 @@ object CasioSupport {
     private lateinit var writer: (BluetoothDevice, BluetoothGattCharacteristic, ByteArray) -> Unit
     private val handlesToCharacteristicsMap = HashMap<Int, UUID>()
 
+    enum class WATCH_BUTTON {
+        UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, INVALID
+    }
+
     init {
         initHandlesMap()
     }
@@ -171,6 +175,23 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
         return DeviceCharacteristics.findCharacteristic(handlesToCharacteristicsMap[handle])
     }
 
+    fun getPressedWatchButton(): WATCH_BUTTON {
+        /*
+        RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
+        LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
+        */
+        val bleIntArr = Utils.toIntArray(WatchDataCollector.bleFeatures)
+        if (bleIntArr.size < 19) {
+            return WATCH_BUTTON.LOWER_LEFT
+        }
+
+        return when (bleIntArr[8]) {
+            1 -> WATCH_BUTTON.LOWER_LEFT
+            4 -> WATCH_BUTTON.LOWER_RIGHT
+            else -> WATCH_BUTTON.INVALID
+        }
+    }
+
     fun toJson(data: String): JSONObject {
         val intArray = Utils.toIntArray(data)
         val json = JSONObject()
@@ -183,7 +204,9 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
             }
 
             // Add topics so the right component will receive data
-            CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code -> {json.put("CASIO_DST_SETTING", data)}
+            CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code -> {
+                json.put("CASIO_DST_SETTING", data)
+            }
             CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code -> {
                 val intArray = Utils.toIntArray(data)
                 if (intArray[1] == 0) {
@@ -193,9 +216,22 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
                 }
                 json.put("CASIO_WORLD_CITIES", data)
             }
-            CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code -> {json.put("CASIO_DST_WATCH_STATE", data)}
-            CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code -> {json.put("CASIO_WATCH_NAME", data)}
-            CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code -> {json.put("CASIO_WATCH_CONDITION", BatteryLevelDecoder.decodeValue(data))}
+            CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code -> {
+                json.put("CASIO_DST_WATCH_STATE", data)
+            }
+            CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code -> {
+                json.put("CASIO_WATCH_NAME", data)
+            }
+            CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code -> {
+                json.put("CASIO_WATCH_CONDITION", BatteryLevelDecoder.decodeValue(data))
+            }
+
+            CasioConstants.CHARACTERISTICS.CASIO_APP_INFORMATION.code -> {
+                json.put("CASIO_APP_INFORMATION", data)
+            }
+            CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code -> {
+                json.put("CASIO_BLE_FEATURES", data)
+            }
         }
 
         return json

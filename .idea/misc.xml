@@ -19,6 +19,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_watch_later_black_24dp.xml" value="0.1925" />
+        <entry key="app/src/main/res/layout/action_item.xml" value="0.2807971014492754" />
         <entry key="app/src/main/res/layout/activity_ble_operations.xml" value="0.3591485507246377" />
         <entry key="app/src/main/res/layout/activity_gshock_screens.xml" value="0.2682291666666667" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.28958333333333336" />
@@ -26,9 +27,10 @@
         <entry key="app/src/main/res/layout/edittext_hex_payload.xml" value="0.28958333333333336" />
         <entry key="app/src/main/res/layout/event_item.xml" value="0.2765625" />
         <entry key="app/src/main/res/layout/exact_time.xml" value="0.20625" />
-        <entry key="app/src/main/res/layout/fragment_alarms.xml" value="0.21240942028985507" />
+        <entry key="app/src/main/res/layout/fragment_actions.xml" value="0.19322916666666667" />
+        <entry key="app/src/main/res/layout/fragment_alarms.xml" value="0.2096069868995633" />
         <entry key="app/src/main/res/layout/fragment_dashboard.xml" value="0.22447916666666667" />
-        <entry key="app/src/main/res/layout/fragment_events.xml" value="0.23333333333333334" />
+        <entry key="app/src/main/res/layout/fragment_events.xml" value="0.19047619047619047" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.28229166666666666" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.22447916666666667" />
         <entry key="app/src/main/res/layout/fragment_reminders.xml" value="0.23333333333333334" />

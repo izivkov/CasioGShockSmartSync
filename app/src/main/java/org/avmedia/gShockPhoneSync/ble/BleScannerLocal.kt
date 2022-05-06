@@ -38,6 +38,7 @@ data class BleScannerLocal(val context: Context) {
     private val scanSettings = ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
         // .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+        // .setNumOfMatches(1)
         .build()
 
     private var isScanning = false
@@ -63,6 +64,7 @@ data class BleScannerLocal(val context: Context) {
             if (isScanning) {
                 return
             }
+            scanSettings.describeContents()
             bleScanner.startScan(createFilters(), scanSettings, scanCallback)
             isScanning = true
         } else {
@@ -72,14 +74,36 @@ data class BleScannerLocal(val context: Context) {
         isScanning = true
     }
 
+/*
+I/BleExtensionsKt: Service 00001801-0000-1000-8000-00805f9b34fb
+Characteristics:
+|--
+I/BleExtensionsKt: Service 00001800-0000-1000-8000-00805f9b34fb
+Characteristics:
+|--00002a00-0000-1000-8000-00805f9b34fb: READABLE
+|--00002a01-0000-1000-8000-00805f9b34fb: READABLE
+I/BleExtensionsKt: Service 00001804-0000-1000-8000-00805f9b34fb
+Characteristics:
+|--00002a07-0000-1000-8000-00805f9b34fb: READABLE
+I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
+Characteristics:
+|--26eb002c-b012-49a8-b1f8-394fb2032b0f: WRITABLE WITHOUT RESPONSE
+|--26eb002d-b012-49a8-b1f8-394fb2032b0f: WRITABLE, NOTIFIABLE
+|------00002902-0000-1000-8000-00805f9b34fb: EMPTY
+|--26eb0023-b012-49a8-b1f8-394fb2032b0f: WRITABLE, NOTIFIABLE
+|------00002902-0000-1000-8000-00805f9b34fb: EMPTY
+|--26eb0024-b012-49a8-b1f8-394fb2032b0f: WRITABLE WITHOUT RESPONSE, NOTIFIABLE
+|------00002902-0000-1000-8000-00805f9b34fb: EMPTY
+*/
+
     private fun createFilters(): ArrayList<ScanFilter> {
-        val filter = ScanFilter.Builder().setServiceUuid(
-            ParcelUuid.fromString(CasioConstants.CASIO_SERVICE.toString())
-        ).build()
+        val filter = ScanFilter.Builder()
+            .setServiceUuid(ParcelUuid.fromString(CasioConstants.CASIO_SERVICE.toString()))
+            // .setDeviceName("CASIO GW-B5600")
+            .build()
 
         val filters = ArrayList<ScanFilter>()
         filters.add(filter)
-
         return filters
     }
 
@@ -92,7 +116,6 @@ data class BleScannerLocal(val context: Context) {
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            Timber.i("onScanResult: result: $result")
             stopBleScan()
 
             if (cacheDevice) {

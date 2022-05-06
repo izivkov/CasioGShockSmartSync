@@ -69,7 +69,5 @@
             app:infoText="@string/events_screen_info"
             />
 
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

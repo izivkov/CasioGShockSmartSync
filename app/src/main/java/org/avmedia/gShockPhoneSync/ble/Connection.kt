@@ -160,11 +160,6 @@ object Connection : IConnection {
             device,
             DeviceCharacteristics.findCharacteristic(CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID)
         )
-
-        enableNotifications(
-            device,
-            DeviceCharacteristics.findCharacteristic(CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID)
-        )
     }
 
     private fun enableNotifications(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic) {
@@ -260,7 +255,6 @@ object Connection : IConnection {
                 deviceGattMap.remove(device)
                 ProgressEvents.Events.Disconnect.payload = device
                 ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
-
                 signalEndOfOperation()
             }
             is CharacteristicWrite -> with(operation) {
@@ -276,7 +270,6 @@ object Connection : IConnection {
             }
             is CharacteristicRead -> with(operation) {
                 gatt.findCharacteristic(characteristicUuid)?.let { characteristic ->
-                    Timber.d ("==============> characteristic: $characteristic")
                     gatt.readCharacteristic(characteristic)
 
                 } ?: this@Connection.run {

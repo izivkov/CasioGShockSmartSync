@@ -32,4 +32,11 @@
         android:label="@string/title_events"
         tools:layout="@layout/fragment_events"
         />
+
+    <fragment
+        android:id="@+id/navigation_actions"
+        android:name="org.avmedia.gShockPhoneSync.ui.actions.ActionsFragment"
+        android:label="@string/title_actions"
+        tools:layout="@layout/fragment_actions"
+        />
 </navigation>

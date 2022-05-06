@@ -25,4 +25,10 @@
         android:title="@string/events"
         />
 
+    <item
+        android:id="@+id/navigation_actions"
+        android:icon="@drawable/ic_actions"
+        android:title="@string/actions"
+        />
+
 </menu>

@@ -25,6 +25,7 @@ object WatchDataCollector {
     var homeCity: String = ""
     private var hourChime: String = ""
     var hourChime2: String = ""
+    var bleFeatures: String = ""
 
     init {
         subscribe("CASIO_DST_SETTING", ::onDataReceived)
@@ -32,6 +33,8 @@ object WatchDataCollector {
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
         subscribe("CASIO_WATCH_NAME", ::onDataReceived)
         subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
+        subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
+        subscribe("CASIO_BLE_FEATURES", ::onDataReceived)
     }
 
     private fun onDataReceived(data: String) {
@@ -65,6 +68,9 @@ object WatchDataCollector {
             }
             "28" -> {
                 batteryLevel = BatteryLevelDecoder.decodeValue(command).toInt()
+            }
+            "10" -> {
+                bleFeatures = command
             }
         }
     }
@@ -117,6 +123,12 @@ object WatchDataCollector {
 
         // battery level
         writeCmd(0xC, "28")
+
+        // app info
+        writeCmd(0xC, "22")
+
+        // CASIO_BLE_FEATURES, determine which button was pressed from these.
+        writeCmd(0xC, "10")
     }
     fun runInitCommands() {
         dstSettings.forEach { command ->
