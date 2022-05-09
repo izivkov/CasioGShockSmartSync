@@ -22,11 +22,11 @@ class ActionItem @JvmOverloads constructor(
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
     private lateinit var onDataChanged: KFunction<Unit>
-    private lateinit var action: IAction
+    private lateinit var action: ActionData.Action
 
     init {}
 
-    fun setActionData(action: IAction) {
+    fun setActionData(action: ActionData.Action) {
         this.action = action
     }
 }

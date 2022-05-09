@@ -21,7 +21,10 @@ class ConnectionLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        show()
+        // show()
+        // INZ temp
+        hide ()
+
         createAppEventsSubscription ()
     }
 

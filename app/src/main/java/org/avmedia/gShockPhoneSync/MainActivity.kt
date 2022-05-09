@@ -67,6 +67,10 @@ class MainActivity : AppCompatActivity() {
         bleScannerLocal = BleScannerLocal(this)
         Connection.init(this)
         WatchDataListener.init()
+
+        // INZ new
+        navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
+        // INZ end
     }
 
     override fun onResume() {

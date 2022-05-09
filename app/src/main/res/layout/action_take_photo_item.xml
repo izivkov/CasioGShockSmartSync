@@ -14,6 +14,8 @@
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
     app:cardElevation="2dp"
+    app:strokeColor="@color/stroke_color"
+    app:strokeWidth="1dp"
     >
 
     <LinearLayout
@@ -27,24 +29,55 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:padding="6dp"
+            android:padding="4dp"
             >
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Action Item"
+                android:layout_gravity="center_vertical"
+                android:text="Take a photo"
                 android:textSize="24dp"
                 />
 
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                />
+
+            <RadioGroup
+                android:id="@+id/cameraOrientationGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="right"
+                android:checkedButton="@+id/front"
+                android:orientation="vertical"
+                >
+
+                <RadioButton
+                    android:id="@+id/front"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Front Cam"
+                    />
+
+                <RadioButton
+                    android:id="@+id/back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Back Cam"
+                    />
+            </RadioGroup>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_margin="0dp"
+            android:layout_margin="8dp"
             android:orientation="horizontal"
             >
 

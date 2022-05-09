@@ -34,8 +34,12 @@ class MainLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        hide()
-        createAppEventsSubscription ()
+        // INZ temp
+        // hide()
+        show()
+        // INZ end
+
+        createAppEventsSubscription()
     }
 
     private fun createAppEventsSubscription(): Disposable =
@@ -44,7 +48,8 @@ class MainLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        val navController = (context as Activity).findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+                        val navController =
+                            (context as Activity).findNavController(R.id.nav_host_fragment_activity_gshock_screens)
                         val watchButtonPressed = CasioSupport.getPressedWatchButton()
                         if (watchButtonPressed == CasioSupport.WATCH_BUTTON.LOWER_RIGHT) {
                             navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)

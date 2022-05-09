@@ -21,7 +21,6 @@ import timber.log.Timber
 import java.text.ParseException
 import java.util.Date
 
-
 class AlarmAdapter(private val alarms: ArrayList<AlarmsData.Alarm>) :
     RecyclerView.Adapter<AlarmAdapter.ViewHolder>() {
 

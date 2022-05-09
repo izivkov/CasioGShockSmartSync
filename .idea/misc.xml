@@ -20,11 +20,13 @@
         <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.1925" />
         <entry key="app/src/main/res/drawable/ic_watch_later_black_24dp.xml" value="0.1925" />
         <entry key="app/src/main/res/layout/action_item.xml" value="0.2807971014492754" />
+        <entry key="app/src/main/res/layout/action_take_photo_item.xml" value="0.19895833333333332" />
         <entry key="app/src/main/res/layout/activity_ble_operations.xml" value="0.3591485507246377" />
         <entry key="app/src/main/res/layout/activity_gshock_screens.xml" value="0.2682291666666667" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.28958333333333336" />
         <entry key="app/src/main/res/layout/alarm_item.xml" value="0.335" />
         <entry key="app/src/main/res/layout/edittext_hex_payload.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/layout/email_item.xml" value="0.3640625" />
         <entry key="app/src/main/res/layout/event_item.xml" value="0.2765625" />
         <entry key="app/src/main/res/layout/exact_time.xml" value="0.20625" />
         <entry key="app/src/main/res/layout/fragment_actions.xml" value="0.19322916666666667" />
@@ -35,8 +37,10 @@
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.22447916666666667" />
         <entry key="app/src/main/res/layout/fragment_reminders.xml" value="0.23333333333333334" />
         <entry key="app/src/main/res/layout/fragment_time.xml" value="0.20625" />
+        <entry key="app/src/main/res/layout/phone_call_item.xml" value="0.25677083333333334" />
         <entry key="app/src/main/res/layout/row_characteristic.xml" value="0.28958333333333336" />
         <entry key="app/src/main/res/layout/row_scan_result.xml" value="0.28958333333333336" />
+        <entry key="app/src/main/res/layout/separator_item.xml" value="0.25677083333333334" />
         <entry key="app/src/main/res/layout/watch_info.xml" value="0.2328125" />
         <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.22447916666666667" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2985" />

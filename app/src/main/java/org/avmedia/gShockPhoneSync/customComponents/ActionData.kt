@@ -6,17 +6,42 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.content.Intent
+import androidx.core.content.ContextCompat.startActivity
 import com.google.gson.Gson
 import timber.log.Timber
 
 object ActionData {
 
-    open class Action(open override var title: String, open override var enabled: Boolean) : IAction {
+    abstract class Action(open var title: String, open var enabled: Boolean) {
+        abstract fun run()
+    }
+
+    class SetTimeAction (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
         override fun run() {
             TODO("Not yet implemented")
         }
+    }
 
-        override fun getId(): Int {
+    class SetLocationAction (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
+        override fun run() {
+            TODO("Not yet implemented")
+        }
+    }
+
+    class StartVoiceAssistAction (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
+        override fun run() {
+        }
+    }
+
+    class Separator (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
+        override fun run() {
+            TODO("Not yet implemented")
+        }
+    }
+
+    class MapAction (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
+        override fun run() {
             TODO("Not yet implemented")
         }
     }
@@ -29,15 +54,59 @@ object ActionData {
         init {
             Timber.d("PhoneDialAction")
         }
+
+        override fun run() {
+            TODO("Not yet implemented")
+        }
     }
 
-    val actions = ArrayList<IAction>()
+    enum class CAMERA_ORIENTATION(val orientation: String) {
+        FRONT("FRONT"), BACK("BACK")
+    }
+
+    class PhotoAction (
+        override var title: String,
+        override var enabled: Boolean,
+        private val cameraOrientation: CAMERA_ORIENTATION
+    ) : Action(title, enabled) {
+        init {
+            Timber.d("PhotoAction: orientation: $cameraOrientation")
+        }
+
+        override fun run() {
+            TODO("Not yet implemented")
+        }
+    }
+
+    class EmailLocationAction (
+        override var title: String,
+        override var enabled: Boolean,
+        var emailAddress: String,
+        var extraText: String
+    ) : Action(title, enabled) {
+        init {
+            Timber.d("EmailLocationAction: emailAddress: $emailAddress")
+            Timber.d("EmailLocationAction: extraText: $extraText")
+        }
+
+        override fun run() {
+            TODO("Not yet implemented")
+        }
+    }
+
+    val actions = ArrayList<ActionData.Action>()
 
     init {
-        actions.add(Action("Set Time", true))
-        actions.add(Action("Save current location to Google maps", false))
-        actions.add(Action("Take a photo", true))
-        actions.add(PhoneDialAction("Make a phone call", true, "416-555-3045"))
+        actions.add(MapAction("Map", false))
+        actions.add(SetLocationAction("Save location to G-maps", false))
+        actions.add(SetTimeAction("Set Time", true))
+        actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.FRONT))
+        actions.add(StartVoiceAssistAction("Start Voice Assist", true))
+
+        actions.add(Separator("Emergency Actions:", false))
+
+        actions.add(PhoneDialAction("Make a phone call", true, ""))
+        actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
     }
 
     fun clear() {
