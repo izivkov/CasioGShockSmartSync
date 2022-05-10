@@ -8,7 +8,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import com.google.gson.Gson
 
-object AlarmsData {
+object AlarmsModel {
 
     class Alarm(var hour: Int, var minute: Int, var enabled: Boolean, var hasHourlyChime: Boolean = false)
 

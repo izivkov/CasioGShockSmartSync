@@ -20,7 +20,7 @@ import java.time.ZoneId
 import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
-object EventsData {
+object EventsModel {
 
     const val MAX_REMINDERS = 5
 
@@ -171,11 +171,11 @@ object EventsData {
         return (events.filter { it.selected } as ArrayList<Event>).size
     }
 
-    fun createEventDate(timeMs: Long, zone: ZoneId): EventsData.EventDate {
+    fun createEventDate(timeMs: Long, zone: ZoneId): EventsModel.EventDate {
         val start: LocalDate =
             Instant.ofEpochMilli(timeMs).atZone(zone)
                 .toLocalDate()
-        return EventsData.EventDate(
+        return EventsModel.EventDate(
             start.year,
             start.month,
             start.dayOfMonth

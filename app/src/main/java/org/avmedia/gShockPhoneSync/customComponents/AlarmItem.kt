@@ -22,7 +22,7 @@ class AlarmItem @JvmOverloads constructor(
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
     private lateinit var onDataChanged: KFunction<Unit>
-    private lateinit var alarm: AlarmsData.Alarm
+    private lateinit var alarm: AlarmsModel.Alarm
     private lateinit var alarmTime: TextView
 
     init {}
@@ -56,7 +56,7 @@ class AlarmItem @JvmOverloads constructor(
         }
     }
 
-    fun setAlarmData(alarm: AlarmsData.Alarm) {
+    fun setAlarmData(alarm: AlarmsModel.Alarm) {
         this.alarm = alarm
 
         alarmTime = findViewById<TextView>(R.id.time)

@@ -10,17 +10,20 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
+import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
+import org.jetbrains.anko.sdk27.coroutines.onFocusChange
 import timber.log.Timber
 
 // This adapter handles a heterogeneous list of actions.
 
-class ActionAdapter(private val actions: ArrayList<ActionData.Action>) :
+class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     enum class ACTION_TYPES {
@@ -36,7 +39,8 @@ class ActionAdapter(private val actions: ArrayList<ActionData.Action>) :
 
     inner class ViewHolderActionTakePhoto(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
-        val orientation: RadioGroup = itemView.findViewById<RadioGroup>(R.id.cameraOrientationGroup)
+        val radioGroup: RadioGroup = itemView.findViewById<RadioGroup>(R.id.cameraOrientationGroup)
+
         val actionEnabled: SwitchMaterial =
             itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
     }
@@ -45,7 +49,7 @@ class ActionAdapter(private val actions: ArrayList<ActionData.Action>) :
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
         val actionEnabled: SwitchMaterial =
             itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
-        val phoneNumber: TextView =
+        var phoneNumber: TextView =
             itemView.findViewById<TextView>(R.id.phone_number)
     }
 
@@ -63,16 +67,16 @@ class ActionAdapter(private val actions: ArrayList<ActionData.Action>) :
 
     // Returns the view type of the item at position for the purposes of view recycling.
     override fun getItemViewType(position: Int): Int {
-        if (actions[position] is ActionData.PhotoAction) {
+        if (actions[position] is ActionsModel.PhotoAction) {
             return ACTION_TYPES.PHOTO.ordinal
         }
-        if (actions[position] is ActionData.Separator) {
+        if (actions[position] is ActionsModel.Separator) {
             return ACTION_TYPES.SEPARATOR.ordinal
         }
-        if (actions[position] is ActionData.PhoneDialAction) {
+        if (actions[position] is ActionsModel.PhoneDialAction) {
             return ACTION_TYPES.PHONE_CALL.ordinal
         }
-        if (actions[position] is ActionData.EmailLocationAction) {
+        if (actions[position] is ActionsModel.EmailLocationAction) {
             return ACTION_TYPES.EMAIL.ordinal
         }
         return ACTION_TYPES.BASE_ACTION.ordinal
@@ -111,6 +115,7 @@ class ActionAdapter(private val actions: ArrayList<ActionData.Action>) :
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...actions.size: ${actions.size}")
+
         when (viewHolder.itemViewType) {
             ACTION_TYPES.PHOTO.ordinal -> {
                 val vhPhoto = viewHolder as ViewHolderActionTakePhoto
@@ -140,27 +145,54 @@ class ActionAdapter(private val actions: ArrayList<ActionData.Action>) :
         vhEmail: ViewHolderActionSendEmail,
         position: Int
     ) {
-        val action: ActionData.EmailLocationAction = actions[position] as ActionData.EmailLocationAction
+        val action: ActionsModel.EmailLocationAction =
+            actions[position] as ActionsModel.EmailLocationAction
         vhEmail.title.text = action.title
         vhEmail.actionEnabled.isChecked = action.enabled
         vhEmail.emailAddress.text = action.emailAddress
+
+        vhEmail.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            action.enabled = isChecked
+        })
+
+        vhEmail.emailAddress.onFocusChange { v, hasFocus ->
+            if (!hasFocus) {
+                (actions[position] as ActionsModel.EmailLocationAction).emailAddress = (v as EditText).text.toString()
+
+                // save value here in case we close screen while still in this field
+                action.save(vhEmail.itemView.context)
+            }
+        }
     }
 
     private fun configurePhoneCall(
         vhPhoneCall: ViewHolderActionPhoneCall,
         position: Int
     ) {
-        val action: ActionData.PhoneDialAction = actions[position] as ActionData.PhoneDialAction
+        val action: ActionsModel.PhoneDialAction = actions[position] as ActionsModel.PhoneDialAction
         vhPhoneCall.title.text = action.title
         vhPhoneCall.actionEnabled.isChecked = action.enabled
         vhPhoneCall.phoneNumber.text = action.phoneNumber
+
+        vhPhoneCall.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            (actions[position] as ActionsModel.PhoneDialAction).enabled = isChecked
+        })
+
+        vhPhoneCall.phoneNumber.onFocusChange { v, hasFocus ->
+            if (!hasFocus) {
+                (actions[position] as ActionsModel.PhoneDialAction).phoneNumber = (v as EditText).text.toString()
+
+                // save value here in case we close screen while still in this field
+                action.save(vhPhoneCall.itemView.context)
+            }
+        }
     }
 
     private fun configureSeparator(
         vhBaseAction: ActionAdapter.ViewHolderActionSeparator,
         position: Int
     ) {
-        val action: ActionData.Action = actions[position]
+        val action: ActionsModel.Action = actions[position]
         vhBaseAction.title.text = action.title
     }
 
@@ -168,19 +200,40 @@ class ActionAdapter(private val actions: ArrayList<ActionData.Action>) :
         vhBaseAction: ActionAdapter.ViewHolderBaseAction,
         position: Int
     ) {
-        val action: ActionData.Action = actions[position]
+        val action: ActionsModel.Action = actions[position]
         vhBaseAction.actionEnabled.isChecked = action.enabled
         vhBaseAction.title.text = action.title
+
+        vhBaseAction.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            actions[position].enabled = isChecked
+        })
     }
 
     private fun configureActionTakePhoto(
         vhPhoto: ActionAdapter.ViewHolderActionTakePhoto,
         position: Int
     ) {
-        val action: ActionData.PhotoAction = actions[position] as ActionData.PhotoAction
+        val action: ActionsModel.PhotoAction = actions[position] as ActionsModel.PhotoAction
         vhPhoto.actionEnabled.isChecked = action.enabled
         vhPhoto.title.text = action.title
-        // vhPhoto.orientation....
+
+        if (action.cameraOrientation.toString() == "FRONT")
+            vhPhoto.radioGroup.check(R.id.front)
+        else
+            vhPhoto.radioGroup.check(R.id.back)
+
+        vhPhoto.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            action.enabled = isChecked
+        })
+
+        vhPhoto.radioGroup.setOnCheckedChangeListener(
+            RadioGroup.OnCheckedChangeListener { group, checkedId ->
+                if (checkedId == R.id.front) {
+                    action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.FRONT
+                } else {
+                    action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.BACK
+                }
+            })
     }
 
     override fun getItemCount(): Int {

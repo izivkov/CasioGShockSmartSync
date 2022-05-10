@@ -28,7 +28,7 @@ class SendEventsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    sendMessage("{action: \"SET_REMINDERS\", value: ${EventsData.getSelectedEvents()}}")
+                    sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
                     Utils.toast(context, "Events Sent to Watch")
                 }
             }

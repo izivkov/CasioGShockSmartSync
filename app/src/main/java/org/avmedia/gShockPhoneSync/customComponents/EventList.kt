@@ -15,7 +15,7 @@ class EventList @JvmOverloads constructor(
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
     init {
-        adapter = EventAdapter(EventsData.events)
+        adapter = EventAdapter(EventsModel.events)
         layoutManager = LinearLayoutManager(context)
     }
 }

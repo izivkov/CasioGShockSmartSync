@@ -5,23 +5,43 @@
  */
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Rect
 import android.util.AttributeSet
+import android.util.LongSparseArray
+import android.view.View
+import android.view.translation.ViewTranslationResponse
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.avmedia.gShockPhoneSync.ble.Connection
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
-import org.jetbrains.anko.runOnUiThread
-import org.json.JSONObject
 
 class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
     init {
-        adapter = ActionAdapter(ActionData.actions)
+        adapter = ActionAdapter(ActionsModel.actions)
         layoutManager = LinearLayoutManager(context)
+    }
+
+    private fun loadData(context: Context) {
+        ActionsModel.actions.forEach {
+            it.load(context)
+        }
+    }
+
+    private fun saveData(context: Context) {
+        ActionsModel.actions.forEach {
+            it.save(context)
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        saveData(context)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        loadData (context)
     }
 }

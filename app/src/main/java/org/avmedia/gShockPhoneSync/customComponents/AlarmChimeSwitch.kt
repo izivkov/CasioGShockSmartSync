@@ -20,7 +20,7 @@ class AlarmChimeSwitch @JvmOverloads constructor(
         createAppEventsSubscription()
 
         setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            AlarmsData.alarms[0].hasHourlyChime = isChecked
+            AlarmsModel.alarms[0].hasHourlyChime = isChecked
         })
     }
 
@@ -31,7 +31,7 @@ class AlarmChimeSwitch @JvmOverloads constructor(
             {
                 when (it) {
                     ProgressEvents.Events.AlarmDataLoaded -> {
-                        isChecked = AlarmsData.alarms[0].hasHourlyChime
+                        isChecked = AlarmsModel.alarms[0].hasHourlyChime
                     }
                 }
             },

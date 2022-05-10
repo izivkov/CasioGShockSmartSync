@@ -18,7 +18,7 @@ import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 import java.text.ParseException
 
-class EventAdapter(private val events: ArrayList<EventsData.Event>) :
+class EventAdapter(private val events: ArrayList<EventsModel.Event>) :
     RecyclerView.Adapter<EventAdapter.ViewHolder>() {
 
     // Provide a direct reference to each of the views within a data item
@@ -41,7 +41,7 @@ class EventAdapter(private val events: ArrayList<EventsData.Event>) :
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...events.size: ${events.size}")
-        val event: EventsData.Event = events[position]
+        val event: EventsModel.Event = events[position]
         try {
             viewHolder.titleView.text = event.title
             if (event.incompatible) {
@@ -57,8 +57,8 @@ class EventAdapter(private val events: ArrayList<EventsData.Event>) :
             }
 
             viewHolder.selectedView.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
-                if (isChecked && EventsData.getSelectedCount() == EventsData.MAX_REMINDERS) {
-                    Utils.toast(buttonView.context, "Max ${EventsData.MAX_REMINDERS} items selected. Please unselect some first.")
+                if (isChecked && EventsModel.getSelectedCount() == EventsModel.MAX_REMINDERS) {
+                    Utils.toast(buttonView.context, "Max ${EventsModel.MAX_REMINDERS} items selected. Please unselect some first.")
                     viewHolder.selectedView.isChecked = false
                     event.selected = false
                 } else {

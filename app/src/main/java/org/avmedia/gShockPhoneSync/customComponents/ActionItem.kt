@@ -8,13 +8,6 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import android.widget.TextView
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
-import org.avmedia.gShockPhoneSync.MainActivity
-import org.avmedia.gShockPhoneSync.R
 import kotlin.reflect.KFunction
 
 class ActionItem @JvmOverloads constructor(
@@ -22,11 +15,11 @@ class ActionItem @JvmOverloads constructor(
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
     private lateinit var onDataChanged: KFunction<Unit>
-    private lateinit var action: ActionData.Action
+    private lateinit var action: ActionsModel.Action
 
     init {}
 
-    fun setActionData(action: ActionData.Action) {
+    fun setActionData(action: ActionsModel.Action) {
         this.action = action
     }
 }

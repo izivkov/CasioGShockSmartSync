@@ -16,12 +16,12 @@ class EventItem @JvmOverloads constructor(
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
     private lateinit var onDataChanged: KFunction<Unit>
-    private lateinit var event: EventsData.Event
+    private lateinit var event: EventsModel.Event
     private lateinit var eventTitle: TextView
 
     init {}
 
-    fun setEventData(event: EventsData.Event) {
+    fun setEventData(event: EventsModel.Event) {
         this.event = event
     }
 

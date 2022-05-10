@@ -6,20 +6,40 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.content.Intent
-import androidx.core.content.ContextCompat.startActivity
+import android.content.Context
 import com.google.gson.Gson
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import timber.log.Timber
 
-object ActionData {
+object ActionsModel {
 
     abstract class Action(open var title: String, open var enabled: Boolean) {
         abstract fun run()
+
+        open fun save(context: Context) {
+            val key = this.javaClass.simpleName+".enabled"
+            val value = enabled
+            LocalDataStorage.put(key, value.toString(), context)
+        }
+
+        open fun load (context: Context) {
+            val key = this.javaClass.simpleName+".enabled"
+            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+        }
     }
 
     class SetTimeAction (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
         override fun run() {
             TODO("Not yet implemented")
+        }
+
+        override fun save(context: Context) {
+            super.save (context)
+        }
+
+        override fun load(context: Context) {
+            val key = this.javaClass.simpleName+".enabled"
+            enabled = LocalDataStorage.get(key, "true", context).toBoolean()
         }
     }
 
@@ -27,10 +47,26 @@ object ActionData {
         override fun run() {
             TODO("Not yet implemented")
         }
+
+        override fun save(context: Context) {
+            super.save (context)
+        }
+
+        override fun load(context: Context) {
+            super.load(context)
+        }
     }
 
     class StartVoiceAssistAction (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
         override fun run() {
+        }
+
+        override fun save(context: Context) {
+            super.save (context)
+        }
+
+        override fun load(context: Context) {
+            super.load(context)
         }
     }
 
@@ -38,18 +74,34 @@ object ActionData {
         override fun run() {
             TODO("Not yet implemented")
         }
+
+        override fun save(context: Context) {
+            super.save (context)
+        }
+
+        override fun load(context: Context) {
+            super.save (context)
+        }
     }
 
     class MapAction (override var title: String, override var enabled: Boolean) : Action (title, enabled) {
         override fun run() {
             TODO("Not yet implemented")
         }
+
+        override fun save(context: Context) {
+            super.save (context)
+        }
+
+        override fun load(context: Context) {
+            super.load(context)
+        }
     }
 
     class PhoneDialAction(
         override var title: String,
         override var enabled: Boolean,
-        val phoneNumber: String
+        var phoneNumber: String
     ) : Action(title, enabled) {
         init {
             Timber.d("PhoneDialAction")
@@ -58,16 +110,28 @@ object ActionData {
         override fun run() {
             TODO("Not yet implemented")
         }
+
+        override fun save(context: Context) {
+            super.save (context)
+            val key = this.javaClass.simpleName+".phoneNumber"
+            LocalDataStorage.put(key, phoneNumber.toString(), context)
+        }
+
+        override fun load(context: Context) {
+            super.load(context)
+            val key = this.javaClass.simpleName+".phoneNumber"
+            phoneNumber = LocalDataStorage.get(key, "", context).toString()
+        }
     }
 
-    enum class CAMERA_ORIENTATION(val orientation: String) {
-        FRONT("FRONT"), BACK("BACK")
+    enum class CAMERA_ORIENTATION(cameraOrientation: String) {
+        FRONT("FRONT"), BACK("BACK");
     }
 
     class PhotoAction (
         override var title: String,
         override var enabled: Boolean,
-        private val cameraOrientation: CAMERA_ORIENTATION
+        var cameraOrientation: CAMERA_ORIENTATION
     ) : Action(title, enabled) {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
@@ -75,6 +139,18 @@ object ActionData {
 
         override fun run() {
             TODO("Not yet implemented")
+        }
+
+        override fun save(context: Context) {
+            super.save (context)
+            val key = this.javaClass.simpleName+".cameraOrientation"
+            LocalDataStorage.put(key, cameraOrientation.toString(), context)
+        }
+
+        override fun load(context: Context) {
+            super.load(context)
+            val key = this.javaClass.simpleName+".cameraOrientation"
+            cameraOrientation = if (LocalDataStorage.get(key, "FRONT", context).toString() == "BACK") CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
         }
     }
 
@@ -92,9 +168,23 @@ object ActionData {
         override fun run() {
             TODO("Not yet implemented")
         }
+
+        override fun save(context: Context) {
+            val key = this.javaClass.simpleName+".emailAddress"
+            LocalDataStorage.put(key, emailAddress.toString(), context)
+            super.save (context)
+        }
+
+        override fun load(context: Context) {
+            super.load(context)
+
+            val key = this.javaClass.simpleName+".emailAddress"
+            emailAddress = LocalDataStorage.get(key, "", context).toString()
+            extraText = "Sent by G-shock App:\n https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"
+        }
     }
 
-    val actions = ArrayList<ActionData.Action>()
+    val actions = ArrayList<ActionsModel.Action>()
 
     init {
         actions.add(MapAction("Map", false))

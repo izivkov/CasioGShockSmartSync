@@ -5,7 +5,6 @@
  */
 
 package org.avmedia.gShockPhoneSync.utils
-
 import android.content.Context
 
 object LocalDataStorage {
@@ -19,9 +18,9 @@ object LocalDataStorage {
         editor.commit()
     }
 
-    fun get(key: String, context: Context): String? {
+    fun get(key: String, defaultValue: String?, context: Context): String? {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-        return sharedPreference.getString(key, null)
+        return sharedPreference.getString(key, null) ?: defaultValue
     }
 
     fun delete(key: String, context: Context) {

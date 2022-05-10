@@ -21,17 +21,17 @@ class AlarmList @JvmOverloads constructor(
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
     init {
-        adapter = AlarmAdapter(AlarmsData.alarms)
+        adapter = AlarmAdapter(AlarmsModel.alarms)
         layoutManager = LinearLayoutManager(context)
 
-        if (AlarmsData.isEmpty()) {
+        if (AlarmsModel.isEmpty()) {
             subscribe("ALARMS", ::onDataReceived)
             Connection.sendMessage(JSONObject("{ action: 'GET_ALARMS'}").toString())
         }
     }
 
     private fun onDataReceived(data: String) {
-        AlarmsData.fromJson(data)
+        AlarmsModel.fromJson(data)
         context.runOnUiThread {
             adapter?.notifyDataSetChanged()
             ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)

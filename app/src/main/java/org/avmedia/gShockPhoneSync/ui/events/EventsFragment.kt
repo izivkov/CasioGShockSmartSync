@@ -12,7 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import org.avmedia.gShockPhoneSync.customComponents.EventsData
+import org.avmedia.gShockPhoneSync.customComponents.EventsModel
 import org.avmedia.gShockPhoneSync.databinding.FragmentEventsBinding
 
 class EventsFragment : Fragment() {
@@ -28,7 +28,7 @@ class EventsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        EventsData.init(requireContext())
+        EventsModel.init(requireContext())
 
         val notificationsViewModel =
             ViewModelProvider(this).get(EventsViewModel::class.java)

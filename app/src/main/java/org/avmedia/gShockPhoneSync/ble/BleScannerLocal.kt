@@ -52,7 +52,7 @@ data class BleScannerLocal(val context: Context) {
         var device: BluetoothDevice? = null
         var cachedDeviceAddr: String? = null
         if (cacheDevice) {
-            cachedDeviceAddr = LocalDataStorage.get("cached device", context)
+            cachedDeviceAddr = LocalDataStorage.get("cached device", null, context)
         }
 
         if (cachedDeviceAddr != null) {
@@ -119,7 +119,7 @@ Characteristics:
             stopBleScan()
 
             if (cacheDevice) {
-                val cachedDevice = LocalDataStorage.get("cached device", context)
+                val cachedDevice = LocalDataStorage.get("cached device", null, context)
                 if (cachedDevice == null || cachedDevice != result.device.address) {
                     LocalDataStorage.put("cached device", result.device.address, context)
                 }

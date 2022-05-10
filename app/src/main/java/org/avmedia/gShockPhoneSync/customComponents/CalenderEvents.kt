@@ -17,13 +17,13 @@ import java.time.ZoneId
 import java.util.Calendar
 
 object CalenderEvents {
-    fun getDataFromEventTable(context: Context): ArrayList<EventsData.Event> {
+    fun getDataFromEventTable(context: Context): ArrayList<EventsModel.Event> {
         return getEvents(context)
     }
 
     @SuppressLint("Range")
-    private fun getEvents(context: Context): ArrayList<EventsData.Event> {
-        val events: ArrayList<EventsData.Event> = ArrayList()
+    private fun getEvents(context: Context): ArrayList<EventsModel.Event> {
+        val events: ArrayList<EventsModel.Event> = ArrayList()
         val cur: Cursor?
         val cr: ContentResolver = context.contentResolver
 
@@ -71,14 +71,14 @@ object CalenderEvents {
                 zone = ZoneId.of("UTC")
             }
 
-            val startDate = EventsData.createEventDate(dateStart!!.toLong(), zone)
+            val startDate = EventsModel.createEventDate(dateStart!!.toLong(), zone)
             var endDate = startDate
 
             val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
                 RRuleValues.getValues(rrule, startDate, zone)
 
             if (localEndDate != null) {
-                endDate = EventsData.EventDate(
+                endDate = EventsModel.EventDate(
                     localEndDate.year,
                     localEndDate.month,
                     localEndDate.dayOfMonth
@@ -90,10 +90,10 @@ object CalenderEvents {
                 continue // do not add expired events
             }
 
-            val selected = events.size < EventsData.MAX_REMINDERS
+            val selected = events.size < EventsModel.MAX_REMINDERS
             if (title != null) {
                 events.add(
-                    EventsData.Event(
+                    EventsModel.Event(
                         title,
                         startDate,
                         endDate,

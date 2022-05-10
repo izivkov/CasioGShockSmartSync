@@ -21,7 +21,7 @@ import timber.log.Timber
 import java.text.ParseException
 import java.util.Date
 
-class AlarmAdapter(private val alarms: ArrayList<AlarmsData.Alarm>) :
+class AlarmAdapter(private val alarms: ArrayList<AlarmsModel.Alarm>) :
     RecyclerView.Adapter<AlarmAdapter.ViewHolder>() {
 
     // Provide a direct reference to each of the views within a data item
@@ -44,7 +44,7 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsData.Alarm>) :
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...alarms.size: ${alarms.size}")
-        val alarm: AlarmsData.Alarm = alarms[position]
+        val alarm: AlarmsModel.Alarm = alarms[position]
         val timeView = viewHolder.timeView
         val alarmEnabled = viewHolder.alarmEnabled
         try {

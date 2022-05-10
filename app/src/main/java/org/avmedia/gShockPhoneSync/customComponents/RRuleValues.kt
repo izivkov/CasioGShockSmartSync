@@ -21,12 +21,12 @@ object RRuleValues {
         var localEndDate: LocalDate? = null,
         var incompatible: Boolean = false,
         var daysOfWeek: ArrayList<DayOfWeek>? = null,
-        var repeatPeriod: EventsData.RepeatPeriod = EventsData.RepeatPeriod.NEVER
+        var repeatPeriod: EventsModel.RepeatPeriod = EventsModel.RepeatPeriod.NEVER
     )
 
     fun getValues(
         rrule: String?,
-        startDate: EventsData.EventDate,
+        startDate: EventsModel.EventDate,
         zone: ZoneId
     ): Values {
         val rruleValues = Values()
@@ -108,7 +108,7 @@ object RRuleValues {
                 }
 
                 rruleValues.repeatPeriod = toEventRepeatPeriod(rruleObj.freq)
-                if (rruleValues.repeatPeriod == EventsData.RepeatPeriod.WEEKLY) {
+                if (rruleValues.repeatPeriod == EventsModel.RepeatPeriod.WEEKLY) {
                     val weekDays = rruleObj.byDay
                     rruleValues.daysOfWeek = createDaysOfWeek(weekDays)
                 }
@@ -118,13 +118,13 @@ object RRuleValues {
         return rruleValues
     }
 
-    private fun toEventRepeatPeriod(freq: Frequency): EventsData.RepeatPeriod {
+    private fun toEventRepeatPeriod(freq: Frequency): EventsModel.RepeatPeriod {
         when (freq) {
-            Frequency.Monthly -> return EventsData.RepeatPeriod.MONTHLY
-            Frequency.Weekly -> return EventsData.RepeatPeriod.WEEKLY
-            Frequency.Yearly -> return EventsData.RepeatPeriod.YEARLY
-            Frequency.Daily -> return EventsData.RepeatPeriod.DAILY
-            else -> return EventsData.RepeatPeriod.NEVER
+            Frequency.Monthly -> return EventsModel.RepeatPeriod.MONTHLY
+            Frequency.Weekly -> return EventsModel.RepeatPeriod.WEEKLY
+            Frequency.Yearly -> return EventsModel.RepeatPeriod.YEARLY
+            Frequency.Daily -> return EventsModel.RepeatPeriod.DAILY
+            else -> return EventsModel.RepeatPeriod.NEVER
         }
     }
 
