@@ -76,12 +76,9 @@ style="margin: 10px;" />
 
 The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.
 
-## Playstore
-
-<a href="https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync">
-<img src="https://camo.githubusercontent.com/14aff0715e7c45aa33a99be1c282faf39181e284f3c25fbb60556a25bb9cdcee/68747470733a2f2f63646e2e7261776769742e636f6d2f73746576657269636865792f676f6f676c652d706c61792d62616467652d7376672f6d61737465722f696d672f66725f6765742e737667" width="50%" data-canonical-src="https://cdn.rawgit.com/steverichey/google-play-badge-svg/master/img/en_get.svg" style="max-width: 100%;">
-</a>
-
 ## Credits
 - The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
 - Some if the Casio specific code is loosely based on the `Gadgetbridge` https://github.com/Freeyourgadget/Gadgetbridge project
+
+<a href='https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="300"/></a>
+</a>
