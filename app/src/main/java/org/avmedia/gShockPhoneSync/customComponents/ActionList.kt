@@ -6,13 +6,13 @@
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
-import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.LongSparseArray
-import android.view.View
-import android.view.translation.ViewTranslationResponse
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.utils.Utils
 
 class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -21,6 +21,31 @@ class ActionList @JvmOverloads constructor(
     init {
         adapter = ActionAdapter(ActionsModel.actions)
         layoutManager = LinearLayoutManager(context)
+    }
+
+    fun init() {
+        super.onAttachedToWindow()
+        loadData(context)
+
+        if (Utils.isDebugMode() || CasioSupport.isActionButtonPressed()) {
+            runActions()
+        }
+    }
+
+    fun shutdown() {
+        super.onDetachedFromWindow()
+        saveData(context)
+    }
+
+    private fun runActions() {
+        ActionsModel.actions.forEach {
+            if (it.enabled) {
+                // Run in background for speed
+                GlobalScope.launch {
+                    it.run(context)
+                }
+            }
+        }
     }
 
     private fun loadData(context: Context) {
@@ -35,13 +60,4 @@ class ActionList @JvmOverloads constructor(
         }
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        saveData(context)
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        loadData (context)
-    }
 }

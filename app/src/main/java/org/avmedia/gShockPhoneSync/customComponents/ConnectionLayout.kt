@@ -14,6 +14,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
 class ConnectionLayout @JvmOverloads constructor(
@@ -21,10 +22,7 @@ class ConnectionLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        // show()
-        // INZ temp
-        hide ()
-
+        if (Utils.isDebugMode()) hide () else show()
         createAppEventsSubscription ()
     }
 

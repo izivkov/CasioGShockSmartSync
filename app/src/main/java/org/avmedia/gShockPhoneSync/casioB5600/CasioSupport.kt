@@ -192,6 +192,11 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
         }
     }
 
+    fun isActionButtonPressed (): Boolean {
+        val watchButtonPressed = CasioSupport.getPressedWatchButton()
+        return watchButtonPressed == CasioSupport.WATCH_BUTTON.LOWER_RIGHT
+    }
+
     fun toJson(data: String): JSONObject {
         val intArray = Utils.toIntArray(data)
         val json = JSONObject()

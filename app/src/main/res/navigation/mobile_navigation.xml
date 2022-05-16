@@ -20,14 +20,14 @@
         />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/navigation_alarms"
         android:name="org.avmedia.gShockPhoneSync.ui.alarms.AlarmsFragment"
         android:label="@string/title_alarms"
         tools:layout="@layout/fragment_alarms"
         />
 
     <fragment
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_events"
         android:name="org.avmedia.gShockPhoneSync.ui.events.EventsFragment"
         android:label="@string/title_events"
         tools:layout="@layout/fragment_events"

@@ -30,8 +30,6 @@ import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataListener
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
-import org.jetbrains.anko.okButton
-import org.jetbrains.anko.yesButton
 import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -68,9 +66,9 @@ class MainActivity : AppCompatActivity() {
         Connection.init(this)
         WatchDataListener.init()
 
-        // INZ new
-        navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
-        // INZ end
+        if (Utils.isDebugMode()) {
+            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
+        }
     }
 
     override fun onResume() {
@@ -156,7 +154,8 @@ class MainActivity : AppCompatActivity() {
     private fun isLocationEnabled(mContext: Context): Boolean {
         val lm = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || lm.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER)
+            LocationManager.NETWORK_PROVIDER
+        )
     }
 
     private fun showLocationIsDisabledAlert() {

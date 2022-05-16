@@ -6,14 +6,23 @@
 
 package org.avmedia.gShockPhoneSync.utils
 
+import android.app.ActivityManager
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.view.View
 import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Locale
-
+import java.util.*
 
 object Utils {
+
+    fun isDebugMode(): Boolean {
+        return false
+    }
+
     fun String.hexToBytes() =
         this.chunked(2).map { it.uppercase(Locale.US).toInt(16).toByte() }.toByteArray()
 
@@ -23,12 +32,12 @@ object Utils {
     fun byteArrayOfIntArray(intArray: IntArray) =
         ByteArray(intArray.size) { pos -> intArray[pos].toByte() }
 
-    fun toByteArray(string: String):ByteArray {
+    fun toByteArray(string: String): ByteArray {
         val charset = Charsets.UTF_8
         return string.toByteArray(charset)
     }
 
-    fun toByteArray(string: String, maxLen: Int):ByteArray {
+    fun toByteArray(string: String, maxLen: Int): ByteArray {
         val charset = Charsets.UTF_8
         var retArr = string.toByteArray(charset)
         if (retArr.size > maxLen) {
@@ -41,7 +50,7 @@ object Utils {
         return retArr
     }
 
-    fun toHexStr (asciiStr: String) : String {
+    fun toHexStr(asciiStr: String): String {
         var byteArr = toByteArray(asciiStr)
         var hexStr = ""
         byteArr.forEach {
@@ -56,6 +65,15 @@ object Utils {
     fun toast(context: Context, message: String) {
         val toast: Toast = Toast.makeText(context, message, Toast.LENGTH_LONG)
         toast.show()
+    }
+
+    fun snackBar(view: View, message: String) {
+
+        val snackBar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE)
+            .setAction("OK", View.OnClickListener {})
+            .setActionTextColor(Color.BLUE)
+            .setBackgroundTint(Color.LTGRAY)
+            .show()
     }
 
     fun toIntArray(hexStr: String): ArrayList<Int> {
@@ -137,5 +155,19 @@ object Utils {
             return null
         }
         return getInt(name)
+    }
+
+    fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+        try {
+            val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
+            for (service in manager!!.getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.name == service.service.className) {
+                    return true
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 }

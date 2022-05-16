@@ -30,6 +30,16 @@
             android:padding="6dp"
             >
 
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/generic_action_item"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="4dp"
+                android:contentDescription="Voice Assistant"
+                />
+
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"

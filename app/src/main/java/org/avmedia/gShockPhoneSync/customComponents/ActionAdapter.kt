@@ -6,12 +6,14 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.annotation.RequiresApi
@@ -30,15 +32,23 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         BASE_ACTION, SEPARATOR, MAP, PHOTO, PHONE_CALL, LOCATION, EMAIL, SET_TIME, ACTIVATE_VOICE_ASSISTANT
     }
 
-    inner class ViewHolderBaseAction(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    open inner class ViewHolderBaseAction(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
+        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
 
         val actionEnabled: SwitchMaterial =
             itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
     }
 
+    inner class ViewHolderSetTime(itemView: View) : ViewHolderBaseAction(itemView) {}
+    inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView) {}
+    inner class ViewHolderStartVoiceAssis(itemView: View) : ViewHolderBaseAction(itemView) {}
+
+    inner class ViewHolderMap(itemView: View) : RecyclerView.ViewHolder(itemView)
+
     inner class ViewHolderActionTakePhoto(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
+        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
         val radioGroup: RadioGroup = itemView.findViewById<RadioGroup>(R.id.cameraOrientationGroup)
 
         val actionEnabled: SwitchMaterial =
@@ -55,6 +65,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
 
     inner class ViewHolderActionSendEmail(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
+        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
         val actionEnabled: SwitchMaterial =
             itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
         val emailAddress: TextView =
@@ -79,7 +90,23 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         if (actions[position] is ActionsModel.EmailLocationAction) {
             return ACTION_TYPES.EMAIL.ordinal
         }
+        if (actions[position] is ActionsModel.MapAction) {
+            return ACTION_TYPES.MAP.ordinal
+        }
+        if (actions[position] is ActionsModel.SetTimeAction) {
+            return ACTION_TYPES.SET_TIME.ordinal
+        }
+        if (actions[position] is ActionsModel.SetLocationAction) {
+            return ACTION_TYPES.LOCATION.ordinal
+        }
+        if (actions[position] is ActionsModel.StartVoiceAssistAction) {
+            return ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal
+        }
         return ACTION_TYPES.BASE_ACTION.ordinal
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -87,8 +114,13 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         val inflater = LayoutInflater.from(context)
 
         val viewHolder: RecyclerView.ViewHolder = when (viewType) {
+            ACTION_TYPES.MAP.ordinal -> {
+                val vMap: View = inflater.inflate(R.layout.action_map_item, parent, false)
+                ViewHolderMap(vMap)
+            }
             ACTION_TYPES.PHOTO.ordinal -> {
-                val vPhoto: View = inflater.inflate(R.layout.action_take_photo_item, parent, false)
+                val vPhoto: View =
+                    inflater.inflate(R.layout.action_take_photo_item, parent, false)
                 ViewHolderActionTakePhoto(vPhoto)
             }
             ACTION_TYPES.SEPARATOR.ordinal -> {
@@ -102,6 +134,18 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             ACTION_TYPES.EMAIL.ordinal -> {
                 val vEmail: View = inflater.inflate(R.layout.email_item, parent, false)
                 ViewHolderActionSendEmail(vEmail)
+            }
+            ACTION_TYPES.SET_TIME.ordinal -> {
+                val vSetTime: View = inflater.inflate(R.layout.action_item, parent, false)
+                ViewHolderSetTime(vSetTime)
+            }
+            ACTION_TYPES.LOCATION.ordinal -> {
+                val vLocation: View = inflater.inflate(R.layout.action_item, parent, false)
+                ViewHolderSaveLocation(vLocation)
+            }
+            ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal -> {
+                val vVoiceAssistant: View = inflater.inflate(R.layout.action_item, parent, false)
+                ViewHolderStartVoiceAssis(vVoiceAssistant)
             }
             else -> {
                 val vAction: View = inflater.inflate(R.layout.action_item, parent, false)
@@ -133,6 +177,22 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 val vhEmail = viewHolder as ViewHolderActionSendEmail
                 configureSendEmail(vhEmail, position)
             }
+            ACTION_TYPES.MAP.ordinal -> {
+                val vhMap = viewHolder as ViewHolderMap
+                configureMap(vhMap, position)
+            }
+            ACTION_TYPES.SET_TIME.ordinal -> {
+                val vhTime = viewHolder as ViewHolderSetTime
+                configureTime(vhTime, position)
+            }
+            ACTION_TYPES.LOCATION.ordinal -> {
+                val vhLocation = viewHolder as ViewHolderSaveLocation
+                configureLocation(vhLocation, position)
+            }
+            ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal -> {
+                val vhVoiceAssistant = viewHolder as ViewHolderStartVoiceAssis
+                configureVoiceAssistant(vhVoiceAssistant, position)
+            }
             else -> {
                 val vhBaseAction: ViewHolderBaseAction =
                     viewHolder as ViewHolderBaseAction
@@ -141,12 +201,51 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         }
     }
 
+    private fun configureVoiceAssistant(vhVoiceAssistant: ActionAdapter.ViewHolderStartVoiceAssis, position: Int) {
+        val action: ActionsModel.StartVoiceAssistAction =
+            actions[position] as ActionsModel.StartVoiceAssistAction
+        vhVoiceAssistant.title.text = action.title
+        vhVoiceAssistant.actionEnabled.isChecked = action.enabled
+
+        vhVoiceAssistant.icon.setImageResource(R.drawable.voice_assist)
+
+        vhVoiceAssistant.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            action.enabled = isChecked
+        })
+    }
+
+    private fun configureLocation(vhLocation: ActionAdapter.ViewHolderSaveLocation, position: Int) {
+        val action: ActionsModel.SetLocationAction =
+            actions[position] as ActionsModel.SetLocationAction
+        vhLocation.title.text = action.title
+        vhLocation.actionEnabled.isChecked = action.enabled
+        vhLocation.icon.setImageResource(R.drawable.location)
+
+        vhLocation.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            action.enabled = isChecked
+        })
+    }
+
+    private fun configureTime(vhTime: ActionAdapter.ViewHolderSetTime, position: Int) {
+        val action: ActionsModel.SetTimeAction =
+            actions[position] as ActionsModel.SetTimeAction
+        vhTime.title.text = action.title
+        vhTime.actionEnabled.isChecked = action.enabled
+
+        vhTime.icon.setImageResource(R.drawable.time)
+
+        vhTime.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            action.enabled = isChecked
+        })
+    }
+
     private fun configureSendEmail(
         vhEmail: ViewHolderActionSendEmail,
         position: Int
     ) {
         val action: ActionsModel.EmailLocationAction =
             actions[position] as ActionsModel.EmailLocationAction
+
         vhEmail.title.text = action.title
         vhEmail.actionEnabled.isChecked = action.enabled
         vhEmail.emailAddress.text = action.emailAddress
@@ -157,7 +256,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
 
         vhEmail.emailAddress.onFocusChange { v, hasFocus ->
             if (!hasFocus) {
-                (actions[position] as ActionsModel.EmailLocationAction).emailAddress = (v as EditText).text.toString()
+                (actions[position] as ActionsModel.EmailLocationAction).emailAddress =
+                    (v as EditText).text.toString()
 
                 // save value here in case we close screen while still in this field
                 action.save(vhEmail.itemView.context)
@@ -169,7 +269,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhPhoneCall: ViewHolderActionPhoneCall,
         position: Int
     ) {
-        val action: ActionsModel.PhoneDialAction = actions[position] as ActionsModel.PhoneDialAction
+        val action: ActionsModel.PhoneDialAction =
+            actions[position] as ActionsModel.PhoneDialAction
         vhPhoneCall.title.text = action.title
         vhPhoneCall.actionEnabled.isChecked = action.enabled
         vhPhoneCall.phoneNumber.text = action.phoneNumber
@@ -180,7 +281,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
 
         vhPhoneCall.phoneNumber.onFocusChange { v, hasFocus ->
             if (!hasFocus) {
-                (actions[position] as ActionsModel.PhoneDialAction).phoneNumber = (v as EditText).text.toString()
+                (actions[position] as ActionsModel.PhoneDialAction).phoneNumber =
+                    (v as EditText).text.toString()
 
                 // save value here in case we close screen while still in this field
                 action.save(vhPhoneCall.itemView.context)
@@ -194,6 +296,13 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     ) {
         val action: ActionsModel.Action = actions[position]
         vhBaseAction.title.text = action.title
+    }
+
+    private fun configureMap(
+        vhBaseAction: ActionAdapter.ViewHolderMap,
+        position: Int
+    ) {
+        val action: ActionsModel.Action = actions[position]
     }
 
     private fun configureBaseActionViewHolder(
@@ -216,6 +325,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         val action: ActionsModel.PhotoAction = actions[position] as ActionsModel.PhotoAction
         vhPhoto.actionEnabled.isChecked = action.enabled
         vhPhoto.title.text = action.title
+        vhPhoto.icon.setImageResource(R.drawable.camera)
 
         if (action.cameraOrientation.toString() == "FRONT")
             vhPhoto.radioGroup.check(R.id.front)

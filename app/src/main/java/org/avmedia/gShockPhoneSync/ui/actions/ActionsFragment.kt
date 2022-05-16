@@ -34,15 +34,17 @@ class ActionsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val notificationsViewModel =
-            ViewModelProvider(this).get(ActionsViewModel::class.java)
+            ViewModelProvider(this)[ActionsViewModel::class.java]
 
         _binding = FragmentActionsBinding.inflate(inflater, container, false)
+        _binding?.actionList?.init()
         val root: View = binding.root
         return root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding?.actionList?.shutdown()
         _binding = null
     }
 }

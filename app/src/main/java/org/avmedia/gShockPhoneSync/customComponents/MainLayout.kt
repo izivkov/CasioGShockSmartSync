@@ -27,6 +27,7 @@ import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
 class MainLayout @JvmOverloads constructor(
@@ -34,11 +35,7 @@ class MainLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        // INZ temp
-        // hide()
-        show()
-        // INZ end
-
+        if (Utils.isDebugMode()) show () else hide()
         createAppEventsSubscription()
     }
 
@@ -50,8 +47,7 @@ class MainLayout @JvmOverloads constructor(
                     ProgressEvents.Events.WatchInitializationCompleted -> {
                         val navController =
                             (context as Activity).findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        val watchButtonPressed = CasioSupport.getPressedWatchButton()
-                        if (watchButtonPressed == CasioSupport.WATCH_BUTTON.LOWER_RIGHT) {
+                        if (CasioSupport.isActionButtonPressed ()) {
                             navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
                         } else {
                             navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)

@@ -14,13 +14,13 @@
         />
 
     <item
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/navigation_alarms"
         android:icon="@drawable/ic_alarm_black_24dp"
         android:title="@string/alarms"
         />
 
     <item
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_events"
         android:icon="@drawable/ic_event_black_24dp"
         android:title="@string/events"
         />

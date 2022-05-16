@@ -37,8 +37,6 @@ data class BleScannerLocal(val context: Context) {
 
     private val scanSettings = ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-        // .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
-        // .setNumOfMatches(1)
         .build()
 
     private var isScanning = false
@@ -99,7 +97,6 @@ Characteristics:
     private fun createFilters(): ArrayList<ScanFilter> {
         val filter = ScanFilter.Builder()
             .setServiceUuid(ParcelUuid.fromString(CasioConstants.CASIO_SERVICE.toString()))
-            // .setDeviceName("CASIO GW-B5600")
             .build()
 
         val filters = ArrayList<ScanFilter>()
