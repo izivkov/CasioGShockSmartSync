@@ -27,6 +27,7 @@ data class PermissionManager(val context: Context) {
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.READ_CALENDAR,
         Manifest.permission.CAMERA,
+        Manifest.permission.CALL_PHONE,
     )
 
     init {

@@ -8,11 +8,11 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.app.Activity
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
+import android.content.Intent
+import android.net.Uri
 import androidx.camera.core.CameraSelector
+import androidx.core.content.ContextCompat.startActivity
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
 import org.avmedia.gShockPhoneSync.utils.CameraCapture
@@ -22,7 +22,8 @@ import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.Clock
-import java.util.Locale
+import java.util.*
+
 
 object ActionsModel {
 
@@ -48,7 +49,11 @@ object ActionsModel {
             Timber.d("running ${this.javaClass.simpleName}")
 
             if (!Utils.isDebugMode()) {
-                sendMessage("{ action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()} }")
+                sendMessage(
+                    "{ action: \"SET_TIME\", value: ${
+                        Clock.systemDefaultZone().millis()
+                    } }"
+                )
             }
         }
 
@@ -70,6 +75,8 @@ object ActionsModel {
         Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
+
+            context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }
 
@@ -102,6 +109,10 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
+
+            val dialIntent = Intent(Intent.ACTION_CALL)
+            dialIntent.data = Uri.parse("tel:$phoneNumber")
+            context.startActivity(dialIntent)
         }
 
         override fun save(context: Context) {
@@ -133,8 +144,9 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
-            (context as Activity).runOnUiThread() {
-                val cameraSelector:CameraSelector = if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
+            (context as Activity).runOnUiThread {
+                val cameraSelector: CameraSelector =
+                    if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
                 CameraCapture(context, cameraSelector).start()
                 Timber.d("Photo taken...")
             }
