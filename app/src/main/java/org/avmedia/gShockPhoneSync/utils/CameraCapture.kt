@@ -152,7 +152,8 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/GShock-Pictures")
+                // put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/GShock-Pictures")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/Camera")
             }
         }
 
@@ -177,7 +178,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     MediaActionSound().play(MediaActionSound.SHUTTER_CLICK)
-                    val msg = "Photo stored at [Photos App] -> Library -> GShock-Pictures"
+                    val msg = "Find the picture in your [Photos] app"
                     if (currentContextView != null) {
                         Utils.snackBar(currentContextView, msg)
                     }

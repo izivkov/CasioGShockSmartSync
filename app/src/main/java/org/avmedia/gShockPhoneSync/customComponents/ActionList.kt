@@ -6,6 +6,7 @@
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
+import android.os.CountDownTimer
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,6 +14,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.Utils
+import timber.log.Timber
 
 class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

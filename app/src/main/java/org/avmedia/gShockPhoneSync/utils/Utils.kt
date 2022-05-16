@@ -69,8 +69,7 @@ object Utils {
 
     fun snackBar(view: View, message: String) {
 
-        val snackBar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE)
-            .setAction("OK", View.OnClickListener {})
+        val snackBar = Snackbar.make(view, message, Snackbar.LENGTH_LONG)
             .setActionTextColor(Color.BLUE)
             .setBackgroundTint(Color.LTGRAY)
             .show()

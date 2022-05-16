@@ -19,10 +19,11 @@
     <string name="send_alarms_to_phone">Send to\nPhone</string>
     <string name="reminders">Reminders</string>
     <string name="send_events_to_watch">Send to Watch\n Reminders</string>
-    <string name="connection_screen_info">To proceed to the next screen, you need to connect your Casio GW-B5600 watch to this app. Just press and hold the lower-left button on the watch, as indicated by the arrow for 3 seconds. After the second double-beep, you will see CNCT message flashing on your watch\'s info window, and the app will display the time-setting screen.\n\nAlternatively, for quick time setting, you can press the lower-right button shortly, and the "TIME" message will appear on the watch. You can then set the time by pressing "SEND TO WATCH" button.</string>
+    <string name="connection_screen_info">To proceed to the next screen, you need to connect your Casio GW-B5600 watch to this app. Just press and hold the lower-left button on the watch, as indicated by the arrow for 3 seconds. After the second double-beep, you will see CNCT message flashing on your watch\'s info window, and the app will display the time-setting screen.\n\nTo run Actions defined in the [Actions] screen, short-press the lower-right button. Actions are programs on your phone, like [Take a photo]. Using these actions, the watch acts like a remote control for your phone.</string>
     <string name="alarms_screen_info">The GW-B5600 has 5 alarms and a "signal" (hourly chime) settings shown here. The alarms can be updated by pressing on the time value of each alarm. A new dialog will appear, which allows you to set the alarm\'s time. Once the alarms have been set, you can send them to the watch, or send them to the Alarm Clock app on the phone.</string>
     <string name="events_screen_info">This screen displays Events from your Google Calendar and allows you to send them to the watch\'s reminders.\n\nIf no events appear, make sure you have future events, or non-expired repeating events in your Google calender. Also, make sure you have set your phone to auto-sync to your Google account.
 </string>
     <string name="actions">Actions</string>
     <string name="title_actions">Actions</string>
+    <string name="actions_screen_info">The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.</string>
 </resources>

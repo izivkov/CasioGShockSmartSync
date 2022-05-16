@@ -24,10 +24,9 @@ import java.text.SimpleDateFormat
 import java.time.Clock
 import java.util.*
 
-
 object ActionsModel {
 
-    abstract class Action(open var title: String, open var enabled: Boolean) {
+    abstract class Action(open var title: String, open var enabled: Boolean, var isEmergency:Boolean = false) {
         abstract fun run(context: Context)
 
         open fun save(context: Context) {
@@ -102,7 +101,7 @@ object ActionsModel {
         override var title: String,
         override var enabled: Boolean,
         var phoneNumber: String
-    ) : Action(title, enabled) {
+    ) : Action(title, enabled, true) {
         init {
             Timber.d("PhoneDialAction")
         }
@@ -161,7 +160,7 @@ object ActionsModel {
         override fun load(context: Context) {
             super.load(context)
             val key = this.javaClass.simpleName + ".cameraOrientation"
-            cameraOrientation = if (LocalDataStorage.get(key, "FRONT", context)
+            cameraOrientation = if (LocalDataStorage.get(key, "BACK", context)
                     .toString() == "BACK"
             ) CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
         }
@@ -172,7 +171,7 @@ object ActionsModel {
         override var enabled: Boolean,
         var emailAddress: String,
         var extraText: String
-    ) : Action(title, enabled) {
+    ) : Action(title, enabled, true) {
         init {
             Timber.d("EmailLocationAction: emailAddress: $emailAddress")
             Timber.d("EmailLocationAction: extraText: $extraText")
@@ -204,7 +203,7 @@ object ActionsModel {
         // actions.add(MapAction("Map", false))
         // actions.add(SetLocationAction("Save location to G-maps", false))
         actions.add(SetTimeAction("Set Time", true))
-        actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.FRONT))
+        actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.BACK))
         actions.add(StartVoiceAssistAction("Start Voice Assist", true))
 
         actions.add(Separator("Emergency Actions:", false))
