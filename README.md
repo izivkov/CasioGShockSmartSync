@@ -68,8 +68,18 @@ the app will display the event as `Incompatible`. Only future events and recurri
 The watch only supports `all-day reminders`. However, if the Google calendar event has a specific time,
 it will still be used as a day reminder on the watch.
 
+## Actions
+<img src="images/ActionsScreen.png"
+alt="Events Screen"
+width=200
+style="margin: 10px;" />
+
+The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.
+
 ## Playstore
 https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync
+
+<img src="https://camo.githubusercontent.com/14aff0715e7c45aa33a99be1c282faf39181e284f3c25fbb60556a25bb9cdcee/68747470733a2f2f63646e2e7261776769742e636f6d2f73746576657269636865792f676f6f676c652d706c61792d62616467652d7376672f6d61737465722f696d672f66725f6765742e737667" width="50%" data-canonical-src="https://cdn.rawgit.com/steverichey/google-play-badge-svg/master/img/en_get.svg" style="max-width: 100%;">
 
 ## Credits
 - The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
