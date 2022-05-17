@@ -270,14 +270,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhPhoneCall.phoneNumber.text = action.phoneNumber
 
         vhPhoneCall.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
-
-            vhPhoneCall.phoneNumber.clearFocus()
-
-            if (isChecked && action.validate(vhPhoneCall.phoneNumber.context)) {
-                (actions[position] as ActionsModel.PhoneDialAction).enabled = isChecked
-            } else {
-                vhPhoneCall.actionEnabled.isChecked = false
-            }
+            action.enabled = isChecked
         })
 
         vhPhoneCall.phoneNumber.onFocusChange { v, hasFocus ->

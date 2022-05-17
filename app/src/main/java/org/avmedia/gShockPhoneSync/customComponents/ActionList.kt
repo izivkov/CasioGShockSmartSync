@@ -5,9 +5,13 @@
  */
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.os.CountDownTimer
 import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
@@ -61,5 +65,4 @@ class ActionList @JvmOverloads constructor(
             it.save(context)
         }
     }
-
 }
