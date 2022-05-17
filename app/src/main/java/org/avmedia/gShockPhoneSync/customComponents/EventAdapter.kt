@@ -58,7 +58,7 @@ class EventAdapter(private val events: ArrayList<EventsModel.Event>) :
 
             viewHolder.selectedView.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
                 if (isChecked && EventsModel.getSelectedCount() == EventsModel.MAX_REMINDERS) {
-                    Utils.toast(buttonView.context, "Max ${EventsModel.MAX_REMINDERS} items selected. Please unselect some first.")
+                    Utils.snackBar(buttonView.context, "Max ${EventsModel.MAX_REMINDERS} items selected. Please unselect some first.")
                     viewHolder.selectedView.isChecked = false
                     event.selected = false
                 } else {

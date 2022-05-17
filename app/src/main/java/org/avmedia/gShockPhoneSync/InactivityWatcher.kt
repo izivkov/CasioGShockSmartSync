@@ -34,7 +34,7 @@ object InactivityWatcher {
 
         futureTask = scheduler.schedule({
             Connection.disconnect(context)
-            Utils.toast(context, "Disconnecting due to inactivity")
+            Utils.snackBar(context, "Disconnecting due to inactivity")
         }, TIMEOUT, TimeUnit.SECONDS)
     }
 }

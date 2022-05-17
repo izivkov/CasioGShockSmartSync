@@ -11,6 +11,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Insets
 import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata.FLASH_MODE_TORCH
 import android.media.MediaActionSound
 import android.os.Build
 import android.provider.MediaStore
@@ -21,6 +22,7 @@ import android.view.WindowMetrics
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
+import androidx.camera.core.ImageCapture.FLASH_MODE_ON
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.customComponents.ActionsModel.FileSpecs.RATIO_16_9_VALUE

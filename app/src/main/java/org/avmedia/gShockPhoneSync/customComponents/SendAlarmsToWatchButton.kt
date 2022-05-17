@@ -26,7 +26,7 @@ class SendAlarmsToWatchButton @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
                     sendMessage("{action: \"SET_ALARMS\", value: ${AlarmsModel.toJson()}}")
-                    Utils.toast(context, "Alarms Sent to Watch")
+                    Utils.snackBar(context, "Alarms Sent to Watch")
                 }
             }
             return false

@@ -26,7 +26,7 @@ class SendTimeButton @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
                     sendTimeToWatch()
-                    Utils.toast(context, "Time Sent to Watch")
+                    Utils.snackBar(context, "Time Sent to Watch")
                 }
             }
             return false

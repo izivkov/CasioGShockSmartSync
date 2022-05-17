@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
             bleScannerLocal.startConnection()
         } else {
             Timber.i("Not all permissions granted...")
-            Utils.toast(this, "Not all permissions granted, exiting...")
+            Utils.snackBar(this, "Not all permissions granted, exiting...")
             finish()
         }
     }
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                         Timber.i("onDisconnect")
                         InactivityWatcher.cancel()
 
-                        Utils.toast(this, "Disconnected from watch!")
+                        Utils.snackBar(this, "Disconnected from watch!")
                         val device = ProgressEvents.Events.Disconnect.payload as BluetoothDevice
                         Connection.teardownConnection(device)
 
@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS))
             }
             noButton {
-                Utils.toast(this@MainActivity, "Not all permissions granted, exiting...")
+                Utils.snackBar(this@MainActivity, "Not all permissions granted, exiting...")
                 finish()
             }
         }.show()

@@ -6,13 +6,14 @@
 
 package org.avmedia.gShockPhoneSync.ui.actions
 
+import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.PermissionManager
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import timber.log.Timber
 
@@ -35,6 +36,13 @@ class ActionsFragment : Fragment() {
     ): View {
         val notificationsViewModel =
             ViewModelProvider(this)[ActionsViewModel::class.java]
+
+        context?.let { PermissionManager(it) }?.setupPermissions(
+            arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.CALL_PHONE
+            )
+        )
 
         _binding = FragmentActionsBinding.inflate(inflater, container, false)
         _binding?.actionList?.init()

@@ -6,12 +6,14 @@
 
 package org.avmedia.gShockPhoneSync.ui.events
 
+import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import org.avmedia.gShockPhoneSync.PermissionManager
 import org.avmedia.gShockPhoneSync.customComponents.EventsModel
 import org.avmedia.gShockPhoneSync.databinding.FragmentEventsBinding
 

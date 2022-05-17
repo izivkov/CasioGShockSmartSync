@@ -39,6 +39,8 @@ object ActionsModel {
             val key = this.javaClass.simpleName + ".enabled"
             enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
+
+        open fun validate(context: Context): Boolean {return true}
     }
 
     class SetTimeAction(override var title: String, override var enabled: Boolean) :
@@ -67,14 +69,12 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
         }
-
     }
 
     class StartVoiceAssistAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-
             context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }
@@ -124,6 +124,15 @@ object ActionsModel {
             super.load(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
             phoneNumber = LocalDataStorage.get(key, "", context).toString()
+        }
+
+        override fun validate(context: Context): Boolean {
+            if (phoneNumber.isEmpty()) {
+                Utils.snackBar(context, "Phone number cannot be empty!")
+                return false
+            }
+
+            return true
         }
     }
 

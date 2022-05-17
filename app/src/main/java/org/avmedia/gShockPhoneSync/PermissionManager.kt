@@ -26,8 +26,10 @@ data class PermissionManager(val context: Context) {
     private var PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.READ_CALENDAR,
-        Manifest.permission.CAMERA,
-        Manifest.permission.CALL_PHONE,
+
+        // moved to Actions fragment
+        // Manifest.permission.CAMERA,
+        // Manifest.permission.CALL_PHONE,
     )
 
     init {
@@ -50,6 +52,14 @@ data class PermissionManager(val context: Context) {
         }
     }
 
+    fun setupPermissions(strArray: Array<String>) {
+        if (!hasPermissions(context, strArray)) {
+            ActivityCompat.requestPermissions(context as Activity, strArray, PERMISSION_ALL)
+        } else {
+            ProgressEvents.onNext(ProgressEvents.Events.AllPermissionsAccepted)
+        }
+    }
+
     fun hasAllPermissions(): Boolean {
         return hasPermissions(context, PERMISSIONS)
     }
@@ -63,8 +73,8 @@ data class PermissionManager(val context: Context) {
                     enableBtIntent,
                     ENABLE_BLUETOOTH_REQUEST_CODE
                 )
-            } catch(e: SecurityException) {
-                Utils.toast(context, "Please turn on BlueTooth and restart the app...")
+            } catch (e: SecurityException) {
+                Utils.snackBar(context, "Please turn on BlueTooth and restart the app...")
                 (context as Activity).finish()
             }
         }

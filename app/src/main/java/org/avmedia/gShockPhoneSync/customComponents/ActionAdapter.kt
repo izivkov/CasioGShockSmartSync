@@ -6,16 +6,11 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.RadioGroup
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -40,9 +35,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
     }
 
-    inner class ViewHolderSetTime(itemView: View) : ViewHolderBaseAction(itemView) {}
-    inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView) {}
-    inner class ViewHolderStartVoiceAssis(itemView: View) : ViewHolderBaseAction(itemView) {}
+    inner class ViewHolderSetTime(itemView: View) : ViewHolderBaseAction(itemView)
+    inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView)
+    inner class ViewHolderStartVoiceAssis(itemView: View) : ViewHolderBaseAction(itemView)
 
     inner class ViewHolderMap(itemView: View) : RecyclerView.ViewHolder(itemView)
 
@@ -103,10 +98,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             return ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal
         }
         return ACTION_TYPES.BASE_ACTION.ordinal
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -201,7 +192,10 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         }
     }
 
-    private fun configureVoiceAssistant(vhVoiceAssistant: ActionAdapter.ViewHolderStartVoiceAssis, position: Int) {
+    private fun configureVoiceAssistant(
+        vhVoiceAssistant: ActionAdapter.ViewHolderStartVoiceAssis,
+        position: Int
+    ) {
         val action: ActionsModel.StartVoiceAssistAction =
             actions[position] as ActionsModel.StartVoiceAssistAction
         vhVoiceAssistant.title.text = action.title
@@ -276,7 +270,11 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhPhoneCall.phoneNumber.text = action.phoneNumber
 
         vhPhoneCall.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
-            (actions[position] as ActionsModel.PhoneDialAction).enabled = isChecked
+            if (isChecked && action.validate(vhPhoneCall.phoneNumber.context)) {
+                (actions[position] as ActionsModel.PhoneDialAction).enabled = isChecked
+            } else {
+                vhPhoneCall.actionEnabled.isChecked = false
+            }
         })
 
         vhPhoneCall.phoneNumber.onFocusChange { v, hasFocus ->

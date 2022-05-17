@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.utils
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.res.ColorStateList
@@ -13,6 +14,7 @@ import android.graphics.Color
 import android.view.View
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
+import org.jetbrains.anko.contentView
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -73,6 +75,10 @@ object Utils {
             .setActionTextColor(Color.BLUE)
             .setBackgroundTint(Color.LTGRAY)
             .show()
+    }
+
+    fun snackBar(context: Context, message: String) {
+        snackBar((context as Activity).contentView!!, message)
     }
 
     fun toIntArray(hexStr: String): ArrayList<Int> {
