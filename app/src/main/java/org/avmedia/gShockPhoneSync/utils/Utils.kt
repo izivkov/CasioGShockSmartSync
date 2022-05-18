@@ -11,9 +11,13 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.Color.BLACK
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import com.google.android.material.internal.ContextUtils.getActivity
 import com.google.android.material.snackbar.Snackbar
+import org.avmedia.gShockPhoneSync.R
 import org.jetbrains.anko.contentView
 import org.json.JSONArray
 import org.json.JSONObject
@@ -71,9 +75,10 @@ object Utils {
 
     fun snackBar(view: View, message: String) {
 
-        val snackBar = Snackbar.make(view, message, Snackbar.LENGTH_LONG)
+        Snackbar.make(view, message, Snackbar.LENGTH_LONG)
             .setActionTextColor(Color.BLUE)
-            .setBackgroundTint(Color.LTGRAY)
+            .setBackgroundTint(ContextCompat.getColor(view.context, R.color.grey_700))
+            .setTextColor(Color.WHITE)
             .show()
     }
 

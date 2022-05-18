@@ -56,7 +56,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
         val currentContextView = (context as Activity).contentView
         viewBinding = FragmentActionsBinding.inflate(context.layoutInflater)
         context.setContentView(viewBinding.root)
-
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         startCamera()
@@ -121,7 +120,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
         // restore the context, so se can continue running normal
         (context as Activity).setContentView(currentContextView)
     }
-
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)
         if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
@@ -135,7 +133,9 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             val windowMetrics: WindowMetrics = activity.windowManager.currentWindowMetrics
             val insets: Insets = windowMetrics.windowInsets
                 .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
-            ScreenSize(windowMetrics.bounds.width(), windowMetrics.bounds.height())
+            val w = windowMetrics.bounds.width()
+            val h = windowMetrics.bounds.height()
+            ScreenSize(w, h)
         } else {
             val displayMetrics: DisplayMetrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
@@ -176,11 +176,12 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Timber.d("Photo capture failed: ${exc.message}")
+                    Utils.snackBar(context, "Could not take a picture. Error: ${exc.message}")
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     MediaActionSound().play(MediaActionSound.SHUTTER_CLICK)
-                    val msg = "Find the picture in your [Photos] app"
+                    val msg = "Find the picture in your [Photos] or [Gallery] apps"
                     if (currentContextView != null) {
                         Utils.snackBar(currentContextView, msg)
                     }

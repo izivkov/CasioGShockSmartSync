@@ -19,6 +19,7 @@ import android.os.ParcelUuid
 import androidx.appcompat.app.AppCompatActivity
 import org.avmedia.gShockPhoneSync.casioB5600.CasioConstants
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
 data class BleScannerLocal(val context: Context) {
@@ -26,10 +27,10 @@ data class BleScannerLocal(val context: Context) {
     private val cacheDevice = false
 
     val bluetoothAdapter: BluetoothAdapter by lazy {
-        val bluetoothManager =
-            context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothManager.adapter
-    }
+            val bluetoothManager =
+                context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothManager.adapter
+        }
 
     private val bleScanner by lazy {
         bluetoothAdapter.bluetoothLeScanner
@@ -44,6 +45,10 @@ data class BleScannerLocal(val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun startConnection() {
+        if (Utils.isDebugMode()) {
+            return
+        }
+
         if (Connection.isConnected()) {
             return
         }

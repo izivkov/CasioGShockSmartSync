@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -75,7 +76,11 @@ object ActionsModel {
         Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            try {
+                context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } catch (e: ActivityNotFoundException) {
+                Utils.snackBar(context, "Voice Assistant not available on this device!")
+            }
         }
     }
 

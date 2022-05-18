@@ -21,8 +21,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
-import java.io.IOException
-import java.util.Locale
+import java.util.*
 
 
 class LocationText @JvmOverloads constructor(
@@ -60,23 +59,22 @@ class LocationText @JvmOverloads constructor(
     @SuppressLint("MissingPermission")
     private fun getLastLocation() {
         if (isLocationEnabled()) {
-
             mFusedLocationClient.lastLocation.addOnCompleteListener(context as Activity) { task ->
-                var location: Location? = task.result
-                if (location == null) {
-                    requestNewLocationData()
-                } else {
-                    val geoCoder = Geocoder(context, Locale.getDefault())
-                    try {
+                try {
+                    var location: Location? = task.result
+                    if (location == null) {
+                        requestNewLocationData()
+                    } else {
+                        val geoCoder = Geocoder(context, Locale.getDefault())
                         val addresses: List<Address> =
                             geoCoder.getFromLocation(location.latitude, location.longitude, 1)
                         if (addresses.isNotEmpty() && addresses[0] != null && addresses[0].locality != null) {
                             text = addresses[0].locality
                             LastLocation.cachedLocation = addresses[0].locality
                         }
-                    } catch (e: Exception) {
-                        text = ""
                     }
+                } catch (e: Exception) {
+                    text = ""
                 }
             }
         }

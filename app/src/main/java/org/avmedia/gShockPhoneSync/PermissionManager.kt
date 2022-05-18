@@ -26,10 +26,6 @@ data class PermissionManager(val context: Context) {
     private var PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.READ_CALENDAR,
-
-        // moved to Actions fragment
-        // Manifest.permission.CAMERA,
-        // Manifest.permission.CALL_PHONE,
     )
 
     init {

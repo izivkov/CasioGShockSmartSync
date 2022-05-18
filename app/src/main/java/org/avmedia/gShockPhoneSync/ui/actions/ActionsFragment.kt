@@ -40,7 +40,8 @@ class ActionsFragment : Fragment() {
         context?.let { PermissionManager(it) }?.setupPermissions(
             arrayOf(
                 Manifest.permission.CAMERA,
-                Manifest.permission.CALL_PHONE
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
             )
         )
 
@@ -54,5 +55,7 @@ class ActionsFragment : Fragment() {
         super.onDestroyView()
         _binding?.actionList?.shutdown()
         _binding = null
+
+
     }
 }

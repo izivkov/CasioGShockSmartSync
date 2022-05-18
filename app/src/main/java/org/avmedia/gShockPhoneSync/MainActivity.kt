@@ -74,18 +74,21 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        if (!bleScannerLocal.bluetoothAdapter.isEnabled) {
-            permissionManager.promptEnableBluetooth()
-            return
-        }
+        if (!Utils.isDebugMode()) {
 
-        if (!isLocationEnabled(this)) {
-            showLocationIsDisabledAlert()
-            return
-        }
+            if (!bleScannerLocal.bluetoothAdapter.isEnabled) {
+                permissionManager.promptEnableBluetooth()
+                return
+            }
 
-        if (permissionManager.hasAllPermissions()) {
-            bleScannerLocal.startConnection()
+            if (!isLocationEnabled(this)) {
+                showLocationIsDisabledAlert()
+                return
+            }
+
+            if (permissionManager.hasAllPermissions()) {
+                bleScannerLocal.startConnection()
+            }
         }
     }
 
