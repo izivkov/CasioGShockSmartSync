@@ -5,20 +5,14 @@
  */
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.os.CountDownTimer
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.Utils
-import timber.log.Timber
 
 class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -48,7 +42,13 @@ class ActionList @JvmOverloads constructor(
             if (it.enabled) {
                 // Run in background for speed
                 GlobalScope.launch {
-                    it.run(context)
+                    try {
+                        it.run(context)
+                    } catch (e: SecurityException) {
+                        Utils.snackBar(context, "You have not given permission to to run action ${it.title}.")
+                    } catch (e: Exception) {
+                        Utils.snackBar(context, "Could not run action ${it.title}.")
+                    }
                 }
             }
         }

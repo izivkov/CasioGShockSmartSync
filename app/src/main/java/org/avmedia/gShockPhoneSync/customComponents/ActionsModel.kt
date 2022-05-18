@@ -12,7 +12,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
-import androidx.core.content.ContextCompat.startActivity
 import com.google.gson.Gson
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
@@ -27,7 +26,11 @@ import java.util.*
 
 object ActionsModel {
 
-    abstract class Action(open var title: String, open var enabled: Boolean, var isEmergency:Boolean = false) {
+    abstract class Action(
+        open var title: String,
+        open var enabled: Boolean,
+        var isEmergency: Boolean = false
+    ) {
         abstract fun run(context: Context)
 
         open fun save(context: Context) {
@@ -41,7 +44,9 @@ object ActionsModel {
             enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
 
-        open fun validate(context: Context): Boolean {return true}
+        open fun validate(context: Context): Boolean {
+            return true
+        }
     }
 
     class SetTimeAction(override var title: String, override var enabled: Boolean) :
@@ -114,13 +119,9 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
-            try {
-                val dialIntent = Intent(Intent.ACTION_CALL)
-                dialIntent.data = Uri.parse("tel:$phoneNumber")
-                context.startActivity(dialIntent)
-            } catch (e:SecurityException) {
-                Utils.snackBar(context, "You have not given permission to make a phonecall.")
-            }
+            val dialIntent = Intent(Intent.ACTION_CALL)
+            dialIntent.data = Uri.parse("tel:$phoneNumber")
+            context.startActivity(dialIntent)
         }
 
         override fun save(context: Context) {
