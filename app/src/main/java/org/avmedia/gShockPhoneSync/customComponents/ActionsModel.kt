@@ -114,9 +114,13 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
-            val dialIntent = Intent(Intent.ACTION_CALL)
-            dialIntent.data = Uri.parse("tel:$phoneNumber")
-            context.startActivity(dialIntent)
+            try {
+                val dialIntent = Intent(Intent.ACTION_CALL)
+                dialIntent.data = Uri.parse("tel:$phoneNumber")
+                context.startActivity(dialIntent)
+            } catch (e:SecurityException) {
+                Utils.snackBar(context, "You have not given permission to make a phonecall.")
+            }
         }
 
         override fun save(context: Context) {

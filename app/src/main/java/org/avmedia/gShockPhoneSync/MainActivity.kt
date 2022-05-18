@@ -31,9 +31,11 @@ import org.avmedia.gShockPhoneSync.utils.WatchDataListener
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class MainActivity : AppCompatActivity() {
@@ -109,7 +111,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             Timber.i("Not all permissions granted...")
             Utils.snackBar(this, "Not all permissions granted, exiting...")
-            finish()
+
+            Timer("SettingUp", false).schedule(2000) {
+                finish()
+            }
         }
     }
 
