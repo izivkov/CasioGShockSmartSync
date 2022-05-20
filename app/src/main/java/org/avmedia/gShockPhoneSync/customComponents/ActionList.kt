@@ -5,14 +5,24 @@
  */
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.InactivityWatcher
+import org.avmedia.gShockPhoneSync.ble.Connection
+import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
+import timber.log.Timber
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -30,10 +40,25 @@ class ActionList @JvmOverloads constructor(
         if (Utils.isDebugMode() || CasioSupport.isActionButtonPressed()) {
             runActions()
         }
+
+        watchForDisconnect()
+    }
+
+    private fun watchForDisconnect() {
+        ProgressEvents.subscriber.start(
+            this.javaClass.simpleName,
+
+            {
+                when (it) {
+                    ProgressEvents.Events.Disconnect -> {
+                        shutdown()
+                    }
+                }
+            },
+            { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
 
     fun shutdown() {
-        super.onDetachedFromWindow()
         saveData(context)
     }
 

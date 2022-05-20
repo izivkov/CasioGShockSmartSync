@@ -55,7 +55,5 @@ class ActionsFragment : Fragment() {
         super.onDestroyView()
         _binding?.actionList?.shutdown()
         _binding = null
-
-
     }
 }
