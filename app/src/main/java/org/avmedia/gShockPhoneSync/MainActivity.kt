@@ -51,6 +51,8 @@ class MainActivity : AppCompatActivity() {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        bleScannerLocal = BleScannerLocal(this)
+
         permissionManager = PermissionManager(this)
         permissionManager.setupPermissions()
 
@@ -64,7 +66,6 @@ class MainActivity : AppCompatActivity() {
 
         createAppEventsSubscription()
 
-        bleScannerLocal = BleScannerLocal(this)
         Connection.init(this)
         WatchDataListener.init()
 

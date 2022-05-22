@@ -30,8 +30,8 @@
             android:layout_height="24dp"
             android:src="@drawable/camera"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="4dp"
-            android:contentDescription="Voice Assistant"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@string/voice_assistant"
             />
 
         <LinearLayout
@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="Take a photo"
+                android:text="@string/take_a_photo"
                 android:textSize="24dp"
                 />
 
@@ -61,8 +61,7 @@
                 android:id="@+id/cameraOrientationGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:checkedButton="@+id/front"
                 android:orientation="vertical"
                 >
@@ -71,14 +70,14 @@
                     android:id="@+id/front"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Front Cam"
+                    android:text="@string/front_cam"
                     />
 
                 <RadioButton
                     android:id="@+id/back"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Back Cam"
+                    android:text="@string/back_cam"
                     />
             </RadioGroup>
         </LinearLayout>

@@ -26,4 +26,15 @@
     <string name="actions">Actions</string>
     <string name="title_actions">Actions</string>
     <string name="actions_screen_info">The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.</string>
+    <string name="feb_22_mar_24">Feb-22 - Mar-24</string>
+    <string name="weekly">WEEKLY</string>
+    <string name="title_goes_here">Title goes here</string>
+    <string name="action_item">Action Item</string>
+    <string name="voice_assistant">Voice Assistant</string>
+    <string name="front_cam">Front Cam</string>
+    <string name="back_cam">Back Cam</string>
+    <string name="take_a_photo">Take a photo</string>
+    <string name="image_of_casio_5600_watch">Image of Casio 5600 watch</string>
+    <string name="info">Info</string>
+    <string name="daily">Daily</string>
 </resources>

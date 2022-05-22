@@ -19,11 +19,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:baselineAligned="false" android:orientation="horizontal"
         >
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
@@ -36,15 +36,15 @@
                 android:layout_height="24dp"
                 android:src="@drawable/generic_action_item"
                 android:layout_gravity="center_vertical"
-                android:layout_marginRight="4dp"
-                android:contentDescription="Voice Assistant"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/voice_assistant"
                 />
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Action Item"
+                android:text="@string/action_item"
                 android:textSize="24dp"
                 />
 

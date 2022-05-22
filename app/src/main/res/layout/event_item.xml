@@ -9,6 +9,7 @@
 <org.avmedia.gShockPhoneSync.customComponents.EventItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/CardViewStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -21,7 +22,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:baselineAligned="false" android:orientation="horizontal"
         >
 
         <LinearLayout
@@ -40,9 +41,9 @@
 
                 <TextView
                     android:id="@+id/title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Title goes here"
+                    android:text="@string/title_goes_here"
                     android:textSize="24dp"
                     android:layout_marginRight="6dp"
                     android:layout_weight="1"
@@ -52,7 +53,7 @@
                     android:id="@+id/selected"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_gravity="right"
+                    android:layout_gravity="end"
                     android:text=""
                     />
 
@@ -60,18 +61,18 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 android:padding="4dp"
-                >
+                tools:ignore="NestedWeights">
 
                 <TextView
                     android:id="@+id/period"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:text="Feb-22 - Mar-24"
+                    android:layout_gravity="end"
+                    android:text="@string/feb_22_mar_24"
                     android:textSize="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -81,7 +82,7 @@
                     android:id="@+id/frequency"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="WEEKLY"
+                    android:text="@string/weekly"
                     android:textSize="16dp"
 
                     app:layout_constraintEnd_toEndOf="parent"

@@ -33,6 +33,7 @@ class SendAlarmsToPhoneButton @JvmOverloads constructor(
                     updatePhoneAlarmClock()
                 }
             }
+            v?.performClick()
             return false
         }
     }

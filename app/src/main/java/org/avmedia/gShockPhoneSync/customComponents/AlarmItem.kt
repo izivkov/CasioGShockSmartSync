@@ -52,6 +52,7 @@ class AlarmItem @JvmOverloads constructor(
                     }
                 }
             }
+            v?.performClick()
             return false
         }
     }
@@ -61,6 +62,8 @@ class AlarmItem @JvmOverloads constructor(
 
         alarmTime = findViewById<TextView>(R.id.time)
         alarmTime.setOnTouchListener(OnTouchListener())
+
+        alarmTime.performClick()
     }
 
     fun setOnDataChange(onDataChanged: KFunction<Unit>) {

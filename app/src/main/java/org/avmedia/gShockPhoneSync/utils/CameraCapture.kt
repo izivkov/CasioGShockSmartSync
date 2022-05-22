@@ -11,7 +11,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Insets
 import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CameraMetadata.FLASH_MODE_TORCH
 import android.media.MediaActionSound
 import android.os.Build
 import android.provider.MediaStore
@@ -22,14 +21,12 @@ import android.view.WindowMetrics
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
-import androidx.camera.core.ImageCapture.FLASH_MODE_ON
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.customComponents.ActionsModel.FileSpecs.RATIO_16_9_VALUE
 import org.avmedia.gShockPhoneSync.customComponents.ActionsModel.FileSpecs.RATIO_4_3_VALUE
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.jetbrains.anko.contentView
-import org.jetbrains.anko.layoutInflater
 import timber.log.Timber
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
@@ -48,12 +45,12 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
     private var imageCapture: ImageCapture? = null
     private lateinit var viewBinding: FragmentActionsBinding
     private val windowManager: WindowManager = (context as Activity).windowManager
-    private val currentContextView = (context as Activity).contentView
+    private var currentContextView = (context as Activity).contentView
 
     data class ScreenSize(val width: Int, val height: Int)
 
     fun start() {
-        val currentContextView = (context as Activity).contentView
+        currentContextView = (context as Activity).contentView
         viewBinding = FragmentActionsBinding.inflate(context.layoutInflater)
         context.setContentView(viewBinding.root)
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -68,14 +65,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
             val rotation = viewBinding.viewFinder.display.rotation
-
-            // Preview
-            val preview = Preview.Builder()
-                .setTargetRotation(rotation)
-                .build()
-                .also {
-                    it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
-                }
 
             val screenSize = getScreenSize(context as Activity)
             val screenAspectRatio = aspectRatio(screenSize.width, screenSize.height)
@@ -120,6 +109,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
         // restore the context, so se can continue running normal
         (context as Activity).setContentView(currentContextView)
     }
+
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)
         if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
@@ -131,8 +121,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
     private fun getScreenSize(activity: Activity): ScreenSize {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowMetrics: WindowMetrics = activity.windowManager.currentWindowMetrics
-            val insets: Insets = windowMetrics.windowInsets
-                .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
             val w = windowMetrics.bounds.width()
             val h = windowMetrics.bounds.height()
             ScreenSize(w, h)
@@ -181,9 +169,9 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     MediaActionSound().play(MediaActionSound.SHUTTER_CLICK)
-                    val msg = "Find the picture in your [Photos] or [Gallery] apps"
+                    val msg = "Find the picture in your [Photos] or [Gallery] app."
                     if (currentContextView != null) {
-                        Utils.snackBar(currentContextView, msg)
+                        Utils.snackBar(context, msg)
                     }
                     Timber.d(msg)
                 }
@@ -208,7 +196,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             val luma = pixels.average()
 
             listener(luma)
-
             image.close()
         }
     }

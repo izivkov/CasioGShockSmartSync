@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +40,7 @@ class EventAdapter(private val events: ArrayList<EventsModel.Event>) :
         return ViewHolder(eventView)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...events.size: ${events.size}")
         val event: EventsModel.Event = events[position]

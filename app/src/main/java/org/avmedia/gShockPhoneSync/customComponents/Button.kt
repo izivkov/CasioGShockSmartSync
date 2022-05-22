@@ -41,6 +41,7 @@ open class Button @JvmOverloads constructor(
                 }
             }
             return false
+            v?.performClick()
         }
     }
 

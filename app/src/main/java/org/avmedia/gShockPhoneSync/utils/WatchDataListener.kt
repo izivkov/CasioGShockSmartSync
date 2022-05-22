@@ -24,7 +24,6 @@ object WatchDataListener {
                 if (data == null) {
                     return
                 }
-                Timber.i("dataReceived: ------> [$data]")
                 val dataJson = CasioSupport.toJson(data)
 
                 for (topic in dataJson.keys()) {

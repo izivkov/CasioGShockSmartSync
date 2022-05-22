@@ -22,7 +22,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:baselineAligned="false" android:orientation="horizontal"
         >
 
         <LinearLayout
@@ -40,7 +40,7 @@
                 android:id="@+id/watchTimeTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:text="Local Time"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="20dp"
@@ -50,7 +50,7 @@
                 android:id="@+id/textClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:format12Hour="h:mm:ss a"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textSize="34dp"
@@ -60,7 +60,7 @@
                 android:id="@+id/location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="16dp"
                 />

@@ -32,6 +32,7 @@ class SendEventsToWatchButton @JvmOverloads constructor(
                     Utils.snackBar(context, "Events Sent to Watch")
                 }
             }
+            v?.performClick()
             return false
         }
     }

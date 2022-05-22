@@ -14,8 +14,6 @@
     >
 
     <org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/connection_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -28,10 +26,11 @@
             app:srcCompat="@drawable/ic_gw_b5600"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="242dp"
+            android:contentDescription="@string/image_of_casio_5600_watch"
             />
 
         <org.avmedia.gShockPhoneSync.customComponents.ConnectionSpinner
-            android:id="@+id/connection_spinner"
+            android:id="@+id/connection_dpinner"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,7 +45,7 @@
             android:id="@+id/info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Info"
+            android:contentDescription="@string/info"
             android:layout_margin="20dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_info_24dp"
@@ -58,8 +57,6 @@
     </org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout>
 
     <org.avmedia.gShockPhoneSync.customComponents.MainLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -7,6 +7,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    package="org.avmedia.gShockPhoneSync"
     >
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -38,12 +39,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
-        >
+        android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity
             android:name="org.avmedia.gShockPhoneSync.MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullUser"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

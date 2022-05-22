@@ -29,6 +29,7 @@ class SendAlarmsToWatchButton @JvmOverloads constructor(
                     Utils.snackBar(context, "Alarms Sent to Watch")
                 }
             }
+            v?.performClick()
             return false
         }
     }

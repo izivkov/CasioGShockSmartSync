@@ -29,6 +29,7 @@ class SendTimeButton @JvmOverloads constructor(
                     Utils.snackBar(context, "Time Sent to Watch")
                 }
             }
+            v?.performClick()
             return false
         }
 
