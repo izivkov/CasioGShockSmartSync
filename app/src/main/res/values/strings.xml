@@ -17,7 +17,6 @@
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
     <string name="send_alarms_to_phone">Send to\nPhone</string>
-    <string name="reminders">Reminders</string>
     <string name="send_events_to_watch">Send to Watch\n Reminders</string>
     <string name="connection_screen_info">To proceed to the next screen, you need to connect your Casio GW-B5600 watch to this app. Just press and hold the lower-left button on the watch, as indicated by the arrow for 3 seconds. After the second double-beep, you will see CNCT message flashing on your watch\'s info window, and the app will display the time-setting screen.\n\nTo run Actions defined in the [Actions] screen, short-press the lower-right button. Actions are programs on your phone, like [Take a photo]. Using these actions, the watch acts like a remote control for your phone.</string>
     <string name="alarms_screen_info">The GW-B5600 has 5 alarms and a "signal" (hourly chime) settings shown here. The alarms can be updated by pressing on the time value of each alarm. A new dialog will appear, which allows you to set the alarm\'s time. Once the alarms have been set, you can send them to the watch, or send them to the Alarm Clock app on the phone.</string>
@@ -37,4 +36,15 @@
     <string name="image_of_casio_5600_watch">Image of Casio 5600 watch</string>
     <string name="info">Info</string>
     <string name="daily">Daily</string>
+    <string name="_12_00">12:00</string>
+    <string name="email_item">Email Item</string>
+    <string name="email_example_com">me@example.com</string>
+    <string name="watch_alarms">Watch Alarms</string>
+    <string name="signal_chime">Signal (chime)</string>
+    <string name="google_calender_events">Google Calender Events</string>
+    <string name="local_time">Local Time</string>
+    <string name="send_to_watch">Send to Watch</string>
+    <string name="_416_555_6789">416-555-6789</string>
+    <string name="phonecall_item">PhoneCall Item</string>
+    <string name="home_time">Home Time</string>
 </resources>

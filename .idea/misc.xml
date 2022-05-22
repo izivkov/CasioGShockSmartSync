@@ -3,17 +3,21 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.152" />
         <entry key="app/src/main/res/drawable/button.xml" value="0.152" />
         <entry key="app/src/main/res/drawable/camera.xml" value="0.152" />
+        <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.152" />
         <entry key="app/src/main/res/layout/action_item.xml" value="0.2509057971014493" />
+        <entry key="app/src/main/res/layout/action_map_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/action_take_photo_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/alarm_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/email_item.xml" value="0.19427083333333334" />
-        <entry key="app/src/main/res/layout/event_item.xml" value="0.11041666666666666" />
+        <entry key="app/src/main/res/layout/event_item.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_actions.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_alarms.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/fragment_events.xml" value="0.25677083333333334" />
+        <entry key="app/src/main/res/layout/fragment_time.xml" value="0.2765625" />
         <entry key="app/src/main/res/layout/local_time.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/phone_call_item.xml" value="0.22604166666666667" />
         <entry key="app/src/main/res/layout/separator_item.xml" value="0.11041666666666666" />

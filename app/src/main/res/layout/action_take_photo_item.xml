@@ -9,14 +9,14 @@
 <org.avmedia.gShockPhoneSync.customComponents.ActionItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/CardViewStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
     app:cardElevation="2dp"
     app:strokeColor="@color/stroke_color"
-    app:strokeWidth="1dp"
-    >
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,7 +35,7 @@
             />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
@@ -49,13 +49,13 @@
                 android:layout_gravity="center_vertical"
                 android:text="@string/take_a_photo"
                 android:textSize="24dp"
-                />
+                tools:ignore="SpUsage" />
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                />
+                tools:ignore="NestedWeights" />
 
             <RadioGroup
                 android:id="@+id/cameraOrientationGroup"

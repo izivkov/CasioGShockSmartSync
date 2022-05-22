@@ -38,7 +38,6 @@ object ReminderEncoder {
 
     private const val ENABLED_MASK = 0b00000001
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun reminderTimeFromJson(reminderJson: JSONObject): IntArray {
 
         val enabled = reminderJson.getBooleanSafe("enabled")
@@ -55,8 +54,7 @@ object ReminderEncoder {
         return reminderCmd
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun createTimeDetail(
+    private fun createTimeDetail(
         repeatPeriod: String?,
         startDate: JSONObject?,
         endDate: JSONObject?,

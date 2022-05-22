@@ -59,10 +59,10 @@ class BatteryView @JvmOverloads constructor(
         subscribe(this.javaClass.simpleName, "CASIO_WATCH_CONDITION")
     }
 
-    override fun onDataReceived(data: String, name: String) {
+    override fun onDataReceived(value: String, name: String) {
         context.runOnUiThread {
-            setPercent(data.toInt())
-            super.onDataReceived(data, name)
+            setPercent(value.toInt())
+            super.onDataReceived(value, name)
         }
     }
 

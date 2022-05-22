@@ -40,8 +40,8 @@ open class Button @JvmOverloads constructor(
                     sendMessage(command)
                 }
             }
-            return false
             v?.performClick()
+            return false
         }
     }
 

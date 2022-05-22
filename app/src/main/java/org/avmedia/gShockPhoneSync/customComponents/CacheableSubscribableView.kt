@@ -12,7 +12,7 @@ import android.util.AttributeSet
 import android.view.View
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 
-open abstract class CacheableSubscribableView @JvmOverloads constructor(
+abstract class CacheableSubscribableView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 

@@ -12,7 +12,7 @@ import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.jetbrains.anko.runOnUiThread
 
-open abstract class CacheableSubscribableTextView @JvmOverloads constructor(
+abstract class CacheableSubscribableTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 

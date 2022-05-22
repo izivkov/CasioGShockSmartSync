@@ -128,7 +128,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         return viewHolder
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...actions.size: ${actions.size}")
 
@@ -182,7 +181,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhVoiceAssistant.actionEnabled.isChecked = action.enabled
         vhVoiceAssistant.icon.setImageResource(R.drawable.voice_assist)
 
-        vhVoiceAssistant.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        vhVoiceAssistant.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
     }
@@ -193,7 +192,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhLocation.actionEnabled.isChecked = action.enabled
         vhLocation.icon.setImageResource(R.drawable.location)
 
-        vhLocation.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        vhLocation.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
     }
@@ -204,7 +203,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhTime.actionEnabled.isChecked = action.enabled
         vhTime.icon.setImageResource(R.drawable.time)
 
-        vhTime.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        vhTime.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
     }
@@ -218,7 +217,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhEmail.actionEnabled.isChecked = action.enabled
         vhEmail.emailAddress.text = action.emailAddress
 
-        vhEmail.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        vhEmail.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
 
@@ -242,7 +241,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhPhoneCall.actionEnabled.isChecked = action.enabled
         vhPhoneCall.phoneNumber.text = action.phoneNumber
 
-        vhPhoneCall.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        vhPhoneCall.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
 
@@ -280,7 +279,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhBaseAction.actionEnabled.isChecked = action.enabled
         vhBaseAction.title.text = action.title
 
-        vhBaseAction.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        vhBaseAction.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             actions[position].enabled = isChecked
         })
     }
@@ -299,7 +298,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         else
             vhPhoto.radioGroup.check(R.id.back)
 
-        vhPhoto.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        vhPhoto.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
 

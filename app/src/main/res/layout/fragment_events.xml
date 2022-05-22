@@ -18,12 +18,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="2pt"
-        android:text="Google Calender Events"
+        android:text="@string/google_calender_events"
         android:textSize="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        />
+        tools:ignore="SpUsage" />
 
     <org.avmedia.gShockPhoneSync.customComponents.EventList
         android:id="@+id/eventList"
@@ -61,7 +61,7 @@
             android:id="@+id/info_events"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Info"
+            android:contentDescription="@string/info"
             android:layout_margin="5dp"
             android:layout_gravity="center"
             android:background="@android:color/transparent"

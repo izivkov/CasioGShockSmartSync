@@ -41,7 +41,6 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsModel.Alarm>) :
         return ViewHolder(alarmView)
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...alarms.size: ${alarms.size}")
         val alarm: AlarmsModel.Alarm = alarms[position]

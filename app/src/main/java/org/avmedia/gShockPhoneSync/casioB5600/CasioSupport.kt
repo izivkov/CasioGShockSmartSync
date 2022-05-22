@@ -77,7 +77,6 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
         this.writer = writer
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun callWriter(message: String) {
         when (val action = JSONObject(message).get("action")) {
             "GET_ALARMS" -> {

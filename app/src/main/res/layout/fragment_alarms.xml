@@ -20,12 +20,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="2pt"
-        android:text="Watch Alarms"
+        android:text="@string/watch_alarms"
         android:textSize="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        />
+        tools:ignore="SpUsage" />
 
     <!-- Recycling view -->
 
@@ -49,7 +49,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_margin="4dp"
-        android:text="Signal (chime) "
+        android:text="@string/signal_chime"
         app:layout_constraintBottom_toTopOf="@+id/buttons"
         app:layout_constraintEnd_toEndOf="parent"
         />
@@ -90,7 +90,7 @@
             android:id="@+id/info_alarms"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Info"
+            android:contentDescription="@string/info"
             android:layout_margin="5dp"
             android:layout_gravity="center"
             android:background="@android:color/transparent"

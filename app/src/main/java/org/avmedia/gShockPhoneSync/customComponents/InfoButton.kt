@@ -45,7 +45,7 @@ class InfoButton @JvmOverloads constructor(
 
                     dialogBuilder.setMessage(infoText)
                         .setCancelable(false)
-                        .setPositiveButton("OK", DialogInterface.OnClickListener { dialog, id ->
+                        .setPositiveButton("OK", DialogInterface.OnClickListener { dialog, _ ->
                             dialog.cancel()
                         })
 

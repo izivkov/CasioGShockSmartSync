@@ -41,10 +41,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:text="Local Time"
+                android:text="@string/local_time"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="20dp"
-                />
+                tools:ignore="SpUsage" />
 
             <TextClock
                 android:id="@+id/textClock"
@@ -54,7 +54,7 @@
                 android:format12Hour="h:mm:ss a"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textSize="34dp"
-                />
+                tools:ignore="SpUsage" />
 
             <org.avmedia.gShockPhoneSync.customComponents.LocationText
                 android:id="@+id/location"
@@ -63,7 +63,7 @@
                 android:layout_gravity="start"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="16dp"
-                />
+                tools:ignore="SpUsage" />
 
         </LinearLayout>
 
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:background="@drawable/button"
-                android:text="Send to Watch"
+                android:text="@string/send_to_watch"
                 tools:ignore="MissingConstraints"
                 />
 

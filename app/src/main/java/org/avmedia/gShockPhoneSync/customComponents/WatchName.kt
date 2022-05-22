@@ -19,7 +19,7 @@ class WatchName @JvmOverloads constructor(
         subscribe(this.javaClass.simpleName, "CASIO_WATCH_NAME")
     }
 
-    override fun onDataReceived(data: String, name: String) {
-        super.onDataReceived(Utils.toAsciiString(data, 1), name)
+    override fun onDataReceived(value: String, name: String) {
+        super.onDataReceived(Utils.toAsciiString(value, 1), name)
     }
 }

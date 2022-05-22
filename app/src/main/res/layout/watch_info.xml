@@ -9,6 +9,7 @@
 <org.avmedia.gShockPhoneSync.customComponents.WatchInfo
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/watch_info"
     style="@style/CardViewStyle"
     android:layout_width="0dp"
@@ -25,8 +26,7 @@
         android:layout_height="match_parent"
         android:layout_margin="12dp"
         android:orientation="horizontal"
-        android:paddingBottom="20dp"
-        >
+        android:paddingBottom="20dp">
 
         <org.avmedia.gShockPhoneSync.customComponents.WatchName
             android:id="@+id/watch_name"
@@ -49,7 +49,7 @@
             >
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
@@ -62,7 +62,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:text="Home Time"
+                    android:text="@string/home_time"
                     />
 
                 <org.avmedia.gShockPhoneSync.customComponents.HomeTime
@@ -71,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:textSize="18dp"
-                    />
+                    tools:ignore="SpUsage" />
 
             </LinearLayout>
 

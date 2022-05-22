@@ -12,14 +12,15 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.util.Preconditions.checkArgument
 import com.google.gson.Gson
+import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
 import java.time.ZoneId
-import java.util.Locale
+import java.util.*
+import kotlin.collections.ArrayList
 
-@RequiresApi(Build.VERSION_CODES.O)
 object EventsModel {
 
     const val MAX_REMINDERS = 5
@@ -123,6 +124,9 @@ object EventsModel {
                 RepeatPeriod.MONTHLY -> {
                     formattedFreq =
                         "${startDate?.day}${getDayOfMonthSuffix(startDate?.day!!.toInt())} each month"
+                }
+                else -> {
+                    Timber.i("Invalid frequency format")
                 }
             }
             return formattedFreq

@@ -27,10 +27,10 @@ data class BleScannerLocal(val context: Context) {
     private val cacheDevice = false
 
     val bluetoothAdapter: BluetoothAdapter by lazy {
-            val bluetoothManager =
-                context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
-            bluetoothManager.adapter
-        }
+        val bluetoothManager =
+            context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothManager.adapter
+    }
 
     private val bleScanner by lazy {
         bluetoothAdapter.bluetoothLeScanner
@@ -68,6 +68,13 @@ data class BleScannerLocal(val context: Context) {
                 return
             }
             scanSettings.describeContents()
+            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled || bleScanner == null) {
+                Utils.snackBar(
+                    context,
+                    "Bluetooth not available. Please turn on Bluetooth and restart the app."
+                )
+                return
+            }
             bleScanner.startScan(createFilters(), scanSettings, scanCallback)
             isScanning = true
         } else {

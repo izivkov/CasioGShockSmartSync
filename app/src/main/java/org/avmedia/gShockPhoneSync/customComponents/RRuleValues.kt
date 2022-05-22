@@ -41,7 +41,7 @@ object RRuleValues {
 
                 val validByMonth = rruleObj.byMonth.isEmpty()
                 val validByDay = rruleObj.byDay.isEmpty() || validNumberOnly.containsAll(numberArr)
-                val validInterval = rruleObj.interval != null && (rruleObj.interval != 0 || rruleObj.interval != 1)
+                val validInterval = rruleObj.interval != 1
 
                 return validByMonth && validByDay && validInterval
             }
@@ -51,21 +51,21 @@ object RRuleValues {
                 Timber.i("Event not compatible with Watch")
             }
 
-            if (rrule != null && rrule.isNotEmpty()) {
-                val rruleObj = RRule(rrule)
-                if (rruleObj.until != null) {
+            if (rrule.isNotEmpty()) {
+                val rruleObjVal = RRule(rrule)
+                if (rruleObjVal.until != null) {
                     val formatter: DateTimeFormatter =
                         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
                     val localDate =
-                        LocalDateTime.parse(rruleObj.until.toString(), formatter).toLocalDate()
+                        LocalDateTime.parse(rruleObjVal.until.toString(), formatter).toLocalDate()
                     val instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
 
                     rruleValues.localEndDate = instant.atZone(zone).toLocalDate()
 
-                } else if (rruleObj.count != null) {
-                    val numberOfPeriods: Long = (rruleObj.count - 1).toLong()
+                } else if (rruleObjVal.count != null) {
+                    val numberOfPeriods: Long = (rruleObjVal.count - 1).toLong()
                     if (numberOfPeriods > 1) {
-                        when (rruleObj.freq) {
+                        when (rruleObjVal.freq) {
                             Frequency.Daily -> {
                                 rruleValues.localEndDate =
                                     LocalDate.of(
@@ -107,9 +107,9 @@ object RRuleValues {
                     }
                 }
 
-                rruleValues.repeatPeriod = toEventRepeatPeriod(rruleObj.freq)
+                rruleValues.repeatPeriod = toEventRepeatPeriod(rruleObjVal.freq)
                 if (rruleValues.repeatPeriod == EventsModel.RepeatPeriod.WEEKLY) {
-                    val weekDays = rruleObj.byDay
+                    val weekDays = rruleObjVal.byDay
                     rruleValues.daysOfWeek = createDaysOfWeek(weekDays)
                 }
             }

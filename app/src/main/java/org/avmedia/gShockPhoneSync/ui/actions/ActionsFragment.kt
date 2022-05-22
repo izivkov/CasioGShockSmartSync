@@ -34,9 +34,6 @@ class ActionsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val notificationsViewModel =
-            ViewModelProvider(this)[ActionsViewModel::class.java]
-
         context?.let { PermissionManager(it) }?.setupPermissions(
             arrayOf(
                 Manifest.permission.CAMERA,

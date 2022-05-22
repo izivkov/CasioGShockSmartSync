@@ -90,7 +90,7 @@
             app:layout_constraintTop_toTopOf="parent"
 
             app:navGraph="@navigation/mobile_navigation"
-            >
+            tools:ignore="FragmentTagUsage">
 
         </fragment>
 

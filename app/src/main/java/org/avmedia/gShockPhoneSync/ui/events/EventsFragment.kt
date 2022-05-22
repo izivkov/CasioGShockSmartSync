@@ -31,10 +31,6 @@ class EventsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         EventsModel.init(requireContext())
-
-        val notificationsViewModel =
-            ViewModelProvider(this).get(EventsViewModel::class.java)
-
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
         val root: View = binding.root
         return root

@@ -27,9 +27,6 @@ class TimeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(TimeViewModel::class.java)
-
         _binding = FragmentTimeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

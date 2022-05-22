@@ -25,9 +25,6 @@ class AlarmsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dashboardViewModel =
-            ViewModelProvider(this).get(AlarmsViewModel::class.java)
-
         _binding = FragmentAlarmsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

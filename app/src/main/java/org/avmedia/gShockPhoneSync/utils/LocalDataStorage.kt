@@ -15,7 +15,7 @@ object LocalDataStorage {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
         var editor = sharedPreference.edit()
         editor.putString(key, value)
-        editor.commit()
+        editor.apply()
     }
 
     fun get(key: String, defaultValue: String?, context: Context): String? {
@@ -27,13 +27,13 @@ object LocalDataStorage {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
         var editor = sharedPreference.edit()
         editor.remove(key)
-        editor.commit()
+        editor.apply()
     }
 
     fun clear(context: Context) {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
         var editor = sharedPreference.edit()
         editor.clear()
-        editor.commit()
+        editor.apply()
     }
 }

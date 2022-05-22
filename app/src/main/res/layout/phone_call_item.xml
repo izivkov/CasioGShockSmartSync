@@ -9,12 +9,12 @@
 <org.avmedia.gShockPhoneSync.customComponents.ActionItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/CardViewStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="3dp"
-    app:cardElevation="2dp"
-    >
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,34 +29,33 @@
             android:src="@drawable/phone"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="4dp"
-            android:contentDescription="Voice Assistant"
+            android:contentDescription="@string/voice_assistant"
             />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:padding="6dp"
-            >
+            android:padding="6dp">
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PhoneCall Item"
+                android:text="@string/phonecall_item"
                 android:textSize="24dp"
-                />
+                tools:ignore="SpUsage" />
 
             <EditText
                 android:id="@+id/phone_number"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:textSize="20dp"
-                android:hint="416-555-6789"
+                android:hint="@string/_416_555_6789"
                 android:autofillHints=""
                 android:inputType="phone"
-                />
+                tools:ignore="SpUsage" />
 
         </LinearLayout>
 
