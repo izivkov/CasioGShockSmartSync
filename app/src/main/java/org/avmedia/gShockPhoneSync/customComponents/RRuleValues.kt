@@ -119,12 +119,12 @@ object RRuleValues {
     }
 
     private fun toEventRepeatPeriod(freq: Frequency): EventsModel.RepeatPeriod {
-        when (freq) {
-            Frequency.Monthly -> return EventsModel.RepeatPeriod.MONTHLY
-            Frequency.Weekly -> return EventsModel.RepeatPeriod.WEEKLY
-            Frequency.Yearly -> return EventsModel.RepeatPeriod.YEARLY
-            Frequency.Daily -> return EventsModel.RepeatPeriod.DAILY
-            else -> return EventsModel.RepeatPeriod.NEVER
+        return when (freq) {
+            Frequency.Monthly -> EventsModel.RepeatPeriod.MONTHLY
+            Frequency.Weekly -> EventsModel.RepeatPeriod.WEEKLY
+            Frequency.Yearly -> EventsModel.RepeatPeriod.YEARLY
+            Frequency.Daily -> EventsModel.RepeatPeriod.DAILY
+            else -> EventsModel.RepeatPeriod.NEVER
         }
     }
 
@@ -137,7 +137,7 @@ object RRuleValues {
                 "Wednesday" -> days?.add(DayOfWeek.WEDNESDAY)
                 "Thursday" -> days?.add(DayOfWeek.THURSDAY)
                 "Friday" -> days?.add(DayOfWeek.FRIDAY)
-                "SATURDAY" -> days?.add(DayOfWeek.SATURDAY)
+                "Saturday" -> days?.add(DayOfWeek.SATURDAY)
                 else -> days?.add(DayOfWeek.SUNDAY)
             }
         }

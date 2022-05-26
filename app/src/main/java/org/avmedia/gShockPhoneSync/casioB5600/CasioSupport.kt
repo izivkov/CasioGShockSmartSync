@@ -174,7 +174,7 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
         return DeviceCharacteristics.findCharacteristic(handlesToCharacteristicsMap[handle])
     }
 
-    fun getPressedWatchButton(): WATCH_BUTTON {
+    private fun getPressedWatchButton(): WATCH_BUTTON {
         /*
         RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
         LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
