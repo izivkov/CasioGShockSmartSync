@@ -82,7 +82,7 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             try {
-                context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK))
             } catch (e: ActivityNotFoundException) {
                 Utils.snackBar(context, "Voice Assistant not available on this device!")
             }
@@ -119,7 +119,7 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
-            val dialIntent = Intent(Intent.ACTION_CALL)
+            val dialIntent = Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
             dialIntent.data = Uri.parse("tel:$phoneNumber")
             context.startActivity(dialIntent)
         }

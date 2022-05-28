@@ -12,7 +12,7 @@ import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.json.JSONObject
-import java.util.Locale
+import java.util.*
 
 object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
@@ -28,13 +28,31 @@ object WatchDataCollector {
     var bleFeatures: String = ""
 
     init {
+        subscribe("CASIO_BLE_FEATURES", ::onBleFeaturesReceived)
         subscribe("CASIO_DST_SETTING", ::onDataReceived)
         subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
         subscribe("CASIO_WATCH_NAME", ::onDataReceived)
         subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
         subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
-        subscribe("CASIO_BLE_FEATURES", ::onDataReceived)
+    }
+
+    fun start() {
+        unmatchedCmdCount = -1
+        dstSettings.clear()
+        dstWatchState.clear()
+        worldCities.clear()
+
+        Connection.enableNotifications()
+        getInfoAboutPressedButton()
+    }
+
+    private fun onBleFeaturesReceived(data: String) {
+        add(data)
+        ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
+
+        // continue to get the rest of the settings
+        getAllWatchSettings()
     }
 
     private fun onDataReceived(data: String) {
@@ -89,64 +107,66 @@ object WatchDataCollector {
         })
     }
 
-    fun start() {
-        unmatchedCmdCount = -1
-        dstSettings.clear()
-        dstWatchState.clear()
-        worldCities.clear()
-
-        Connection.enableNotifications()
-
-        // get DTS watch state
-        writeCmd(0xC, "1d00")
-        writeCmd(0xC, "1d02")
-        writeCmd(0xC, "1d04")
-
-        // get DTS for world cities
-        writeCmd(0xC, "1e00")
-        writeCmd(0xC, "1e01")
-        writeCmd(0xC, "1e02")
-        writeCmd(0xC, "1e03")
-        writeCmd(0xC, "1e04")
-        writeCmd(0xC, "1e05")
-
-        // get world cities
-        writeCmd(0xC, "1f00")
-        writeCmd(0xC, "1f01")
-        writeCmd(0xC, "1f02")
-        writeCmd(0xC, "1f03")
-        writeCmd(0xC, "1f04")
-        writeCmd(0xC, "1f05")
-
-        // watch name
-        writeCmd(0xC, "23")
-
-        // battery level
-        writeCmd(0xC, "28")
-
-        // app info
-        writeCmd(0xC, "22")
-
+    private fun getInfoAboutPressedButton() {
         // CASIO_BLE_FEATURES, determine which button was pressed from these.
         writeCmd(0xC, "10")
     }
+
+    private fun getAllWatchSettings() {
+
+        // get DTS watch state
+        writeCmdWithResponseCount(0xC, "1d00")
+        writeCmdWithResponseCount(0xC, "1d02")
+        writeCmdWithResponseCount(0xC, "1d04")
+
+        // get DTS for world cities
+        writeCmdWithResponseCount(0xC, "1e00")
+        writeCmdWithResponseCount(0xC, "1e01")
+        writeCmdWithResponseCount(0xC, "1e02")
+        writeCmdWithResponseCount(0xC, "1e03")
+        writeCmdWithResponseCount(0xC, "1e04")
+        writeCmdWithResponseCount(0xC, "1e05")
+
+        // get world cities
+        writeCmdWithResponseCount(0xC, "1f00")
+        writeCmdWithResponseCount(0xC, "1f01")
+        writeCmdWithResponseCount(0xC, "1f02")
+        writeCmdWithResponseCount(0xC, "1f03")
+        writeCmdWithResponseCount(0xC, "1f04")
+        writeCmdWithResponseCount(0xC, "1f05")
+
+        // watch name
+        writeCmdWithResponseCount(0xC, "23")
+
+        // battery level
+        writeCmdWithResponseCount(0xC, "28")
+
+        // app info
+        writeCmdWithResponseCount(0xC, "22")
+    }
+
     fun runInitCommands() {
         dstSettings.forEach { command ->
-            writeCmd(0xe, command)
+            writeCmdWithResponseCount(0xe, command)
         }
         dstWatchState.forEach { command ->
-            writeCmd(0xe, command)
+            writeCmdWithResponseCount(0xe, command)
         }
         worldCities.forEach { command ->
-            writeCmd(0xe, command)
+            writeCmdWithResponseCount(0xe, command)
         }
     }
 
-    private fun writeCmd(handle: Int, cmd: String) {
+    private fun writeCmdWithResponseCount(handle: Int, cmd: String) {
         if (unmatchedCmdCount == -1) {
             unmatchedCmdCount = 0
         }
         ++unmatchedCmdCount
+
+        writeCmd(handle, cmd)
+    }
+
+    private fun writeCmd(handle: Int, cmd: String) {
         CasioSupport.writeCmdFromString(handle, cmd)
     }
 
