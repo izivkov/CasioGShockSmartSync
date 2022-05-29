@@ -23,9 +23,6 @@ import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
 data class BleScannerLocal(val context: Context) {
-    lateinit var device: BluetoothDevice
-    private val cacheDevice = false
-
     val bluetoothAdapter: BluetoothAdapter by lazy {
         val bluetoothManager =
             context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
@@ -37,7 +34,7 @@ data class BleScannerLocal(val context: Context) {
     }
 
     private val scanSettings = ScanSettings.Builder()
-        .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
         .build()
 
     private var isScanning = false
@@ -45,22 +42,14 @@ data class BleScannerLocal(val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun startConnection() {
-        if (Utils.isDebugMode()) {
+        if (Utils.isDebugMode() || Connection.isConnected() || Connection.isConnecting()) {
             return
         }
 
-        if (Connection.isConnected()) {
-            return
-        }
         var device: BluetoothDevice? = null
-        var cachedDeviceAddr: String? = null
-        if (cacheDevice) {
-            cachedDeviceAddr = LocalDataStorage.get("cached device", null, context)
-        }
-
-        if (cachedDeviceAddr != null) {
-            device = bluetoothAdapter.getRemoteDevice(cachedDeviceAddr)
-            this.device = device
+        var cachedDeviceAddress= LocalDataStorage.get("cached device", null, context)
+        if (cachedDeviceAddress != null) {
+            device = bluetoothAdapter.getRemoteDevice(cachedDeviceAddress)
         }
 
         if (device == null || device.type == BluetoothDevice.DEVICE_TYPE_UNKNOWN) {
@@ -127,11 +116,9 @@ Characteristics:
 
             stopBleScan()
 
-            if (cacheDevice) {
-                val cachedDevice = LocalDataStorage.get("cached device", null, context)
-                if (cachedDevice == null || cachedDevice != result.device.address) {
-                    LocalDataStorage.put("cached device", result.device.address, context)
-                }
+            val cachedDevice = LocalDataStorage.get("cached device", null, context)
+            if (cachedDevice == null || cachedDevice != result.device.address) {
+                LocalDataStorage.put("cached device", result.device.address, context)
             }
 
             Connection.connect(result.device, context)

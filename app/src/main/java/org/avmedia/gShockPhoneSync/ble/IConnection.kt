@@ -16,6 +16,7 @@ interface IConnection {
     fun connect(context: Context)
     fun disconnect(context: Context? = null)
     fun isConnected(): Boolean
+    fun isConnecting(): Boolean
     fun sendMessage(message: String)
     fun start()
     fun stop()

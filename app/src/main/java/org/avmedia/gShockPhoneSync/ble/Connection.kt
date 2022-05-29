@@ -41,6 +41,7 @@ object Connection : IConnection {
     var dataReceivedCallback: IDataReceived? = null
     var oneTimeLock = false
     lateinit var applicationContext: Context
+    private var isConnecting = false
 
     // Interface
     override fun init(context: Context) {
@@ -64,6 +65,10 @@ object Connection : IConnection {
         return this::device.isInitialized && device.isConnected()
     }
 
+    override fun isConnecting(): Boolean {
+        return isConnecting
+    }
+
     override fun sendMessage(message: String) {
         CasioSupport.callWriter(message)
     }
@@ -82,6 +87,7 @@ object Connection : IConnection {
         if (device.isConnected()) {
             Timber.e("Already connected to ${device.address}!")
         } else {
+            isConnecting = true
             enqueueOperation(Connect(device, context.applicationContext))
         }
     }
@@ -233,7 +239,7 @@ object Connection : IConnection {
         // Handle Connect separately from other operations that require device to be connected
         if (operation is Connect) {
             with(operation) {
-                device.connectGatt(context, false, callback)
+                device.connectGatt(context, true, callback)
             }
             return
         }
@@ -357,7 +363,7 @@ object Connection : IConnection {
         @SuppressLint("MissingPermission")
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             val deviceAddress = gatt.device.address
-            Connection.device = gatt.device
+            device = gatt.device
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
@@ -376,11 +382,16 @@ object Connection : IConnection {
                 }
             } else {
                 Timber.e("onConnectionStateChange: status $status encountered for $deviceAddress!")
+
                 if (pendingOperation is Connect) {
                     signalEndOfOperation()
+                    ProgressEvents.onNext(ProgressEvents.Events.ConnectionFailed)
+                    Timber.d("Restart connection...")
                 }
                 teardownConnection(gatt.device)
             }
+
+            isConnecting = false
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
@@ -392,6 +403,8 @@ object Connection : IConnection {
                 } else {
                     Timber.e("Service discovery failed due to status $status")
                     teardownConnection(gatt.device)
+                    Timber.d("Restart connection after failed discovery...")
+                    ProgressEvents.onNext(ProgressEvents.Events.ConnectionFailed)
                 }
             }
 

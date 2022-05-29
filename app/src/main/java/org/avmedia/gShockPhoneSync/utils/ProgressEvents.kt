@@ -68,5 +68,6 @@ object ProgressEvents {
         object WatchInitializationCompleted : Events()
         object AllPermissionsAccepted: Events()
         object ButtonPressedInfoReceived : Events()
+        object ConnectionFailed : Events()
     }
 }

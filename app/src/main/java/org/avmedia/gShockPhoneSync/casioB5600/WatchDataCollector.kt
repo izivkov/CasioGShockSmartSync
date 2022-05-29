@@ -67,6 +67,11 @@ object WatchDataCollector {
     }
 
     private fun add(command: String) {
+        val intArr = Utils.toIntArray(command)
+        if (intArr.isNotEmpty() && intArr.size == 1 && intArr[0] > 0xff) {
+            return
+        }
+
         val shortStr = Utils.toCompactString(command)
         when (shortStr.substring(0, 2).uppercase(Locale.getDefault())) {
             "1E" -> dstSettings.add(shortStr)

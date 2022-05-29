@@ -25,6 +25,7 @@ import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
+import org.avmedia.gShockPhoneSync.utils.ForegroundService
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataListener
@@ -67,6 +68,10 @@ class MainActivity : AppCompatActivity() {
 
         Connection.init(this)
         WatchDataListener.init()
+
+        // This will run in the foreground, but not reliable. Do not use for now.
+        // val intent = Intent(this, ForegroundService::class.java)
+        // this.startService(intent)
 
         if (Utils.isDebugMode()) {
             navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
@@ -153,9 +158,13 @@ class MainActivity : AppCompatActivity() {
                             bleScannerLocal.startConnection()
                         }, 5L, TimeUnit.SECONDS)
                     }
+                    ProgressEvents.Events.ConnectionFailed -> {
+                        bleScannerLocal.startConnection()
+                    }
                 }
             },
-            { throwable -> Timber.d("Got error on subscribe: $throwable") })
+            { throwable -> Timber.d("Got error on subscribe: $throwable")
+            throwable.printStackTrace()})
     }
 
     // location
