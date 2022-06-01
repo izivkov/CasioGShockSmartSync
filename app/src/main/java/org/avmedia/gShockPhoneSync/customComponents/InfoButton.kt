@@ -50,7 +50,7 @@ class InfoButton @JvmOverloads constructor(
                         })
 
                     val alert = dialogBuilder.create()
-                    alert.setTitle("Info:")
+                    alert.setTitle("Help:")
                     alert.show()
                 }
             }
