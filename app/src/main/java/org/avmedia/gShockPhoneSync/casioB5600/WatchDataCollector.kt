@@ -28,7 +28,7 @@ object WatchDataCollector {
     var bleFeatures: String = ""
 
     init {
-        subscribe("CASIO_BLE_FEATURES", ::onBleFeaturesReceived)
+        subscribe("CASIO_BLE_FEATURES", ::onDataReceived)
         subscribe("CASIO_DST_SETTING", ::onDataReceived)
         subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
@@ -44,14 +44,7 @@ object WatchDataCollector {
         worldCities.clear()
 
         Connection.enableNotifications()
-        getInfoAboutPressedButton()
-    }
 
-    private fun onBleFeaturesReceived(data: String) {
-        add(data)
-        ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
-
-        // continue to get the rest of the settings
         getAllWatchSettings()
     }
 
@@ -94,6 +87,7 @@ object WatchDataCollector {
             }
             "10" -> {
                 bleFeatures = command
+                ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
             }
         }
     }
@@ -112,12 +106,10 @@ object WatchDataCollector {
         })
     }
 
-    private fun getInfoAboutPressedButton() {
+    private fun getAllWatchSettings() {
+
         // CASIO_BLE_FEATURES, determine which button was pressed from these.
         writeCmd(0xC, "10")
-    }
-
-    private fun getAllWatchSettings() {
 
         // get DTS watch state
         writeCmdWithResponseCount(0xC, "1d00")

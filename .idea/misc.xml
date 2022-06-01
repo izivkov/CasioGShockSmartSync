@@ -6,6 +6,8 @@
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.152" />
         <entry key="app/src/main/res/drawable/button.xml" value="0.152" />
         <entry key="app/src/main/res/drawable/camera.xml" value="0.152" />
+        <entry key="app/src/main/res/drawable/ic_help_24dp.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_info_24dp.xml" value="0.185" />
         <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.152" />
         <entry key="app/src/main/res/layout/action_item.xml" value="0.2509057971014493" />
         <entry key="app/src/main/res/layout/action_map_item.xml" value="0.19427083333333334" />

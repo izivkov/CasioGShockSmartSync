@@ -52,7 +52,7 @@
         android:layout_margin="10dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/info"
-        android:src="@drawable/ic_info_24dp"
+        android:src="@drawable/ic_help_24dp"
         app:infoText="@string/actions_screen_info"
         app:layout_constraintTop_toBottomOf="@+id/actionList"
         app:layout_constraintBottom_toBottomOf="parent"
