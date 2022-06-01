@@ -109,7 +109,7 @@ object WatchDataCollector {
     private fun getAllWatchSettings() {
 
         // CASIO_BLE_FEATURES, determine which button was pressed from these.
-        writeCmd(0xC, "10")
+        writeCmdWithResponseCount(0xC, "10")
 
         // get DTS watch state
         writeCmdWithResponseCount(0xC, "1d00")

@@ -240,16 +240,4 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
 
         return json
     }
-
-    fun requestWatchName() {
-        writeCmd(0xC, byteArrayOfInts(0x23))
-    }
-
-    fun requestBatteryLevel() {
-        writeCmd(0xC, byteArrayOfInts(0x28))
-    }
-
-    fun requestHomeTime() {
-        writeCmd(0xC, byteArrayOfInts(0x1f, 0x0))
-    }
 }
