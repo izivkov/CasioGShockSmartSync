@@ -7,24 +7,51 @@
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.app.Activity
+import android.bluetooth.BluetoothDevice
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.InactivityWatcher
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
+import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
+import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.utils.CameraCapture
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.Clock
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 object ActionsModel {
+
+    val actions = ArrayList<ActionsModel.Action>()
+
+    init {
+        // actions.add(MapAction("Map", false))
+        // actions.add(SetLocationAction("Save location to G-maps", false))
+        actions.add(SetTimeAction("Set Time", true))
+        actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.BACK))
+        actions.add(StartVoiceAssistAction("Start Voice Assist", true))
+
+        actions.add(Separator("Emergency Actions:", false))
+
+        actions.add(PhoneDialAction("Make a phone call", true, ""))
+        // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
+    }
 
     abstract class Action(
         open var title: String,
@@ -54,14 +81,31 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
+            createAppEventsSubscription()
+        }
 
-            if (!Utils.isDebugMode()) {
-                sendMessage(
-                    "{ action: \"SET_TIME\", value: ${
-                        Clock.systemDefaultZone().millis()
-                    } }"
-                )
-            }
+        private fun createAppEventsSubscription() {
+            ProgressEvents.subscriber.start(
+                this.javaClass.simpleName,
+
+                {
+                    when (it) {
+                        // For setting time, we need to wait until the watch has been initialised.
+                        ProgressEvents.Events.WatchDataCollected -> {
+                            if (!Utils.isDebugMode()) {
+                                sendMessage(
+                                    "{ action: \"SET_TIME\", value: ${
+                                        Clock.systemDefaultZone().millis()
+                                    }}"
+                                )
+                            }
+                        }
+                    }
+                },
+                { throwable ->
+                    Timber.d("Got error on subscribe: $throwable")
+                    throwable.printStackTrace()
+                })
         }
 
         override fun load(context: Context) {
@@ -82,7 +126,7 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             try {
-                context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK))
+                context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             } catch (e: ActivityNotFoundException) {
                 Utils.snackBar(context, "Voice Assistant not available on this device!")
             }
@@ -119,7 +163,7 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
-            val dialIntent = Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+            val dialIntent = Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             dialIntent.data = Uri.parse("tel:$phoneNumber")
             context.startActivity(dialIntent)
         }
@@ -216,21 +260,6 @@ object ActionsModel {
         }
     }
 
-    val actions = ArrayList<ActionsModel.Action>()
-
-    init {
-        // actions.add(MapAction("Map", false))
-        // actions.add(SetLocationAction("Save location to G-maps", false))
-        actions.add(SetTimeAction("Set Time", true))
-        actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.BACK))
-        actions.add(StartVoiceAssistAction("Start Voice Assist", true))
-
-        actions.add(Separator("Emergency Actions:", false))
-
-        actions.add(PhoneDialAction("Make a phone call", true, ""))
-        // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
-    }
-
     fun clear() {
         actions.clear()
     }
@@ -276,6 +305,38 @@ object ActionsModel {
 
             return if (mediaDir != null && mediaDir.exists())
                 mediaDir else appContext.filesDir
+        }
+    }
+
+    fun runActions(context: Context) {
+        actions.forEach {
+            if (it.enabled) {
+                // Run in background for speed
+                GlobalScope.launch {
+                    try {
+                        it.run(context)
+                    } catch (e: SecurityException) {
+                        Utils.snackBar(
+                            context,
+                            "You have not given permission to to run action ${it.title}."
+                        )
+                    } catch (e: Exception) {
+                        Utils.snackBar(context, "Could not run action ${it.title}.")
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadData(context: Context) {
+        actions.forEach {
+            it.load(context)
+        }
+    }
+
+    fun saveData(context: Context) {
+        actions.forEach {
+            it.save(context)
         }
     }
 }

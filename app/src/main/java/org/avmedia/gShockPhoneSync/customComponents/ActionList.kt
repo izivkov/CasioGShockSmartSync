@@ -7,6 +7,8 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,20 +36,13 @@ class ActionList @JvmOverloads constructor(
     }
 
     fun init() {
-        super.onAttachedToWindow()
-        loadData(context)
-
-        if (Utils.isDebugMode() || CasioSupport.isActionButtonPressed()) {
-            runActions()
-        }
-
+        ActionsModel.loadData(context)
         watchForDisconnect()
     }
 
     private fun watchForDisconnect() {
         ProgressEvents.subscriber.start(
             this.javaClass.simpleName,
-
             {
                 when (it) {
                     ProgressEvents.Events.Disconnect -> {
@@ -59,35 +54,6 @@ class ActionList @JvmOverloads constructor(
     }
 
     fun shutdown() {
-        saveData(context)
-    }
-
-    private fun runActions() {
-        ActionsModel.actions.forEach {
-            if (it.enabled) {
-                // Run in background for speed
-                GlobalScope.launch {
-                    try {
-                        it.run(context)
-                    } catch (e: SecurityException) {
-                        Utils.snackBar(context, "You have not given permission to to run action ${it.title}.")
-                    } catch (e: Exception) {
-                        Utils.snackBar(context, "Could not run action ${it.title}.")
-                    }
-                }
-            }
-        }
-    }
-
-    private fun loadData(context: Context) {
-        ActionsModel.actions.forEach {
-            it.load(context)
-        }
-    }
-
-    private fun saveData(context: Context) {
-        ActionsModel.actions.forEach {
-            it.save(context)
-        }
+        ActionsModel.saveData(context)
     }
 }

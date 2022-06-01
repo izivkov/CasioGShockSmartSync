@@ -10,11 +10,9 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -24,8 +22,8 @@ import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
+import org.avmedia.gShockPhoneSync.customComponents.ActionsModel
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
-import org.avmedia.gShockPhoneSync.utils.ForegroundService
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataListener
@@ -136,12 +134,19 @@ class MainActivity : AppCompatActivity() {
                         CasioSupport.init()
                     }
                     ProgressEvents.Events.WatchDataCollected -> {
-
                         // We have collected all data from watch.
                         // Send initializer data to watch, se we can set time later
                         WatchDataCollector.runInitCommands()
                         ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
+
                         InactivityWatcher.start(this)
+                    }
+
+                    ProgressEvents.Events.ButtonPressedInfoReceived -> {
+                        if (CasioSupport.isActionButtonPressed()) {
+                            ActionsModel.loadData(this)
+                            ActionsModel.runActions(this)
+                        }
                     }
                     ProgressEvents.Events.Disconnect -> {
                         Timber.i("onDisconnect")
@@ -163,8 +168,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             },
-            { throwable -> Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()})
+            { throwable ->
+                Timber.d("Got error on subscribe: $throwable")
+                throwable.printStackTrace()
+            })
     }
 
     // location

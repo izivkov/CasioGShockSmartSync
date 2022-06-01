@@ -24,7 +24,7 @@
 </string>
     <string name="actions">Actions</string>
     <string name="title_actions">Actions</string>
-    <string name="actions_screen_info">The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.</string>
+    <string name="actions_screen_info">The selected actions are run when the user short-presses the lower-right watch button from the initial screen. With these actions, the watch acts as a remote control for your phone. The app has to be in the foreground to run all actions except setting time.</string>
     <string name="feb_22_mar_24">Feb-22 - Mar-24</string>
     <string name="weekly">WEEKLY</string>
     <string name="title_goes_here">Title goes here</string>

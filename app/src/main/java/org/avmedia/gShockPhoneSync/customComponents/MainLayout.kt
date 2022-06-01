@@ -17,6 +17,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -30,12 +31,13 @@ import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
+
 class MainLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (Utils.isDebugMode()) show () else hide()
+        if (Utils.isDebugMode()) show() else hide()
         createAppEventsSubscription()
     }
 
@@ -47,12 +49,12 @@ class MainLayout @JvmOverloads constructor(
                     ProgressEvents.Events.WatchInitializationCompleted -> {
                         val navController =
                             (context as Activity).findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        if (CasioSupport.isActionButtonPressed ()) {
+
+                        if (CasioSupport.isActionButtonPressed()) {
                             navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
                         } else {
                             navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
                         }
-
                         show()
                     }
                     ProgressEvents.Events.Disconnect -> {

@@ -11,6 +11,8 @@
         <entry key="app/src/main/res/layout/action_map_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/action_take_photo_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.19427083333333334" />
+        <entry key="app/src/main/res/layout/activity_run_actions.xml" value="0.3640625" />
+        <entry key="app/src/main/res/layout/activity_run_actions_actovity.xml" value="0.3640625" />
         <entry key="app/src/main/res/layout/alarm_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/email_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/event_item.xml" value="0.1" />
