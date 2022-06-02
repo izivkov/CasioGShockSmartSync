@@ -37,7 +37,13 @@
         <activity
             android:name="org.avmedia.gShockPhoneSync.MainActivity"
             android:exported="true"
-            android:screenOrientation="fullUser">
+            android:screenOrientation="fullUser"
+            android:rotationAnimation="seamless"
+            android:resizeableActivity="true"
+            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
+            tools:targetApi="O"
+            >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

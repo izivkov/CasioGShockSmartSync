@@ -70,7 +70,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-            val rotation = viewBinding.viewFinder.display?.rotation?: ROTATION_0
+            val rotation = viewBinding.viewFinder.display.rotation
 
             val screenSize = getScreenSize(context as Activity)
             val screenAspectRatio = aspectRatio(screenSize.width, screenSize.height)
