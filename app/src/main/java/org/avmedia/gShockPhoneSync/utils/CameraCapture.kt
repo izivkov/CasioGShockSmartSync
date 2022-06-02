@@ -6,16 +6,17 @@
 
 package org.avmedia.gShockPhoneSync.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
-import android.graphics.Insets
 import android.hardware.camera2.CameraManager
+import android.hardware.display.DisplayManager
 import android.media.MediaActionSound
 import android.os.Build
 import android.provider.MediaStore
 import android.util.DisplayMetrics
-import android.view.WindowInsets
+import android.view.Surface.ROTATION_0
 import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.appcompat.app.AppCompatActivity
@@ -43,11 +44,16 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
     private var cameraManager: CameraManager? = null
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
+    private var imageAnalyzer: ImageAnalysis? = null
     private lateinit var viewBinding: FragmentActionsBinding
     private val windowManager: WindowManager = (context as Activity).windowManager
     private var currentContextView = (context as Activity).contentView
 
     data class ScreenSize(val width: Int, val height: Int)
+
+    private val displayManager by lazy {
+        context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+    }
 
     fun start() {
         currentContextView = (context as Activity).contentView
@@ -58,13 +64,13 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
         startCamera()
     }
 
+    @SuppressLint("WrongConstant")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
-            val rotation = viewBinding.viewFinder.display.rotation
+            val rotation = viewBinding.viewFinder.display?.rotation?: ROTATION_0
 
             val screenSize = getScreenSize(context as Activity)
             val screenAspectRatio = aspectRatio(screenSize.width, screenSize.height)
@@ -75,7 +81,9 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
                 .setTargetRotation(rotation)
                 .build()
 
-            val imageAnalyzer = ImageAnalysis.Builder()
+            imageAnalyzer = ImageAnalysis.Builder()
+                .setTargetRotation(rotation)
+                .setTargetAspectRatio(screenAspectRatio)
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->

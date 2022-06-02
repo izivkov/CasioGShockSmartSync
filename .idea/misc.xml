@@ -9,6 +9,8 @@
         <entry key="app/src/main/res/drawable/ic_help_24dp.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_info_24dp.xml" value="0.185" />
         <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.152" />
+        <entry key="app/src/main/res/layout-land/action_take_photo_item.xml" value="0.1626984126984127" />
+        <entry key="app/src/main/res/layout-land/fragment_actions.xml" value="0.23412698412698413" />
         <entry key="app/src/main/res/layout/action_item.xml" value="0.2509057971014493" />
         <entry key="app/src/main/res/layout/action_map_item.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/action_take_photo_item.xml" value="0.19427083333333334" />
