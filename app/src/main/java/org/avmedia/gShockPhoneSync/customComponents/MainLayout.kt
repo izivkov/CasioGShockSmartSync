@@ -46,7 +46,7 @@ class MainLayout @JvmOverloads constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.Events.ButtonPressedInfoReceived -> {
+                    ProgressEvents.Events.WatchInitializationCompleted -> {
                         if (!CasioSupport.isActionButtonPressed()) {
                             show()
                         }

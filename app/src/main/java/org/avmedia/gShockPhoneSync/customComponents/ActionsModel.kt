@@ -91,7 +91,7 @@ object ActionsModel {
                 {
                     when (it) {
                         // For setting time, we need to wait until the watch has been initialised.
-                        ProgressEvents.Events.WatchDataCollected -> {
+                        ProgressEvents.Events.WatchInitializationCompleted -> {
                             if (!Utils.isDebugMode()) {
                                 sendMessage(
                                     "{ action: \"SET_TIME\", value: ${

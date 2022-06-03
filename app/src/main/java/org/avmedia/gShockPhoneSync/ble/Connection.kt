@@ -260,6 +260,7 @@ object Connection : IConnection {
                 gatt.close()
                 deviceGattMap.remove(device)
                 ProgressEvents.Events.Disconnect.payload = device
+                Timber.i("************** sending disconnect event...")
                 ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
                 signalEndOfOperation()
             }
@@ -382,6 +383,10 @@ object Connection : IConnection {
                 }
             } else {
                 Timber.e("onConnectionStateChange: status $status encountered for $deviceAddress!")
+                if (status == 8 || status == 19) { // out of range or disconnected by device
+                    // inform disconnected.
+                    ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
+                }
 
                 if (pendingOperation is Connect) {
                     signalEndOfOperation()
