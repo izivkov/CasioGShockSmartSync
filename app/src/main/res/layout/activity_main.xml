@@ -95,4 +95,25 @@
         </fragment>
 
     </org.avmedia.gShockPhoneSync.customComponents.MainLayout>
+
+    <org.avmedia.gShockPhoneSync.customComponents.ActionRunnerLayout
+        android:id="@+id/action_runner_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <TextView
+            android:id="@+id/action_runner_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/running_actions"
+            android:textSize="32dp"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
+
+    </org.avmedia.gShockPhoneSync.customComponents.ActionRunnerLayout>
 </FrameLayout>

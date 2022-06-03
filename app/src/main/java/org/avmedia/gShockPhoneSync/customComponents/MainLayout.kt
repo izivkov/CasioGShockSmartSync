@@ -46,16 +46,10 @@ class MainLayout @JvmOverloads constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.Events.WatchInitializationCompleted -> {
-                        val navController =
-                            (context as Activity).findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-
-                        if (CasioSupport.isActionButtonPressed()) {
-                            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_actions)
-                        } else {
-                            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
+                    ProgressEvents.Events.ButtonPressedInfoReceived -> {
+                        if (!CasioSupport.isActionButtonPressed()) {
+                            show()
                         }
-                        show()
                     }
                     ProgressEvents.Events.Disconnect -> {
                         hide()

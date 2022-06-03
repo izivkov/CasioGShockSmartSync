@@ -102,6 +102,11 @@ object WatchDataCollector {
 
             if (isComplete()) {
                 ProgressEvents.onNext(ProgressEvents.Events.WatchDataCollected)
+
+                // We have collected all data from watch.
+                // Send initializer data to watch, se we can set time later
+                runInitCommands()
+                ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
             }
         })
     }

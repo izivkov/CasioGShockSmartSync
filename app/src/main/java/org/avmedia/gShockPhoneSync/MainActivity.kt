@@ -134,21 +134,9 @@ class MainActivity : AppCompatActivity() {
                         CasioSupport.init()
                     }
                     ProgressEvents.Events.WatchDataCollected -> {
-
-                        // We have collected all data from watch.
-                        // Send initializer data to watch, se we can set time later
-                        WatchDataCollector.runInitCommands()
-                        ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
-
                         InactivityWatcher.start(this)
                     }
 
-                    ProgressEvents.Events.ButtonPressedInfoReceived -> {
-                        if (CasioSupport.isActionButtonPressed()) {
-                            ActionsModel.loadData(this)
-                            ActionsModel.runActions(this)
-                        }
-                    }
                     ProgressEvents.Events.Disconnect -> {
                         Timber.i("onDisconnect")
                         InactivityWatcher.cancel()

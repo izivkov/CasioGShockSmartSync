@@ -4,6 +4,15 @@
  * Last modified 2022-03-29, 11:56 a.m.
  */
 
+/*
+ * Developed by:
+ *
+ * Ivo Zivkov
+ * izivkov@gmail.com
+ *
+ * Date: 2020-12-27, 10:58 p.m.
+ */
+
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
@@ -13,17 +22,17 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
+import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
-class ConnectionLayout @JvmOverloads constructor(
+class ActionRunnerLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (Utils.isDebugMode()) hide () else show()
-        createAppEventsSubscription ()
+        hide()
+        createAppEventsSubscription()
     }
 
     private fun createAppEventsSubscription(): Disposable =
@@ -32,10 +41,15 @@ class ConnectionLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.ButtonPressedInfoReceived -> {
-                        hide()
+                        if (CasioSupport.isActionButtonPressed()) {
+                            show()
+
+                            ActionsModel.loadData(context)
+                            ActionsModel.runActions(context)
+                        }
                     }
                     ProgressEvents.Events.Disconnect -> {
-                        show()
+                        hide()
                     }
                 }
             }
