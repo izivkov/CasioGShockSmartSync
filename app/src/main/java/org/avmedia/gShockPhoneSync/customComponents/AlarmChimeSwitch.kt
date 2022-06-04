@@ -9,8 +9,6 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.CompoundButton
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import timber.log.Timber
 
 class AlarmChimeSwitch @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -18,7 +16,9 @@ class AlarmChimeSwitch @JvmOverloads constructor(
 
     init {
         setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            AlarmsModel.alarms[0].hasHourlyChime = isChecked
+            if (AlarmsModel.alarms.isNotEmpty()) {
+                AlarmsModel.alarms[0].hasHourlyChime = isChecked
+            }
         })
     }
 }
