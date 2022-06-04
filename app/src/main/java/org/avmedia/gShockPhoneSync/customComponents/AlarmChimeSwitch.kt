@@ -17,24 +17,8 @@ class AlarmChimeSwitch @JvmOverloads constructor(
 ) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs) {
 
     init {
-        createAppEventsSubscription()
-    }
-
-    private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(
-            this.javaClass.simpleName,
-
-            {
-                when (it) {
-                    ProgressEvents.Events.AlarmDataLoaded -> {
-                        isChecked = AlarmsModel.alarms[0].hasHourlyChime
-
-                        setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            AlarmsModel.alarms[0].hasHourlyChime = isChecked
-                        })
-                    }
-                }
-            },
-            { throwable -> Timber.d("Got error on subscribe: $throwable") })
+        setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            AlarmsModel.alarms[0].hasHourlyChime = isChecked
+        })
     }
 }
