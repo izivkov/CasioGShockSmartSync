@@ -56,6 +56,7 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsModel.Alarm>) :
             alarmEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
                 alarm.enabled = isChecked
             })
+
             (viewHolder.itemView as AlarmItem).setAlarmData(alarm)
             viewHolder.itemView.setOnDataChange(::notifyDataSetChanged)
         } catch (e: ParseException) {
