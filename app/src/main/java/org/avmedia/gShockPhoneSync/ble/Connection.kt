@@ -24,7 +24,6 @@ import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.reflect.KFunction
 
 private const val GATT_MIN_MTU_SIZE = 23
 
@@ -260,7 +259,6 @@ object Connection : IConnection {
                 gatt.close()
                 deviceGattMap.remove(device)
                 ProgressEvents.Events.Disconnect.payload = device
-                Timber.i("************** sending disconnect event...")
                 ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
                 signalEndOfOperation()
             }
