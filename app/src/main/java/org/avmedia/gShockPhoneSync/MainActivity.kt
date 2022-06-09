@@ -42,6 +42,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bleScannerLocal: BleScannerLocal
     private lateinit var permissionManager: PermissionManager
 
+    init {
+        instance = this
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -181,6 +185,15 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }.show()
+    }
+
+    companion object {
+        private var instance: MainActivity? = null
+
+        // Make context available from anywhere in the code (not yet used).
+        fun applicationContext() : Context {
+            return instance!!.applicationContext
+        }
     }
 }
 

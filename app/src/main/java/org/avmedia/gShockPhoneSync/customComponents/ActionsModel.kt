@@ -23,28 +23,28 @@ import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
-import org.avmedia.gShockPhoneSync.utils.CameraCapture
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gShockPhoneSync.utils.*
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.Clock
 import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 
 object ActionsModel {
 
     val actions = ArrayList<ActionsModel.Action>()
 
+    enum class RUN_MODE(value: Int) {
+        SYNC(0), ASYNC(1),
+    }
+
     init {
         // actions.add(MapAction("Map", false))
         // actions.add(SetLocationAction("Save location to G-maps", false))
         actions.add(SetTimeAction("Set Time", true))
+        actions.add(SetEventsAction("Set Reminders from Google Calender", false))
         actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.BACK))
+        actions.add(ToggleFlashlightAction("Toggle Flashlight", false))
         actions.add(StartVoiceAssistAction("Start Voice Assist", true))
 
         actions.add(Separator("Emergency Actions:", false))
@@ -56,7 +56,8 @@ object ActionsModel {
     abstract class Action(
         open var title: String,
         open var enabled: Boolean,
-        var isEmergency: Boolean = false
+        var isEmergency: Boolean = false,
+        var runMode: RUN_MODE = RUN_MODE.SYNC
     ) {
         abstract fun run(context: Context)
 
@@ -73,6 +74,38 @@ object ActionsModel {
 
         open fun validate(context: Context): Boolean {
             return true
+        }
+    }
+
+    class SetEventsAction(override var title: String, override var enabled: Boolean) :
+        Action(title, enabled) {
+
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+
+            EventsModel.init(context)
+            sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
+
+            Utils.snackBar(context, "Events Sent to Watch")
+        }
+
+        override fun load(context: Context) {
+            val key = this.javaClass.simpleName + ".enabled"
+            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+        }
+    }
+
+    class ToggleFlashlightAction(override var title: String, override var enabled: Boolean) :
+        Action(title, enabled) {
+
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            Flashlight.toggle(context)
+        }
+
+        override fun load(context: Context) {
+            val key = this.javaClass.simpleName + ".enabled"
+            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
     }
 
@@ -163,7 +196,8 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
-            val dialIntent = Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            val dialIntent =
+                Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             dialIntent.data = Uri.parse("tel:$phoneNumber")
             context.startActivity(dialIntent)
         }
@@ -308,21 +342,38 @@ object ActionsModel {
         }
     }
 
+    /*
+    Note: Alternatively, actions can run autonomously, when certain conditions were met:
+    1. User pressed Action button (lower-right) on the watch
+    2. The action is enabled
+    3. Certain progress event received.
+
+    However, this way gives us more control on how to start the actions.
+     */
+
     fun runActions(context: Context) {
-        actions.forEach {
+        fun runIt(action: Action) {
+            try {
+                action.run(context)
+            } catch (e: SecurityException) {
+                Utils.snackBar(
+                    context,
+                    "You have not given permission to to run action ${action.title}."
+                )
+            } catch (e: Exception) {
+                Utils.snackBar(context, "Could not run action ${action.title}. Reason: $e")
+            }
+        }
+
+        actions.sortedWith(compareBy { it.runMode.ordinal }).forEach { // sort by async mode first
             if (it.enabled) {
                 // Run in background for speed
-                GlobalScope.launch {
-                    try {
-                        it.run(context)
-                    } catch (e: SecurityException) {
-                        Utils.snackBar(
-                            context,
-                            "You have not given permission to to run action ${it.title}."
-                        )
-                    } catch (e: Exception) {
-                        Utils.snackBar(context, "Could not run action ${it.title}.")
+                if (it.runMode == RUN_MODE.ASYNC) {
+                    GlobalScope.launch {
+                        runIt(it)
                     }
+                } else {
+                    runIt(it)
                 }
             }
         }

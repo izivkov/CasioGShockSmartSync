@@ -6,12 +6,10 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
@@ -24,7 +22,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     enum class ACTION_TYPES {
-        BASE_ACTION, SEPARATOR, MAP, PHOTO, PHONE_CALL, LOCATION, EMAIL, SET_TIME, ACTIVATE_VOICE_ASSISTANT
+        BASE_ACTION, SEPARATOR, MAP, PHOTO, PHONE_CALL, LOCATION, EMAIL, SET_TIME, ACTIVATE_VOICE_ASSISTANT, SET_EVENTS, TOGGLE_FLASHLIGHT
     }
 
     open inner class ViewHolderBaseAction(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -36,6 +34,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     inner class ViewHolderSetTime(itemView: View) : ViewHolderBaseAction(itemView)
+    inner class ViewHolderSetEvents(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderStartVoiceAssis(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderMap(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -44,6 +43,12 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
         var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
         val radioGroup: RadioGroup = itemView.findViewById<RadioGroup>(R.id.cameraOrientationGroup)
+        val actionEnabled: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+    }
+
+    inner class ViewHolderActionToggleFlashlight (itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val title: TextView = itemView.findViewById<TextView>(R.id.title)
+        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
         val actionEnabled: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
     }
 
@@ -70,6 +75,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     override fun getItemViewType(position: Int): Int {
 
         if (actions[position] is ActionsModel.PhotoAction) { return ACTION_TYPES.PHOTO.ordinal }
+        if (actions[position] is ActionsModel.ToggleFlashlightAction) { return ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal }
         if (actions[position] is ActionsModel.Separator) { return ACTION_TYPES.SEPARATOR.ordinal }
         if (actions[position] is ActionsModel.PhoneDialAction) { return ACTION_TYPES.PHONE_CALL.ordinal }
         if (actions[position] is ActionsModel.EmailLocationAction) { return ACTION_TYPES.EMAIL.ordinal }
@@ -77,6 +83,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         if (actions[position] is ActionsModel.SetTimeAction) { return ACTION_TYPES.SET_TIME.ordinal }
         if (actions[position] is ActionsModel.SetLocationAction) { return ACTION_TYPES.LOCATION.ordinal }
         if (actions[position] is ActionsModel.StartVoiceAssistAction) { return ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal }
+        if (actions[position] is ActionsModel.SetEventsAction) { return ACTION_TYPES.SET_EVENTS.ordinal }
 
         return ACTION_TYPES.BASE_ACTION.ordinal
     }
@@ -95,6 +102,11 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                     inflater.inflate(R.layout.action_take_photo_item, parent, false)
                 ViewHolderActionTakePhoto(vPhoto)
             }
+            ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal -> {
+                val vFlashlight: View =
+                    inflater.inflate(R.layout.action_item, parent, false)
+                ViewHolderActionToggleFlashlight(vFlashlight)
+            }
             ACTION_TYPES.SEPARATOR.ordinal -> {
                 val vSeparator: View = inflater.inflate(R.layout.separator_item, parent, false)
                 ViewHolderActionSeparator(vSeparator)
@@ -110,6 +122,10 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vSetTime: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderSetTime(vSetTime)
+            }
+            ACTION_TYPES.SET_EVENTS.ordinal -> {
+                val vSetEvents: View = inflater.inflate(R.layout.action_item, parent, false)
+                ViewHolderSetEvents(vSetEvents)
             }
             ACTION_TYPES.LOCATION.ordinal -> {
                 val vLocation: View = inflater.inflate(R.layout.action_item, parent, false)
@@ -136,6 +152,10 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 val vhPhoto = viewHolder as ViewHolderActionTakePhoto
                 configureActionTakePhoto(vhPhoto, position)
             }
+            ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal -> {
+                val vhFlashlight = viewHolder as ViewHolderActionToggleFlashlight
+                configureActionToggleFlashlight(vhFlashlight, position)
+            }
             ACTION_TYPES.SEPARATOR.ordinal -> {
                 val vhSeparator = viewHolder as ViewHolderActionSeparator
                 configureSeparator(vhSeparator, position)
@@ -155,6 +175,10 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vhTime = viewHolder as ViewHolderSetTime
                 configureTime(vhTime, position)
+            }
+            ACTION_TYPES.SET_EVENTS.ordinal -> {
+                val vhEvents = viewHolder as ViewHolderSetEvents
+                configureEvents(vhEvents, position)
             }
             ACTION_TYPES.LOCATION.ordinal -> {
                 val vhLocation = viewHolder as ViewHolderSaveLocation
@@ -204,6 +228,17 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhTime.icon.setImageResource(R.drawable.time)
 
         vhTime.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            action.enabled = isChecked
+        })
+    }
+
+    private fun configureEvents(vhEvents: ActionAdapter.ViewHolderSetEvents, position: Int) {
+        val action: ActionsModel.SetEventsAction = actions[position] as ActionsModel.SetEventsAction
+        vhEvents.title.text = action.title
+        vhEvents.actionEnabled.isChecked = action.enabled
+        vhEvents.icon.setImageResource(R.drawable.events)
+
+        vhEvents.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
     }
@@ -310,6 +345,20 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                     action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.BACK
                 }
             })
+    }
+
+    private fun configureActionToggleFlashlight(
+        vhFlashlight: ActionAdapter.ViewHolderActionToggleFlashlight,
+        position: Int
+    ) {
+        val action: ActionsModel.ToggleFlashlightAction = actions[position] as ActionsModel.ToggleFlashlightAction
+        vhFlashlight.actionEnabled.isChecked = action.enabled
+        vhFlashlight.title.text = action.title
+        vhFlashlight.icon.setImageResource(R.drawable.flashlight)
+
+        vhFlashlight.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            action.enabled = isChecked
+        })
     }
 
     override fun getItemCount(): Int {

@@ -16,14 +16,13 @@ import android.media.MediaActionSound
 import android.os.Build
 import android.provider.MediaStore
 import android.util.DisplayMetrics
-import android.view.Surface.ROTATION_0
-import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import org.avmedia.gShockPhoneSync.customComponents.ActionsModel.FileSpecs.RATIO_16_9_VALUE
 import org.avmedia.gShockPhoneSync.customComponents.ActionsModel.FileSpecs.RATIO_4_3_VALUE
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
@@ -41,12 +40,11 @@ import kotlin.math.min
 typealias LumaListener = (luma: Double) -> Unit
 
 class CameraCapture(val context: Context, private val cameraSelector: CameraSelector) {
-    private var cameraManager: CameraManager? = null
+    private var cameraManager: CameraManager? = context.getSystemService() as CameraManager?
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private lateinit var viewBinding: FragmentActionsBinding
-    private val windowManager: WindowManager = (context as Activity).windowManager
     private var currentContextView = (context as Activity).contentView
 
     data class ScreenSize(val width: Int, val height: Int)
