@@ -28,7 +28,7 @@ object WatchDataCollector {
     var bleFeatures: String = ""
 
     init {
-        subscribe("CASIO_BLE_FEATURES", ::onDataReceived)
+        subscribe("CASIO_BLE_FEATURES", ::onButtonPressedInfoReceived)
         subscribe("CASIO_DST_SETTING", ::onDataReceived)
         subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
@@ -44,13 +44,29 @@ object WatchDataCollector {
         worldCities.clear()
 
         Connection.enableNotifications()
+        requestButtonPressedInformation ()
+    }
 
-        getAllWatchSettings()
+    private fun requestButtonPressedInformation () {
+        // CASIO_BLE_FEATURES, determine which button was pressed from these.
+        writeCmd (0xC, "10")
     }
 
     private fun onDataReceived(data: String) {
         add(data)
         --unmatchedCmdCount
+    }
+
+    private fun onButtonPressedInfoReceived(data: String) {
+        add(data)
+
+        /* Normally for running actions we do not need full watch configuration.
+        One exception is [setting time] action. This action requests
+        full configuration explicitly.
+         */
+        if (!CasioSupport.isActionButtonPressed()) {
+            requestCompleteWatchSettings()
+        }
     }
 
     fun toJson(command: String): JSONObject {
@@ -111,10 +127,7 @@ object WatchDataCollector {
         })
     }
 
-    private fun getAllWatchSettings() {
-
-        // CASIO_BLE_FEATURES, determine which button was pressed from these.
-        writeCmdWithResponseCount(0xC, "10")
+    fun requestCompleteWatchSettings() {
 
         // get DTS watch state
         writeCmdWithResponseCount(0xC, "1d00")
@@ -147,7 +160,7 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "22")
     }
 
-    fun runInitCommands() {
+    private fun runInitCommands() {
         dstSettings.forEach { command ->
             writeCmdWithResponseCount(0xe, command)
         }

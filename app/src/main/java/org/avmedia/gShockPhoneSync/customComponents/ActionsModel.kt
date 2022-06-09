@@ -115,6 +115,9 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             createAppEventsSubscription()
+
+            // in order to set time, we need to get complete watch configuration.
+            WatchDataCollector.requestCompleteWatchSettings()
         }
 
         private fun createAppEventsSubscription() {
