@@ -3,7 +3,7 @@
  * Copyright (c) 2022 . All rights reserved.
  * Last modified 2022-03-20, 9:42 p.m.
  */
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.alarms
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,8 +11,6 @@ import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.avmedia.gShockPhoneSync.ble.Connection
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmAdapter
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.jetbrains.anko.runOnUiThread

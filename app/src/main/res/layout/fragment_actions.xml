@@ -29,7 +29,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpUsage" />
 
-    <org.avmedia.gShockPhoneSync.customComponents.ActionList
+    <org.avmedia.gShockPhoneSync.ui.actions.ActionList
         android:id="@+id/actionList"
         android:layout_width="0dp"
         android:layout_height="0dp"

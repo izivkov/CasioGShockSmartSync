@@ -29,7 +29,7 @@
 
     <!-- Recycling view -->
 
-    <org.avmedia.gShockPhoneSync.customComponents.AlarmList
+    <org.avmedia.gShockPhoneSync.ui.alarms.AlarmList
         android:id="@+id/alarmList"
         android:layout_width="0dp"
         android:layout_height="0dp"
