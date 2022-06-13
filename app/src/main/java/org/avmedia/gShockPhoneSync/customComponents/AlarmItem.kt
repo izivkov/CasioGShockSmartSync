@@ -4,7 +4,7 @@
  * Last modified 2022-03-29, 5:57 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.ui.alarms
+package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
@@ -15,6 +15,7 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import kotlin.reflect.KFunction
 
 class AlarmItem @JvmOverloads constructor(

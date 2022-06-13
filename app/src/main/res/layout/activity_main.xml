@@ -96,7 +96,7 @@
 
     </org.avmedia.gShockPhoneSync.customComponents.MainLayout>
 
-    <org.avmedia.gShockPhoneSync.ui.actions.ActionRunnerLayout
+    <org.avmedia.gShockPhoneSync.customComponents.ActionRunnerLayout
         android:id="@+id/action_runner_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -115,5 +115,5 @@
             app:layout_constraintBottom_toBottomOf="parent"
             />
 
-    </org.avmedia.gShockPhoneSync.ui.actions.ActionRunnerLayout>
+    </org.avmedia.gShockPhoneSync.customComponents.ActionRunnerLayout>
 </FrameLayout>

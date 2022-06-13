@@ -4,11 +4,12 @@
  * Last modified 2022-03-29, 5:57 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.ui.events
+package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.TextView
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import kotlin.reflect.KFunction
 
 class EventItem @JvmOverloads constructor(

@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.customComponents.EventItem
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 import java.text.ParseException

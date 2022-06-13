@@ -3,12 +3,14 @@
  * Copyright (c) 2022 . All rights reserved.
  * Last modified 2022-05-06, 7:00 p.m.
  */
-package org.avmedia.gShockPhoneSync.ui.actions
+package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.avmedia.gShockPhoneSync.ui.actions.ActionAdapter
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 

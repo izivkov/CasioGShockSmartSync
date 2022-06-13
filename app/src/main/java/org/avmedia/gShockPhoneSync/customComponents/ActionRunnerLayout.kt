@@ -13,7 +13,7 @@
  * Date: 2020-12-27, 10:58 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.ui.actions
+package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
@@ -23,6 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 

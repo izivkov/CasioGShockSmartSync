@@ -25,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpUsage" />
 
-    <org.avmedia.gShockPhoneSync.ui.events.EventList
+    <org.avmedia.gShockPhoneSync.customComponents.EventList
         android:id="@+id/eventList"
         android:layout_width="0dp"
         android:layout_height="0dp"

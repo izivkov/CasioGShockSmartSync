@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.customComponents.AlarmItem
 import timber.log.Timber
 import java.text.ParseException
 import java.util.Date

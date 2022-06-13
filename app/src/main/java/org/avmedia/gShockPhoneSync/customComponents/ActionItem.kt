@@ -4,10 +4,11 @@
  * Last modified 2022-03-29, 5:57 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.ui.actions
+package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import kotlin.reflect.KFunction
 
 class ActionItem @JvmOverloads constructor(
