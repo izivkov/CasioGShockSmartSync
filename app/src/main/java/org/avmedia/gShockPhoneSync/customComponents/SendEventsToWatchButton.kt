@@ -7,11 +7,10 @@
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
-import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.annotation.RequiresApi
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendEventsToWatchButton @JvmOverloads constructor(

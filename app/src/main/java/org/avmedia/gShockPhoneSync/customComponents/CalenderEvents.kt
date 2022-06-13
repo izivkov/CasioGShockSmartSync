@@ -12,6 +12,7 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar

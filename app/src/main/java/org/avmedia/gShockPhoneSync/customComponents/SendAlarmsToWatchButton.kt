@@ -10,6 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendAlarmsToWatchButton @JvmOverloads constructor(

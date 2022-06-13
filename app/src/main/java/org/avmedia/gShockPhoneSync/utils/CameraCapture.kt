@@ -23,8 +23,8 @@ import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import org.avmedia.gShockPhoneSync.customComponents.ActionsModel.FileSpecs.RATIO_16_9_VALUE
-import org.avmedia.gShockPhoneSync.customComponents.ActionsModel.FileSpecs.RATIO_4_3_VALUE
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_16_9_VALUE
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_4_3_VALUE
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.jetbrains.anko.contentView
 import timber.log.Timber

@@ -4,7 +4,7 @@
  * Last modified 2022-03-20, 7:47 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.alarms
 
 import com.google.gson.Gson
 

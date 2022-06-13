@@ -3,7 +3,7 @@
  * Copyright (c) 2022 . All rights reserved.
  * Last modified 2022-03-20, 9:42 p.m.
  */
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.events
 
 import android.content.Context
 import android.util.AttributeSet

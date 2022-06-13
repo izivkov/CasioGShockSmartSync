@@ -4,14 +4,13 @@
  * Last modified 2022-03-20, 7:47 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.events
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.util.Preconditions.checkArgument
 import com.google.gson.Gson
+import org.avmedia.gShockPhoneSync.customComponents.CalenderEvents
 import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.Instant
@@ -175,11 +174,11 @@ object EventsModel {
         return (events.filter { it.selected } as ArrayList<Event>).size
     }
 
-    fun createEventDate(timeMs: Long, zone: ZoneId): EventsModel.EventDate {
+    fun createEventDate(timeMs: Long, zone: ZoneId): EventDate {
         val start: LocalDate =
             Instant.ofEpochMilli(timeMs).atZone(zone)
                 .toLocalDate()
-        return EventsModel.EventDate(
+        return EventDate(
             start.year,
             start.month,
             start.dayOfMonth

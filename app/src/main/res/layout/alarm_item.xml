@@ -6,7 +6,7 @@
   ~ Last modified 2022-03-28, 3:16 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.customComponents.AlarmItem
+<org.avmedia.gShockPhoneSync.ui.alarms.AlarmItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -71,4 +71,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</org.avmedia.gShockPhoneSync.customComponents.AlarmItem>
+</org.avmedia.gShockPhoneSync.ui.alarms.AlarmItem>

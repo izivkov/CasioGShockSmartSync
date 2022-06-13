@@ -29,7 +29,7 @@
 
     <!-- Recycling view -->
 
-    <org.avmedia.gShockPhoneSync.customComponents.AlarmList
+    <org.avmedia.gShockPhoneSync.ui.alarms.AlarmList
         android:id="@+id/alarmList"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -42,7 +42,7 @@
         app:layout_constraintVertical_bias="0.0"
         />
 
-    <org.avmedia.gShockPhoneSync.customComponents.AlarmChimeSwitch
+    <org.avmedia.gShockPhoneSync.ui.alarms.AlarmChimeSwitch
         android:id="@+id/chime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -4,7 +4,7 @@
  * Last modified 2022-05-07, 7:52 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.view.LayoutInflater
 import android.view.View
@@ -197,7 +197,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureVoiceAssistant(
-        vhVoiceAssistant: ActionAdapter.ViewHolderStartVoiceAssis,
+        vhVoiceAssistant: ViewHolderStartVoiceAssis,
         position: Int
     ) {
         val action: ActionsModel.StartVoiceAssistAction = actions[position] as ActionsModel.StartVoiceAssistAction
@@ -210,7 +210,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         })
     }
 
-    private fun configureLocation(vhLocation: ActionAdapter.ViewHolderSaveLocation, position: Int) {
+    private fun configureLocation(vhLocation: ViewHolderSaveLocation, position: Int) {
         val action: ActionsModel.SetLocationAction = actions[position] as ActionsModel.SetLocationAction
         vhLocation.title.text = action.title
         vhLocation.actionEnabled.isChecked = action.enabled
@@ -221,7 +221,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         })
     }
 
-    private fun configureTime(vhTime: ActionAdapter.ViewHolderSetTime, position: Int) {
+    private fun configureTime(vhTime: ViewHolderSetTime, position: Int) {
         val action: ActionsModel.SetTimeAction = actions[position] as ActionsModel.SetTimeAction
         vhTime.title.text = action.title
         vhTime.actionEnabled.isChecked = action.enabled
@@ -232,7 +232,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         })
     }
 
-    private fun configureEvents(vhEvents: ActionAdapter.ViewHolderSetEvents, position: Int) {
+    private fun configureEvents(vhEvents: ViewHolderSetEvents, position: Int) {
         val action: ActionsModel.SetEventsAction = actions[position] as ActionsModel.SetEventsAction
         vhEvents.title.text = action.title
         vhEvents.actionEnabled.isChecked = action.enabled
@@ -292,7 +292,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureSeparator(
-        vhBaseAction: ActionAdapter.ViewHolderActionSeparator,
+        vhBaseAction: ViewHolderActionSeparator,
         position: Int
     ) {
         val action: ActionsModel.Action = actions[position]
@@ -300,14 +300,14 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureMap(
-        vhBaseAction: ActionAdapter.ViewHolderMap,
+        vhBaseAction: ViewHolderMap,
         position: Int
     ) {
         val action: ActionsModel.Action = actions[position]
     }
 
     private fun configureBaseActionViewHolder(
-        vhBaseAction: ActionAdapter.ViewHolderBaseAction,
+        vhBaseAction: ViewHolderBaseAction,
         position: Int
     ) {
         val action: ActionsModel.Action = actions[position]
@@ -320,7 +320,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureActionTakePhoto(
-        vhPhoto: ActionAdapter.ViewHolderActionTakePhoto,
+        vhPhoto: ViewHolderActionTakePhoto,
         position: Int
     ) {
         val action: ActionsModel.PhotoAction = actions[position] as ActionsModel.PhotoAction
@@ -348,7 +348,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureActionToggleFlashlight(
-        vhFlashlight: ActionAdapter.ViewHolderActionToggleFlashlight,
+        vhFlashlight: ViewHolderActionToggleFlashlight,
         position: Int
     ) {
         val action: ActionsModel.ToggleFlashlightAction = actions[position] as ActionsModel.ToggleFlashlightAction

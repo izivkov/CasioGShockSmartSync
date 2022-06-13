@@ -21,8 +21,6 @@ import org.avmedia.gShockPhoneSync.ble.BleScannerLocal
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
-import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
-import org.avmedia.gShockPhoneSync.customComponents.ActionsModel
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils

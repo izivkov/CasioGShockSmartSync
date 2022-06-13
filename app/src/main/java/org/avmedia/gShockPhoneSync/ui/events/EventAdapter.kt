@@ -4,7 +4,7 @@
  * Last modified 2022-03-21, 11:19 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.events
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater

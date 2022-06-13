@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.WeekdayNum
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.LocalDate

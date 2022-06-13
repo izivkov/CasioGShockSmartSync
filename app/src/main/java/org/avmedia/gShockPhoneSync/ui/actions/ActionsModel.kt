@@ -4,10 +4,9 @@
  * Last modified 2022-03-20, 7:47 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.app.Activity
-import android.bluetooth.BluetoothDevice
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -16,13 +15,10 @@ import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.avmedia.gShockPhoneSync.InactivityWatcher
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
-import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
 import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.*
 import timber.log.Timber
 import java.io.File
@@ -32,7 +28,7 @@ import java.util.*
 
 object ActionsModel {
 
-    val actions = ArrayList<ActionsModel.Action>()
+    val actions = ArrayList<Action>()
 
     enum class RUN_MODE(value: Int) {
         SYNC(0), ASYNC(1),

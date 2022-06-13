@@ -13,6 +13,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.ble.Connection
+import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
