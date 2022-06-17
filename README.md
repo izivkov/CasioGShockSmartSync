@@ -1,4 +1,4 @@
-> **_NOTE:_** We are looking for contributors to add support for other watches. Specifically, the G-Shock [GMWB5000 series](https://gshock.casio.com/us/products/full-metal/gmw-b5000/) are similar to the B5600, and should be not too hard to implement. Drop me a note if you are interested to contribute.
+> **_NOTE:_** We are looking for contributors to add support for other watches. Specifically, the G-Shock [GMWB5000 series](https://gshock.casio.com/us/products/full-metal/gmw-b5000/) are similar to the B5600, and should be not too hard to implement. Drop me a note at <izivkov@gmail.com> if you are interested to contribute.
 
 # Casio G-Shock Phone Sync
 
