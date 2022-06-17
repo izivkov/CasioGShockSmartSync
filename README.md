@@ -1,3 +1,5 @@
+**_NOTE:_** We are looking for contributors to add support for other watches. Specifically, the G-Shock [GMWB5000 series](https://gshock.casio.com/us/products/full-metal/gmw-b5000/) are similar to the B5600, and should be not too hard to implement. Drop me a note if you are interested.
+
 # Casio G-Shock Phone Sync
 
 This app integrates the Casio G-shock [B5600 series bluetooth watches](https://world.g-shock.com/asia-mea/en/products/standard_digital/gw-b5600/), 
