@@ -4,7 +4,8 @@
   ~ Last modified 2022-03-12, 10:11 a.m.
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/actions_root"
@@ -14,6 +15,7 @@
 
     <androidx.camera.view.PreviewView
         android:id="@+id/view_finder"
+        android:alpha="0"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

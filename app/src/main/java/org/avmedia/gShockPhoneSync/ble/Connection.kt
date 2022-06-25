@@ -367,8 +367,6 @@ object Connection : IConnection {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     ProgressEvents.onNext(ProgressEvents.Events.ConnectionStarted)
-                    Timber.w("onConnectionStateChange: connected to $deviceAddress")
-
                     deviceGattMap[gatt.device] = gatt
 
                     Handler(Looper.getMainLooper()).post {
@@ -381,9 +379,8 @@ object Connection : IConnection {
                 }
             } else {
                 Timber.e("onConnectionStateChange: status $status encountered for $deviceAddress!")
-                if (status == 8 || status == 19) { // out of range or disconnected by device
-                    // inform disconnected.
-                    ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
+                if (status == 19) { // disconnected by device
+                    Timber.d("Got error $status")
                 }
 
                 if (pendingOperation is Connect) {

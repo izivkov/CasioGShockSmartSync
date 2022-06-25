@@ -288,6 +288,7 @@
     <color name="colorPrimary">@color/indigo_500</color>
     <color name="colorPrimaryDark">@color/indigo_700</color>
     <color name="colorAccent">@color/pink_A200</color>
+    <color name="colorBackground">@color/amber_50</color>
 
     <!--Light Background Dark Text-->
     <color name="light_bg_dark_primary_text">#DE000000</color>
