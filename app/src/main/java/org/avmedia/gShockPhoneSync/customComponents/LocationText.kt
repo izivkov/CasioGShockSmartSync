@@ -15,10 +15,10 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
 import android.util.AttributeSet
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
+//import com.google.android.gms.location.FusedLocationProviderClient
+//import com.google.android.gms.location.LocationCallback
+//import com.google.android.gms.location.LocationRequest
+//import com.google.android.gms.location.LocationServices
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 import java.util.*
@@ -28,7 +28,7 @@ class LocationText @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
-    lateinit var mFusedLocationClient: FusedLocationProviderClient
+    // lateinit var mFusedLocationClient: FusedLocationProviderClient
 
     private object LastLocation {
         var cachedLocation: String = ""
@@ -37,7 +37,7 @@ class LocationText @JvmOverloads constructor(
     init {
         text = LastLocation.cachedLocation
         if (text.isEmpty()) {
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            // mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             createAppEventsSubscription()
         }
     }
@@ -49,13 +49,14 @@ class LocationText @JvmOverloads constructor(
             {
                 when (it) {
                     ProgressEvents.Events.AllPermissionsAccepted -> {
-                        getLastLocation()
+                        // getLastLocation()
                     }
                 }
             },
             { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
 
+    /*
     @SuppressLint("MissingPermission")
     private fun getLastLocation() {
         if (isLocationEnabled()) {
@@ -63,7 +64,7 @@ class LocationText @JvmOverloads constructor(
                 try {
                     var location: Location? = task.result
                     if (location == null) {
-                        requestNewLocationData()
+                        // requestNewLocationData()
                     } else {
                         val geoCoder = Geocoder(context, Locale.getDefault())
                         val addresses: List<Address> =
@@ -79,7 +80,9 @@ class LocationText @JvmOverloads constructor(
             }
         }
     }
+     */
 
+    /*
     @SuppressLint("MissingPermission")
     private fun requestNewLocationData() {
         var mLocationRequest = LocationRequest()
@@ -94,18 +97,19 @@ class LocationText @JvmOverloads constructor(
             Looper.myLooper()!!
         )
     }
+     */
 
-    private val mLocationCallback = object : LocationCallback() {
-        fun callBack() {
-            Timber.d("mLocationCallback called...")
-        }
-    }
-
-    private fun isLocationEnabled(): Boolean {
-        var locationManager: LocationManager =
-            context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
-    }
+//    private val mLocationCallback = object : LocationCallback() {
+//        fun callBack() {
+//            Timber.d("mLocationCallback called...")
+//        }
+//    }
+//
+//    private fun isLocationEnabled(): Boolean {
+//        var locationManager: LocationManager =
+//            context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+//        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+//            LocationManager.NETWORK_PROVIDER
+//        )
+//    }
 }
