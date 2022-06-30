@@ -56,15 +56,6 @@
                 android:textSize="34dp"
                 tools:ignore="SpUsage" />
 
-            <org.avmedia.gShockPhoneSync.customComponents.LocationText
-                android:id="@+id/location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="16dp"
-                tools:ignore="SpUsage" />
-
         </LinearLayout>
 
         <LinearLayout
