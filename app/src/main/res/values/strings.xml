@@ -5,7 +5,7 @@
   -->
 
 <resources>
-    <string name="app_name">Casio G-Shock Phone Sync</string>
+    <string name="app_name">CasioGShockPhoneSync</string>
     <string name="title_activity_gshock_screens">GshockScreens</string>
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
