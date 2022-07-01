@@ -9,7 +9,7 @@ G-shock into a semi-smart watch.
 
 ## General
 
-<img src="images/ConnectingScreen.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/ConnectingScreen.png"
 alt="Connection Screen"
 width=200
 style="margin: 10px;" />
@@ -18,7 +18,7 @@ The app works by sending commands to the watch via Bluetooth (BLE). The watch da
 a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch` button is pressed.  
 
 ## Setting Time
-<img src="images/TimeScreen.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/TimeScreen.png"
 alt="Time Screen"
 width=200
 style="margin: 10px;" />
@@ -30,12 +30,12 @@ This screen also shows your `Home Time` location and battery level.
 
 ## Alarms
 
-<img src="images/AlarmsScreen.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/AlarmsScreen.png"
 alt="Alarms Screen"
 width=200
 style="float: left; margin: 10px;" />
 
-<img src="images/SetAlarmScreen.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/SetAlarmScreen.png"
 alt="Set Alarm Screen"
 width=200
 style="margin: 10px;" />
@@ -49,7 +49,7 @@ Unfortunately, there is currently no way to read the alarms from the `Alarm Cloc
 so we cannot set the watch alarms from this app. However, we can set the `Alarm Clock` app with the watch's alarms.
 
 ## Events
-<img src="images/EventsScreen.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/EventsScreen.png"
 alt="Events Screen"
 width=200
 style="margin: 10px;" />
@@ -71,7 +71,7 @@ The watch only supports `all-day reminders`. However, if the Google calendar eve
 it will still be used as a day reminder on the watch.
 
 ## Actions
-<img src="images/ActionsScreen.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/ActionsScreen.png"
 alt="Events Screen"
 width=200
 style="margin: 10px;" />
@@ -84,5 +84,3 @@ The app has to be in the foreground in order to run the actions. An exception to
 - The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
 - Some if the Casio specific code is loosely based on the `Gadgetbridge` https://github.com/Freeyourgadget/Gadgetbridge project
 
-<a href='https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="300"/></a>
-</a>

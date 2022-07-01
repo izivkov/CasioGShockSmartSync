@@ -9,14 +9,17 @@
         <entry key="app/src/main/res/drawable/camera.xml" value="0.152" />
         <entry key="app/src/main/res/drawable/events.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/flashlight.xml" value="0.1885" />
+        <entry key="app/src/main/res/drawable/generic_action_item.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/ic_actions.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_alarm_black_24dp.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_event_black_24dp.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_help_24dp.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_info_24dp.xml" value="0.185" />
         <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.152" />
+        <entry key="app/src/main/res/drawable/ic_watch_later_black_24dp.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/mail.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/phone.xml" value="0.145" />
+        <entry key="app/src/main/res/drawable/time.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/voice_assist.xml" value="0.145" />
         <entry key="app/src/main/res/layout-land/action_take_photo_item.xml" value="0.1626984126984127" />
         <entry key="app/src/main/res/layout-land/fragment_actions.xml" value="0.23412698412698413" />
@@ -37,6 +40,9 @@
         <entry key="app/src/main/res/layout/phone_call_item.xml" value="0.22604166666666667" />
         <entry key="app/src/main/res/layout/separator_item.xml" value="0.11041666666666666" />
         <entry key="app/src/main/res/layout/watch_info.xml" value="0.3640625" />
+        <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.25625" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1885" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1885" />
       </map>
     </option>
   </component>
