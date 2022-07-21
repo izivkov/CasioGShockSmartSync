@@ -6,8 +6,7 @@
   ~ Last modified 2022-03-28, 10:09 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.ui.time.LocalTime
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<org.avmedia.gShockPhoneSync.ui.time.LocalTime xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/exact_time"
@@ -16,14 +15,13 @@
     android:clickable="true"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    >
+    app:layout_constraintTop_toTopOf="parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false" android:orientation="horizontal"
-        >
+        android:baselineAligned="false"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,8 +31,7 @@
             android:paddingLeft="12dp"
             android:paddingTop="20dp"
             android:paddingRight="12dp"
-            android:paddingBottom="20dp"
-            >
+            android:paddingBottom="20dp">
 
             <TextView
                 android:id="@+id/watchTimeTitle"
@@ -56,15 +53,27 @@
                 android:textSize="34dp"
                 tools:ignore="SpUsage" />
 
-            <org.avmedia.gShockPhoneSync.ui.time.TimezoneText
-                android:id="@+id/textTimeZone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="16dp"
-                android:text=""
-                tools:ignore="SpUsage" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:padding="4dp"
+                tools:ignore="NestedWeights">
+
+                <org.avmedia.gShockPhoneSync.ui.time.TimezoneText
+                    android:id="@+id/textTimeZone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:text=""
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SpUsage" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
 
@@ -74,8 +83,7 @@
             android:layout_gravity="center_vertical"
             android:layout_margin="8dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
 
             <org.avmedia.gShockPhoneSync.customComponents.SendTimeButton
                 android:id="@+id/SendTime"
@@ -85,8 +93,7 @@
                 android:layout_margin="5dp"
                 android:background="@drawable/button"
                 android:text="@string/send_to_watch"
-                tools:ignore="MissingConstraints"
-                />
+                tools:ignore="MissingConstraints" />
 
         </LinearLayout>
     </LinearLayout>
