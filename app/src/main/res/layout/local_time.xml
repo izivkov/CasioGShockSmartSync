@@ -63,7 +63,7 @@
                 android:layout_gravity="start"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="16dp"
-                android:text="Timezone here"
+                android:text=""
                 tools:ignore="SpUsage" />
 
         </LinearLayout>

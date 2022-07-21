@@ -18,6 +18,12 @@ class TimezoneText @JvmOverloads constructor(
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     init {
-        text = TimeZone.getDefault().id
+    }
+
+    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        if (visibility == View.VISIBLE) {
+            text = TimeZone.getDefault().id
+        }
     }
 }
