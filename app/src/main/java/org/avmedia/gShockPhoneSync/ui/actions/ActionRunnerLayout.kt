@@ -13,7 +13,7 @@
  * Date: 2020-12-27, 10:58 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.content.Context
 import android.util.AttributeSet

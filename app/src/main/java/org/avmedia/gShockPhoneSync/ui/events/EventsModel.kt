@@ -10,7 +10,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.util.Preconditions.checkArgument
 import com.google.gson.Gson
-import org.avmedia.gShockPhoneSync.customComponents.CalenderEvents
 import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.Instant

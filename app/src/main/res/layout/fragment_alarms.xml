@@ -42,7 +42,7 @@
         app:layout_constraintVertical_bias="0.0"
         />
 
-    <org.avmedia.gShockPhoneSync.customComponents.AlarmChimeSwitch
+    <org.avmedia.gShockPhoneSync.ui.alarms.AlarmChimeSwitch
         android:id="@+id/chime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

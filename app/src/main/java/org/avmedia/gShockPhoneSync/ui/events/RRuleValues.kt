@@ -4,12 +4,11 @@
  * Last modified 2022-04-07, 10:24 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.events
 
 import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.WeekdayNum
-import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.LocalDate

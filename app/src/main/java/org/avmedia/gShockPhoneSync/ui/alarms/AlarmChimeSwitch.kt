@@ -4,12 +4,11 @@
  * Last modified 2022-03-20, 7:44 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.alarms
 
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.CompoundButton
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 

@@ -6,7 +6,7 @@
   ~ Last modified 2022-03-28, 10:09 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.customComponents.LocalTime
+<org.avmedia.gShockPhoneSync.ui.time.LocalTime
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -56,6 +56,16 @@
                 android:textSize="34dp"
                 tools:ignore="SpUsage" />
 
+            <org.avmedia.gShockPhoneSync.ui.time.TimezoneText
+                android:id="@+id/textTimeZone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="16dp"
+                android:text="Timezone here"
+                tools:ignore="SpUsage" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -81,4 +91,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</org.avmedia.gShockPhoneSync.customComponents.LocalTime>
+</org.avmedia.gShockPhoneSync.ui.time.LocalTime>

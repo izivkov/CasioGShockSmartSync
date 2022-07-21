@@ -4,7 +4,7 @@
  * Last modified 2022-04-03, 6:13 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.events
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
@@ -12,7 +12,6 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
-import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
