@@ -18,21 +18,6 @@ class TimezoneText @JvmOverloads constructor(
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     init {
-        waitForInitialization()
+        text = TimeZone.getDefault().id
     }
-
-    private fun waitForInitialization() {
-        ProgressEvents.subscriber.start(
-            this.javaClass.simpleName,
-
-            {
-                when (it) {
-                    ProgressEvents.Events.WatchInitializationCompleted -> {
-                        text = TimeZone.getDefault().id
-                    }
-                }
-            },
-            { throwable -> Timber.d("Got error on subscribe: $throwable") })
-    }
-
 }
