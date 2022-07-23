@@ -36,9 +36,13 @@
         <entry key="app/src/main/res/layout/fragment_alarms.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/fragment_events.xml" value="0.25677083333333334" />
         <entry key="app/src/main/res/layout/fragment_time.xml" value="0.2765625" />
+        <entry key="app/src/main/res/layout/layout.xml" value="0.22395833333333334" />
         <entry key="app/src/main/res/layout/local_time.xml" value="0.19427083333333334" />
         <entry key="app/src/main/res/layout/phone_call_item.xml" value="0.22604166666666667" />
         <entry key="app/src/main/res/layout/separator_item.xml" value="0.11041666666666666" />
+        <entry key="app/src/main/res/layout/time_zone.xml" value="0.2765625" />
+        <entry key="app/src/main/res/layout/time_zone_save.xml" value="0.3640625" />
+        <entry key="app/src/main/res/layout/timezone.xml" value="0.3640625" />
         <entry key="app/src/main/res/layout/watch_info.xml" value="0.3640625" />
         <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.25625" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1885" />

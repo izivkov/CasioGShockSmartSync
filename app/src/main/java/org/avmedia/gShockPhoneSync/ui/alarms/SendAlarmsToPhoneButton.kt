@@ -4,7 +4,7 @@
  * Last modified 2022-03-23, 9:38 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.alarms
 
 import android.content.Context
 import android.content.Intent
@@ -13,7 +13,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.ble.Connection
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
+import org.avmedia.gShockPhoneSync.customComponents.Button
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit

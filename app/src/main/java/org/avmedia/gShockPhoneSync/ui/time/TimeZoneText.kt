@@ -9,11 +9,10 @@ package org.avmedia.gShockPhoneSync.ui.time
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import timber.log.Timber
 import java.util.*
+import java.util.TimeZone.getDefault
 
-class TimezoneText @JvmOverloads constructor(
+class TimeZoneText @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 

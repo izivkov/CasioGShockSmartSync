@@ -4,12 +4,13 @@
  * Last modified 2022-03-26, 11:02 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
 import java.time.Clock
 
@@ -25,7 +26,10 @@ class SendTimeButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
+
+                    // WatchDataCollector.setHomeTime("ROME")
                     sendTimeToWatch()
+
                     Utils.snackBar(context, "Time Sent to Watch")
                 }
             }

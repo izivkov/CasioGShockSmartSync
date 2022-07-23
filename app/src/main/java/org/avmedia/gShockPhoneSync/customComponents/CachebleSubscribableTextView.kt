@@ -41,4 +41,8 @@ abstract class CacheableSubscribableTextView @JvmOverloads constructor(
     private fun put(name: String, value: String) {
         return ValueCache.put(name, value)
     }
+
+    protected fun remove (name: String) {
+        ValueCache.remove(name)
+    }
 }

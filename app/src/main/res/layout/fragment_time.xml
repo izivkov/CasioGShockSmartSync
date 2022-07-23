@@ -15,7 +15,7 @@
     >
 
     <include layout="@layout/local_time" />
-
+<!--    <include layout="@layout/time_zone" />-->
     <include layout="@layout/watch_info" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

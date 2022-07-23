@@ -7,17 +7,27 @@
 package org.avmedia.gShockPhoneSync.casioB5600
 
 import android.annotation.SuppressLint
+import android.os.Handler
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.json.JSONObject
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.concurrent.schedule
 
 object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
     private val dstWatchState: ArrayList<String> = ArrayList<String>()
-    private val worldCities: ArrayList<String> = ArrayList<String>()
+
+    class WorldCity (private val city:String, val index:Int) {
+        fun createCasioString ():String {
+            return ("1F" + "%02x".format(index) + Utils.toHexStr(city.take(18)).padEnd(40, '0'))
+        }
+    }
+
+    private val worldCities: HashMap<Int , WorldCity> = HashMap<Int , WorldCity>()
     var unmatchedCmdCount: Int = -1
 
     var batteryLevel: Int = 0
@@ -86,7 +96,8 @@ object WatchDataCollector {
             "1E" -> dstSettings.add(shortStr)
             "1D" -> dstWatchState.add(shortStr)
             "1F" -> {
-                worldCities.add(shortStr)
+                val wc = createWordCity (shortStr)
+                worldCities[wc.index] = wc // replace existing element if it exists
                 if (homeCity == "") {
                     // Home city is in the fist position, so data will start with "1F 00"
                     val cityNumber = shortStr.substring(2, 4)
@@ -106,6 +117,12 @@ object WatchDataCollector {
                 ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
             }
         }
+    }
+
+    private fun createWordCity (casioString: String): WorldCity {
+        val city = Utils.toAsciiString(casioString.substring(4).trim('0'), 0)
+        val index = casioString.substring(2,4).toInt()
+        return WorldCity(city, index)
     }
 
     @SuppressLint("CheckResult")
@@ -142,13 +159,7 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "1e04")
         writeCmdWithResponseCount(0xC, "1e05")
 
-        // get world cities
-        writeCmdWithResponseCount(0xC, "1f00")
-        writeCmdWithResponseCount(0xC, "1f01")
-        writeCmdWithResponseCount(0xC, "1f02")
-        writeCmdWithResponseCount(0xC, "1f03")
-        writeCmdWithResponseCount(0xC, "1f04")
-        writeCmdWithResponseCount(0xC, "1f05")
+        getWorldCities()
 
         // watch name
         writeCmdWithResponseCount(0xC, "23")
@@ -160,6 +171,28 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "22")
     }
 
+    private fun getWorldCities() {
+        // get world cities
+        writeCmdWithResponseCount(0xC, "1f00")
+        writeCmdWithResponseCount(0xC, "1f01")
+        writeCmdWithResponseCount(0xC, "1f02")
+        writeCmdWithResponseCount(0xC, "1f03")
+        writeCmdWithResponseCount(0xC, "1f04")
+        writeCmdWithResponseCount(0xC, "1f05")
+    }
+
+    fun setHomeTime (city: String) {
+        if (worldCities.isEmpty())
+            return
+
+        var worldCity = WorldCity(city, 0)
+        writeCmd(0xe, worldCity.createCasioString())
+
+        Timer("SettingUp", false).schedule(1000L) {
+            writeCmd(0xC, "1f00")
+        }
+    }
+
     private fun runInitCommands() {
         dstSettings.forEach { command ->
             writeCmdWithResponseCount(0xe, command)
@@ -167,8 +200,8 @@ object WatchDataCollector {
         dstWatchState.forEach { command ->
             writeCmdWithResponseCount(0xe, command)
         }
-        worldCities.forEach { command ->
-            writeCmdWithResponseCount(0xe, command)
+        worldCities.values.forEach { wc ->
+            writeCmdWithResponseCount(0xe, wc.createCasioString())
         }
     }
 

@@ -4,7 +4,7 @@
  * Last modified 2022-03-29, 6:14 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.time
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -19,13 +19,14 @@ import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableView
 import org.jetbrains.anko.runOnUiThread
 
 class BatteryView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : CacheableSubscribableView (context, attrs, defStyleAttr) {
+) : CacheableSubscribableView(context, attrs, defStyleAttr) {
     private var radius: Float = 0f
 
     // Top

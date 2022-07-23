@@ -43,7 +43,7 @@
                     android:id="@+id/title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_goes_here"
+                    android:text="@string/title_placeholder"
                     android:textSize="24dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"

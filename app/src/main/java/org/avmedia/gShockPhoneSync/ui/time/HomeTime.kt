@@ -4,10 +4,11 @@
  * Last modified 2022-03-29, 6:24 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
+import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import org.avmedia.gShockPhoneSync.utils.Utils
 
 open class HomeTime @JvmOverloads constructor(
@@ -15,7 +16,7 @@ open class HomeTime @JvmOverloads constructor(
 ) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
 
     init {
-        text = get(this.javaClass.simpleName)
+        text = this.javaClass.simpleName
         subscribe(this.javaClass.simpleName, "HOME_TIME")
     }
 

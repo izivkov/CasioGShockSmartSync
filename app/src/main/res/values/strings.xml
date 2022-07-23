@@ -48,4 +48,5 @@
     <string name="phonecall_item">PhoneCall Item</string>
     <string name="home_time">Home Time</string>
     <string name="running_actions">Running Actions</string>
+    <string name="title_placeholder">Title Placeholder</string>
 </resources>

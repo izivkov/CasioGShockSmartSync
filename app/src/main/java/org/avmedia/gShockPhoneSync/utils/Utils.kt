@@ -102,7 +102,10 @@ object Utils {
 
     fun toAsciiString(hexStr: String, commandLengthToSkip: Int): String {
         var asciiStr = ""
-        val strArrayWithCommand = hexStr.split(' ')
+        var strArrayWithCommand = hexStr.split(' ')
+        if (strArrayWithCommand.size == 1) { // no spaces between hex values, i.e. 4C4F4E444F4E
+            strArrayWithCommand = hexStr.chunked(2)
+        }
 
         // skip command
         val strArray = strArrayWithCommand.subList(commandLengthToSkip, strArrayWithCommand.size)

@@ -6,15 +6,15 @@
   ~ Last modified 2022-03-28, 10:09 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.ui.time.LocalTime xmlns:android="http://schemas.android.com/apk/res/android"
+<org.avmedia.gShockPhoneSync.ui.time.TimeZoneCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/exact_time"
+    android:id="@+id/time_zone"
     style="@style/CardViewStyle"
     android:layout_height="wrap_content"
     android:clickable="true"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/exact_time"
     app:layout_constraintTop_toTopOf="parent">
 
     <LinearLayout
@@ -34,46 +34,26 @@
             android:paddingBottom="20dp">
 
             <TextView
-                android:id="@+id/watchTimeTitle"
+                android:id="@+id/timezoneTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:text="@string/local_time"
+                android:text="Local Timezone"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="20dp"
                 tools:ignore="SpUsage" />
 
-            <TextClock
-                android:id="@+id/textClock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:format12Hour="h:mm:ss a"
-                android:textAppearance="?attr/textAppearanceBody2"
-                android:textSize="34dp"
-                tools:ignore="SpUsage" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <org.avmedia.gShockPhoneSync.ui.time.TimeZoneText
+                android:id="@+id/textTimeZone"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:padding="4dp"
-                tools:ignore="NestedWeights">
-
-                <org.avmedia.gShockPhoneSync.ui.time.TimeZoneText
-                    android:id="@+id/textTimeZone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:text=""
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textSize="16dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="SpUsage" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_height="wrap_content"
+                android:text="Timezone Placeholder"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginTop="10dp"
+                android:textSize="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="SpUsage" />
 
         </LinearLayout>
 
@@ -85,17 +65,17 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <org.avmedia.gShockPhoneSync.ui.time.SendTimeButton
-                android:id="@+id/SendTime"
+            <org.avmedia.gShockPhoneSync.ui.time.SendTimezoneButton
+                android:id="@+id/SendTimezone"
                 style="@style/buttonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:background="@drawable/button"
-                android:text="@string/send_to_watch"
+                android:text="Set Home Time to this TZ"
                 tools:ignore="MissingConstraints" />
 
         </LinearLayout>
     </LinearLayout>
 
-</org.avmedia.gShockPhoneSync.ui.time.LocalTime>
+</org.avmedia.gShockPhoneSync.ui.time.TimeZoneCardView>
