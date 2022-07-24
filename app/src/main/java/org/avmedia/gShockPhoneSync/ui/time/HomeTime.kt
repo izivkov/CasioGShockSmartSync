@@ -16,7 +16,7 @@ open class HomeTime @JvmOverloads constructor(
 ) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
 
     init {
-        text = this.javaClass.simpleName
+        text = get(this.javaClass.simpleName)
         subscribe(this.javaClass.simpleName, "HOME_TIME")
     }
 
