@@ -12,12 +12,11 @@ import android.view.View
 import java.util.*
 import java.util.TimeZone.getDefault
 
-class TimeZoneText @JvmOverloads constructor(
+class TimeZoneTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
-    init {
-    }
+    init {}
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
         super.onVisibilityChanged(changedView, visibility)

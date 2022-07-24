@@ -10,7 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 
 
-class TimeZoneCardView @JvmOverloads constructor(
+class LocalTimeCardView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 

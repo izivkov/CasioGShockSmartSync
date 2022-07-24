@@ -159,7 +159,12 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "1e04")
         writeCmdWithResponseCount(0xC, "1e05")
 
-        getWorldCities()
+        writeCmdWithResponseCount(0xC, "1f00")
+        writeCmdWithResponseCount(0xC, "1f01")
+        writeCmdWithResponseCount(0xC, "1f02")
+        writeCmdWithResponseCount(0xC, "1f03")
+        writeCmdWithResponseCount(0xC, "1f04")
+        writeCmdWithResponseCount(0xC, "1f05")
 
         // watch name
         writeCmdWithResponseCount(0xC, "23")
@@ -169,28 +174,6 @@ object WatchDataCollector {
 
         // app info
         writeCmdWithResponseCount(0xC, "22")
-    }
-
-    private fun getWorldCities() {
-        // get world cities
-        writeCmdWithResponseCount(0xC, "1f00")
-        writeCmdWithResponseCount(0xC, "1f01")
-        writeCmdWithResponseCount(0xC, "1f02")
-        writeCmdWithResponseCount(0xC, "1f03")
-        writeCmdWithResponseCount(0xC, "1f04")
-        writeCmdWithResponseCount(0xC, "1f05")
-    }
-
-    fun setHomeTime (city: String) {
-        if (worldCities.isEmpty())
-            return
-
-        var worldCity = WorldCity(city, 0)
-        writeCmd(0xe, worldCity.createCasioString())
-
-        Timer("SettingUp", false).schedule(1000L) {
-            writeCmd(0xC, "1f00")
-        }
     }
 
     private fun runInitCommands() {
