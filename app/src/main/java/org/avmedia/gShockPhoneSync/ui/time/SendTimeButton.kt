@@ -10,9 +10,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlinx.android.synthetic.main.alarm_item.view.*
+import org.avmedia.gShockPhoneSync.casioB5600.CasioTimeZone
+import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.customComponents.Button
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import java.time.Clock
+import java.util.*
 
 class SendTimeButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -27,9 +32,7 @@ class SendTimeButton @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
 
-                    // WatchDataCollector.setHomeTime("ROME")
                     sendTimeToWatch()
-
                     Utils.snackBar(context, "Time Sent to Watch")
                 }
             }
@@ -38,7 +41,12 @@ class SendTimeButton @JvmOverloads constructor(
         }
 
         private fun sendTimeToWatch() {
-            sendMessage("{action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()} }")
+            CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
+
+            sendMessage("{action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()}}")
+
+            // update the screen with new Home Time
+            CasioTimeZone.rereadHomeTimeFromWatch()
         }
     }
 }

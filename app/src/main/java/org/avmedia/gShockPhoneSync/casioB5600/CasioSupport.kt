@@ -8,10 +8,9 @@ package org.avmedia.gShockPhoneSync.casioB5600
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
-import android.os.Build
-import androidx.annotation.RequiresApi
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics.device
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfIntArray
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfInts
@@ -20,7 +19,7 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.time.Instant
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 object CasioSupport {
 
@@ -125,7 +124,7 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
             }
 
             "SET_TIME" -> {
-                var dateTimeMs: Long = JSONObject(message).get("value") as Long
+                val dateTimeMs: Long = JSONObject(message).get("value") as Long
 
                 val dateTime =
                     Instant.ofEpochMilli(dateTimeMs).atZone(ZoneId.systemDefault())
@@ -134,6 +133,7 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
                 val timeData = TimeEncoder.prepareCurrentTime(dateTime)
                 var timeCommand =
                     byteArrayOfInts(CasioConstants.CHARACTERISTICS.CASIO_CURRENT_TIME.code) + timeData
+
                 writeCmd(0x000e, timeCommand)
             }
             else -> {
@@ -191,7 +191,7 @@ I/BleExtensionsKt: Service 26eb000d-b012-49a8-b1f8-394fb2032b0f
         }
     }
 
-    fun isActionButtonPressed (): Boolean {
+    fun isActionButtonPressed(): Boolean {
         val watchButtonPressed = CasioSupport.getPressedWatchButton()
         return watchButtonPressed == CasioSupport.WATCH_BUTTON.LOWER_RIGHT
     }

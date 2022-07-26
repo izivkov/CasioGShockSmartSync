@@ -17,8 +17,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
+import org.avmedia.gShockPhoneSync.casioB5600.CasioTimeZone
 import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
+import org.avmedia.gShockPhoneSync.ui.time.SendTimeButton
 import org.avmedia.gShockPhoneSync.utils.*
 import timber.log.Timber
 import java.io.File
@@ -110,13 +112,13 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            createAppEventsSubscription()
+            createAppEventsSubscription(context)
 
             // in order to set time, we need to get complete watch configuration.
             WatchDataCollector.requestCompleteWatchSettings()
         }
 
-        private fun createAppEventsSubscription() {
+        private fun createAppEventsSubscription(context: Context) {
             ProgressEvents.subscriber.start(
                 this.javaClass.simpleName,
 
@@ -125,10 +127,10 @@ object ActionsModel {
                         // For setting time, we need to wait until the watch has been initialised.
                         ProgressEvents.Events.WatchInitializationCompleted -> {
                             if (!Utils.isDebugMode()) {
+                                CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
+
                                 sendMessage(
-                                    "{ action: \"SET_TIME\", value: ${
-                                        Clock.systemDefaultZone().millis()
-                                    }}"
+                                    "{ action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()}}"
                                 )
                             }
                         }

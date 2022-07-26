@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.utils
 import android.content.Context
+import java.util.*
 
 object LocalDataStorage {
 
@@ -36,4 +37,17 @@ object LocalDataStorage {
         editor.clear()
         editor.apply()
     }
+
+    fun getTimezoneForFutureUse (context: Context) :String {
+        var timeZone = ""
+        val timeZoneChanged: Boolean =
+            get("timezone", "", context) != TimeZone.getDefault().id
+        if (timeZoneChanged) {
+            timeZone = TimeZone.getDefault().id
+            put("timezone", TimeZone.getDefault().id, context)
+        }
+
+        return timeZone
+    }
+
 }

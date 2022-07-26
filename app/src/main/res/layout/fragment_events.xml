@@ -46,7 +46,7 @@
         app:layout_constraintStart_toStartOf="parent"
         >
 
-        <org.avmedia.gShockPhoneSync.customComponents.SendEventsToWatchButton
+        <org.avmedia.gShockPhoneSync.ui.events.SendEventsToWatchButton
             android:id="@+id/send_reminders_button"
             style="@style/buttonStyle"
             android:layout_width="wrap_content"

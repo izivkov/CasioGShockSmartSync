@@ -11,7 +11,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendEventsToWatchButton @JvmOverloads constructor(

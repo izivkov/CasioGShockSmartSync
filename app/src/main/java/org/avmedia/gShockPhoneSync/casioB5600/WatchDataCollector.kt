@@ -21,13 +21,7 @@ object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
     private val dstWatchState: ArrayList<String> = ArrayList<String>()
 
-    class WorldCity (private val city:String, val index:Int) {
-        fun createCasioString ():String {
-            return ("1F" + "%02x".format(index) + Utils.toHexStr(city.take(18)).padEnd(40, '0'))
-        }
-    }
-
-    private val worldCities: HashMap<Int , WorldCity> = HashMap<Int , WorldCity>()
+    private val worldCities: HashMap<Int , CasioTimeZone.WorldCity> = HashMap<Int , CasioTimeZone.WorldCity>()
     var unmatchedCmdCount: Int = -1
 
     var batteryLevel: Int = 0
@@ -119,10 +113,10 @@ object WatchDataCollector {
         }
     }
 
-    private fun createWordCity (casioString: String): WorldCity {
+    private fun createWordCity (casioString: String): CasioTimeZone.WorldCity {
         val city = Utils.toAsciiString(casioString.substring(4).trim('0'), 0)
         val index = casioString.substring(2,4).toInt()
-        return WorldCity(city, index)
+        return CasioTimeZone.WorldCity(city, index)
     }
 
     @SuppressLint("CheckResult")
@@ -174,6 +168,9 @@ object WatchDataCollector {
 
         // app info
         writeCmdWithResponseCount(0xC, "22")
+    }
+
+    fun setHomeTime (city: String) {
     }
 
     private fun runInitCommands() {
