@@ -31,8 +31,13 @@ class SendTimeButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
+                    CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
 
                     sendTimeToWatch()
+
+                    // update the screen with new Home Time
+                    CasioTimeZone.rereadHomeTimeFromWatch()
+
                     Utils.snackBar(context, "Time Sent to Watch")
                 }
             }
@@ -41,12 +46,7 @@ class SendTimeButton @JvmOverloads constructor(
         }
 
         private fun sendTimeToWatch() {
-            CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
-
             sendMessage("{action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()}}")
-
-            // update the screen with new Home Time
-            CasioTimeZone.rereadHomeTimeFromWatch()
         }
     }
 }

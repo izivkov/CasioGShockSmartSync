@@ -127,6 +127,11 @@ object ActionsModel {
                         // For setting time, we need to wait until the watch has been initialised.
                         ProgressEvents.Events.WatchInitializationCompleted -> {
                             if (!Utils.isDebugMode()) {
+
+                                // Update the HomeTime according to the current TimeZone
+                                // This could be optimised to be called only if the
+                                // timezone has changed, but this adds complexity.
+                                // Maybe we can do this in the future.
                                 CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
 
                                 sendMessage(

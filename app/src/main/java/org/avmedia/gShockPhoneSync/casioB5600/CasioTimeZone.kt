@@ -21,7 +21,7 @@ object CasioTimeZone {
         }
     }
     fun setHomeTime(timeZone:String) {
-        val city = CasioTimeZone.TimeZoneHelper.parseCity(timeZone)
+        val city = TimeZoneHelper.parseCity(timeZone)
 
         var worldCity = WorldCity(city, 0)
         CasioSupport.writeCmdFromString(0xe, worldCity.createCasioString())
