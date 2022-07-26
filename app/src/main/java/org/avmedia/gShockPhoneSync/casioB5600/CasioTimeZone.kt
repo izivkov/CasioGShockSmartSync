@@ -20,6 +20,7 @@ object CasioTimeZone {
             }
         }
     }
+
     fun setHomeTime(timeZone:String) {
         val city = TimeZoneHelper.parseCity(timeZone)
 
