@@ -26,7 +26,7 @@ class AlarmList @JvmOverloads constructor(
 
         if (AlarmsModel.isEmpty()) {
             subscribe("ALARMS", ::onDataReceived)
-            Connection.sendMessage(JSONObject("{ action: 'GET_ALARMS'}").toString())
+            Connection.sendMessage("{ action: 'GET_ALARMS'}")
         }
     }
 

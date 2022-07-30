@@ -7,26 +7,28 @@
 package org.avmedia.gShockPhoneSync.customComponents
 
 object ValueCache {
-    private data class Value(val value:String, var isSet:Boolean = false)
+    private data class Value(val value: String, var isSet: Boolean = false)
 
     private val valueMap = HashMap<String, Value>()
 
-                    fun put (name:String, value:String) {
+    fun put(name: String, value: String) {
         valueMap[name] = Value(value, true)
     }
 
-    fun get (name:String):String? {
+    fun get(name: String): String? {
         return valueMap[name]?.value
     }
 
-    fun remove (name:String) {
+    fun remove(name: String) {
         valueMap.remove(name)
     }
 
-    fun isSet(name: String) : Boolean {
+    fun isSet(name: String): Boolean {
         val value = valueMap[name] ?: return false
         return value.isSet
     }
 
-    fun clear () {valueMap.clear()}
+    fun clear() {
+        valueMap.clear()
+    }
 }
