@@ -10,7 +10,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics.device
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfIntArray
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfInts
