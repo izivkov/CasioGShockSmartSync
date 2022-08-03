@@ -66,7 +66,6 @@ class MainActivity : AppCompatActivity() {
 
         createAppEventsSubscription()
 
-        WatchFactory.create("CASIO GW-B5600")
         Connection.init(this)
         WatchDataListener.init()
 

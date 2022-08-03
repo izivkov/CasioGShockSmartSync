@@ -1,13 +1,23 @@
 package org.avmedia.gShockPhoneSync.casio
 
 object WatchFactory {
-    public lateinit var watch: BluetoothWatch
+    val watch: BluetoothWatch by lazy(::create)
 
-    fun create(watchName: String) {
-        if (!this::watch.isInitialized || watch == null) {
-            // TODO: Add more watches here by extending "BluetoothWatch"
-            // Use "watchName" to determine what watch to create.
-            watch = Casio5600Watch()
+    private fun create(): BluetoothWatch {
+        return createFromName(getWatchName())
+    }
+
+    private fun createFromName(watchName: String): BluetoothWatch {
+        return when (watchName) {
+            "CASIO GW-B5600" -> Casio5600Watch()
+            // TODO: Add more watches here by extending "BluetoothWatch" based on "watchName"
+            else -> {
+                Casio5600Watch()
+            }
         }
+    }
+
+    private fun getWatchName(): String {
+        return "CASIO GW-B5600"
     }
 }

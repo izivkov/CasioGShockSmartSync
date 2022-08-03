@@ -13,7 +13,7 @@ import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics.device
 import org.json.JSONObject
 import java.util.*
 
-abstract class BluetoothWatch {
+sealed class BluetoothWatch {
 
     private var mAvailableCharacteristics: Map<UUID, BluetoothGattCharacteristic>? = null
     private lateinit var writer: (BluetoothDevice, BluetoothGattCharacteristic, ByteArray) -> Unit

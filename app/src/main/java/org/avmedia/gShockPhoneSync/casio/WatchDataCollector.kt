@@ -168,9 +168,6 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "22")
     }
 
-    fun setHomeTime (city: String) {
-    }
-
     private fun runInitCommands() {
         dstSettings.forEach { command ->
             writeCmdWithResponseCount(0xe, command)
