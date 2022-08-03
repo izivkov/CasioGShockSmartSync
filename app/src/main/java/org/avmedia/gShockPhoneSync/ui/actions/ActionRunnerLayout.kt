@@ -22,8 +22,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
-import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
+import org.avmedia.gShockPhoneSync.casio.WatchFactory
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 
@@ -42,7 +41,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.ButtonPressedInfoReceived -> {
-                        if (CasioSupport.isActionButtonPressed()) {
+                        if (WatchFactory.watch.isActionButtonPressed()) {
                             show()
 
                             ActionsModel.loadData(context)

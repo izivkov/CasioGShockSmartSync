@@ -1,7 +1,6 @@
-package org.avmedia.gShockPhoneSync.casioB5600
+package org.avmedia.gShockPhoneSync.casio
 
 import org.avmedia.gShockPhoneSync.utils.Utils
-import java.util.*
 
 object CasioTimeZone {
     class WorldCity(private val city: String, val index: Int) {
@@ -25,10 +24,10 @@ object CasioTimeZone {
         val city = TimeZoneHelper.parseCity(timeZone)
 
         var worldCity = WorldCity(city, 0)
-        CasioSupport.writeCmdFromString(0xe, worldCity.createCasioString())
+        WatchFactory.watch.writeCmdFromString(0xe, worldCity.createCasioString())
     }
 
     fun rereadHomeTimeFromWatch() {
-        CasioSupport.writeCmdFromString(0xC, "1f00")
+        WatchFactory.watch.writeCmdFromString(0xC, "1f00")
     }
 }

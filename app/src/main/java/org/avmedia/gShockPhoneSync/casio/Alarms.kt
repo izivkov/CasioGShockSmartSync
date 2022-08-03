@@ -4,7 +4,7 @@
  * Last modified 2022-03-27, 9:45 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.casioB5600
+package org.avmedia.gShockPhoneSync.casio
 
 import com.google.gson.Gson
 import org.avmedia.gShockPhoneSync.utils.Utils

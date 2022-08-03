@@ -3,7 +3,7 @@
  * Copyright (c) 2022 . All rights reserved.
  * Last modified 2022-03-27, 9:52 a.m.
  */
-package org.avmedia.gShockPhoneSync.casioB5600
+package org.avmedia.gShockPhoneSync.casio
 
 import java.util.UUID
 

@@ -4,10 +4,10 @@
  * Last modified 2022-04-03, 10:57 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.casioB5600
+package org.avmedia.gShockPhoneSync.casio
 
 import com.google.gson.Gson
-import org.avmedia.gShockPhoneSync.casioB5600.Alarms.ENABLED_MASK
+import org.avmedia.gShockPhoneSync.casio.Alarms.ENABLED_MASK
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.json.JSONArray
 import org.json.JSONObject

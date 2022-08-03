@@ -10,11 +10,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.android.synthetic.main.alarm_item.view.*
-import org.avmedia.gShockPhoneSync.casioB5600.CasioTimeZone
-import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
+import org.avmedia.gShockPhoneSync.casio.CasioTimeZone
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import java.time.Clock
 import java.util.*

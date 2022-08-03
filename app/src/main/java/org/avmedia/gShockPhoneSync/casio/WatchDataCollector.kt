@@ -4,10 +4,9 @@
  * Last modified 2022-03-29, 2:38 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.casioB5600
+package org.avmedia.gShockPhoneSync.casio
 
 import android.annotation.SuppressLint
-import android.os.Handler
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -15,7 +14,6 @@ import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.concurrent.schedule
 
 object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
@@ -68,7 +66,7 @@ object WatchDataCollector {
         One exception is [setting time] action. This action requests
         full configuration explicitly.
          */
-        if (!CasioSupport.isActionButtonPressed()) {
+        if (!WatchFactory.watch.isActionButtonPressed()) {
             requestCompleteWatchSettings()
         }
     }
@@ -170,9 +168,6 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "22")
     }
 
-    fun setHomeTime (city: String) {
-    }
-
     private fun runInitCommands() {
         dstSettings.forEach { command ->
             writeCmdWithResponseCount(0xe, command)
@@ -195,7 +190,7 @@ object WatchDataCollector {
     }
 
     private fun writeCmd(handle: Int, cmd: String) {
-        CasioSupport.writeCmdFromString(handle, cmd)
+        WatchFactory.watch.writeCmdFromString(handle, cmd)
     }
 
     private fun isComplete(): Boolean {

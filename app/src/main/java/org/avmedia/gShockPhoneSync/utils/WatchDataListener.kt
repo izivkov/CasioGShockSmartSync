@@ -8,8 +8,7 @@ package org.avmedia.gShockPhoneSync.utils
 
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.IDataReceived
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
-import timber.log.Timber
+import org.avmedia.gShockPhoneSync.casio.WatchFactory
 
 /*
 This class accepts data from the watch and sends it via "emitEvent()" to whatever
@@ -24,7 +23,7 @@ object WatchDataListener {
                 if (data == null) {
                     return
                 }
-                val dataJson = CasioSupport.toJson(data)
+                val dataJson = WatchFactory.watch.toJson(data)
 
                 for (topic in dataJson.keys()) {
                     val value: String = dataJson.getString(topic)

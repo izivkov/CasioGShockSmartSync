@@ -4,10 +4,8 @@
  * Last modified 2022-04-03, 10:50 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.casioB5600
+package org.avmedia.gShockPhoneSync.casio
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.Utils.getBooleanSafe
 import org.avmedia.gShockPhoneSync.utils.Utils.getJSONArraySafe

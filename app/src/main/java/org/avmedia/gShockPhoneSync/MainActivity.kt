@@ -20,7 +20,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.avmedia.gShockPhoneSync.ble.BleScannerLocal
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.casio.WatchFactory
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                         val device =
                             ProgressEvents.Events.ConnectionSetupComplete.payload as BluetoothDevice
                         DeviceCharacteristics.init(device)
-                        CasioSupport.init()
+                        WatchFactory.watch.init()
                     }
                     ProgressEvents.Events.WatchDataCollected -> {
                         InactivityWatcher.start(this)

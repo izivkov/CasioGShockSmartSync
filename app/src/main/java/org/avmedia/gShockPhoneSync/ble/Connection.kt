@@ -17,8 +17,8 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import org.avmedia.gShockPhoneSync.casioB5600.CasioConstants
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.casio.CasioConstants
+import org.avmedia.gShockPhoneSync.casio.WatchFactory
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 import java.util.UUID
@@ -45,7 +45,7 @@ object Connection : IConnection {
     // Interface
     override fun init(context: Context) {
         applicationContext = context.applicationContext
-        CasioSupport.setWriter(::writeCharacteristic)
+        WatchFactory.watch.setWriter(::writeCharacteristic)
     }
 
     override fun setDataCallback(dataCallback: IDataReceived?) {
@@ -69,7 +69,7 @@ object Connection : IConnection {
     }
 
     override fun sendMessage(message: String) {
-        CasioSupport.callWriter(message)
+        WatchFactory.watch.callWriter(message)
     }
 
     override fun start() {

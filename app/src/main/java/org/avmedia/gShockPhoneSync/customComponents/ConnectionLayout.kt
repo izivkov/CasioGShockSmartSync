@@ -13,7 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.casio.WatchFactory
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
@@ -33,12 +33,12 @@ class ConnectionLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.ButtonPressedInfoReceived -> {
-                        if (CasioSupport.isActionButtonPressed()) {
+                        if (WatchFactory.watch.isActionButtonPressed()) {
                             hide()
                         }
                     }
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        if (!CasioSupport.isActionButtonPressed()) {
+                        if (!WatchFactory.watch.isActionButtonPressed()) {
                             hide()
                         }
                     }
