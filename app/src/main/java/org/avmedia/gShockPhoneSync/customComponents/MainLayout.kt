@@ -15,18 +15,14 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.navigation.findNavController
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.casioB5600.CasioSupport
+import org.avmedia.gShockPhoneSync.casio.WatchFactory
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
@@ -47,7 +43,7 @@ class MainLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        if (!CasioSupport.isActionButtonPressed()) {
+                        if (!WatchFactory.watch.isActionButtonPressed()) {
                             show()
                         }
                     }

@@ -17,10 +17,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
-import org.avmedia.gShockPhoneSync.casioB5600.CasioTimeZone
-import org.avmedia.gShockPhoneSync.casioB5600.WatchDataCollector
+import org.avmedia.gShockPhoneSync.casio.CasioTimeZone
+import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
-import org.avmedia.gShockPhoneSync.ui.time.SendTimeButton
 import org.avmedia.gShockPhoneSync.utils.*
 import timber.log.Timber
 import java.io.File

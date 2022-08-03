@@ -4,7 +4,7 @@
  * Last modified 2022-04-03, 11:01 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.casioB5600
+package org.avmedia.gShockPhoneSync.casio
 
 import java.time.LocalDateTime
 

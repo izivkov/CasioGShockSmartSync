@@ -17,7 +17,7 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.ParcelUuid
 import androidx.appcompat.app.AppCompatActivity
-import org.avmedia.gShockPhoneSync.casioB5600.CasioConstants
+import org.avmedia.gShockPhoneSync.casio.CasioConstants
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
