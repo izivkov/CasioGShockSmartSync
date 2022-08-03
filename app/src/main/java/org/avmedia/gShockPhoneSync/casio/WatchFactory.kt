@@ -18,6 +18,7 @@ object WatchFactory {
     }
 
     private fun getWatchName(): String {
+        // TO DO: get this from watch if possible.
         return "CASIO GW-B5600"
     }
 }
