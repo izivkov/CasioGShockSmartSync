@@ -20,10 +20,6 @@ object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
     private val dstWatchState: ArrayList<String> = ArrayList<String>()
 
-    // new
-    private var appInfo:String = ""
-    // end new
-
     private val worldCities: HashMap<Int , CasioTimeZone.WorldCity> = HashMap<Int , CasioTimeZone.WorldCity>()
     var unmatchedCmdCount: Int = -1
 
@@ -42,7 +38,6 @@ object WatchDataCollector {
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
         subscribe("CASIO_WATCH_NAME", ::onDataReceived)
         subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
-        subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
     }
 
     fun start() {
@@ -115,11 +110,6 @@ object WatchDataCollector {
                 bleFeatures = command
                 ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
             }
-            "22" -> {
-                // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
-                appInfo = Utils.toCompactString(command)
-                writeCmd(0xE, appInfo)
-            }
         }
     }
 
@@ -177,7 +167,9 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "28")
 
         // app info
-        writeCmdWithResponseCount(0xC, "22")
+        // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
+        // It is a hard-coded value, which is what the official app does as well.
+        writeCmd(0xE, "223488F4E5D5AFC829E06D02")
     }
 
     private fun runInitCommands() {
