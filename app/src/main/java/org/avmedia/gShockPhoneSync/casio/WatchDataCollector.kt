@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.casio
 
 import android.annotation.SuppressLint
+import android.util.Log
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -19,11 +20,16 @@ object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
     private val dstWatchState: ArrayList<String> = ArrayList<String>()
 
+    // new
+    private var appInfo:String = ""
+    // end new
+
     private val worldCities: HashMap<Int , CasioTimeZone.WorldCity> = HashMap<Int , CasioTimeZone.WorldCity>()
     var unmatchedCmdCount: Int = -1
 
     var batteryLevel: Int = 0
     var watchName: String = ""
+    var moduleId:String = ""
     var homeCity: String = ""
     private var hourChime: String = ""
     var hourChime2: String = ""
@@ -87,6 +93,7 @@ object WatchDataCollector {
         when (shortStr.substring(0, 2).uppercase(Locale.getDefault())) {
             "1E" -> dstSettings.add(shortStr)
             "1D" -> dstWatchState.add(shortStr)
+
             "1F" -> {
                 val wc = createWordCity (shortStr)
                 worldCities[wc.index] = wc // replace existing element if it exists
@@ -107,6 +114,11 @@ object WatchDataCollector {
             "10" -> {
                 bleFeatures = command
                 ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
+            }
+            "22" -> {
+                // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
+                appInfo = Utils.toCompactString(command)
+                writeCmd(0xE, appInfo)
             }
         }
     }

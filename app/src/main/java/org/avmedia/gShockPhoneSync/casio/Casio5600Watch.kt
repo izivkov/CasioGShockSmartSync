@@ -18,7 +18,6 @@ import java.time.ZoneId
 class Casio5600Watch: BluetoothWatch() {
 
     init {
-        initHandlesMap()
     }
 
     override fun init() {
@@ -103,6 +102,7 @@ class Casio5600Watch: BluetoothWatch() {
         /*
         RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
         LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
+                      0x10 17 62 16 05 85 dd 7f ->00<- 03 0f ff ff ff ff 24 00 00 00 // after watch reset
         */
         val bleIntArr = Utils.toIntArray(WatchDataCollector.bleFeatures)
         if (bleIntArr.size < 19) {
@@ -110,7 +110,7 @@ class Casio5600Watch: BluetoothWatch() {
         }
 
         return when (bleIntArr[8]) {
-            1 -> WATCH_BUTTON.LOWER_LEFT
+            in 0..1 -> WATCH_BUTTON.LOWER_LEFT
             4 -> WATCH_BUTTON.LOWER_RIGHT
             else -> WATCH_BUTTON.INVALID
         }
