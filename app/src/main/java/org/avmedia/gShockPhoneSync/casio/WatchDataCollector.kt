@@ -106,10 +106,14 @@ object WatchDataCollector {
 
             // Instead of "1E", is this more readable?
             // CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.ordinal -> dstSettings.add(shortStr)
+
+            // DST settings
             "1E" -> dstSettings.add(shortStr)
 
+            // watch state
             "1D" -> dstWatchState.add(shortStr)
 
+            // World cities
             "1F" -> {
                 val wc = createWordCity (shortStr)
                 worldCities[wc.index] = wc // replace existing element if it exists
@@ -121,14 +125,18 @@ object WatchDataCollector {
                     }
                 }
             }
+
+            // watch name
             "23" -> {
                 watchName = Utils.toAsciiString(command, 1)
             }
 
+            // battery level
             "28" -> {
                 batteryLevel = BatteryLevelDecoder.decodeValue(command).toInt()
             }
 
+            // Ble features. We can detect from these which button was pressed
             "10" -> {
                 bleFeatures = command
                 ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
@@ -176,6 +184,7 @@ object WatchDataCollector {
         writeCmdWithResponseCount(0xC, "1e04")
         writeCmdWithResponseCount(0xC, "1e05")
 
+        // World cities
         writeCmdWithResponseCount(0xC, "1f00")
         writeCmdWithResponseCount(0xC, "1f01")
         writeCmdWithResponseCount(0xC, "1f02")
@@ -195,6 +204,8 @@ object WatchDataCollector {
         writeCmd(0xE, "223488F4E5D5AFC829E06D02")
     }
 
+    // we have collected all data from watch. Write it back.
+    // This is needed in order to be able to set time on watch.
     private fun runInitCommands() {
         dstSettings.forEach { command ->
             writeCmdWithResponseCount(0xe, command)
