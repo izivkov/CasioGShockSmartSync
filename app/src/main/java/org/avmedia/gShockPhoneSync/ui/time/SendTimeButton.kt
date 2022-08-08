@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.casio.CasioTimeZone
+import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
 import java.time.Clock
@@ -33,7 +34,7 @@ class SendTimeButton @JvmOverloads constructor(
                     sendTimeToWatch()
 
                     // update the screen with new Home Time
-                    CasioTimeZone.rereadHomeTimeFromWatch()
+                    WatchDataCollector.rereadHomeTimeFromWatch()
 
                     Utils.snackBar(context, "Time Sent to Watch")
                 }

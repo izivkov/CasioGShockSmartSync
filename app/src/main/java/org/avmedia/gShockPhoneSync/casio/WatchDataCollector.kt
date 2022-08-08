@@ -16,6 +16,21 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
+/* In BLE, handles are 16 bit values mapping to attributes UUID's like this: 26eb002d-b012-49a8-b1f8-394fb2032b0f
+ We use two handles, 0xC (to ask for some value) and 0xE (to write a new value). Instead of using the
+ long attribute UUID, we use the handle to look up the long value.
+ You can read more here: https://www.oreilly.com/library/view/getting-started-with/9781491900550/ch04.html
+
+Here us a table of standard handles and corresponding UUID:
+handle: 0x0003, char properties: 0x02, char value handle: 0x0004, uuid: 00002a00-0000-1000-8000-00805f9b34fb
+handle: 0x0005, char properties: 0x02, char value handle: 0x0006, uuid: 00002a01-0000-1000-8000-00805f9b34fb
+handle: 0x0008, char properties: 0x02, char value handle: 0x0009, uuid: 00002a07-0000-1000-8000-00805f9b34fb
+handle: 0x000b, char properties: 0x04, char value handle: 0x000c, uuid: 26eb002c-b012-49a8-b1f8-394fb2032b0f
+handle: 0x000d, char properties: 0x18, char value handle: 0x000e, uuid: 26eb002d-b012-49a8-b1f8-394fb2032b0f
+handle: 0x0010, char properties: 0x18, char value handle: 0x0011, uuid: 26eb0023-b012-49a8-b1f8-394fb2032b0f
+handle: 0x0013, char properties: 0x14, char value handle: 0x0014, uuid: 26eb0024-b012-49a8-b1f8-394fb2032b0f
+ */
+
 object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
     private val dstWatchState: ArrayList<String> = ArrayList<String>()
@@ -85,8 +100,14 @@ object WatchDataCollector {
         }
 
         val shortStr = Utils.toCompactString(command)
+
+        // get the first byte of the returned data, which indicates the data content.
         when (shortStr.substring(0, 2).uppercase(Locale.getDefault())) {
+
+            // Instead of "1E", is this more readable?
+            // CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.ordinal -> dstSettings.add(shortStr)
             "1E" -> dstSettings.add(shortStr)
+
             "1D" -> dstWatchState.add(shortStr)
 
             "1F" -> {
@@ -103,9 +124,11 @@ object WatchDataCollector {
             "23" -> {
                 watchName = Utils.toAsciiString(command, 1)
             }
+
             "28" -> {
                 batteryLevel = BatteryLevelDecoder.decodeValue(command).toInt()
             }
+
             "10" -> {
                 bleFeatures = command
                 ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
@@ -191,6 +214,14 @@ object WatchDataCollector {
         ++unmatchedCmdCount
 
         writeCmd(handle, cmd)
+    }
+
+    fun rereadHomeTimeFromWatch() {
+        WatchFactory.watch.writeCmdFromString(0xC, "1f00")
+    }
+
+    fun setHomeTime(worldCityName:String) {
+        WatchFactory.watch.writeCmdFromString(0xe, worldCityName)
     }
 
     private fun writeCmd(handle: Int, cmd: String) {

@@ -24,10 +24,6 @@ object CasioTimeZone {
         val city = TimeZoneHelper.parseCity(timeZone)
 
         var worldCity = WorldCity(city, 0)
-        WatchFactory.watch.writeCmdFromString(0xe, worldCity.createCasioString())
-    }
-
-    fun rereadHomeTimeFromWatch() {
-        WatchFactory.watch.writeCmdFromString(0xC, "1f00")
+        WatchDataCollector.setHomeTime(worldCity.createCasioString())
     }
 }
