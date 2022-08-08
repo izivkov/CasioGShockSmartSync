@@ -16,7 +16,8 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
-/* In BLE, handles are 16 bit values mapping to attributes UUID's like this: 26eb002d-b012-49a8-b1f8-394fb2032b0f
+/*
+ In BLE, handles are 16 bit values mapping to attributes UUID's like this: 26eb002d-b012-49a8-b1f8-394fb2032b0f
  We use two handles, 0xC (to ask for some value) and 0xE (to write a new value). Instead of using the
  long attribute UUID, we use the handle to look up the long value.
  You can read more here: https://www.oreilly.com/library/view/getting-started-with/9781491900550/ch04.html
@@ -29,7 +30,7 @@ handle: 0x000b, char properties: 0x04, char value handle: 0x000c, uuid: 26eb002c
 handle: 0x000d, char properties: 0x18, char value handle: 0x000e, uuid: 26eb002d-b012-49a8-b1f8-394fb2032b0f
 handle: 0x0010, char properties: 0x18, char value handle: 0x0011, uuid: 26eb0023-b012-49a8-b1f8-394fb2032b0f
 handle: 0x0013, char properties: 0x14, char value handle: 0x0014, uuid: 26eb0024-b012-49a8-b1f8-394fb2032b0f
- */
+*/
 
 object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
@@ -107,13 +108,13 @@ object WatchDataCollector {
             // Instead of "1E", is this more readable?
             // CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.ordinal -> dstSettings.add(shortStr)
 
-            // DST settings
+            // DST settings, i.e. 1e 04 7a 00 20 04 00
             "1E" -> dstSettings.add(shortStr)
 
-            // watch state
+            // watch state, i.e. 1d0001030202763a01ffffffffffff
             "1D" -> dstWatchState.add(shortStr)
 
-            // World cities
+            // World cities, i.e. 1f00544f524f4e544f00000000000000000000000000
             "1F" -> {
                 val wc = createWordCity (shortStr)
                 worldCities[wc.index] = wc // replace existing element if it exists
@@ -126,17 +127,18 @@ object WatchDataCollector {
                 }
             }
 
-            // watch name
+            // watch name, i.e. 23434153494f2047572d42353630300000000000
             "23" -> {
                 watchName = Utils.toAsciiString(command, 1)
             }
 
-            // battery level
+            // battery level, i.e. 28132400
             "28" -> {
                 batteryLevel = BatteryLevelDecoder.decodeValue(command).toInt()
             }
 
-            // Ble features. We can detect from these which button was pressed
+            // Ble features. We can detect from these which button was pressed.
+            // i.e. 101762532585fd7f00030fffffffff24000000
             "10" -> {
                 bleFeatures = command
                 ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
