@@ -28,7 +28,13 @@ value 0x23 using handle 0xC like this:
     writeCmdWithResponseCount(0xC, "23")
 
 The data will come in the callback Connection.onCharacteristicChanged(), which calls our provided callback
-dataReceived() in WatchDataListener class, and is further processed from there.
+dataReceived() in WatchDataListener class, and is further processed from there. The data will be sent to
+different subscribers, listening on topics of interest. The topics correspond to the first two bytes of
+the data, i.e. "23" for watch name. So, when we call:
+
+    subscribe("CASIO_WATCH_NAME", ::onDataReceived)
+
+any data starting with "23" will be received in the onDataReceived() method.
 
 To update value on the watch, we use handle 0xE, like this:
 
@@ -38,7 +44,7 @@ To update value on the watch, we use handle 0xE, like this:
 
         1f - update city
         00 - city number - 00 means the first city
-        544f524f4e544f... - city name, to TORONTO in ascii
+        54 4f 52 4f 4e 54 4f... - city name, to TORONTO in ascii
 */
 
 object WatchDataCollector {
