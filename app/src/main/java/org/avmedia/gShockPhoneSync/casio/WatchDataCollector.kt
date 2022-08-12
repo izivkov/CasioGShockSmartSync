@@ -51,7 +51,7 @@ object WatchDataCollector {
     private val dstSettings: ArrayList<String> = ArrayList<String>()
     private val dstWatchState: ArrayList<String> = ArrayList<String>()
 
-    private val worldCities: HashMap<Int , CasioTimeZone.WorldCity> = HashMap<Int , CasioTimeZone.WorldCity>()
+    private val worldCities: HashMap<Int, CasioTimeZone.WorldCity> = HashMap<Int, CasioTimeZone.WorldCity>()
     var unmatchedCmdCount: Int = -1
 
     var batteryLevel: Int = 0
