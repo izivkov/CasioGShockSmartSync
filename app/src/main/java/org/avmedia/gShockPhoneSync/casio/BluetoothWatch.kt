@@ -52,7 +52,11 @@ sealed class BluetoothWatch {
     private fun toCasioCmd(bytesStr: String): ByteArray {
         val parts = bytesStr.chunked(2)
         val hexArr = parts.map { str ->
-            str.toInt(16).toByte()
+            try {
+                str.toInt(16).toByte()
+            } catch (e:java.lang.NumberFormatException) {
+                str.toInt(16).toByte()
+            }
         }
         return hexArr.toByteArray()
     }

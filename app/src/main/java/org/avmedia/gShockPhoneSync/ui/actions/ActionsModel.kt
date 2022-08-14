@@ -114,7 +114,7 @@ object ActionsModel {
             createAppEventsSubscription(context)
 
             // in order to set time, we need to get complete watch configuration.
-            WatchDataCollector.requestCompleteWatchSettings()
+            // WatchDataCollector.requestCompleteWatchSettings()
         }
 
         private fun createAppEventsSubscription(context: Context) {

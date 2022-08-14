@@ -14,7 +14,9 @@ import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.HashMap
+import java.util.Collections.addAll
+import kotlin.collections.ArrayList
+import kotlin.reflect.KFunction1
 
 /*
  In BLE, handles are 16 bit values mapping to attributes UUID's like this: 26eb002d-b012-49a8-b1f8-394fb2032b0f
@@ -48,58 +50,119 @@ To update value on the watch, we use handle 0xE, like this:
 */
 
 object WatchDataCollector {
-    private val dstSettings: ArrayList<String> = ArrayList<String>()
-    private val dstWatchState: ArrayList<String> = ArrayList<String>()
 
-    private val worldCities: HashMap<Int, CasioTimeZone.WorldCity> = HashMap<Int, CasioTimeZone.WorldCity>()
-    var unmatchedCmdCount: Int = -1
+    private val worldCities: HashMap<Int, CasioTimeZone.WorldCity> =
+        HashMap<Int, CasioTimeZone.WorldCity>()
 
     var batteryLevel: Int = 0
     var watchName: String = ""
-    var moduleId:String = ""
+    var moduleId: String = ""
     var homeCity: String = ""
-    private var hourChime: String = ""
-    var hourChime2: String = ""
     var bleFeatures: String = ""
 
+    /*
+    1. Request data from watch by sending writeCmd(0xC, request)
+    2. Receive corresponding data via onDataReceived() and match to request
+    3. Send back this result to the watch. This is needed in order to be able set time.
+     */
+    class DataItem(
+        var request: String,
+        var replyAction: KFunction1<String, Unit>,
+        var waitingForReply: Boolean = true
+    ) {
+        var response: String = ""
+
+        init {
+            request = request.uppercase()
+            writeCmd(0xC, request)
+        }
+    }
+
+    private fun initShortList(): List<DataItem> {
+        val list = ArrayList<DataItem>()
+
+        // ble features
+        list.add(DataItem("10", ::setBleFeatures1))
+        return list
+    }
+
+    private fun initLongList(): List<DataItem> {
+        val list = ArrayList<DataItem>()
+
+        Connection.enableNotifications()
+
+        // ble features
+        list.add(DataItem("10", ::setBleFeatures1))
+
+        // get DTS watch state
+        list.add(DataItem("1d00", ::sendDataToWatch))
+        list.add(DataItem("1d02", ::sendDataToWatch))
+        list.add(DataItem("1d04", ::sendDataToWatch))
+
+        // get DTS for world cities
+        list.add(DataItem("1e00", ::setHomeCity1))
+        list.add(DataItem("1e01", ::sendDataToWatch))
+        list.add(DataItem("1e02", ::sendDataToWatch))
+        list.add(DataItem("1e03", ::sendDataToWatch))
+        list.add(DataItem("1e04", ::sendDataToWatch))
+        list.add(DataItem("1e05", ::sendDataToWatch))
+
+        // World cities
+        list.add(DataItem("1f00", ::sendDataToWatch))
+        list.add(DataItem("1f01", ::sendDataToWatch))
+        list.add(DataItem("1f02", ::sendDataToWatch))
+        list.add(DataItem("1f03", ::sendDataToWatch))
+        list.add(DataItem("1f04", ::sendDataToWatch))
+        list.add(DataItem("1f05", ::sendDataToWatch))
+
+        list.add(DataItem("23", ::setWatchName1))
+        list.add(DataItem("28", ::setBatteryLevel, false))
+        list.add(DataItem("22", ::setAppInfo1))
+
+        return list
+    }
+
+    private val itemList = ArrayList<DataItem>()
+    private lateinit var itemMap:Map <String, DataItem>
+
     init {
-        subscribe("CASIO_BLE_FEATURES", ::onButtonPressedInfoReceived)
+        subscribe("CASIO_BLE_FEATURES", ::onDataReceived)
         subscribe("CASIO_DST_SETTING", ::onDataReceived)
         subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
         subscribe("CASIO_WATCH_NAME", ::onDataReceived)
         subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
+        subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
     }
 
     fun start() {
-        unmatchedCmdCount = -1
-        dstSettings.clear()
-        dstWatchState.clear()
-        worldCities.clear()
-
-        Connection.enableNotifications()
-        requestButtonPressedInformation ()
+        itemList.addAll(initLongList())
+        itemMap = itemList.associateBy { it.request }.toMap()
     }
 
-    private fun requestButtonPressedInformation () {
+    private fun requestButtonPressedInformation() {
         // CASIO_BLE_FEATURES, determine which button was pressed from these.
-        writeCmd (0xC, "10")
+        writeCmd(0xC, "10")
     }
 
     private fun onDataReceived(data: String) {
-        add(data)
-        --unmatchedCmdCount
-    }
+        val shortStr = Utils.toCompactString(data)
 
-    private fun onButtonPressedInfoReceived(data: String) {
-        add(data)
+        var keyLength = 2
+        // get the first byte of the returned data, which indicates the data content.
+        val startOfData = shortStr.substring(0, 2).uppercase(Locale.getDefault())
+        if (startOfData in arrayOf("1D", "1E", "1F")) {
+            keyLength = 4
+        }
 
-        /* Normally for running actions we do not need full watch configuration.
-        One exception is [setting time] action. This action requests
-        full configuration explicitly.
-         */
-        if (!WatchFactory.watch.isActionButtonPressed()) {
-            requestCompleteWatchSettings()
+        val cmdKey = shortStr.substring(0, keyLength).uppercase(Locale.getDefault())
+        val dataItem = itemMap[cmdKey]
+        dataItem?.waitingForReply = false
+        dataItem?.replyAction?.let { it(data) }
+
+        if (isComplete()) {
+            ProgressEvents.onNext(ProgressEvents.Events.WatchDataCollected)
+            ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
         }
     }
 
@@ -109,61 +172,9 @@ object WatchDataCollector {
         return jsonObject
     }
 
-    private fun add(command: String) {
-        val intArr = Utils.toIntArray(command)
-        if (intArr.isNotEmpty() && intArr.size == 1 && intArr[0] > 0xff) {
-            return
-        }
-
-        val shortStr = Utils.toCompactString(command)
-
-        // get the first byte of the returned data, which indicates the data content.
-        when (shortStr.substring(0, 2).uppercase(Locale.getDefault())) {
-
-            // Instead of "1E", is this more readable?
-            // CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.ordinal -> dstSettings.add(shortStr)
-
-            // DST settings, i.e. 1e 04 7a 00 20 04 00
-            "1E" -> dstSettings.add(shortStr)
-
-            // watch state, i.e. 1d0001030202763a01ffffffffffff
-            "1D" -> dstWatchState.add(shortStr)
-
-            // World cities, i.e. 1f00544f524f4e544f00000000000000000000000000
-            "1F" -> {
-                val wc = createWordCity (shortStr)
-                worldCities[wc.index] = wc // replace existing element if it exists
-                if (homeCity == "") {
-                    // Home city is in the fist position, so data will start with "1F 00"
-                    val cityNumber = shortStr.substring(2, 4)
-                    if (cityNumber.toInt() == 0) {
-                        homeCity = Utils.toAsciiString(command, 2)
-                    }
-                }
-            }
-
-            // watch name, i.e. 23434153494f2047572d42353630300000000000
-            "23" -> {
-                watchName = Utils.toAsciiString(command, 1)
-            }
-
-            // battery level, i.e. 28132400
-            "28" -> {
-                batteryLevel = BatteryLevelDecoder.decodeValue(command).toInt()
-            }
-
-            // Ble features. We can detect from these which button was pressed.
-            // i.e. 101762532585fd7f00030fffffffff24000000
-            "10" -> {
-                bleFeatures = command
-                ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
-            }
-        }
-    }
-
-    private fun createWordCity (casioString: String): CasioTimeZone.WorldCity {
+    private fun createWordCity(casioString: String): CasioTimeZone.WorldCity {
         val city = Utils.toAsciiString(casioString.substring(4).trim('0'), 0)
-        val index = casioString.substring(2,4).toInt()
+        val index = casioString.substring(2, 4).toInt()
         return CasioTimeZone.WorldCity(city, index)
     }
 
@@ -174,81 +185,14 @@ object WatchDataCollector {
         // receive values from the commands we issued in start()
         WatchDataEvents.subscribe(this.javaClass.simpleName, subject, onNext = {
             onDataReceived(it as String)
-
-            if (isComplete()) {
-                ProgressEvents.onNext(ProgressEvents.Events.WatchDataCollected)
-
-                // We have collected all data from watch.
-                // Send initializer data to watch, se we can set time later
-                runInitCommands()
-                ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
-            }
         })
-    }
-
-    fun requestCompleteWatchSettings() {
-
-        // get DTS watch state
-        writeCmdWithResponseCount(0xC, "1d00")
-        writeCmdWithResponseCount(0xC, "1d02")
-        writeCmdWithResponseCount(0xC, "1d04")
-
-        // get DTS for world cities
-        writeCmdWithResponseCount(0xC, "1e00")
-        writeCmdWithResponseCount(0xC, "1e01")
-        writeCmdWithResponseCount(0xC, "1e02")
-        writeCmdWithResponseCount(0xC, "1e03")
-        writeCmdWithResponseCount(0xC, "1e04")
-        writeCmdWithResponseCount(0xC, "1e05")
-
-        // World cities
-        writeCmdWithResponseCount(0xC, "1f00")
-        writeCmdWithResponseCount(0xC, "1f01")
-        writeCmdWithResponseCount(0xC, "1f02")
-        writeCmdWithResponseCount(0xC, "1f03")
-        writeCmdWithResponseCount(0xC, "1f04")
-        writeCmdWithResponseCount(0xC, "1f05")
-
-        // watch name
-        writeCmdWithResponseCount(0xC, "23")
-
-        // battery level
-        writeCmdWithResponseCount(0xC, "28")
-
-        // app info
-        // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
-        // It is a hard-coded value, which is what the official app does as well.
-        writeCmd(0xE, "223488F4E5D5AFC829E06D02")
-    }
-
-    // we have collected all data from watch. Write it back.
-    // This is needed in order to be able to set time on watch.
-    private fun runInitCommands() {
-        dstSettings.forEach { command ->
-            writeCmdWithResponseCount(0xe, command)
-        }
-        dstWatchState.forEach { command ->
-            writeCmdWithResponseCount(0xe, command)
-        }
-        worldCities.values.forEach { wc ->
-            writeCmdWithResponseCount(0xe, wc.createCasioString())
-        }
-    }
-
-    private fun writeCmdWithResponseCount(handle: Int, cmd: String) {
-        if (unmatchedCmdCount == -1) {
-            unmatchedCmdCount = 0
-        }
-        ++unmatchedCmdCount
-
-        writeCmd(handle, cmd)
     }
 
     fun rereadHomeTimeFromWatch() {
         WatchFactory.watch.writeCmdFromString(0xC, "1f00")
     }
 
-    fun setHomeTime(worldCityName:String) {
+    fun setHomeTime(worldCityName: String) {
         WatchFactory.watch.writeCmdFromString(0xe, worldCityName)
     }
 
@@ -257,6 +201,49 @@ object WatchDataCollector {
     }
 
     private fun isComplete(): Boolean {
-        return unmatchedCmdCount == 0
+        return itemList.none { it.waitingForReply }
+    }
+
+    ////////////////////
+    // Response actions.
+    ////////////////////
+    private fun sendDataToWatch(data: String): Unit {
+        writeCmd(0xE, Utils.toCompactString(data))
+    }
+
+    private fun setWatchName1(data: String): Unit {
+        // watch name, i.e. 23434153494f2047572d42353630300000000000
+        watchName = Utils.toAsciiString(data, 1)
+    }
+
+    private fun setBatteryLevel(data: String): Unit {
+        // battery level, i.e. 28132400
+        batteryLevel = BatteryLevelDecoder.decodeValue(data).toInt()
+    }
+
+    private fun setHomeCity1(data: String): Unit {
+        val shortStr = Utils.toCompactString(data)
+        val wc = createWordCity(shortStr)
+        worldCities[wc.index] = wc // replace existing element if it exists
+        if (homeCity == "") {
+            // Home city is in the fist position, so data will start with "1F 00"
+            val cityNumber = shortStr.substring(2, 4)
+            if (cityNumber.toInt() == 0) {
+                homeCity = Utils.toAsciiString(data, 2)
+            }
+        }
+    }
+
+    private fun setBleFeatures1(data: String): Unit {
+        bleFeatures = data
+        ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
+    }
+
+    private fun setAppInfo1(data: String): Unit {
+        // app info
+        // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
+        // It is a hard-coded value, which is what the official app does as well.
+
+        writeCmd(0xE, "223488F4E5D5AFC829E06D02")
     }
 }
