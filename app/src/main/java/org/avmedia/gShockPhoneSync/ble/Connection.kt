@@ -21,6 +21,7 @@ import org.avmedia.gShockPhoneSync.casio.CasioConstants
 import org.avmedia.gShockPhoneSync.casio.WatchFactory
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
+import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -464,7 +465,7 @@ object Connection : IConnection {
             with(characteristic) {
                 when (status) {
                     BluetoothGatt.GATT_SUCCESS -> {
-                        Timber.i("Wrote to characteristic $uuid | value: ${value.toHexString()}")
+                        Timber.i("${LocalDateTime.now()} Wrote to characteristic $uuid | value: ${value.toHexString()}")
                     }
 
                     BluetoothGatt.GATT_WRITE_NOT_PERMITTED -> {

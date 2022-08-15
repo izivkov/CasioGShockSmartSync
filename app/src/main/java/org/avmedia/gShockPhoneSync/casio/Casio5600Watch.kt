@@ -102,7 +102,7 @@ class Casio5600Watch: BluetoothWatch() {
         LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
                       0x10 17 62 16 05 85 dd 7f ->00<- 03 0f ff ff ff ff 24 00 00 00 // after watch reset
         */
-        val bleIntArr = Utils.toIntArray(WatchDataCollector.bleFeatures)
+        val bleIntArr = Utils.toIntArray(WatchDataCollector.bleFeaturesValue)
         if (bleIntArr.size < 19) {
             return WATCH_BUTTON.LOWER_LEFT
         }

@@ -14,7 +14,6 @@ import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.jetbrains.anko.runOnUiThread
-import org.json.JSONObject
 
 class AlarmList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
