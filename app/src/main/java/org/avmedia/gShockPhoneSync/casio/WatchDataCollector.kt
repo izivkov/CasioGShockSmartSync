@@ -7,7 +7,6 @@
 package org.avmedia.gShockPhoneSync.casio
 
 import android.annotation.SuppressLint
-import android.util.Log
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -76,9 +75,7 @@ object WatchDataCollector {
 
     fun start() {
         Connection.enableNotifications()
-
         requestButtonPressedInformation()
-        // sendRequests(itemList)
     }
 
     private fun requestButtonPressedInformation() {
@@ -136,7 +133,7 @@ object WatchDataCollector {
         return list
     }
 
-    private fun sendRequests(_itemList:List<DataItem>) {
+    private fun sendRequests(_itemList: List<DataItem>) {
         _itemList.forEach {
 
             // do not expect result from setBatteryLevel
@@ -165,7 +162,7 @@ object WatchDataCollector {
 
         // Handle bleFeatures in a special way, because it is not part of the map.
         // We need to process bleFeatures first before the rest.
-        val dataItem:DataItem? = itemMap[cmdKey]
+        val dataItem: DataItem? = itemMap[cmdKey]
 
         dataItem?.waitingForReply = false
         dataItem?.response = data
@@ -249,7 +246,7 @@ object WatchDataCollector {
     }
 
     private fun setAppInfo(data: String): Unit {
-        // app info
+        // App info:
         // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
         // It is a hard-coded value, which is what the official app does as well.
 
