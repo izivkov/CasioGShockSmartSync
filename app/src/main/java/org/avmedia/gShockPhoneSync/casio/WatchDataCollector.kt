@@ -159,13 +159,11 @@ object WatchDataCollector {
         }
 
         val cmdKey = shortStr.substring(0, keyLength).uppercase(Locale.getDefault())
-
-        // Handle bleFeatures in a special way, because it is not part of the map.
-        // We need to process bleFeatures first before the rest.
         val dataItem: DataItem? = itemMap[cmdKey]
-
         dataItem?.waitingForReply = false
         dataItem?.response = data
+
+        // run the response action
         dataItem?.responseAction?.let { it(data) }
     }
 
