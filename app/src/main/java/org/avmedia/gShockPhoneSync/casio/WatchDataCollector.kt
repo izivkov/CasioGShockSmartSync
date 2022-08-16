@@ -167,12 +167,6 @@ object WatchDataCollector {
         dataItem?.responseAction?.let { it(data) }
     }
 
-    fun toJson(command: String): JSONObject {
-        val jsonObject = JSONObject()
-        jsonObject.put("WATCH_INFO_DATA", command)
-        return jsonObject
-    }
-
     private fun createWordCity(casioString: String): CasioTimeZone.WorldCity {
         val city = Utils.toAsciiString(casioString.substring(4).trim('0'), 0)
         val index = casioString.substring(2, 4).toInt()
@@ -225,7 +219,7 @@ object WatchDataCollector {
 
     private fun setBatteryLevel(data: String): Unit {
         // battery level, i.e. 28132400
-        batteryLevelValue = BatteryLevelDecoder.decodeValue("data").toInt()
+        batteryLevelValue = BatteryLevelDecoder.decodeValue(data).toInt()
     }
 
     private fun setHomeCity(data: String): Unit {
