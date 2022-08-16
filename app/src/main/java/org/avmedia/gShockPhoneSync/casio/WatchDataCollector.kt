@@ -7,7 +7,9 @@
 package org.avmedia.gShockPhoneSync.casio
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import org.avmedia.gShockPhoneSync.ble.Connection
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
@@ -85,8 +87,22 @@ object WatchDataCollector {
         bleFeaturesValue = data
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
 
+        if (WatchFactory.watch.isActionButtonPressed()) {
+            if (!ActionsModel.hasTimeSet()) {
+                // We are running actions, and none of them has to set time...
+                // We do not need to initialise watch.
+                return
+            }
+        }
+
         // Now that we can tell which button has been pressed, we can get the rest of the watch info.
-        sendRequests(itemList.filter { it.request != "10" })
+        var filteredItems = itemList.filter { it.request != "10" }
+
+        if (WatchFactory.watch.isActionButtonPressed()) {
+            // if we are running actions, we do not need to batteryLevel.
+            filteredItems = filteredItems.filter { it.request != "28" }
+        }
+        sendRequests(filteredItems)
     }
 
     private fun initList(): List<DataItem> {

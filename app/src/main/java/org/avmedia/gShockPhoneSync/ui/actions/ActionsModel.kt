@@ -394,4 +394,13 @@ object ActionsModel {
             it.save(context)
         }
     }
+
+    fun hasTimeSet ():Boolean {
+        actions.forEach {
+            if (it.enabled && it is SetTimeAction) {
+                return true
+            }
+        }
+        return false
+    }
 }
