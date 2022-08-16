@@ -11,6 +11,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
@@ -111,9 +112,6 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             createAppEventsSubscription(context)
-
-            // in order to set time, we need to get complete watch configuration.
-            // WatchDataCollector.requestCompleteWatchSettings()
         }
 
         private fun createAppEventsSubscription(context: Context) {
@@ -377,6 +375,7 @@ object ActionsModel {
                         runIt(it)
                     }
                 } else {
+                    Log.i ("", "Running $it")
                     runIt(it)
                 }
             }

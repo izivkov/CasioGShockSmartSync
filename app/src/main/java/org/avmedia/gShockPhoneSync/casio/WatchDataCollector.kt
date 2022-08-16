@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync.casio
 
 import android.annotation.SuppressLint
 import android.app.Notification
+import android.util.Log
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
@@ -15,6 +16,7 @@ import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.json.JSONObject
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
 
 /*
@@ -86,23 +88,24 @@ object WatchDataCollector {
     private fun setBleFeatures(data: String): Unit {
         bleFeaturesValue = data
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
+        sendRequests(filterItems(itemList))
+    }
+
+    private fun filterItems (_itemList:List<DataItem>): List<DataItem> {
+        // remove the item we have already processed
+        var items = _itemList.filter { it.request != "10" }
 
         if (WatchFactory.watch.isActionButtonPressed()) {
             if (!ActionsModel.hasTimeSet()) {
                 // We are running actions, and none of them has to set time...
-                // We do not need to initialise watch.
-                return
+                // We do not need to initialise watch. Return empty list.
+                return ArrayList<DataItem>()
             }
-        }
 
-        // Now that we can tell which button has been pressed, we can get the rest of the watch info.
-        var filteredItems = itemList.filter { it.request != "10" }
-
-        if (WatchFactory.watch.isActionButtonPressed()) {
-            // if we are running actions, we do not need to batteryLevel.
-            filteredItems = filteredItems.filter { it.request != "28" }
+            // If we are running actions, we do not need to batteryLevel.
+            return items.filter { it.request != "28" }
         }
-        sendRequests(filteredItems)
+        return items
     }
 
     private fun initList(): List<DataItem> {
