@@ -37,7 +37,6 @@ object WatchDataCollector {
     private val worldCities: HashMap<Int, CasioTimeZone.WorldCity> =
         HashMap<Int, CasioTimeZone.WorldCity>()
 
-    var batteryLevelValue: Int = 0
     var watchNameValue: String = ""
     var homeCityValue: String = ""
     var bleFeaturesValue: String = ""
@@ -69,7 +68,6 @@ object WatchDataCollector {
         subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
         subscribe("CASIO_WATCH_NAME", ::onDataReceived)
-        subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
         subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
     }
 
@@ -218,8 +216,7 @@ object WatchDataCollector {
     }
 
     private fun setBatteryLevel(data: String): Unit {
-        // battery level, i.e. 28132400
-        batteryLevelValue = BatteryLevelDecoder.decodeValue(data).toInt()
+        // empty
     }
 
     private fun setHomeCity(data: String): Unit {
