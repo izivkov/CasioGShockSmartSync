@@ -5,12 +5,7 @@ with Google services such as `Google Calendar` events and `Google Alarm Clock`. 
 [official](https://play.google.com/store/apps/details?id=com.casio.gshockconnected) Casio app. Instead it converts your traditional 
 G-shock into a semi-smart watch.
 
-Here are links to the supported watches:
-
-```
-[](https://tinyurl.com/y4r5xf94)
-[](https://tinyurl.com/yvnku2au)
-```
+[These](https://tinyurl.com/y4r5xf94) and [these](https://tinyurl.com/yvnku2au) watches are supported.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
