@@ -40,9 +40,6 @@ object ProgressEvents {
 
     val connectionEventFlowable = (eventProcessor as Flowable<Events>)
 
-    init {
-    }
-
     fun onNext(e: Events) {
         if (eventProcessor.hasSubscribers()) {
             return eventProcessor.onNext(e)
