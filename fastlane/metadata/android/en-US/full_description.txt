@@ -1,3 +1,12 @@
+
+This app integrates the Casio G-shock square digital Bluetooth watches (B5600, B5000 series), with Google services such as "Google Calendar" events and
+"Google Alarm Clock". It also works as a remote control for your phone. It basically converts your traditional G-shock into a semi-smart watch.
+
+Here are the supported watches:
+
+    https://tinyurl.com/y4r5xf94
+    https://tinyurl.com/yvnku2au
+
 General
 =======
 The app works by sending commands to the watch via Bluetooth (BLE). The watch 
