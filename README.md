@@ -8,8 +8,8 @@ G-shock into a semi-smart watch.
 Here are links to the supported watches:
 
 ```
-https://tinyurl.com/y4r5xf94
-https://tinyurl.com/yvnku2au
+[](https://tinyurl.com/y4r5xf94)
+[](https://tinyurl.com/yvnku2au)
 ```
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
