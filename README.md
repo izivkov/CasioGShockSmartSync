@@ -1,13 +1,16 @@
-> **_NOTE:_** We are looking for contributors to add support for other watches. Specifically, the G-Shock [GMWB5000 series](https://gshock.casio.com/us/products/full-metal/gmw-b5000/) are similar to the B5600, and should be not too hard to implement. Drop me a note at <izivkov@gmail.com> if you are interested to contribute.
+# Casio G-Shock Smart Sync
 
-> **_NOTE:_** I am often asked to add support for other watches. If you cannot contribte code, please consider donating or lending me a watch which you wish the app to support. This app does not generate any income for me, and I cannot justify the extra cost of purchasing other Casio watches. Contact me at izivkov@gmail.com to get details.
-
-# Casio G-Shock Phone Sync
-
-This app integrates the Casio G-shock [B5600 series bluetooth watches](https://world.g-shock.com/asia-mea/en/products/standard_digital/gw-b5600/), 
+This app integrates the Casio G-shock square gitital Bluetooth watches (B5600, B5000), 
 with Google services such as `Google Calendar` events and `Google Alarm Clock`. It is not meant to replace the 
 [official](https://play.google.com/store/apps/details?id=com.casio.gshockconnected) Casio app. Instead it converts your traditional 
 G-shock into a semi-smart watch.
+
+Here are links to the supported watches:
+
+```
+https://tinyurl.com/y4r5xf94
+https://tinyurl.com/yvnku2au
+```
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
