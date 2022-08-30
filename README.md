@@ -14,8 +14,6 @@ This app integrates the Casio G-shock square digital Bluetooth watches (B5600, B
      height="80">](https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync)
 
 ## General
-[
-](https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync)
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/ConnectingScreen.png"
 alt="Connection Screen"
 width=200
