@@ -45,7 +45,7 @@ alt="Set Alarm Screen"
 width=200
 style="margin: 10px;" />
 
-The GW-B5600 has 5 alarms and a `Signal` or `chime` setting. They are first read from the watch, 
+The B5600/B5000 watches 5 alarms and a `Signal` or `chime` setting. They are first read from the watch,
 and displayed in the app. The alarms can be updated by pressing on the time display of each alarm. 
 A dialog will appear which allows you to select the time.
 
