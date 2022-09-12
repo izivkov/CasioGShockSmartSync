@@ -10,6 +10,7 @@
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
     <string name="title_events">Events</string>
+    <string name="title_settings">Settings</string>
     <string name="events">Events</string>
     <string name="alarms">Alarms</string>
     <string name="time">Time</string>
@@ -49,4 +50,7 @@
     <string name="home_time">Home Time</string>
     <string name="running_actions">Running Actions</string>
     <string name="title_placeholder">Title Placeholder</string>
+    <string name="settings">Settings</string>
+    <string name="send_to_watch_settings">Send to\nWatch</string>
+    <string name="auto_configure_settings">Auto Set\nValues</string>
 </resources>

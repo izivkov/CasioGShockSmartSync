@@ -39,4 +39,11 @@
         android:label="@string/title_actions"
         tools:layout="@layout/fragment_actions"
         />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment"
+        android:label="@string/title_settings"
+        tools:layout="@layout/fragment_settings"
+        />
 </navigation>

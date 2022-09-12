@@ -43,13 +43,16 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
         var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
         val radioGroup: RadioGroup = itemView.findViewById<RadioGroup>(R.id.cameraOrientationGroup)
-        val actionEnabled: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+        val actionEnabled: SwitchMaterial =
+            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
     }
 
-    inner class ViewHolderActionToggleFlashlight (itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolderActionToggleFlashlight(itemView: View) :
+        RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
         var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
-        val actionEnabled: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+        val actionEnabled: SwitchMaterial =
+            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
     }
 
     inner class ViewHolderActionPhoneCall(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -63,7 +66,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     inner class ViewHolderActionSendEmail(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
         var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
-        val actionEnabled: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+        val actionEnabled: SwitchMaterial =
+            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
         val emailAddress: TextView = itemView.findViewById<TextView>(R.id.email_address)
     }
 
@@ -74,16 +78,36 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     // Returns the view type of the item at position for the purposes of view recycling.
     override fun getItemViewType(position: Int): Int {
 
-        if (actions[position] is ActionsModel.PhotoAction) { return ACTION_TYPES.PHOTO.ordinal }
-        if (actions[position] is ActionsModel.ToggleFlashlightAction) { return ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal }
-        if (actions[position] is ActionsModel.Separator) { return ACTION_TYPES.SEPARATOR.ordinal }
-        if (actions[position] is ActionsModel.PhoneDialAction) { return ACTION_TYPES.PHONE_CALL.ordinal }
-        if (actions[position] is ActionsModel.EmailLocationAction) { return ACTION_TYPES.EMAIL.ordinal }
-        if (actions[position] is ActionsModel.MapAction) { return ACTION_TYPES.MAP.ordinal }
-        if (actions[position] is ActionsModel.SetTimeAction) { return ACTION_TYPES.SET_TIME.ordinal }
-        if (actions[position] is ActionsModel.SetLocationAction) { return ACTION_TYPES.LOCATION.ordinal }
-        if (actions[position] is ActionsModel.StartVoiceAssistAction) { return ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal }
-        if (actions[position] is ActionsModel.SetEventsAction) { return ACTION_TYPES.SET_EVENTS.ordinal }
+        if (actions[position] is ActionsModel.PhotoAction) {
+            return ACTION_TYPES.PHOTO.ordinal
+        }
+        if (actions[position] is ActionsModel.ToggleFlashlightAction) {
+            return ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal
+        }
+        if (actions[position] is ActionsModel.Separator) {
+            return ACTION_TYPES.SEPARATOR.ordinal
+        }
+        if (actions[position] is ActionsModel.PhoneDialAction) {
+            return ACTION_TYPES.PHONE_CALL.ordinal
+        }
+        if (actions[position] is ActionsModel.EmailLocationAction) {
+            return ACTION_TYPES.EMAIL.ordinal
+        }
+        if (actions[position] is ActionsModel.MapAction) {
+            return ACTION_TYPES.MAP.ordinal
+        }
+        if (actions[position] is ActionsModel.SetTimeAction) {
+            return ACTION_TYPES.SET_TIME.ordinal
+        }
+        if (actions[position] is ActionsModel.SetLocationAction) {
+            return ACTION_TYPES.LOCATION.ordinal
+        }
+        if (actions[position] is ActionsModel.StartVoiceAssistAction) {
+            return ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal
+        }
+        if (actions[position] is ActionsModel.SetEventsAction) {
+            return ACTION_TYPES.SET_EVENTS.ordinal
+        }
 
         return ACTION_TYPES.BASE_ACTION.ordinal
     }
@@ -200,7 +224,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhVoiceAssistant: ViewHolderStartVoiceAssis,
         position: Int
     ) {
-        val action: ActionsModel.StartVoiceAssistAction = actions[position] as ActionsModel.StartVoiceAssistAction
+        val action: ActionsModel.StartVoiceAssistAction =
+            actions[position] as ActionsModel.StartVoiceAssistAction
         vhVoiceAssistant.title.text = action.title
         vhVoiceAssistant.actionEnabled.isChecked = action.enabled
         vhVoiceAssistant.icon.setImageResource(R.drawable.voice_assist)
@@ -211,7 +236,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureLocation(vhLocation: ViewHolderSaveLocation, position: Int) {
-        val action: ActionsModel.SetLocationAction = actions[position] as ActionsModel.SetLocationAction
+        val action: ActionsModel.SetLocationAction =
+            actions[position] as ActionsModel.SetLocationAction
         vhLocation.title.text = action.title
         vhLocation.actionEnabled.isChecked = action.enabled
         vhLocation.icon.setImageResource(R.drawable.location)
@@ -247,7 +273,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhEmail: ViewHolderActionSendEmail,
         position: Int
     ) {
-        val action: ActionsModel.EmailLocationAction = actions[position] as ActionsModel.EmailLocationAction
+        val action: ActionsModel.EmailLocationAction =
+            actions[position] as ActionsModel.EmailLocationAction
         vhEmail.title.text = action.title
         vhEmail.actionEnabled.isChecked = action.enabled
         vhEmail.emailAddress.text = action.emailAddress
@@ -351,7 +378,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhFlashlight: ViewHolderActionToggleFlashlight,
         position: Int
     ) {
-        val action: ActionsModel.ToggleFlashlightAction = actions[position] as ActionsModel.ToggleFlashlightAction
+        val action: ActionsModel.ToggleFlashlightAction =
+            actions[position] as ActionsModel.ToggleFlashlightAction
         vhFlashlight.actionEnabled.isChecked = action.enabled
         vhFlashlight.title.text = action.title
         vhFlashlight.icon.setImageResource(R.drawable.flashlight)

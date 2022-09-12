@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-28, 3:16 p.m.
+  -->
+
+<org.avmedia.gShockPhoneSync.ui.settings.SettingsItem xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/CardViewStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="3dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/stroke_color"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp">
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:text="@string/title_placeholder"
+                    android:textSize="24dp"
+                    tools:ignore="SpUsage" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</org.avmedia.gShockPhoneSync.ui.settings.SettingsItem>
