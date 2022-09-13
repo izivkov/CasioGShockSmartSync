@@ -34,7 +34,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_settings"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/buttons"
         />
 
     <LinearLayout
@@ -46,6 +46,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         >
+
+        <org.avmedia.gShockPhoneSync.customComponents.InfoButton
+            android:id="@+id/info_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/info"
+            android:layout_margin="5dp"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_help_24dp"
+            app:infoText="@string/auto_fill_help"
+            />
 
         <org.avmedia.gShockPhoneSync.ui.settings.AutoFillValuesButton
             android:id="@+id/AutoConfigureButton"
@@ -66,18 +78,6 @@
             android:background="@drawable/button"
             android:text="@string/send_to_watch_settings"
             tools:ignore="MissingConstraints"
-            />
-
-        <org.avmedia.gShockPhoneSync.customComponents.InfoButton
-            android:id="@+id/info_settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/info"
-            android:layout_margin="5dp"
-            android:layout_gravity="center"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_help_24dp"
-            app:infoText="@string/alarms_screen_info"
             />
 
     </LinearLayout>

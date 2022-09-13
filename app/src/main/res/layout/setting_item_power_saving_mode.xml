@@ -21,29 +21,37 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
+        android:padding="8dp"
         android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="4dp">
+                android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/title"
+                    android:id="@+id/power_saving_mode"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    android:text="@string/title_placeholder"
-                    android:textSize="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/power_saving_mode"
+                    android:textSize="20dp"
                     tools:ignore="SpUsage" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/power_saving_on_off"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textOff="Off"
+                    android:textOn="On"
+                    />
 
             </LinearLayout>
         </LinearLayout>

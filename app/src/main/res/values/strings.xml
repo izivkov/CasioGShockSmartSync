@@ -52,5 +52,14 @@
     <string name="title_placeholder">Title Placeholder</string>
     <string name="settings">Settings</string>
     <string name="send_to_watch_settings">Send to\nWatch</string>
-    <string name="auto_configure_settings">Auto Set\nValues</string>
+    <string name="auto_configure_settings">Auto Fill\nValues</string>
+    <string name="time_format">Time Format</string>
+    <string name="_12h">12h</string>
+    <string name="_24h">24h</string>
+    <string name="date_format">Date Format</string>
+    <string name="language">Language</string>
+    <string name="operational_sound">Button Operation Tone</string>
+    <string name="power_saving_mode">Power Saving Mode</string>
+    <string name="select_language">Select Language</string>
+    <string name="auto_fill_help">The auto-fill values are created as follows:\n\nTime/Date format and Language, are obtained from the Phone\'s setting.\n\nButton tone is turned OFF if the phone is in DnD mode, ON otherwise.\n\nAuto Light will be set ON during night, OFF during the day\n\nPower Saving will be set to ON if the battery\'s level is at 15% or less.\n\nNote: The values will not change until sent again, even if the conditions change (i.e. night becomes day)</string>
 </resources>

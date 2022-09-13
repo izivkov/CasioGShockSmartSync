@@ -29,7 +29,6 @@ class TimeFragment : Fragment() {
     ): View {
         _binding = FragmentTimeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
         return root
     }
 

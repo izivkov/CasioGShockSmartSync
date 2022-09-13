@@ -26,7 +26,7 @@ import java.util.*
 object Utils {
 
     fun isDebugMode(): Boolean {
-        return false
+        return true
     }
 
     fun String.hexToBytes() =
