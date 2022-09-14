@@ -71,7 +71,7 @@
                     tools:ignore="SpUsage" />
 
                 <RadioGroup
-                    android:id="@+id/time_format_group"
+                    android:id="@+id/light_duration_group"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
@@ -86,7 +86,7 @@
                         android:text="2s" />
 
                     <RadioButton
-                        android:id="@+id/four_Seconds"
+                        android:id="@+id/four_seconds"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"

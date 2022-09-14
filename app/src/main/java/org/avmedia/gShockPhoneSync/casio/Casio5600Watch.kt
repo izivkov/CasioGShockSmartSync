@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.casio
 
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfIntArray
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfInts
@@ -69,6 +70,9 @@ class Casio5600Watch: BluetoothWatch() {
                 Timber.i("Got reminders $remindersJsonArr")
             }
 
+            "GET_SETTINGS" -> {
+                writeCmd(0x000c, Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte()))
+            }
             "SET_TIME" -> {
                 val dateTimeMs: Long = JSONObject(message).get("value") as Long
 
@@ -133,6 +137,9 @@ class Casio5600Watch: BluetoothWatch() {
             // Add topics so the right component will receive data
             CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code -> {
                 json.put("CASIO_DST_SETTING", data)
+            }
+            CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code -> {
+                return SettingsDecoder.toJson(data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code -> {
                 val intArray = Utils.toIntArray(data)

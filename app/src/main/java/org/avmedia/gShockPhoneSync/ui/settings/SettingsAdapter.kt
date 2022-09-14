@@ -9,8 +9,10 @@ package org.avmedia.gShockPhoneSync.ui.setting
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.actions.ActionAdapter
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
@@ -26,13 +28,27 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     open inner class ViewHolderBaseSetting(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // add common functions here
+        // add common functionality here
     }
 
-    inner class ViewHolderLocale(itemView: View) : ViewHolderBaseSetting(itemView)
-    inner class ViewHolderOperationSound(itemView: View) : ViewHolderBaseSetting(itemView)
-    inner class ViewHolderLight(itemView: View) : ViewHolderBaseSetting(itemView)
-    inner class ViewHolderPowerSavingMode(itemView: View) : ViewHolderBaseSetting(itemView)
+    inner class ViewHolderLocale(itemView: View) : ViewHolderBaseSetting(itemView) {
+        val timeFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.time_format_group)
+        val dateFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.date_format_group)
+        val language: org.avmedia.gShockPhoneSync.ui.settings.LanguageMenu = itemView.findViewById(R.id.language_menu)
+    }
+
+    inner class ViewHolderOperationSound(itemView: View) : ViewHolderBaseSetting(itemView) {
+        val soundOnOff: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.sound_on_off)
+    }
+
+    inner class ViewHolderLight(itemView: View) : ViewHolderBaseSetting(itemView) {
+        val autoLight: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.auto_light_on_off)
+        val duration: RadioGroup = itemView.findViewById<RadioGroup>(R.id.light_duration_group)
+    }
+
+    inner class ViewHolderPowerSavingMode(itemView: View) : ViewHolderBaseSetting(itemView) {
+        val powerSavingMode: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.power_saving_on_off)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val context = parent.context
@@ -106,18 +122,41 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
     private fun configureLocale(vhLocale: ViewHolderLocale, position: Int) {
         val setting: SettingsModel.Locale = settings[position] as SettingsModel.Locale
+        if (setting.dateFormat == SettingsModel.Locale.DATE_FORMAT.DAY_MONTH) {
+            vhLocale.dateFormat.check(R.id.day_month)
+        } else {
+            vhLocale.dateFormat.check(R.id.month_day)
+        }
+
+        if (setting.timeFormat == SettingsModel.Locale.TIME_FORMAT.TWELVE_HOURS) {
+            vhLocale.timeFormat.check(R.id.twelve_hours)
+        } else {
+            vhLocale.timeFormat.check(R.id.twenty_four_hours)
+        }
+
+        vhLocale.language.setText(setting.dayOfWeekLanguage.value, false)
     }
 
     private fun configureLight(vhLight: ViewHolderLight, position: Int) {
         val setting: SettingsModel.Light = settings[position] as SettingsModel.Light
+        vhLight.autoLight.isChecked = setting.autoLight == true
+
+        if (setting.duration == SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS) {
+            vhLight.duration.check(R.id.two_seconds)
+        } else {
+            vhLight.duration.check(R.id.four_seconds)
+        }
+
     }
 
     private fun configureSound(vhOperationSound: ViewHolderOperationSound, position: Int) {
         val setting: SettingsModel.OperationSound = settings[position] as SettingsModel.OperationSound
+        vhOperationSound.soundOnOff.isChecked = setting.sound == true
     }
 
     private fun configurePowerSavingMode(vhPowerSavingMode: ViewHolderPowerSavingMode, position: Int) {
         val setting: SettingsModel.PowerSavingMode = settings[position] as SettingsModel.PowerSavingMode
+        vhPowerSavingMode.powerSavingMode.isChecked = setting.powerSavingMode == true
     }
 
     override fun getItemCount(): Int {

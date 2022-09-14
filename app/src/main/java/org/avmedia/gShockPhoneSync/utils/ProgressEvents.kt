@@ -66,5 +66,6 @@ object ProgressEvents {
         object AllPermissionsAccepted: Events()
         object ButtonPressedInfoReceived : Events()
         object ConnectionFailed : Events()
+        object SettingsLoaded : Events()
     }
 }

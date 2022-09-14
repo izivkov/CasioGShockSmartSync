@@ -126,13 +126,14 @@
                     tools:ignore="SpUsage" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/menu"
+                    android:id="@+id/language_menu_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:hint="@string/select_language">
 
                     <org.avmedia.gShockPhoneSync.ui.settings.LanguageMenu
+                        android:id="@+id/language_menu"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
