@@ -21,7 +21,7 @@ object SettingsModel {
             TWELVE_HOURS("12h"), TWENTY_FOUR_HOURS("24h"),
         }
         enum class DATE_FORMAT(val value: String) {
-            MONTH_DAY("Month, day"), DAY_MONTH("Day, month"),
+            MONTH_DAY("MM:DD"), DAY_MONTH("DD:MM"),
         }
 
         enum class DAY_OF_WEEK_LANGUAGE(val value: String) {
