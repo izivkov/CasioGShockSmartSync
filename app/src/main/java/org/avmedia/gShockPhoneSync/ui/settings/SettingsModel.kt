@@ -16,6 +16,11 @@ object SettingsModel {
         settings.associateBy { it.title }.toMap()
     }
 
+    val locale by lazy { settingsMap["Locale"] }
+    val buttonSound  by lazy { settingsMap["Button Sound"]}
+    val powerSavingMode  by lazy { settingsMap["Power Saving Mode"] }
+    val light by lazy { settingsMap["Light"] }
+
     class Locale: Setting("Locale") {
         enum class TIME_FORMAT(val value: String) {
             TWELVE_HOURS("12h"), TWENTY_FOUR_HOURS("24h"),

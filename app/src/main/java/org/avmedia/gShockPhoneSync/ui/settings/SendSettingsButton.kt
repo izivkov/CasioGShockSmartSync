@@ -10,7 +10,11 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.google.gson.Gson
+import org.avmedia.gShockPhoneSync.casio.SettingsTranportObject
 import org.avmedia.gShockPhoneSync.customComponents.Button
+import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
+import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendSettingsButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,5 +38,25 @@ class SendSettingsButton @JvmOverloads constructor(
     }
 
     private fun updateSettings() {
+        var settingsTransportObj = SettingsTranportObject()
+
+        val localeSetting = SettingsModel.locale as SettingsModel.Locale
+        settingsTransportObj.language = localeSetting.dayOfWeekLanguage.value
+        settingsTransportObj.timeFormat = localeSetting.timeFormat.value
+        settingsTransportObj.dateFormat = localeSetting.dateFormat.value
+
+        val lightSetting = SettingsModel.light as SettingsModel.Light
+        settingsTransportObj.autoLight = lightSetting.autoLight
+        settingsTransportObj.lightDuration = lightSetting.duration.value
+
+        val powerSavingMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
+        settingsTransportObj.powerSavingMode = powerSavingMode.powerSavingMode
+
+        val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound
+        settingsTransportObj.buttonTone = buttonTone.sound
+
+        val settingJson = Gson().toJson(settingsTransportObj)
+        sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
+        Utils.snackBar(context, "Settings Sent to Watch")
     }
 }

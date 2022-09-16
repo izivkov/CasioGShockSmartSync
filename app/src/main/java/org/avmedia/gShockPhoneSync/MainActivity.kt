@@ -157,6 +157,10 @@ class MainActivity : AppCompatActivity() {
                     ProgressEvents.Events.ConnectionFailed -> {
                         bleScannerLocal.startConnection()
                     }
+                    ProgressEvents.Events.WatchInitializationCompleted -> {
+                        val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+                        navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
+                    }
                 }
             },
             { throwable ->

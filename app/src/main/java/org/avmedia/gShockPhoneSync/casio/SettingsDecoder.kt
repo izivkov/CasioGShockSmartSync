@@ -52,9 +52,10 @@ Power Saving: off
         13 03 00 00 00 00 00 00 00 00 00 00
 
 Byte 2 as binary:
-24 hours:   001
-button tone 010
-light off:  100
+24 hours:       00000001
+button tone     00000010
+light off:      00000100
+pwr. saving off:00010000
  */
 
 object SettingsDecoder {
@@ -66,19 +67,18 @@ object SettingsDecoder {
     }
 
     private fun createJsonSettings(settingString: String): JSONObject {
-        val MASK_24_HIURS =         0b00000001
+        val MASK_24_HOURS =         0b00000001
         val MASK_BUTTON_TONE_OFF =  0b00000010
         val MASK_LIGHT_OFF =        0b00000100
         val POWER_SAVING_MODE =     0b00010000
 
-        val settings = Settings()
+        val settings = SettingsTranportObject()
 
         val settingArray = Utils.toIntArray(settingString)
 
-        // INZ TEST
-        if (settingArray[1] and MASK_24_HIURS != 0) { settings.timeFormat = "24h" } else { settings.timeFormat = "12h" }
-        settings.timeTone = settingArray[1] and MASK_BUTTON_TONE_OFF == 0
-        settings.autoLight = settingArray[1] and MASK_LIGHT_OFF != 0
+        if (settingArray[1] and MASK_24_HOURS != 0) { settings.timeFormat = "24h" } else { settings.timeFormat = "12h" }
+        settings.buttonTone = settingArray[1] and MASK_BUTTON_TONE_OFF == 0
+        settings.autoLight = settingArray[1] and MASK_LIGHT_OFF == 0
         settings.powerSavingMode = settingArray[1] and POWER_SAVING_MODE == 0
 
         if (settingArray[4] == 1) { settings.dateFormat = "DD:MM" } else { settings.dateFormat = "MM:DD" }
@@ -91,7 +91,6 @@ object SettingsDecoder {
         if (settingArray[5] == 5) { settings.language = "Russian" }
 
         if (settingArray[2] == 1) { settings.lightDuration = "4s" } else { settings.lightDuration = "2s" }
-        // INZ TEST END
 
         return JSONObject(Gson().toJson(settings))
     }

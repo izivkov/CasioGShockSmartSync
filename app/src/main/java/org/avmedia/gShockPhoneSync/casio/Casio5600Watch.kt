@@ -73,6 +73,10 @@ class Casio5600Watch: BluetoothWatch() {
             "GET_SETTINGS" -> {
                 writeCmd(0x000c, Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte()))
             }
+            "SET_SETTINGS" -> {
+                val settings = JSONObject(message).get("value") as JSONObject
+                writeCmd(0x000e, SettingsEncoder.encode(settings))
+            }
             "SET_TIME" -> {
                 val dateTimeMs: Long = JSONObject(message).get("value") as Long
 

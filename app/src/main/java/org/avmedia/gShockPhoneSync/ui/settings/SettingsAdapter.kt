@@ -9,13 +9,12 @@ package org.avmedia.gShockPhoneSync.ui.setting
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.CompoundButton
 import android.widget.RadioGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ui.actions.ActionAdapter
-import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 
 // This adapter handles a heterogeneous list of settings.
@@ -34,7 +33,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     inner class ViewHolderLocale(itemView: View) : ViewHolderBaseSetting(itemView) {
         val timeFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.time_format_group)
         val dateFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.date_format_group)
-        val language: org.avmedia.gShockPhoneSync.ui.settings.LanguageMenu = itemView.findViewById(R.id.language_menu)
+        val language: org.avmedia.gShockPhoneSync.ui.settings.LanguageMenu =
+            itemView.findViewById(R.id.language_menu)
     }
 
     inner class ViewHolderOperationSound(itemView: View) : ViewHolderBaseSetting(itemView) {
@@ -42,12 +42,14 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     inner class ViewHolderLight(itemView: View) : ViewHolderBaseSetting(itemView) {
-        val autoLight: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.auto_light_on_off)
+        val autoLight: SwitchMaterial =
+            itemView.findViewById<SwitchMaterial>(R.id.auto_light_on_off)
         val duration: RadioGroup = itemView.findViewById<RadioGroup>(R.id.light_duration_group)
     }
 
     inner class ViewHolderPowerSavingMode(itemView: View) : ViewHolderBaseSetting(itemView) {
-        val powerSavingMode: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.power_saving_on_off)
+        val powerSavingMode: SwitchMaterial =
+            itemView.findViewById<SwitchMaterial>(R.id.power_saving_on_off)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -60,7 +62,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 ViewHolderLocale(vSetting)
             }
             SETTINGS_TYPES.OPERATION_SOUND.ordinal -> {
-                val vSetting: View = inflater.inflate(R.layout.setting_item_operation_sound, parent, false)
+                val vSetting: View =
+                    inflater.inflate(R.layout.setting_item_operation_sound, parent, false)
                 ViewHolderOperationSound(vSetting)
             }
             SETTINGS_TYPES.LIGHT.ordinal -> {
@@ -68,7 +71,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 ViewHolderLight(vSetting)
             }
             SETTINGS_TYPES.POWER_SAVING_MODE.ordinal -> {
-                val vSetting: View = inflater.inflate(R.layout.setting_item_power_saving_mode, parent, false)
+                val vSetting: View =
+                    inflater.inflate(R.layout.setting_item_power_saving_mode, parent, false)
                 ViewHolderPowerSavingMode(vSetting)
             }
             else -> {
@@ -90,7 +94,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vhLight = viewHolder as ViewHolderLight
                 configureLight(vhLight, position)
             }
-            SETTINGS_TYPES.OPERATION_SOUND .ordinal -> {
+            SETTINGS_TYPES.OPERATION_SOUND.ordinal -> {
                 val vhOperationSound = viewHolder as ViewHolderOperationSound
                 configureSound(vhOperationSound, position)
             }
@@ -135,6 +139,39 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
 
         vhLocale.language.setText(setting.dayOfWeekLanguage.value, false)
+
+        vhLocale.timeFormat.setOnCheckedChangeListener(
+            RadioGroup.OnCheckedChangeListener { _, checkedId ->
+                if (checkedId == R.id.twelve_hours) {
+                    setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWELVE_HOURS
+                } else {
+                    setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
+                }
+            })
+
+        vhLocale.dateFormat.setOnCheckedChangeListener(
+            RadioGroup.OnCheckedChangeListener { _, checkedId ->
+                if (checkedId == R.id.month_day) {
+                    setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.MONTH_DAY
+                } else {
+                    setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.DAY_MONTH
+                }
+            })
+
+        val listener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            val selectedItem = parent.getItemAtPosition(position)
+                .toString()
+            when (selectedItem) {
+                "English" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
+                "Spanish" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
+                "French" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
+                "German" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
+                "Italian" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
+                "Russian" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
+            }
+        }
+
+        vhLocale.language.onItemClickListener = listener
     }
 
     private fun configureLight(vhLight: ViewHolderLight, position: Int) {
@@ -147,16 +184,39 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             vhLight.duration.check(R.id.four_seconds)
         }
 
+        vhLight.autoLight.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            setting.autoLight = isChecked
+        })
+
+        vhLight.duration.setOnCheckedChangeListener(
+            RadioGroup.OnCheckedChangeListener { _, checkedId ->
+                if (checkedId == R.id.two_seconds) {
+                    setting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
+                } else {
+                    setting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
+                }
+            })
     }
 
     private fun configureSound(vhOperationSound: ViewHolderOperationSound, position: Int) {
         val setting: SettingsModel.OperationSound = settings[position] as SettingsModel.OperationSound
         vhOperationSound.soundOnOff.isChecked = setting.sound == true
+
+        vhOperationSound.soundOnOff.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            setting.sound = isChecked
+        })
     }
 
-    private fun configurePowerSavingMode(vhPowerSavingMode: ViewHolderPowerSavingMode, position: Int) {
+    private fun configurePowerSavingMode(
+        vhPowerSavingMode: ViewHolderPowerSavingMode,
+        position: Int
+    ) {
         val setting: SettingsModel.PowerSavingMode = settings[position] as SettingsModel.PowerSavingMode
         vhPowerSavingMode.powerSavingMode.isChecked = setting.powerSavingMode == true
+
+        vhPowerSavingMode.powerSavingMode.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            setting.powerSavingMode = isChecked
+        })
     }
 
     override fun getItemCount(): Int {
