@@ -83,7 +83,13 @@ style="margin: 10px;" />
 
 The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.
 
-The app has to be in the foreground in order to run the actions. An exception to this is Setting Time.
+## Settings
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/Settings.png"
+alt="Set Alarm Screen"
+width=200
+style="margin: 10px;" />
+
+This screen allows you to set up the watch's settings. You can auto prefill the values using information from your phone.
 
 ## Credits
 - The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
