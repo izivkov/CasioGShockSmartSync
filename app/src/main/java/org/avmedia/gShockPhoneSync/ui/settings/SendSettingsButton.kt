@@ -37,24 +37,24 @@ class SendSettingsButton @JvmOverloads constructor(
     }
 
     private fun updateSettings() {
-        var settingsTransportObj = SettingsTransferObject()
+        var settingsTransferObj = SettingsTransferObject()
 
         val localeSetting = SettingsModel.locale as SettingsModel.Locale
-        settingsTransportObj.language = localeSetting.dayOfWeekLanguage.value
-        settingsTransportObj.timeFormat = localeSetting.timeFormat.value
-        settingsTransportObj.dateFormat = localeSetting.dateFormat.value
+        settingsTransferObj.language = localeSetting.dayOfWeekLanguage.value
+        settingsTransferObj.timeFormat = localeSetting.timeFormat.value
+        settingsTransferObj.dateFormat = localeSetting.dateFormat.value
 
         val lightSetting = SettingsModel.light as SettingsModel.Light
-        settingsTransportObj.autoLight = lightSetting.autoLight
-        settingsTransportObj.lightDuration = lightSetting.duration.value
+        settingsTransferObj.autoLight = lightSetting.autoLight
+        settingsTransferObj.lightDuration = lightSetting.duration.value
 
         val powerSavingMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
-        settingsTransportObj.powerSavingMode = powerSavingMode.powerSavingMode
+        settingsTransferObj.powerSavingMode = powerSavingMode.powerSavingMode
 
         val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound
-        settingsTransportObj.buttonTone = buttonTone.sound
+        settingsTransferObj.buttonTone = buttonTone.sound
 
-        val settingJson = Gson().toJson(settingsTransportObj)
+        val settingJson = Gson().toJson(settingsTransferObj)
         sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
         Utils.snackBar(context, "Settings Sent to Watch")
     }

@@ -69,7 +69,7 @@ object AutoConfigurator {
         // Light
         settings.lightDuration = "2s"
         settings.autoLight = false
-        // for autoLight, we may want to use day/time to set off/on
+        // for auto-light, we may want to use day/time to set off/on
 
         // Power Save mode
         val batteryLevel:Int = WatchDataCollector.batteryLevelValue.toInt()
