@@ -15,6 +15,7 @@ import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
 import org.json.JSONObject
+import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
@@ -44,6 +45,7 @@ object WatchDataCollector {
     var watchNameValue: String = ""
     var homeCityValue: String = ""
     var bleFeaturesValue: String = ""
+    var batteryLevelValue: String = "0"
 
     class DataItem(
         var request: String,
@@ -73,6 +75,7 @@ object WatchDataCollector {
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
         subscribe("CASIO_WATCH_NAME", ::onDataReceived)
         subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
+        subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
     }
 
     fun start() {
@@ -139,8 +142,7 @@ object WatchDataCollector {
         list.add(DataItem("23", ::setWatchName1))
 
         // Battery level, i.e. 28132400.
-        // Do not expect result from setBatteryLevel.
-        list.add(DataItem("28", ::setBatteryLevel, false))
+        list.add(DataItem("28", ::setBatteryLevel, true))
 
         // app info
         // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
@@ -152,20 +154,11 @@ object WatchDataCollector {
 
     private fun sendRequests(_itemList: List<DataItem>) {
         _itemList.forEach {
-
-            // do not expect result from setBatteryLevel
-            it.waitingForReply = it.request != "28"
-
             it.request()
         }
     }
 
     private fun onDataReceived(data: String) {
-
-        // we sometimes get unknown data, like 100. Just ignore it.
-        if (data.length <= 3) {
-            return
-        }
 
         val shortStr = Utils.toCompactString(data)
         var keyLength = 2
@@ -235,7 +228,8 @@ object WatchDataCollector {
     }
 
     private fun setBatteryLevel(data: String): Unit {
-        // empty
+        Timber.i("Battery Level: $data")
+        batteryLevelValue = BatteryLevelDecoder.decodeValue(data)
     }
 
     private fun setHomeCity(data: String): Unit {

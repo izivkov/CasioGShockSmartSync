@@ -19,6 +19,7 @@ import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.casio.BatteryLevelDecoder
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableView
 import org.jetbrains.anko.runOnUiThread
 
@@ -62,8 +63,9 @@ class BatteryView @JvmOverloads constructor(
 
     override fun onDataReceived(value: String, name: String) {
         context.runOnUiThread {
-            setPercent(value.toInt())
-            super.onDataReceived(value, name)
+            val batteryLevel = BatteryLevelDecoder.decodeValue(value)
+            setPercent(batteryLevel.toInt())
+            super.onDataReceived(batteryLevel, name)
         }
     }
 

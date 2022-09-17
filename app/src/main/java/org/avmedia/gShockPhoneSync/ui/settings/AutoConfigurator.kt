@@ -11,6 +11,7 @@ import android.app.NotificationManager.INTERRUPTION_FILTER_ALL
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import org.avmedia.gShockPhoneSync.casio.SettingsTransferObject
+import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -67,9 +68,12 @@ object AutoConfigurator {
 
         // Light
         settings.lightDuration = "2s"
+        settings.autoLight = false
+        // for autoLight, we may want to use day/time to set off/on
 
         // Power Save mode
-        settings.powerSavingMode = true
+        val batteryLevel:Int = WatchDataCollector.batteryLevelValue.toInt()
+        settings.powerSavingMode = batteryLevel <= 15
 
         return settings
     }

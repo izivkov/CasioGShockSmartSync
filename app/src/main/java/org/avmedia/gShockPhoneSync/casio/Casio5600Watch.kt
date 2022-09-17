@@ -161,7 +161,7 @@ class Casio5600Watch: BluetoothWatch() {
                 json.put("CASIO_WATCH_NAME", data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code -> {
-                json.put("CASIO_WATCH_CONDITION", BatteryLevelDecoder.decodeValue(data))
+                json.put("CASIO_WATCH_CONDITION", data)
             }
 
             CasioConstants.CHARACTERISTICS.CASIO_APP_INFORMATION.code -> {
