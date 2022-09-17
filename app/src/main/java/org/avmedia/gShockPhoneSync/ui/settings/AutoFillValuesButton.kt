@@ -50,7 +50,12 @@ class AutoFillValuesButton @JvmOverloads constructor(
 
     private fun fillPowerSavingMode(settings: SettingsTransferObject) {
         val powerSaveMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
-        powerSaveMode.powerSavingMode = settings.powerSavingMode
+
+        // Change only if currently not in power-saving mode,
+        // i.e. do not change from pwr. saving to not saving
+        if (!powerSaveMode.powerSavingMode && settings.powerSavingMode) {
+            powerSaveMode.powerSavingMode = true
+        }
     }
 
     private fun fillLight(settings: SettingsTransferObject) {
@@ -60,7 +65,6 @@ class AutoFillValuesButton @JvmOverloads constructor(
             lightSetting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
         } else {
             lightSetting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
-
         }
     }
 
