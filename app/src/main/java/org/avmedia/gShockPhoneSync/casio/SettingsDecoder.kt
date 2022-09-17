@@ -72,7 +72,7 @@ object SettingsDecoder {
         val MASK_LIGHT_OFF =        0b00000100
         val POWER_SAVING_MODE =     0b00010000
 
-        val settings = SettingsTranportObject()
+        val settings = SettingsTransferObject()
 
         val settingArray = Utils.toIntArray(settingString)
 

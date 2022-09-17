@@ -10,6 +10,8 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
@@ -27,6 +29,8 @@ class SettingsList @JvmOverloads constructor(
 
         subscribe("SETTINGS", ::onDataReceived)
         Connection.sendMessage("{ action: 'GET_SETTINGS'}")
+
+        listenForUpdateRequest()
     }
 
     fun init() {
@@ -35,11 +39,30 @@ class SettingsList @JvmOverloads constructor(
 
     private fun onDataReceived(data: String) {
         SettingsModel.fromJson(data)
+        updateUI()
+    }
+
+    private fun updateUI () {
         context.runOnUiThread {
             adapter?.notifyDataSetChanged()
             ProgressEvents.onNext(ProgressEvents.Events.SettingsLoaded)
         }
     }
+
+    private fun listenForUpdateRequest(): Disposable =
+        ProgressEvents.connectionEventFlowable
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                when (it) {
+                    // Somebody has made a change to the model...need to update the UI
+                    ProgressEvents.Events.NeedToUpdateUI -> {
+                        updateUI ()
+                    }
+                }
+            }
+            .subscribe(
+                { },
+                { throwable -> Timber.i("Got error on subscribe: $throwable") })
 
     @SuppressLint("CheckResult")
     private fun subscribe(subject: String, onDataReceived: (String) -> Unit) {

@@ -67,5 +67,6 @@ object ProgressEvents {
         object ButtonPressedInfoReceived : Events()
         object ConnectionFailed : Events()
         object SettingsLoaded : Events()
+        object NeedToUpdateUI : Events()
     }
 }

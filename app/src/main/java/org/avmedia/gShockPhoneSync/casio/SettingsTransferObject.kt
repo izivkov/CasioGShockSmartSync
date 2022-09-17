@@ -1,6 +1,6 @@
 package org.avmedia.gShockPhoneSync.casio
 
-class SettingsTranportObject {
+class SettingsTransferObject {
     var timeFormat = ""
     var dateFormat = ""
     var language = ""

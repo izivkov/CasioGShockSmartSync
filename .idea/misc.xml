@@ -12,10 +12,16 @@
         <entry key="app/src/main/res/drawable/generic_action_item.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/ic_actions.xml" value="0.145" />
         <entry key="app/src/main/res/drawable/ic_alarm_black_24dp.xml" value="0.145" />
+        <entry key="app/src/main/res/drawable/ic_de.xml" value="0.1885" />
+        <entry key="app/src/main/res/drawable/ic_es.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/ic_event_black_24dp.xml" value="0.145" />
+        <entry key="app/src/main/res/drawable/ic_fr.xml" value="0.1885" />
+        <entry key="app/src/main/res/drawable/ic_gb.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/ic_help_24dp.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_info_24dp.xml" value="0.185" />
+        <entry key="app/src/main/res/drawable/ic_it.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/ic_reminder.xml" value="0.152" />
+        <entry key="app/src/main/res/drawable/ic_ru.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/ic_settings.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/ic_watch_later_black_24dp.xml" value="0.1885" />
         <entry key="app/src/main/res/drawable/mail.xml" value="0.145" />

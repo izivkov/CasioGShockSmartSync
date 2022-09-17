@@ -11,9 +11,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.google.gson.Gson
-import org.avmedia.gShockPhoneSync.casio.SettingsTranportObject
+import org.avmedia.gShockPhoneSync.casio.SettingsTransferObject
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendSettingsButton @JvmOverloads constructor(
@@ -38,7 +37,7 @@ class SendSettingsButton @JvmOverloads constructor(
     }
 
     private fun updateSettings() {
-        var settingsTransportObj = SettingsTranportObject()
+        var settingsTransportObj = SettingsTransferObject()
 
         val localeSetting = SettingsModel.locale as SettingsModel.Locale
         settingsTransportObj.language = localeSetting.dayOfWeekLanguage.value

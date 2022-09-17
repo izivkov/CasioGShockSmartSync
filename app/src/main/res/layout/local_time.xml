@@ -49,6 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:format12Hour="h:mm:ss a"
+                android:format24Hour="H:mm:ss"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textSize="34dp"
                 tools:ignore="SpUsage" />
