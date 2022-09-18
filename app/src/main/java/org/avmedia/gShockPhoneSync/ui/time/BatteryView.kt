@@ -20,6 +20,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.casio.BatteryLevelDecoder
+import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableView
 import org.jetbrains.anko.runOnUiThread
 
@@ -27,7 +28,7 @@ class BatteryView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : CacheableSubscribableView(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr) {
     private var radius: Float = 0f
 
     // Top
@@ -56,17 +57,8 @@ class BatteryView @JvmOverloads constructor(
 
     init {
         percentageBitmap = getBitmap(R.drawable.stripes)
-        val percentStr = get (this.javaClass.simpleName) ?: "0"
+        val percentStr = WatchDataCollector.batteryLevelValue
         setPercent(percentStr.toInt())
-        subscribe(this.javaClass.simpleName, "CASIO_WATCH_CONDITION")
-    }
-
-    override fun onDataReceived(value: String, name: String) {
-        context.runOnUiThread {
-            val batteryLevel = BatteryLevelDecoder.decodeValue(value)
-            setPercent(batteryLevel.toInt())
-            super.onDataReceived(batteryLevel, name)
-        }
     }
 
     @SuppressLint("DrawAllocation")
