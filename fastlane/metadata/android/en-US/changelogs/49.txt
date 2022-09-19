@@ -1,0 +1,2 @@
+* Add Settings screen
+* Update dependencies
