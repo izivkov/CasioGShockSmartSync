@@ -10,11 +10,12 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.android.synthetic.main.alarm_item.view.*
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
+import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.casio.SettingsTransferObject
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import java.util.*
 
 
 class AutoFillValuesButton @JvmOverloads constructor(
@@ -30,7 +31,23 @@ class AutoFillValuesButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    autoFill()
+                    // autoFill()
+
+                    // INZ new
+                    val picker =
+                        MaterialTimePicker.Builder()
+                            .setTitleText("Timer")
+                            .setTimeFormat(TimeFormat.CLOCK_24H)
+                            .setHour(0)
+                            .setMinute(0)
+                            .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
+                            .build()
+
+                    picker.show(
+                        (context as MainActivity).supportFragmentManager,
+                        picker.toString()
+                    )
+                 // INZ end new
                 }
             }
             v?.performClick()
