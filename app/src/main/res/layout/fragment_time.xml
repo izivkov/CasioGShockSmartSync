@@ -26,6 +26,7 @@
         tools:ignore="SpUsage" />
 
     <include layout="@layout/local_time" />
+    <include layout="@layout/timer" />
     <include layout="@layout/watch_info" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         // this.startService(intent)
 
         if (Utils.isDebugMode()) {
-            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_settings)
+            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
         }
     }
 
