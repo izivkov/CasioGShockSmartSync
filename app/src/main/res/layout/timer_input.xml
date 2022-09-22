@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/timer_hours"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="00"
+        android:inputType="number"
+        android:maxLength="2"
+        android:textSize="34dp" />
+
+    <TextView
+        android:id="@+id/hour_min_separator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=":" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/timer_minutes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="00"
+        android:inputType="number"
+        android:maxLength="2"
+        android:textSize="34dp" />
+
+    <TextView
+        android:id="@+id/min_seconds_separator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=":" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/timer_seconds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="00"
+        android:inputType="number"
+        android:maxLength="2"
+        android:textSize="34dp" />
+
+</LinearLayout>

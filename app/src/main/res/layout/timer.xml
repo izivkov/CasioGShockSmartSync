@@ -6,10 +6,10 @@
   ~ Last modified 2022-03-28, 10:09 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.ui.time.LocalTimeCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<org.avmedia.gShockPhoneSync.ui.time.TimerCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/timer_view"
+    android:id="@+id/timer_card_view"
     style="@style/CardViewStyle"
     android:layout_height="wrap_content"
     android:clickable="true"
@@ -35,7 +35,7 @@
             android:paddingBottom="20dp">
 
             <TextView
-                android:id="@+id/localViewTitle"
+                android:id="@+id/timerViewTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
@@ -44,14 +44,14 @@
                 android:textSize="20dp"
                 tools:ignore="SpUsage" />
 
-            <TextView
+            <org.avmedia.gShockPhoneSync.ui.time.TimerTimeView
                 android:id="@+id/text_timer"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textSize="34dp"
-                android:text="5:23:45"
+                android:text="00:00:00"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -77,4 +77,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</org.avmedia.gShockPhoneSync.ui.time.LocalTimeCardView>
+</org.avmedia.gShockPhoneSync.ui.time.TimerCardView>

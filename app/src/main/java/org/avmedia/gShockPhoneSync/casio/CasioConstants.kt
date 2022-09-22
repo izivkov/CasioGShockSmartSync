@@ -132,6 +132,7 @@ object CasioConstants {
         CASIO_WORLD_CITIES(0x1f),
         CASIO_REMINDER_TITLE(0x30),
         CASIO_REMINDER_TIME(0x31),
+        CASIO_TIMER(0x18),
     }
 
     enum class Model {

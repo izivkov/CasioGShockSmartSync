@@ -8,21 +8,14 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
+import android.graphics.*
 import android.graphics.drawable.PaintDrawable
 import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.casio.BatteryLevelDecoder
 import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
-import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableView
-import org.jetbrains.anko.runOnUiThread
 
 class BatteryView @JvmOverloads constructor(
     context: Context,
@@ -112,7 +105,8 @@ class BatteryView @JvmOverloads constructor(
         percentRect.top =
             percentRectTopMin + (percentRect.bottom - percentRectTopMin) * (100 - percent) / 100
 
-        val pctRect = RectF(percentRect.left, percentRect.top, percentRect.right, percentRect.bottom)
+        val pctRect =
+            RectF(percentRect.left, percentRect.top, percentRect.right, percentRect.bottom)
         percentageBitmap?.let {
             canvas.drawBitmap(it, null, pctRect, null)
         }

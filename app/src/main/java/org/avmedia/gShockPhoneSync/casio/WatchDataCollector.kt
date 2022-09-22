@@ -46,6 +46,7 @@ object WatchDataCollector {
     var homeCityValue: String = ""
     var bleFeaturesValue: String = ""
     var batteryLevelValue: String = "0"
+    var timerValue:String = "0"
 
     class DataItem(
         var request: String,
@@ -76,6 +77,7 @@ object WatchDataCollector {
         subscribe("CASIO_WATCH_NAME", ::onDataReceived)
         subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
         subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
+        subscribe("CASIO_TIMER", ::onDataReceived)
     }
 
     fun start() {
@@ -143,6 +145,9 @@ object WatchDataCollector {
 
         // Battery level, i.e. 28132400.
         list.add(DataItem("28", ::setBatteryLevel, true))
+
+        // Timer Value, i.e. 18 06 07 08 00 00 00 00.
+        list.add(DataItem("18", ::setTimer))
 
         // app info
         // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
@@ -230,6 +235,11 @@ object WatchDataCollector {
     private fun setBatteryLevel(data: String): Unit {
         Timber.i("Battery Level: $data")
         batteryLevelValue = BatteryLevelDecoder.decodeValue(data)
+    }
+
+    private fun setTimer(data: String): Unit {
+        Timber.i("Timer Date: $data")
+        timerValue = TimerDecoder.decodeValue(data)
     }
 
     private fun setHomeCity(data: String): Unit {

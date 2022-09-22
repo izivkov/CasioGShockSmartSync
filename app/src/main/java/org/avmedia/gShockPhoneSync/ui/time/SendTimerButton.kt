@@ -25,15 +25,16 @@ class SendTimerButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    Utils.snackBar(context, "Timer Sent to Watch")
+                    sendTimeToWatch(TimerModel.get())
                 }
             }
             v?.performClick()
             return false
         }
 
-        private fun sendTimeToWatch() {
-            sendMessage("{action: \"SET_TIMER\", value: ${10000L}")
+        private fun sendTimeToWatch(durationInSeconds: Int) {
+            sendMessage("{action: \"SET_TIMER\", value: $durationInSeconds}")
+            Utils.snackBar(context, "Timer Set on Watch")
         }
     }
 }

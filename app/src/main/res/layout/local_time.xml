@@ -12,7 +12,7 @@
     android:id="@+id/exact_time"
     style="@style/CardViewStyle"
     android:layout_height="wrap_content"
-    android:clickable="true"
+    android:clickable="false"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/title_time">

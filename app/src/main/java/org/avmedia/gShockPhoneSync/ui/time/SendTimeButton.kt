@@ -36,7 +36,7 @@ class SendTimeButton @JvmOverloads constructor(
                     // update the screen with new Home Time
                     WatchDataCollector.rereadHomeTimeFromWatch()
 
-                    Utils.snackBar(context, "Time Sent to Watch")
+                    Utils.snackBar(context, "Time Set on Watch")
                 }
             }
             v?.performClick()
