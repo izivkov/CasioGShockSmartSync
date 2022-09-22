@@ -4,7 +4,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 object TimerModel {
-    var inSeconds = 0
+    private var inSeconds = 0
 
     fun set(time: String) {
         inSeconds = try {

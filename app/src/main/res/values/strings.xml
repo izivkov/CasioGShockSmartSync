@@ -61,7 +61,7 @@
     <string name="operational_sound">Button Operation Tone</string>
     <string name="power_saving_mode">Power Saving Mode</string>
     <string name="select_language">Select Language</string>
-    <string name="auto_fill_help">The auto-fill values are derived as follows:\n\n• Time/Date format and Language, are obtained from the Phone\'s setting.\n• Button tone is turned OFF if the phone is in DnD mode, ON otherwise.\n• Power Saving will be set to ON if the battery\'s level is at 15% or less.\n\nNote: The values will not change until sent again, even if the conditions change (i.e DnD is turned ON/OFF)</string>
+    <string name="auto_fill_help">The auto-fill values are derived as follows:\n\n• Time/Date format and Language, are obtained from the Phone\'s setting.\n\n• Button tone is turned OFF if the phone is in DnD mode, ON otherwise.\n\n• Power Saving will be set to ON if the battery\'s level is at 15% or less.\n\nNote: The values will not change until sent again, even if the conditions change (i.e DnD is turned ON/OFF)</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="timerDialogTitle">Timer</string>

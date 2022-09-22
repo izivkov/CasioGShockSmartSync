@@ -29,10 +29,29 @@ class TimerTimeView @JvmOverloads constructor(
 
     init {
         setOnTouchListener(OnTouchListener())
-        val timer = WatchDataCollector.timerValue
-        text = makeLongString(timer.toInt())
+        text = makeLongString(TimerModel.get())
+        waitForInitialization (context)
     }
 
+    private fun waitForInitialization(context: Context) {
+        ProgressEvents.subscriber.start(
+            this.javaClass.simpleName,
+            {
+
+                when (it) {
+                    // For setting time, we need to wait until the watch has been initialised.
+                    ProgressEvents.Events.WatchInitializationCompleted -> {
+                        val timer = WatchDataCollector.timerValue
+                        TimerModel.set(timer.toInt())
+                        text = makeLongString(timer.toInt())
+                    }
+                }
+            },
+            { throwable ->
+                Timber.d("Got error on subscribe: $throwable")
+                throwable.printStackTrace()
+            })
+    }
     private fun makeLongString(inSeconds: Int): String {
         val hours = inSeconds / 3600
         val minutesAndSeconds = inSeconds % 3600
