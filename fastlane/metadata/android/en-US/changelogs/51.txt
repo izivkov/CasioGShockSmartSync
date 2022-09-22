@@ -1,0 +1,2 @@
+Added Settings Screen
+Added support for Timer
