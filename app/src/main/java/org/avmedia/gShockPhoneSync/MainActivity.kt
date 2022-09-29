@@ -158,7 +158,8 @@ class MainActivity : AppCompatActivity() {
                         bleScannerLocal.startConnection()
                     }
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+                        val navController =
+                            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
                         navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
                     }
                 }
@@ -193,7 +194,7 @@ class MainActivity : AppCompatActivity() {
         private var instance: MainActivity? = null
 
         // Make context available from anywhere in the code (not yet used).
-        fun applicationContext() : Context {
+        fun applicationContext(): Context {
             return instance!!.applicationContext
         }
     }

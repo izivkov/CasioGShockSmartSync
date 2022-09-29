@@ -26,6 +26,10 @@ class SendAlarmsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
+                    if (AlarmsModel.alarms.isEmpty()) {
+                        Utils.snackBar(context, "Cannot set alarms...unsupported watch?")
+                        return false
+                    }
                     sendMessage("{action: \"SET_ALARMS\", value: ${AlarmsModel.toJson()}}")
                     Utils.snackBar(context, "Alarms Sent to Watch")
                 }

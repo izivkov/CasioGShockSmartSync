@@ -42,6 +42,9 @@ class Casio5600Watch: BluetoothWatch() {
             }
             "SET_ALARMS" -> {
                 val alarmsJsonArr: JSONArray = JSONObject(message).get("value") as JSONArray
+                if (alarmsJsonArr.length() == 0) {
+                    return
+                }
                 val alarmCasio0 = Alarms.fromJsonAlarmFirstAlarm(alarmsJsonArr[0] as JSONObject)
                 writeCmd(0x000e, alarmCasio0)
                 var alarmCasio: ByteArray = Alarms.fromJsonAlarmSecondaryAlarms(alarmsJsonArr)
