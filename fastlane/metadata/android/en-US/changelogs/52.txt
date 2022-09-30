@@ -1,0 +1,2 @@
+Fixed an issue with weekly events.
+
