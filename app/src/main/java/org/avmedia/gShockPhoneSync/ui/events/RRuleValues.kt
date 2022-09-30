@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.ui.events
 
+import android.os.Build
 import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.WeekdayNum
@@ -41,9 +42,8 @@ object RRuleValues {
 
                 val validByMonth = rruleObj.byMonth.isEmpty()
                 val validByDay = rruleObj.byDay.isEmpty() || validNumberOnly.containsAll(numberArr)
-                val validInterval = rruleObj.interval != 1
 
-                return validByMonth && validByDay && validInterval
+                return validByMonth && validByDay
             }
 
             if (!isCompatible(rruleObj)) {
