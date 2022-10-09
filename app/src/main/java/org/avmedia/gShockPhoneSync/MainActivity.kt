@@ -88,11 +88,6 @@ class MainActivity : AppCompatActivity() {
                 return
             }
 
-            if (!isLocationEnabled(this)) {
-                showLocationIsDisabledAlert()
-                return
-            }
-
             if (permissionManager.hasAllPermissions()) {
                 bleScannerLocal.startConnection()
             }
@@ -168,26 +163,6 @@ class MainActivity : AppCompatActivity() {
                 Timber.d("Got error on subscribe: $throwable")
                 throwable.printStackTrace()
             })
-    }
-
-    // location
-    private fun isLocationEnabled(mContext: Context): Boolean {
-        val lm = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || lm.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
-    }
-
-    private fun showLocationIsDisabledAlert() {
-        alert("This app requires your location setting to be enabled. Select \"SETTINGS\" to enable it.") {
-            neutralPressed("Settings") {
-                startActivity(Intent(ACTION_LOCATION_SOURCE_SETTINGS))
-            }
-            noButton {
-                Utils.snackBar(this@MainActivity, "Not all permissions granted, exiting...")
-                finish()
-            }
-        }.show()
     }
 
     companion object {
