@@ -84,7 +84,10 @@ class Casio5600Watch : BluetoothWatch() {
                 val settings = JSONObject(message).get("value") as JSONObject
                 // add the original string from Casio, so we do not mess up any ot the other settings.
                 settings.put("casioIsAutoTimeOriginalValue", settingsTransferObject.casioIsAutoTimeOriginalValue)
-                writeCmd(0x000e, SettingsEncoder.encodeTimeAdjustment(settings))
+                val encodedTimeAdj = SettingsEncoder.encodeTimeAdjustment(settings)
+                if (encodedTimeAdj.isNotEmpty()) {
+                    writeCmd(0x000e, encodedTimeAdj)
+                }
             }
 
             "GET_TIMER" -> {
