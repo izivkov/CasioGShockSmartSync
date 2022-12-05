@@ -6,6 +6,9 @@
 
 package org.avmedia.gShockPhoneSync.casio
 
+import org.avmedia.gShockPhoneSync.ble.toHexString
+import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gShockPhoneSync.utils.Utils.hexToBytes
 import org.json.JSONObject
 import kotlin.experimental.or
 
@@ -37,5 +40,27 @@ object SettingsEncoder {
         }
 
         return arr
+    }
+
+    fun encodeTimeAdjustment(settings: JSONObject): ByteArray {
+
+        var casioIsAutoTimeOriginalValue = settings.getString("casioIsAutoTimeOriginalValue")
+        if (casioIsAutoTimeOriginalValue.isEmpty()) {
+            return "".toByteArray()
+        }
+
+        // syncing off: 110f0f0f0600500004000100->80<-37d2
+        // syncing on:  110f0f0f0600500004000100->00<-37d2
+
+        var intArray = Utils.toIntArray(casioIsAutoTimeOriginalValue)
+
+        if (settings.get("timeAdjustment") == true) {
+            intArray[12] = 0x00
+        } else {
+            intArray[12] = 0x80
+        }
+
+        var byteArr = intArray.foldIndexed(ByteArray(intArray.size)) { i, a, v -> a.apply { set(i, v.toByte()) } }
+        return byteArr
     }
 }

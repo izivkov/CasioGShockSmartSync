@@ -19,6 +19,7 @@ object SettingsModel {
     val locale by lazy { settingsMap["Locale"] }
     val buttonSound  by lazy { settingsMap["Button Sound"]}
     val powerSavingMode  by lazy { settingsMap["Power Saving Mode"] }
+    val timeAdjustment by lazy { settingsMap["Time Adjustment"] }
     val light by lazy { settingsMap["Light"] }
 
     class Locale: Setting("Locale") {
@@ -55,18 +56,23 @@ object SettingsModel {
         var powerSavingMode:Boolean = false
     }
 
+    class TimeAdjustment: Setting("Time Adjustment") {
+        var timeAdjustment:Boolean = true
+    }
+
     init {
         settings.add(Locale())
         settings.add(OperationSound())
         settings.add(Light())
         settings.add(PowerSavingMode())
+        settings.add(TimeAdjustment())
     }
 
     @Synchronized
     fun fromJson(jsonStr: String) {
         /*
         jsonStr:
-        {"autoLight":true,"dateFormat":"MM:DD","language":"Spanish","lightDuration":"4s","powerSavingMode":true,"timeFormat":"12h","timeTone":false}
+        {"autoLight":true,"dateFormat":"MM:DD","language":"Spanish","lightDuration":"4s","powerSavingMode":true, "timeAdjustment":true, "timeFormat":"12h","timeTone":false}
          */
 
         val jsonObj = JSONObject(jsonStr)
@@ -78,6 +84,10 @@ object SettingsModel {
                 "powerSavingMode" -> {
                     val setting: PowerSavingMode = settingsMap["Power Saving Mode"] as PowerSavingMode
                     setting.powerSavingMode = value == true
+                }
+                "timeAdjustment" -> {
+                    val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
+                    setting.timeAdjustment = value == true
                 }
                 "timeTone" -> {
                     val setting: OperationSound = settingsMap["Button Sound"] as OperationSound

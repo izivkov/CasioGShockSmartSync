@@ -50,7 +50,7 @@ class BatteryView @JvmOverloads constructor(
 
     init {
         percentageBitmap = getBitmap(R.drawable.stripes)
-        val percentStr = WatchDataCollector.batteryLevelValue
+        val percentStr = WatchDataCollector.CollectedData.batteryLevelValue
         setPercent(percentStr.toInt())
     }
 

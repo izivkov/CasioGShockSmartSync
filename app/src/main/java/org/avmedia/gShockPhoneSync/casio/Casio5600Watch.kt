@@ -6,7 +6,6 @@
 
 package org.avmedia.gShockPhoneSync.casio
 
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfIntArray
 import org.avmedia.gShockPhoneSync.utils.Utils.byteArrayOfInts
@@ -16,14 +15,8 @@ import timber.log.Timber
 import java.time.Instant
 import java.time.ZoneId
 
-class Casio5600Watch: BluetoothWatch() {
-
-    init {
-    }
-
-    override fun init() {
-        super.init()
-    }
+class Casio5600Watch : BluetoothWatch() {
+    private val settingsTransferObject = SettingsTransferObject()
 
     override fun callWriter(message: String) {
         when (val action = JSONObject(message).get("action")) {
@@ -71,14 +64,34 @@ class Casio5600Watch: BluetoothWatch() {
             }
 
             "GET_SETTINGS" -> {
-                writeCmd(0x000c, Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte()))
+                writeCmd(
+                    0x000c,
+                    Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte())
+                )
             }
             "SET_SETTINGS" -> {
                 val settings = JSONObject(message).get("value") as JSONObject
                 writeCmd(0x000e, SettingsEncoder.encode(settings))
             }
+
+            "GET_TIME_ADJUSTMENT" -> {
+                writeCmd(
+                    0x000c,
+                    Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code.toByte())
+                )
+            }
+            "SET_TIME_ADJUSTMENT" -> {
+                val settings = JSONObject(message).get("value") as JSONObject
+                // add the original string from Casio, so we do not mess up any ot the other settings.
+                settings.put("casioIsAutoTimeOriginalValue", settingsTransferObject.casioIsAutoTimeOriginalValue)
+                writeCmd(0x000e, SettingsEncoder.encodeTimeAdjustment(settings))
+            }
+
             "GET_TIMER" -> {
-                writeCmd(0x000c, Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_TIMER.code.toByte()))
+                writeCmd(
+                    0x000c,
+                    Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_TIMER.code.toByte())
+                )
             }
             "SET_TIMER" -> {
                 val seconds = JSONObject(message).get("value").toString()
@@ -116,8 +129,9 @@ class Casio5600Watch: BluetoothWatch() {
         RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
         LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
                       0x10 17 62 16 05 85 dd 7f ->00<- 03 0f ff ff ff ff 24 00 00 00 // after watch reset
+        AUTO TIME:    0x10 17 62 18 75 85 dd 7f ->03<- 03 0f ff ff ff ff 24 00 00 00
         */
-        val bleIntArr = Utils.toIntArray(WatchDataCollector.bleFeaturesValue)
+        val bleIntArr = Utils.toIntArray(WatchDataCollector.CollectedData.bleFeaturesValue)
         if (bleIntArr.size < 19) {
             return WATCH_BUTTON.LOWER_LEFT
         }
@@ -127,6 +141,11 @@ class Casio5600Watch: BluetoothWatch() {
             4 -> WATCH_BUTTON.LOWER_RIGHT
             else -> WATCH_BUTTON.INVALID
         }
+    }
+
+    private fun isAutoTime (data:String) : Boolean {
+        val bleIntArr = Utils.toIntArray(data)
+        return bleIntArr[8] == 3
     }
 
     override fun isActionButtonPressed(): Boolean {
@@ -150,15 +169,19 @@ class Casio5600Watch: BluetoothWatch() {
                 json.put("CASIO_DST_SETTING", data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code -> {
-                return SettingsDecoder.toJson(data)
+                return SettingsDecoder.toJson(data, settingsTransferObject)
             }
+            CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code -> {
+                SettingsDecoder.getTimeAdjustment (data, settingsTransferObject)
+                return SettingsDecoder.toJsonTimeAdjustment(settingsTransferObject)
+            }
+
             CasioConstants.CHARACTERISTICS.CASIO_TIMER.code -> {
-                val intArray = Utils.toIntArray(data)
                 json.put("CASIO_TIMER", data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code -> {
-                val intArray = Utils.toIntArray(data)
-                if (intArray[1] == 0) {
+                val characteristicsArray = Utils.toIntArray(data)
+                if (characteristicsArray[1] == 0) {
                     // 0x1F 00 ... Only the first World City contains the home time.
                     // Send this data on topic "HOME_TIME" to be received by HomeTime custom component.
                     json.put("HOME_TIME", data)
@@ -179,7 +202,11 @@ class Casio5600Watch: BluetoothWatch() {
                 json.put("CASIO_APP_INFORMATION", data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code -> {
-                json.put("CASIO_BLE_FEATURES", data)
+                if (isAutoTime(data)) {
+                    json.put("AUTO_TIME_SET", data)
+                } else {
+                    json.put("BUTTON_PRESSED", data)
+                }
             }
         }
         return json

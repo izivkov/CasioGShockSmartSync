@@ -41,7 +41,7 @@ class TimerTimeView @JvmOverloads constructor(
                 when (it) {
                     // For setting time, we need to wait until the watch has been initialised.
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        val timer = WatchDataCollector.timerValue
+                        val timer = WatchDataCollector.CollectedData.timerValue
                         TimerModel.set(timer.toInt())
                         text = makeLongString(timer.toInt())
                     }

@@ -10,6 +10,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.util.Preconditions.checkArgument
 import com.google.gson.Gson
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
+import org.avmedia.gShockPhoneSync.ble.Connection
+import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
 import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.Instant
@@ -23,13 +26,11 @@ object EventsModel {
 
     const val MAX_REMINDERS = 5
 
-    lateinit var events: ArrayList<Event>
+    val events by lazy {
+        CalenderEvents.getDataFromEventTable(applicationContext())
+    }
 
     init {}
-
-    fun init(context: Context) {
-        events = CalenderEvents.getDataFromEventTable(context)
-    }
 
     enum class RepeatPeriod(val periodDuration: String) {
         NEVER("NEVER"),

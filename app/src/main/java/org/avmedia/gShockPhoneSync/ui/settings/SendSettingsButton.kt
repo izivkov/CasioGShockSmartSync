@@ -51,11 +51,16 @@ class SendSettingsButton @JvmOverloads constructor(
         val powerSavingMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
         settingsTransferObj.powerSavingMode = powerSavingMode.powerSavingMode
 
+        val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
+        settingsTransferObj.timeAdjustment = timeAdjustment.timeAdjustment
+
         val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound
         settingsTransferObj.buttonTone = buttonTone.sound
 
         val settingJson = Gson().toJson(settingsTransferObj)
         sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
+        sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
+
         Utils.snackBar(context, "Settings Sent to Watch")
     }
 }

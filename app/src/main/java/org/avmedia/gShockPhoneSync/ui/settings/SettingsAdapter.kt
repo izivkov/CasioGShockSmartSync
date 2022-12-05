@@ -23,7 +23,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     enum class SETTINGS_TYPES {
-        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, UNKNOWN
+        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, UNKNOWN
     }
 
     open inner class ViewHolderBaseSetting(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -52,6 +52,11 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             itemView.findViewById<SwitchMaterial>(R.id.power_saving_on_off)
     }
 
+    inner class ViewHolderTimeAdjustment(itemView: View) : ViewHolderBaseSetting(itemView) {
+        val timeAdjustment: SwitchMaterial =
+            itemView.findViewById<SwitchMaterial>(R.id.time_adjustment_on_off)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val context = parent.context
         val inflater = LayoutInflater.from(context)
@@ -74,6 +79,11 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_power_saving_mode, parent, false)
                 ViewHolderPowerSavingMode(vSetting)
+            }
+            SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal -> {
+                val vSetting: View =
+                    inflater.inflate(R.layout.setting_item_time_adjustment, parent, false)
+                ViewHolderTimeAdjustment(vSetting)
             }
             else -> {
                 val vSetting: View = inflater.inflate(R.layout.setting_item_locale, parent, false)
@@ -102,6 +112,10 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vhPowerSavingMode = viewHolder as ViewHolderPowerSavingMode
                 configurePowerSavingMode(vhPowerSavingMode, position)
             }
+            SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal -> {
+                val vhTimeAdjustment = viewHolder as ViewHolderTimeAdjustment
+                configureTimeAdjustment(vhTimeAdjustment, position)
+            }
         }
     }
 
@@ -119,6 +133,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
         if (settings[position] is SettingsModel.PowerSavingMode) {
             return SETTINGS_TYPES.POWER_SAVING_MODE.ordinal
+        }
+        if (settings[position] is SettingsModel.TimeAdjustment) {
+            return SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal
         }
 
         return SETTINGS_TYPES.UNKNOWN.ordinal
@@ -216,6 +233,18 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhPowerSavingMode.powerSavingMode.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             setting.powerSavingMode = isChecked
+        })
+    }
+
+    private fun configureTimeAdjustment(
+        vhTimeAdjustment: ViewHolderTimeAdjustment,
+        position: Int
+    ) {
+        val setting: SettingsModel.TimeAdjustment = settings[position] as SettingsModel.TimeAdjustment
+        vhTimeAdjustment.timeAdjustment.isChecked = setting.timeAdjustment == true
+
+        vhTimeAdjustment.timeAdjustment.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            setting.timeAdjustment = isChecked
         })
     }
 

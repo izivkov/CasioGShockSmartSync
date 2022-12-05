@@ -26,7 +26,6 @@ class EventsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        EventsModel.init(requireContext())
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
         val root: View = binding.root
         return root

@@ -8,10 +8,7 @@ package org.avmedia.gShockPhoneSync
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.Intent
-import android.location.LocationManager
 import android.os.Bundle
-import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -25,8 +22,6 @@ import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataListener
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.noButton
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
@@ -68,6 +63,7 @@ class MainActivity : AppCompatActivity() {
 
         Connection.init(this)
         WatchDataListener.init()
+        AutoTimeSetter()
 
         // This will run in the foreground, but not reliable. Do not use for now.
         // val intent = Intent(this, ForegroundService::class.java)

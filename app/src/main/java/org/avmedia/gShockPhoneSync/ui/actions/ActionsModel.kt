@@ -79,10 +79,7 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-
-            EventsModel.init(context)
             sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
-
             Utils.snackBar(context, "Events Sent to Watch")
         }
 

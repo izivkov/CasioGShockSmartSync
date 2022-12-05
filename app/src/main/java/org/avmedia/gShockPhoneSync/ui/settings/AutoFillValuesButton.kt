@@ -45,8 +45,15 @@ class AutoFillValuesButton @JvmOverloads constructor(
         fillButtonTone(settings)
         fillLight(settings)
         fillPowerSavingMode(settings)
+        fillTimeAdjustment(settings)
 
         updateUI()
+    }
+
+    private fun fillTimeAdjustment(settings: SettingsTransferObject) {
+        val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
+
+        timeAdjustment.timeAdjustment = settings.timeAdjustment
     }
 
     private fun fillPowerSavingMode(settings: SettingsTransferObject) {

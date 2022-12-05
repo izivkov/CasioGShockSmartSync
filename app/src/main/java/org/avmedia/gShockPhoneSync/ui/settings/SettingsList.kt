@@ -30,6 +30,9 @@ class SettingsList @JvmOverloads constructor(
         subscribe("SETTINGS", ::onDataReceived)
         Connection.sendMessage("{ action: 'GET_SETTINGS'}")
 
+        subscribe("TIME_ADJUSTMENT", ::onReceivedTimeAdjustment)
+        Connection.sendMessage("{ action: 'GET_TIME_ADJUSTMENT'}")
+
         listenForUpdateRequest()
     }
 
@@ -38,6 +41,11 @@ class SettingsList @JvmOverloads constructor(
     }
 
     private fun onDataReceived(data: String) {
+        SettingsModel.fromJson(data)
+        updateUI()
+    }
+
+    private fun onReceivedTimeAdjustment(data: String) {
         SettingsModel.fromJson(data)
         updateUI()
     }

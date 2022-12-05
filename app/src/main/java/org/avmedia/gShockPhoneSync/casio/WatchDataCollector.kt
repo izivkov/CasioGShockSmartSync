@@ -7,14 +7,11 @@
 package org.avmedia.gShockPhoneSync.casio
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.util.Log
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
-import org.json.JSONObject
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
@@ -42,11 +39,13 @@ object WatchDataCollector {
     private val worldCities: HashMap<Int, CasioTimeZone.WorldCity> =
         HashMap<Int, CasioTimeZone.WorldCity>()
 
-    var watchNameValue: String = ""
-    var homeCityValue: String = ""
-    var bleFeaturesValue: String = ""
-    var batteryLevelValue: String = "0"
-    var timerValue:String = "0"
+    object CollectedData {
+        var watchNameValue: String = ""
+        var homeCityValue: String = ""
+        var bleFeaturesValue: String = ""
+        var batteryLevelValue: String = "0"
+        var timerValue: String = "0"
+    }
 
     class DataItem(
         var request: String,
@@ -70,7 +69,7 @@ object WatchDataCollector {
     }
 
     init {
-        subscribe("CASIO_BLE_FEATURES", ::onDataReceived)
+        subscribe("BUTTON_PRESSED", ::onDataReceived)
         subscribe("CASIO_DST_SETTING", ::onDataReceived)
         subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
         subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
@@ -90,8 +89,8 @@ object WatchDataCollector {
         sendRequests(itemList.filter { it.request == "10" })
     }
 
-    private fun setBleFeatures(data: String): Unit {
-        bleFeaturesValue = data
+    private fun setButtonPressed(data: String): Unit {
+        CollectedData.bleFeaturesValue = data
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
         sendRequests(filterItems(itemList))
     }
@@ -117,7 +116,7 @@ object WatchDataCollector {
         val list = ArrayList<DataItem>()
 
         // ble features - used to determine which button on the watch was pressed.
-        list.add(DataItem("10", ::setBleFeatures))
+        list.add(DataItem("10", ::setButtonPressed))
 
         // get DTS watch state
         list.add(DataItem("1d00", ::sendDataToWatch))
@@ -229,28 +228,28 @@ object WatchDataCollector {
 
     private fun setWatchName1(data: String): Unit {
         // watch name, i.e. 23434153494f2047572d42353630300000000000
-        watchNameValue = Utils.toAsciiString(data, 1)
+        CollectedData.watchNameValue = Utils.toAsciiString(data, 1)
     }
 
     private fun setBatteryLevel(data: String): Unit {
         Timber.i("Battery Level: $data")
-        batteryLevelValue = BatteryLevelDecoder.decodeValue(data)
+        CollectedData.batteryLevelValue = BatteryLevelDecoder.decodeValue(data)
     }
 
     private fun setTimer(data: String): Unit {
         Timber.i("Timer Date: $data")
-        timerValue = TimerDecoder.decodeValue(data)
+        CollectedData.timerValue = TimerDecoder.decodeValue(data)
     }
 
     private fun setHomeCity(data: String): Unit {
         val shortStr = Utils.toCompactString(data)
         val wc = createWordCity(shortStr)
         worldCities[wc.index] = wc // replace existing element if it exists
-        if (homeCityValue == "") {
+        if (CollectedData.homeCityValue == "") {
             // Home city is in the fist position, so data will start with "1F 00"
             val cityNumber = shortStr.substring(2, 4)
             if (cityNumber.toInt() == 0) {
-                homeCityValue = Utils.toAsciiString(data, 2)
+                CollectedData.homeCityValue = Utils.toAsciiString(data, 2)
             }
         }
 

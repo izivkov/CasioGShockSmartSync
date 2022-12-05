@@ -22,7 +22,6 @@ object AutoConfigurator {
         val currentLocale: Locale = Locale.getDefault()
         val language = currentLocale.language
 
-        val localeSetting = SettingsModel.locale as SettingsModel.Locale
         when (language) {
             "en" -> settings.language = "English"
             "es" -> settings.language = "Spanish"
@@ -72,7 +71,7 @@ object AutoConfigurator {
         // for auto-light, we may want to use day/time to set off/on
 
         // Power Save mode
-        val batteryLevel:Int = WatchDataCollector.batteryLevelValue.toInt()
+        val batteryLevel:Int = WatchDataCollector.CollectedData.batteryLevelValue.toInt()
         settings.powerSavingMode = batteryLevel <= 15
 
         return settings
