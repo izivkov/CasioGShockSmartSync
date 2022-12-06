@@ -99,16 +99,19 @@ object WatchDataCollector {
         // remove the item we have already processed
         var items = _itemList.filter { it.request != "10" }
 
-        if (WatchFactory.watch.isActionRunRequested()) {
+        if (WatchFactory.watch.isActionButtonPressed()) {
             if (!ActionsModel.hasTimeSet()) {
                 // We are running actions, and none of them has to set time...
                 // We do not need to initialise watch. Return empty list.
                 return ArrayList<DataItem>()
             }
+        }
 
+        if (WatchFactory.watch.isActionRunRequested()) {
             // If we are running actions, we do not need to batteryLevel.
             return items.filter { it.request != "28" }
         }
+
         return items
     }
 

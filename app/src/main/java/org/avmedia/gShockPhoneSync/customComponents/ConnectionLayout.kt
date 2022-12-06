@@ -38,7 +38,7 @@ class ConnectionLayout @JvmOverloads constructor(
                         }
                     }
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        if (!WatchFactory.watch.isActionButtonPressed()) {
+                        if (!WatchFactory.watch.isActionButtonPressed() && !WatchFactory.watch.isAutoTimeStarted()) {
                             hide()
                         }
                     }
