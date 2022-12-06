@@ -39,6 +39,10 @@ object WatchDataCollector {
     private val worldCities: HashMap<Int, CasioTimeZone.WorldCity> =
         HashMap<Int, CasioTimeZone.WorldCity>()
 
+    private val filteredItems : List<WatchDataCollector.DataItem> by lazy {
+        filterItems(itemList)
+    }
+
     object CollectedData {
         var watchNameValue: String = ""
         var homeCityValue: String = ""
@@ -85,14 +89,22 @@ object WatchDataCollector {
     }
 
     private fun requestButtonPressedInformation() {
+        resetAllItems()
+
         // CASIO_BLE_FEATURES, determine which button was pressed from these.
         sendRequests(itemList.filter { it.request == "10" })
+    }
+
+    private fun resetAllItems () {
+        itemList.forEach() {
+            it.waitingForReply = true
+        }
     }
 
     private fun setButtonPressed(data: String): Unit {
         CollectedData.bleFeaturesValue = data
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
-        sendRequests(filterItems(itemList))
+        sendRequests(filteredItems)
     }
 
     private fun filterItems (_itemList:List<DataItem>): List<DataItem> {
@@ -219,7 +231,7 @@ object WatchDataCollector {
     }
 
     private fun isComplete(): Boolean {
-        return itemList.none { it.waitingForReply }
+        return filteredItems.none { it.waitingForReply }
     }
 
     ////////////////////

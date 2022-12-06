@@ -60,17 +60,19 @@ pwr. saving off:00010000
 
 object SettingsDecoder {
 
-    fun toJson(casioArray: String, settingsTransferObject: SettingsTransferObject): JSONObject {
+    fun toJson(casioArray: String): JSONObject {
         val jsonResponse = JSONObject()
-        jsonResponse.put("SETTINGS", createJsonSettings(casioArray, settingsTransferObject))
+        jsonResponse.put("SETTINGS", createJsonSettings(casioArray))
         return jsonResponse
     }
 
-    private fun createJsonSettings(settingString: String, settings: SettingsTransferObject): JSONObject {
+    private fun createJsonSettings(settingString: String): JSONObject {
         val MASK_24_HOURS =         0b00000001
         val MASK_BUTTON_TONE_OFF =  0b00000010
         val MASK_LIGHT_OFF =        0b00000100
         val POWER_SAVING_MODE =     0b00010000
+
+        val settings = SettingsTransferObject()
 
         val settingArray = Utils.toIntArray(settingString)
 
@@ -97,12 +99,16 @@ object SettingsDecoder {
         // syncing off: 110f0f0f0600500004000100->80<-37d2
         // syncing on:  110f0f0f0600500004000100->00<-37d2
 
-        settings.casioIsAutoTimeOriginalValue = data
+        CasioIsAutoTimeOriginalValue.value = data // save original data for future use
         settings.timeAdjustment = Utils.toIntArray(data)[12] == 0
     }
 
     fun toJsonTimeAdjustment(settings: SettingsTransferObject): JSONObject {
         var jsonResponse = JSONObject()
         return jsonResponse.put("TIME_ADJUSTMENT", "{\"timeAdjustment\": ${settings.timeAdjustment} }")
+    }
+
+    object CasioIsAutoTimeOriginalValue {
+        var value = ""
     }
 }
