@@ -143,9 +143,16 @@ class Casio5600Watch : BluetoothWatch() {
 
         return when (bleIntArr[8]) {
             in 0..1 -> WATCH_BUTTON.LOWER_LEFT
-            in 3..4 -> WATCH_BUTTON.LOWER_RIGHT
+            4 -> WATCH_BUTTON.LOWER_RIGHT
+            3 -> WATCH_BUTTON.NO_BUTTON // auto time set, no button pressed. Run selected actions to set time and calender only.
             else -> WATCH_BUTTON.INVALID
         }
+    }
+
+    override fun isActionRunRequested(): Boolean {
+        val watchButtonPressed = getPressedWatchButton()
+        return watchButtonPressed == WATCH_BUTTON.LOWER_RIGHT ||
+                watchButtonPressed == WATCH_BUTTON.NO_BUTTON // automatic time set
     }
 
     override fun isActionButtonPressed(): Boolean {

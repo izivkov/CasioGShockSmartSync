@@ -19,7 +19,7 @@ sealed class BluetoothWatch {
     private lateinit var writer: (BluetoothDevice, BluetoothGattCharacteristic, ByteArray) -> Unit
 
     enum class WATCH_BUTTON {
-        UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, INVALID
+        UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, NO_BUTTON, INVALID
     }
 
     init {
@@ -72,6 +72,7 @@ sealed class BluetoothWatch {
     abstract fun callWriter(message: String)
     abstract fun toJson(data: String): JSONObject
     abstract fun getPressedWatchButton(): WATCH_BUTTON
-    abstract fun isActionButtonPressed(): Boolean
+    abstract fun isActionRunRequested(): Boolean
     abstract fun isAutoTimeStarted(): Boolean
+    abstract fun isActionButtonPressed(): Boolean
 }

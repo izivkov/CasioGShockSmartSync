@@ -368,8 +368,12 @@ object ActionsModel {
 
     fun runActions(context: Context) {
 
+        // Here we select which actions to run.
+        // If we got here from auto-time set, just run the Time action and the Calender action
+        // If we got here by pressing the lower-right (actions) button, run all enabled actions.
+
         var actionsToRum = if (WatchFactory.watch.isAutoTimeStarted()) {
-            // if we are auto-setting time, just use the TimeSetAction and SetEventsAction
+            // if we are auto-setting time, just run the TimeSetAction and SetEventsAction
             val autoActions = ArrayList<Action>()
             autoActions.add(SetTimeAction("Set Time", true))
             autoActions.add(SetEventsAction("Set Calender", true))
@@ -379,12 +383,13 @@ object ActionsModel {
 
             autoActions
         } else {
-            // use all enabled actions
+            // Use all enabled actions.
+            // Sort by async mode first.
             actions.sortedWith(compareBy { it.runMode.ordinal })
         }
 
         actionsToRum
-            .forEach { // sort by async mode first
+            .forEach {
                 if (it.enabled) {
                     // Run in background for speed
                     if (it.runMode == RUN_MODE.ASYNC) {

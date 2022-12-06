@@ -99,7 +99,7 @@ object WatchDataCollector {
         // remove the item we have already processed
         var items = _itemList.filter { it.request != "10" }
 
-        if (WatchFactory.watch.isActionButtonPressed()) {
+        if (WatchFactory.watch.isActionRunRequested()) {
             if (!ActionsModel.hasTimeSet()) {
                 // We are running actions, and none of them has to set time...
                 // We do not need to initialise watch. Return empty list.
