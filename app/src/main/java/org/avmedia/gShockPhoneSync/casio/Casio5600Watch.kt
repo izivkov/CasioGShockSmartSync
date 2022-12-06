@@ -83,7 +83,10 @@ class Casio5600Watch : BluetoothWatch() {
             "SET_TIME_ADJUSTMENT" -> {
                 val settings = JSONObject(message).get("value") as JSONObject
                 // add the original string from Casio, so we do not mess up any ot the other settings.
-                settings.put("casioIsAutoTimeOriginalValue", settingsTransferObject.casioIsAutoTimeOriginalValue)
+                settings.put(
+                    "casioIsAutoTimeOriginalValue",
+                    settingsTransferObject.casioIsAutoTimeOriginalValue
+                )
                 val encodedTimeAdj = SettingsEncoder.encodeTimeAdjustment(settings)
                 if (encodedTimeAdj.isNotEmpty()) {
                     writeCmd(0x000e, encodedTimeAdj)
@@ -132,7 +135,6 @@ class Casio5600Watch : BluetoothWatch() {
         RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
         LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
                       0x10 17 62 16 05 85 dd 7f ->00<- 03 0f ff ff ff ff 24 00 00 00 // after watch reset
-        AUTO TIME:    0x10 17 62 18 75 85 dd 7f ->03<- 03 0f ff ff ff ff 24 00 00 00
         */
         val bleIntArr = Utils.toIntArray(WatchDataCollector.CollectedData.bleFeaturesValue)
         if (bleIntArr.size < 19) {
@@ -141,19 +143,23 @@ class Casio5600Watch : BluetoothWatch() {
 
         return when (bleIntArr[8]) {
             in 0..1 -> WATCH_BUTTON.LOWER_LEFT
-            4 -> WATCH_BUTTON.LOWER_RIGHT
+            in 3..4 -> WATCH_BUTTON.LOWER_RIGHT
             else -> WATCH_BUTTON.INVALID
         }
-    }
-
-    private fun isAutoTime (data:String) : Boolean {
-        val bleIntArr = Utils.toIntArray(data)
-        return bleIntArr[8] == 3
     }
 
     override fun isActionButtonPressed(): Boolean {
         val watchButtonPressed = getPressedWatchButton()
         return watchButtonPressed == WATCH_BUTTON.LOWER_RIGHT
+    }
+
+    override fun isAutoTimeStarted(): Boolean {
+        val bleIntArr = Utils.toIntArray(WatchDataCollector.CollectedData.bleFeaturesValue)
+        if (bleIntArr.size < 19) {
+            return false
+        }
+
+        return bleIntArr[8] == 3
     }
 
     override fun toJson(data: String): JSONObject {
@@ -175,7 +181,7 @@ class Casio5600Watch : BluetoothWatch() {
                 return SettingsDecoder.toJson(data, settingsTransferObject)
             }
             CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code -> {
-                SettingsDecoder.getTimeAdjustment (data, settingsTransferObject)
+                SettingsDecoder.getTimeAdjustment(data, settingsTransferObject)
                 return SettingsDecoder.toJsonTimeAdjustment(settingsTransferObject)
             }
 
@@ -205,11 +211,7 @@ class Casio5600Watch : BluetoothWatch() {
                 json.put("CASIO_APP_INFORMATION", data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code -> {
-                if (isAutoTime(data)) {
-                    json.put("AUTO_TIME_SET", data)
-                } else {
-                    json.put("BUTTON_PRESSED", data)
-                }
+                json.put("BUTTON_PRESSED", data)
             }
         }
         return json

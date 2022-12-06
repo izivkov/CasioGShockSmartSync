@@ -63,7 +63,6 @@ class MainActivity : AppCompatActivity() {
 
         Connection.init(this)
         WatchDataListener.init()
-        AutoTimeSetter()
 
         // This will run in the foreground, but not reliable. Do not use for now.
         // val intent = Intent(this, ForegroundService::class.java)

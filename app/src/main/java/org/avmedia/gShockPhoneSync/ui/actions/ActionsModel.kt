@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
 import org.avmedia.gShockPhoneSync.casio.CasioTimeZone
+import org.avmedia.gShockPhoneSync.casio.WatchFactory
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.*
 import timber.log.Timber
@@ -128,7 +129,9 @@ object ActionsModel {
                                 CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
 
                                 sendMessage(
-                                    "{ action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()}}"
+                                    "{ action: \"SET_TIME\", value: ${
+                                        Clock.systemDefaultZone().millis()
+                                    }}"
                                 )
                             }
                         }
@@ -350,33 +353,51 @@ object ActionsModel {
     However, this way gives us more control on how to start the actions.
      */
 
+    private fun runIt(action: Action, context: Context) {
+        try {
+            action.run(context)
+        } catch (e: SecurityException) {
+            Utils.snackBar(
+                context,
+                "You have not given permission to to run action ${action.title}."
+            )
+        } catch (e: Exception) {
+            Utils.snackBar(context, "Could not run action ${action.title}. Reason: $e")
+        }
+    }
+
     fun runActions(context: Context) {
-        fun runIt(action: Action) {
-            try {
-                action.run(context)
-            } catch (e: SecurityException) {
-                Utils.snackBar(
-                    context,
-                    "You have not given permission to to run action ${action.title}."
-                )
-            } catch (e: Exception) {
-                Utils.snackBar(context, "Could not run action ${action.title}. Reason: $e")
-            }
+
+        var actionsToRum = if (WatchFactory.watch.isAutoTimeStarted()) {
+            // if we are auto-setting time, just use the TimeSetAction and SetEventsAction
+            val autoActions = ArrayList<Action>()
+            autoActions.add(SetTimeAction("Set Time", true))
+            autoActions.add(SetEventsAction("Set Calender", true))
+
+            // INZ just for test, remove later
+            autoActions.add(PhotoAction("Take a picture", true, CAMERA_ORIENTATION.BACK))
+
+            autoActions
+        } else {
+            // use all enabled actions
+            actions.sortedWith(compareBy { it.runMode.ordinal })
         }
 
-        actions.sortedWith(compareBy { it.runMode.ordinal }).forEach { // sort by async mode first
-            if (it.enabled) {
-                // Run in background for speed
-                if (it.runMode == RUN_MODE.ASYNC) {
-                    GlobalScope.launch {
-                        runIt(it)
+        actionsToRum
+            .forEach { // sort by async mode first
+                if (it.enabled) {
+                    // Run in background for speed
+                    if (it.runMode == RUN_MODE.ASYNC) {
+                        GlobalScope.launch {
+                            runIt(it, context)
+                        }
+                    } else {
+                        Log.i("", "Running $it")
+                        runIt(it, context)
                     }
-                } else {
-                    Log.i ("", "Running $it")
-                    runIt(it)
                 }
             }
-        }
+
     }
 
     fun loadData(context: Context) {
@@ -391,12 +412,21 @@ object ActionsModel {
         }
     }
 
-    fun hasTimeSet ():Boolean {
+    fun hasTimeSet(): Boolean {
+        if (WatchFactory.watch.isAutoTimeStarted()) {
+            return true
+        }
+
         actions.forEach {
             if (it.enabled && it is SetTimeAction) {
                 return true
             }
         }
         return false
+    }
+
+    fun runActionsForAutoTimeSetting(context: Context) {
+        runIt(SetTimeAction("Set Time", true), context)
+        runIt(SetEventsAction("Set Reminders from Google Calender", false), context)
     }
 }

@@ -73,4 +73,5 @@ sealed class BluetoothWatch {
     abstract fun toJson(data: String): JSONObject
     abstract fun getPressedWatchButton(): WATCH_BUTTON
     abstract fun isActionButtonPressed(): Boolean
+    abstract fun isAutoTimeStarted(): Boolean
 }
