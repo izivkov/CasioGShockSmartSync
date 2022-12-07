@@ -120,7 +120,7 @@ object WatchDataCollector {
         }
 
         if (WatchFactory.watch.isActionRunRequested()) {
-            // If we are running actions, we do not need to batteryLevel.
+            // If we are running actions, we do not need to get batteryLevel.
             return items.filter { it.request != "28" }
         }
 
