@@ -402,7 +402,6 @@ object ActionsModel {
                     }
                 }
             }
-
     }
 
     fun loadData(context: Context) {

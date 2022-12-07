@@ -46,6 +46,9 @@ class ActionRunnerLayout @JvmOverloads constructor(
 
                             ActionsModel.loadData(context)
                             ActionsModel.runActions(context)
+                        } else if (WatchFactory.watch.isAutoTimeStarted()) {
+                            ActionsModel.loadData(context)
+                            ActionsModel.runActionsForAutoTimeSetting(context)
                         }
                     }
                     ProgressEvents.Events.Disconnect -> {

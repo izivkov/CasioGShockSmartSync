@@ -43,7 +43,7 @@ class MainLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        if (!WatchFactory.watch.isActionButtonPressed()) {
+                        if (!WatchFactory.watch.isActionButtonPressed() && !WatchFactory.watch.isAutoTimeStarted()) {
                             show()
                         }
                     }
