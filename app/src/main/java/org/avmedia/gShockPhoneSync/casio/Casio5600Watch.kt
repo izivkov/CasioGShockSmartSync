@@ -135,16 +135,17 @@ class Casio5600Watch : BluetoothWatch() {
         RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
         LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
                       0x10 17 62 16 05 85 dd 7f ->00<- 03 0f ff ff ff ff 24 00 00 00 // after watch reset
+        AUTO-TIME:    0x10 17 62 16 05 85 dd 7f ->03<- 03 0f ff ff ff ff 24 00 00 00 // no button pressed
         */
         val bleIntArr = Utils.toIntArray(WatchDataCollector.CollectedData.bleFeaturesValue)
         if (bleIntArr.size < 19) {
-            return WATCH_BUTTON.LOWER_LEFT
+            return WATCH_BUTTON.INVALID
         }
 
         return when (bleIntArr[8]) {
             in 0..1 -> WATCH_BUTTON.LOWER_LEFT
             4 -> WATCH_BUTTON.LOWER_RIGHT
-            3 -> WATCH_BUTTON.NO_BUTTON // auto time set, no button pressed. Run selected actions to set time and calender only.
+            3 -> WATCH_BUTTON.NO_BUTTON // auto time set, no button pressed. Run actions to set time and calender only.
             else -> WATCH_BUTTON.INVALID
         }
     }

@@ -41,13 +41,12 @@ class ActionRunnerLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.ButtonPressedInfoReceived -> {
+                        ActionsModel.loadData(context)
+
                         if (WatchFactory.watch.isActionButtonPressed()) {
                             show()
-
-                            ActionsModel.loadData(context)
                             ActionsModel.runActions(context)
                         } else if (WatchFactory.watch.isAutoTimeStarted()) {
-                            ActionsModel.loadData(context)
                             ActionsModel.runActionsForAutoTimeSetting(context)
                         }
                     }

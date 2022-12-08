@@ -367,39 +367,24 @@ object ActionsModel {
     }
 
     fun runActions(context: Context) {
+        runFilteredActions(context, actions.filter { it.enabled })
+    }
 
-        // Here we select which actions to run.
-        // If we got here from auto-time set, just run the Time action and the Calender action
-        // If we got here by pressing the lower-right (actions) button, run all enabled actions.
+    fun runActionsForAutoTimeSetting(context: Context) {
+        runFilteredActions(context, actions.filter { it is SetTimeAction || it is SetEventsAction })
+    }
 
-        var actionsToRum = if (WatchFactory.watch.isAutoTimeStarted()) {
-            // if we are auto-setting time, just run the TimeSetAction and SetEventsAction
-            val autoActions = ArrayList<Action>()
-            autoActions.add(SetTimeAction("Set Time", true))
-            autoActions.add(SetEventsAction("Set Calender", true))
-
-            // INZ just for test, remove later
-            autoActions.add(PhotoAction("Take a picture", true, CAMERA_ORIENTATION.BACK))
-
-            autoActions
-        } else {
-            // Use all enabled actions.
-            // Sort by async mode first.
-            actions.sortedWith(compareBy { it.runMode.ordinal })
-        }
-
-        actionsToRum
+    private fun runFilteredActions (context: Context, filteredActions: List<ActionsModel.Action>) {
+        filteredActions.sofilteredActions = {ArrayList@19244}  size = 2rtedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
-                if (it.enabled) {
-                    // Run in background for speed
-                    if (it.runMode == RUN_MODE.ASYNC) {
-                        GlobalScope.launch {
-                            runIt(it, context)
-                        }
-                    } else {
-                        Log.i("", "Running $it")
+                // Run in background for speed
+                if (it.runMode == RUN_MODE.ASYNC) {
+                    GlobalScope.launch {
                         runIt(it, context)
                     }
+                } else {
+                    Log.i("", "Running $it")
+                    runIt(it, context)
                 }
             }
     }
@@ -427,10 +412,5 @@ object ActionsModel {
             }
         }
         return false
-    }
-
-    fun runActionsForAutoTimeSetting(context: Context) {
-        runIt(SetTimeAction("Set Time", true), context)
-        runIt(SetEventsAction("Set Reminders from Google Calender", false), context)
     }
 }
