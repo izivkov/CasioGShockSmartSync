@@ -375,7 +375,7 @@ object ActionsModel {
     }
 
     private fun runFilteredActions (context: Context, filteredActions: List<ActionsModel.Action>) {
-        filteredActions.sofilteredActions = {ArrayList@19244}  size = 2rtedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
+        filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
                 // Run in background for speed
                 if (it.runMode == RUN_MODE.ASYNC) {
