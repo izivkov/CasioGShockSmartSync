@@ -377,13 +377,12 @@ object ActionsModel {
     private fun runFilteredActions (context: Context, filteredActions: List<ActionsModel.Action>) {
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
-                // Run in background for speed
                 if (it.runMode == RUN_MODE.ASYNC) {
+                    // Run in background for speed.
                     GlobalScope.launch {
                         runIt(it, context)
                     }
                 } else {
-                    Log.i("", "Running $it")
                     runIt(it, context)
                 }
             }
