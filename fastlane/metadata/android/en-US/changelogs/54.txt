@@ -1,0 +1,4 @@
+- Add the ability to auto-sync the watch's time periodically initiated from the watch (4 times per day)
+- In addition to time update, the calendar events are are also updated periodically.
+- Added ability to enable/disable auto-time sync in Settings.
+- Fixed an issue with actions. If the action button was pressed a second time to run actions again, the second attempt failed. Now this is working.
