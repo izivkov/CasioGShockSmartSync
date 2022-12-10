@@ -11,7 +11,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
@@ -130,7 +129,7 @@ object ActionsModel {
 
                                 sendMessage(
                                     "{ action: \"SET_TIME\", value: ${
-                                        Clock.systemDefaultZone().millis()
+                                        Clock.systemDefaultZone().millis() + 3000 // add 3 seconds to compensate for extra commands
                                     }}"
                                 )
                             }
@@ -374,7 +373,7 @@ object ActionsModel {
         runFilteredActions(context, actions.filter { it is SetTimeAction || it is SetEventsAction })
     }
 
-    private fun runFilteredActions (context: Context, filteredActions: List<ActionsModel.Action>) {
+    private fun runFilteredActions(context: Context, filteredActions: List<ActionsModel.Action>) {
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
