@@ -137,6 +137,9 @@ class Casio5600Watch : BluetoothWatch() {
                       0x10 17 62 16 05 85 dd 7f ->00<- 03 0f ff ff ff ff 24 00 00 00 // after watch reset
         AUTO-TIME:    0x10 17 62 16 05 85 dd 7f ->03<- 03 0f ff ff ff ff 24 00 00 00 // no button pressed
         */
+        if (WatchDataCollector.CollectedData.bleFeaturesValue == "") {
+            return WATCH_BUTTON.INVALID
+        }
         val bleIntArr = Utils.toIntArray(WatchDataCollector.CollectedData.bleFeaturesValue)
         if (bleIntArr.size < 19) {
             return WATCH_BUTTON.INVALID
