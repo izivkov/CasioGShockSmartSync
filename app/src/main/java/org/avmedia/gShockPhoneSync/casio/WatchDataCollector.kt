@@ -36,6 +36,8 @@ value 0x23 using handle 0xC like this:
 
 object WatchDataCollector {
 
+    private const val optimiseTraffic = true
+
     private val worldCities: HashMap<Int, CasioTimeZone.WorldCity> =
         HashMap<Int, CasioTimeZone.WorldCity>()
 
@@ -73,14 +75,7 @@ object WatchDataCollector {
     }
 
     init {
-        subscribe("BUTTON_PRESSED", ::onDataReceived)
-        subscribe("CASIO_DST_SETTING", ::onDataReceived)
-        subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
-        subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
-        subscribe("CASIO_WATCH_NAME", ::onDataReceived)
-        subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
-        subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
-        subscribe("CASIO_TIMER", ::onDataReceived)
+        subscribe("BUTTON_PRESSED", ::onButtonPressedInfoReceived)
     }
 
     fun start() {
@@ -111,17 +106,19 @@ object WatchDataCollector {
         // remove the item we have already processed
         var items = _itemList.filter { it.request != "10" }
 
-        if (WatchFactory.watch.isActionButtonPressed()) {
-            if (!ActionsModel.hasTimeSet()) {
-                // We are running actions, and none of them has to set time...
-                // We do not need to initialise watch. Return empty list.
-                return ArrayList<DataItem>()
+        if (optimiseTraffic) {
+            if (WatchFactory.watch.isActionButtonPressed()) {
+                if (!ActionsModel.hasTimeSet()) {
+                    // We are running actions, and none of them has to set time...
+                    // We do not need to initialise watch. Return empty list.
+                    return ArrayList<DataItem>()
+                }
             }
-        }
 
-        if (WatchFactory.watch.isActionRunRequested()) {
-            // If we are running actions, we do not need to get batteryLevel.
-            return items.filter { it.request != "28" }
+            if (WatchFactory.watch.isActionRunRequested()) {
+                // If we are running actions, we do not need to get batteryLevel.
+                return items.filter { it.request != "28" }
+            }
         }
 
         return items
@@ -175,6 +172,18 @@ object WatchDataCollector {
         _itemList.forEach {
             it.request()
         }
+    }
+
+    private fun onButtonPressedInfoReceived(data: String) {
+        subscribe("CASIO_DST_SETTING", ::onDataReceived)
+        subscribe("CASIO_WORLD_CITIES", ::onDataReceived)
+        subscribe("CASIO_DST_WATCH_STATE", ::onDataReceived)
+        subscribe("CASIO_WATCH_NAME", ::onDataReceived)
+        subscribe("CASIO_APP_INFORMATION", ::onDataReceived)
+        subscribe("CASIO_WATCH_CONDITION", ::onDataReceived)
+        subscribe("CASIO_TIMER", ::onDataReceived)
+
+        onDataReceived(data)
     }
 
     private fun onDataReceived(data: String) {
