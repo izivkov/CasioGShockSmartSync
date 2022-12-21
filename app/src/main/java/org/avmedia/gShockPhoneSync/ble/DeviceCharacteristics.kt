@@ -77,6 +77,7 @@ handle: 0x0013, char properties: 0x14, char value handle: 0x0014, uuid: 26eb0024
 
     private fun initHandlesMap(): HashMap<Int, UUID> {
         var handlesMap = HashMap<Int, UUID>()
+
         handlesMap[0x04] = CasioConstants.CASIO_GET_DEVICE_NAME
         handlesMap[0x06] = CasioConstants.CASIO_APPEARANCE
         handlesMap[0x09] = CasioConstants.TX_POWER_LEVEL_CHARACTERISTIC_UUID
@@ -85,7 +86,9 @@ handle: 0x0013, char properties: 0x14, char value handle: 0x0014, uuid: 26eb0024
         handlesMap[0x0e] = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
         handlesMap[0x11] = CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID
         handlesMap[0x14] = CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID
-        
+
+        handlesMap[0xFF] = CasioConstants.SERIAL_NUMBER_STRING
+
         return handlesMap
     }
 }

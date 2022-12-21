@@ -5,7 +5,7 @@
  */
 package org.avmedia.gShockPhoneSync.casio
 
-import java.util.UUID
+import java.util.*
 
 object CasioConstants {
     val CASIO_SERVICE = UUID.fromString("00001804-0000-1000-8000-00805f9b34fb")
@@ -105,8 +105,12 @@ object CasioConstants {
     // experimentally found:
     val CASIO_GET_DEVICE_NAME: UUID =
         UUID.fromString("00002a00-0000-1000-8000-00805f9b34fb") // returns 0x43 41 53 49 4F 20 47 57 2D 42 35 36 30 30 00 00 (CASIO GW-B5600)
+
     val CASIO_TX_POWER_LEVEL: UUID = UUID.fromString("00002a07-0000-1000-8000-00805f9b34fb")
     val CASIO_APPEARANCE: UUID = UUID.fromString("00002a01-0000-1000-8000-00805f9b34fb")
+
+    // possibly not supported...
+    val SERIAL_NUMBER_STRING: UUID = UUID.fromString("00002a25-0000-1000-8000-00805f9b34fb")
 
     enum class CHARACTERISTICS(val code: Int) {
         CASIO_WATCH_NAME(0x23),
