@@ -156,7 +156,7 @@ object ActionsModel {
     }
 
     class StartVoiceAssistAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled) {
+        Action(title, enabled, false, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             try {
@@ -233,7 +233,7 @@ object ActionsModel {
         override var title: String,
         override var enabled: Boolean,
         var cameraOrientation: CAMERA_ORIENTATION
-    ) : Action(title, enabled) {
+    ) : Action(title, enabled, false, RUN_MODE.ASYNC) {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
         }
