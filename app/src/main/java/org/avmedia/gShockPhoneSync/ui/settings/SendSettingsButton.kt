@@ -13,6 +13,7 @@ import android.view.View
 import com.google.gson.Gson
 import org.avmedia.gShockPhoneSync.casio.SettingsTransferObject
 import org.avmedia.gShockPhoneSync.customComponents.Button
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendSettingsButton @JvmOverloads constructor(
@@ -53,6 +54,8 @@ class SendSettingsButton @JvmOverloads constructor(
 
         val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
         settingsTransferObj.timeAdjustment = timeAdjustment.timeAdjustment
+
+        LocalDataStorage.setTimeAdjustmentNotification(timeAdjustment.timeAdjustmentNotifications)
 
         val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound
         settingsTransferObj.buttonTone = buttonTone.sound

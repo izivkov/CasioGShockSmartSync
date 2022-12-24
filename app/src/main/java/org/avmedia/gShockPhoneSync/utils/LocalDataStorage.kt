@@ -50,4 +50,16 @@ object LocalDataStorage {
         return timeZone
     }
 
+    // INZ Implement
+    private var _timeAdjustmentNotification = false
+    public fun getTimeAdjustmentNotification () :Boolean {
+
+        // INZ: TODO: Implement this function
+        return _timeAdjustmentNotification
+    }
+    public fun setTimeAdjustmentNotification (value: Boolean) {
+
+        // INZ: TODO: Implement this function
+        _timeAdjustmentNotification = value
+    }
 }

@@ -6,6 +6,8 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage.getTimeAdjustmentNotification
 import org.json.JSONObject
 
 object SettingsModel {
@@ -58,6 +60,7 @@ object SettingsModel {
 
     class TimeAdjustment: Setting("Time Adjustment") {
         var timeAdjustment:Boolean = true
+        var timeAdjustmentNotifications:Boolean = false
     }
 
     init {
@@ -88,6 +91,7 @@ object SettingsModel {
                 "timeAdjustment" -> {
                     val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
                     setting.timeAdjustment = value == true
+                    setting.timeAdjustmentNotifications = LocalDataStorage.getTimeAdjustmentNotification()
                 }
                 "timeTone" -> {
                     val setting: OperationSound = settingsMap["Button Sound"] as OperationSound

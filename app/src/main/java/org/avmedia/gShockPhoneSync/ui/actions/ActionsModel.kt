@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.app.Activity
+import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -23,8 +24,10 @@ import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.*
 import timber.log.Timber
 import java.io.File
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.Clock
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 object ActionsModel {
@@ -367,10 +370,22 @@ object ActionsModel {
 
     fun runActions(context: Context) {
         runFilteredActions(context, actions.filter { it.enabled })
+        // showTimeSyncNotification(context)
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
         runFilteredActions(context, actions.filter { it is SetTimeAction || it is SetEventsAction })
+        showTimeSyncNotification(context)
+    }
+
+    private fun showTimeSyncNotification (context:Context) {
+        val dateStr = DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
+
+        NotificationProvider.createNotification (
+            context,
+            "G-Shock Smart Sync",
+            "Time set at $dateStr",
+            NotificationManager.IMPORTANCE_DEFAULT)
     }
 
     private fun runFilteredActions(context: Context, filteredActions: List<ActionsModel.Action>) {

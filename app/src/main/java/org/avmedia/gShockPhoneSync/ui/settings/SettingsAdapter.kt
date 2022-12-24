@@ -13,6 +13,7 @@ import android.widget.AdapterView
 import android.widget.CompoundButton
 import android.widget.RadioGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
@@ -55,6 +56,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     inner class ViewHolderTimeAdjustment(itemView: View) : ViewHolderBaseSetting(itemView) {
         val timeAdjustment: SwitchMaterial =
             itemView.findViewById<SwitchMaterial>(R.id.time_adjustment_on_off)
+
+        val timeAdjustmentNotification: MaterialCheckBox =
+            itemView.findViewById<MaterialCheckBox>(R.id.notify_me)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -242,9 +246,14 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     ) {
         val setting: SettingsModel.TimeAdjustment = settings[position] as SettingsModel.TimeAdjustment
         vhTimeAdjustment.timeAdjustment.isChecked = setting.timeAdjustment == true
+        vhTimeAdjustment.timeAdjustmentNotification.isChecked = setting.timeAdjustmentNotifications == true
 
         vhTimeAdjustment.timeAdjustment.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustment = isChecked
+        })
+
+        vhTimeAdjustment.timeAdjustmentNotification.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            setting.timeAdjustmentNotifications = isChecked
         })
     }
 
