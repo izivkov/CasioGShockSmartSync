@@ -17,6 +17,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 
 // This adapter handles a heterogeneous list of settings.
 
@@ -254,6 +255,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhTimeAdjustment.timeAdjustmentNotification.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustmentNotifications = isChecked
+            LocalDataStorage.setTimeAdjustmentNotification(setting.timeAdjustmentNotifications)
         })
     }
 

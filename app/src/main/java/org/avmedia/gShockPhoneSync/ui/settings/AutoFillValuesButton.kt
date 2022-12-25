@@ -54,6 +54,7 @@ class AutoFillValuesButton @JvmOverloads constructor(
         val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
 
         timeAdjustment.timeAdjustment = settings.timeAdjustment
+        timeAdjustment.timeAdjustmentNotifications = false
     }
 
     private fun fillPowerSavingMode(settings: SettingsTransferObject) {

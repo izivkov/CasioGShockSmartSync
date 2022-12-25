@@ -21,8 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
-        android:padding="6dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="6dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -38,9 +38,9 @@
                     android:id="@+id/time_adjustment"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
                     android:text="Time Adjustment"
                     android:textSize="20dp"
                     tools:ignore="SpUsage" />
@@ -50,17 +50,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textOff="Off"
-                    android:textOn="On"
-                    />
+                    android:textOn="On" />
 
             </LinearLayout>
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/notify_me"
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textSize="16dp"
-                android:text="Notify Me"
-                />
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/notify_me_prompt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="0dp"
+                    android:layout_weight="1"
+                    android:text="Notify me"
+                    android:textSize="16dp"
+                    tools:ignore="SpUsage" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/notify_me"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="" />
+
+            </LinearLayout>
 
         </LinearLayout>
     </LinearLayout>

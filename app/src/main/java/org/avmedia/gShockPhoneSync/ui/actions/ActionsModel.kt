@@ -370,12 +370,15 @@ object ActionsModel {
 
     fun runActions(context: Context) {
         runFilteredActions(context, actions.filter { it.enabled })
-        // showTimeSyncNotification(context)
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
         runFilteredActions(context, actions.filter { it is SetTimeAction || it is SetEventsAction })
-        showTimeSyncNotification(context)
+
+        // show notification if configured
+        if (LocalDataStorage.getTimeAdjustmentNotification()) {
+            showTimeSyncNotification(context)
+        }
     }
 
     private fun showTimeSyncNotification (context:Context) {
