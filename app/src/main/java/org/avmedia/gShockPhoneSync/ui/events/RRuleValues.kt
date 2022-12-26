@@ -6,16 +6,16 @@
 
 package org.avmedia.gShockPhoneSync.ui.events
 
-import android.os.Build
+import android.app.Activity
 import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.WeekdayNum
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
+import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 object RRuleValues {
     data class Values(
@@ -33,6 +33,11 @@ object RRuleValues {
         val rruleValues = Values()
 
         if (rrule != null && rrule.isNotEmpty()) {
+
+            if (!validateRule(rrule)) {
+                rruleValues.incompatible = true
+                return rruleValues
+            }
 
             val rruleObj = RRule(rrule)
 
@@ -116,6 +121,29 @@ object RRuleValues {
         }
 
         return rruleValues
+    }
+
+    private fun validateRule(rule: String): Boolean {
+        val dateFormatter =
+            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC)
+
+        var i = 0
+        val name = "RRULE"
+        val components = rule.replace("$name:", "").split(";", "=")
+        while (i < components.size) {
+            val component = components[i]
+            if (component == "UNTIL") {
+                var untilValue = components[i + 1]
+                try {
+                    LocalDateTime.parse(untilValue, dateFormatter).toInstant(ZoneOffset.UTC)
+                } catch (e: DateTimeParseException) {
+                    Timber.e("Invalid Calender Date: $component}: $untilValue")
+                    return false
+                }
+            }
+            ++i
+        }
+        return true
     }
 
     private fun toEventRepeatPeriod(freq: Frequency): EventsModel.RepeatPeriod {

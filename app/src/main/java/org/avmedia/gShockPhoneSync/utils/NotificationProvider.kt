@@ -1,19 +1,14 @@
-package org.avmedia.gShockPhoneSync.ui.actions
+package org.avmedia.gShockPhoneSync.utils
 
 import android.R
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat.getSystemService
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
 object NotificationProvider {
     val CHANNEL_ID = "G_SHOCK_SMART_SYNC_CHANNEL"
-
-    init {
-    }
 
     fun createNotification(context: Context, title: String, notificationText: String, importance:Int = NotificationManager.IMPORTANCE_DEFAULT) {
         val notificationManager: NotificationManager =
@@ -25,6 +20,10 @@ object NotificationProvider {
             description = descriptionText
         }
         // Register the channel with the system
+
+        // From ChatGPT:
+        // There is no harm or memory leak from calling createNotificationChannel() multiple times
+        // with the same channel ID. The second call will simply overwrite the first call.
         notificationManager.createNotificationChannel(channel)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)

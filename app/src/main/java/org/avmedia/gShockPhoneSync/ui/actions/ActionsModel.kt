@@ -27,7 +27,6 @@ import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.Clock
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 object ActionsModel {
@@ -132,7 +131,8 @@ object ActionsModel {
 
                                 sendMessage(
                                     "{ action: \"SET_TIME\", value: ${
-                                        Clock.systemDefaultZone().millis() + 3000 // add 3 seconds to compensate for extra commands
+                                        Clock.systemDefaultZone()
+                                            .millis() + 3000 // add 3 seconds to compensate for extra commands
                                     }}"
                                 )
                             }
@@ -381,14 +381,16 @@ object ActionsModel {
         }
     }
 
-    private fun showTimeSyncNotification (context:Context) {
-        val dateStr = DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
+    private fun showTimeSyncNotification(context: Context) {
+        val dateStr =
+            DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
 
-        NotificationProvider.createNotification (
+        NotificationProvider.createNotification(
             context,
             "G-Shock Smart Sync",
             "Time set at $dateStr",
-            NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
     }
 
     private fun runFilteredActions(context: Context, filteredActions: List<ActionsModel.Action>) {

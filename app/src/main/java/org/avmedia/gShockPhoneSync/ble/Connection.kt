@@ -369,7 +369,6 @@ object Connection : IConnection {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     ProgressEvents.onNext(ProgressEvents.Events.ConnectionStarted)
                     deviceGattMap[gatt.device] = gatt
-
                     Handler(Looper.getMainLooper()).post {
                         gatt.discoverServices()
                     }

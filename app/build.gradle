@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdkVersion 26
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 58
         versionName "5.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
