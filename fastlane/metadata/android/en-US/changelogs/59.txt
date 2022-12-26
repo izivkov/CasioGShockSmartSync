@@ -1,0 +1,1 @@
+Added optional notification when auto-setting time
