@@ -47,8 +47,9 @@ object RRuleValues {
 
                 val validByMonth = rruleObj.byMonth.isEmpty()
                 val validByDay = rruleObj.byDay.isEmpty() || validNumberOnly.containsAll(numberArr)
+                val invalidByWeekly = (rruleObj.freq == Frequency.Weekly) && (rruleObj.interval > 1)
 
-                return validByMonth && validByDay
+                return validByMonth && validByDay && !invalidByWeekly
             }
 
             if (!isCompatible(rruleObj)) {
@@ -82,13 +83,15 @@ object RRuleValues {
 
                             }
                             Frequency.Weekly -> {
+                                val weekDays = rruleObjVal.byDay
+                                val daysPerWeek = weekDays.size.coerceAtLeast(1)
                                 rruleValues.localEndDate =
                                     LocalDate.of(
                                         startDate.year!!,
                                         startDate.month!!,
                                         startDate.day!!
                                     )
-                                        .plusWeeks(numberOfPeriods)
+                                        .plusWeeks(numberOfPeriods / daysPerWeek)
                             }
                             Frequency.Monthly -> {
                                 rruleValues.localEndDate =
