@@ -124,6 +124,11 @@ object RRuleValues {
 
     private fun calculateEndDate(startDate: LocalDate, daysOfWeek: ArrayList<WeekdayNum>, n: Int): LocalDate {
         var endDate = startDate
+
+        if (daysOfWeek == null || daysOfWeek.isEmpty()) {
+            return endDate
+        }
+
         val daysOfWeekLocalDay = daysOfWeek.map {
             when (it.weekday) {
                 Weekday.Monday -> DayOfWeek.MONDAY
