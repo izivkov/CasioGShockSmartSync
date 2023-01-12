@@ -40,6 +40,7 @@
             android:screenOrientation="fullUser"
             android:rotationAnimation="seamless"
             android:resizeableActivity="true"
+            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
             tools:targetApi="O"
             >
 
