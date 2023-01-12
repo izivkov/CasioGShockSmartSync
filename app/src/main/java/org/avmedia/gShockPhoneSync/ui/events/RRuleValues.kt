@@ -6,16 +6,16 @@
 
 package org.avmedia.gShockPhoneSync.ui.events
 
-import android.app.Activity
 import com.philjay.Frequency
 import com.philjay.RRule
+import com.philjay.Weekday
 import com.philjay.WeekdayNum
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
-import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.util.*
+import kotlin.collections.ArrayList
 
 object RRuleValues {
     data class Values(
@@ -70,7 +70,7 @@ object RRuleValues {
 
                 } else if (rruleObjVal.count != null) {
                     val numberOfPeriods: Long = (rruleObjVal.count - 1).toLong()
-                    if (numberOfPeriods > 1) {
+                    if (numberOfPeriods > 0) {
                         when (rruleObjVal.freq) {
                             Frequency.Daily -> {
                                 rruleValues.localEndDate =
@@ -80,18 +80,14 @@ object RRuleValues {
                                         startDate.day!!
                                     )
                                         .plusDays(numberOfPeriods)
-
                             }
                             Frequency.Weekly -> {
                                 val weekDays = rruleObjVal.byDay
-                                val daysPerWeek = weekDays.size.coerceAtLeast(1)
-                                rruleValues.localEndDate =
-                                    LocalDate.of(
-                                        startDate.year!!,
-                                        startDate.month!!,
-                                        startDate.day!!
-                                    )
-                                        .plusWeeks(numberOfPeriods / daysPerWeek)
+
+                                rruleValues.localEndDate = calculateEndDate(
+                                    LocalDate.of(startDate.year!!, startDate.month!!, startDate.day!!),
+                                    weekDays,
+                                    numberOfPeriods.toInt())
                             }
                             Frequency.Monthly -> {
                                 rruleValues.localEndDate =
@@ -124,6 +120,29 @@ object RRuleValues {
         }
 
         return rruleValues
+    }
+
+    private fun calculateEndDate(startDate: LocalDate, daysOfWeek: ArrayList<WeekdayNum>, n: Int): LocalDate {
+        var endDate = startDate
+        val daysOfWeekLocalDay = daysOfWeek.map {
+            when (it.weekday) {
+                Weekday.Monday -> DayOfWeek.MONDAY
+                Weekday.Tuesday -> DayOfWeek.TUESDAY
+                Weekday.Wednesday -> DayOfWeek.WEDNESDAY
+                Weekday.Thursday -> DayOfWeek.THURSDAY
+                Weekday.Friday -> DayOfWeek.FRIDAY
+                Weekday.Saturday -> DayOfWeek.SATURDAY
+                Weekday.Sunday -> DayOfWeek.SUNDAY
+            }
+        }
+        var count = 0
+        while (count < n) {
+            if (daysOfWeekLocalDay.contains(endDate.dayOfWeek)) {
+                count++
+            }
+            endDate = endDate.plusDays(1)
+        }
+        return endDate
     }
 
     private fun validateRule(rule: String): Boolean {
