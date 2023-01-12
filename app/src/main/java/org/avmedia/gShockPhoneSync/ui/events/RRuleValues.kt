@@ -137,10 +137,10 @@ object RRuleValues {
         }
         var count = 0
         while (count < n) {
+            endDate = endDate.plusDays(1)
             if (daysOfWeekLocalDay.contains(endDate.dayOfWeek)) {
                 count++
             }
-            endDate = endDate.plusDays(1)
         }
         return endDate
     }
