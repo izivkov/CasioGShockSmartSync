@@ -62,7 +62,9 @@ object CalenderEvents {
             null)
 
         while (cur!!.moveToNext()) {
-            val title: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
+            var title: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
+            title = if (title.isNullOrBlank()) "(No title)" else title
+
             val dateStart: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
             val rrule: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
             val allDay: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
