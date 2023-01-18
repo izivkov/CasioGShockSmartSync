@@ -9,10 +9,12 @@ package org.avmedia.gShockPhoneSync.ui.events
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
+import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
+import android.os.Handler
 import android.provider.CalendarContract
-import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
@@ -60,6 +62,8 @@ object CalenderEvents {
             selection,
             selectionArgs,
             null)
+
+        CalenderObserver.register(cr, uri)
 
         while (cur!!.moveToNext()) {
             var title: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
@@ -112,5 +116,22 @@ object CalenderEvents {
         cur.close()
 
         return events
+    }
+
+    object CalenderObserver {
+        private var registered = false
+
+        private val calendarObserver = object : ContentObserver(Handler()) {
+            override fun onChange(selfChange: Boolean) {
+                ProgressEvents.onNext(ProgressEvents.Events.CalendarUpdated)
+            }
+        }
+
+        fun register (cr: ContentResolver, uri: Uri) {
+            if (!registered) {
+                cr.registerContentObserver(uri, true, calendarObserver)
+                registered = true
+            }
+        }
     }
 }

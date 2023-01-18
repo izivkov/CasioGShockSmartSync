@@ -9,8 +9,12 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.avmedia.gShockPhoneSync.ui.events.EventAdapter
-import org.avmedia.gShockPhoneSync.ui.events.EventsModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import org.avmedia.gShockPhoneSync.MainActivity
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.jetbrains.anko.runOnUiThread
+import timber.log.Timber
 
 class EventList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -19,5 +23,26 @@ class EventList @JvmOverloads constructor(
     init {
         adapter = EventAdapter(EventsModel.events)
         layoutManager = LinearLayoutManager(context)
+
+        listenForUpdateRequest()
     }
+
+    private fun listenForUpdateRequest(): Disposable =
+        ProgressEvents.connectionEventFlowable
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                when (it) {
+                    // Somebody has made a change to the model...need to update the UI
+                    ProgressEvents.Events.CalendarUpdated -> {
+                        EventsModel.refresh()
+                        context.runOnUiThread {
+                            adapter?.notifyDataSetChanged()
+                        }
+                    }
+                }
+            }
+            .subscribe(
+                { },
+                { throwable -> Timber.i("Got error on subscribe: $throwable") })
+
 }

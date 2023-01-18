@@ -68,5 +68,7 @@ object ProgressEvents {
         object ConnectionFailed : Events()
         object SettingsLoaded : Events()
         object NeedToUpdateUI : Events()
+        object CalendarUpdated : Events() {
+        }
     }
 }

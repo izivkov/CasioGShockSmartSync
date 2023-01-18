@@ -10,9 +10,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.util.Preconditions.checkArgument
 import com.google.gson.Gson
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.ble.Connection
 import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
+import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.Instant
@@ -30,7 +33,13 @@ object EventsModel {
         CalenderEvents.getDataFromEventTable(applicationContext())
     }
 
-    init {}
+    init {
+    }
+
+    fun refresh () {
+        events.clear()
+        events.addAll(CalenderEvents.getDataFromEventTable(applicationContext()))
+    }
 
     enum class RepeatPeriod(val periodDuration: String) {
         NEVER("NEVER"),
@@ -124,7 +133,9 @@ object EventsModel {
                     formattedFreq =
                         "${startDate?.day}${getDayOfMonthSuffix(startDate?.day!!.toInt())} each month"
                 }
-                else -> {
+                RepeatPeriod.NEVER -> {
+                    Timber.i("Single-time event...")
+                } else -> {
                     Timber.i("Invalid frequency format")
                 }
             }
