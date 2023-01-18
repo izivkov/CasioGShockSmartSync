@@ -47,9 +47,9 @@ object CalenderEvents {
         val selection =
             """
             ${CalendarContract.Events.HAS_ALARM} = "1"
-            and (${CalendarContract.Events.DTSTART} >= ${calendar.timeInMillis}
+            and (${CalendarContract.Events.DTEND} >= ${calendar.timeInMillis}
             or ${CalendarContract.Events.RRULE} IS NOT NULL)
-            """
+            """.trimIndent()
 
         val selectionArgs: Array<String>? = null
 
