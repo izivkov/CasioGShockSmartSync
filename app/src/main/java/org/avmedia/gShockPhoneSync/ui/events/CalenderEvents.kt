@@ -63,7 +63,7 @@ object CalenderEvents {
             selectionArgs,
             null)
 
-        CalenderObserver.register(cr, uri)
+        CalendarObserver.register(cr, uri)
 
         while (cur!!.moveToNext()) {
             var title: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
@@ -118,7 +118,7 @@ object CalenderEvents {
         return events
     }
 
-    object CalenderObserver {
+    private object CalendarObserver {
         private var registered = false
 
         private val calendarObserver = object : ContentObserver(Handler()) {
