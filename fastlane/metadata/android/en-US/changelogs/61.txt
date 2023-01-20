@@ -1,0 +1,1 @@
+Calendar screen now updates when Google Calender updated.
