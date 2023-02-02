@@ -9,7 +9,7 @@ package org.avmedia.gShockPhoneSync.ui.time
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gshockapi.utils.Utils
 
 class WatchName @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

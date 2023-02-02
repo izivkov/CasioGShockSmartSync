@@ -14,8 +14,10 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
 
 class BatteryView @JvmOverloads constructor(
     context: Context,
@@ -50,8 +52,11 @@ class BatteryView @JvmOverloads constructor(
 
     init {
         percentageBitmap = getBitmap(R.drawable.stripes)
-        val percentStr = WatchDataCollector.CollectedData.batteryLevelValue
-        setPercent(percentStr.toInt())
+
+//        GlobalScope.launch {
+//            val percentStr = api().getBatteryLevel()
+//            setPercent(percentStr.toInt())
+//        }
     }
 
     @SuppressLint("DrawAllocation")

@@ -6,6 +6,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.ble.BleScannerLocal
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.Connection.sendMessage
@@ -24,6 +26,7 @@ class GShockAPI(private val context: Context) {
     private var bleScannerLocal: BleScannerLocal = BleScannerLocal(context)
     private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
     private val cache = WatchValuesCache()
+    private lateinit var device:BluetoothDevice
 
     suspend fun waitForConnection(deviceId: String? = ""): String {
         Connection.init(context)
@@ -31,7 +34,6 @@ class GShockAPI(private val context: Context) {
 
         bleScannerLocal = BleScannerLocal(context)
         bleScannerLocal.startConnection(deviceId)
-        Connection.init(context)
 
         val deferredResult = CompletableDeferred<String>()
         fun waitForConnectionSetupComplete() {
@@ -53,7 +55,12 @@ class GShockAPI(private val context: Context) {
         }
 
         waitForConnectionSetupComplete()
-        return deferredResult.await()
+        val ret = deferredResult.await()
+        return ret
+    }
+
+    fun teardownConnection () {
+        Connection.teardownConnection(device)
     }
 
     suspend fun getPressedButton(): BluetoothWatch.WATCH_BUTTON {
@@ -86,30 +93,31 @@ class GShockAPI(private val context: Context) {
                 }
             }
 
+            ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
             resultQueue.dequeue()?.complete(ret)
         }
 
         return deferredResultButton.await()
     }
 
-    suspend fun isActionRunRequested(): Boolean {
-        val watchButtonPressed = getPressedButton()
-        return watchButtonPressed == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT || watchButtonPressed == BluetoothWatch.WATCH_BUTTON.NO_BUTTON // automatic time set
+    fun isActionRunRequested(): Boolean {
+        val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
+
+        return button == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
+                || button == BluetoothWatch.WATCH_BUTTON.NO_BUTTON // automatic time set
     }
 
-    suspend fun isActionButtonPressed(): Boolean {
-        val watchButtonPressed = getPressedButton()
-        return watchButtonPressed == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
+    // TODO: INZ fix later
+    fun isActionButtonPressed(): Boolean {
+        val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
+        return button == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
     }
 
-//    override fun isAutoTimeStarted(): Boolean {
-//        val bleIntArr = Utils.toIntArray(WatchDataCollector.CollectedData.bleFeaturesValue)
-//        if (bleIntArr.size < 19) {
-//            return false
-//        }
-//
-//        return bleIntArr[8] == 3
-//    }
+    // TODO: INZ fix later
+    fun isAutoTimeStarted(): Boolean {
+        val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
+        return button == BluetoothWatch.WATCH_BUTTON.NO_BUTTON
+    }
 
     suspend fun getWatchName(): String {
         val key = "23"
@@ -196,7 +204,7 @@ class GShockAPI(private val context: Context) {
     }
 
     suspend fun getHomeTime(): String {
-        return cache.getCached("1f00", ::_getWorldCities) as String // het home time from the first city in the list
+        return cache.getCached("1f00", ::_getWorldCities) as String // get home time from the first city in the list
     }
 
     suspend fun getBatteryLevel(): String {
@@ -296,23 +304,8 @@ class GShockAPI(private val context: Context) {
     }
 
     suspend fun init() {
-        getDTSWatchState(BluetoothWatch.DTS_STATE.ZERO)
-        getDTSWatchState(BluetoothWatch.DTS_STATE.TWO)
-        getDTSWatchState(BluetoothWatch.DTS_STATE.FOUR)
-
-        getDTSForWorldCities(0)
-        getDTSForWorldCities(1)
-        getDTSForWorldCities(2)
-        getDTSForWorldCities(3)
-        getDTSForWorldCities(4)
-        getDTSForWorldCities(5)
-
-        getWorldCities(0)
-        getWorldCities(1)
-        getWorldCities(2)
-        getWorldCities(3)
-        getWorldCities(4)
-        getWorldCities(5)
+        getPressedButton()
+        ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
     }
 
     suspend fun getAlarms(): AlarmsModel {
@@ -447,13 +440,21 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    fun setSettings(settingsTransferObj: SettingsSimpleModel) {
-        val settingJson = Gson().toJson(settingsTransferObj)
+    fun setSettings(settingsSimpleModel: SettingsSimpleModel) {
+        val settingJson = Gson().toJson(settingsSimpleModel)
         sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
         sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
     }
 
     fun getDeviceId(): String {
         return Connection.getDeviceId()
+    }
+
+    fun disconnect(context: Context) {
+        Connection.disconnect(context)
+    }
+
+    fun preventReconnection () {
+        Connection.oneTimeLock = true
     }
 }

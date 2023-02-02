@@ -10,8 +10,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import org.avmedia.gShockPhoneSync.casio.CasioTimeZone
-import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
 import java.time.Clock
@@ -29,22 +30,18 @@ class SendTimeButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
-
-                    sendTimeToWatch()
+                    api().setTime(true)
 
                     // update the screen with new Home Time
-                    WatchDataCollector.rereadHomeTimeFromWatch()
+                    GlobalScope.launch {
+                        api().getHomeTime()
+                    }
 
                     Utils.snackBar(context, "Time Set on Watch")
                 }
             }
             v?.performClick()
             return false
-        }
-
-        private fun sendTimeToWatch() {
-            sendMessage("{action: \"SET_TIME\", value: ${Clock.systemDefaultZone().millis()}}")
         }
     }
 }

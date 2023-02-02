@@ -16,8 +16,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gshockapi.utils.ProgressEvents
 
 data class PermissionManager(val context: Context) {
 

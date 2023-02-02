@@ -7,6 +7,7 @@
 package org.avmedia.gshockapi
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.util.Preconditions.checkArgument
@@ -27,6 +28,12 @@ object EventsModel {
 
     fun createEvent(event: Event) {
         events.add(event)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun refresh (context: Context) {
+        events.clear()
+        events.addAll(CalenderEvents.getDataFromEventTable(context))
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

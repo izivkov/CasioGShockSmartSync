@@ -14,7 +14,8 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.CalendarContract
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gshockapi.EventsModel
+import org.avmedia.gshockapi.utils.ProgressEvents
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar

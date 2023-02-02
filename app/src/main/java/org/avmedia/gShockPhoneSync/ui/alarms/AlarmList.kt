@@ -10,9 +10,11 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.avmedia.gShockPhoneSync.ble.Connection
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.AlarmsModel
+import org.avmedia.gshockapi.utils.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
 
 class AlarmList @JvmOverloads constructor(
@@ -24,24 +26,12 @@ class AlarmList @JvmOverloads constructor(
         layoutManager = LinearLayoutManager(context)
 
         if (AlarmsModel.isEmpty()) {
-            subscribe("ALARMS", ::onDataReceived)
-            Connection.sendMessage("{ action: 'GET_ALARMS'}")
-        }
-    }
+            GlobalScope.launch {
+                api().getAlarms() // update the model
 
-    private fun onDataReceived(data: String) {
-        AlarmsModel.fromJson(data)
-        context.runOnUiThread {
-            adapter?.notifyDataSetChanged()
-            ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)
+                adapter?.notifyDataSetChanged()
+                ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)
+            }
         }
-    }
-
-    @SuppressLint("CheckResult")
-    private fun subscribe(subject: String, onDataReceived: (String) -> Unit) {
-        WatchDataEvents.addSubject(subject)
-        WatchDataEvents.subscribe(this.javaClass.simpleName, subject, onNext = {
-            onDataReceived(it as String)
-        })
     }
 }

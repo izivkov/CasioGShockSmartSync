@@ -11,7 +11,7 @@ import com.google.gson.Gson
 object AlarmsModel {
 
 
-    open class Alarm(val hour: Int, val minute: Int, val enabled: Boolean, val hasHourlyChime: Boolean = false)
+    open class Alarm(var hour: Int, var minute: Int, var enabled: Boolean, var hasHourlyChime: Boolean = false)
     val alarms = ArrayList<Alarm>()
 
     fun clear() {

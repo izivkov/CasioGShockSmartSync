@@ -10,19 +10,18 @@ import android.app.NotificationManager
 import android.app.NotificationManager.INTERRUPTION_FILTER_ALL
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
-import org.avmedia.gShockPhoneSync.casio.SettingsTransferObject
-import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.casio.SettingsSimpleModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 object AutoConfigurator {
 
-    fun configure(context: Context): SettingsTransferObject {
-        val settings = SettingsTransferObject()
+    suspend fun configure(context: Context): SettingsSimpleModel {
+        val settings = SettingsSimpleModel()
         val currentLocale: Locale = Locale.getDefault()
-        val language = currentLocale.language
 
-        when (language) {
+        when (currentLocale.language) {
             "en" -> settings.language = "English"
             "es" -> settings.language = "Spanish"
             "fr" -> settings.language = "French"
@@ -71,7 +70,7 @@ object AutoConfigurator {
         // for auto-light, we may want to use day/time to set off/on
 
         // Power Save mode
-        val batteryLevel:Int = WatchDataCollector.CollectedData.batteryLevelValue.toInt()
+        val batteryLevel: Int = api().getBatteryLevel().toInt()
         settings.powerSavingMode = batteryLevel <= 15
 
         return settings

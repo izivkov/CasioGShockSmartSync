@@ -10,6 +10,7 @@ import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.Weekday
 import com.philjay.WeekdayNum
+import org.avmedia.gshockapi.EventsModel
 import timber.log.Timber
 import java.time.*
 import java.time.format.DateTimeFormatter

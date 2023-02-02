@@ -9,7 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import org.avmedia.gshockapi.utils.WatchDataEvents
 import org.jetbrains.anko.runOnUiThread
 
 abstract class CacheableSubscribableTextView @JvmOverloads constructor(

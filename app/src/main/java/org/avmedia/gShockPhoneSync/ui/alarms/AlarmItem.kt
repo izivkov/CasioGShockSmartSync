@@ -15,7 +15,7 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
+import org.avmedia.gshockapi.AlarmsModel
 import kotlin.reflect.KFunction
 
 class AlarmItem @JvmOverloads constructor(

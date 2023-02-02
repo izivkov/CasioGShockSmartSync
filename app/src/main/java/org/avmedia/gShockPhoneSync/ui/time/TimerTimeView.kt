@@ -8,18 +8,14 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import androidx.core.content.ContextCompat.getSystemService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ble.Connection
-import org.avmedia.gShockPhoneSync.casio.WatchDataCollector
-import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import org.avmedia.gshockapi.utils.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
-import org.json.JSONObject
 import timber.log.Timber
 
 
@@ -30,7 +26,7 @@ class TimerTimeView @JvmOverloads constructor(
     init {
         setOnTouchListener(OnTouchListener())
         text = makeLongString(TimerModel.get())
-        waitForInitialization (context)
+        waitForInitialization(context)
     }
 
     private fun waitForInitialization(context: Context) {
@@ -41,9 +37,12 @@ class TimerTimeView @JvmOverloads constructor(
                 when (it) {
                     // For setting time, we need to wait until the watch has been initialised.
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        val timer = WatchDataCollector.CollectedData.timerValue
-                        TimerModel.set(timer.toInt())
-                        text = makeLongString(timer.toInt())
+                        GlobalScope.launch {
+                            val timerVal = api().getTimer()
+                            context.runOnUiThread {
+                                text = makeLongString(timerVal.toInt())
+                            }
+                        }
                     }
                 }
             },
@@ -52,6 +51,7 @@ class TimerTimeView @JvmOverloads constructor(
                 throwable.printStackTrace()
             })
     }
+
     private fun makeLongString(inSeconds: Int): String {
         val hours = inSeconds / 3600
         val minutesAndSeconds = inSeconds % 3600

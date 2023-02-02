@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.os.Bundle
@@ -14,14 +15,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import org.avmedia.gShockPhoneSync.ble.BleScannerLocal
-import org.avmedia.gShockPhoneSync.ble.Connection
-import org.avmedia.gShockPhoneSync.ble.DeviceCharacteristics
-import org.avmedia.gShockPhoneSync.casio.WatchFactory
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gShockPhoneSync.utils.WatchDataListener
+import org.avmedia.gshockapi.GShockAPI
+import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
@@ -32,8 +32,8 @@ import kotlin.concurrent.schedule
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var bleScannerLocal: BleScannerLocal
     private lateinit var permissionManager: PermissionManager
+    private val api = GShockAPI(this)
 
     init {
         instance = this
@@ -45,8 +45,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        bleScannerLocal = BleScannerLocal(this)
 
         permissionManager = PermissionManager(this)
         permissionManager.setupPermissions()
@@ -61,32 +59,32 @@ class MainActivity : AppCompatActivity() {
 
         createAppEventsSubscription()
 
-        Connection.init(this)
-        WatchDataListener.init()
-
         // This will run in the foreground, but not reliable. Do not use for now.
         // val intent = Intent(this, ForegroundService::class.java)
         // this.startService(intent)
 
         if (Utils.isDebugMode()) {
-            navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
+            navController.navigate(R.id.navigation_home)
+        }
+
+        run()
+        // ApiTest().run(this)
+    }
+
+
+    private fun run() {
+
+        GlobalScope.launch {
+            waitForConnectionCached()
+
+            // call init here to getPressedButton() and to inform that API is ready to use.
+            api().init ()
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onResume() {
         super.onResume()
-
-        if (!Utils.isDebugMode()) {
-
-            if (!bleScannerLocal.bluetoothAdapter.isEnabled) {
-                permissionManager.promptEnableBluetooth()
-                return
-            }
-
-            if (permissionManager.hasAllPermissions()) {
-                bleScannerLocal.startConnection()
-            }
-        }
     }
 
     override fun onUserInteraction() {
@@ -94,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         InactivityWatcher.resetTimer(this)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -102,7 +101,9 @@ class MainActivity : AppCompatActivity() {
         permissionManager.onRequestPermissionsResult(grantResults)
 
         if (grantResults.all { it == 0 }) {
-            bleScannerLocal.startConnection()
+            GlobalScope.launch {
+                waitForConnectionCached()
+            }
         } else {
             Timber.i("Not all permissions granted...")
             Utils.snackBar(this, "Not all permissions granted, exiting...")
@@ -120,10 +121,6 @@ class MainActivity : AppCompatActivity() {
             {
                 when (it) {
                     ProgressEvents.Events.ConnectionSetupComplete -> {
-                        val device =
-                            ProgressEvents.Events.ConnectionSetupComplete.payload as BluetoothDevice
-                        DeviceCharacteristics.init(device)
-                        WatchFactory.watch.init()
                     }
                     ProgressEvents.Events.WatchDataCollected -> {
                         InactivityWatcher.start(this)
@@ -135,22 +132,22 @@ class MainActivity : AppCompatActivity() {
 
                         Utils.snackBar(this, "Disconnected from watch!")
                         val device = ProgressEvents.Events.Disconnect.payload as BluetoothDevice
-                        Connection.teardownConnection(device)
+                        api().teardownConnection()
 
                         // restart after 5 seconds
                         val reconnectScheduler: ScheduledExecutorService =
                             Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
-                            bleScannerLocal.startConnection()
+                            GlobalScope.launch {
+                                waitForConnectionCached()
+                            }
                         }, 5L, TimeUnit.SECONDS)
                     }
-                    ProgressEvents.Events.ConnectionFailed -> {
-                        bleScannerLocal.startConnection()
-                    }
+
                     ProgressEvents.Events.WatchInitializationCompleted -> {
                         val navController =
                             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        navController.navigate(org.avmedia.gShockPhoneSync.R.id.navigation_home)
+                        navController.navigate(R.id.navigation_home)
                     }
                 }
             },
@@ -160,12 +157,22 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
+    private suspend fun waitForConnectionCached() {
+        var cachedDeviceAddress: String? =
+            LocalDataStorage.get("cached device", null, this@MainActivity)
+        api().waitForConnection(cachedDeviceAddress)
+        LocalDataStorage.put("cached device", api().getDeviceId(), this@MainActivity)
+    }
+
     companion object {
         private var instance: MainActivity? = null
 
         // Make context available from anywhere in the code (not yet used).
         fun applicationContext(): Context {
             return instance!!.applicationContext
+        }
+        fun api():GShockAPI {
+            return instance!!.api
         }
     }
 }

@@ -9,10 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import org.avmedia.gShockPhoneSync.ble.Connection
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import org.avmedia.gshockapi.utils.WatchDataEvents
 
 open class Button @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -29,21 +26,21 @@ open class Button @JvmOverloads constructor(
         visibility = INVISIBLE
     }
 
-    protected fun sendMessage(message: String) {
-        Connection.sendMessage(message)
-    }
+//    protected fun sendMessage(message: String) {
+//        Connection.sendMessage(message)
+//    }
 
-    inner class OnTouchListener(private val command: String) : View.OnTouchListener {
-        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-            when (event?.action) {
-                MotionEvent.ACTION_UP -> {
-                    sendMessage(command)
-                }
-            }
-            v?.performClick()
-            return false
-        }
-    }
+//    inner class OnTouchListener(private val command: String) : View.OnTouchListener {
+//        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+//            when (event?.action) {
+//                MotionEvent.ACTION_UP -> {
+//                    sendMessage(command)
+//                }
+//            }
+//            v?.performClick()
+//            return false
+//        }
+//    }
 
     @SuppressLint("CheckResult")
     protected fun subscribe(subject: String, onDataReceived: (String) -> Unit) {

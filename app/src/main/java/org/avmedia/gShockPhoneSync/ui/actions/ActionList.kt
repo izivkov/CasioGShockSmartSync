@@ -9,7 +9,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 
 class ActionList @JvmOverloads constructor(

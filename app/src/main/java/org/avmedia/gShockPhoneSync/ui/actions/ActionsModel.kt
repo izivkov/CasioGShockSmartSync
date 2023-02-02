@@ -16,12 +16,11 @@ import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ble.Connection.sendMessage
-import org.avmedia.gShockPhoneSync.casio.CasioTimeZone
-import org.avmedia.gShockPhoneSync.casio.WatchFactory
-import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.*
+import org.avmedia.gshockapi.EventsModel
+import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
@@ -81,7 +80,8 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
+            // sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
+            api().setEvents(EventsModel)
             Utils.snackBar(context, "Events Sent to Watch")
         }
 
@@ -122,19 +122,7 @@ object ActionsModel {
                         // For setting time, we need to wait until the watch has been initialised.
                         ProgressEvents.Events.WatchInitializationCompleted -> {
                             if (!Utils.isDebugMode()) {
-
-                                // Update the HomeTime according to the current TimeZone
-                                // This could be optimised to be called only if the
-                                // timezone has changed, but this adds complexity.
-                                // Maybe we can do this in the future.
-                                CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
-
-                                sendMessage(
-                                    "{ action: \"SET_TIME\", value: ${
-                                        Clock.systemDefaultZone()
-                                            .millis() + 3000 // add 3 seconds to compensate for extra commands
-                                    }}"
-                                )
+                                api().setTime(true)
                             }
                         }
                     }
@@ -420,7 +408,7 @@ object ActionsModel {
     }
 
     fun hasTimeSet(): Boolean {
-        if (WatchFactory.watch.isAutoTimeStarted()) {
+        if (api().isAutoTimeStarted()) {
             return true
         }
 

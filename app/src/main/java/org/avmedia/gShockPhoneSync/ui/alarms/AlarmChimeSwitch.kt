@@ -9,7 +9,8 @@ package org.avmedia.gShockPhoneSync.ui.alarms
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.CompoundButton
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gshockapi.AlarmsModel
+import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 
 class AlarmChimeSwitch @JvmOverloads constructor(

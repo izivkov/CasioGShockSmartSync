@@ -10,8 +10,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gshockapi.AlarmsModel
 
 class SendAlarmsToWatchButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -26,11 +28,7 @@ class SendAlarmsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    if (AlarmsModel.alarms.isEmpty()) {
-                        Utils.snackBar(context, "Cannot set alarms...unsupported watch?")
-                        return false
-                    }
-                    sendMessage("{action: \"SET_ALARMS\", value: ${AlarmsModel.toJson()}}")
+                    api().setAlarms(AlarmsModel)
                     Utils.snackBar(context, "Alarms Sent to Watch")
                 }
             }

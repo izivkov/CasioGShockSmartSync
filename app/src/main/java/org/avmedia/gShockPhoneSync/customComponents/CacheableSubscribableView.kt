@@ -10,7 +10,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import org.avmedia.gshockapi.utils.WatchDataEvents
 
 abstract class CacheableSubscribableView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

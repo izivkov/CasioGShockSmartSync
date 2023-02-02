@@ -12,10 +12,12 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gShockPhoneSync.casio.WatchFactory
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.utils.Utils
 import timber.log.Timber
 
 class ConnectionLayout @JvmOverloads constructor(
@@ -33,15 +35,20 @@ class ConnectionLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.ButtonPressedInfoReceived -> {
-                        if (WatchFactory.watch.isActionButtonPressed()) {
+                        if (api().isActionButtonPressed()) {
                             hide()
                         }
                     }
+
+                    ProgressEvents.Events.ConnectionSetupComplete -> {
+                    }
+
                     ProgressEvents.Events.WatchInitializationCompleted -> {
-                        if (!WatchFactory.watch.isActionButtonPressed() && !WatchFactory.watch.isAutoTimeStarted()) {
+                        if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
                             hide()
                         }
                     }
+
                     ProgressEvents.Events.Disconnect -> {
                         show()
                     }

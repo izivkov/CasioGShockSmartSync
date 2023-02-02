@@ -10,6 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
 
@@ -25,16 +26,11 @@ class SendTimerButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    sendTimeToWatch(TimerModel.get())
+                    api().setTimer(TimerModel.get() as Long)
                 }
             }
             v?.performClick()
             return false
-        }
-
-        private fun sendTimeToWatch(durationInSeconds: Int) {
-            sendMessage("{action: \"SET_TIMER\", value: $durationInSeconds}")
-            Utils.snackBar(context, "Timer Set on Watch")
         }
     }
 }

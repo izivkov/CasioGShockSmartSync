@@ -9,7 +9,7 @@ package org.avmedia.gShockPhoneSync.ui.events
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.TextView
-import org.avmedia.gShockPhoneSync.ui.events.EventsModel
+import org.avmedia.gshockapi.EventsModel
 import kotlin.reflect.KFunction
 
 class EventItem @JvmOverloads constructor(

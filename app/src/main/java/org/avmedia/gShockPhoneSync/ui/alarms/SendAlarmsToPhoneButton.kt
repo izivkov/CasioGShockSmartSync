@@ -12,8 +12,9 @@ import android.provider.AlarmClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import org.avmedia.gShockPhoneSync.ble.Connection
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
+import org.avmedia.gshockapi.AlarmsModel
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -73,11 +74,11 @@ class SendAlarmsToPhoneButton @JvmOverloads constructor(
                 /*
                 Schedule startActivity() one second apart, to give them time to complete.
                 When startActivity() is called, the current activity calls onPause(), which
-                normally closes the connection. The 'oneTimeLock' flag will prevent this,
+                normally closes the connection. Calling "preventReconnection()" will prevent this,
                 and will reset itself on each 'disconnect' attempt.
                  */
                 executorService.schedule({
-                    Connection.oneTimeLock = true
+                    api().preventReconnection()
                     context.startActivity(intent)
                 }, index.toLong(), TimeUnit.SECONDS)
             }

@@ -12,10 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import org.avmedia.gShockPhoneSync.ble.Connection
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
-import org.avmedia.gShockPhoneSync.utils.WatchDataEvents
+import org.avmedia.gshockapi.utils.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 
@@ -27,17 +28,14 @@ class SettingsList @JvmOverloads constructor(
         adapter = SettingsAdapter(SettingsModel.settings)
         layoutManager = LinearLayoutManager(context)
 
-        subscribe("SETTINGS", ::onDataReceived)
-        Connection.sendMessage("{ action: 'GET_SETTINGS'}")
-
-        subscribe("TIME_ADJUSTMENT", ::onReceivedTimeAdjustment)
-        Connection.sendMessage("{ action: 'GET_TIME_ADJUSTMENT'}")
-
         listenForUpdateRequest()
     }
 
     fun init() {
         Timber.i("SettingsList: init() called")
+        GlobalScope.launch {
+            api().getSettings() // update teh model
+        }
     }
 
     private fun onDataReceived(data: String) {
@@ -71,12 +69,4 @@ class SettingsList @JvmOverloads constructor(
             .subscribe(
                 { },
                 { throwable -> Timber.i("Got error on subscribe: $throwable") })
-
-    @SuppressLint("CheckResult")
-    private fun subscribe(subject: String, onDataReceived: (String) -> Unit) {
-        WatchDataEvents.addSubject(subject)
-        WatchDataEvents.subscribe(this.javaClass.simpleName, subject, onNext = {
-            onDataReceived(it as String)
-        })
-    }
 }

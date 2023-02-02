@@ -10,12 +10,11 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
-import org.avmedia.gShockPhoneSync.MainActivity
-import org.avmedia.gShockPhoneSync.casio.SettingsTransferObject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gshockapi.casio.SettingsSimpleModel
+import org.avmedia.gshockapi.utils.ProgressEvents
 
 
 class AutoFillValuesButton @JvmOverloads constructor(
@@ -40,24 +39,26 @@ class AutoFillValuesButton @JvmOverloads constructor(
     }
 
     private fun autoFill() {
-        val settings = AutoConfigurator.configure(context)
-        fillLocale(settings)
-        fillButtonTone(settings)
-        fillLight(settings)
-        fillPowerSavingMode(settings)
-        fillTimeAdjustment(settings)
+        GlobalScope.launch {
+            val settings = AutoConfigurator.configure(context)
+            fillLocale(settings)
+            fillButtonTone(settings)
+            fillLight(settings)
+            fillPowerSavingMode(settings)
+            fillTimeAdjustment(settings)
 
-        updateUI()
+            updateUI()
+        }
     }
 
-    private fun fillTimeAdjustment(settings: SettingsTransferObject) {
+    private fun fillTimeAdjustment(settings: SettingsSimpleModel) {
         val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
 
         timeAdjustment.timeAdjustment = settings.timeAdjustment
         timeAdjustment.timeAdjustmentNotifications = false
     }
 
-    private fun fillPowerSavingMode(settings: SettingsTransferObject) {
+    private fun fillPowerSavingMode(settings: SettingsSimpleModel) {
         val powerSaveMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
 
         // Change only if currently not in power-saving mode,
@@ -67,7 +68,7 @@ class AutoFillValuesButton @JvmOverloads constructor(
         }
     }
 
-    private fun fillLight(settings: SettingsTransferObject) {
+    private fun fillLight(settings: SettingsSimpleModel) {
         val lightSetting = SettingsModel.light as SettingsModel.Light
         lightSetting.autoLight = settings.autoLight
         if (settings.lightDuration == "2s") {
@@ -77,12 +78,12 @@ class AutoFillValuesButton @JvmOverloads constructor(
         }
     }
 
-    private fun fillButtonTone(settings: SettingsTransferObject) {
+    private fun fillButtonTone(settings: SettingsSimpleModel) {
         val toneSetting = SettingsModel.buttonSound as SettingsModel.OperationSound
         toneSetting.sound = settings.buttonTone
     }
 
-    private fun fillLocale(settings: SettingsTransferObject) {
+    private fun fillLocale(settings: SettingsSimpleModel) {
 
         val localeSetting = SettingsModel.locale as SettingsModel.Locale
         when (settings.language) {

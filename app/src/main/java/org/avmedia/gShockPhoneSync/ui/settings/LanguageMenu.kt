@@ -15,8 +15,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.casio.WatchFactory
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 
 class LanguageMenu @JvmOverloads constructor(

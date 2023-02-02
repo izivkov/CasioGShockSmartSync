@@ -22,8 +22,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gShockPhoneSync.casio.WatchFactory
-import org.avmedia.gShockPhoneSync.utils.ProgressEvents
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 
 class ActionRunnerLayout @JvmOverloads constructor(
@@ -43,10 +43,10 @@ class ActionRunnerLayout @JvmOverloads constructor(
                     ProgressEvents.Events.ButtonPressedInfoReceived -> {
                         ActionsModel.loadData(context)
 
-                        if (WatchFactory.watch.isActionButtonPressed()) {
+                        if (api().isActionButtonPressed()) {
                             show()
                             ActionsModel.runActions(context)
-                        } else if (WatchFactory.watch.isAutoTimeStarted()) {
+                        } else if (api().isAutoTimeStarted()) {
                             ActionsModel.runActionsForAutoTimeSetting(context)
                         }
                     }
