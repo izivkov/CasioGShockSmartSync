@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gshockapi.utils.ProgressEvents
 import java.time.Clock
 import java.util.*
 
@@ -32,11 +33,7 @@ class SendTimeButton @JvmOverloads constructor(
                 MotionEvent.ACTION_UP -> {
                     api().setTime(true)
 
-                    // update the screen with new Home Time
-                    GlobalScope.launch {
-                        api().getHomeTime()
-                    }
-
+                    ProgressEvents.onNext(ProgressEvents.Events.HomeTimeUpdated)
                     Utils.snackBar(context, "Time Set on Watch")
                 }
             }

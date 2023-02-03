@@ -71,14 +71,13 @@ class MainActivity : AppCompatActivity() {
         // ApiTest().run(this)
     }
 
-
     private fun run() {
 
         GlobalScope.launch {
             waitForConnectionCached()
 
             // call init here to getPressedButton() and to inform that API is ready to use.
-            api().init ()
+            api().init (this@MainActivity)
         }
     }
 

@@ -1,13 +1,13 @@
 package org.avmedia.gshockapi
 
+import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
 import org.avmedia.gshockapi.ble.BleScannerLocal
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.Connection.sendMessage
@@ -64,7 +64,9 @@ class GShockAPI(private val context: Context) {
     }
 
     suspend fun getPressedButton(): BluetoothWatch.WATCH_BUTTON {
-        return cache.getCached("10", ::_getPressedButton) as BluetoothWatch.WATCH_BUTTON
+        val ret = cache.getCached("10", ::_getPressedButton) as BluetoothWatch.WATCH_BUTTON
+        ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
+        return ret
     }
 
     private suspend fun _getPressedButton(key:String): BluetoothWatch.WATCH_BUTTON {
@@ -93,7 +95,6 @@ class GShockAPI(private val context: Context) {
                 }
             }
 
-            ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
             resultQueue.dequeue()?.complete(ret)
         }
 
@@ -107,13 +108,18 @@ class GShockAPI(private val context: Context) {
                 || button == BluetoothWatch.WATCH_BUTTON.NO_BUTTON // automatic time set
     }
 
-    // TODO: INZ fix later
     fun isActionButtonPressed(): Boolean {
         val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
-        return button == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
+        val res = button == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
+        return res
     }
 
-    // TODO: INZ fix later
+    fun isNormalButtonPressed(): Boolean {
+        val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
+        val res = button == BluetoothWatch.WATCH_BUTTON.LOWER_LEFT
+        return res
+    }
+
     fun isAutoTimeStarted(): Boolean {
         val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
         return button == BluetoothWatch.WATCH_BUTTON.NO_BUTTON
@@ -303,7 +309,7 @@ class GShockAPI(private val context: Context) {
         )
     }
 
-    suspend fun init() {
+    suspend fun init(context: Context) {
         getPressedButton()
         ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
     }

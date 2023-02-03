@@ -14,8 +14,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 
@@ -52,16 +51,19 @@ class BatteryView @JvmOverloads constructor(
 
     init {
         percentageBitmap = getBitmap(R.drawable.stripes)
+    }
 
-//        GlobalScope.launch {
-//            val percentStr = api().getBatteryLevel()
-//            setPercent(percentStr.toInt())
-//        }
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        runBlocking {
+            val percentStr = api().getBatteryLevel()
+            setPercent(percentStr.toInt())
+        }
     }
 
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val measureWidth = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
+        val measureWidth = getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
         val measureHeight = (measureWidth * 3f).toInt()
         setMeasuredDimension(measureWidth, measureHeight)
 

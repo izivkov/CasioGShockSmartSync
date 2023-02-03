@@ -8,19 +8,22 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import org.avmedia.gshockapi.utils.Utils
+import org.avmedia.gshockapi.utils.ProgressEvents
+import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
 
-    init {
-        text = get(this.javaClass.simpleName)
-        subscribe(this.javaClass.simpleName, "CASIO_WATCH_NAME")
-    }
-
-    override fun onDataReceived(value: String, name: String) {
-        super.onDataReceived(Utils.toAsciiString(value, 1), name)
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        runBlocking { text = api().getWatchName() }
     }
 }

@@ -42,3 +42,4 @@ class ConnectionSpinner @JvmOverloads constructor(
             { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
 }
+

@@ -12,8 +12,6 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.utils.ProgressEvents
@@ -25,8 +23,8 @@ class ConnectionLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (Utils.isDebugMode()) hide () else show()
-        createAppEventsSubscription ()
+        if (Utils.isDebugMode()) hide() else show()
+        createAppEventsSubscription()
     }
 
     private fun createAppEventsSubscription(): Disposable =
@@ -35,16 +33,7 @@ class ConnectionLayout @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     ProgressEvents.Events.ButtonPressedInfoReceived -> {
-                        if (api().isActionButtonPressed()) {
-                            hide()
-                        }
-                    }
-
-                    ProgressEvents.Events.ConnectionSetupComplete -> {
-                    }
-
-                    ProgressEvents.Events.WatchInitializationCompleted -> {
-                        if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
+                        if (api().isNormalButtonPressed() || api().isActionButtonPressed()) {
                             hide()
                         }
                     }

@@ -12,6 +12,7 @@ import android.widget.EditText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.utils.ProgressEvents
@@ -25,31 +26,14 @@ class TimerTimeView @JvmOverloads constructor(
 
     init {
         setOnTouchListener(OnTouchListener())
-        text = makeLongString(TimerModel.get())
-        waitForInitialization(context)
     }
 
-    private fun waitForInitialization(context: Context) {
-        ProgressEvents.subscriber.start(
-            this.javaClass.simpleName,
-            {
-
-                when (it) {
-                    // For setting time, we need to wait until the watch has been initialised.
-                    ProgressEvents.Events.WatchInitializationCompleted -> {
-                        GlobalScope.launch {
-                            val timerVal = api().getTimer()
-                            context.runOnUiThread {
-                                text = makeLongString(timerVal.toInt())
-                            }
-                        }
-                    }
-                }
-            },
-            { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        runBlocking {
+            val timerVal = api().getTimer()
+            text = makeLongString(timerVal.toInt())
+        }
     }
 
     private fun makeLongString(inSeconds: Int): String {

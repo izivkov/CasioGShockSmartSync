@@ -8,6 +8,9 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
+import kotlinx.coroutines.runBlocking
+import org.avmedia.gShockPhoneSync.MainActivity
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import org.avmedia.gshockapi.utils.Utils
 
@@ -15,12 +18,10 @@ open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
 
-    init {
-        text = get(this.javaClass.simpleName)
-        subscribe(this.javaClass.simpleName, "HOME_TIME")
-    }
-
-    override fun onDataReceived(data: String, name: String) {
-        super.onDataReceived(Utils.toAsciiString(data, 1), name)
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        runBlocking {
+            text = api().getHomeTime()
+        }
     }
 }

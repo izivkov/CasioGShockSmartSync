@@ -66,5 +66,6 @@ object ProgressEvents {
         object SettingsLoaded : Events()
         object NeedToUpdateUI : Events()
         object CalendarUpdated : Events()
+        object HomeTimeUpdated : Events()
     }
 }
