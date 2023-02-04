@@ -280,5 +280,4 @@ object EventsModel {
             start.dayOfMonth
         )
     }
-
 }

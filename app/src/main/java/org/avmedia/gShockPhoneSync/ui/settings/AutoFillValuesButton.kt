@@ -10,8 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gshockapi.casio.SettingsSimpleModel
 import org.avmedia.gshockapi.utils.ProgressEvents
@@ -39,7 +38,7 @@ class AutoFillValuesButton @JvmOverloads constructor(
     }
 
     private fun autoFill() {
-        GlobalScope.launch {
+        runBlocking {
             val settings = AutoConfigurator.configure(context)
             fillLocale(settings)
             fillButtonTone(settings)

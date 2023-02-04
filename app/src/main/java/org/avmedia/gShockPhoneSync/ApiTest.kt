@@ -3,8 +3,7 @@ package org.avmedia.gShockPhoneSync
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.AlarmsModel
@@ -15,7 +14,7 @@ import org.avmedia.gshockapi.casio.SettingsSimpleModel
 class ApiTest {
     fun run(context: Context) {
 
-        GlobalScope.launch {
+        runBlocking {
             waitForConnectionCached(context)
             // api().init ()
 

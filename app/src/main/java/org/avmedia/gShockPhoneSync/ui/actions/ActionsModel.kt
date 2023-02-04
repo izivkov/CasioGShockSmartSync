@@ -387,7 +387,7 @@ object ActionsModel {
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
                     // Run in background for speed.
-                    GlobalScope.launch {
+                    runBlocking{
                         runIt(it, context)
                     }
                 } else {

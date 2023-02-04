@@ -17,6 +17,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -77,7 +78,7 @@ class MainActivity : AppCompatActivity() {
             waitForConnectionCached()
 
             // call init here to getPressedButton() and to inform that API is ready to use.
-            api().init (this@MainActivity)
+            api().init(this@MainActivity)
         }
     }
 
@@ -93,14 +94,13 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("RestrictedApi")
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionManager.onRequestPermissionsResult(grantResults)
 
         if (grantResults.all { it == 0 }) {
-            GlobalScope.launch {
+            runBlocking {
                 waitForConnectionCached()
             }
         } else {
@@ -114,8 +114,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(
-            this.javaClass.simpleName,
+        ProgressEvents.subscriber.start(this.javaClass.simpleName,
 
             {
                 when (it) {
@@ -150,8 +149,7 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate(R.id.navigation_home)
                     }
                 }
-            },
-            { throwable ->
+            }, { throwable ->
                 Timber.d("Got error on subscribe: $throwable")
                 throwable.printStackTrace()
             })
@@ -171,7 +169,8 @@ class MainActivity : AppCompatActivity() {
         fun applicationContext(): Context {
             return instance!!.applicationContext
         }
-        fun api():GShockAPI {
+
+        fun api(): GShockAPI {
             return instance!!.api
         }
     }

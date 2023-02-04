@@ -5,13 +5,11 @@
  */
 package org.avmedia.gShockPhoneSync.ui.alarms
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.AlarmsModel
 import org.avmedia.gshockapi.utils.ProgressEvents
@@ -26,11 +24,13 @@ class AlarmList @JvmOverloads constructor(
         layoutManager = LinearLayoutManager(context)
 
         if (AlarmsModel.isEmpty()) {
-            GlobalScope.launch {
+            runBlocking {
                 api().getAlarms() // update the model
 
-                adapter?.notifyDataSetChanged()
-                ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)
+                context.runOnUiThread {
+                    adapter?.notifyDataSetChanged()
+                    ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)
+                }
             }
         }
     }

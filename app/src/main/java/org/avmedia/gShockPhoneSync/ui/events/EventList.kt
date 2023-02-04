@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import org.avmedia.gShockPhoneSync.MainActivity
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.EventsModel
 import org.avmedia.gshockapi.utils.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
@@ -23,6 +25,10 @@ class EventList @JvmOverloads constructor(
     init {
         adapter = EventAdapter(EventsModel.events)
         layoutManager = LinearLayoutManager(context)
+
+        var eventsModel = EventsModel
+        eventsModel.clear()
+        eventsModel.events.addAll(api().getEventsFromCalendar(context))
 
         listenForUpdateRequest()
     }
@@ -44,5 +50,4 @@ class EventList @JvmOverloads constructor(
             .subscribe(
                 { },
                 { throwable -> Timber.i("Got error on subscribe: $throwable") })
-
 }

@@ -12,8 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
 import org.avmedia.gshockapi.utils.ProgressEvents
@@ -33,7 +32,7 @@ class SettingsList @JvmOverloads constructor(
 
     fun init() {
         Timber.i("SettingsList: init() called")
-        GlobalScope.launch {
+        runBlocking {
             api().getSettings() // update teh model
         }
     }
