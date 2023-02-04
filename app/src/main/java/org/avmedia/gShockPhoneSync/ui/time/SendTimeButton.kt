@@ -10,13 +10,11 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.utils.ProgressEvents
-import java.time.Clock
 import java.util.*
 
 class SendTimeButton @JvmOverloads constructor(
@@ -31,10 +29,13 @@ class SendTimeButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    api().setTime(true)
 
-                    ProgressEvents.onNext(ProgressEvents.Events.HomeTimeUpdated)
-                    Utils.snackBar(context, "Time Set on Watch")
+                    runBlocking {
+                        api().setHomeTime(TimeZone.getDefault().id)
+                        ProgressEvents.onNext(ProgressEvents.Events.HomeTimeUpdated)
+                        api().setTime(true)
+                        Utils.snackBar(context, "Time Set on Watch")
+                    }
                 }
             }
             v?.performClick()

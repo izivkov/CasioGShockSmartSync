@@ -8,15 +8,24 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
+import org.avmedia.gshockapi.utils.ProgressEvents
 import org.avmedia.gshockapi.utils.Utils
+import timber.log.Timber
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
+
+    init {
+        // Listen on HomeTime update events
+        createSubscription()
+    }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
@@ -24,4 +33,23 @@ open class HomeTime @JvmOverloads constructor(
             text = api().getHomeTime()
         }
     }
+
+    private fun createSubscription(): Disposable =
+        ProgressEvents.connectionEventFlowable
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                when (it) {
+                    // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
+                    ProgressEvents.Events.HomeTimeUpdated -> {
+                        runBlocking {
+                            val homeTime = api().getHomeTime()
+                            text = homeTime
+                        }
+                    }
+                }
+            }
+            .subscribe(
+                { },
+                { throwable -> Timber.i("Got error on subscribe: $throwable") })
+
 }

@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi
 
+import timber.log.Timber
 import kotlin.reflect.KSuspendFunction1
 
 class WatchValuesCache {
@@ -22,5 +23,9 @@ class WatchValuesCache {
 
     fun get(key:String): Any? {
         return map[key]
+    }
+
+    fun remove(key: String) {
+        map.remove(key)
     }
 }

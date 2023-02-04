@@ -28,13 +28,9 @@ class ApiTest {
             println("App Info: ${api().getAppInfo()}")
 
             println("Home Time: ${api().getHomeTime()}")
-            println("Home Time: ${api().getHomeTime()}")
-            println("Home Time: ${api().getHomeTime()}")
 
             getDTSState()
-
             getWorldCities()
-
             getRTSForWorldCities()
 
             api().setTime()

@@ -468,14 +468,14 @@ object Connection : IConnection {
             with(characteristic) {
                 when (status) {
                     BluetoothGatt.GATT_SUCCESS -> {
-                        //Timber.i("${LocalDateTime.now()} Wrote to characteristic $uuid | value: ${value.toHexString()}")
+                        Timber.i("${LocalDateTime.now()} Wrote to characteristic $uuid | value: ${value.toHexString()}")
                     }
 
                     BluetoothGatt.GATT_WRITE_NOT_PERMITTED -> {
-                        //Timber.e("Write not permitted for $uuid!")
+                        Timber.e("Write not permitted for $uuid!")
                     }
                     else -> {
-                        //Timber.e("Characteristic write failed for $uuid, error: $status")
+                        Timber.e("Characteristic write failed for $uuid, error: $status")
                     }
                 }
             }

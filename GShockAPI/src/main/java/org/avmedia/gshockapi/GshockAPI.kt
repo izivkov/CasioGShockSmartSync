@@ -1,13 +1,11 @@
 package org.avmedia.gshockapi
 
-import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import org.avmedia.gshockapi.ble.BleScannerLocal
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.Connection.sendMessage
@@ -20,13 +18,14 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.time.Clock
 import java.util.*
+import kotlin.reflect.KSuspendFunction1
 
 class GShockAPI(private val context: Context) {
 
     private var bleScannerLocal: BleScannerLocal = BleScannerLocal(context)
     private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
     private val cache = WatchValuesCache()
-    private lateinit var device:BluetoothDevice
+    private lateinit var device: BluetoothDevice
 
     suspend fun waitForConnection(deviceId: String? = ""): String {
         Connection.init(context)
@@ -59,7 +58,7 @@ class GShockAPI(private val context: Context) {
         return ret
     }
 
-    fun teardownConnection () {
+    fun teardownConnection() {
         Connection.teardownConnection(device)
     }
 
@@ -69,7 +68,7 @@ class GShockAPI(private val context: Context) {
         return ret
     }
 
-    private suspend fun _getPressedButton(key:String): BluetoothWatch.WATCH_BUTTON {
+    private suspend fun _getPressedButton(key: String): BluetoothWatch.WATCH_BUTTON {
 
         request(key)
 
@@ -99,13 +98,6 @@ class GShockAPI(private val context: Context) {
         }
 
         return deferredResultButton.await()
-    }
-
-    fun isActionRunRequested(): Boolean {
-        val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
-
-        return button == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
-                || button == BluetoothWatch.WATCH_BUTTON.NO_BUTTON // automatic time set
     }
 
     fun isActionButtonPressed(): Boolean {
@@ -183,9 +175,9 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    suspend fun getWorldCities(cityNumber: Int): Any {
+    suspend fun getWorldCities(cityNumber: Int): String {
         val key = "1f0$cityNumber"
-        return cache.getCached(key, ::_getWorldCities)
+        return cache.getCached(key, ::_getWorldCities) as String
     }
 
     private suspend fun _getWorldCities(key: String): String {
@@ -197,20 +189,19 @@ class GShockAPI(private val context: Context) {
 
         subscribe("CASIO_WORLD_CITIES") { data: String ->
 
-            val city = Utils.toAsciiString(data, 2)
-
-            if (Utils.toIntArray(data)[1] == 0) { // set home_time from the first city
-                cache.put("10", city)
-            }
-
-            resultQueue.dequeue()?.complete(city)
+            // val city = Utils.toAsciiString(data, 2)
+            resultQueue.dequeue()?.complete(data)
         }
 
         return deferredResult.await()
     }
 
     suspend fun getHomeTime(): String {
-        return cache.getCached("1f00", ::_getWorldCities) as String // get home time from the first city in the list
+        val homeCityRaw =  cache.getCached(
+            "1f00", ::_getWorldCities
+        ) as String // get home time from the first city in the list
+
+        return Utils.toAsciiString(homeCityRaw, 2)
     }
 
     suspend fun getBatteryLevel(): String {
@@ -231,11 +222,11 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    suspend fun getTimer(): Long {
-        return cache.getCached("18", ::_getTimer) as Long
+    suspend fun getTimer(): Int {
+        return cache.getCached("18", ::_getTimer) as Int
     }
 
-    private suspend fun _getTimer(key:String): Long {
+    private suspend fun _getTimer(key: String): Int {
 
         request(key)
 
@@ -243,18 +234,18 @@ class GShockAPI(private val context: Context) {
             return TimerDecoder.decodeValue(data)
         }
 
-        var deferredResult = CompletableDeferred<Long>()
+        var deferredResult = CompletableDeferred<Int>()
         resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
 
         subscribe("CASIO_TIMER") {
-            resultQueue.dequeue()?.complete(getTimer(it).toLong())
+            resultQueue.dequeue()?.complete(getTimer(it).toInt())
         }
 
         return deferredResult.await()
     }
 
 
-    fun setTimer(timerValue: Long) {
+    fun setTimer(timerValue: Int) {
         sendMessage("{action: \"SET_TIMER\", value: $timerValue}")
     }
 
@@ -262,7 +253,7 @@ class GShockAPI(private val context: Context) {
         return cache.getCached("22", ::_getAppInfo) as String
     }
 
-    private suspend fun _getAppInfo(key:String): String {
+    private suspend fun _getAppInfo(key: String): String {
 
         request(key)
 
@@ -292,7 +283,7 @@ class GShockAPI(private val context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun setTime(changeHomeTime: Boolean = true) {
+    suspend fun setTime(changeHomeTime: Boolean = true) {
 
         // Update the HomeTime according to the current TimeZone
         // This could be optimised to be called only if the
@@ -302,15 +293,48 @@ class GShockAPI(private val context: Context) {
             CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
         }
 
+        // initializeForSettingTime()
+
         sendMessage(
             "{action: \"SET_TIME\", value: ${
-                Clock.systemDefaultZone().millis() + (0 * 60 * 1000)
+                Clock.systemDefaultZone().millis()
             }}"
         )
     }
 
+    private suspend fun initializeForSettingTime() {
+        // Before we can set time, we must read and write back these values.
+        // Why? Not sure, ask Casio
+
+        suspend fun <T> readAndWrite(function: KSuspendFunction1<T, String>, param: T) {
+            val ret: String = function(param)
+            val shortStr = Utils.toCompactString(ret)
+            CasioIO.writeCmd(0xE, shortStr)
+        }
+
+        readAndWrite(::getDTSWatchState, BluetoothWatch.DTS_STATE.ZERO)
+        readAndWrite(::getDTSWatchState, BluetoothWatch.DTS_STATE.TWO)
+        readAndWrite(::getDTSWatchState, BluetoothWatch.DTS_STATE.FOUR)
+
+        readAndWrite(::getDTSForWorldCities, 0)
+        readAndWrite(::getDTSForWorldCities, 1)
+        readAndWrite(::getDTSForWorldCities, 2)
+        readAndWrite(::getDTSForWorldCities, 3)
+        readAndWrite(::getDTSForWorldCities, 4)
+        readAndWrite(::getDTSForWorldCities, 5)
+
+        readAndWrite(::getWorldCities, 0)
+        readAndWrite(::getWorldCities, 1)
+        readAndWrite(::getWorldCities, 2)
+        readAndWrite(::getWorldCities, 3)
+        readAndWrite(::getWorldCities, 4)
+        readAndWrite(::getWorldCities, 5)
+    }
+
     suspend fun init(context: Context) {
         getPressedButton()
+        initializeForSettingTime()
+        getAppInfo() // this call re-enables lower-right button after watch reset.
         ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
     }
 
@@ -460,7 +484,18 @@ class GShockAPI(private val context: Context) {
         Connection.disconnect(context)
     }
 
-    fun preventReconnection () {
+    fun preventReconnection() {
         Connection.oneTimeLock = true
+    }
+
+    fun setHomeTime(id: String) {
+        cache.remove("1f00")
+        CasioTimeZone.setHomeTime(id)
+    }
+
+    private fun createWordCity(casioString: String): CasioTimeZone.WorldCity {
+        val city = Utils.toAsciiString(casioString.substring(4).trim('0'), 0)
+        val index = casioString.substring(2, 4).toInt()
+        return CasioTimeZone.WorldCity(city, index)
     }
 }

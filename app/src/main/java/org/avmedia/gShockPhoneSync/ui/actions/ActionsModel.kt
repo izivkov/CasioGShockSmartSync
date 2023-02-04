@@ -16,6 +16,7 @@ import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.*
@@ -121,7 +122,7 @@ object ActionsModel {
                     when (it) {
                         // For setting time, we need to wait until the watch has been initialised.
                         ProgressEvents.Events.WatchInitializationCompleted -> {
-                            if (!Utils.isDebugMode()) {
+                            runBlocking {
                                 api().setTime(true)
                             }
                         }

@@ -8,14 +8,9 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
@@ -24,6 +19,10 @@ class WatchName @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        runBlocking { text = api().getWatchName() }
+        runBlocking {
+            val name = api().getWatchName()
+            Timber.i(">>> setting watch name to $name")
+            text = name
+        }
     }
 }

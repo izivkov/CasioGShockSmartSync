@@ -32,7 +32,7 @@ class ConnectionLayout @JvmOverloads constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.Events.ButtonPressedInfoReceived -> {
+                    ProgressEvents.Events.WatchInitializationCompleted -> {
                         if (api().isNormalButtonPressed() || api().isActionButtonPressed()) {
                             hide()
                         }

@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity() {
                 when (it) {
                     ProgressEvents.Events.ConnectionSetupComplete -> {
                     }
+
                     ProgressEvents.Events.WatchDataCollected -> {
                         InactivityWatcher.start(this)
                     }

@@ -26,7 +26,7 @@ class SendTimerButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    api().setTimer(TimerModel.get() as Long)
+                    api().setTimer(TimerModel.get())
                 }
             }
             v?.performClick()
