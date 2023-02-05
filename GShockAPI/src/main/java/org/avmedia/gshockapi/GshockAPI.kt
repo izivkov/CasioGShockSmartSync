@@ -25,9 +25,13 @@ class GShockAPI(private val context: Context) {
     private var bleScannerLocal: BleScannerLocal = BleScannerLocal(context)
     private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
     private val cache = WatchValuesCache()
-    private lateinit var device: BluetoothDevice
 
-    suspend fun waitForConnection(deviceId: String? = ""): String {
+    suspend fun waitForConnection(deviceId: String? = "") : String{
+
+        if (Connection.isConnected() || Connection.isConnecting()) {
+           return "Connecting"
+        }
+
         Connection.init(context)
         WatchDataListener.init()
 
@@ -35,6 +39,8 @@ class GShockAPI(private val context: Context) {
         bleScannerLocal.startConnection(deviceId)
 
         val deferredResult = CompletableDeferred<String>()
+        resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
+
         fun waitForConnectionSetupComplete() {
             ProgressEvents.subscriber.start(this.javaClass.simpleName, {
                 when (it) {
@@ -43,8 +49,10 @@ class GShockAPI(private val context: Context) {
                             ProgressEvents.Events.ConnectionSetupComplete.payload as BluetoothDevice
 
                         DeviceCharacteristics.init(device)
+                        WatchFactory.watch.init()
                         Connection.enableNotifications()
-                        deferredResult.complete("Connected")
+
+                        resultQueue.dequeue()?.complete("Connected")
                     }
                 }
             }, { throwable ->
@@ -55,10 +63,11 @@ class GShockAPI(private val context: Context) {
 
         waitForConnectionSetupComplete()
         val ret = deferredResult.await()
+        Timber.i("------> Got result: $ret")
         return ret
     }
 
-    fun teardownConnection() {
+    fun teardownConnection(device:  BluetoothDevice) {
         Connection.teardownConnection(device)
     }
 
@@ -497,5 +506,9 @@ class GShockAPI(private val context: Context) {
         val city = Utils.toAsciiString(casioString.substring(4).trim('0'), 0)
         val index = casioString.substring(2, 4).toInt()
         return CasioTimeZone.WorldCity(city, index)
+    }
+
+    fun isBluetoothEnabled(): Boolean {
+        return bleScannerLocal.bluetoothAdapter.isEnabled
     }
 }

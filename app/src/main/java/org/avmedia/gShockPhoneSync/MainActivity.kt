@@ -17,7 +17,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -68,7 +67,7 @@ class MainActivity : AppCompatActivity() {
             navController.navigate(R.id.navigation_home)
         }
 
-        run()
+        // run()
         // ApiTest().run(this)
     }
 
@@ -76,8 +75,6 @@ class MainActivity : AppCompatActivity() {
 
         GlobalScope.launch {
             waitForConnectionCached()
-
-            // call init here to getPressedButton() and to inform that API is ready to use.
             api().init(this@MainActivity)
         }
     }
@@ -85,6 +82,15 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("RestrictedApi")
     override fun onResume() {
         super.onResume()
+
+        if (!api().isBluetoothEnabled()) {
+            permissionManager.promptEnableBluetooth()
+            return
+        }
+
+        if (permissionManager.hasAllPermissions()) {
+            run()
+        }
     }
 
     override fun onUserInteraction() {
@@ -100,9 +106,7 @@ class MainActivity : AppCompatActivity() {
         permissionManager.onRequestPermissionsResult(grantResults)
 
         if (grantResults.all { it == 0 }) {
-            runBlocking {
-                waitForConnectionCached()
-            }
+            run()
         } else {
             Timber.i("Not all permissions granted...")
             Utils.snackBar(this, "Not all permissions granted, exiting...")
@@ -131,16 +135,18 @@ class MainActivity : AppCompatActivity() {
 
                         Utils.snackBar(this, "Disconnected from watch!")
                         val device = ProgressEvents.Events.Disconnect.payload as BluetoothDevice
-                        api().teardownConnection()
+                        api().teardownConnection(device)
 
                         // restart after 5 seconds
                         val reconnectScheduler: ScheduledExecutorService =
                             Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
-                            GlobalScope.launch {
-                                waitForConnectionCached()
-                            }
+                            run()
                         }, 5L, TimeUnit.SECONDS)
+                    }
+
+                    ProgressEvents.Events.ConnectionFailed -> {
+                        run()
                     }
 
                     ProgressEvents.Events.WatchInitializationCompleted -> {
