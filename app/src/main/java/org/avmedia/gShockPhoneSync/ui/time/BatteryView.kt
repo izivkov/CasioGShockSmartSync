@@ -53,11 +53,13 @@ class BatteryView @JvmOverloads constructor(
         percentageBitmap = getBitmap(R.drawable.stripes)
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        runBlocking {
-            val percentStr = api().getBatteryLevel()
-            setPercent(percentStr.toInt())
+    // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        if (api().isConnected()) {
+            runBlocking {
+                setPercent(api().getBatteryLevel().toInt())
+            }
         }
     }
 

@@ -15,19 +15,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.utils.ProgressEvents
+import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -73,7 +74,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun run() {
 
-        GlobalScope.launch {
+        val scope = CoroutineScope(Dispatchers.Default)
+
+        scope.launch {
             waitForConnectionCached()
             api().init(this@MainActivity)
         }

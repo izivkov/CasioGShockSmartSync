@@ -11,18 +11,22 @@ import android.util.AttributeSet
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
+import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        runBlocking {
-            val name = api().getWatchName()
-            Timber.i(">>> setting watch name to $name")
-            text = name
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+
+        if (api().isConnected()) {
+            runBlocking {
+                val name = api().getWatchName()
+                Timber.i(">>> setting watch name to $name")
+                text = name
+            }
         }
     }
 }

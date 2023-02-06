@@ -28,12 +28,13 @@ class TimerTimeView @JvmOverloads constructor(
         setOnTouchListener(OnTouchListener())
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        runBlocking {
-            val timerVal = api().getTimer()
-            Timber.i("-----> Setting timer Watch...")
-            text = makeLongString(timerVal.toInt())
+    // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        if (api().isConnected()) {
+            runBlocking {
+                text = makeLongString(api().getTimer().toInt())
+            }
         }
     }
 

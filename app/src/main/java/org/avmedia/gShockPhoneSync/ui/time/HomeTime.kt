@@ -27,10 +27,13 @@ open class HomeTime @JvmOverloads constructor(
         createSubscription()
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        runBlocking {
-            text = api().getHomeTime()
+    // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        if (api().isConnected()) {
+            runBlocking {
+                text = api().getHomeTime()
+            }
         }
     }
 
@@ -51,5 +54,4 @@ open class HomeTime @JvmOverloads constructor(
             .subscribe(
                 { },
                 { throwable -> Timber.i("Got error on subscribe: $throwable") })
-
 }

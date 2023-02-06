@@ -66,6 +66,10 @@ class GShockAPI(private val context: Context) {
         return ret
     }
 
+    fun isConnected (): Boolean {
+        return Connection.isConnected()
+    }
+
     fun teardownConnection(device: BluetoothDevice) {
         Connection.teardownConnection(device)
     }
