@@ -32,6 +32,7 @@ class TimerTimeView @JvmOverloads constructor(
         super.onLayout(changed, left, top, right, bottom)
         runBlocking {
             val timerVal = api().getTimer()
+            Timber.i("-----> Setting timer Watch...")
             text = makeLongString(timerVal.toInt())
         }
     }
@@ -91,10 +92,8 @@ class TimerTimeView @JvmOverloads constructor(
                                 seconds = (secondsInputView.text.toString()).toInt()
                             }
 
-                            text = "${"%02d".format(hours)}:${"%02d".format(minutes)}:${
-                                "%02d".format(seconds)
-                            }"
-
+                            Timber.i("-----> Setting timer from Dialog Box...")
+                            text = "${"%02d".format(hours)}:${"%02d".format(minutes)}:${"%02d".format(seconds)}"
                             TimerModel.set(text.toString())
                         }
 

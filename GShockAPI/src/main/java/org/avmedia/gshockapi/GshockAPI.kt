@@ -26,10 +26,10 @@ class GShockAPI(private val context: Context) {
     private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
     private val cache = WatchValuesCache()
 
-    suspend fun waitForConnection(deviceId: String? = "") : String{
+    suspend fun waitForConnection(deviceId: String? = ""): String {
 
         if (Connection.isConnected() || Connection.isConnecting()) {
-           return "Connecting"
+            return "Connecting"
         }
 
         Connection.init(context)
@@ -63,16 +63,18 @@ class GShockAPI(private val context: Context) {
 
         waitForConnectionSetupComplete()
         val ret = deferredResult.await()
-        Timber.i("------> Got result: $ret")
         return ret
     }
 
-    fun teardownConnection(device:  BluetoothDevice) {
+    fun teardownConnection(device: BluetoothDevice) {
         Connection.teardownConnection(device)
     }
 
+    /* Do not get value from cache, because we do not want to get all values here. */
     suspend fun getPressedButton(): BluetoothWatch.WATCH_BUTTON {
-        val ret = cache.getCached("10", ::_getPressedButton) as BluetoothWatch.WATCH_BUTTON
+        val key = "10"
+        val ret = _getPressedButton(key)
+        cache.put(key, ret) // store in cache for functions such as isActionButtonPressed()
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
         return ret
     }
@@ -206,7 +208,7 @@ class GShockAPI(private val context: Context) {
     }
 
     suspend fun getHomeTime(): String {
-        val homeCityRaw =  cache.getCached(
+        val homeCityRaw = cache.getCached(
             "1f00", ::_getWorldCities
         ) as String // get home time from the first city in the list
 
@@ -255,6 +257,7 @@ class GShockAPI(private val context: Context) {
 
 
     fun setTimer(timerValue: Int) {
+        cache.remove("18")
         sendMessage("{action: \"SET_TIMER\", value: $timerValue}")
     }
 
@@ -342,6 +345,7 @@ class GShockAPI(private val context: Context) {
 
     suspend fun init(context: Context) {
         getPressedButton()
+        ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
         initializeForSettingTime()
         getAppInfo() // this call re-enables lower-right button after watch reset.
         ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)

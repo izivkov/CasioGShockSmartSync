@@ -44,6 +44,7 @@ class MainLayout @JvmOverloads constructor(
                 when (it) {
                     ProgressEvents.Events.WatchInitializationCompleted -> {
                         if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
+                            Timber.i("---> Show main layout...")
                             show()
                         }
                     }

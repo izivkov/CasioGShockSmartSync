@@ -44,6 +44,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
                         ActionsModel.loadData(context)
 
                         if (api().isActionButtonPressed()) {
+                            Timber.i("---> Show Action Runner")
                             show()
                             ActionsModel.runActions(context)
                         } else if (api().isAutoTimeStarted()) {
