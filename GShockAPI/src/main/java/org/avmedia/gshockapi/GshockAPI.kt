@@ -79,7 +79,6 @@ class GShockAPI(private val context: Context) {
         val key = "10"
         val ret = _getPressedButton(key)
         cache.put(key, ret) // store in cache for functions such as isActionButtonPressed()
-        ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
         return ret
     }
 
@@ -123,8 +122,7 @@ class GShockAPI(private val context: Context) {
 
     fun isNormalButtonPressed(): Boolean {
         val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
-        val res = button == BluetoothWatch.WATCH_BUTTON.LOWER_LEFT
-        return res
+        return button == BluetoothWatch.WATCH_BUTTON.LOWER_LEFT
     }
 
     fun isAutoTimeStarted(): Boolean {
@@ -305,6 +303,7 @@ class GShockAPI(private val context: Context) {
         // This could be optimised to be called only if the
         // timezone has changed, but this adds complexity.
         // Maybe we can do this in the future.
+
         if (changeHomeTime) {
             CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
         }

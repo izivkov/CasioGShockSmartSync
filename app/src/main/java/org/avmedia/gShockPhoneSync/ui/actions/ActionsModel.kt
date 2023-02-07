@@ -122,7 +122,7 @@ object ActionsModel {
                     when (it) {
                         // For setting time, we need to wait until the watch has been initialised.
                         ProgressEvents.Events.WatchInitializationCompleted -> {
-                            runBlocking {
+                            runBlocking() {
                                 api().setTime(true)
                             }
                         }
@@ -220,7 +220,6 @@ object ActionsModel {
     enum class CAMERA_ORIENTATION(cameraOrientation: String) {
         FRONT("FRONT"), BACK("BACK");
     }
-
     class PhotoAction(
         override var title: String,
         override var enabled: Boolean,
@@ -229,7 +228,6 @@ object ActionsModel {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
         }
-
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
@@ -343,7 +341,6 @@ object ActionsModel {
 
     However, this way gives us more control on how to start the actions.
      */
-
     private fun runIt(action: Action, context: Context) {
         try {
             action.run(context)
@@ -356,11 +353,9 @@ object ActionsModel {
             Utils.snackBar(context, "Could not run action ${action.title}. Reason: $e")
         }
     }
-
     fun runActions(context: Context) {
         runFilteredActions(context, actions.filter { it.enabled })
     }
-
     fun runActionsForAutoTimeSetting(context: Context) {
         runFilteredActions(context, actions.filter { it is SetTimeAction || it is SetEventsAction })
 
@@ -369,7 +364,6 @@ object ActionsModel {
             showTimeSyncNotification(context)
         }
     }
-
     private fun showTimeSyncNotification(context: Context) {
         val dateStr =
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))

@@ -7,7 +7,6 @@
 package org.avmedia.gShockPhoneSync
 
 interface IHideableLayout {
-
     fun show()
     fun hide()
 }

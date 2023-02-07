@@ -21,14 +21,12 @@ import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.utils.ProgressEvents
-import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
-
 
 class MainActivity : AppCompatActivity() {
 

@@ -21,7 +21,7 @@ class WatchName @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        if (api().isConnected()) {
+        if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
                 val name = api().getWatchName()
                 Timber.i(">>> setting watch name to $name")

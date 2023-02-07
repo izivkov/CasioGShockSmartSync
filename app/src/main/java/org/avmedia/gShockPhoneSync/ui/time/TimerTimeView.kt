@@ -23,7 +23,6 @@ import timber.log.Timber
 class TimerTimeView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
-
     init {
         setOnTouchListener(OnTouchListener())
     }
@@ -31,7 +30,7 @@ class TimerTimeView @JvmOverloads constructor(
     // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
     override fun onFinishInflate() {
         super.onFinishInflate()
-        if (api().isConnected()) {
+        if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
                 text = makeLongString(api().getTimer().toInt())
             }

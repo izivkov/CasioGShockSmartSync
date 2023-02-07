@@ -30,7 +30,7 @@ open class HomeTime @JvmOverloads constructor(
     // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
     override fun onFinishInflate() {
         super.onFinishInflate()
-        if (api().isConnected()) {
+        if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
                 text = api().getHomeTime()
             }
