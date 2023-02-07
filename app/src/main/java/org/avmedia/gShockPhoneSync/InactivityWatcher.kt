@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync
 
 import android.content.Context
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.utils.Utils.snackBar
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -21,6 +22,7 @@ object InactivityWatcher {
     fun start(context: Context) {
         futureTask = scheduler.schedule({
             api().disconnect(context)
+            snackBar(context, "Disconnecting due to inactivity")
         }, TIMEOUT, TimeUnit.SECONDS)
     }
 
@@ -33,10 +35,7 @@ object InactivityWatcher {
 
         futureTask = scheduler.schedule({
             api().disconnect(context)
-            org.avmedia.gShockPhoneSync.utils.Utils.snackBar(
-                context,
-                "Disconnecting due to inactivity"
-            )
+            snackBar(context, "Disconnecting due to inactivity")
         }, TIMEOUT, TimeUnit.SECONDS)
     }
 }

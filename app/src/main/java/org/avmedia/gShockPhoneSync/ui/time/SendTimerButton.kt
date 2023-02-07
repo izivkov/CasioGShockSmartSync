@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
+import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendTimerButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -26,6 +27,7 @@ class SendTimerButton @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
                     api().setTimer(TimerModel.get())
+                    Utils.snackBar(context, "Timer Set on Watch")
                 }
             }
             v?.performClick()

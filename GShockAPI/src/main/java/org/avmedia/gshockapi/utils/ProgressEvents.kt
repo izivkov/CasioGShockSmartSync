@@ -58,7 +58,6 @@ object ProgressEvents {
         object NotificationsEnabled : Events()
         object NotificationsDisabled : Events()
         object MtuChanged : Events()
-        object WatchDataCollected : Events()
         object WatchInitializationCompleted : Events()
         object AllPermissionsAccepted : Events()
         object ButtonPressedInfoReceived : Events()
