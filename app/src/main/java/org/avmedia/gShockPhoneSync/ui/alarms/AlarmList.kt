@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gshockapi.AlarmsModel
 import org.avmedia.gshockapi.utils.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
 
@@ -25,7 +24,11 @@ class AlarmList @JvmOverloads constructor(
 
         if (AlarmsModel.isEmpty()) {
             runBlocking {
-                api().getAlarms() // update the model
+                var alarms = api().getAlarms()
+
+                // update the model
+                AlarmsModel.alarms.clear()
+                AlarmsModel.alarms.addAll(alarms)
 
                 context.runOnUiThread {
                     adapter?.notifyDataSetChanged()

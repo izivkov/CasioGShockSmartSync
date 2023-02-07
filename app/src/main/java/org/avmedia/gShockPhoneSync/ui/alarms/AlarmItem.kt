@@ -15,7 +15,7 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gshockapi.AlarmsModel
+import org.avmedia.gshockapi.Alarm
 import kotlin.reflect.KFunction
 
 class AlarmItem @JvmOverloads constructor(
@@ -23,7 +23,7 @@ class AlarmItem @JvmOverloads constructor(
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
     private lateinit var onDataChanged: KFunction<Unit>
-    private lateinit var alarm: AlarmsModel.Alarm
+    private lateinit var alarm: Alarm
     private lateinit var alarmTime: TextView
 
     init {}
@@ -58,7 +58,7 @@ class AlarmItem @JvmOverloads constructor(
         }
     }
 
-    fun setAlarmData(alarm: AlarmsModel.Alarm) {
+    fun setAlarmData(alarm: Alarm) {
         this.alarm = alarm
 
         alarmTime = findViewById<TextView>(R.id.time)

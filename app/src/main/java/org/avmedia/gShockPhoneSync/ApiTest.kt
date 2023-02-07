@@ -6,7 +6,8 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gshockapi.AlarmsModel
+import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
+import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.EventsModel
 import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.casio.SettingsSimpleModel
@@ -34,12 +35,15 @@ class ApiTest {
 
             api().setTime()
 
-            val model = api().getAlarms()
+            val alarms = api().getAlarms()
+            var model = AlarmsModel
+            model.alarms.clear()
+            model.alarms.addAll(alarms)
             println("Alarm model: ${model.toJson()}")
 
-            model.alarms[0] = AlarmsModel.Alarm(6, 46, enabled = true, hasHourlyChime = false)
-            model.alarms[4] = AlarmsModel.Alarm(9, 25, enabled = false)
-            api().setAlarms(model)
+            model.alarms[0] = Alarm(6, 46, enabled = true, hasHourlyChime = false)
+            model.alarms[4] = Alarm(9, 25, enabled = false)
+            api().setAlarms(model.alarms)
 
             handleReminders()
 

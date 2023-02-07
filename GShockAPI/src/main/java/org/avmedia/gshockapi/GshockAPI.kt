@@ -355,30 +355,42 @@ class GShockAPI(private val context: Context) {
         ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
     }
 
-    suspend fun getAlarms(): AlarmsModel {
-        var alarmModel = AlarmsModel
-        alarmModel.clear()
+    suspend fun getAlarms(): ArrayList<Alarm> {
+        var alarms = ArrayList<Alarm>()
+
+        fun fromJson(jsonStr: String) {
+            val gson = Gson()
+            val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
+            alarms.addAll(alarmArr)
+        }
 
         sendMessage("{ action: 'GET_ALARMS'}")
 
-        var deferredResult = CompletableDeferred<AlarmsModel>()
+        var deferredResult = CompletableDeferred<ArrayList<Alarm>>()
         resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
 
         subscribe("ALARMS") {
-            alarmModel.fromJson(it)
-            if (alarmModel.alarms.size > 1) {
-                resultQueue.dequeue()?.complete(alarmModel)
+            fromJson(it)
+            if (alarms.size > 1) {
+                resultQueue.dequeue()?.complete(alarms)
             }
         }
         return deferredResult.await()
     }
 
-    fun setAlarms(alarmModel: AlarmsModel) {
-        if (alarmModel.alarms.isEmpty()) {
+    fun setAlarms(alarms: ArrayList<Alarm>) {
+        if (alarms.isEmpty()) {
             Timber.d("Alarm model not initialised! Cannot set alarm")
             return
         }
-        sendMessage("{action: \"SET_ALARMS\", value: ${alarmModel.toJson()} }")
+
+        @Synchronized
+        fun toJson(): String {
+            val gson = Gson()
+            return gson.toJson(alarms)
+        }
+
+        sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

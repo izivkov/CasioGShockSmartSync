@@ -13,7 +13,6 @@ import android.view.View
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gshockapi.AlarmsModel
 
 class SendAlarmsToWatchButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -28,7 +27,7 @@ class SendAlarmsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    api().setAlarms(AlarmsModel)
+                    api().setAlarms(AlarmsModel.alarms)
                     Utils.snackBar(context, "Alarms Sent to Watch")
                 }
             }

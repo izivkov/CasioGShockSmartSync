@@ -15,12 +15,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gshockapi.AlarmsModel
+import org.avmedia.gshockapi.Alarm
 import timber.log.Timber
 import java.text.ParseException
 import java.util.Date
 
-class AlarmAdapter(private val alarms: ArrayList<AlarmsModel.Alarm>) :
+class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
     RecyclerView.Adapter<AlarmAdapter.ViewHolder>() {
 
     // Provide a direct reference to each of the views within a data item
@@ -42,7 +42,7 @@ class AlarmAdapter(private val alarms: ArrayList<AlarmsModel.Alarm>) :
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...alarms.size: ${alarms.size}")
-        val alarm: AlarmsModel.Alarm = alarms[position]
+        val alarm: Alarm = alarms[position]
         val timeView = viewHolder.timeView
         val alarmEnabled = viewHolder.alarmEnabled
         try {
