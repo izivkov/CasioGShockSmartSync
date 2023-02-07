@@ -13,7 +13,6 @@ import android.view.View
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gshockapi.EventsModel
 
 class SendEventsToWatchButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -28,7 +27,7 @@ class SendEventsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    api().setEvents(EventsModel)
+                    api().setEvents(EventsModel.events)
                     Utils.snackBar(context, "Events Sent to Watch")
 
                 }

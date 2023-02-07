@@ -11,9 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import org.avmedia.gShockPhoneSync.MainActivity
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gshockapi.EventsModel
 import org.avmedia.gshockapi.utils.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
@@ -28,7 +25,7 @@ class EventList @JvmOverloads constructor(
 
         var eventsModel = EventsModel
         eventsModel.clear()
-        eventsModel.events.addAll(api().getEventsFromCalendar(context))
+        eventsModel.events.addAll(CalenderEvents.getEventsFromCalendar(context))
 
         listenForUpdateRequest()
     }

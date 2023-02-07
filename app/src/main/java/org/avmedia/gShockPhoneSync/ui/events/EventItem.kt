@@ -9,7 +9,7 @@ package org.avmedia.gShockPhoneSync.ui.events
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.TextView
-import org.avmedia.gshockapi.EventsModel
+import org.avmedia.gshockapi.Event
 import kotlin.reflect.KFunction
 
 class EventItem @JvmOverloads constructor(
@@ -17,12 +17,12 @@ class EventItem @JvmOverloads constructor(
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
     private lateinit var onDataChanged: KFunction<Unit>
-    private lateinit var event: EventsModel.Event
+    private lateinit var event: Event
     private lateinit var eventTitle: TextView
 
     init {}
 
-    fun setEventData(event: EventsModel.Event) {
+    fun setEventData(event: Event) {
         this.event = event
     }
 

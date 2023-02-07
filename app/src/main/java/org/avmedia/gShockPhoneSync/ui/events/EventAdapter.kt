@@ -16,11 +16,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gshockapi.EventsModel
+import org.avmedia.gshockapi.Event
 import timber.log.Timber
 import java.text.ParseException
 
-class EventAdapter(private val events: ArrayList<EventsModel.Event>) :
+class EventAdapter(private val events: ArrayList<Event>) :
     RecyclerView.Adapter<EventAdapter.ViewHolder>() {
 
     // Provide a direct reference to each of the views within a data item
@@ -44,7 +44,7 @@ class EventAdapter(private val events: ArrayList<EventsModel.Event>) :
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...events.size: ${events.size}")
-        val event: EventsModel.Event = events[position]
+        val event: Event = events[position]
         try {
             viewHolder.titleView.text = event.title
             if (event.incompatible) {

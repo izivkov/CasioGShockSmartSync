@@ -394,9 +394,9 @@ class GShockAPI(private val context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun getEventsFromWatch(): ArrayList<EventsModel.Event> {
+    suspend fun getEventsFromWatch(): ArrayList<Event> {
 
-        val events = ArrayList<EventsModel.Event>()
+        val events = ArrayList<Event>()
 
         events.add(getEventFromWatch(1))
         events.add(getEventFromWatch(2))
@@ -408,11 +408,11 @@ class GShockAPI(private val context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun getEventFromWatch(eventNumber: Int): EventsModel.Event {
+    suspend fun getEventFromWatch(eventNumber: Int): Event {
         request("30${eventNumber}") // reminder title
         request("31${eventNumber}") // reminder time
 
-        var deferredResult = CompletableDeferred<EventsModel.Event>()
+        var deferredResult = CompletableDeferred<Event>()
         resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
 
         var title = ""
@@ -424,7 +424,7 @@ class GShockAPI(private val context: Context) {
                 }
                 "time" -> {
                     reminderJson.put("title", title)
-                    val event = EventsModel.createEvent(reminderJson)
+                    val event = Event(reminderJson)
                     resultQueue.dequeue()?.complete(event)
                 }
             }
@@ -432,18 +432,25 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun getEventsFromCalendar(context: Context): ArrayList<EventsModel.Event> {
-        return CalenderEvents.getDataFromEventTable(context)
-    }
+    fun setEvents(events: ArrayList<Event>) {
 
-    fun setEvents(eventModel: EventsModel) {
-
-        if (eventModel.isEmpty()) {
+        if (events.isEmpty()) {
             Timber.d("Events model not initialised! Cannot set reminders")
             return
         }
-        sendMessage("{action: \"SET_REMINDERS\", value: ${eventModel.getSelectedEvents()} }")
+
+        @Synchronized
+        fun toJson(events: ArrayList<Event>): String {
+            val gson = Gson()
+            return gson.toJson(events)
+        }
+
+        fun getSelectedEvents(events: ArrayList<Event>): String {
+            val selectedEvents = events.filter { it.selected } as ArrayList<Event>
+            return toJson(selectedEvents)
+        }
+
+        sendMessage("{action: \"SET_REMINDERS\", value: ${getSelectedEvents(events)} }")
     }
 
     private fun subscribe(subject: String, onDataReceived: (String) -> Unit): Unit {

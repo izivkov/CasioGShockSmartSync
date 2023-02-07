@@ -7,8 +7,9 @@ import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
+import org.avmedia.gShockPhoneSync.ui.events.CalenderEvents
 import org.avmedia.gshockapi.Alarm
-import org.avmedia.gshockapi.EventsModel
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.casio.SettingsSimpleModel
 
@@ -82,11 +83,13 @@ class ApiTest {
         var eventsModel = EventsModel
         eventsModel.clear()
 
-        // eventsModel.events.addAll(api().getEventsFromCalendar(this@MainActivity))
         eventsModel.events.addAll(api().getEventsFromWatch())
+        println("Event model from Watch: $eventsModel")
 
-        // api().setEvents(eventsModel)
-        println("Event model: $eventsModel")
+        eventsModel.events.addAll(CalenderEvents.getEventsFromCalendar(MainActivity.applicationContext()))
+        println("Event model from Google Calendar: $eventsModel")
+
+        api().setEvents(CalenderEvents.getEventsFromCalendar(MainActivity.applicationContext()))
     }
 
     private suspend fun handleSettings() {

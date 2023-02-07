@@ -14,13 +14,11 @@ import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.*
-import org.avmedia.gshockapi.EventsModel
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 import java.io.File
@@ -82,7 +80,7 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             // sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
-            api().setEvents(EventsModel)
+            api().setEvents(EventsModel.events)
             Utils.snackBar(context, "Events Sent to Watch")
         }
 

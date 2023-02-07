@@ -6,16 +6,19 @@
 
 package org.avmedia.gShockPhoneSync.ui.events
 
+import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.Weekday
 import com.philjay.WeekdayNum
-import org.avmedia.gshockapi.EventsModel
+import org.avmedia.gshockapi.EventDate
+import org.avmedia.gshockapi.RepeatPeriod
 import timber.log.Timber
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.util.*
 import kotlin.collections.ArrayList
 
 object RRuleValues {
@@ -23,12 +26,12 @@ object RRuleValues {
         var localEndDate: LocalDate? = null,
         var incompatible: Boolean = false,
         var daysOfWeek: ArrayList<DayOfWeek>? = null,
-        var repeatPeriod: EventsModel.RepeatPeriod = EventsModel.RepeatPeriod.NEVER
+        var repeatPeriod: RepeatPeriod = RepeatPeriod.NEVER
     )
 
     fun getValues(
         rrule: String?,
-        startDate: EventsModel.EventDate,
+        startDate: EventDate,
         zone: ZoneId
     ): Values {
         val rruleValues = Values()
@@ -113,7 +116,7 @@ object RRuleValues {
                 }
 
                 rruleValues.repeatPeriod = toEventRepeatPeriod(rruleObjVal.freq)
-                if (rruleValues.repeatPeriod == EventsModel.RepeatPeriod.WEEKLY) {
+                if (rruleValues.repeatPeriod == RepeatPeriod.WEEKLY) {
                     val weekDays = rruleObjVal.byDay
                     rruleValues.daysOfWeek = createDaysOfWeek(weekDays)
                 }
@@ -174,13 +177,13 @@ object RRuleValues {
         return true
     }
 
-    private fun toEventRepeatPeriod(freq: Frequency): EventsModel.RepeatPeriod {
+    private fun toEventRepeatPeriod(freq: Frequency): RepeatPeriod {
         return when (freq) {
-            Frequency.Monthly -> EventsModel.RepeatPeriod.MONTHLY
-            Frequency.Weekly -> EventsModel.RepeatPeriod.WEEKLY
-            Frequency.Yearly -> EventsModel.RepeatPeriod.YEARLY
-            Frequency.Daily -> EventsModel.RepeatPeriod.DAILY
-            else -> EventsModel.RepeatPeriod.NEVER
+            Frequency.Monthly -> RepeatPeriod.MONTHLY
+            Frequency.Weekly -> RepeatPeriod.WEEKLY
+            Frequency.Yearly -> RepeatPeriod.YEARLY
+            Frequency.Daily -> RepeatPeriod.DAILY
+            else -> RepeatPeriod.NEVER
         }
     }
 

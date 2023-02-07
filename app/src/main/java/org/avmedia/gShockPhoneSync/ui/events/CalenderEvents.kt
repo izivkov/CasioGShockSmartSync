@@ -4,7 +4,7 @@
  * Last modified 2022-04-03, 6:13 p.m.
  */
 
-package org.avmedia.gshockapi
+package org.avmedia.gShockPhoneSync.ui.events
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
@@ -14,24 +14,25 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import android.os.Looper
 import android.provider.CalendarContract
 import androidx.annotation.RequiresApi
+import org.avmedia.gshockapi.Event
+import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.utils.ProgressEvents
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.Calendar
+import java.util.*
 
 object CalenderEvents {
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getDataFromEventTable(context: Context): ArrayList<EventsModel.Event> {
+    fun getEventsFromCalendar(context: Context): ArrayList<Event> {
         return getEvents(context)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Range")
-    private fun getEvents(context: Context): ArrayList<EventsModel.Event> {
-        val events: ArrayList<EventsModel.Event> = ArrayList()
+    private fun getEvents(context: Context): ArrayList<Event> {
+        val events: ArrayList<Event> = ArrayList()
         val cur: Cursor?
         val cr: ContentResolver = context.contentResolver
 
@@ -66,7 +67,8 @@ object CalenderEvents {
             mProjection,
             selection,
             selectionArgs,
-            null)
+            null
+        )
 
         CalendarObserver.register(cr, uri)
 
@@ -74,7 +76,8 @@ object CalenderEvents {
             var title: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
             title = if (title.isNullOrBlank()) "(No title)" else title
 
-            val dateStart: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
+            val dateStart: String? =
+                cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
             val rrule: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
             val allDay: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
 
@@ -90,7 +93,7 @@ object CalenderEvents {
                 RRuleValues.getValues(rrule, startDate, zone)
 
             if (localEndDate != null) {
-                endDate = EventsModel.EventDate(
+                endDate = EventDate(
                     localEndDate.year,
                     localEndDate.month,
                     localEndDate.dayOfMonth
@@ -102,19 +105,20 @@ object CalenderEvents {
                 continue // do not add expired events
             }
 
-            val selected = events.size < EventsModel.MAX_REMINDERS
-                events.add(
-                    EventsModel.Event(
-                        title,
-                        startDate,
-                        endDate,
-                        repeatPeriod,
-                        daysOfWeek,
-                        true,
-                        incompatible,
-                        selected
-                    )
+            val selected =
+                events.size < EventsModel.MAX_REMINDERS
+            events.add(
+                Event(
+                    title,
+                    startDate,
+                    endDate,
+                    repeatPeriod,
+                    daysOfWeek,
+                    true,
+                    incompatible,
+                    selected
                 )
+            )
         }
         cur.close()
 
@@ -134,7 +138,7 @@ object CalenderEvents {
             }
         }
 
-        fun register (cr: ContentResolver, uri: Uri) {
+        fun register(cr: ContentResolver, uri: Uri) {
             if (!registered) {
                 cr.registerContentObserver(uri, true, calendarObserver)
                 registered = true
