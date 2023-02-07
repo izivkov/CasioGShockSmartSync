@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.util.*
 
-class Event (
+class Event(
     var title: String,
     private var startDate: EventDate?,
     var endDate: EventDate?,
@@ -31,7 +31,8 @@ class Event (
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    constructor(json:JSONObject) : this("", null, null, RepeatPeriod.NEVER, null, false, false, false
+    constructor(json: JSONObject) : this(
+        "", null, null, RepeatPeriod.NEVER, null, false, false, false
     ) {
         val event = createEvent(json)
 

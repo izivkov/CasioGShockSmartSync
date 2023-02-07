@@ -146,13 +146,13 @@ class Casio5600Watch : BluetoothWatch() {
             }
             CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code -> {
                 val reminderJson = JSONObject()
-                val startOfData = data+2 // skip command code 0x31 01
-                reminderJson.put ("REMINDERS", ReminderDecoder.reminderTimeToJson(startOfData))
+                val startOfData = data + 2 // skip command code 0x31 01
+                reminderJson.put("REMINDERS", ReminderDecoder.reminderTimeToJson(startOfData))
                 return reminderJson
             }
             CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code -> {
                 val reminderJson = JSONObject()
-                reminderJson.put ("REMINDERS", ReminderDecoder.reminderTitleToJson(data))
+                reminderJson.put("REMINDERS", ReminderDecoder.reminderTitleToJson(data))
                 return reminderJson
             }
             CasioConstants.CHARACTERISTICS.CASIO_TIMER.code -> {

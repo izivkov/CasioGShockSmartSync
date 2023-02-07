@@ -6,11 +6,6 @@
 
 package org.avmedia.gshockapi.casio
 
-import org.avmedia.gshockapi.utils.Utils
-import org.json.JSONArray
-import org.json.JSONObject
-import timber.log.Timber
-
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.ENABLED_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.FRIDAY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.MONDAY_MASK
@@ -22,6 +17,10 @@ import org.avmedia.gshockapi.casio.ReminderMasks.Companion.TUESDAY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.WEDNESDAY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.WEEKLY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.YEARLY_MASK
+import org.avmedia.gshockapi.utils.Utils
+import org.json.JSONArray
+import org.json.JSONObject
+import timber.log.Timber
 
 object ReminderDecoder {
     /* Reminders
@@ -38,7 +37,7 @@ object ReminderDecoder {
             return JSONObject("{\"end\": \"\"}")
         }
 
-        val reminderAll:IntArray = Utils.toIntArray(reminderStr).toIntArray()
+        val reminderAll: IntArray = Utils.toIntArray(reminderStr).toIntArray()
 
         // Remove the first 2 chars:
         // 0x31 05 <--- 00 23 02 21 23 02 21 00 00
@@ -54,7 +53,10 @@ object ReminderDecoder {
 
         reminderJson.put("startDate", timeDetailMap["startDate"])
         reminderJson.put("endDate", timeDetailMap["endDate"])
-        reminderJson.put("daysOfWeek", convertArrayListToJSONArray(timeDetailMap["daysOfWeek"] as ArrayList<String>))
+        reminderJson.put(
+            "daysOfWeek",
+            convertArrayListToJSONArray(timeDetailMap["daysOfWeek"] as ArrayList<String>)
+        )
 
         return JSONObject("{\"time\": $reminderJson}")
     }

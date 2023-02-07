@@ -5,6 +5,7 @@
  */
 
 package org.avmedia.gShockPhoneSync.utils
+
 import android.content.Context
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import java.util.*
@@ -39,7 +40,7 @@ object LocalDataStorage {
         editor.apply()
     }
 
-    fun getTimezoneForFutureUse (context: Context) :String {
+    fun getTimezoneForFutureUse(context: Context): String {
         var timeZone = ""
         val timeZoneChanged: Boolean =
             get("timezone", "", context) != TimeZone.getDefault().id
@@ -51,19 +52,19 @@ object LocalDataStorage {
         return timeZone
     }
 
-    private fun getBoolean (key:String): Boolean {
+    private fun getBoolean(key: String): Boolean {
         return get(key, "false", applicationContext()) == "true"
     }
 
-    private fun putBoolean (key:String, value:Boolean) {
+    private fun putBoolean(key: String, value: Boolean) {
         put(key, value.toString(), applicationContext())
     }
 
-    public fun getTimeAdjustmentNotification () :Boolean {
+    fun getTimeAdjustmentNotification(): Boolean {
         return getBoolean("timeAdjustmentNotification")
     }
 
-    public fun setTimeAdjustmentNotification (value: Boolean) {
-        putBoolean ("timeAdjustmentNotification", value)
+    fun setTimeAdjustmentNotification(value: Boolean) {
+        putBoolean("timeAdjustmentNotification", value)
     }
 }

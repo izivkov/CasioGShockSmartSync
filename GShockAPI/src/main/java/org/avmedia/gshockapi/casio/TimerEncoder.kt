@@ -25,10 +25,10 @@ object TimerEncoder {
         val seconds = minutesAndSeconds % 60
 
         val arr = ByteArray(7)
-        arr [0] = 0x18
-        arr [1] = hours.toByte()
-        arr [2] = minutes.toByte()
-        arr [3] = seconds.toByte()
+        arr[0] = 0x18
+        arr[1] = hours.toByte()
+        arr[2] = minutes.toByte()
+        arr[3] = seconds.toByte()
 
         return arr
     }

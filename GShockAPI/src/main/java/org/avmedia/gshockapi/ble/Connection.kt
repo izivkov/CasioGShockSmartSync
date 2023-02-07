@@ -7,13 +7,7 @@
 package org.avmedia.gshockapi.ble
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattDescriptor
-import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothProfile
+import android.bluetooth.*
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -22,7 +16,7 @@ import org.avmedia.gshockapi.casio.WatchFactory
 import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -172,7 +166,10 @@ object Connection : IConnection {
         )
     }
 
-    private fun enableNotifications(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic) {
+    private fun enableNotifications(
+        device: BluetoothDevice,
+        characteristic: BluetoothGattCharacteristic
+    ) {
         if (device.isConnected() &&
             (characteristic.isIndicatable() || characteristic.isNotifiable())
         ) {
@@ -298,7 +295,7 @@ object Connection : IConnection {
             }
             is DescriptorRead -> with(operation) {
                 gatt.findDescriptor(descriptorUuid)?.let { descriptor ->
-                    Timber.d ("==============> descriptor: $descriptor")
+                    Timber.d("==============> descriptor: $descriptor")
                     gatt.readDescriptor(descriptor)
                 } ?: this@Connection.run {
                     Timber.e("Cannot find $descriptorUuid to read from")
@@ -565,7 +562,7 @@ object Connection : IConnection {
             val charUuid = characteristic.uuid
             val notificationsEnabled =
                 value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) ||
-                    value.contentEquals(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)
+                        value.contentEquals(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)
             val notificationsDisabled =
                 value.contentEquals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)
 

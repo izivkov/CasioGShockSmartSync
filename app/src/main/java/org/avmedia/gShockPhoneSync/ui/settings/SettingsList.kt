@@ -5,7 +5,6 @@
  */
 package org.avmedia.gShockPhoneSync.ui.settings
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,7 +46,7 @@ class SettingsList @JvmOverloads constructor(
         updateUI()
     }
 
-    private fun updateUI () {
+    private fun updateUI() {
         context.runOnUiThread {
             adapter?.notifyDataSetChanged()
             ProgressEvents.onNext(ProgressEvents.Events.SettingsLoaded)
@@ -61,7 +60,7 @@ class SettingsList @JvmOverloads constructor(
                 when (it) {
                     // Somebody has made a change to the model...need to update the UI
                     ProgressEvents.Events.NeedToUpdateUI -> {
-                        updateUI ()
+                        updateUI()
                     }
                 }
             }

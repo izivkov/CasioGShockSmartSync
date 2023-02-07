@@ -184,12 +184,18 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             val selectedItem = parent.getItemAtPosition(position)
                 .toString()
             when (selectedItem) {
-                "English" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
-                "Spanish" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
-                "French" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
-                "German" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
-                "Italian" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
-                "Russian" -> setting.dayOfWeekLanguage = SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
+                "English" -> setting.dayOfWeekLanguage =
+                    SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
+                "Spanish" -> setting.dayOfWeekLanguage =
+                    SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
+                "French" -> setting.dayOfWeekLanguage =
+                    SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
+                "German" -> setting.dayOfWeekLanguage =
+                    SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
+                "Italian" -> setting.dayOfWeekLanguage =
+                    SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
+                "Russian" -> setting.dayOfWeekLanguage =
+                    SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
             }
         }
 
@@ -221,7 +227,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     private fun configureSound(vhOperationSound: ViewHolderOperationSound, position: Int) {
-        val setting: SettingsModel.OperationSound = settings[position] as SettingsModel.OperationSound
+        val setting: SettingsModel.OperationSound =
+            settings[position] as SettingsModel.OperationSound
         vhOperationSound.soundOnOff.isChecked = setting.sound == true
 
         vhOperationSound.soundOnOff.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
@@ -233,7 +240,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         vhPowerSavingMode: ViewHolderPowerSavingMode,
         position: Int
     ) {
-        val setting: SettingsModel.PowerSavingMode = settings[position] as SettingsModel.PowerSavingMode
+        val setting: SettingsModel.PowerSavingMode =
+            settings[position] as SettingsModel.PowerSavingMode
         vhPowerSavingMode.powerSavingMode.isChecked = setting.powerSavingMode == true
 
         vhPowerSavingMode.powerSavingMode.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
@@ -245,9 +253,11 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         vhTimeAdjustment: ViewHolderTimeAdjustment,
         position: Int
     ) {
-        val setting: SettingsModel.TimeAdjustment = settings[position] as SettingsModel.TimeAdjustment
+        val setting: SettingsModel.TimeAdjustment =
+            settings[position] as SettingsModel.TimeAdjustment
         vhTimeAdjustment.timeAdjustment.isChecked = setting.timeAdjustment == true
-        vhTimeAdjustment.timeAdjustmentNotification.isChecked = setting.timeAdjustmentNotifications == true
+        vhTimeAdjustment.timeAdjustmentNotification.isChecked =
+            setting.timeAdjustmentNotifications == true
 
         vhTimeAdjustment.timeAdjustment.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustment = isChecked

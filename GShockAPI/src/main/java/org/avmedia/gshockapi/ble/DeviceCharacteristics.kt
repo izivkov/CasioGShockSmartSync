@@ -15,7 +15,7 @@ object DeviceCharacteristics {
 
     lateinit var device: BluetoothDevice
 
-    val handlesToCharacteristicsMap by lazy (::initHandlesMap)
+    val handlesToCharacteristicsMap by lazy(::initHandlesMap)
 
     private val characteristicMap by lazy {
         characteristics.associateBy { it.uuid }.toMap()

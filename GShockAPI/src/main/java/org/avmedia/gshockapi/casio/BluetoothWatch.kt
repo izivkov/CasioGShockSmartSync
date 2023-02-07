@@ -22,7 +22,7 @@ sealed class BluetoothWatch {
         UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, NO_BUTTON, INVALID
     }
 
-    enum class DTS_STATE(val state:Int) {ZERO(0), TWO(2), FOUR(4)}
+    enum class DTS_STATE(val state: Int) { ZERO(0), TWO(2), FOUR(4) }
 
     open fun init() {
         CasioIO.init()
@@ -53,7 +53,7 @@ sealed class BluetoothWatch {
         val hexArr = parts.map { str ->
             try {
                 str.toInt(16).toByte()
-            } catch (e:java.lang.NumberFormatException) {
+            } catch (e: java.lang.NumberFormatException) {
                 str.toInt(16).toByte()
             }
         }

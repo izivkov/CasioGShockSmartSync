@@ -10,7 +10,7 @@ import org.avmedia.gshockapi.utils.Utils
 
 object BatteryLevelDecoder {
 
-    fun decodeValue (data: String): String {
+    fun decodeValue(data: String): String {
         var percent = 0
 
         var cmdInts = Utils.toIntArray(data)

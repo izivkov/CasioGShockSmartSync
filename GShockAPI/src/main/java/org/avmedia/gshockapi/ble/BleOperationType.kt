@@ -8,7 +8,7 @@ package org.avmedia.gshockapi.ble
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import java.util.UUID
+import java.util.*
 
 /** Abstract sealed class representing a type of BLE operation */
 sealed class BleOperationType {

@@ -66,7 +66,7 @@ class GShockAPI(private val context: Context) {
         return ret
     }
 
-    fun isConnected (): Boolean {
+    fun isConnected(): Boolean {
         return Connection.isConnected()
     }
 

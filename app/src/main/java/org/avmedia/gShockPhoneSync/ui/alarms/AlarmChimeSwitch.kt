@@ -19,7 +19,7 @@ class AlarmChimeSwitch @JvmOverloads constructor(
     init {
         createAppEventsSubscription()
 
-        setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        setOnCheckedChangeListener(OnCheckedChangeListener { _, isChecked ->
             if (!AlarmsModel.isEmpty()) {
                 AlarmsModel.alarms[0].hasHourlyChime = isChecked
             }

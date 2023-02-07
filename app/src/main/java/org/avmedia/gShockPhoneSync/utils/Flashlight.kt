@@ -19,9 +19,6 @@ object Flashlight {
     private lateinit var cameraManager: CameraManager
 
     private var torchCallback: TorchCallback = object : TorchCallback() {
-        override fun onTorchModeUnavailable(cameraId: String) {
-            super.onTorchModeUnavailable(cameraId)
-        }
 
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
             super.onTorchModeChanged(cameraId, enabled)
@@ -31,25 +28,25 @@ object Flashlight {
         }
     }
 
-    private fun turnOnOff (context:Context, state: Boolean) {
+    private fun turnOnOff(context: Context, state: Boolean) {
         if (cameraManager.cameraIdList.isEmpty()) {
             Timber.d("Flashlight not available")
             Utils.snackBar(context, "Flashlight not available")
             return
         }
 
-        cameraId = cameraManager!!.cameraIdList[0] // 0 is for back camera and 1 is for front camera
-        cameraManager?.setTorchMode(cameraId, state)
+        cameraId = cameraManager.cameraIdList[0] // 0 is for back camera and 1 is for front camera
+        cameraManager.setTorchMode(cameraId, state)
     }
 
-    fun toggle (context: Context) {
+    fun toggle(context: Context) {
         cameraManager = (context.getSystemService() as CameraManager?)!!
         if (cameraManager == null) {
             Utils.snackBar(context, "Flashlight not available")
             return
         }
 
-        cameraManager?.registerTorchCallback(torchCallback, null)
+        cameraManager.registerTorchCallback(torchCallback, null)
         turnOnOff(context, !currentState)
     }
 }

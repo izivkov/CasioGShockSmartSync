@@ -14,13 +14,16 @@ class ResultQueue<T> {
             queue.removeAt(0)
         }
     }
+
     fun peek(): T? {
         return queue.firstOrNull()
     }
+
     fun isEmpty(): Boolean {
         return queue.isEmpty()
     }
-    fun size():Int {
+
+    fun size(): Int {
         return queue.size
     }
 

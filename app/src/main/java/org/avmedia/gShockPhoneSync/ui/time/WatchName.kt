@@ -11,7 +11,6 @@ import android.util.AttributeSet
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(

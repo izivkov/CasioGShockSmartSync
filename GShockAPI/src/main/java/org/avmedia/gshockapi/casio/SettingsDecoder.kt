@@ -67,30 +67,54 @@ object SettingsDecoder {
     }
 
     private fun createJsonSettings(settingString: String): JSONObject {
-        val MASK_24_HOURS =         0b00000001
-        val MASK_BUTTON_TONE_OFF =  0b00000010
-        val MASK_LIGHT_OFF =        0b00000100
-        val POWER_SAVING_MODE =     0b00010000
+        val MASK_24_HOURS = 0b00000001
+        val MASK_BUTTON_TONE_OFF = 0b00000010
+        val MASK_LIGHT_OFF = 0b00000100
+        val POWER_SAVING_MODE = 0b00010000
 
         val settings = SettingsSimpleModel()
 
         val settingArray = Utils.toIntArray(settingString)
 
-        if (settingArray[1] and MASK_24_HOURS != 0) { settings.timeFormat = "24h" } else { settings.timeFormat = "12h" }
+        if (settingArray[1] and MASK_24_HOURS != 0) {
+            settings.timeFormat = "24h"
+        } else {
+            settings.timeFormat = "12h"
+        }
         settings.buttonTone = settingArray[1] and MASK_BUTTON_TONE_OFF == 0
         settings.autoLight = settingArray[1] and MASK_LIGHT_OFF == 0
         settings.powerSavingMode = settingArray[1] and POWER_SAVING_MODE == 0
 
-        if (settingArray[4] == 1) { settings.dateFormat = "DD:MM" } else { settings.dateFormat = "MM:DD" }
+        if (settingArray[4] == 1) {
+            settings.dateFormat = "DD:MM"
+        } else {
+            settings.dateFormat = "MM:DD"
+        }
 
-        if (settingArray[5] == 0) { settings.language = "English" }
-        if (settingArray[5] == 1) { settings.language = "Spanish" }
-        if (settingArray[5] == 2) { settings.language = "French" }
-        if (settingArray[5] == 3) { settings.language = "German" }
-        if (settingArray[5] == 4) { settings.language = "Italian" }
-        if (settingArray[5] == 5) { settings.language = "Russian" }
+        if (settingArray[5] == 0) {
+            settings.language = "English"
+        }
+        if (settingArray[5] == 1) {
+            settings.language = "Spanish"
+        }
+        if (settingArray[5] == 2) {
+            settings.language = "French"
+        }
+        if (settingArray[5] == 3) {
+            settings.language = "German"
+        }
+        if (settingArray[5] == 4) {
+            settings.language = "Italian"
+        }
+        if (settingArray[5] == 5) {
+            settings.language = "Russian"
+        }
 
-        if (settingArray[2] == 1) { settings.lightDuration = "4s" } else { settings.lightDuration = "2s" }
+        if (settingArray[2] == 1) {
+            settings.lightDuration = "4s"
+        } else {
+            settings.lightDuration = "2s"
+        }
 
         return JSONObject(Gson().toJson(settings))
     }
@@ -105,7 +129,10 @@ object SettingsDecoder {
 
     fun toJsonTimeAdjustment(settings: SettingsSimpleModel): JSONObject {
         var jsonResponse = JSONObject()
-        return jsonResponse.put("TIME_ADJUSTMENT", "{\"timeAdjustment\": ${settings.timeAdjustment} }")
+        return jsonResponse.put(
+            "TIME_ADJUSTMENT",
+            "{\"timeAdjustment\": ${settings.timeAdjustment} }"
+        )
     }
 
     object CasioIsAutoTimeOriginalValue {

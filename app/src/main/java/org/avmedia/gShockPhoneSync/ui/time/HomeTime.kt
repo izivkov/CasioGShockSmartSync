@@ -11,11 +11,9 @@ import android.util.AttributeSet
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.runBlocking
-import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import org.avmedia.gshockapi.utils.ProgressEvents
-import org.avmedia.gshockapi.utils.Utils
 import timber.log.Timber
 
 open class HomeTime @JvmOverloads constructor(

@@ -10,13 +10,9 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gshockapi.utils.ProgressEvents
-import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 
 
@@ -93,7 +89,9 @@ class TimerTimeView @JvmOverloads constructor(
                             }
 
                             Timber.i("-----> Setting timer from Dialog Box...")
-                            text = "${"%02d".format(hours)}:${"%02d".format(minutes)}:${"%02d".format(seconds)}"
+                            text = "${"%02d".format(hours)}:${"%02d".format(minutes)}:${
+                                "%02d".format(seconds)
+                            }"
                             TimerModel.set(text.toString())
                         }
 

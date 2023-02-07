@@ -6,15 +6,6 @@
 
 package org.avmedia.gshockapi.casio
 
-import org.avmedia.gshockapi.utils.Utils
-import org.avmedia.gshockapi.utils.Utils.getBooleanSafe
-import org.avmedia.gshockapi.utils.Utils.getJSONArraySafe
-import org.avmedia.gshockapi.utils.Utils.getJSONObjectSafe
-import org.avmedia.gshockapi.utils.Utils.getStringSafe
-import org.json.JSONArray
-import org.json.JSONObject
-import timber.log.Timber
-
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.ENABLED_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.FRIDAY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.MONDAY_MASK
@@ -26,6 +17,14 @@ import org.avmedia.gshockapi.casio.ReminderMasks.Companion.TUESDAY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.WEDNESDAY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.WEEKLY_MASK
 import org.avmedia.gshockapi.casio.ReminderMasks.Companion.YEARLY_MASK
+import org.avmedia.gshockapi.utils.Utils
+import org.avmedia.gshockapi.utils.Utils.getBooleanSafe
+import org.avmedia.gshockapi.utils.Utils.getJSONArraySafe
+import org.avmedia.gshockapi.utils.Utils.getJSONObjectSafe
+import org.avmedia.gshockapi.utils.Utils.getStringSafe
+import org.json.JSONArray
+import org.json.JSONObject
+import timber.log.Timber
 
 object ReminderEncoder {
     /* Reminders

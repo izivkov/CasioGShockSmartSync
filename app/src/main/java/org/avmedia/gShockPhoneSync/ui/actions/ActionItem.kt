@@ -8,7 +8,6 @@ package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import kotlin.reflect.KFunction
 
 class ActionItem @JvmOverloads constructor(

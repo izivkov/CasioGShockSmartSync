@@ -7,21 +7,13 @@
 package org.avmedia.gShockPhoneSync.utils
 
 import android.app.Activity
-import android.app.ActivityManager
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.Color.BLACK
 import android.view.View
-import android.widget.Toast
 import androidx.core.content.ContextCompat
-import com.google.android.material.internal.ContextUtils.getActivity
 import com.google.android.material.snackbar.Snackbar
 import org.avmedia.gShockPhoneSync.R
 import org.jetbrains.anko.contentView
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.*
 
 object Utils {
 

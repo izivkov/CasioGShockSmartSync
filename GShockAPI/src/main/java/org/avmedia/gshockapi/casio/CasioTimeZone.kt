@@ -1,6 +1,5 @@
 package org.avmedia.gshockapi.casio
 
-import org.avmedia.gshockapi.casio.CasioIO.writeCmd
 import org.avmedia.gshockapi.utils.Utils
 
 object CasioTimeZone {
@@ -21,7 +20,7 @@ object CasioTimeZone {
         }
     }
 
-    fun setHomeTime(timeZone:String) {
+    fun setHomeTime(timeZone: String) {
         val city = TimeZoneHelper.parseCity(timeZone)
 
         var worldCity = WorldCity(city, 0)

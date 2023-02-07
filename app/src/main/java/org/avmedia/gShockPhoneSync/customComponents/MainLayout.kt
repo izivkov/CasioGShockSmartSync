@@ -16,7 +16,6 @@
 package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
-import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -24,9 +23,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
+
 class MainLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
@@ -35,6 +34,7 @@ class MainLayout @JvmOverloads constructor(
         hide()
         createAppEventsSubscription()
     }
+
     private fun createAppEventsSubscription(): Disposable =
         ProgressEvents.connectionEventFlowable
             .observeOn(AndroidSchedulers.mainThread())

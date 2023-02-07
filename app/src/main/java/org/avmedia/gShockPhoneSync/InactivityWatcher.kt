@@ -33,7 +33,10 @@ object InactivityWatcher {
 
         futureTask = scheduler.schedule({
             api().disconnect(context)
-            org.avmedia.gShockPhoneSync.utils.Utils.snackBar(context, "Disconnecting due to inactivity")
+            org.avmedia.gShockPhoneSync.utils.Utils.snackBar(
+                context,
+                "Disconnecting due to inactivity"
+            )
         }, TIMEOUT, TimeUnit.SECONDS)
     }
 }

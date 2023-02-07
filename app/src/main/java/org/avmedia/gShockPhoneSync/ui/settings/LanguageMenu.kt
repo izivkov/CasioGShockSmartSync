@@ -9,8 +9,6 @@ package org.avmedia.gShockPhoneSync.ui.settings
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.EditText
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -20,7 +18,7 @@ import timber.log.Timber
 
 class LanguageMenu @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) :  MaterialAutoCompleteTextView(context, attrs, defStyleAttr) {
+) : MaterialAutoCompleteTextView(context, attrs, defStyleAttr) {
 
     init {
         val items = listOf("English", "Spanish", "French", "German", "Italian", "Russian")

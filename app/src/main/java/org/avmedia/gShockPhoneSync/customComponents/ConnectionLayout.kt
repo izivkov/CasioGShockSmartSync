@@ -15,7 +15,6 @@ import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.utils.ProgressEvents
-import org.avmedia.gshockapi.utils.Utils
 import timber.log.Timber
 
 class ConnectionLayout @JvmOverloads constructor(

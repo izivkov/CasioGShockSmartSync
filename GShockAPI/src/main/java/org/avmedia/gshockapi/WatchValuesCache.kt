@@ -1,12 +1,11 @@
 package org.avmedia.gshockapi
 
-import timber.log.Timber
 import kotlin.reflect.KSuspendFunction1
 
 class WatchValuesCache {
     private val map = mutableMapOf<String, Any>()
 
-    suspend fun getCached (key:String, func: KSuspendFunction1<String, Any>): Any {
+    suspend fun getCached(key: String, func: KSuspendFunction1<String, Any>): Any {
         val cachedResult = get(key)
         if (cachedResult == null) {
             val funcResult = func(key)
@@ -17,11 +16,11 @@ class WatchValuesCache {
         return cachedResult
     }
 
-    fun put(key:String, value: Any) {
+    fun put(key: String, value: Any) {
         map[key] = value
     }
 
-    fun get(key:String): Any? {
+    fun get(key: String): Any? {
         return map[key]
     }
 

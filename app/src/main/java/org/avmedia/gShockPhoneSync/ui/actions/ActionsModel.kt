@@ -17,8 +17,8 @@ import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.utils.*
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
+import org.avmedia.gShockPhoneSync.utils.*
 import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 import java.io.File
@@ -120,7 +120,7 @@ object ActionsModel {
                     when (it) {
                         // For setting time, we need to wait until the watch has been initialised.
                         ProgressEvents.Events.WatchInitializationCompleted -> {
-                            runBlocking() {
+                            runBlocking {
                                 api().setTime(true)
                             }
                         }
@@ -218,6 +218,7 @@ object ActionsModel {
     enum class CAMERA_ORIENTATION(cameraOrientation: String) {
         FRONT("FRONT"), BACK("BACK");
     }
+
     class PhotoAction(
         override var title: String,
         override var enabled: Boolean,
@@ -226,6 +227,7 @@ object ActionsModel {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
         }
+
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
@@ -351,9 +353,11 @@ object ActionsModel {
             Utils.snackBar(context, "Could not run action ${action.title}. Reason: $e")
         }
     }
+
     fun runActions(context: Context) {
         runFilteredActions(context, actions.filter { it.enabled })
     }
+
     fun runActionsForAutoTimeSetting(context: Context) {
         runFilteredActions(context, actions.filter { it is SetTimeAction || it is SetEventsAction })
 
@@ -362,6 +366,7 @@ object ActionsModel {
             showTimeSyncNotification(context)
         }
     }
+
     private fun showTimeSyncNotification(context: Context) {
         val dateStr =
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
@@ -374,12 +379,12 @@ object ActionsModel {
         )
     }
 
-    private fun runFilteredActions(context: Context, filteredActions: List<ActionsModel.Action>) {
+    private fun runFilteredActions(context: Context, filteredActions: List<Action>) {
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
                     // Run in background for speed.
-                    runBlocking{
+                    runBlocking {
                         runIt(it, context)
                     }
                 } else {

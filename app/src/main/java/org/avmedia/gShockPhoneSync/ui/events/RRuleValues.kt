@@ -6,9 +6,6 @@
 
 package org.avmedia.gShockPhoneSync.ui.events
 
-import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.Weekday
@@ -19,7 +16,6 @@ import timber.log.Timber
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import kotlin.collections.ArrayList
 
 object RRuleValues {
     data class Values(
@@ -89,9 +85,14 @@ object RRuleValues {
                                 val weekDays = rruleObjVal.byDay
 
                                 rruleValues.localEndDate = calculateEndDate(
-                                    LocalDate.of(startDate.year!!, startDate.month!!, startDate.day!!),
+                                    LocalDate.of(
+                                        startDate.year!!,
+                                        startDate.month!!,
+                                        startDate.day!!
+                                    ),
                                     weekDays,
-                                    numberOfPeriods.toInt())
+                                    numberOfPeriods.toInt()
+                                )
                             }
                             Frequency.Monthly -> {
                                 rruleValues.localEndDate =
@@ -126,7 +127,11 @@ object RRuleValues {
         return rruleValues
     }
 
-    private fun calculateEndDate(startDate: LocalDate, daysOfWeek: ArrayList<WeekdayNum>, n: Int): LocalDate {
+    private fun calculateEndDate(
+        startDate: LocalDate,
+        daysOfWeek: ArrayList<WeekdayNum>,
+        n: Int
+    ): LocalDate {
         var endDate = startDate
 
         if (daysOfWeek == null || daysOfWeek.isEmpty()) {

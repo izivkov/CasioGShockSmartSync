@@ -5,11 +5,11 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import org.avmedia.gShockPhoneSync.ui.events.CalenderEvents
-import org.avmedia.gshockapi.Alarm
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.casio.SettingsSimpleModel
 

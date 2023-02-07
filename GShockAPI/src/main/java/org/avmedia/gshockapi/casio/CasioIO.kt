@@ -10,7 +10,7 @@ import org.avmedia.gshockapi.ble.Connection
 
 object CasioIO {
 
-    fun request(request:String) {
+    fun request(request: String) {
         writeCmd(0xC, request)
     }
 

@@ -6,14 +6,9 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gshockapi.utils.WatchDataEvents
-import org.jetbrains.anko.runOnUiThread
 
 abstract class CacheableSubscribableTextView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
-
-}
+) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr)

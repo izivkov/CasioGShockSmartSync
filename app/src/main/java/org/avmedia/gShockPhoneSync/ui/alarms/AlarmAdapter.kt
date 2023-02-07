@@ -18,7 +18,7 @@ import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.Alarm
 import timber.log.Timber
 import java.text.ParseException
-import java.util.Date
+import java.util.*
 
 class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
     RecyclerView.Adapter<AlarmAdapter.ViewHolder>() {

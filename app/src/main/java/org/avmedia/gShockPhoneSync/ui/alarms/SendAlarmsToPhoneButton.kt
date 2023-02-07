@@ -14,7 +14,7 @@ import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import java.util.Calendar
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 

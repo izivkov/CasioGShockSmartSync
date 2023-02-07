@@ -20,7 +20,7 @@ Handle: 0xe
 
 object TimerDecoder {
 
-    fun decodeValue (data: String):String {
+    fun decodeValue(data: String): String {
         val timerIntArray = Utils.toIntArray(data)
 
         val hours = timerIntArray[1]

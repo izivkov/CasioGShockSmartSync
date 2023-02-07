@@ -12,7 +12,6 @@ import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gShockPhoneSync.utils.Utils
 
 class SendTimerButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

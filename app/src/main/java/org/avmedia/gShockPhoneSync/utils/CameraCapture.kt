@@ -23,9 +23,9 @@ import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_16_9_VALUE
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_4_3_VALUE
-import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.jetbrains.anko.contentView
 import timber.log.Timber
 import java.nio.ByteBuffer
@@ -68,7 +68,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-            val rotation = viewBinding?.viewFinder?.display.rotation
+            val rotation = viewBinding.viewFinder.display.rotation
 
             val screenSize = getScreenSize(context as Activity)
             val screenAspectRatio = aspectRatio(screenSize.width, screenSize.height)

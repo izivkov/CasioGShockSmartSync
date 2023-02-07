@@ -8,11 +8,6 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
-import org.avmedia.gShockPhoneSync.MainActivity
 
 
 class TimerCardView @JvmOverloads constructor(
