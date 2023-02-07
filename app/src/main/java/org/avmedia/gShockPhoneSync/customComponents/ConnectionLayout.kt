@@ -23,7 +23,7 @@ class ConnectionLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (Utils.isDebugMode()) hide() else show()
+        show()
         createAppEventsSubscription()
     }
 

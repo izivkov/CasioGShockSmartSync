@@ -32,7 +32,7 @@ class MainLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (Utils.isDebugMode()) show() else hide()
+        hide()
         createAppEventsSubscription()
     }
     private fun createAppEventsSubscription(): Disposable =

@@ -62,10 +62,6 @@ class MainActivity : AppCompatActivity() {
         // val intent = Intent(this, ForegroundService::class.java)
         // this.startService(intent)
 
-        if (Utils.isDebugMode()) {
-            navController.navigate(R.id.navigation_home)
-        }
-
         // run()
         // ApiTest().run(this)
     }

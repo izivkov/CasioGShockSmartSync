@@ -347,6 +347,7 @@ class GShockAPI(private val context: Context) {
     }
 
     suspend fun init(context: Context) {
+        resultQueue.clear()
         getPressedButton()
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
         initializeForSettingTime()

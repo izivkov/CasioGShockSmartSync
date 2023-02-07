@@ -25,10 +25,6 @@ import java.util.*
 
 object Utils {
 
-    fun isDebugMode(): Boolean {
-        return false
-    }
-
     fun snackBar(view: View, message: String) {
 
         Snackbar.make(view, message, Snackbar.LENGTH_LONG)

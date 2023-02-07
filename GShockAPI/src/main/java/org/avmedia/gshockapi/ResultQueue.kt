@@ -23,4 +23,8 @@ class ResultQueue<T> {
     fun size():Int {
         return queue.size
     }
+
+    fun clear() {
+        queue.clear()
+    }
 }

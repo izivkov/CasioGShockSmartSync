@@ -12,10 +12,6 @@ import java.util.*
 
 object Utils {
 
-    fun isDebugMode(): Boolean {
-        return false
-    }
-
     fun String.hexToBytes() =
         this.chunked(2).map { it.uppercase(Locale.US).toInt(16).toByte() }.toByteArray()
 
