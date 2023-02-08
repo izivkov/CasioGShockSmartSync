@@ -308,7 +308,7 @@ class GShockAPI(private val context: Context) {
             CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
         }
 
-        // initializeForSettingTime()
+        initializeForSettingTime()
 
         sendMessage(
             "{action: \"SET_TIME\", value: ${
@@ -350,7 +350,7 @@ class GShockAPI(private val context: Context) {
         resultQueue.clear()
         getPressedButton()
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
-        initializeForSettingTime()
+        // initializeForSettingTime()
         getAppInfo() // this call re-enables lower-right button after watch reset.
         ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
     }

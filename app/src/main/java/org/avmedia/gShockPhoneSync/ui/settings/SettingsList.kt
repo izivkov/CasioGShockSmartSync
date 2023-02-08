@@ -9,13 +9,17 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
+import org.avmedia.gshockapi.casio.SettingsSimpleModel
 import org.avmedia.gshockapi.utils.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
+import org.json.JSONObject
 import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(
@@ -32,18 +36,10 @@ class SettingsList @JvmOverloads constructor(
     fun init() {
         Timber.i("SettingsList: init() called")
         runBlocking {
-            api().getSettings() // update teh model
+            val settingSimpleModel = api().getSettings() // update teh model
+            val settingStr = Gson().toJson(settingSimpleModel)
+            SettingsModel.fromJson(settingStr)
         }
-    }
-
-    private fun onDataReceived(data: String) {
-        SettingsModel.fromJson(data)
-        updateUI()
-    }
-
-    private fun onReceivedTimeAdjustment(data: String) {
-        SettingsModel.fromJson(data)
-        updateUI()
     }
 
     private fun updateUI() {

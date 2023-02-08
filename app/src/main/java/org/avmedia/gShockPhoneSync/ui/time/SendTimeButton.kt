@@ -10,6 +10,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
@@ -30,7 +32,7 @@ class SendTimeButton @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
 
-                    runBlocking {
+                    GlobalScope.launch {
                         api().setHomeTime(TimeZone.getDefault().id)
                         ProgressEvents.onNext(ProgressEvents.Events.HomeTimeUpdated)
                         api().setTime(true)
