@@ -33,9 +33,8 @@ class SendTimeButton @JvmOverloads constructor(
                 MotionEvent.ACTION_UP -> {
 
                     GlobalScope.launch {
-                        api().setHomeTime(TimeZone.getDefault().id)
-                        ProgressEvents.onNext(ProgressEvents.Events.HomeTimeUpdated)
                         api().setTime(true)
+                        ProgressEvents.onNext(ProgressEvents.Events.HomeTimeUpdated)
                         Utils.snackBar(context, "Time Set on Watch")
                     }
                 }

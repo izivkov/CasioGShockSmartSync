@@ -24,6 +24,6 @@ object CasioTimeZone {
         val city = TimeZoneHelper.parseCity(timeZone)
 
         var worldCity = WorldCity(city, 0)
-        CasioIO.writeCmd(0xe, worldCity.createCasioString())
+        CasioIO.writeCmd(0xE, worldCity.createCasioString())
     }
 }

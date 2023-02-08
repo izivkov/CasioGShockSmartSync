@@ -201,8 +201,6 @@ class GShockAPI(private val context: Context) {
         resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
 
         subscribe("CASIO_WORLD_CITIES") { data: String ->
-
-            // val city = Utils.toAsciiString(data, 2)
             resultQueue.dequeue()?.complete(data)
         }
 
@@ -299,16 +297,16 @@ class GShockAPI(private val context: Context) {
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setTime(changeHomeTime: Boolean = true) {
 
+        initializeForSettingTime()
+
         // Update the HomeTime according to the current TimeZone
         // This could be optimised to be called only if the
         // timezone has changed, but this adds complexity.
         // Maybe we can do this in the future.
-
         if (changeHomeTime) {
             CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
+            setHomeTime(TimeZone.getDefault().id)
         }
-
-        initializeForSettingTime()
 
         sendMessage(
             "{action: \"SET_TIME\", value: ${
