@@ -109,27 +109,9 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            createAppEventsSubscription(context)
-        }
-
-        private fun createAppEventsSubscription(context: Context) {
-            ProgressEvents.subscriber.start(
-                this.javaClass.simpleName,
-
-                {
-                    when (it) {
-                        // For setting time, we need to wait until the watch has been initialised.
-                        ProgressEvents.Events.WatchInitializationCompleted -> {
-                            runBlocking {
-                                api().setTime(true)
-                            }
-                        }
-                    }
-                },
-                { throwable ->
-                    Timber.d("Got error on subscribe: $throwable")
-                    throwable.printStackTrace()
-                })
+            runBlocking {
+                api().setTime(true)
+            }
         }
 
         override fun load(context: Context) {
