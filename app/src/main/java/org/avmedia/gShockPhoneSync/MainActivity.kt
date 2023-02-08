@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         // val intent = Intent(this, ForegroundService::class.java)
         // this.startService(intent)
 
-        // run()
+        run()
         // ApiTest().run(this)
     }
 
@@ -79,15 +79,6 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("RestrictedApi")
     override fun onResume() {
         super.onResume()
-
-        if (!api().isBluetoothEnabled()) {
-            permissionManager.promptEnableBluetooth()
-            return
-        }
-
-        if (permissionManager.hasAllPermissions()) {
-            run()
-        }
     }
 
     override fun onUserInteraction() {
