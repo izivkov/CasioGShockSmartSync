@@ -26,6 +26,23 @@ class GShockAPI(private val context: Context) {
     private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
     private val cache = WatchValuesCache()
 
+    /**
+     * This function waits for the watch to connect to the phone.
+     * When connected, it returns and emmits a `ConnectionSetupComplete` event, which
+     * can inform other parts of the app that the connection has taken place.
+     * @param[deviceId] Optional parameter containing a the Bluetooth ID
+     * of a watch which was previously connected. Providing this parameter will
+     * speed up connection. Its value can be saved in local storage for future use,
+     * and can be obtained after connection by calling `getDeviceId()`. Here is an example:
+     * ```
+     * private suspend fun waitForConnectionCached() {
+     *      var cachedDeviceAddress: String? =
+     *      LocalDataStorage.get("cached device", null, this@MainActivity)
+     *      api().waitForConnection(cachedDeviceAddress)
+     *      LocalDataStorage.put("cached device", api().getDeviceId(), this@MainActivity)
+     *   }
+     * ```
+     */
     suspend fun waitForConnection(deviceId: String? = ""): String {
 
         if (Connection.isConnected() || Connection.isConnecting()) {
@@ -62,19 +79,62 @@ class GShockAPI(private val context: Context) {
         }
 
         waitForConnectionSetupComplete()
-        val ret = deferredResult.await()
-        return ret
+        return deferredResult.await()
     }
 
+    /**
+     * Returns a Boolean value indicating if the watch is currently commenced to teh phone
+     */
     fun isConnected(): Boolean {
         return Connection.isConnected()
     }
 
+    /**
+     * Close the connection and free all associated resources.
+     * @param[deviceId] The deviceId associated with current connection.
+     * The `deviceId` can be obtained by calling `getDeviceId()` or from the
+     * payload in the `ProgressEvents.Events.Disconnect` event
+     */
     fun teardownConnection(device: BluetoothDevice) {
         Connection.teardownConnection(device)
     }
 
-    /* Do not get value from cache, because we do not want to get all values here. */
+    /**
+     * This function tells us which button was pressed on the watch to
+     * initiate the connection. Remember, the connection between the phone and the
+     * watch can only be initiated from the <b>watch</b>.
+     *
+     *
+     * The return values are interpreted as follows:
+     *
+     * - `LOWER_LEFT` - this connection is initiated by a long-press of the lower-left button on the watch.
+     * The app receiving this type of connection can now send and receive commands to the watch.
+     * - `LOWER_RIGHT` - this connection is initiated by a short-press of the lower-right button,
+     * which is usually used to set time. But the app can use this signal to perform other arbitrary functions.
+     * Therefore, this button is also referred as `ACTION BUTTON`.
+     * The connection will automatically disconnect in about 20 seconds.
+     * - `NO_BUTTON` - this connection is initiated automatically, periodically
+     * from the watch, without user input. It will automatically disconnect in about 20 seconds.
+     *
+     *
+     * *This function is relatively expensive, since it performs round trip to the watch to get the value. Therefore, it should be called only once each time the connection is established. The returned values will not change for the duration of the connection. After that, the user can call one of these lightweight functions:*
+     *
+     *
+     *   [isActionButtonPressed]
+     *
+     *
+     *   [isNormalButtonPressed]
+     *
+     *
+     *   [isAutoTimeStarted]
+     *
+     *
+     * @return [BluetoothWatch.WATCH_BUTTON]
+     **
+     * @see BluetoothWatch.WATCH_BUTTON
+     */
+    /* Do not get value from cache, because we do not want to
+    get all values here. */
     suspend fun getPressedButton(): BluetoothWatch.WATCH_BUTTON {
         val key = "10"
         val ret = _getPressedButton(key)
@@ -114,22 +174,45 @@ class GShockAPI(private val context: Context) {
         return deferredResultButton.await()
     }
 
+    /**
+     * This function tells us if the connection was initiated by short-pressing the lower-right button on the
+     * watch, also known as ACTION BUTTON
+     *
+     * @return **true** if the lower-right button initiated the connection, **false** otherwise.
+     */
     fun isActionButtonPressed(): Boolean {
         val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
-        val res = button == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
-        return res
+        return button == BluetoothWatch.WATCH_BUTTON.LOWER_RIGHT
     }
 
+    /**
+     * This function tells us if the connection was initiated by long-pressing the lower-left
+     * button on the watch
+     *
+     * @return **true** if the lower-left button initiated the connection, **false** otherwise.
+     */
     fun isNormalButtonPressed(): Boolean {
         val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
         return button == BluetoothWatch.WATCH_BUTTON.LOWER_LEFT
     }
 
+    /**
+     * This function tells us if the connection was initiated automatically by the watch, without the user
+     * pressing any button. This happens if Auto-Time is set in the setting. In this case, the
+     * watch will periodically connect at around 00:30, 06:30, 12:30 and 18:30
+     *
+     * @return **true** if watch automatically initiated the connection, **false** otherwise.
+     */
     fun isAutoTimeStarted(): Boolean {
         val button = cache.get("10") as BluetoothWatch.WATCH_BUTTON
         return button == BluetoothWatch.WATCH_BUTTON.NO_BUTTON
     }
 
+    /**
+     * Get the name of the watch.
+     *
+     * @return returns the name of the watch as a String. i.e. "GW-B5600"
+     */
     suspend fun getWatchName(): String {
         val key = "23"
         return cache.getCached(key, ::_getWatchName) as String
@@ -150,12 +233,17 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    suspend fun getDTSWatchState(state: BluetoothWatch.DTS_STATE): String {
+    /**
+     * Get the DST state of the watch.
+     *
+     * @return returns the Daylight Saving Time state of the watch as a String.
+     */
+    suspend fun getDSTWatchState(state: BluetoothWatch.DTS_STATE): String {
         val key = "1d0${state.state}"
-        return cache.getCached(key, ::_getDTSWatchState) as String
+        return cache.getCached(key, ::_getDSTWatchState) as String
     }
 
-    private suspend fun _getDTSWatchState(key: String): String {
+    private suspend fun _getDSTWatchState(key: String): String {
 
         request(key)
 
@@ -169,12 +257,20 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    suspend fun getDTSForWorldCities(cityNumber: Int): String {
+    /**
+     * Get the DST for a particular World City set on the watch.
+     * There are 6 world cities that can be stored.
+     *
+     * @param cityNumber: index of the world city (0..5)
+     *
+     * @return returns the Daylight Saving Time state of the requested World City as a String.
+     */
+    suspend fun getDSTForWorldCities(cityNumber: Int): String {
         val key = "1e0$cityNumber"
-        return cache.getCached(key, ::_getDTSForWorldCities) as String
+        return cache.getCached(key, ::_getDSTForWorldCities) as String
     }
 
-    private suspend fun _getDTSForWorldCities(key: String): String {
+    private suspend fun _getDSTForWorldCities(key: String): String {
 
         request(key)
 
@@ -188,6 +284,14 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
+    /**
+     * Get the name for a particular World City set on the watch.
+     * There are 6 world cities that can be stored.
+     *
+     * @param cityNumber Index of the world city (0..5)
+     *
+     * @return returns the name of the requested World City as a String.
+     */
     suspend fun getWorldCities(cityNumber: Int): String {
         val key = "1f0$cityNumber"
         return cache.getCached(key, ::_getWorldCities) as String
@@ -207,6 +311,11 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
+    /**
+     * Get Home Time, (Home City).
+     *
+     * @return returns the name of Home City as a String.
+     */
     suspend fun getHomeTime(): String {
         val homeCityRaw = cache.getCached(
             "1f00", ::_getWorldCities
@@ -215,6 +324,11 @@ class GShockAPI(private val context: Context) {
         return Utils.toAsciiString(homeCityRaw, 2)
     }
 
+    /**
+     * Get Battery level.
+     *
+     * @return the battery level in percent as a String. E.g.: "83"
+     */
     suspend fun getBatteryLevel(): String {
         return cache.getCached("28", ::_getBatteryLevel) as String
     }
@@ -233,6 +347,11 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
+    /**
+     * Get Timer value in seconds.
+     *
+     * @return The timer number of seconds as an Int.  E.g.: 180 meas the timer is set for 3 minutes.
+     */
     suspend fun getTimer(): Int {
         return cache.getCached("18", ::_getTimer) as Int
     }
@@ -256,11 +375,23 @@ class GShockAPI(private val context: Context) {
     }
 
 
+    /**
+     * Set Timer value in seconds.
+     *
+     * @param timerValue Timer number of seconds as an Int.  E.g.: 180 meas the timer is set for 3 minutes.
+     */
     fun setTimer(timerValue: Int) {
         cache.remove("18")
         sendMessage("{action: \"SET_TIMER\", value: $timerValue}")
     }
 
+    /**
+     * Gets and internally sets app info to the watch.
+     * This is needed to re-enable lower-right button after the watch has been reset or BLE has been cleared.
+     * Call this function after each time the connection has been established.
+     *
+     * @return appInfo string from the watch.
+     */
     suspend fun getAppInfo(): String {
         return cache.getCached("22", ::_getAppInfo) as String
     }
@@ -294,6 +425,13 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
+    /**
+     * Sets the current time on the watch from the time on the phone. In addition, it can optionally set the Home Time
+     * to the current time zone. If timezone changes during travel, the watch will automatically be set to the
+     * correct time and timezone after running this function.
+     *
+     * @param changeHomeTime If *true*, the Home Time will be changed to the current timezone.
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setTime(changeHomeTime: Boolean = true) {
 
@@ -315,6 +453,9 @@ class GShockAPI(private val context: Context) {
         )
     }
 
+    /**
+     * This function is internally called by [setTime] to initialize some values.
+     */
     private suspend fun initializeForSettingTime() {
         // Before we can set time, we must read and write back these values.
         // Why? Not sure, ask Casio
@@ -325,16 +466,16 @@ class GShockAPI(private val context: Context) {
             CasioIO.writeCmd(0xE, shortStr)
         }
 
-        readAndWrite(::getDTSWatchState, BluetoothWatch.DTS_STATE.ZERO)
-        readAndWrite(::getDTSWatchState, BluetoothWatch.DTS_STATE.TWO)
-        readAndWrite(::getDTSWatchState, BluetoothWatch.DTS_STATE.FOUR)
+        readAndWrite(::getDSTWatchState, BluetoothWatch.DTS_STATE.ZERO)
+        readAndWrite(::getDSTWatchState, BluetoothWatch.DTS_STATE.TWO)
+        readAndWrite(::getDSTWatchState, BluetoothWatch.DTS_STATE.FOUR)
 
-        readAndWrite(::getDTSForWorldCities, 0)
-        readAndWrite(::getDTSForWorldCities, 1)
-        readAndWrite(::getDTSForWorldCities, 2)
-        readAndWrite(::getDTSForWorldCities, 3)
-        readAndWrite(::getDTSForWorldCities, 4)
-        readAndWrite(::getDTSForWorldCities, 5)
+        readAndWrite(::getDSTForWorldCities, 0)
+        readAndWrite(::getDSTForWorldCities, 1)
+        readAndWrite(::getDSTForWorldCities, 2)
+        readAndWrite(::getDSTForWorldCities, 3)
+        readAndWrite(::getDSTForWorldCities, 4)
+        readAndWrite(::getDSTForWorldCities, 5)
 
         readAndWrite(::getWorldCities, 0)
         readAndWrite(::getWorldCities, 1)
@@ -344,15 +485,33 @@ class GShockAPI(private val context: Context) {
         readAndWrite(::getWorldCities, 5)
     }
 
-    suspend fun init(context: Context) {
+    /**
+     * Call this function when the app first starts, right after connection has been established,
+     * i.e. after [waitForConnection] returns. Here is an example:
+     *
+     * ```
+     * private fun run() {
+     *      val scope = CoroutineScope(Dispatchers.Default)
+     *      scope.launch {
+     *          waitForConnection()
+     *          init()
+     *      }
+     * }
+     * ```
+     */
+    suspend fun init() {
         resultQueue.clear()
         getPressedButton()
         ProgressEvents.onNext(ProgressEvents.Events.ButtonPressedInfoReceived)
-        // initializeForSettingTime()
         getAppInfo() // this call re-enables lower-right button after watch reset.
         ProgressEvents.onNext(ProgressEvents.Events.WatchInitializationCompleted)
     }
 
+    /**
+     * Gets the current alarms from the watch. Up to 5 alarms are supported on the watch.
+     *
+     * @return ArrayList<[Alarm]>
+     */
     suspend fun getAlarms(): ArrayList<Alarm> {
         var alarms = ArrayList<Alarm>()
 
@@ -376,6 +535,11 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
+    /**
+     * Sets alarms to the watch. Up to 5 alarms are supported on the watch.
+     *
+     * @param ArrayList<[Alarm]>
+     */
     fun setAlarms(alarms: ArrayList<Alarm>) {
         if (alarms.isEmpty()) {
             Timber.d("Alarm model not initialised! Cannot set alarm")
@@ -391,6 +555,11 @@ class GShockAPI(private val context: Context) {
         sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
     }
 
+    /**
+     * Gets the current events (reminders) from the watch. Up to 5 events are supported.
+     *
+     * @return ArrayList<[Event]>
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getEventsFromWatch(): ArrayList<Event> {
 
@@ -405,6 +574,13 @@ class GShockAPI(private val context: Context) {
         return events
     }
 
+
+    /**
+     * Gets a single event (reminder) from the watch.
+     *
+     * @param eventNumber The index of the event 1..5
+     * @return [Event]
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getEventFromWatch(eventNumber: Int): Event {
         request("30${eventNumber}") // reminder title
@@ -430,6 +606,11 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
+    /**
+     * Sets events (reminders) to the watch. Up to 5 events are supported.
+     *
+     * @param ArrayList<[Event]>
+     */
     fun setEvents(events: ArrayList<Event>) {
 
         if (events.isEmpty()) {
@@ -460,6 +641,17 @@ class GShockAPI(private val context: Context) {
         }
     }
 
+    /**
+     * Get settings from the watch. Example:
+     *
+     * ```
+     *      val settingsSimpleModel: SettingsSimpleModel = getSettings()
+     *      settingsSimpleModel.dateFormat = "MM:DD"
+     *      ...
+     *      setSettings(settingsSimpleModel)
+     * ```
+     * @return [SettingsSimpleModel]
+     */
     suspend fun getSettings(): SettingsSimpleModel {
         val model = SettingsModel
 
@@ -504,16 +696,39 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
+    /**
+     * Set settings to the watch. Populate a [SettingsSimpleModel] and call this function. Example:
+     *
+     * ```
+     *      val settingsSimpleModel: SettingsSimpleModel = getSettings()
+     *      settingsSimpleModel.dateFormat = "MM:DD"
+     *      ...
+     *      setSettings(settingsSimpleModel)
+     * ```
+     *
+     * @param settingsSimpleModel
+     */
     fun setSettings(settingsSimpleModel: SettingsSimpleModel) {
         val settingJson = Gson().toJson(settingsSimpleModel)
         sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
         sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
     }
 
+
+    /**
+     * Get the Bluetooth ID os the connected watch
+     *
+     * @return watch's bluetooth ID as a String. Should look something like: "ED:85:83:38:62:17"
+     */
     fun getDeviceId(): String {
         return Connection.getDeviceId()
     }
 
+    /**
+     * Disconnect from the watch
+     *
+     * @param context [Context]
+     */
     fun disconnect(context: Context) {
         Connection.disconnect(context)
     }
@@ -522,17 +737,16 @@ class GShockAPI(private val context: Context) {
         Connection.oneTimeLock = true
     }
 
-    fun setHomeTime(id: String) {
+    private fun setHomeTime(id: String) {
         cache.remove("1f00")
         CasioTimeZone.setHomeTime(id)
     }
 
-    private fun createWordCity(casioString: String): CasioTimeZone.WorldCity {
-        val city = Utils.toAsciiString(casioString.substring(4).trim('0'), 0)
-        val index = casioString.substring(2, 4).toInt()
-        return CasioTimeZone.WorldCity(city, index)
-    }
-
+    /**
+     * Tells is if Bluetooth is currently enabled on the phone. If not, the app can take action to enable it.
+     *
+     * @return *true* if enables, *false* otherwise.
+     */
     fun isBluetoothEnabled(): Boolean {
         return bleScannerLocal.bluetoothAdapter.isEnabled
     }
