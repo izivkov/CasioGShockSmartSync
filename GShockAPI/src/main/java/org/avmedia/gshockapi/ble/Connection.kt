@@ -13,7 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.WatchFactory
-import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.time.LocalDateTime
 import java.util.*

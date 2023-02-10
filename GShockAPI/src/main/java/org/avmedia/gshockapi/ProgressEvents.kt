@@ -4,7 +4,7 @@
  * Last modified 2022-03-28, 3:48 p.m.
  */
 
-package org.avmedia.gshockapi.utils
+package org.avmedia.gshockapi
 
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
