@@ -13,7 +13,7 @@ import android.view.View
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gshockapi.casio.SettingsSimpleModel
-import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.ProgressEvents
 
 
 class AutoFillValuesButton @JvmOverloads constructor(

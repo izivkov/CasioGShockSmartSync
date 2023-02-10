@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 

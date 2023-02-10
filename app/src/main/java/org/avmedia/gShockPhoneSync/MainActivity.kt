@@ -20,7 +20,7 @@ import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.GShockAPI
-import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
         scope.launch {
             waitForConnectionCached()
-            api().init(this@MainActivity)
+            api().init()
         }
     }
 

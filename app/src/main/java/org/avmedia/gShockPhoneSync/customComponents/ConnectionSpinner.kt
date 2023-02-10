@@ -10,7 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ProgressBar
-import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
 class ConnectionSpinner @JvmOverloads constructor(

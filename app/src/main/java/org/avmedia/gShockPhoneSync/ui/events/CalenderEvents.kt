@@ -18,7 +18,7 @@ import android.provider.CalendarContract
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
-import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.ProgressEvents
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*

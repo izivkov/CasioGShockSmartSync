@@ -19,7 +19,6 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.*
-import org.avmedia.gshockapi.utils.ProgressEvents
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat

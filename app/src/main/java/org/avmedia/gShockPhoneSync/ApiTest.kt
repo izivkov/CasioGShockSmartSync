@@ -55,12 +55,12 @@ class ApiTest {
     }
 
     private suspend fun getRTSForWorldCities() {
-        println("World DTS City 0: ${api().getDTSForWorldCities(0)}")
-        println("World DTS City 1: ${api().getDTSForWorldCities(1)}")
-        println("World DTS City 2: ${api().getDTSForWorldCities(2)}")
-        println("World DTS City 3: ${api().getDTSForWorldCities(3)}")
-        println("World DTS City 4: ${api().getDTSForWorldCities(4)}")
-        println("World DTS City 5: ${api().getDTSForWorldCities(5)}")
+        println("World DTS City 0: ${api().getDSTForWorldCities(0)}")
+        println("World DTS City 1: ${api().getDSTForWorldCities(1)}")
+        println("World DTS City 2: ${api().getDSTForWorldCities(2)}")
+        println("World DTS City 3: ${api().getDSTForWorldCities(3)}")
+        println("World DTS City 4: ${api().getDSTForWorldCities(4)}")
+        println("World DTS City 5: ${api().getDSTForWorldCities(5)}")
     }
 
     private suspend fun getWorldCities() {
@@ -73,9 +73,9 @@ class ApiTest {
     }
 
     private suspend fun getDTSState() {
-        println("TDS STATE ZERO: ${api().getDTSWatchState(BluetoothWatch.DTS_STATE.ZERO)}")
-        println("TDS STATE TWO: ${api().getDTSWatchState(BluetoothWatch.DTS_STATE.TWO)}")
-        println("TDS STATE FOUR: ${api().getDTSWatchState(BluetoothWatch.DTS_STATE.FOUR)}")
+        println("TDS STATE ZERO: ${api().getDSTWatchState(BluetoothWatch.DTS_STATE.ZERO)}")
+        println("TDS STATE TWO: ${api().getDSTWatchState(BluetoothWatch.DTS_STATE.TWO)}")
+        println("TDS STATE FOUR: ${api().getDSTWatchState(BluetoothWatch.DTS_STATE.FOUR)}")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

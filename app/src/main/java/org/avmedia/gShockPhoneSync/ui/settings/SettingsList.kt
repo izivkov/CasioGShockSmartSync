@@ -14,12 +14,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
-import org.avmedia.gshockapi.casio.SettingsSimpleModel
-import org.avmedia.gshockapi.utils.ProgressEvents
+import org.avmedia.gshockapi.ProgressEvents
 import org.jetbrains.anko.runOnUiThread
-import org.json.JSONObject
 import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(

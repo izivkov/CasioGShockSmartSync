@@ -12,12 +12,10 @@ import android.view.MotionEvent
 import android.view.View
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gshockapi.utils.ProgressEvents
-import java.util.*
+import org.avmedia.gshockapi.ProgressEvents
 
 class SendTimeButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
