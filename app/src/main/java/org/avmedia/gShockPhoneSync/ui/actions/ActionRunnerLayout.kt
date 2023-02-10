@@ -36,7 +36,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription(): Disposable =
-        ProgressEvents.connectionEventFlowable
+        ProgressEvents.connectionEventsFlowable
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {

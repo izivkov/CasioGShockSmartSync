@@ -423,8 +423,8 @@ object Connection : IConnection {
             Timber.w("ATT MTU changed to $mtu, success: ${status == BluetoothGatt.GATT_SUCCESS}")
 
             // listeners.forEach { it.get()?.onMtuChanged?.invoke(gatt.device, mtu) }
-            ProgressEvents.Events.MtuChanged.payload = gatt.device
-            ProgressEvents.onNext(ProgressEvents.Events.MtuChanged)
+//            ProgressEvents.Events.MtuChanged.payload = gatt.device
+//            ProgressEvents.onNext(ProgressEvents.Events.MtuChanged)
 
             if (pendingOperation is MtuRequest) {
                 signalEndOfOperation()
@@ -440,8 +440,6 @@ object Connection : IConnection {
                 when (status) {
                     BluetoothGatt.GATT_SUCCESS -> {
                         Timber.i("Read characteristic $uuid | value: ${value.toHexString()}")
-                        ProgressEvents.Events.CharacteristicRead.payload = value.toHexString()
-                        ProgressEvents.onNext(ProgressEvents.Events.CharacteristicRead)
                     }
                     BluetoothGatt.GATT_READ_NOT_PERMITTED -> {
                         Timber.e("Read not permitted for $uuid!")
@@ -487,8 +485,6 @@ object Connection : IConnection {
             characteristic: BluetoothGattCharacteristic
         ) {
             with(characteristic) {
-                ProgressEvents.Events.CharacteristicChanged.payload = value.toHexString()
-                ProgressEvents.onNext(ProgressEvents.Events.CharacteristicChanged)
                 dataReceivedCallback?.dataReceived(value.toHexString())
             }
         }
@@ -502,8 +498,6 @@ object Connection : IConnection {
                 when (status) {
                     BluetoothGatt.GATT_SUCCESS -> {
                         Timber.i("Read descriptor $uuid | value: ${value.toHexString()}")
-                        ProgressEvents.Events.DescriptorRead.payload = value.toHexString()
-                        ProgressEvents.onNext(ProgressEvents.Events.DescriptorRead)
                     }
                     BluetoothGatt.GATT_READ_NOT_PERMITTED -> {
                         Timber.e("Read not permitted for $uuid!")
@@ -531,9 +525,6 @@ object Connection : IConnection {
 
                         if (isCccd()) {
                             onCccdWrite(gatt, value, characteristic)
-                        } else {
-                            ProgressEvents.Events.DescriptorWrite.payload = value.toHexString()
-                            ProgressEvents.onNext(ProgressEvents.Events.DescriptorWrite)
                         }
                     }
                     BluetoothGatt.GATT_WRITE_NOT_PERMITTED -> {

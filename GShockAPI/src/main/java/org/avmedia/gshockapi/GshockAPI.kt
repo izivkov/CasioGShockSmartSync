@@ -83,7 +83,7 @@ class GShockAPI(private val context: Context) {
     }
 
     /**
-     * Returns a Boolean value indicating if the watch is currently commenced to teh phone
+     * Returns a Boolean value indicating if the watch is currently commenced to the phone
      */
     fun isConnected(): Boolean {
         return Connection.isConnected()

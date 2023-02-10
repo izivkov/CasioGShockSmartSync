@@ -47,7 +47,7 @@ class SettingsList @JvmOverloads constructor(
     }
 
     private fun listenForUpdateRequest(): Disposable =
-        ProgressEvents.connectionEventFlowable
+        ProgressEvents.connectionEventsFlowable
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {

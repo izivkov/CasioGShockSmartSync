@@ -28,7 +28,7 @@ class LanguageMenu @JvmOverloads constructor(
     }
 
     private fun createSubscription(): Disposable =
-        ProgressEvents.connectionEventFlowable
+        ProgressEvents.connectionEventsFlowable
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
