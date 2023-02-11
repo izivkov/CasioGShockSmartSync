@@ -1,12 +1,14 @@
 # Module casio-g-shock-smart-sync-app
 
 ## Description
+T
 
-This is a library to communicate and perform functions on the Casio G-Shock 
-5000/6500 Bluetooth watches
+# Package org.avmedia.gshockapi
+Casio G-Shock 5000/5600 API
 
-This functions API allows you to talk the Casio G-Shock watch.
-It can perform task such as:
+## Description
+This library provides an API to communicate and issue commands to the Casio G-Shock 5000 and 56000
+series of watches via the Bluetooth interface. It can perform the following tasks:
 
 - Set watch's time
 - Set Home Time (Home City)
@@ -17,11 +19,3 @@ It can perform task such as:
 - Get watch's battery level
 - Set watch's Timer
 
-This module will be separated into its own project later
-
-# Package org.avmedia.gshockapi
-Casio G-Shock 5000/5600 API
-
-## Level 2 heading
-Provides an API to communicate and issue commands to the Casio G-Shock 5000 and 56000
-series of watches via the Bluetooth interface.
