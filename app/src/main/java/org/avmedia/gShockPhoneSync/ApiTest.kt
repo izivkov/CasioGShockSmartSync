@@ -11,7 +11,7 @@ import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.casio.BluetoothWatch
-import org.avmedia.gshockapi.casio.SettingsSimpleModel
+import org.avmedia.gshockapi.Settings
 
 class ApiTest {
     fun run(context: Context) {
@@ -93,9 +93,9 @@ class ApiTest {
     }
 
     private suspend fun handleSettings() {
-        val settingsSimpleModel: SettingsSimpleModel = api().getSettings()
-        settingsSimpleModel.dateFormat = "MM:DD"
-        api().setSettings(settingsSimpleModel)
+        val settings: Settings = api().getSettings()
+        settings.dateFormat = "MM:DD"
+        api().setSettings(settings)
     }
 
     private suspend fun handleTimer() {

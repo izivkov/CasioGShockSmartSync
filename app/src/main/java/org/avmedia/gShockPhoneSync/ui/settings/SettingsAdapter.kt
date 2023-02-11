@@ -17,7 +17,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gshockapi.SettingsModel
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 
 // This adapter handles a heterogeneous list of settings.
 

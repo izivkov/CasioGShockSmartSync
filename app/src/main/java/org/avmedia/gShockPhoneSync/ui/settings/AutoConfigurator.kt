@@ -11,14 +11,14 @@ import android.app.NotificationManager.INTERRUPTION_FILTER_ALL
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gshockapi.casio.SettingsSimpleModel
+import org.avmedia.gshockapi.Settings
 import java.text.SimpleDateFormat
 import java.util.*
 
 object AutoConfigurator {
 
-    suspend fun configure(context: Context): SettingsSimpleModel {
-        val settings = SettingsSimpleModel()
+    suspend fun configure(context: Context): Settings {
+        val settings = Settings()
         val currentLocale: Locale = Locale.getDefault()
 
         when (currentLocale.language) {

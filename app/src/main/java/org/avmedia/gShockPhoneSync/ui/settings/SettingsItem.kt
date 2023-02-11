@@ -8,7 +8,6 @@ package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gshockapi.SettingsModel
 import kotlin.reflect.KFunction
 
 class SettingsItem @JvmOverloads constructor(

@@ -1,6 +1,6 @@
-package org.avmedia.gshockapi.casio
+package org.avmedia.gshockapi
 
-class SettingsSimpleModel {
+class Settings {
     var timeFormat = ""
     var dateFormat = ""
     var language = ""

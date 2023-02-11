@@ -8,6 +8,7 @@ package org.avmedia.gshockapi.casio
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.Utils.byteArrayOfIntArray
 import org.avmedia.gshockapi.utils.Utils.byteArrayOfInts
@@ -18,7 +19,7 @@ import java.time.Instant
 import java.time.ZoneId
 
 class Casio5600Watch : BluetoothWatch() {
-    private val settingsSimpleModel = SettingsSimpleModel()
+    private val settings = Settings()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun callWriter(message: String) {
@@ -141,8 +142,8 @@ class Casio5600Watch : BluetoothWatch() {
                 return SettingsDecoder.toJson(data)
             }
             CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code -> {
-                SettingsDecoder.getTimeAdjustment(data, settingsSimpleModel)
-                return SettingsDecoder.toJsonTimeAdjustment(settingsSimpleModel)
+                SettingsDecoder.getTimeAdjustment(data, settings)
+                return SettingsDecoder.toJsonTimeAdjustment(settings)
             }
             CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code -> {
                 val reminderJson = JSONObject()

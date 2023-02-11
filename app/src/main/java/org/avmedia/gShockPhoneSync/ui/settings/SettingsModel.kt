@@ -4,7 +4,7 @@
  * Last modified 2022-03-20, 7:47 p.m.
  */
 
-package org.avmedia.gshockapi
+package org.avmedia.gShockPhoneSync.ui.settings
 
 import org.json.JSONObject
 
@@ -73,6 +73,52 @@ object SettingsModel {
         settings.add(TimeAdjustment())
     }
 
+    /*
+        suspend fun getSettings(): SettingsSimpleModel {
+        val model = org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
+
+        sendMessage("{ action: 'GET_SETTINGS'}")
+
+        var deferredResult = CompletableDeferred<SettingsSimpleModel>()
+        resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
+
+        subscribe("SETTINGS") {
+            val settingsModel = org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
+            settingsModel.fromJson(it)
+
+            val settingsSimpleModel = SettingsSimpleModel()
+
+            val localeSetting = org.avmedia.gShockPhoneSync.ui.settings.SettingsModel.locale as org.avmedia.gShockPhoneSync.ui.settings.SettingsModel.Locale
+            localeSetting.dayOfWeekLanguage.value = settingsSimpleModel.language
+            settingsSimpleModel.timeFormat = localeSetting.timeFormat.value
+            settingsSimpleModel.dateFormat = localeSetting.dateFormat.value
+
+            val lightSetting = settingsModel.light as org.avmedia.gShockPhoneSync.ui.settings.SettingsModel.Light
+            settingsSimpleModel.autoLight = lightSetting.autoLight
+            settingsSimpleModel.lightDuration = lightSetting.duration.value
+
+            val powerSavingMode = settingsModel.powerSavingMode as org.avmedia.gShockPhoneSync.ui.settings.SettingsModel.PowerSavingMode
+            settingsSimpleModel.powerSavingMode = powerSavingMode.powerSavingMode
+
+            val timeAdjustment = settingsModel.timeAdjustment as org.avmedia.gShockPhoneSync.ui.settings.SettingsModel.TimeAdjustment
+            settingsSimpleModel.timeAdjustment = timeAdjustment.timeAdjustment
+
+            val buttonTone = model.buttonSound as org.avmedia.gShockPhoneSync.ui.settings.SettingsModel.OperationSound
+            settingsSimpleModel.buttonTone = buttonTone.sound
+
+            sendMessage("{ action: 'GET_TIME_ADJUSTMENT'}")
+            subscribe("TIME_ADJUSTMENT") { timeAdjustmentData ->
+                val dataJson = JSONObject(timeAdjustmentData)
+                settingsSimpleModel.timeAdjustment =
+                    dataJson.getBooleanSafe("timeAdjustment") == true
+                resultQueue.dequeue()?.complete(settingsSimpleModel)
+            }
+        }
+
+        return deferredResult.await()
+    }
+
+     */
     @Synchronized
     fun fromJson(jsonStr: String) {
         /*

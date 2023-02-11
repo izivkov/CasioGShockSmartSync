@@ -12,9 +12,8 @@ import android.view.MotionEvent
 import android.view.View
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gshockapi.casio.SettingsSimpleModel
+import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.SettingsModel
 
 
 class AutoFillValuesButton @JvmOverloads constructor(
@@ -51,14 +50,14 @@ class AutoFillValuesButton @JvmOverloads constructor(
         }
     }
 
-    private fun fillTimeAdjustment(settings: SettingsSimpleModel) {
+    private fun fillTimeAdjustment(settings: Settings) {
         val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
 
         timeAdjustment.timeAdjustment = settings.timeAdjustment
         timeAdjustment.timeAdjustmentNotifications = false
     }
 
-    private fun fillPowerSavingMode(settings: SettingsSimpleModel) {
+    private fun fillPowerSavingMode(settings: Settings) {
         val powerSaveMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
 
         // Change only if currently not in power-saving mode,
@@ -68,7 +67,7 @@ class AutoFillValuesButton @JvmOverloads constructor(
         }
     }
 
-    private fun fillLight(settings: SettingsSimpleModel) {
+    private fun fillLight(settings: Settings) {
         val lightSetting = SettingsModel.light as SettingsModel.Light
         lightSetting.autoLight = settings.autoLight
         if (settings.lightDuration == "2s") {
@@ -78,12 +77,12 @@ class AutoFillValuesButton @JvmOverloads constructor(
         }
     }
 
-    private fun fillButtonTone(settings: SettingsSimpleModel) {
+    private fun fillButtonTone(settings: Settings) {
         val toneSetting = SettingsModel.buttonSound as SettingsModel.OperationSound
         toneSetting.sound = settings.buttonTone
     }
 
-    private fun fillLocale(settings: SettingsSimpleModel) {
+    private fun fillLocale(settings: Settings) {
 
         val localeSetting = SettingsModel.locale as SettingsModel.Locale
         when (settings.language) {

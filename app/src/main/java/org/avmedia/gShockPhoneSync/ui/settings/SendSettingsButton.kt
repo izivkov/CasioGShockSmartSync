@@ -14,8 +14,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gshockapi.SettingsModel
-import org.avmedia.gshockapi.casio.SettingsSimpleModel
+import org.avmedia.gshockapi.Settings
 
 class SendSettingsButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -39,29 +38,29 @@ class SendSettingsButton @JvmOverloads constructor(
     }
 
     private fun updateSettings() {
-        var settingsSimpleModel = SettingsSimpleModel()
+        var settings = Settings()
 
         val localeSetting = SettingsModel.locale as SettingsModel.Locale
-        settingsSimpleModel.language = localeSetting.dayOfWeekLanguage.value
-        settingsSimpleModel.timeFormat = localeSetting.timeFormat.value
-        settingsSimpleModel.dateFormat = localeSetting.dateFormat.value
+        settings.language = localeSetting.dayOfWeekLanguage.value
+        settings.timeFormat = localeSetting.timeFormat.value
+        settings.dateFormat = localeSetting.dateFormat.value
 
         val lightSetting = SettingsModel.light as SettingsModel.Light
-        settingsSimpleModel.autoLight = lightSetting.autoLight
-        settingsSimpleModel.lightDuration = lightSetting.duration.value
+        settings.autoLight = lightSetting.autoLight
+        settings.lightDuration = lightSetting.duration.value
 
         val powerSavingMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
-        settingsSimpleModel.powerSavingMode = powerSavingMode.powerSavingMode
+        settings.powerSavingMode = powerSavingMode.powerSavingMode
 
         val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
-        settingsSimpleModel.timeAdjustment = timeAdjustment.timeAdjustment
+        settings.timeAdjustment = timeAdjustment.timeAdjustment
 
         LocalDataStorage.setTimeAdjustmentNotification(timeAdjustment.timeAdjustmentNotifications)
 
         val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound
-        settingsSimpleModel.buttonTone = buttonTone.sound
+        settings.buttonTone = buttonTone.sound
 
-        api().setSettings(settingsSimpleModel)
+        api().setSettings(settings)
 
         Utils.snackBar(context, "Settings Sent to Watch")
     }

@@ -7,6 +7,7 @@
 package org.avmedia.gshockapi.casio
 
 import com.google.gson.Gson
+import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 
@@ -72,7 +73,7 @@ object SettingsDecoder {
         val MASK_LIGHT_OFF = 0b00000100
         val POWER_SAVING_MODE = 0b00010000
 
-        val settings = SettingsSimpleModel()
+        val settings = Settings()
 
         val settingArray = Utils.toIntArray(settingString)
 
@@ -119,7 +120,7 @@ object SettingsDecoder {
         return JSONObject(Gson().toJson(settings))
     }
 
-    fun getTimeAdjustment(data: String, settings: SettingsSimpleModel) {
+    fun getTimeAdjustment(data: String, settings: Settings) {
         // syncing off: 110f0f0f0600500004000100->80<-37d2
         // syncing on:  110f0f0f0600500004000100->00<-37d2
 
@@ -127,7 +128,7 @@ object SettingsDecoder {
         settings.timeAdjustment = Utils.toIntArray(data)[12] == 0
     }
 
-    fun toJsonTimeAdjustment(settings: SettingsSimpleModel): JSONObject {
+    fun toJsonTimeAdjustment(settings: Settings): JSONObject {
         var jsonResponse = JSONObject()
         return jsonResponse.put(
             "TIME_ADJUSTMENT",

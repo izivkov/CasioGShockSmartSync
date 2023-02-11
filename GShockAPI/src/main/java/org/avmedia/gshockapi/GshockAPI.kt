@@ -650,54 +650,47 @@ class GShockAPI(private val context: Context) {
      *      ...
      *      setSettings(settingsSimpleModel)
      * ```
-     * @return [SettingsSimpleModel]
+     * @return [Settings]
      */
-    suspend fun getSettings(): SettingsSimpleModel {
-        val model = SettingsModel
+    suspend fun getSettings(): Settings {
+        val settings = getBasicSettings()
+        val timeAdjustment = getTimeAdjustment()
+        settings.timeAdjustment = timeAdjustment
+        return settings
+    }
 
+    private suspend fun getBasicSettings(): Settings {
         sendMessage("{ action: 'GET_SETTINGS'}")
 
-        var deferredResult = CompletableDeferred<SettingsSimpleModel>()
+        var deferredResult = CompletableDeferred<Settings>()
         resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
 
         subscribe("SETTINGS") {
-            val settingsModel = SettingsModel
-            settingsModel.fromJson(it)
+            val model = Gson().fromJson(it, Settings::class.java)
+            resultQueue.dequeue()?.complete(model)
 
-            val settingsSimpleModel = SettingsSimpleModel()
+        }
+        return deferredResult.await()
+    }
 
-            val localeSetting = SettingsModel.locale as SettingsModel.Locale
-            localeSetting.dayOfWeekLanguage.value = settingsSimpleModel.language
-            settingsSimpleModel.timeFormat = localeSetting.timeFormat.value
-            settingsSimpleModel.dateFormat = localeSetting.dateFormat.value
+    private suspend fun getTimeAdjustment(): Boolean {
+        sendMessage("{ action: 'GET_TIME_ADJUSTMENT'}")
 
-            val lightSetting = settingsModel.light as SettingsModel.Light
-            settingsSimpleModel.autoLight = lightSetting.autoLight
-            settingsSimpleModel.lightDuration = lightSetting.duration.value
+        var deferredResult = CompletableDeferred<Boolean>()
+        resultQueue.enqueue(deferredResult as CompletableDeferred<Any>)
 
-            val powerSavingMode = settingsModel.powerSavingMode as SettingsModel.PowerSavingMode
-            settingsSimpleModel.powerSavingMode = powerSavingMode.powerSavingMode
+        subscribe("TIME_ADJUSTMENT") { timeAdjustmentData ->
+            val dataJson = JSONObject(timeAdjustmentData)
+            val timeAdjustment = dataJson.getBooleanSafe("timeAdjustment") == true
 
-            val timeAdjustment = settingsModel.timeAdjustment as SettingsModel.TimeAdjustment
-            settingsSimpleModel.timeAdjustment = timeAdjustment.timeAdjustment
-
-            val buttonTone = model.buttonSound as SettingsModel.OperationSound
-            settingsSimpleModel.buttonTone = buttonTone.sound
-
-            sendMessage("{ action: 'GET_TIME_ADJUSTMENT'}")
-            subscribe("TIME_ADJUSTMENT") { timeAdjustmentData ->
-                val dataJson = JSONObject(timeAdjustmentData)
-                settingsSimpleModel.timeAdjustment =
-                    dataJson.getBooleanSafe("timeAdjustment") == true
-                resultQueue.dequeue()?.complete(settingsSimpleModel)
-            }
+            resultQueue.dequeue()?.complete(timeAdjustment)
         }
 
         return deferredResult.await()
     }
 
     /**
-     * Set settings to the watch. Populate a [SettingsSimpleModel] and call this function. Example:
+     * Set settings to the watch. Populate a [Settings] and call this function. Example:
      *
      * ```
      *      val settingsSimpleModel: SettingsSimpleModel = getSettings()
@@ -706,10 +699,10 @@ class GShockAPI(private val context: Context) {
      *      setSettings(settingsSimpleModel)
      * ```
      *
-     * @param settingsSimpleModel
+     * @param settings
      */
-    fun setSettings(settingsSimpleModel: SettingsSimpleModel) {
-        val settingJson = Gson().toJson(settingsSimpleModel)
+    fun setSettings(settings: Settings) {
+        val settingJson = Gson().toJson(settings)
         sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
         sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
     }
