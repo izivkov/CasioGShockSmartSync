@@ -10,12 +10,16 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import org.avmedia.gShockPhoneSync.R
-import org.jetbrains.anko.contentView
+import java.util.*
 
 object Utils {
+
+    val Activity.contentView: View?
+        get() = (findViewById<ViewGroup>(android.R.id.content))?.getChildAt(0)
 
     fun snackBar(view: View, message: String) {
 

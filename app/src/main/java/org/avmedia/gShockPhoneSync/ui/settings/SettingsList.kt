@@ -5,6 +5,7 @@
  */
 package org.avmedia.gShockPhoneSync.ui.settings
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,7 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
 import org.avmedia.gshockapi.ProgressEvents
-import org.jetbrains.anko.runOnUiThread
+import org.avmedia.gshockapi.SettingsModel
 import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(
@@ -40,7 +41,7 @@ class SettingsList @JvmOverloads constructor(
     }
 
     private fun updateUI() {
-        context.runOnUiThread {
+        (context as Activity).runOnUiThread {
             adapter?.notifyDataSetChanged()
             ProgressEvents.onNext(ProgressEvents.Events.SettingsLoaded)
         }

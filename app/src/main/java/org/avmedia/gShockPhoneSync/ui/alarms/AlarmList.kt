@@ -5,6 +5,7 @@
  */
 package org.avmedia.gShockPhoneSync.ui.alarms
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.ProgressEvents
-import org.jetbrains.anko.runOnUiThread
 
 class AlarmList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -30,7 +30,7 @@ class AlarmList @JvmOverloads constructor(
                 AlarmsModel.alarms.clear()
                 AlarmsModel.alarms.addAll(alarms)
 
-                context.runOnUiThread {
+                (context as Activity).runOnUiThread {
                     adapter?.notifyDataSetChanged()
                     ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)
                 }

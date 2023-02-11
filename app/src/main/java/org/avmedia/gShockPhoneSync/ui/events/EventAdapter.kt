@@ -73,7 +73,7 @@ class EventAdapter(private val events: ArrayList<Event>) :
             })
 
             (viewHolder.itemView as EventItem).setEventData(event)
-            viewHolder.itemView.setOnDataChange(::notifyDataSetChanged)
+            (viewHolder.itemView as EventItem).setOnDataChange(::notifyDataSetChanged)
         } catch (e: ParseException) {
             e.printStackTrace()
         }

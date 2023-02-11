@@ -50,16 +50,14 @@ dependencies {
     implementation 'com.github.PhilJay:RRule:1.0.3'
 }
 
-dokkaHtml.configure {
-
-    // moduleName.set("module.md")
-
-    dokkaSourceSets {
-        configureEach {
-            includes.from("module.md")
-        }
-    }
-}
+//dokkaHtml.configure {
+//
+//    dokkaSourceSets {
+//        configureEach {
+//            includes.from("module.md")
+//        }
+//    }
+//}
 
 
 

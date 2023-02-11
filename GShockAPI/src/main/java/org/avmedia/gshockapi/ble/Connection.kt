@@ -382,8 +382,8 @@ object Connection : IConnection {
                 Timber.e("onConnectionStateChange: status $status encountered for $deviceAddress!")
                 if (status == 19 || status == 8) { // disconnected by device
                     Timber.d("Got error $status")
-                    // ProgressEvents.Events.Disconnect.payload = device
-                    // ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
+                    //ProgressEvents.Events.Disconnect.payload = device
+                    //ProgressEvents.onNext(ProgressEvents.Events.Disconnect)
                 }
 
                 if (pendingOperation is Connect) {

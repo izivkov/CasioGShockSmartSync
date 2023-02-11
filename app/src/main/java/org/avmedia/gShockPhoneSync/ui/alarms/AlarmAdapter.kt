@@ -57,7 +57,7 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
             })
 
             (viewHolder.itemView as AlarmItem).setAlarmData(alarm)
-            viewHolder.itemView.setOnDataChange(::notifyDataSetChanged)
+            (viewHolder.itemView as AlarmItem).setOnDataChange(::notifyDataSetChanged)
         } catch (e: ParseException) {
             e.printStackTrace()
         }

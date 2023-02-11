@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gshockapi.casio.SettingsSimpleModel
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.SettingsModel
 
 
 class AutoFillValuesButton @JvmOverloads constructor(

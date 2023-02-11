@@ -14,6 +14,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gshockapi.SettingsModel
 import org.avmedia.gshockapi.casio.SettingsSimpleModel
 
 class SendSettingsButton @JvmOverloads constructor(

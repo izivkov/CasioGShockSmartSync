@@ -13,7 +13,6 @@ import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
-import org.jetbrains.anko.sdk27.coroutines.onFocusChange
 import timber.log.Timber
 
 // This adapter handles a heterogeneous list of actions.
@@ -283,7 +282,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             action.enabled = isChecked
         })
 
-        vhEmail.emailAddress.onFocusChange { v, hasFocus ->
+        vhEmail.emailAddress.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 (actions[position] as ActionsModel.EmailLocationAction).emailAddress =
                     (v as EditText).text.toString()
@@ -307,7 +306,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             action.enabled = isChecked
         })
 
-        vhPhoneCall.phoneNumber.onFocusChange { v, hasFocus ->
+        vhPhoneCall.phoneNumber.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
                 (actions[position] as ActionsModel.PhoneDialAction).phoneNumber =
                     (v as EditText).text.toString()

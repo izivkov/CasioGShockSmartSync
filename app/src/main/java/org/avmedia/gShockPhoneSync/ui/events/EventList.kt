@@ -5,6 +5,7 @@
  */
 package org.avmedia.gShockPhoneSync.ui.events
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.avmedia.gshockapi.ProgressEvents
-import org.jetbrains.anko.runOnUiThread
 import timber.log.Timber
 
 class EventList @JvmOverloads constructor(
@@ -38,7 +38,7 @@ class EventList @JvmOverloads constructor(
                     // Somebody has made a change to the model...need to update the UI
                     ProgressEvents.Events.CalendarUpdated -> {
                         EventsModel.refresh(context)
-                        context.runOnUiThread {
+                        (context as Activity).runOnUiThread {
                             adapter?.notifyDataSetChanged()
                         }
                     }
