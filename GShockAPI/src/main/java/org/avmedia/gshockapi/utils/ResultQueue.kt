@@ -1,4 +1,4 @@
-package org.avmedia.gshockapi
+package org.avmedia.gshockapi.utils
 
 class ResultQueue<T> {
     private var queue: MutableList<T> = mutableListOf()

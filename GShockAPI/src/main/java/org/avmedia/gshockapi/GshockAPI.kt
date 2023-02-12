@@ -20,6 +20,35 @@ import java.time.Clock
 import java.util.*
 import kotlin.reflect.KSuspendFunction1
 
+/**
+ * This class contains all the API functions. This should the the main interface to the library.
+ *
+ *
+ * Here is how to use it:
+ *
+ * ```
+ * private val api = GShockAPI(this)
+ *
+ * class MainActivity : AppCompatActivity() {
+ *  override fun onCreate(savedInstanceState: Bundle?) {
+ *      super.onCreate(savedInstanceState)
+ *      ...
+ *      runBlocking {
+ *          api.waitForConnection(this)
+ *          api.init ()
+ *          api.getPressedButton()
+ *          api.getWatchName()
+ *          api.getBatteryLevel()
+ *          api.getTimer()
+ *          api.getAppInfo()
+ *          api.getHomeTime()
+ *          api.setTime()
+ *          ...
+ *      }
+ *  }
+ * }
+ * ```
+ */
 class GShockAPI(private val context: Context) {
 
     private var bleScannerLocal: BleScannerLocal = BleScannerLocal(context)
@@ -258,12 +287,12 @@ class GShockAPI(private val context: Context) {
     }
 
     /**
-     * Get the DST for a particular World City set on the watch.
+     * Get the **Daylight Saving Time** for a particular World City set on the watch.
      * There are 6 world cities that can be stored.
      *
      * @param cityNumber: index of the world city (0..5)
      *
-     * @return returns the Daylight Saving Time state of the requested World City as a String.
+     * @return Daylight Saving Time state of the requested World City as a String.
      */
     suspend fun getDSTForWorldCities(cityNumber: Int): String {
         val key = "1e0$cityNumber"
@@ -290,7 +319,7 @@ class GShockAPI(private val context: Context) {
      *
      * @param cityNumber Index of the world city (0..5)
      *
-     * @return returns the name of the requested World City as a String.
+     * @return The name of the requested World City as a String.
      */
     suspend fun getWorldCities(cityNumber: Int): String {
         val key = "1f0$cityNumber"
@@ -314,7 +343,7 @@ class GShockAPI(private val context: Context) {
     /**
      * Get Home Time, (Home City).
      *
-     * @return returns the name of Home City as a String.
+     * @return The name of Home City as a String.
      */
     suspend fun getHomeTime(): String {
         val homeCityRaw = cache.getCached(
@@ -333,7 +362,7 @@ class GShockAPI(private val context: Context) {
         return cache.getCached("28", ::_getBatteryLevel) as String
     }
 
-    suspend fun _getBatteryLevel(key: String): String {
+    private suspend fun _getBatteryLevel(key: String): String {
 
         request(key)
 
@@ -350,7 +379,7 @@ class GShockAPI(private val context: Context) {
     /**
      * Get Timer value in seconds.
      *
-     * @return The timer number of seconds as an Int.  E.g.: 180 meas the timer is set for 3 minutes.
+     * @return The timer number in seconds as an Int.  E.g.: 180 means the timer is set for 3 minutes.
      */
     suspend fun getTimer(): Int {
         return cache.getCached("18", ::_getTimer) as Int
@@ -378,7 +407,7 @@ class GShockAPI(private val context: Context) {
     /**
      * Set Timer value in seconds.
      *
-     * @param timerValue Timer number of seconds as an Int.  E.g.: 180 meas the timer is set for 3 minutes.
+     * @param timerValue Timer number of seconds as an Int.  E.g.: 180 means the timer will be set for 3 minutes.
      */
     fun setTimer(timerValue: Int) {
         cache.remove("18")
@@ -430,7 +459,7 @@ class GShockAPI(private val context: Context) {
      * to the current time zone. If timezone changes during travel, the watch will automatically be set to the
      * correct time and timezone after running this function.
      *
-     * @param changeHomeTime If *true*, the Home Time will be changed to the current timezone.
+     * @param changeHomeTime If *true*, the **Home Time** will be changed to the current timezone.
      */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setTime(changeHomeTime: Boolean = true) {
@@ -645,10 +674,10 @@ class GShockAPI(private val context: Context) {
      * Get settings from the watch. Example:
      *
      * ```
-     *      val settingsSimpleModel: SettingsSimpleModel = getSettings()
-     *      settingsSimpleModel.dateFormat = "MM:DD"
+     *      val settings: Settings = getSettings()
+     *      settings.dateFormat = "MM:DD"
      *      ...
-     *      setSettings(settingsSimpleModel)
+     *      setSettings(settings)
      * ```
      * @return [Settings]
      */
@@ -693,10 +722,10 @@ class GShockAPI(private val context: Context) {
      * Set settings to the watch. Populate a [Settings] and call this function. Example:
      *
      * ```
-     *      val settingsSimpleModel: SettingsSimpleModel = getSettings()
+     *      val settings: Settings = getSettings()
      *      settingsSimpleModel.dateFormat = "MM:DD"
      *      ...
-     *      setSettings(settingsSimpleModel)
+     *      setSettings(settings)
      * ```
      *
      * @param settings
@@ -711,7 +740,7 @@ class GShockAPI(private val context: Context) {
     /**
      * Get the Bluetooth ID os the connected watch
      *
-     * @return watch's bluetooth ID as a String. Should look something like: "ED:85:83:38:62:17"
+     * @return watch's Bluetooth ID as a String. Should look something like: "ED:85:83:38:62:17"
      */
     fun getDeviceId(): String {
         return Connection.getDeviceId()
@@ -736,7 +765,7 @@ class GShockAPI(private val context: Context) {
     }
 
     /**
-     * Tells is if Bluetooth is currently enabled on the phone. If not, the app can take action to enable it.
+     * Tells us if Bluetooth is currently enabled on the phone. If not, the app can take action to enable it.
      *
      * @return *true* if enables, *false* otherwise.
      */

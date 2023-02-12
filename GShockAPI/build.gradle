@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-    id("org.jetbrains.dokka") version "1.7.20"
+    id("org.jetbrains.dokka") version("1.7.20")
 }
 
 android {
@@ -50,15 +50,28 @@ dependencies {
     implementation 'com.github.PhilJay:RRule:1.0.3'
 }
 
-//dokkaHtml.configure {
-//
-//    dokkaSourceSets {
-//        configureEach {
-//            includes.from("module.md")
-//        }
-//    }
-//}
+dokkaHtml.configure {
 
+    dokkaSourceSets {
+        configureEach {
+            includes.from("module.md")
 
+            includeNonPublic.set(false)
+            skipDeprecated.set(true)
+            reportUndocumented.set(false) // Emit warnings about not documented members
 
-
+            perPackageOption {
+                matchingRegex.set(".*ble")
+                suppress.set(true)
+            }
+            perPackageOption {
+                matchingRegex.set(".*casio")
+                suppress.set(true)
+            }
+            perPackageOption {
+                matchingRegex.set(".*utils")
+                suppress.set(true)
+            }
+        }
+    }
+}

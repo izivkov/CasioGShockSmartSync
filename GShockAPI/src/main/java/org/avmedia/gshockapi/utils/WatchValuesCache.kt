@@ -1,4 +1,4 @@
-package org.avmedia.gshockapi
+package org.avmedia.gshockapi.utils
 
 import kotlin.reflect.KSuspendFunction1
 

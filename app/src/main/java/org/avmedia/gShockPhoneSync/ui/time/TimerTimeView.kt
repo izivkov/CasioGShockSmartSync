@@ -28,7 +28,7 @@ class TimerTimeView @JvmOverloads constructor(
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
-                text = makeLongString(api().getTimer().toInt())
+                text = makeLongString(api().getTimer())
             }
         }
     }
