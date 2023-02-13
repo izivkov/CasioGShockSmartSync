@@ -5,8 +5,6 @@
 **This library will be transferred to a separate project.**
 
 ## Documentation
-Coming up soon. For now, to see how to use it, please refer to:
+https://izivkov.github.io/GShockAPI
 
-https://github.com/izivkov/CasioGShockSmartSync/blob/Refactor-into-API/app/src/main/java/org/avmedia/gShockPhoneSync/ApiTest.kt
-
-
+(WIP, visit again later)
