@@ -72,7 +72,6 @@ class MainActivity : AppCompatActivity() {
 
         scope.launch {
             waitForConnectionCached()
-            api().init()
         }
     }
 
