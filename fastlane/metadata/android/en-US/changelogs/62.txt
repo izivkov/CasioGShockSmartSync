@@ -1,0 +1,3 @@
+- Separated API into a different project.
+- Sped connection time significantly.
+- Fixed bug in reconnection after Photo action
