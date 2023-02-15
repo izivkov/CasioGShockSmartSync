@@ -19,6 +19,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.*
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
@@ -212,12 +213,30 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
 
-            (context as Activity).runOnUiThread {
-                val cameraSelector: CameraSelector =
-                    if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
-                CameraCapture(context, cameraSelector).start()
-                Timber.d("Photo taken...")
+            // Since we are running this action in the UI Thread (foreground), it will interfere the ProgressEvents.
+            // Some observers, like the MainActivity will not be able to receive Disconnect messages.
+            // Therefore, wait for the Disconnect message and then run the action.
+            fun createAppEventsSubscription() {
+                ProgressEvents.subscriber.start(this.javaClass.simpleName,
+
+                    {
+                        when (it) {
+                            ProgressEvents.Events.Disconnect -> {
+                                (context as Activity).runOnUiThread {
+                                    val cameraSelector: CameraSelector =
+                                        if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
+                                    CameraCapture(context, cameraSelector).start()
+                                    Timber.d("Photo taken...")
+                                }
+                            }
+                        }
+                    }, { throwable ->
+                        Timber.d("Got error on subscribe: $throwable")
+                        throwable.printStackTrace()
+                    })
             }
+
+            createAppEventsSubscription()
         }
 
         override fun save(context: Context) {

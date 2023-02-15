@@ -35,10 +35,9 @@ class MainLayout @JvmOverloads constructor(
         createAppEventsSubscription()
     }
 
-    private fun createAppEventsSubscription(): Disposable =
-        ProgressEvents.connectionEventsFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
+    private fun createAppEventsSubscription() {
+        ProgressEvents.subscriber.start(this.javaClass.simpleName,
+            {
                 when (it) {
                     ProgressEvents.Events.WatchInitializationCompleted -> {
                         if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
@@ -49,10 +48,11 @@ class MainLayout @JvmOverloads constructor(
                         hide()
                     }
                 }
-            }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
+            }, { throwable ->
+                Timber.d("Got error on subscribe: $throwable")
+                throwable.printStackTrace()
+            })
+    }
 
     override fun show() {
         visibility = View.VISIBLE
