@@ -1,0 +1,2 @@
+- Fixed possible crash when setting permissions.
+

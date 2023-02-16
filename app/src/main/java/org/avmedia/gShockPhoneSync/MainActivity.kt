@@ -68,10 +68,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun run() {
 
-        val scope = CoroutineScope(Dispatchers.Default)
-
-        scope.launch {
-            waitForConnectionCached()
+        if (permissionManager.hasAllPermissions()) {
+            GlobalScope.launch {
+                waitForConnectionCached()
+            }
         }
     }
 
