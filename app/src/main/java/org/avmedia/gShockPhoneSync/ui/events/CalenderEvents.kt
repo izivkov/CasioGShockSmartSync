@@ -134,7 +134,7 @@ object CalenderEvents {
 
         private val calendarObserver = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {
-                ProgressEvents.onNext(ProgressEvents.Events.CalendarUpdated)
+                ProgressEvents.onNext("CalendarUpdated")
             }
         }
 

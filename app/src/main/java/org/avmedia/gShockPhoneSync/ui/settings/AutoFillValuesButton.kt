@@ -114,6 +114,6 @@ class AutoFillValuesButton @JvmOverloads constructor(
     }
 
     private fun updateUI() {
-        ProgressEvents.onNext(ProgressEvents.Events.NeedToUpdateUI)
+        ProgressEvents.onNext("NeedToUpdateUI")
     }
 }

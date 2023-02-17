@@ -7,14 +7,20 @@
 package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import org.avmedia.gShockPhoneSync.PermissionManager
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.findNavController
+import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+
 
 class ActionsFragment : Fragment() {
 
@@ -25,15 +31,25 @@ class ActionsFragment : Fragment() {
     private val binding get() = _binding!!
 
     init {
-        Timber.d("Created ActionsFragment")
+        ProgressEvents.addEvent("ActionsPermissionsGranted")
+        ProgressEvents.addEvent("ActionsPermissionsNotGranted")
     }
 
+    @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        context?.let { PermissionManager(it) }?.setupPermissions(
+        val requestMultiplePermissions = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            if (permissions.all { it.value }) {
+                ProgressEvents.onNext("ActionsPermissionsGranted")
+            } else {
+                ProgressEvents.onNext("ActionsPermissionsNotGranted")
+            }
+        }
+
+        requestMultiplePermissions.launch(
             arrayOf(
                 Manifest.permission.CAMERA,
                 Manifest.permission.CALL_PHONE,
@@ -51,5 +67,12 @@ class ActionsFragment : Fragment() {
         super.onDestroyView()
         _binding?.actionList?.shutdown()
         _binding = null
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        Timber.i("Requesting permissions")
     }
 }

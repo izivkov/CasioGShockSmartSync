@@ -42,7 +42,7 @@ class SettingsList @JvmOverloads constructor(
     private fun updateUI() {
         (context as Activity).runOnUiThread {
             adapter?.notifyDataSetChanged()
-            ProgressEvents.onNext(ProgressEvents.Events.SettingsLoaded)
+            ProgressEvents.onNext("SettingsLoaded")
         }
     }
 
@@ -52,7 +52,7 @@ class SettingsList @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     // Somebody has made a change to the model...need to update the UI
-                    ProgressEvents.Events.NeedToUpdateUI -> {
+                    ProgressEvents.lookupEvent("NeedToUpdateUI") -> {
                         updateUI()
                     }
                 }

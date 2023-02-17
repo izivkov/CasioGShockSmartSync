@@ -221,7 +221,7 @@ object ActionsModel {
 
                     {
                         when (it) {
-                            ProgressEvents.Events.Disconnect -> {
+                            ProgressEvents.lookupEvent("Disconnect") -> {
                                 (context as Activity).runOnUiThread {
                                     val cameraSelector: CameraSelector =
                                         if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA

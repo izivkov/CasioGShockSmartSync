@@ -32,7 +32,7 @@ class AlarmList @JvmOverloads constructor(
 
                 (context as Activity).runOnUiThread {
                     adapter?.notifyDataSetChanged()
-                    ProgressEvents.onNext(ProgressEvents.Events.AlarmDataLoaded)
+                    ProgressEvents.onNext("AlarmDataLoaded")
                 }
             }
         }

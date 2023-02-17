@@ -23,11 +23,36 @@ class EventList @JvmOverloads constructor(
         adapter = EventAdapter(EventsModel.events)
         layoutManager = LinearLayoutManager(context)
 
-        var eventsModel = EventsModel
-        eventsModel.clear()
-        eventsModel.events.addAll(CalenderEvents.getEventsFromCalendar(context))
+        waitForPermissions()
 
-        listenForUpdateRequest()
+//        var eventsModel = EventsModel
+//        eventsModel.clear()
+//        eventsModel.events.addAll(CalenderEvents.getEventsFromCalendar(context))
+//
+//        listenForUpdateRequest()
+    }
+
+    private fun waitForPermissions() {
+        ProgressEvents.subscriber.start(this.javaClass.simpleName,
+
+            {
+                when (it) {
+                    ProgressEvents.lookupEvent("CalendarPermissionsGranted") -> {
+                        var eventsModel = EventsModel
+                        eventsModel.clear()
+                        eventsModel.events.addAll(CalenderEvents.getEventsFromCalendar(context))
+
+                        (context as Activity).runOnUiThread {
+                            adapter?.notifyDataSetChanged()
+                        }
+
+                        listenForUpdateRequest()
+                    }
+                }
+            }, { throwable ->
+                Timber.d("Got error on subscribe: $throwable")
+                throwable.printStackTrace()
+            })
     }
 
     private fun listenForUpdateRequest(): Disposable =
@@ -36,7 +61,7 @@ class EventList @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     // Somebody has made a change to the model...need to update the UI
-                    ProgressEvents.Events.CalendarUpdated -> {
+                    ProgressEvents.lookupEvent("CalendarUpdated") -> {
                         EventsModel.refresh(context)
                         (context as Activity).runOnUiThread {
                             adapter?.notifyDataSetChanged()

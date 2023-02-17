@@ -33,7 +33,7 @@ class LanguageMenu @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
-                    ProgressEvents.Events.Disconnect -> {
+                    ProgressEvents.lookupEvent("Disconnect") -> {
                         dismissDropDown()
                     }
                 }

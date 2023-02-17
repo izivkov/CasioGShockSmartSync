@@ -40,7 +40,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.Events.ButtonPressedInfoReceived -> {
+                    ProgressEvents.lookupEvent("ButtonPressedInfoReceived") -> {
                         ActionsModel.loadData(context)
 
                         if (api().isActionButtonPressed()) {
@@ -50,7 +50,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
                             ActionsModel.runActionsForAutoTimeSetting(context)
                         }
                     }
-                    ProgressEvents.Events.Disconnect -> {
+                    ProgressEvents.lookupEvent("Disconnect") -> {
                         hide()
                     }
                 }

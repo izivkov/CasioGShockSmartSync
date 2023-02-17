@@ -32,7 +32,7 @@ class SendTimeButton @JvmOverloads constructor(
 
                     GlobalScope.launch {
                         api().setTime(true)
-                        ProgressEvents.onNext(ProgressEvents.Events.HomeTimeUpdated)
+                        ProgressEvents.onNext("HomeTimeUpdated")
                         Utils.snackBar(context, "Time Set on Watch")
                     }
                 }

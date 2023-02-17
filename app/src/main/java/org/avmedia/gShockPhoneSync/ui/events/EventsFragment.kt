@@ -6,12 +6,15 @@
 
 package org.avmedia.gShockPhoneSync.ui.events
 
+import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import org.avmedia.gShockPhoneSync.databinding.FragmentEventsBinding
+import org.avmedia.gshockapi.ProgressEvents
 
 class EventsFragment : Fragment() {
 
@@ -21,12 +24,35 @@ class EventsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    init {
+        ProgressEvents.addEvent("CalendarPermissionsGranted")
+        ProgressEvents.addEvent("CalendarPermissionsNotGranted")
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
+
+        val requestMultiplePermissions = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            if (permissions.all { it.value }) {
+                ProgressEvents.onNext("CalendarPermissionsGranted")
+            } else {
+                ProgressEvents.onNext("CalendarPermissionsNotGranted")
+            }
+        }
+
+        requestMultiplePermissions.launch(
+            arrayOf(
+                Manifest.permission.READ_CALENDAR,
+            )
+        )
+
         val root: View = binding.root
         return root
     }

@@ -6,12 +6,16 @@
 
 package org.avmedia.gShockPhoneSync.ui.time
 
+import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import org.avmedia.gShockPhoneSync.databinding.FragmentTimeBinding
+import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 
 class TimeFragment : Fragment() {
 
@@ -21,14 +25,36 @@ class TimeFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    init {
+        ProgressEvents.addEvent("BasicPermissionsAllGranted")
+        ProgressEvents.addEvent("BasicPermissionsNotAllGranted")
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTimeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-        return root
+
+        val requestMultiplePermissions = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            if (permissions.all { it.value }) {
+                ProgressEvents.onNext("BasicPermissionsAllGranted")
+            } else {
+                ProgressEvents.onNext("BasicPermissionsNotAllGranted")
+            }
+        }
+
+        requestMultiplePermissions.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            )
+        )
+
+        return binding.root
     }
 
     override fun onDestroyView() {
