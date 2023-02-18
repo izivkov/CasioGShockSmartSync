@@ -39,7 +39,6 @@ class EventsFragment : Fragment() {
         val requestMultiplePermissions = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
-
             if (permissions.all { it.value }) {
                 ProgressEvents.onNext("CalendarPermissionsGranted")
             } else {

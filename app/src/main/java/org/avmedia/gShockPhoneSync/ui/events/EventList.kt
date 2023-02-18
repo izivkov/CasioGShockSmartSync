@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -23,13 +25,8 @@ class EventList @JvmOverloads constructor(
         adapter = EventAdapter(EventsModel.events)
         layoutManager = LinearLayoutManager(context)
 
+        listenForUpdateRequest()
         waitForPermissions()
-
-//        var eventsModel = EventsModel
-//        eventsModel.clear()
-//        eventsModel.events.addAll(CalenderEvents.getEventsFromCalendar(context))
-//
-//        listenForUpdateRequest()
     }
 
     private fun waitForPermissions() {
@@ -38,15 +35,10 @@ class EventList @JvmOverloads constructor(
             {
                 when (it) {
                     ProgressEvents.lookupEvent("CalendarPermissionsGranted") -> {
-                        var eventsModel = EventsModel
-                        eventsModel.clear()
-                        eventsModel.events.addAll(CalenderEvents.getEventsFromCalendar(context))
-
+                        EventsModel.refresh(context)
                         (context as Activity).runOnUiThread {
                             adapter?.notifyDataSetChanged()
                         }
-
-                        listenForUpdateRequest()
                     }
                 }
             }, { throwable ->

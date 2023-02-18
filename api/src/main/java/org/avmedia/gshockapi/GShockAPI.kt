@@ -200,7 +200,7 @@ class GShockAPI(private val context: Context) {
                           0x10 17 62 16 05 85 dd 7f ->00<- 03 0f ff ff ff ff 24 00 00 00 // after watch reset
             AUTO-TIME:    0x10 17 62 16 05 85 dd 7f ->03<- 03 0f ff ff ff ff 24 00 00 00 // no button pressed
             */
-            var ret = BluetoothWatch.WATCH_BUTTON.INVALID
+            var ret: BluetoothWatch.WATCH_BUTTON = BluetoothWatch.WATCH_BUTTON.INVALID
 
             if (data != "" && Utils.toIntArray(data).size >= 19) {
                 val bleIntArr = Utils.toIntArray(data)
@@ -212,7 +212,8 @@ class GShockAPI(private val context: Context) {
                 }
             }
 
-            resultQueue.dequeue()?.complete(ret)
+            Timber.d("<<<<<<<<<<<<<<<<<<< _getPressedButton: before dequeue. ret: $ret, type: ${ret::class}")
+            resultQueue.dequeue()!!.complete(ret)
         }
 
         return deferredResultButton.await()

@@ -31,6 +31,7 @@ import kotlin.concurrent.schedule
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
 
     init {
@@ -43,6 +44,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        permissionManager = PermissionManager(this)
+        permissionManager.setupPermissions()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -58,11 +62,15 @@ class MainActivity : AppCompatActivity() {
         // val intent = Intent(this, ForegroundService::class.java)
         // this.startService(intent)
 
-        run()
+        if (permissionManager.hasAllPermissions()) {
+            run()
+        }
         // ApiTest().run(this)
     }
 
     private fun run() {
+
+        Timber.d("---------------------  run() called.")
 
         GlobalScope.launch {
             waitForConnectionCached()
@@ -77,6 +85,14 @@ class MainActivity : AppCompatActivity() {
     override fun onUserInteraction() {
         super.onUserInteraction()
         InactivityWatcher.resetTimer(this)
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionManager.onRequestPermissionsResult(permissions, grantResults)
     }
 
     private fun createAppEventsSubscription() {
@@ -94,7 +110,8 @@ class MainActivity : AppCompatActivity() {
 
                         Utils.snackBar(this, "Disconnected from watch!")
                         val event = ProgressEvents.lookupEvent("Disconnect")
-                        val device = ProgressEvents.lookupEvent("Disconnect")?.payload as BluetoothDevice
+                        val device =
+                            ProgressEvents.lookupEvent("Disconnect")?.payload as BluetoothDevice
                         api().teardownConnection(device)
 
                         // restart after 5 seconds
@@ -109,25 +126,33 @@ class MainActivity : AppCompatActivity() {
                         run()
                     }
 
-                    ProgressEvents.lookupEvent("BasicPermissionsNotAllGranted") -> {
-                        Utils.snackBar(this, "Permissions not granted...Exiting...")
-                        this.finish()
+                    ProgressEvents.lookupEvent("FineLocationPermissionNotGranted") -> {
+                        Utils.snackBar(this, "\"Fine Location\" Permission Not Granted! Clear the App's Cache to try again.")
+                        Timer("SettingUp", false).schedule(6000) {
+                            finish()
+                        }
                     }
 
-                    ProgressEvents.lookupEvent("BasicPermissionsAllGranted") -> {
-                        Timber.i("BasicPermissionsAllGranted")
-                        // run()
+                    ProgressEvents.lookupEvent("FineLocationPermissionGranted") -> {
+                        Timber.i("FineLocationPermissionGranted")
+                        run()
                     }
 
                     ProgressEvents.lookupEvent("ActionsPermissionsNotGranted") -> {
-                        Utils.snackBar(this, "Actions not granted...Cannot access the Actions screen...")
+                        Utils.snackBar(
+                            this,
+                            "Actions not granted...Cannot access the Actions screen..."
+                        )
                         val navController =
                             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
                         navController.navigate(R.id.navigation_home)
                     }
 
                     ProgressEvents.lookupEvent("CalendarPermissionsNotGranted") -> {
-                        Utils.snackBar(this, "Calendar not granted...Cannot access the Actions screen...")
+                        Utils.snackBar(
+                            this,
+                            "Calendar not granted...Cannot access the Actions screen..."
+                        )
                         val navController =
                             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
                         navController.navigate(R.id.navigation_home)
@@ -139,7 +164,8 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate(R.id.navigation_home)
                     }
                 }
-            }, { throwable ->
+            },
+            { throwable ->
                 Timber.d("Got error on subscribe: $throwable")
                 throwable.printStackTrace()
             })

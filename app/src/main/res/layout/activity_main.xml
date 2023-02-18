@@ -48,7 +48,7 @@
             android:contentDescription="@string/info"
             android:layout_margin="20dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_help_24dp"
+            android:src="@drawable/info_48px"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:infoText="@string/connection_screen_info"

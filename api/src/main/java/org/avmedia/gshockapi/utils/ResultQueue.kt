@@ -1,17 +1,18 @@
 package org.avmedia.gshockapi.utils
 
+import timber.log.Timber
+
 class ResultQueue<T> {
     private var queue: MutableList<T> = mutableListOf()
 
     fun enqueue(element: T) {
-        if (size() > 0) {
-            clear()
-        }
         queue.add(element)
     }
 
     fun dequeue(): T? {
+
         return if (queue.isEmpty()) {
+            Timber.d("*** dequeue: Nothing to dequeue ***")
             null
         } else {
             queue.removeAt(0)
