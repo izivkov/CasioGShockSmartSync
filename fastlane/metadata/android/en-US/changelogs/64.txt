@@ -1,0 +1,5 @@
+- Improved handling of permissions
+- Sped up connection
+- Fix possible bug when connecting for the first time
+
+
