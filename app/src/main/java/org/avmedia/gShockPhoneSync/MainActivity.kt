@@ -7,8 +7,11 @@
 package org.avmedia.gShockPhoneSync
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -62,24 +65,70 @@ class MainActivity : AppCompatActivity() {
         // val intent = Intent(this, ForegroundService::class.java)
         // this.startService(intent)
 
-        if (permissionManager.hasAllPermissions()) {
-            run()
-        }
         // ApiTest().run(this)
     }
 
     private fun run() {
 
-        Timber.d("---------------------  run() called.")
-
         GlobalScope.launch {
+            Timber.i("*** Started running() ***")
             waitForConnectionCached()
+        }
+    }
+
+    private fun runWithChecks () {
+
+        val navController =
+            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+
+        // Only start run() from main (Time) fragment.
+        // If we got here by granting permissions in other fragments, like events, do not start again.
+        if (navController.currentDestination?.label != "Time") {
+            return
+        }
+
+        if(!isBluetoothEnabled()!!) {
+            turnOnBLE()
+            return
+        }
+
+        if(isBluetoothEnabled() == true && permissionManager.hasAllPermissions()) {
+            run()
         }
     }
 
     @SuppressLint("RestrictedApi")
     override fun onResume() {
         super.onResume()
+
+        // This method is called whe the main view is created,
+        // and also when we complete a dialog for granting permissions.
+        // We want to sun the app only from the main screen, so
+        // we do some checks in the runWithChecks() method.
+        runWithChecks()
+    }
+
+    @SuppressLint("MissingPermission")
+    fun turnOnBLE() {
+        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
+        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+        if (bluetoothAdapter == null) {
+            Utils.snackBar(this, "Sorry, your device does not support Bluetooth. Exiting...")
+            Timer("SettingUp", false).schedule(6000) { finish() }
+        }
+
+        val REQUEST_ENABLE_BT = 99
+        if (bluetoothAdapter?.isEnabled == false) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+        }
+    }
+
+    private fun isBluetoothEnabled ():Boolean? {
+        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
+        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+
+        return bluetoothAdapter?.isEnabled
     }
 
     override fun onUserInteraction() {
@@ -118,16 +167,19 @@ class MainActivity : AppCompatActivity() {
                         val reconnectScheduler: ScheduledExecutorService =
                             Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
-                            run()
+                            runWithChecks()
                         }, 5L, TimeUnit.SECONDS)
                     }
 
                     ProgressEvents.lookupEvent("ConnectionFailed") -> {
-                        run()
+                        runWithChecks()
                     }
 
                     ProgressEvents.lookupEvent("FineLocationPermissionNotGranted") -> {
-                        Utils.snackBar(this, "\"Fine Location\" Permission Not Granted! Clear the App's Cache to try again.")
+                        Utils.snackBar(
+                            this,
+                            "\"Fine Location\" Permission Not Granted! Clear the App's Cache to try again."
+                        )
                         Timer("SettingUp", false).schedule(6000) {
                             finish()
                         }
@@ -135,13 +187,11 @@ class MainActivity : AppCompatActivity() {
 
                     ProgressEvents.lookupEvent("FineLocationPermissionGranted") -> {
                         Timber.i("FineLocationPermissionGranted")
-                        run()
                     }
 
                     ProgressEvents.lookupEvent("ActionsPermissionsNotGranted") -> {
                         Utils.snackBar(
-                            this,
-                            "Actions not granted...Cannot access the Actions screen..."
+                            this, "Actions not granted...Cannot access the Actions screen..."
                         )
                         val navController =
                             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
@@ -150,8 +200,7 @@ class MainActivity : AppCompatActivity() {
 
                     ProgressEvents.lookupEvent("CalendarPermissionsNotGranted") -> {
                         Utils.snackBar(
-                            this,
-                            "Calendar not granted...Cannot access the Actions screen..."
+                            this, "Calendar not granted...Cannot access the Actions screen..."
                         )
                         val navController =
                             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
@@ -164,8 +213,7 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate(R.id.navigation_home)
                     }
                 }
-            },
-            { throwable ->
+            }, { throwable ->
                 Timber.d("Got error on subscribe: $throwable")
                 throwable.printStackTrace()
             })

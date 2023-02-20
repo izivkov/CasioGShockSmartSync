@@ -82,6 +82,7 @@ object Connection : IConnection {
         deviceGattMap[device]?.services
 
     fun connect(device: BluetoothDevice, context: Context) {
+        Timber.i("---------------------- connect ------------------------")
         if (device.isConnected()) {
             Timber.e("Already connected to ${device.address}!")
         } else {

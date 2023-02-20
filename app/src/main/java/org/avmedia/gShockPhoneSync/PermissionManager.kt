@@ -16,8 +16,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
+import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 
 data class PermissionManager(val context: Context) {
 
@@ -50,14 +52,6 @@ data class PermissionManager(val context: Context) {
         }
     }
 
-    fun setupPermissions(strArray: Array<String>) {
-        if (!hasPermissions(context, strArray)) {
-            ActivityCompat.requestPermissions(context as Activity, strArray, PERMISSION_ALL)
-        } else {
-            ProgressEvents.onNext("FineLocationPermissionGranted")
-        }
-    }
-
     fun hasAllPermissions(): Boolean {
         return hasPermissions(context, PERMISSIONS)
     }
@@ -71,6 +65,7 @@ data class PermissionManager(val context: Context) {
                     enableBtIntent,
                     ENABLE_BLUETOOTH_REQUEST_CODE
                 )
+                Timber.i("Return from startActivityForResult")
             } catch (e: SecurityException) {
                 Utils.snackBar(context, "Please turn on BlueTooth and restart the app...")
                 (context as Activity).finish()

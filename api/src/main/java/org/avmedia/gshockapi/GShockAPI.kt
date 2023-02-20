@@ -100,10 +100,7 @@ class GShockAPI(private val context: Context) {
                     lookupEvent("ConnectionSetupComplete") -> {
                         val device =
                             ProgressEvents.getPayload("ConnectionSetupComplete") as BluetoothDevice
-
                         DeviceCharacteristics.init(device)
-                        WatchFactory.watch.init()
-                        Connection.enableNotifications()
 
                         resultQueue.dequeue()?.complete("Connected")
                     }
@@ -115,12 +112,15 @@ class GShockAPI(private val context: Context) {
         }
 
         waitForConnectionSetupComplete()
+
         return deferredResult.await()
     }
 
     private suspend fun init() {
+        WatchFactory.watch.init()
         resultQueue.clear()
         getPressedButton()
+
         ProgressEvents.onNext("ButtonPressedInfoReceived")
         getAppInfo() // this call re-enables lower-right button after watch reset.
         ProgressEvents.onNext("WatchInitializationCompleted")
@@ -211,8 +211,6 @@ class GShockAPI(private val context: Context) {
                     else -> BluetoothWatch.WATCH_BUTTON.INVALID
                 }
             }
-
-            Timber.d("<<<<<<<<<<<<<<<<<<< _getPressedButton: before dequeue. ret: $ret, type: ${ret::class}")
             resultQueue.dequeue()!!.complete(ret)
         }
 

@@ -27,6 +27,8 @@ data class BleScannerLocal(val context: Context) {
         bluetoothManager.adapter
     }
 
+    private val foundDevices = mutableSetOf<String>()
+
     private val bleScanner by lazy {
         bluetoothAdapter.bluetoothLeScanner
     }
@@ -39,6 +41,9 @@ data class BleScannerLocal(val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun startConnection(deviceId: String?) {
+
+        foundDevices.clear()
+
         var device: BluetoothDevice? = null
         if (!deviceId.isNullOrEmpty()) {
             device = bluetoothAdapter.getRemoteDevice(deviceId)
@@ -101,6 +106,9 @@ Characteristics:
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
+
+            if (foundDevices.contains(result.device.toString())) { return }
+            foundDevices.add(result.device.toString())
 
             stopBleScan()
             Connection.connect(result.device, context)
