@@ -6,15 +6,20 @@
 
 package org.avmedia.gShockPhoneSync
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -36,6 +41,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
+
+    var requestBluetooth = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            Utils.snackBar(this, "Bluetooth enabled.")
+        }else{
+            Utils.snackBar(this, "Please enable Bluetooth in your settings and ty again")
+            finish()
+        }
+    }
 
     init {
         instance = this
@@ -76,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun runWithChecks () {
+    private fun runWithChecks() {
 
         val navController =
             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
@@ -87,12 +101,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if(!isBluetoothEnabled()!!) {
+        if (!isBluetoothEnabled()!!) {
             turnOnBLE()
             return
         }
 
-        if(isBluetoothEnabled() == true && permissionManager.hasAllPermissions()) {
+        if (isBluetoothEnabled() == true && permissionManager.hasAllPermissions()) {
             run()
         }
     }
@@ -108,8 +122,8 @@ class MainActivity : AppCompatActivity() {
         runWithChecks()
     }
 
-    @SuppressLint("MissingPermission")
-    fun turnOnBLE() {
+    // @SuppressLint("MissingPermission")
+    private fun turnOnBLE() {
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
         if (bluetoothAdapter == null) {
@@ -117,14 +131,24 @@ class MainActivity : AppCompatActivity() {
             Timer("SettingUp", false).schedule(6000) { finish() }
         }
 
-        val REQUEST_ENABLE_BT = 99
+        //val REQUEST_ENABLE_BT = 99
         if (bluetoothAdapter?.isEnabled == false) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return
+                }
+            }
+            // startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            requestBluetooth.launch(enableBtIntent)
         }
     }
 
-    private fun isBluetoothEnabled ():Boolean? {
+    private fun isBluetoothEnabled(): Boolean? {
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
