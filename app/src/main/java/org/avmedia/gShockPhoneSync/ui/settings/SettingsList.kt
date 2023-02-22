@@ -52,7 +52,7 @@ class SettingsList @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     // Somebody has made a change to the model...need to update the UI
-                    ProgressEvents.lookupEvent("NeedToUpdateUI") -> {
+                    ProgressEvents["NeedToUpdateUI"] -> {
                         updateUI()
                     }
                 }

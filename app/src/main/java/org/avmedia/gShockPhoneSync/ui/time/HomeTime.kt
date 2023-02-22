@@ -41,7 +41,7 @@ open class HomeTime @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
-                    ProgressEvents.lookupEvent("HomeTimeUpdated") -> {
+                    ProgressEvents["HomeTimeUpdated"] -> {
                         runBlocking {
                             val homeTime = api().getHomeTime()
                             text = homeTime

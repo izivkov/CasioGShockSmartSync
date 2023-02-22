@@ -28,13 +28,13 @@ class ConnectionSpinner @JvmOverloads constructor(
 
             {
                 when (it) {
-                    ProgressEvents.lookupEvent("ConnectionStarted") -> {
+                    ProgressEvents["ConnectionStarted"] -> {
                         visibility = View.VISIBLE
                     }
 
-                    ProgressEvents.lookupEvent("WatchInitializationCompleted"),
-                    ProgressEvents.lookupEvent("ConnectionFailed"),
-                    ProgressEvents.lookupEvent("Disconnect") -> {
+                    ProgressEvents["WatchInitializationCompleted"],
+                    ProgressEvents["ConnectionFailed"],
+                    ProgressEvents["Disconnect"] -> {
                         visibility = View.INVISIBLE
                     }
                 }

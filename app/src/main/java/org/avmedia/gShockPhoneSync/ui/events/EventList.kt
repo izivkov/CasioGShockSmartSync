@@ -34,7 +34,7 @@ class EventList @JvmOverloads constructor(
 
             {
                 when (it) {
-                    ProgressEvents.lookupEvent("CalendarPermissionsGranted") -> {
+                    ProgressEvents["CalendarPermissionsGranted"] -> {
                         EventsModel.refresh(context)
                         (context as Activity).runOnUiThread {
                             adapter?.notifyDataSetChanged()
@@ -53,7 +53,7 @@ class EventList @JvmOverloads constructor(
             .doOnNext {
                 when (it) {
                     // Somebody has made a change to the model...need to update the UI
-                    ProgressEvents.lookupEvent("CalendarUpdated") -> {
+                    ProgressEvents["CalendarUpdated"] -> {
                         EventsModel.refresh(context)
                         (context as Activity).runOnUiThread {
                             adapter?.notifyDataSetChanged()

@@ -31,18 +31,18 @@ class ConnectionLayout @JvmOverloads constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 when (it) {
-                    ProgressEvents.lookupEvent("ButtonPressedInfoReceived") -> {
+                    ProgressEvents["ButtonPressedInfoReceived"] -> {
                         if (api().isActionButtonPressed()) {
                             hide()
                         }
                     }
-                    ProgressEvents.lookupEvent("WatchInitializationCompleted") -> {
+                    ProgressEvents["WatchInitializationCompleted"] -> {
                         if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
                             hide()
                         }
                     }
 
-                    ProgressEvents.lookupEvent("Disconnect") -> {
+                    ProgressEvents["Disconnect"] -> {
                         show()
                     }
                 }

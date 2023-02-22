@@ -173,18 +173,18 @@ class MainActivity : AppCompatActivity() {
 
             {
                 when (it) {
-                    ProgressEvents.lookupEvent("ConnectionSetupComplete") -> {
+                    ProgressEvents["ConnectionSetupComplete"] -> {
                         InactivityWatcher.start(this)
                     }
 
-                    ProgressEvents.lookupEvent("Disconnect") -> {
+                    ProgressEvents["Disconnect"] -> {
                         Timber.i("onDisconnect")
                         InactivityWatcher.cancel()
 
                         Utils.snackBar(this, "Disconnected from watch!")
-                        val event = ProgressEvents.lookupEvent("Disconnect")
+                        val event = ProgressEvents["Disconnect"]
                         val device =
-                            ProgressEvents.lookupEvent("Disconnect")?.payload as BluetoothDevice
+                            ProgressEvents["Disconnect"]?.payload as BluetoothDevice
                         api().teardownConnection(device)
 
                         // restart after 5 seconds
@@ -195,11 +195,11 @@ class MainActivity : AppCompatActivity() {
                         }, 5L, TimeUnit.SECONDS)
                     }
 
-                    ProgressEvents.lookupEvent("ConnectionFailed") -> {
+                    ProgressEvents["ConnectionFailed"] -> {
                         runWithChecks()
                     }
 
-                    ProgressEvents.lookupEvent("FineLocationPermissionNotGranted") -> {
+                    ProgressEvents["FineLocationPermissionNotGranted"] -> {
                         Utils.snackBar(
                             this,
                             "\"Fine Location\" Permission Not Granted! Clear the App's Cache to try again."
@@ -209,11 +209,11 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    ProgressEvents.lookupEvent("FineLocationPermissionGranted") -> {
+                    ProgressEvents["FineLocationPermissionGranted"] -> {
                         Timber.i("FineLocationPermissionGranted")
                     }
 
-                    ProgressEvents.lookupEvent("ActionsPermissionsNotGranted") -> {
+                    ProgressEvents["ActionsPermissionsNotGranted"] -> {
                         Utils.snackBar(
                             this, "Actions not granted...Cannot access the Actions screen..."
                         )
@@ -222,7 +222,7 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate(R.id.navigation_home)
                     }
 
-                    ProgressEvents.lookupEvent("CalendarPermissionsNotGranted") -> {
+                    ProgressEvents["CalendarPermissionsNotGranted"] -> {
                         Utils.snackBar(
                             this, "Calendar not granted...Cannot access the Actions screen..."
                         )
@@ -231,7 +231,7 @@ class MainActivity : AppCompatActivity() {
                         navController.navigate(R.id.navigation_home)
                     }
 
-                    ProgressEvents.lookupEvent("WatchInitializationCompleted") -> {
+                    ProgressEvents["WatchInitializationCompleted"] -> {
                         val navController =
                             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
                         navController.navigate(R.id.navigation_home)

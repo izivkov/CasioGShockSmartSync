@@ -39,12 +39,12 @@ class MainLayout @JvmOverloads constructor(
         ProgressEvents.subscriber.start(this.javaClass.simpleName,
             {
                 when (it) {
-                    ProgressEvents.lookupEvent("WatchInitializationCompleted") -> {
+                    ProgressEvents["WatchInitializationCompleted"] -> {
                         if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
                             show()
                         }
                     }
-                    ProgressEvents.lookupEvent("Disconnect") -> {
+                    ProgressEvents["Disconnect"] -> {
                         hide()
                     }
                 }

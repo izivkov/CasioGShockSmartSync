@@ -31,7 +31,7 @@ class ActionList @JvmOverloads constructor(
             this.javaClass.simpleName,
             {
                 when (it) {
-                    ProgressEvents.lookupEvent("Disconnect") -> {
+                    ProgressEvents["Disconnect"] -> {
                         shutdown()
                     }
                 }

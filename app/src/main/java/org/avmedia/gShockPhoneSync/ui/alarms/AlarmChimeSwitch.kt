@@ -31,7 +31,7 @@ class AlarmChimeSwitch @JvmOverloads constructor(
 
             {
                 when (it) {
-                    ProgressEvents.lookupEvent("AlarmDataLoaded") -> {
+                    ProgressEvents["AlarmDataLoaded"] -> {
                         isChecked = AlarmsModel.alarms[0].hasHourlyChime
                     }
                 }
