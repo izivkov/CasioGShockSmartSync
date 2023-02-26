@@ -30,6 +30,8 @@ class SendTimeButton @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
 
+                    Utils.snackBar(context, "Setting time...")
+
                     GlobalScope.launch {
                         api().setTime(true)
                         ProgressEvents.onNext("HomeTimeUpdated")

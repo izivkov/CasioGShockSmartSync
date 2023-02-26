@@ -59,13 +59,13 @@ object ActionsModel {
         abstract fun run(context: Context)
 
         open fun save(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.canonicalName + ".enabled"
             val value = enabled
             LocalDataStorage.put(key, value.toString(), context)
         }
 
         open fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.canonicalName + ".enabled"
             enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
 
@@ -78,14 +78,14 @@ object ActionsModel {
         Action(title, enabled) {
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
             // sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
             api().setEvents(EventsModel.events)
             Utils.snackBar(context, "Events Sent to Watch")
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.canonicalName + ".enabled"
             enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
     }
@@ -94,12 +94,12 @@ object ActionsModel {
         Action(title, enabled) {
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
             Flashlight.toggle(context)
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.canonicalName + ".enabled"
             enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
     }
@@ -108,14 +108,14 @@ object ActionsModel {
         Action(title, enabled) {
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
             runBlocking {
                 api().setTime(true)
             }
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.canonicalName + ".enabled"
             enabled = LocalDataStorage.get(key, "true", context).toBoolean()
         }
     }
@@ -123,14 +123,14 @@ object ActionsModel {
     class SetLocationAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
         }
     }
 
     class StartVoiceAssistAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled, false, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
             try {
                 context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             } catch (e: ActivityNotFoundException) {
@@ -142,7 +142,7 @@ object ActionsModel {
     class Separator(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
         }
 
         override fun load(context: Context) {
@@ -153,7 +153,7 @@ object ActionsModel {
     class MapAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
         }
     }
 
@@ -167,7 +167,7 @@ object ActionsModel {
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
 
             val dialIntent =
                 Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -177,13 +177,13 @@ object ActionsModel {
 
         override fun save(context: Context) {
             super.save(context)
-            val key = this.javaClass.simpleName + ".phoneNumber"
+            val key = this.javaClass.canonicalName + ".phoneNumber"
             LocalDataStorage.put(key, phoneNumber.toString(), context)
         }
 
         override fun load(context: Context) {
             super.load(context)
-            val key = this.javaClass.simpleName + ".phoneNumber"
+            val key = this.javaClass.canonicalName + ".phoneNumber"
             phoneNumber = LocalDataStorage.get(key, "", context).toString()
         }
 
@@ -211,13 +211,13 @@ object ActionsModel {
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
 
             // Since we are running this action in the UI Thread (foreground), it will interfere the ProgressEvents.
             // Some observers, like the MainActivity will not be able to receive Disconnect messages.
             // Therefore, wait for the Disconnect message and then run the action.
             fun createAppEventsSubscription() {
-                ProgressEvents.subscriber.start(this.javaClass.simpleName,
+                ProgressEvents.subscriber.start(this.javaClass.canonicalName,
 
                     {
                         when (it) {
@@ -241,13 +241,13 @@ object ActionsModel {
 
         override fun save(context: Context) {
             super.save(context)
-            val key = this.javaClass.simpleName + ".cameraOrientation"
+            val key = this.javaClass.canonicalName + ".cameraOrientation"
             LocalDataStorage.put(key, cameraOrientation.toString(), context)
         }
 
         override fun load(context: Context) {
             super.load(context)
-            val key = this.javaClass.simpleName + ".cameraOrientation"
+            val key = this.javaClass.canonicalName + ".cameraOrientation"
             cameraOrientation = if (LocalDataStorage.get(key, "BACK", context)
                     .toString() == "BACK"
             ) CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
@@ -266,11 +266,11 @@ object ActionsModel {
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.canonicalName}")
         }
 
         override fun save(context: Context) {
-            val key = this.javaClass.simpleName + ".emailAddress"
+            val key = this.javaClass.canonicalName + ".emailAddress"
             LocalDataStorage.put(key, emailAddress.toString(), context)
             super.save(context)
         }
@@ -278,7 +278,7 @@ object ActionsModel {
         override fun load(context: Context) {
             super.load(context)
 
-            val key = this.javaClass.simpleName + ".emailAddress"
+            val key = this.javaClass.canonicalName + ".emailAddress"
             emailAddress = LocalDataStorage.get(key, "", context).toString()
             extraText =
                 "Sent by G-shock App:\n https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"

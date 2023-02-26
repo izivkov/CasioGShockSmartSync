@@ -28,7 +28,7 @@ class ActionList @JvmOverloads constructor(
 
     private fun watchForDisconnect() {
         ProgressEvents.subscriber.start(
-            this.javaClass.simpleName,
+            this.javaClass.canonicalName,
             {
                 when (it) {
                     ProgressEvents["Disconnect"] -> {

@@ -30,7 +30,7 @@ class EventList @JvmOverloads constructor(
     }
 
     private fun waitForPermissions() {
-        ProgressEvents.subscriber.start(this.javaClass.simpleName,
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
 
             {
                 when (it) {

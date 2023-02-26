@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.simpleName,
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
 
             {
                 when (it) {

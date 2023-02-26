@@ -45,7 +45,7 @@ open class Button @JvmOverloads constructor(
     @SuppressLint("CheckResult")
     protected fun subscribe(subject: String, onDataReceived: (String) -> Unit) {
         WatchDataEvents.addSubject(subject)
-        WatchDataEvents.subscribe(this.javaClass.simpleName, subject, onNext = {
+        WatchDataEvents.subscribe(this.javaClass.canonicalName, subject, onNext = {
             onDataReceived(it as String)
         })
     }

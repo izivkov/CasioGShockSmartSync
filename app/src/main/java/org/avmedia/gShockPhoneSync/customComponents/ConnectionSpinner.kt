@@ -24,7 +24,7 @@ class ConnectionSpinner @JvmOverloads constructor(
 
     private fun createAppEventsSubscription() {
         ProgressEvents.subscriber.start(
-            this.javaClass.simpleName,
+            this.javaClass.canonicalName,
 
             {
                 when (it) {

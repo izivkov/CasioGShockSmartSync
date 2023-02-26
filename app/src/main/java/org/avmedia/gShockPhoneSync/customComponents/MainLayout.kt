@@ -36,7 +36,7 @@ class MainLayout @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.simpleName,
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
             {
                 when (it) {
                     ProgressEvents["WatchInitializationCompleted"] -> {
