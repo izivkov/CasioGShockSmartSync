@@ -12,8 +12,8 @@ import android.view.MotionEvent
 import android.view.View
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.Settings
 
 
 class AutoFillValuesButton @JvmOverloads constructor(

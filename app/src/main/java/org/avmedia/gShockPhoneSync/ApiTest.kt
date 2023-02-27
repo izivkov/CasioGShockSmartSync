@@ -10,8 +10,8 @@ import org.avmedia.gShockPhoneSync.ui.events.CalenderEvents
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.Alarm
-import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.Settings
+import org.avmedia.gshockapi.casio.BluetoothWatch
 
 class ApiTest {
     fun run(context: Context) {

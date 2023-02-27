@@ -42,14 +42,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
 
-    var requestBluetooth = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            Utils.snackBar(this, "Bluetooth enabled.")
-        }else{
-            Utils.snackBar(this, "Please enable Bluetooth in your settings and ty again")
-            finish()
+    var requestBluetooth =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                Utils.snackBar(this, "Bluetooth enabled.")
+            } else {
+                Utils.snackBar(this, "Please enable Bluetooth in your settings and ty again")
+                finish()
+            }
         }
-    }
 
     init {
         instance = this

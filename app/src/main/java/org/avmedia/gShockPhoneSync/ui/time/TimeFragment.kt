@@ -6,16 +6,12 @@
 
 package org.avmedia.gShockPhoneSync.ui.time
 
-import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.PermissionRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import org.avmedia.gShockPhoneSync.databinding.FragmentTimeBinding
-import org.avmedia.gshockapi.ProgressEvents
 
 class TimeFragment : Fragment() {
 

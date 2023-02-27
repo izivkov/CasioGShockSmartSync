@@ -15,15 +15,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.util.*
-import kotlin.concurrent.schedule
 
 data class PermissionManager(val context: Context) {
 

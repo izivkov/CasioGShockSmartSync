@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.alarms
 
 import android.content.Context
 import android.util.AttributeSet
+import android.widget.CompoundButton.OnCheckedChangeListener
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
