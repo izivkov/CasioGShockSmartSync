@@ -85,8 +85,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun run() {
 
-        GlobalScope.launch {
-            Timber.i("*** Started running() ***")
+        val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+        scope.launch {
+            Timber.i("*** Waiting for connection... ***")
             waitForConnectionCached()
         }
     }
