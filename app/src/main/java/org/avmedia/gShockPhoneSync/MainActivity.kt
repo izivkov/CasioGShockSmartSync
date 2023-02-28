@@ -117,9 +117,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        // This method is called whe the main view is created,
+        // This method is called when the main view is created,
         // and also when we complete a dialog for granting permissions.
-        // We want to sun the app only from the main screen, so
+        // We want to run the app only from the main screen, so
         // we do some checks in the runWithChecks() method.
         runWithChecks()
     }
