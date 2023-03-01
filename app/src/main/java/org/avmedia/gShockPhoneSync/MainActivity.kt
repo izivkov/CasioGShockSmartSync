@@ -209,7 +209,7 @@ class MainActivity : AppCompatActivity() {
                         val reconnectScheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
                             runWithChecks()
-                        }, 2L, TimeUnit.SECONDS)
+                        }, 3L, TimeUnit.SECONDS)
                     }
 
                     ProgressEvents["ActionsPermissionsNotGranted"] -> {
