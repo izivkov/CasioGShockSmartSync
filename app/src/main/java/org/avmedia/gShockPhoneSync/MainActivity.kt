@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if(api().isConnected()) {
+        if (api().isConnected()) {
             return
         }
 

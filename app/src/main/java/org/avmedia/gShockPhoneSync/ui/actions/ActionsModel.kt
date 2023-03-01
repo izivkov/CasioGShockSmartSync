@@ -222,7 +222,7 @@ object ActionsModel {
             }
         }
 
-        private fun runWaitForDisconnect(context:Context) {
+        private fun runWaitForDisconnect(context: Context) {
             Timber.d("running ${this.javaClass.canonicalName}")
 
             // Since we are running this action in the UI Thread (foreground), it will interfere the ProgressEvents.

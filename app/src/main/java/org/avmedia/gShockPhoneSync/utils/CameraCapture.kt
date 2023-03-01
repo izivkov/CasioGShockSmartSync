@@ -28,7 +28,6 @@ import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_16_9_
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_4_3_VALUE
 import org.avmedia.gShockPhoneSync.utils.Utils.contentView
 import timber.log.Timber
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
@@ -83,7 +82,11 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle((context as AppCompatActivity), cameraSelector, imageCapture)
+                cameraProvider.bindToLifecycle(
+                    (context as AppCompatActivity),
+                    cameraSelector,
+                    imageCapture
+                )
 
                 takePhoto()
 

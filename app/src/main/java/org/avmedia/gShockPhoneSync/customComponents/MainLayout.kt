@@ -18,7 +18,6 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api

@@ -26,7 +26,7 @@ class EventList @JvmOverloads constructor(
     }
 
     private fun waitForPermissions() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName+"waitForPermissions",
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName + "waitForPermissions",
 
             {
                 when (it) {
