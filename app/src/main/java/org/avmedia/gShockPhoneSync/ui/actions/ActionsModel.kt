@@ -158,9 +158,7 @@ object ActionsModel {
     }
 
     class PhoneDialAction(
-        override var title: String,
-        override var enabled: Boolean,
-        var phoneNumber: String
+        override var title: String, override var enabled: Boolean, var phoneNumber: String
     ) : Action(title, enabled, true) {
         init {
             Timber.d("PhoneDialAction")
@@ -211,6 +209,20 @@ object ActionsModel {
         }
 
         override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.canonicalName}")
+            runNormal(context)
+        }
+
+        private fun runNormal(context: Context) {
+            (context as Activity).runOnUiThread {
+                val cameraSelector: CameraSelector =
+                    if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
+                CameraCapture(context, cameraSelector).start()
+                Timber.d("Photo taken...")
+            }
+        }
+
+        private fun runWaitForDisconnect(context:Context) {
             Timber.d("running ${this.javaClass.canonicalName}")
 
             // Since we are running this action in the UI Thread (foreground), it will interfere the ProgressEvents.
@@ -315,11 +327,10 @@ object ActionsModel {
         const val RATIO_16_9_VALUE = 16.0 / 9.0
 
         /** Helper function used to create a timestamped file */
-        fun createFile(baseFolder: File, format: String, extension: String) =
-            File(
-                baseFolder, SimpleDateFormat(format, Locale.US)
-                    .format(System.currentTimeMillis()) + extension
-            )
+        fun createFile(baseFolder: File, format: String, extension: String) = File(
+            baseFolder,
+            SimpleDateFormat(format, Locale.US).format(System.currentTimeMillis()) + extension
+        )
 
         fun getOutputDirectory(context: Context): File {
             val appContext = context.applicationContext
@@ -328,8 +339,7 @@ object ActionsModel {
                 File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() }
             }
 
-            return if (mediaDir != null && mediaDir.exists())
-                mediaDir else appContext.filesDir
+            return if (mediaDir != null && mediaDir.exists()) mediaDir else appContext.filesDir
         }
     }
 
@@ -346,8 +356,7 @@ object ActionsModel {
             action.run(context)
         } catch (e: SecurityException) {
             Utils.snackBar(
-                context,
-                "You have not given permission to to run action ${action.title}."
+                context, "You have not given permission to to run action ${action.title}."
             )
         } catch (e: Exception) {
             Utils.snackBar(context, "Could not run action ${action.title}. Reason: $e")

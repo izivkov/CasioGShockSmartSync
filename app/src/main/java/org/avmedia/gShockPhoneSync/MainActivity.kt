@@ -31,9 +31,6 @@ import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
 class MainActivity : AppCompatActivity() {
@@ -64,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         permissionManager = PermissionManager(this)
-        permissionManager.setupPermissions()
+        // permissionManager.setupPermissions()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -87,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
         val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         scope.launch {
-            Timber.i("*** Waiting for connection... ***")
+            Timber.i("=============== >>>> *** Waiting for connection... ***")
             waitForConnectionCached()
         }
     }
@@ -97,20 +94,21 @@ class MainActivity : AppCompatActivity() {
         val navController =
             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
 
-        // Only start run() from main (Time) fragment.
-        // If we got here by granting permissions in other fragments, like events, do not start again.
-        if (navController.currentDestination?.label != "Time") {
-            return
-        }
-
         if (!isBluetoothEnabled()!!) {
             turnOnBLE()
             return
         }
 
-        if (isBluetoothEnabled() == true && permissionManager.hasAllPermissions()) {
-            run()
+        if (!permissionManager.hasAllPermissions()) {
+            permissionManager.setupPermissions()
+            return
         }
+
+        if(api().isConnected()) {
+            return
+        }
+
+        run()
     }
 
     @SuppressLint("RestrictedApi")
@@ -122,6 +120,11 @@ class MainActivity : AppCompatActivity() {
         // We want to run the app only from the main screen, so
         // we do some checks in the runWithChecks() method.
         runWithChecks()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Timber.i("On pause...")
     }
 
     // @SuppressLint("MissingPermission")
@@ -179,24 +182,6 @@ class MainActivity : AppCompatActivity() {
                         InactivityWatcher.start(this)
                     }
 
-                    ProgressEvents["Disconnect"] -> {
-                        Timber.i("onDisconnect")
-                        InactivityWatcher.cancel()
-
-                        Utils.snackBar(this, "Disconnected from watch!")
-                        val event = ProgressEvents["Disconnect"]
-                        val device =
-                            ProgressEvents["Disconnect"]?.payload as BluetoothDevice
-                        api().teardownConnection(device)
-
-                        // restart after 5 seconds
-                        val reconnectScheduler: ScheduledExecutorService =
-                            Executors.newSingleThreadScheduledExecutor()
-                        reconnectScheduler.schedule({
-                            runWithChecks()
-                        }, 5L, TimeUnit.SECONDS)
-                    }
-
                     ProgressEvents["ConnectionFailed"] -> {
                         runWithChecks()
                     }
@@ -213,6 +198,19 @@ class MainActivity : AppCompatActivity() {
 
                     ProgressEvents["FineLocationPermissionGranted"] -> {
                         Timber.i("FineLocationPermissionGranted")
+                    }
+
+                    ProgressEvents["Disconnect"] -> {
+                        Timber.i("onDisconnect")
+                        InactivityWatcher.cancel()
+
+                        Utils.snackBar(this, "Disconnected from watch!")
+                        val event = ProgressEvents["Disconnect"]
+                        val device =
+                            ProgressEvents["Disconnect"]?.payload as BluetoothDevice
+                        api().teardownConnection(device)
+
+                        runWithChecks()
                     }
 
                     ProgressEvents["ActionsPermissionsNotGranted"] -> {

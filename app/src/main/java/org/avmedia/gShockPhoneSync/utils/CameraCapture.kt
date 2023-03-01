@@ -43,7 +43,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
     private var cameraManager: CameraManager? = context.getSystemService() as CameraManager?
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
-    private var imageAnalyzer: ImageAnalysis? = null
     private lateinit var viewBinding: FragmentActionsBinding
     private var currentContextView = (context as Activity).contentView
 
@@ -79,24 +78,12 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
                 .setTargetRotation(rotation)
                 .build()
 
-            imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetRotation(rotation)
-                .setTargetAspectRatio(screenAspectRatio)
-                .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
-                        Timber.d("Average luminosity: $luma")
-                    })
-                }
-
             try {
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                    (context as AppCompatActivity), cameraSelector, imageCapture, imageAnalyzer
-                )
+                cameraProvider.bindToLifecycle((context as AppCompatActivity), cameraSelector, imageCapture)
 
                 takePhoto()
 
@@ -183,27 +170,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
                 }
             }
         )
-    }
-
-    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
-
-        private fun ByteBuffer.toByteArray(): ByteArray {
-            rewind()    // Rewind the buffer to zero
-            val data = ByteArray(remaining())
-            get(data)   // Copy the buffer into a byte array
-            return data // Return the byte array
-        }
-
-        override fun analyze(image: ImageProxy) {
-
-            val buffer = image.planes[0].buffer
-            val data = buffer.toByteArray()
-            val pixels = data.map { it.toInt() and 0xFF }
-            val luma = pixels.average()
-
-            listener(luma)
-            image.close()
-        }
     }
 
     companion object {

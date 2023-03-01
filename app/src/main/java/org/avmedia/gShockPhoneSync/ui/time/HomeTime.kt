@@ -8,8 +8,6 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
@@ -35,10 +33,9 @@ open class HomeTime @JvmOverloads constructor(
         }
     }
 
-    private fun createSubscription(): Disposable =
-        ProgressEvents.connectionEventsFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
+    private fun createSubscription() {
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
+            {
                 when (it) {
                     // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
                     ProgressEvents["HomeTimeUpdated"] -> {
@@ -48,8 +45,9 @@ open class HomeTime @JvmOverloads constructor(
                         }
                     }
                 }
-            }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
+            }, { throwable ->
+                Timber.d("Got error on subscribe: $throwable")
+                throwable.printStackTrace()
+            })
+    }
 }

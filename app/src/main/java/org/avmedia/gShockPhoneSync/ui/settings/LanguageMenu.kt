@@ -10,8 +10,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ArrayAdapter
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
@@ -27,19 +25,18 @@ class LanguageMenu @JvmOverloads constructor(
         createSubscription()
     }
 
-    private fun createSubscription(): Disposable =
-        ProgressEvents.connectionEventsFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
+    private fun createSubscription() {
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
+            {
                 when (it) {
                     // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
                     ProgressEvents["Disconnect"] -> {
                         dismissDropDown()
                     }
                 }
-            }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
-
+            }, { throwable ->
+                Timber.d("Got error on subscribe: $throwable")
+                throwable.printStackTrace()
+            })
+    }
 }

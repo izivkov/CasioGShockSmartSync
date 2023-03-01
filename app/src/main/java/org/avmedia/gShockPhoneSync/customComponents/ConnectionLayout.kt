@@ -12,6 +12,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.ProgressEvents
@@ -26,10 +27,9 @@ class ConnectionLayout @JvmOverloads constructor(
         createAppEventsSubscription()
     }
 
-    private fun createAppEventsSubscription(): Disposable =
-        ProgressEvents.connectionEventsFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
+    private fun createAppEventsSubscription() {
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
+            {
                 when (it) {
                     ProgressEvents["ButtonPressedInfoReceived"] -> {
                         if (api().isActionButtonPressed()) {
@@ -38,18 +38,21 @@ class ConnectionLayout @JvmOverloads constructor(
                     }
                     ProgressEvents["WatchInitializationCompleted"] -> {
                         if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
+                            println("connectionLayout: hide")
                             hide()
                         }
                     }
 
                     ProgressEvents["Disconnect"] -> {
+                        println("connectionLayout: show")
                         show()
                     }
                 }
-            }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
+            }, { throwable ->
+                Timber.d("Got error on subscribe: $throwable")
+                throwable.printStackTrace()
+            })
+    }
 
     override fun show() {
         visibility = View.VISIBLE

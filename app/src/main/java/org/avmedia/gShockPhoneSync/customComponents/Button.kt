@@ -26,22 +26,6 @@ open class Button @JvmOverloads constructor(
         visibility = INVISIBLE
     }
 
-//    protected fun sendMessage(message: String) {
-//        Connection.sendMessage(message)
-//    }
-
-//    inner class OnTouchListener(private val command: String) : View.OnTouchListener {
-//        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-//            when (event?.action) {
-//                MotionEvent.ACTION_UP -> {
-//                    sendMessage(command)
-//                }
-//            }
-//            v?.performClick()
-//            return false
-//        }
-//    }
-
     @SuppressLint("CheckResult")
     protected fun subscribe(subject: String, onDataReceived: (String) -> Unit) {
         WatchDataEvents.addSubject(subject)

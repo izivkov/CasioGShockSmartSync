@@ -11,8 +11,6 @@ import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
@@ -46,18 +44,17 @@ class SettingsList @JvmOverloads constructor(
         }
     }
 
-    private fun listenForUpdateRequest(): Disposable =
-        ProgressEvents.connectionEventsFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                when (it) {
-                    // Somebody has made a change to the model...need to update the UI
-                    ProgressEvents["NeedToUpdateUI"] -> {
-                        updateUI()
-                    }
+    private fun listenForUpdateRequest() {
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
+            when (it) {
+                // Somebody has made a change to the model...need to update the UI
+                ProgressEvents["NeedToUpdateUI"] -> {
+                    updateUI()
                 }
             }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
+        }, { throwable ->
+            Timber.d("Got error on subscribe: $throwable")
+            throwable.printStackTrace()
+        })
+    }
 }

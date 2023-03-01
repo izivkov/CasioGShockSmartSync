@@ -18,6 +18,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
@@ -39,10 +40,12 @@ class MainLayout @JvmOverloads constructor(
                 when (it) {
                     ProgressEvents["WatchInitializationCompleted"] -> {
                         if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
+                            println("MainLayout: show")
                             show()
                         }
                     }
                     ProgressEvents["Disconnect"] -> {
+                        println("MainLayout: hide")
                         hide()
                     }
                 }

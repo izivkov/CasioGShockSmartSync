@@ -19,8 +19,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.ProgressEvents
@@ -35,29 +33,28 @@ class ActionRunnerLayout @JvmOverloads constructor(
         createAppEventsSubscription()
     }
 
-    private fun createAppEventsSubscription(): Disposable =
-        ProgressEvents.connectionEventsFlowable
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext {
-                when (it) {
-                    ProgressEvents["ButtonPressedInfoReceived"] -> {
-                        ActionsModel.loadData(context)
+    private fun createAppEventsSubscription() {
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
+            when (it) {
+                ProgressEvents["ButtonPressedInfoReceived"] -> {
+                    ActionsModel.loadData(context)
 
-                        if (api().isActionButtonPressed()) {
-                            show()
-                            ActionsModel.runActions(context)
-                        } else if (api().isAutoTimeStarted()) {
-                            ActionsModel.runActionsForAutoTimeSetting(context)
-                        }
-                    }
-                    ProgressEvents["Disconnect"] -> {
-                        hide()
+                    if (api().isActionButtonPressed()) {
+                        show()
+                        ActionsModel.runActions(context)
+                    } else if (api().isAutoTimeStarted()) {
+                        ActionsModel.runActionsForAutoTimeSetting(context)
                     }
                 }
+                ProgressEvents["Disconnect"] -> {
+                    hide()
+                }
             }
-            .subscribe(
-                { },
-                { throwable -> Timber.i("Got error on subscribe: $throwable") })
+        }, { throwable ->
+            Timber.d("Got error on subscribe: $throwable")
+            throwable.printStackTrace()
+        })
+    }
 
     override fun show() {
         visibility = View.VISIBLE
