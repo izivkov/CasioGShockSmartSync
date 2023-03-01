@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         permissionManager = PermissionManager(this)
-        // permissionManager.setupPermissions()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -91,8 +90,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun runWithChecks() {
 
-        val navController =
-            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+        findNavController(R.id.nav_host_fragment_activity_gshock_screens)
 
         if (!isBluetoothEnabled()!!) {
             turnOnBLE()
@@ -120,11 +118,6 @@ class MainActivity : AppCompatActivity() {
         // We want to run the app only from the main screen, so
         // we do some checks in the runWithChecks() method.
         runWithChecks()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Timber.i("On pause...")
     }
 
     // @SuppressLint("MissingPermission")

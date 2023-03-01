@@ -210,7 +210,7 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.canonicalName}")
-            runNormal(context)
+            runWaitForDisconnect(context)
         }
 
         private fun runNormal(context: Context) {
