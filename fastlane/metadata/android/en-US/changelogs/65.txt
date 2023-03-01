@@ -1,3 +1,0 @@
-Fixed enabling Bluetooth for android 12 and up
-
-

@@ -1,3 +1,0 @@
-Added timezone to time
-Updates Home Time based on local timezone.
-
