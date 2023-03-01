@@ -31,6 +31,9 @@ import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
 class MainActivity : AppCompatActivity() {
@@ -203,7 +206,10 @@ class MainActivity : AppCompatActivity() {
                             ProgressEvents["Disconnect"]?.payload as BluetoothDevice
                         api().teardownConnection(device)
 
-                        runWithChecks()
+                        val reconnectScheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+                        reconnectScheduler.schedule({
+                            runWithChecks()
+                        }, 2L, TimeUnit.SECONDS)
                     }
 
                     ProgressEvents["ActionsPermissionsNotGranted"] -> {
