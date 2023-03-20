@@ -4,7 +4,7 @@ This app integrates the Casio G-shock square digital Bluetooth watches ([B5600](
 `Google Alarm Clock`. It also works as a remote control for your phone. It is not meant to replace the
 [official](https://play.google.com/store/apps/details?id=com.casio.gshockconnected) Casio app. Instead it converts your traditional G-shock into a semi-smart watch.
 
-[These](https://tinyurl.com/y4r5xf94) and [these](https://tinyurl.com/yvnku2au) watches are supported.
+[These](https://amzn.to/3LDv7zT) and [these](https://amzn.to/3n5L0Fd) watches are supported.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
