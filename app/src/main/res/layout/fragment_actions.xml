@@ -13,12 +13,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.actions.ActionsFragment">
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/view_finder"
-        android:alpha="0"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <TextView
         android:id="@+id/title_actions"
         android:layout_width="wrap_content"
@@ -56,5 +50,11 @@
         app:layout_constraintTop_toBottomOf="@+id/actionList"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/view_finder"
+        android:alpha="0"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,13 +19,18 @@
     <string name="disabled">Disabled</string>
     <string name="send_alarms_to_phone">Send to\nPhone</string>
     <string name="send_events_to_watch">Send to Watch\n Reminders</string>
-    <string name="connection_screen_info">To proceed to the next screen, you need to connect your watch to this app. Just press and hold the lower-left button on the watch for 3 seconds. After the second double-beep, the app will display the time-setting screen.\n\nMake sure the [G-SHOCK Connected] app is not running, as it will interfere with this app.\n\nTo run Actions defined in the [Actions] screen, short-press the lower-right button. Actions are apps on your phone, like [Take a photo]. Using actions, the watch acts like a remote control for your phone.\nv6.9</string>
-    <string name="alarms_screen_info">The B5600/B5000 watches have 5 alarms and a "signal" (hourly chime) settings shown here. The alarms can be updated by pressing on the time value of each alarm. A new dialog will appear, which allows you to set the alarm\'s time. Once the alarms have been set, you can send them to the watch, or send them to the Alarm Clock app on the phone.</string>
-    <string name="events_screen_info">This screen displays Events from your Google Calendar and allows you to send them to the watch\'s reminders.\n\nIf no events appear, make sure you have future events, or non-expired repeating events in your Google calender. Also, make sure you have set your phone to auto-sync to your Google account.
+    <string name="connection_screen_info"><![CDATA[To proceed to the next screen, you need to connect your watch to this app.
+    Just press and hold the <b>lower-left</b> button on the watch for 3 seconds. After the second double-beep, the app will display the time-setting screen.
+    <p>Make sure the <b>G-SHOCK Connected</b> app is not running, as it will interfere with this app.</p>
+    <p>To run Actions defined in the <b>Actions</b> screen, short-press the lower-right button. Actions are apps on your phone, like <b>Take a photo</b>. Using actions, the watch acts like a remote control for your phone.</p>
+    <p>v6.9</p>]]>
+    </string>
+    <string name="alarms_screen_info"><![CDATA[The <b>B5600/B5000</b> watches have 5 alarms and a "signal" (hourly chime) settings shown here. The alarms can be updated by pressing on the time value of each alarm. A new dialog will appear, which allows you to set the alarm\'s time. Once the alarms have been set, you can send them to the watch, or send them to the Alarm Clock app on the phone.]]></string>
+    <string name="events_screen_info"><![CDATA[This screen displays Events from your <b>Google Calendar</b> and allows you to send them to the watch\'s <b>reminders</b>.\n\nIf no events appear, make sure you have future events, or non-expired repeating events in your Google calender. Also, make sure you have set your phone to auto-sync to your Google account.]]>
 </string>
     <string name="actions">Actions</string>
     <string name="title_actions">Actions</string>
-    <string name="actions_screen_info">The selected actions are run when the user short-presses the lower-right watch button from the initial screen. With these actions, the watch acts as a remote control for your phone. The app has to be in the foreground to run all actions except setting time.</string>
+    <string name="actions_screen_info"><![CDATA[The selected actions are run when the user <b>short-presses</b> the <b>lower-right</b> watch button from the initial screen. With these actions, the watch acts as a remote control for your phone.]]></string>
     <string name="feb_22_mar_24">Feb-22 - Mar-24</string>
     <string name="weekly">WEEKLY</string>
     <string name="title_goes_here">Title goes here</string>
@@ -61,9 +66,16 @@
     <string name="operational_sound">Button Operation Tone</string>
     <string name="power_saving_mode">Power Saving Mode</string>
     <string name="select_language">Select Language</string>
-    <string name="auto_fill_help">The auto-fill values are derived as follows:\n\n• Time/Date format and Language, are obtained from the Phone\'s setting.\n\n• Button tone is turned OFF if the phone is in DnD mode, ON otherwise.\n\n• Power Saving will be set to ON if the battery\'s level is at 15% or less.\n\nNote: The values will not change until sent again, even if the conditions change (i.e DnD is turned ON/OFF)</string>
+    <string name="auto_fill_help"><![CDATA[The auto-fill values are derived as follows:
+        <li>Time/Date format and Language, are obtained from the Phone\'s setting.</li>
+        <li>Button tone is turned OFF if the phone is in DnD mode, ON otherwise.</li>
+        <li>Power Saving will be set to ON if the battery\'s level is at 15% or less.</li>
+        Note: <i>The values will not change until sent again, even if the conditions change (i.e DnD is turned ON/OFF)</i>
+        ]]>
+    </string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="timerDialogTitle">Timer</string>
     <string name="initial_timer_value">00:00:00</string>
+    <string name="info_home_time"><![CDATA[<b>Home Time</b> lets you set a specific time zone and have the watch adjust accordingly when synced with Atomic Clocks. When the app sets the watch\'s time (either manually or automatically), it will automatically syncs <b>Home Time</b> with the current time zone as well. This eliminates the need for swapping your <b>World Time</b> and <b>Home Time</b>.]]></string>
 </resources>

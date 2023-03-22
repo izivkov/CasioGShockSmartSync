@@ -27,6 +27,7 @@ import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_16_9_VALUE
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_4_3_VALUE
 import org.avmedia.gShockPhoneSync.utils.Utils.contentView
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -54,19 +55,17 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
     fun start() {
         currentContextView = (context as Activity).contentView
         viewBinding = FragmentActionsBinding.inflate(context.layoutInflater)
-        context.setContentView(viewBinding.root)
         cameraExecutor = Executors.newSingleThreadExecutor()
-
         startCamera()
     }
 
     @SuppressLint("WrongConstant")
     private fun startCamera() {
+        viewBinding.viewFinder.alpha = 1F
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-            val rotation = viewBinding.viewFinder.display.rotation
 
             val screenSize = getScreenSize(context as Activity)
             val screenAspectRatio = aspectRatio(screenSize.width, screenSize.height)
@@ -74,7 +73,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             imageCapture = ImageCapture.Builder()
                 .setTargetAspectRatio(screenAspectRatio)
                 .setFlashMode(FLASH_MODE_AUTO)
-                .setTargetRotation(rotation)
                 .build()
 
             try {
@@ -104,6 +102,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
 
         // restore the context, so se can continue running normal
         (context as Activity).setContentView(currentContextView)
+        viewBinding.viewFinder.alpha = 0f
     }
 
     private fun aspectRatio(width: Int, height: Int): Int {
