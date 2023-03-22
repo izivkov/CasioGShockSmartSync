@@ -22,8 +22,8 @@
     <string name="connection_screen_info"><![CDATA[To proceed to the next screen, you need to connect your watch to this app.
     Just press and hold the <b>lower-left</b> button on the watch for 3 seconds. After the second double-beep, the app will display the time-setting screen.
     <p>Make sure the <b>G-SHOCK Connected</b> app is not running, as it will interfere with this app.</p>
-    <p>To run Actions defined in the <b>Actions</b> screen, short-press the lower-right button. Actions are apps on your phone, like <b>Take a photo</b>. Using actions, the watch acts like a remote control for your phone.</p>
-    <p>v6.9</p>]]>
+    <p>To run Actions defined in the <b>Actions</b> screen, short-press the <b>lower-right</b> button. Actions are apps on your phone, like <b>Take a photo</b>.
+    Using actions, the watch acts like a remote control for your phone.</p>]]>
     </string>
     <string name="alarms_screen_info"><![CDATA[The <b>B5600/B5000</b> watches have 5 alarms and a "signal" (hourly chime) settings shown here. The alarms can be updated by pressing on the time value of each alarm. A new dialog will appear, which allows you to set the alarm\'s time. Once the alarms have been set, you can send them to the watch, or send them to the Alarm Clock app on the phone.]]></string>
     <string name="events_screen_info"><![CDATA[This screen displays Events from your <b>Google Calendar</b> and allows you to send them to the watch\'s <b>reminders</b>.\n\nIf no events appear, make sure you have future events, or non-expired repeating events in your Google calender. Also, make sure you have set your phone to auto-sync to your Google account.]]>
@@ -77,5 +77,9 @@
     <string name="ok">OK</string>
     <string name="timerDialogTitle">Timer</string>
     <string name="initial_timer_value">00:00:00</string>
-    <string name="info_home_time"><![CDATA[<b>Home Time</b> lets you set a specific time zone and have the watch adjust accordingly when synced with Atomic Clocks. When the app sets the watch\'s time (either manually or automatically), it will automatically syncs <b>Home Time</b> with the current time zone as well. This eliminates the need for swapping your <b>World Time</b> and <b>Home Time</b>.]]></string>
+    <string name="info_home_time">
+        <![CDATA[<b>Home Time</b> lets you set a specific time zone and have the watch adjust accordingly when synced with Atomic Clocks.
+        When the app sets the watch\'s time (either manually or automatically),
+        it will automatically syncs <b>Home Time</b> with the current time zone as well. This eliminates the need for swapping your <b>World Time</b> and <b>Home Time</b>.]]>
+    </string>
 </resources>

@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -60,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.connectionLayout.info.getInfoText()
+            ?.let { binding.connectionLayout.info.setInfoText(it+"v"+BuildConfig.VERSION_NAME) }
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
