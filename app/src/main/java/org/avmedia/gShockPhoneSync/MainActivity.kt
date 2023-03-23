@@ -200,6 +200,15 @@ class MainActivity : AppCompatActivity() {
                         Timber.i("FineLocationPermissionGranted")
                     }
 
+                    ProgressEvents["ApiError"] -> {
+                        Utils.snackBar(this, "ApiError! Something went wrong - possibly incompatible watch. Try again")
+
+                        val errorScheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+                        errorScheduler.schedule({
+                            api().disconnect(this)
+                        }, 3L, TimeUnit.SECONDS)
+                    }
+
                     ProgressEvents["Disconnect"] -> {
                         Timber.i("onDisconnect")
                         InactivityWatcher.cancel()
