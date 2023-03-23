@@ -45,7 +45,7 @@ configurations {
 
 dependencies {
     // This is a library to interact with the CASIO GShock 5000/5600 watches
-    implementation 'com.github.izivkov:GShockAPI:1.0.9'
+    implementation 'com.github.izivkov:GShockAPI:1.1.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //noinspection GradleDependency
