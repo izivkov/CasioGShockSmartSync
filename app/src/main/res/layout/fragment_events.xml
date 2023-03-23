@@ -4,14 +4,12 @@
   ~ Last modified 2022-03-12, 10:11 a.m.
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.events.EventsFragment"
-    >
+    tools:context=".ui.events.EventsFragment">
 
     <TextView
         android:id="@+id/title_events"
@@ -33,8 +31,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_events"
-        app:layout_constraintBottom_toTopOf="@+id/send_reminders_button_layout"
-        />
+        app:layout_constraintBottom_toTopOf="@+id/send_reminders_button_layout" />
 
     <LinearLayout
         android:id="@+id/send_reminders_button_layout"
@@ -43,8 +40,7 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
+        app:layout_constraintStart_toStartOf="parent">
 
         <org.avmedia.gShockPhoneSync.ui.events.SendEventsToWatchButton
             android:id="@+id/send_reminders_button"
@@ -54,8 +50,7 @@
             android:layout_margin="5dp"
             android:background="@drawable/button"
             android:text="@string/send_events_to_watch"
-            tools:ignore="MissingConstraints"
-            />
+            tools:ignore="MissingConstraints" />
 
         <org.avmedia.gShockPhoneSync.customComponents.InfoButton
             android:id="@+id/info_events"
@@ -66,8 +61,7 @@
             android:layout_gravity="center"
             android:background="@android:color/transparent"
             android:src="@drawable/info_48px"
-            app:infoText="@string/events_screen_info"
-            />
+            app:infoText="@string/events_screen_info" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

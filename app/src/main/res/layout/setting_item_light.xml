@@ -45,13 +45,12 @@
                     android:textSize="20dp"
                     tools:ignore="SpUsage" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/auto_light_on_off"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textOff="Off"
-                        android:textOn="On"
-                        />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/auto_light_on_off"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textOff="Off"
+                    android:textOn="On" />
 
             </LinearLayout>
 

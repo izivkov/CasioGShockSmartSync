@@ -9,7 +9,6 @@ package org.avmedia.gShockPhoneSync.ui.time
 import android.content.Context
 import android.util.AttributeSet
 import kotlinx.coroutines.runBlocking
-import org.avmedia.gShockPhoneSync.BuildConfig
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import timber.log.Timber

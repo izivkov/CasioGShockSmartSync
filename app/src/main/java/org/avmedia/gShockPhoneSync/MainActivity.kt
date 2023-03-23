@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.connectionLayout.info.getInfoText()
-            ?.let { binding.connectionLayout.info.setInfoText(it+"v"+BuildConfig.VERSION_NAME) }
+            ?.let { binding.connectionLayout.info.setInfoText(it + "v" + BuildConfig.VERSION_NAME) }
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -201,9 +201,13 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     ProgressEvents["ApiError"] -> {
-                        Utils.snackBar(this, "ApiError! Something went wrong - possibly incompatible watch. Try again")
+                        Utils.snackBar(
+                            this,
+                            "ApiError! Something went wrong - possibly incompatible watch. Try again"
+                        )
 
-                        val errorScheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+                        val errorScheduler: ScheduledExecutorService =
+                            Executors.newSingleThreadScheduledExecutor()
                         errorScheduler.schedule({
                             api().disconnect(this)
                         }, 3L, TimeUnit.SECONDS)
@@ -219,7 +223,8 @@ class MainActivity : AppCompatActivity() {
                             ProgressEvents["Disconnect"]?.payload as BluetoothDevice
                         api().teardownConnection(device)
 
-                        val reconnectScheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+                        val reconnectScheduler: ScheduledExecutorService =
+                            Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
                             runWithChecks()
                         }, 3L, TimeUnit.SECONDS)

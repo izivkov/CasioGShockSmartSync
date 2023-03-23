@@ -6,8 +6,7 @@
   ~ Last modified 2022-03-28, 3:16 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.ui.alarms.AlarmItem
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<org.avmedia.gShockPhoneSync.ui.alarms.AlarmItem xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/CardViewStyle"
@@ -29,8 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:padding="16dp"
-            >
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/time"
@@ -47,8 +45,7 @@
                 android:layout_marginStart="5pt"
                 android:text="@string/daily"
                 android:textAppearance="?attr/textAppearanceBody2"
-                android:textColor="?android:attr/textColorSecondary"
-                />
+                android:textColor="?android:attr/textColorSecondary" />
 
         </LinearLayout>
 
@@ -57,16 +54,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_margin="8dp"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/alarmEnabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textOff="@string/disabled"
-                android:textOn="@string/enabled"
-                />
+                android:textOn="@string/enabled" />
 
         </LinearLayout>
     </LinearLayout>
