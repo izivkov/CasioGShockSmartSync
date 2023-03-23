@@ -1,0 +1,3 @@
+Sped up photo action, added info for Home Time, fixed bugs
+
+
