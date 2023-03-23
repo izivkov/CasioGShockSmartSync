@@ -4,8 +4,7 @@
   ~ Last modified 2022-03-12, 10:11 a.m.
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settings_root"
@@ -34,8 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_settings"
-        app:layout_constraintBottom_toTopOf="@+id/buttons"
-        />
+        app:layout_constraintBottom_toTopOf="@+id/buttons" />
 
     <LinearLayout
         android:id="@+id/buttons"
@@ -44,8 +42,7 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
+        app:layout_constraintStart_toStartOf="parent">
 
         <org.avmedia.gShockPhoneSync.customComponents.InfoButton
             android:id="@+id/info_settings"
@@ -56,8 +53,7 @@
             android:layout_gravity="center"
             android:background="@android:color/transparent"
             android:src="@drawable/info_48px"
-            app:infoText="@string/auto_fill_help"
-            />
+            app:infoText="@string/auto_fill_help" />
 
         <org.avmedia.gShockPhoneSync.ui.settings.AutoFillValuesButton
             android:id="@+id/AutoConfigureButton"
@@ -66,8 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:background="@drawable/button"
-            android:text="@string/auto_configure_settings"
-            />
+            android:text="@string/auto_configure_settings" />
 
         <org.avmedia.gShockPhoneSync.ui.settings.SendSettingsButton
             android:id="@+id/SendSettings"
@@ -77,8 +72,7 @@
             android:layout_margin="5dp"
             android:background="@drawable/button"
             android:text="@string/send_to_watch_settings"
-            tools:ignore="MissingConstraints"
-            />
+            tools:ignore="MissingConstraints" />
 
     </LinearLayout>
 

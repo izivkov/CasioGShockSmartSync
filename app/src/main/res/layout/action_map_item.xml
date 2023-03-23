@@ -4,13 +4,10 @@
   ~ Last modified 2022-05-10, 7:31 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.ui.actions.ActionItem
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<org.avmedia.gShockPhoneSync.ui.actions.ActionItem xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/CardViewStyle"
     android:layout_width="match_parent"
     android:layout_height="150dp"
     android:layout_margin="3dp"
-    app:cardElevation="2dp"
-    >
-</org.avmedia.gShockPhoneSync.ui.actions.ActionItem>
+    app:cardElevation="2dp"></org.avmedia.gShockPhoneSync.ui.actions.ActionItem>

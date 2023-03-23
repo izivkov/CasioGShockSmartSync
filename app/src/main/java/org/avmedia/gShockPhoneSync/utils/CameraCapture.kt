@@ -27,7 +27,6 @@ import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_16_9_VALUE
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_4_3_VALUE
 import org.avmedia.gShockPhoneSync.utils.Utils.contentView
-import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*

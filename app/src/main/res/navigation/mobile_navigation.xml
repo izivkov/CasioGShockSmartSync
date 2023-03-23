@@ -4,46 +4,39 @@
   ~ Last modified 2022-03-14, 1:48 p.m.
   -->
 
-<navigation
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home"
-    >
+    app:startDestination="@+id/navigation_home">
 
     <fragment
         android:id="@+id/navigation_home"
         android:name="org.avmedia.gShockPhoneSync.ui.time.TimeFragment"
         android:label="@string/title_time"
-        tools:layout="@layout/fragment_time"
-        />
+        tools:layout="@layout/fragment_time" />
 
     <fragment
         android:id="@+id/navigation_alarms"
         android:name="org.avmedia.gShockPhoneSync.ui.alarms.AlarmsFragment"
         android:label="@string/title_alarms"
-        tools:layout="@layout/fragment_alarms"
-        />
+        tools:layout="@layout/fragment_alarms" />
 
     <fragment
         android:id="@+id/navigation_events"
         android:name="org.avmedia.gShockPhoneSync.ui.events.EventsFragment"
         android:label="@string/title_events"
-        tools:layout="@layout/fragment_events"
-        />
+        tools:layout="@layout/fragment_events" />
 
     <fragment
         android:id="@+id/navigation_actions"
         android:name="org.avmedia.gShockPhoneSync.ui.actions.ActionsFragment"
         android:label="@string/title_actions"
-        tools:layout="@layout/fragment_actions"
-        />
+        tools:layout="@layout/fragment_actions" />
 
     <fragment
         android:id="@+id/navigation_settings"
         android:name="org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
-        tools:layout="@layout/fragment_settings"
-        />
+        tools:layout="@layout/fragment_settings" />
 </navigation>

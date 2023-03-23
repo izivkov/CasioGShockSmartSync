@@ -4,37 +4,31 @@
   ~ Last modified 2022-03-12, 9:46 a.m.
   -->
 
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_watch_later_black_24dp"
-        android:title="@string/time"
-        />
+        android:title="@string/time" />
 
     <item
         android:id="@+id/navigation_alarms"
         android:icon="@drawable/ic_alarm_black_24dp"
-        android:title="@string/alarms"
-        />
+        android:title="@string/alarms" />
 
     <item
         android:id="@+id/navigation_events"
         android:icon="@drawable/ic_event_black_24dp"
-        android:title="@string/events"
-        />
+        android:title="@string/events" />
 
     <item
         android:id="@+id/navigation_actions"
         android:icon="@drawable/ic_actions"
-        android:title="@string/actions"
-        />
+        android:title="@string/actions" />
 
     <item
         android:id="@+id/navigation_settings"
         android:icon="@drawable/ic_settings"
-        android:title="@string/settings"
-        />
+        android:title="@string/settings" />
 
 </menu>

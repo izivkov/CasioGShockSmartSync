@@ -4,20 +4,17 @@
   ~ Last modified 2022-03-29, 12:05 p.m.
   -->
 
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    >
+    tools:context=".MainActivity">
 
     <org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout
         android:id="@+id/connection_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/imageView"
@@ -26,8 +23,7 @@
             app:srcCompat="@drawable/ic_gw_b5600"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="242dp"
-            android:contentDescription="@string/image_of_casio_5600_watch"
-            />
+            android:contentDescription="@string/image_of_casio_5600_watch" />
 
         <org.avmedia.gShockPhoneSync.customComponents.ConnectionSpinner
             android:id="@+id/connection_dpinner"
@@ -38,8 +34,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <org.avmedia.gShockPhoneSync.customComponents.InfoButton
             android:id="@+id/info"
@@ -51,16 +46,14 @@
             android:src="@drawable/info_48px"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:infoText="@string/connection_screen_info"
-            />
+            app:infoText="@string/connection_screen_info" />
 
     </org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout>
 
     <org.avmedia.gShockPhoneSync.customComponents.MainLayout
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/nav_view"
@@ -75,8 +68,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/nav_host_fragment_activity_gshock_screens"
 
-            app:menu="@menu/bottom_nav_menu"
-            />
+            app:menu="@menu/bottom_nav_menu" />
 
         <fragment
             android:id="@+id/nav_host_fragment_activity_gshock_screens"
@@ -99,8 +91,7 @@
     <org.avmedia.gShockPhoneSync.ui.actions.ActionRunnerLayout
         android:id="@+id/action_runner_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/action_runner_text"
@@ -112,8 +103,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </org.avmedia.gShockPhoneSync.ui.actions.ActionRunnerLayout>
 </FrameLayout>

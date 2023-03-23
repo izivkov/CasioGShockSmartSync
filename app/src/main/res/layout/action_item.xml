@@ -6,8 +6,7 @@
   ~ Last modified 2022-03-28, 3:16 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.ui.actions.ActionItem
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<org.avmedia.gShockPhoneSync.ui.actions.ActionItem xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/CardViewStyle"
@@ -19,16 +18,15 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false" android:orientation="horizontal"
-        >
+        android:baselineAligned="false"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:padding="6dp"
-            >
+            android:padding="6dp">
 
             <ImageView
                 android:id="@+id/icon"
@@ -37,8 +35,7 @@
                 android:src="@drawable/generic_action_item"
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="4dp"
-                android:contentDescription="@string/voice_assistant"
-                />
+                android:contentDescription="@string/voice_assistant" />
 
             <TextView
                 android:id="@+id/title"
@@ -55,16 +52,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_margin="0dp"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/actionEnabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textOff="@string/disabled"
-                android:textOn="@string/enabled"
-                />
+                android:textOn="@string/enabled" />
 
         </LinearLayout>
     </LinearLayout>

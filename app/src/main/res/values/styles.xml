@@ -12,8 +12,7 @@
         -->
 
     <!-- Base application theme. -->
-    <style name="AppTheme"
-        parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -24,14 +23,12 @@
 
     </style>
 
-    <style name="buttonStyle"
-        parent="@style/Widget.MaterialComponents.Button.TextButton">
+    <style name="buttonStyle" parent="@style/Widget.MaterialComponents.Button.TextButton">
         <item name="android:layout_margin">2dp</item>
         <item name="android:foreground">?attr/selectableItemBackground</item>
     </style>
 
-    <style name="CardViewStyle"
-        parent="@style/Widget.MaterialComponents.CardView">
+    <style name="CardViewStyle" parent="@style/Widget.MaterialComponents.CardView">
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MaterialCardView.Cut
         </item>
 
@@ -46,8 +43,7 @@
 
     </style>
 
-    <style name="ShapeAppearanceOverlay.MaterialCardView.Cut"
-        parent="">
+    <style name="ShapeAppearanceOverlay.MaterialCardView.Cut" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopRight">8dp</item>
         <item name="cornerSizeTopLeft">8dp</item>
@@ -55,15 +51,13 @@
         <item name="cornerSizeBottomLeft">8dp</item>
     </style>
 
-    <style name="AppTheme.MaterialTimePickerTheme"
-        parent="ThemeOverlay.MaterialComponents.TimePicker"></style>
+    <style name="AppTheme.MaterialTimePickerTheme" parent="ThemeOverlay.MaterialComponents.TimePicker"></style>
 
     <declare-styleable name="BatteryView">
-        <attr name="bv_percent"
-            format="integer" />
+        <attr name="bv_percent" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="InfoButton">
-        <attr name="infoText" format="string|reference"/>
+        <attr name="infoText" format="string|reference" />
     </declare-styleable>
 </resources>

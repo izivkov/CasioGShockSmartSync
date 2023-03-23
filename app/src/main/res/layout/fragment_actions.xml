@@ -4,8 +4,7 @@
   ~ Last modified 2022-03-12, 10:11 a.m.
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/actions_root"
@@ -34,8 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_actions"
-        app:layout_constraintBottom_toTopOf="@+id/action_info"
-        />
+        app:layout_constraintBottom_toTopOf="@+id/action_info" />
 
     <org.avmedia.gShockPhoneSync.customComponents.InfoButton
         android:id="@+id/action_info"
