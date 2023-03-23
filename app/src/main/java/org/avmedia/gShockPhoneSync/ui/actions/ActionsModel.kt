@@ -210,45 +210,13 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.canonicalName}")
-            runWaitForDisconnect(context)
-        }
-
-        private fun runNormal(context: Context) {
             (context as Activity).runOnUiThread {
                 val cameraSelector: CameraSelector =
                     if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
-                CameraCapture(context, cameraSelector).start()
+                val capture = CameraCapture(context, cameraSelector)
+                capture.start()
                 Timber.d("Photo taken...")
             }
-        }
-
-        private fun runWaitForDisconnect(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
-
-            // Since we are running this action in the UI Thread (foreground), it will interfere the ProgressEvents.
-            // Some observers, like the MainActivity will not be able to receive Disconnect messages.
-            // Therefore, wait for the Disconnect message and then run the action.
-            fun createAppEventsSubscription() {
-                ProgressEvents.subscriber.start(this.javaClass.canonicalName,
-
-                    {
-                        when (it) {
-                            ProgressEvents["Disconnect"] -> {
-                                (context as Activity).runOnUiThread {
-                                    val cameraSelector: CameraSelector =
-                                        if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
-                                    CameraCapture(context, cameraSelector).start()
-                                    Timber.d("Photo taken...")
-                                }
-                            }
-                        }
-                    }, { throwable ->
-                        Timber.d("Got error on subscribe: $throwable")
-                        throwable.printStackTrace()
-                    })
-            }
-
-            createAppEventsSubscription()
         }
 
         override fun save(context: Context) {

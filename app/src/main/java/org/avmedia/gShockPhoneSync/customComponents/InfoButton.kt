@@ -9,9 +9,11 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.text.Html
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import org.avmedia.gShockPhoneSync.R
 
 class InfoButton @JvmOverloads constructor(
@@ -43,7 +45,7 @@ class InfoButton @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     val dialogBuilder = AlertDialog.Builder(context)
 
-                    dialogBuilder.setMessage(infoText)
+                    dialogBuilder.setMessage(Html.fromHtml(infoText, FROM_HTML_MODE_LEGACY))
                         .setCancelable(false)
                         .setPositiveButton("OK", DialogInterface.OnClickListener { dialog, _ ->
                             dialog.cancel()

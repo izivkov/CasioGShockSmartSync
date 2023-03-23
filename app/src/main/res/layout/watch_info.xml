@@ -6,8 +6,7 @@
   ~ Last modified 2022-03-29, 8:03 p.m.
   -->
 
-<org.avmedia.gShockPhoneSync.ui.time.WatchInfo
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<org.avmedia.gShockPhoneSync.ui.time.WatchInfo xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/watch_info"
@@ -18,8 +17,7 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/timer_card_view"
-    >
+    app:layout_constraintTop_toBottomOf="@+id/timer_card_view">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -32,13 +30,12 @@
             android:id="@+id/watch_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20pt"
             android:text=""
+            android:textSize="20pt"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -46,8 +43,7 @@
             android:layout_marginStart="25dp"
             android:layout_marginEnd="25dp"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            >
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -55,34 +51,52 @@
                 android:layout_gravity="bottom"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                >
+                app:layout_constraintBottom_toBottomOf="parent">
 
                 <TextView
                     android:id="@+id/home_time_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:text="@string/home_time"
-                    />
+                    android:text="@string/home_time" />
 
-                <org.avmedia.gShockPhoneSync.ui.time.HomeTime
-                    android:id="@+id/home_time"
+                <LinearLayout
+                    android:id="@+id/home_time_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:textSize="18dp"
-                    android:text=""
-                    tools:ignore="SpUsage" />
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
 
+                    <org.avmedia.gShockPhoneSync.ui.time.HomeTime
+                        android:id="@+id/home_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text=""
+                        android:textSize="18dp"
+                        tools:ignore="SpUsage" />
+
+                    <org.avmedia.gShockPhoneSync.customComponents.InfoButton
+                        android:id="@+id/info_home_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="16dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/info"
+                        android:src="@drawable/info_48px"
+                        app:infoText="@string/info_home_time" />
+
+                </LinearLayout>
             </LinearLayout>
 
             <org.avmedia.gShockPhoneSync.ui.time.BatteryView
                 android:id="@+id/battery_view"
                 android:layout_width="20dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                />
+                android:layout_gravity="center" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
