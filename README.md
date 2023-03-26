@@ -91,7 +91,4 @@ style="margin: 10px;" />
 
 This screen allows you to set up the watch's settings. You can auto prefill the values using information from your phone.
 
-## Credits
-- The BLE-related code in this app is based on the `ble-starter-android` https://github.com/PunchThrough/ble-starter-android, but with many modifications.
-- Some if the Casio specific code is loosely based on the `Gadgetbridge` https://github.com/Freeyourgadget/Gadgetbridge project
 

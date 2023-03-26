@@ -5,7 +5,6 @@
  */
 package org.avmedia.gShockPhoneSync.ui.settings
 
-import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,7 +28,6 @@ class SettingsList @JvmOverloads constructor(
     }
 
     fun init() {
-        Timber.i("SettingsList: init() called")
         runBlocking {
             val settingSimpleModel = api().getSettings() // update teh model
             val settingStr = Gson().toJson(settingSimpleModel)
@@ -38,10 +36,8 @@ class SettingsList @JvmOverloads constructor(
     }
 
     private fun updateUI() {
-        (context as Activity).runOnUiThread {
-            adapter?.notifyDataSetChanged()
-            ProgressEvents.onNext("SettingsLoaded")
-        }
+        adapter?.notifyDataSetChanged()
+        ProgressEvents.onNext("SettingsLoaded")
     }
 
     private fun listenForUpdateRequest() {
