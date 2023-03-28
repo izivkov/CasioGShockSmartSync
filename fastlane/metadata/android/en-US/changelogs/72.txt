@@ -1,0 +1,1 @@
+Prevent possible crash. Update info messages. Optimize "Home Time" update.
