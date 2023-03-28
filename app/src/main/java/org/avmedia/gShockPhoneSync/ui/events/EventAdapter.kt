@@ -43,7 +43,6 @@ class EventAdapter(private val events: ArrayList<Event>) :
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        Timber.i("onBindViewHolder called...events.size: ${events.size}")
         val event: Event = events[position]
         try {
             viewHolder.titleView.text = event.title

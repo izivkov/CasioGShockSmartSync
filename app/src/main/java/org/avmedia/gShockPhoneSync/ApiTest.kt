@@ -107,6 +107,9 @@ class ApiTest {
         var cachedDeviceAddress: String? =
             LocalDataStorage.get("cached device", null, context)
         api().waitForConnection(cachedDeviceAddress)
-        LocalDataStorage.put("cached device", api().getDeviceId(), context)
+        val deviceId = api().getDeviceId()
+        if (deviceId != null) {
+            LocalDataStorage.put("cached device", deviceId, context)
+        }
     }
 }
