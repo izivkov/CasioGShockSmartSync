@@ -80,7 +80,7 @@
     <string name="info_home_time">
         <![CDATA[<b>Home Time</b> lets you set a specific time zone and have the watch adjust accordingly when synced with Atomic Clocks.
         When the app sets the watch\'s time (either manually or automatically),
-        it will automatically set the <b>Home Time</b> to the current time zone as well. This eliminates the need for swapping your <b>World Time</b> and <b>Home Time</b>
+        it will set the <b>Home Time</b> to the current time zone as well. So there is no need for swapping your <b>World Time</b> and <b>Home Time</b>
         when travelling to another timezone.]]>
     </string>
 </resources>

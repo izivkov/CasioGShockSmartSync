@@ -65,11 +65,4 @@ class ActionsFragment : Fragment() {
         _binding?.actionList?.shutdown()
         _binding = null
     }
-
-    @SuppressLint("RestrictedApi")
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        Timber.i("Requesting permissions")
-    }
 }

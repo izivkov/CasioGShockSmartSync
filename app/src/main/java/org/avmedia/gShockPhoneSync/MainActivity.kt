@@ -16,14 +16,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
+    private val testCrash = false
 
     var requestBluetooth =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -62,8 +64,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.connectionLayout.info.getInfoText()
-            ?.let { binding.connectionLayout.info.setInfoText(it + "v" + BuildConfig.VERSION_NAME) }
+        binding.info.getInfoText()
+            ?.let { binding.info.setInfoText(it + "v" + BuildConfig.VERSION_NAME) }
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -264,7 +266,11 @@ class MainActivity : AppCompatActivity() {
         var cachedDeviceAddress: String? =
             LocalDataStorage.get("cached device", null, this@MainActivity)
         api().waitForConnection(cachedDeviceAddress)
-        LocalDataStorage.put("cached device", api().getDeviceId(), this@MainActivity)
+
+        val deviceId = api().getDeviceId()
+        if (deviceId != null) {
+            LocalDataStorage.put("cached device", deviceId, this@MainActivity)
+        }
     }
 
     companion object {
