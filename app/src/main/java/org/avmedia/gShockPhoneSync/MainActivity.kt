@@ -265,11 +265,12 @@ class MainActivity : AppCompatActivity() {
     private suspend fun waitForConnectionCached() {
         var cachedDeviceAddress: String? =
             LocalDataStorage.get("cached device", null, this@MainActivity)
-        api().waitForConnection(cachedDeviceAddress)
-
-        val deviceId = api().getDeviceId()
-        if (deviceId != null) {
-            LocalDataStorage.put("cached device", deviceId, this@MainActivity)
+        val status = api().waitForConnection(cachedDeviceAddress)
+        if (status == "OK") {
+            val deviceId = api().getDeviceId()
+            if (deviceId != null) {
+                LocalDataStorage.put("cached device", deviceId, this@MainActivity)
+            }
         }
     }
 
