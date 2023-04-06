@@ -28,8 +28,6 @@ class ActionsFragment : Fragment() {
     private val binding get() = _binding!!
 
     init {
-        ProgressEvents.addEvent("ActionsPermissionsGranted")
-        ProgressEvents.addEvent("ActionsPermissionsNotGranted")
     }
 
     @SuppressLint("UseRequireInsteadOfGet")

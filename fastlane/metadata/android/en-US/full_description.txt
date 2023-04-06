@@ -4,9 +4,9 @@ This app integrates the Casio G-shock square digital Bluetooth watches (B5600, B
 
 Here are the supported watches:
 
-    https://amzn.to/3LDv7zT
+    https://amzn.to/439cb29
 
-    https://amzn.to/3n5L0Fd
+    https://amzn.to/3zShYMt
 
 General
 =======
