@@ -24,10 +24,7 @@ class EventsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    init {
-        ProgressEvents.addEvent("CalendarPermissionsGranted")
-        ProgressEvents.addEvent("CalendarPermissionsNotGranted")
-    }
+    init {}
 
     override fun onCreateView(
         inflater: LayoutInflater,

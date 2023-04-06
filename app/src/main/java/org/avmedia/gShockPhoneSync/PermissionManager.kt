@@ -34,9 +34,6 @@ data class PermissionManager(val context: Context) {
             PERMISSIONS += Manifest.permission.BLUETOOTH_SCAN
             PERMISSIONS += Manifest.permission.BLUETOOTH_CONNECT
         }
-
-        ProgressEvents.addEvent("FineLocationPermissionGranted")
-        ProgressEvents.addEvent("FineLocationPermissionNotGranted")
     }
 
     private fun hasPermissions(context: Context, permissions: Array<String>): Boolean =
