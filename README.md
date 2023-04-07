@@ -1,10 +1,10 @@
 # Casio G-Shock Smart Sync
 
-This app integrates the Casio G-shock square digital Bluetooth watches ([B5600](https://amzn.to/3Gp8Dzc), [B5000](https://amzn.to/3Gs87QV) series), with Google services such as `Google Calendar` events and
+This app integrates the Casio G-shock square digital Bluetooth watches ([B5600](https://amzn.to/3Mt68Qb), [B5000](https://amzn.to/4194M13) series), with Google services such as `Google Calendar` events and
 `Google Alarm Clock`. It also works as a remote control for your phone. It is not meant to replace the
 [official](https://play.google.com/store/apps/details?id=com.casio.gshockconnected) Casio app. Instead it converts your traditional G-shock into a semi-smart watch.
 
-[These](https://amzn.to/3Gp8Dzc) and [these](https://amzn.to/3Gs87QV) watches are supported.
+[These](https://amzn.to/3Mt68Qb) and [these](https://amzn.to/4194M13) watches are supported.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
