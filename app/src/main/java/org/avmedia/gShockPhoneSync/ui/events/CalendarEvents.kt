@@ -23,7 +23,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 
-object CalenderEvents {
+object CalendarEvents {
     @RequiresApi(Build.VERSION_CODES.O)
     fun getEventsFromCalendar(context: Context): ArrayList<Event> {
         return getEvents(context)
