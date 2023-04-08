@@ -28,7 +28,7 @@ object EventsModel {
     @RequiresApi(Build.VERSION_CODES.O)
     fun refresh(context: Context) {
         events.clear()
-        events.addAll(CalenderEvents.getEventsFromCalendar(context))
+        events.addAll(CalendarEvents.getEventsFromCalendar(context))
     }
 
     fun clear() {

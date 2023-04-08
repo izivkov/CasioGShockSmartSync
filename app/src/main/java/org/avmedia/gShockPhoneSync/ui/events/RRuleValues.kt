@@ -173,7 +173,7 @@ object RRuleValues {
                 try {
                     LocalDateTime.parse(untilValue, dateFormatter).toInstant(ZoneOffset.UTC)
                 } catch (e: DateTimeParseException) {
-                    Timber.e("Invalid Calender Date: $component}: $untilValue")
+                    Timber.e("Invalid Calendar Date: $component}: $untilValue")
                     return false
                 }
             }
