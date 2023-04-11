@@ -40,6 +40,7 @@ jobs:
        uses: actions/download-artifact@v1
        with:
          name: apk
+
      - name: Create Release
        id: create_release
        uses: actions/create-release@v1
@@ -48,6 +49,18 @@ jobs:
        with:
          tag_name: ${{ github.run_number }}
          release_name: ${{ github.event.repository.name }} v${{ github.run_number }}
+
+     - name: Sign app APK
+       uses: r0adkll/sign-android-release@v1
+       # ID used to access action output
+       id: sign_app
+       with:
+         releaseDirectory: app/build/outputs/apk/release
+         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+         alias: ${{ secrets.ALIAS }}
+         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+         keyPassword: ${{ secrets.KEY_PASSWORD }}
+
      - name: Upload Release APK
        id: upload_release_asset
        uses: actions/upload-release-asset@v1.0.1
@@ -55,6 +68,7 @@ jobs:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        with:
          upload_url: ${{ steps.create_release.outputs.upload_url }}
-         asset_path: apk/app-debug.apk
+         # asset_path: apk/app-debug.apk
+         asset_path: ${{steps.sign_app.outputs.signedReleaseFile}}
          asset_name: ${{ github.event.repository.name }}.apk
          asset_content_type: application/zip
