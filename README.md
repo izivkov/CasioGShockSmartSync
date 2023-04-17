@@ -91,7 +91,7 @@ style="margin: 10px;" />
 
 This screen allows you to set up the watch's settings. You can auto prefill the values using information from your phone.
 
-# Build Your Own App
+## Build Your Own App
 For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches, I have also created an API (library) project [here](https://github.com/izivkov/GShockAPI). 
 
 
