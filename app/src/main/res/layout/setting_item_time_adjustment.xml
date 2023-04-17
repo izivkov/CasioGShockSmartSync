@@ -36,19 +36,32 @@
 
                 <TextView
                     android:id="@+id/time_adjustment"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
                     android:text="Time Adjustment"
                     android:textSize="20dp"
                     tools:ignore="SpUsage" />
+
+                <org.avmedia.gShockPhoneSync.customComponents.InfoButton
+                    android:id="@+id/info_time_adjustment"
+                    android:gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/info"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="0dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/info_48px"
+                    app:infoText="@string/time_adjustment_info" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/time_adjustment_on_off"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_weight="1"
                     android:textOff="Off"
                     android:textOn="On" />
 
