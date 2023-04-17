@@ -15,7 +15,6 @@
 bin/
 gen/
 out/
-release/
 app/keystore/
 app/build
 

@@ -70,4 +70,10 @@ button from disconnected mode (initial screen).
 
 Using these actions, the watch acts like a remote control for your phone.
 
+Build Your Own App
+==================
+For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches,
+I have also created an API (library) project here: https://github.com/izivkov/GShockAPI.
+
+
 
