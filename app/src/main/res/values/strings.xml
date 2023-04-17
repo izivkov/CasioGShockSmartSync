@@ -83,4 +83,8 @@
         it will set the <b>Home Time</b> to the current time zone as well. So there is no need for swapping your <b>World Time</b> and <b>Home Time</b>
         when travelling to another timezone.]]>
     </string>
+    <string name="time_adjustment_info" ><![CDATA[
+    <li><b>Time Adjustment</b> setting enables the App to automatically update the watch\'s time 4 times per day.</li>
+    <li>At the same time, the App will update the watch\'s <b>Reminders (Events)</b> from your <b>Google Calendar</b></li>
+    ]]></string>
 </resources>
