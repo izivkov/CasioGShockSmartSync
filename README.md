@@ -5,7 +5,7 @@ I think we can do better than the official Casio Connected App! This app provide
 - Sets watch's reminders from Google Calendar
 - Automatically sets correct timezone when setting time while travelling. No need to switch between Word Time and Home time
 - Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
-- Auto-configure most watch settings from phone configuration.
+- Auto-configure most watch settings from phone's configuration.
 - Phone's alarms can be synced with watch's alarms.
 - Optionally, notifies you when time is set.
 
