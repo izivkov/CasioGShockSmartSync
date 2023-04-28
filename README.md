@@ -7,7 +7,6 @@ I think we can do better than the official Casio Connected App! This app provide
 - Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
 - Auto-configure most watch settings from phone's configuration.
 - Phone's alarms can be synced with watch's alarms.
-- Optionally, notifies you when time is set.
 
 This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13) series watches.
 
