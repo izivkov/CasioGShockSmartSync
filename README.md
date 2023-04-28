@@ -2,11 +2,12 @@
 
 I think we can do better than the official Casio Connected App! This app provides the following extra features:
 
-1. Sets watch's reminders from Google Calendar
-2. Automatically sets correct timezone when setting time while travelling. No need to switch between Word Time and Home time
-3. Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
-4. Auto-configure most watch settings from phone configuration.
-5. Phone's alarms can be synced with watch's alarms.
+- Sets watch's reminders from Google Calendar
+- Automatically sets correct timezone when setting time while travelling. No need to switch between Word Time and Home time
+- Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
+- Auto-configure most watch settings from phone configuration.
+- Phone's alarms can be synced with watch's alarms.
+- Optionally, notifies you when time is set.
 
 This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13) series watches.
 
