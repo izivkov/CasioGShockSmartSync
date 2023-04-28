@@ -1,6 +1,6 @@
 # Casio G-Shock Smart Sync
 
-I think we can do better than the official Casio Connected App! This provide the following extra features:
+I think we can do better than the official Casio Connected App! This app provides the following extra features:
 
 1. Sets watch's reminders from Google Calendar
 2. Automatically sets correct timezone when setting time while travelling. No need to switch between Word Time and Home time
