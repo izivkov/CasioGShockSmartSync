@@ -7,7 +7,7 @@ I think we can do better than the official G-Shock Connected App! This app provi
 - Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
 - Auto-configure most watch settings from phone's configuration.
 - Phone's alarms can be synced with watch's alarms.
-- Super fast connection time: 3.5 seconds vs 12 seconds for official app.
+- Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
 This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13) series watches.
 
