@@ -10,13 +10,12 @@ import android.content.Context
 import android.util.AttributeSet
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
+) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     init {
         // Listen on HomeTime update events
@@ -34,20 +33,19 @@ open class HomeTime @JvmOverloads constructor(
     }
 
     private fun createSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
-            {
-                when (it) {
-                    // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
-                    ProgressEvents["HomeTimeUpdated"] -> {
-                        runBlocking {
-                            val homeTime = api().getHomeTime()
-                            text = homeTime
-                        }
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
+            when (it) {
+                // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
+                ProgressEvents["HomeTimeUpdated"] -> {
+                    runBlocking {
+                        text =
+                            api().getHomeTime() // not updating for some reason. Anybody knows why?
                     }
                 }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
+            }
+        }, { throwable ->
+            Timber.d("Got error on subscribe: $throwable")
+            throwable.printStackTrace()
+        })
     }
 }

@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                     ProgressEvents["ApiError"] -> {
                         Utils.snackBar(
                             this,
-                            "ApiError! Something went wrong - possibly incompatible watch. Try again"
+                            "ApiError! Something went wrong - Make sure the official G-Shock app in not running, to prevent interference."
                         )
 
                         val errorScheduler: ScheduledExecutorService =
