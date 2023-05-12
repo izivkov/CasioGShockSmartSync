@@ -17,7 +17,11 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.ParcelUuid
 import androidx.appcompat.app.AppCompatActivity
+import org.avmedia.gshockapi.Event
+import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.utils.Utils
+import org.avmedia.gshockapi.utils.WatchValuesCache
 import timber.log.Timber
 
 data class BleScannerLocal(val context: Context) {
@@ -33,9 +37,8 @@ data class BleScannerLocal(val context: Context) {
         bluetoothAdapter.bluetoothLeScanner
     }
 
-    private val scanSettings = ScanSettings.Builder()
-        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-        .build()
+    private val scanSettings =
+        ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
     private var isScanning = false
 
@@ -90,8 +93,7 @@ Characteristics:
 
     private fun createFilters(): ArrayList<ScanFilter> {
         val filter = ScanFilter.Builder()
-            .setServiceUuid(ParcelUuid.fromString(CasioConstants.CASIO_SERVICE.toString()))
-            .build()
+            .setServiceUuid(ParcelUuid.fromString(CasioConstants.CASIO_SERVICE.toString())).build()
 
         val filters = ArrayList<ScanFilter>()
         filters.add(filter)
@@ -107,6 +109,13 @@ Characteristics:
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
+            val name = result.scanRecord?.deviceName
+            if (name != null) {
+                Connection.deviceName = name.trimEnd('\u0000')
+
+                ProgressEvents.onNext("DeviceName")
+                ProgressEvents["DeviceName"]?.payload = Connection.deviceName
+            }
             if (foundDevices.contains(result.device.toString())) {
                 return
             }

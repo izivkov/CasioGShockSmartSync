@@ -104,12 +104,6 @@ class ApiTest {
     }
 
     private suspend fun waitForConnectionCached(context: Context) {
-        var cachedDeviceAddress: String? =
-            LocalDataStorage.get("cached device", null, context)
-        api().waitForConnection(cachedDeviceAddress)
-        val deviceId = api().getDeviceId()
-        if (deviceId != null) {
-            LocalDataStorage.put("cached device", deviceId, context)
-        }
+        api().waitForConnection()
     }
 }

@@ -16,9 +16,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,7 +25,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
@@ -78,6 +75,8 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
         navView.setupWithNavController(navController)
+
+        val deviceManager = DeviceManager
 
         createAppEventsSubscription()
 
@@ -143,8 +142,7 @@ class MainActivity : AppCompatActivity() {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        this, Manifest.permission.BLUETOOTH_CONNECT
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     return
@@ -221,8 +219,7 @@ class MainActivity : AppCompatActivity() {
 
                         Utils.snackBar(this, "Disconnected from watch!")
                         val event = ProgressEvents["Disconnect"]
-                        val device =
-                            ProgressEvents["Disconnect"]?.payload as BluetoothDevice
+                        val device = ProgressEvents["Disconnect"]?.payload as BluetoothDevice
                         api().teardownConnection(device)
 
                         val reconnectScheduler: ScheduledExecutorService =
@@ -263,14 +260,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
-        var cachedDeviceAddress: String? =
-            LocalDataStorage.get("cached device", null, this@MainActivity)
-        api().waitForConnection(cachedDeviceAddress)
-
-        val deviceId = api().getDeviceId()
-        if (deviceId != null) {
-            LocalDataStorage.put("cached device", deviceId, this@MainActivity)
-        }
+        api().waitForConnection()
     }
 
     companion object {

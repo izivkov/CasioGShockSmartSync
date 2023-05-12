@@ -16,17 +16,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/imageView"
+        <org.avmedia.gShockPhoneSync.customComponents.WatchImageView
+            android:id="@+id/imageViewCasioWatch"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:srcCompat="@drawable/ic_gw_b5600"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="242dp"
-            android:contentDescription="@string/image_of_casio_5600_watch" />
+            android:contentDescription="@string/image_of_casio_watch" />
 
         <org.avmedia.gShockPhoneSync.customComponents.ConnectionSpinner
-            android:id="@+id/connection_dpinner"
+            android:id="@+id/connection_spinner"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

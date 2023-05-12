@@ -17,8 +17,6 @@ class AlarmChimeSwitch @JvmOverloads constructor(
 ) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs) {
 
     init {
-        createAppEventsSubscription()
-
         setOnCheckedChangeListener(OnCheckedChangeListener { _, isChecked ->
             if (!AlarmsModel.isEmpty()) {
                 AlarmsModel.alarms[0].hasHourlyChime = isChecked
@@ -26,17 +24,8 @@ class AlarmChimeSwitch @JvmOverloads constructor(
         })
     }
 
-    private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(
-            this.javaClass.canonicalName,
-
-            {
-                when (it) {
-                    ProgressEvents["AlarmDataLoaded"] -> {
-                        isChecked = AlarmsModel.alarms[0].hasHourlyChime
-                    }
-                }
-            },
-            { throwable -> Timber.d("Got error on subscribe: $throwable") })
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        isChecked = AlarmsModel.alarms[0].hasHourlyChime
     }
 }

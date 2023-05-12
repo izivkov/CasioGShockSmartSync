@@ -152,6 +152,8 @@ class Casio5600Watch : BluetoothWatch() {
                 return settingsJson
             }
             CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code -> {
+                SettingsDecoder.getTimeAdjustment(data, settings)
+
                 val valueJson = SettingsDecoder.toJsonTimeAdjustment(settings)
                 val dataJson = JSONObject().apply {
                     put("key", createKey(data))

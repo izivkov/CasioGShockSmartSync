@@ -27,6 +27,7 @@ private const val GATT_MAX_MTU_SIZE = 517
 
 object Connection : IConnection {
 
+    var deviceName: String = ""
     private lateinit var device: BluetoothDevice
 
     private val deviceGattMap = ConcurrentHashMap<BluetoothDevice, BluetoothGatt>()

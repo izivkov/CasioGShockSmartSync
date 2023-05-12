@@ -5,7 +5,6 @@
  */
 package org.avmedia.gShockPhoneSync.ui.alarms
 
-import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +21,7 @@ class AlarmList @JvmOverloads constructor(
         adapter = AlarmAdapter(AlarmsModel.alarms)
         layoutManager = LinearLayoutManager(context)
 
-        if (AlarmsModel.isEmpty()) {
+        //if (AlarmsModel.isEmpty()) {
             runBlocking {
                 var alarms = api().getAlarms()
 
@@ -30,11 +29,11 @@ class AlarmList @JvmOverloads constructor(
                 AlarmsModel.alarms.clear()
                 AlarmsModel.alarms.addAll(alarms)
 
-                (context as Activity).runOnUiThread {
+                runBlocking {
                     adapter?.notifyDataSetChanged()
-                    ProgressEvents.onNext("AlarmDataLoaded")
                 }
             }
-        }
+        // }
     }
 }
+

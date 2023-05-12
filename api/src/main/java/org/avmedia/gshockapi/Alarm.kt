@@ -14,5 +14,9 @@ open class Alarm(
 
     companion object {
         val alarms: ArrayList<Alarm> = ArrayList<Alarm>()
+
+        fun clear () {
+            alarms.clear()
+        }
     }
 }

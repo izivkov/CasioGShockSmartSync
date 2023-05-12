@@ -87,4 +87,5 @@
     <li><b>Time Adjustment</b> setting enables the App to automatically update the watch\'s time 4 times per day.</li>
     <li>At the same time, the App will update the watch\'s <b>Reminders (Events)</b> from your <b>Google Calendar</b></li>
     ]]></string>
+    <string name="image_of_casio_watch">Casio Watch</string>
 </resources>
