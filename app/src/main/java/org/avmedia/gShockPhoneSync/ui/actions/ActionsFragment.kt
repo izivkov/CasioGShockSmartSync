@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -44,13 +45,17 @@ class ActionsFragment : Fragment() {
             }
         }
 
-        requestMultiplePermissions.launch(
-            arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.CALL_PHONE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            )
+        var requiredPermissions = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.CALL_PHONE,
         )
+
+        // WRITE_EXTERNAL_STORAGE doesn't provide any additional access since Android 11
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            requiredPermissions += Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }
+
+        requestMultiplePermissions.launch(requiredPermissions)
 
         _binding = FragmentActionsBinding.inflate(inflater, container, false)
         _binding?.actionList?.init()
