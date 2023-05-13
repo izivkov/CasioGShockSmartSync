@@ -120,6 +120,8 @@ Characteristics:
                 return
             }
             foundDevices.add(result.device.toString())
+            ProgressEvents.onNext("DeviceAddress")
+            ProgressEvents["DeviceAddress"]?.payload = result.device.toString()
 
             stopBleScan()
             Connection.connect(result.device, context)
