@@ -2,8 +2,8 @@ package org.avmedia.gShockPhoneSync
 
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 object DeviceManager {
@@ -17,8 +17,8 @@ object DeviceManager {
                 ProgressEvents["DeviceName"] -> {
                     val deviceName = ProgressEvents["DeviceName"]?.payload
 
-                    if (LocalDataStorage.get("name", "", applicationContext()) == "") {
-                        LocalDataStorage.put(
+                    if (LocalDataStorage.getForDevice("name", "", applicationContext()) == "") {
+                        LocalDataStorage.putForDevice(
                             "name", deviceName as String, applicationContext()
                         )
                     }
@@ -29,14 +29,12 @@ object DeviceManager {
                         applicationContext()
                     )
                     if (lastModelConnected != null) {
-                        if (lastModelConnected.contains("2100") && MainActivity.api()
-                                .getModel() != GShockAPI.WATCH_MODEL.B2100
+                        if (lastModelConnected.contains("2100") && WatchInfo.model != WatchInfo.WATCH_MODEL.B2100
                         ) {
                             LocalDataStorage.put(
                                 "LastDeviceConnected", deviceName as String, applicationContext()
                             )
-                        } else if (lastModelConnected.contains("5600") && MainActivity.api()
-                                .getModel() != GShockAPI.WATCH_MODEL.B5600
+                        } else if (lastModelConnected.contains("5600") && WatchInfo.model != WatchInfo.WATCH_MODEL.B5600
                         ) {
                             LocalDataStorage.put(
                                 "LastDeviceConnected", deviceName as String, applicationContext()
@@ -48,8 +46,8 @@ object DeviceManager {
                 ProgressEvents["DeviceAddress"] -> {
                     val deviceAddress = ProgressEvents["DeviceAddress"]?.payload
 
-                    if (LocalDataStorage.get("address", "", applicationContext()) == "") {
-                        LocalDataStorage.put(
+                    if (LocalDataStorage.getForDevice("address", "", applicationContext()) == "") {
+                        LocalDataStorage.putForDevice(
                             "address", deviceAddress as String, applicationContext()
                         )
                     }

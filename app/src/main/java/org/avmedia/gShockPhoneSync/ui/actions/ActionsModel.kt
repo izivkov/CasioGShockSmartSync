@@ -58,14 +58,14 @@ object ActionsModel {
         abstract fun run(context: Context)
 
         open fun save(context: Context) {
-            val key = this.javaClass.canonicalName + ".enabled"
+            val key = this.javaClass.simpleName + ".enabled"
             val value = enabled
-            LocalDataStorage.put(key, value.toString(), context)
+            LocalDataStorage.putForDevice(key, value.toString(), context)
         }
 
         open fun load(context: Context) {
-            val key = this.javaClass.canonicalName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            val key = this.javaClass.simpleName + ".enabled"
+            enabled = LocalDataStorage.getForDevice(key, "false", context).toBoolean()
         }
 
         open fun validate(context: Context): Boolean {
@@ -77,15 +77,15 @@ object ActionsModel {
         Action(title, enabled) {
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
             // sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
             api().setEvents(EventsModel.events)
             Utils.snackBar(context, "Events Sent to Watch")
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.canonicalName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            val key = this.javaClass.simpleName + ".enabled"
+            enabled = LocalDataStorage.getForDevice(key, "false", context).toBoolean()
         }
     }
 
@@ -93,13 +93,13 @@ object ActionsModel {
         Action(title, enabled) {
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
             Flashlight.toggle(context)
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.canonicalName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            val key = this.javaClass.simpleName + ".enabled"
+            enabled = LocalDataStorage.getForDevice(key, "false", context).toBoolean()
         }
     }
 
@@ -107,29 +107,29 @@ object ActionsModel {
         Action(title, enabled) {
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
             runBlocking {
                 api().setTime(true)
             }
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.canonicalName + ".enabled"
-            enabled = LocalDataStorage.get(key, "true", context).toBoolean()
+            val key = this.javaClass.simpleName + ".enabled"
+            enabled = LocalDataStorage.getForDevice(key, "true", context).toBoolean()
         }
     }
 
     class SetLocationAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
         }
     }
 
     class StartVoiceAssistAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled, false, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
             try {
                 context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             } catch (e: ActivityNotFoundException) {
@@ -141,7 +141,7 @@ object ActionsModel {
     class Separator(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
         }
 
         override fun load(context: Context) {
@@ -152,7 +152,7 @@ object ActionsModel {
     class MapAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
         }
     }
 
@@ -164,7 +164,7 @@ object ActionsModel {
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
 
             val dialIntent =
                 Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -174,14 +174,14 @@ object ActionsModel {
 
         override fun save(context: Context) {
             super.save(context)
-            val key = this.javaClass.canonicalName + ".phoneNumber"
-            LocalDataStorage.put(key, phoneNumber.toString(), context)
+            val key = this.javaClass.simpleName + ".phoneNumber"
+            LocalDataStorage.putForDevice(key, phoneNumber.toString(), context)
         }
 
         override fun load(context: Context) {
             super.load(context)
-            val key = this.javaClass.canonicalName + ".phoneNumber"
-            phoneNumber = LocalDataStorage.get(key, "", context).toString()
+            val key = this.javaClass.simpleName + ".phoneNumber"
+            phoneNumber = LocalDataStorage.getForDevice(key, "", context).toString()
         }
 
         override fun validate(context: Context): Boolean {
@@ -208,7 +208,7 @@ object ActionsModel {
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
             (context as Activity).runOnUiThread {
                 val cameraSelector: CameraSelector =
                     if (cameraOrientation == CAMERA_ORIENTATION.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
@@ -220,14 +220,14 @@ object ActionsModel {
 
         override fun save(context: Context) {
             super.save(context)
-            val key = this.javaClass.canonicalName + ".cameraOrientation"
-            LocalDataStorage.put(key, cameraOrientation.toString(), context)
+            val key = this.javaClass.simpleName + ".cameraOrientation"
+            LocalDataStorage.putForDevice(key, cameraOrientation.toString(), context)
         }
 
         override fun load(context: Context) {
             super.load(context)
-            val key = this.javaClass.canonicalName + ".cameraOrientation"
-            cameraOrientation = if (LocalDataStorage.get(key, "BACK", context)
+            val key = this.javaClass.simpleName + ".cameraOrientation"
+            cameraOrientation = if (LocalDataStorage.getForDevice(key, "BACK", context)
                     .toString() == "BACK"
             ) CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
         }
@@ -245,20 +245,20 @@ object ActionsModel {
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.canonicalName}")
+            Timber.d("running ${this.javaClass.simpleName}")
         }
 
         override fun save(context: Context) {
-            val key = this.javaClass.canonicalName + ".emailAddress"
-            LocalDataStorage.put(key, emailAddress.toString(), context)
+            val key = this.javaClass.simpleName + ".emailAddress"
+            LocalDataStorage.putForDevice(key, emailAddress.toString(), context)
             super.save(context)
         }
 
         override fun load(context: Context) {
             super.load(context)
 
-            val key = this.javaClass.canonicalName + ".emailAddress"
-            emailAddress = LocalDataStorage.get(key, "", context).toString()
+            val key = this.javaClass.simpleName + ".emailAddress"
+            emailAddress = LocalDataStorage.getForDevice(key, "", context).toString()
             extraText =
                 "Sent by G-shock App:\n https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"
         }

@@ -19,6 +19,7 @@ import android.os.ParcelUuid
 import androidx.appcompat.app.AppCompatActivity
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.WatchValuesCache
@@ -111,10 +112,10 @@ Characteristics:
 
             val name = result.scanRecord?.deviceName
             if (name != null) {
-                Connection.deviceName = name.trimEnd('\u0000')
+                WatchInfo.setDeviceName(name.trimEnd('\u0000'))
 
                 ProgressEvents.onNext("DeviceName")
-                ProgressEvents["DeviceName"]?.payload = Connection.deviceName
+                ProgressEvents["DeviceName"]?.payload = WatchInfo.getDeviceName()
             }
             if (foundDevices.contains(result.device.toString())) {
                 return

@@ -66,12 +66,16 @@ object SettingsModel {
         var timeAdjustmentNotifications: Boolean = LocalDataStorage.getTimeAdjustmentNotification()
     }
 
+    class HandAdjustment : Setting("Hand Adjustment") {
+    }
+
     init {
         settings.add(Locale())
         settings.add(OperationSound())
         settings.add(Light())
         settings.add(PowerSavingMode())
         settings.add(TimeAdjustment())
+        settings.add(HandAdjustment())
     }
 
     @Synchronized

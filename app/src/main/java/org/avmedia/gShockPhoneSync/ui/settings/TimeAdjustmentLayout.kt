@@ -13,12 +13,16 @@ import android.widget.LinearLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gshockapi.WatchInfo
 
-class AutoLightLayout @JvmOverloads constructor(
+class TimeAdjustmentLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) hide() else show()
+        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
+            hide()
+        } else {
+            show()
+        }
     }
 
     override fun show() {

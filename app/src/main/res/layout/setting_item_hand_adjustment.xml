@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-28, 3:16 p.m.
+  -->
+
+<org.avmedia.gShockPhoneSync.ui.settings.SettingsItem xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/CardViewStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="3dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/stroke_color"
+    app:strokeWidth="1dp">
+
+    <!--    <org.avmedia.gShockPhoneSync.ui.settings.HandAdjustmentLayout-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:padding="6dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/hand_adjustment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="6dp"
+                    android:text="Hand Adjustment"
+                    android:textSize="20dp"
+                    tools:ignore="SpUsage" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="end"
+                    >
+
+                    <org.avmedia.gShockPhoneSync.ui.settings.HandleArrowButton
+                        android:id="@+id/arrowLeft"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="30dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Move hand to the Left"
+                        app:layout_constraintEnd_toStartOf="@+id/arrowUp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:src="@drawable/arrow_left" />
+
+                    <org.avmedia.gShockPhoneSync.ui.settings.HandleArrowButton
+                        android:id="@+id/arrowUp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="30dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Reset hand at 12 position"
+                        app:layout_constraintEnd_toStartOf="@+id/arrowRight"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:src="@drawable/arrow_up" />
+
+                    <org.avmedia.gShockPhoneSync.ui.settings.HandleArrowButton
+                        android:id="@+id/arrowRight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="16dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Move hand to the Right"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:src="@drawable/arrow_right" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</org.avmedia.gShockPhoneSync.ui.settings.SettingsItem>

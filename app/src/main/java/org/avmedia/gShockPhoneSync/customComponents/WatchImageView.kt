@@ -13,6 +13,7 @@ import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 class WatchImageView @JvmOverloads constructor(
@@ -35,7 +36,7 @@ class WatchImageView @JvmOverloads constructor(
             when (it) {
                 ProgressEvents["DeviceName"] -> {
                     val deviceName = ProgressEvents["DeviceName"]?.payload
-                    if (api().getModel() == GShockAPI.WATCH_MODEL.B2100) {
+                    if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
                         setImageResource(R.drawable.ga_b2100)
                     } else {
                         setImageResource(R.drawable.ic_gw_b5600)

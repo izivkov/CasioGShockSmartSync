@@ -25,7 +25,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     enum class SETTINGS_TYPES {
-        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, UNKNOWN
+        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, UNKNOWN
     }
 
     open inner class ViewHolderBaseSetting(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -62,6 +62,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             itemView.findViewById<MaterialCheckBox>(R.id.notify_me)
     }
 
+    inner class ViewHolderHandAdjustment(itemView: View) : ViewHolderBaseSetting(itemView) {
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val context = parent.context
         val inflater = LayoutInflater.from(context)
@@ -89,6 +92,11 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_time_adjustment, parent, false)
                 ViewHolderTimeAdjustment(vSetting)
+            }
+            SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
+                val vSetting: View =
+                    inflater.inflate(R.layout.setting_item_hand_adjustment, parent, false)
+                ViewHolderHandAdjustment(vSetting)
             }
             else -> {
                 val vSetting: View = inflater.inflate(R.layout.setting_item_locale, parent, false)
@@ -121,6 +129,10 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vhTimeAdjustment = viewHolder as ViewHolderTimeAdjustment
                 configureTimeAdjustment(vhTimeAdjustment, position)
             }
+            SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
+                val vhHandAdjustment = viewHolder as ViewHolderHandAdjustment
+                configureHandAdjustment(vhHandAdjustment, position)
+            }
         }
     }
 
@@ -141,6 +153,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
         if (settings[position] is SettingsModel.TimeAdjustment) {
             return SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal
+        }
+        if (settings[position] is SettingsModel.HandAdjustment) {
+            return SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal
         }
 
         return SETTINGS_TYPES.UNKNOWN.ordinal
@@ -268,6 +283,11 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             LocalDataStorage.setTimeAdjustmentNotification(setting.timeAdjustmentNotifications)
         })
     }
+
+    private fun configureHandAdjustment(
+        vhTimeAdjustment: ViewHolderHandAdjustment,
+        position: Int
+    ) {}
 
     override fun getItemCount(): Int {
         return settings.size

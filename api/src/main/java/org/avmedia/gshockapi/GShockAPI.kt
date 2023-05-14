@@ -54,10 +54,6 @@ class GShockAPI(private val context: Context) {
     private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
     private val cache = WatchValuesCache()
 
-    enum class WATCH_MODEL {
-        B2100, B5600
-    }
-
     /**
      * This function waits for the watch to connect to the phone.
      * When connected, it returns and emmits a `ConnectionSetupComplete` event, which
@@ -548,7 +544,7 @@ class GShockAPI(private val context: Context) {
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setTime(changeHomeTime: Boolean = true) {
 
-        if (Connection.deviceName?.contains("2100") == true) {
+        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
             initializeForSettingTimeForB2100()
         } else {
             initializeForSettingTimeForB5600()
@@ -876,12 +872,6 @@ class GShockAPI(private val context: Context) {
     private fun setHomeTime(id: String) {
         cache.remove("1f00")
         CasioTimeZone.setHomeTime(id)
-    }
-
-    fun getModel ():WATCH_MODEL {
-        return if (Connection.deviceName.contains("2100")) {
-            WATCH_MODEL.B2100
-        } else WATCH_MODEL.B5600
     }
 
     /**

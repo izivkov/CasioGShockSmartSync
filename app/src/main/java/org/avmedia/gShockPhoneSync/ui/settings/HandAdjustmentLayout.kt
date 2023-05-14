@@ -4,26 +4,21 @@
  * Last modified 2022-03-29, 11:56 a.m.
  */
 
-package org.avmedia.gShockPhoneSync.customComponents
+package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gshockapi.GShockAPI
+import org.avmedia.gshockapi.WatchInfo
 
-class TimeAdjustmentLayout @JvmOverloads constructor(
+class HandAdjustmentLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (api().getModel() == GShockAPI.WATCH_MODEL.B2100) {
-            hide()
-        } else {
-            show()
-        }
+        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) show() else hide()
     }
 
     override fun show() {

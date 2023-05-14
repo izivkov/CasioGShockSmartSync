@@ -17,7 +17,7 @@
     app:strokeColor="@color/stroke_color"
     app:strokeWidth="1dp">
 
-    <org.avmedia.gShockPhoneSync.customComponents.TimeAdjustmentLayout
+    <org.avmedia.gShockPhoneSync.ui.settings.TimeAdjustmentLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
@@ -91,6 +91,6 @@
             </LinearLayout>
 
         </LinearLayout>
-    </org.avmedia.gShockPhoneSync.customComponents.TimeAdjustmentLayout>
+    </org.avmedia.gShockPhoneSync.ui.settings.TimeAdjustmentLayout>
 
 </org.avmedia.gShockPhoneSync.ui.settings.SettingsItem>

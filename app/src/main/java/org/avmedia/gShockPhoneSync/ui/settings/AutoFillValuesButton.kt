@@ -10,9 +10,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gshockapi.ProgressEvents
@@ -54,70 +51,70 @@ class AutoFillValuesButton @JvmOverloads constructor(
         }
     }
 
-private fun fillTimeAdjustment(settings: Settings) {
-    val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
+    private fun fillTimeAdjustment(settings: Settings) {
+        val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
 
-    timeAdjustment.timeAdjustment = settings.timeAdjustment
-    timeAdjustment.timeAdjustmentNotifications = false
-}
-
-private fun fillPowerSavingMode(settings: Settings) {
-    val powerSaveMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
-
-    // Change only if currently not in power-saving mode,
-    // i.e. do not change from pwr. saving to not saving
-    if (!powerSaveMode.powerSavingMode && settings.powerSavingMode) {
-        powerSaveMode.powerSavingMode = true
-    }
-}
-
-private fun fillLight(settings: Settings) {
-    val lightSetting = SettingsModel.light as SettingsModel.Light
-    lightSetting.autoLight = settings.autoLight
-    if (settings.lightDuration == "2s") {
-        lightSetting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
-    } else {
-        lightSetting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
-    }
-}
-
-private fun fillButtonTone(settings: Settings) {
-    val toneSetting = SettingsModel.buttonSound as SettingsModel.OperationSound
-    toneSetting.sound = settings.buttonTone
-}
-
-private fun fillLocale(settings: Settings) {
-
-    val localeSetting = SettingsModel.locale as SettingsModel.Locale
-    when (settings.language) {
-        "English" -> localeSetting.dayOfWeekLanguage =
-            SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
-        "Spanish" -> localeSetting.dayOfWeekLanguage =
-            SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
-        "French" -> localeSetting.dayOfWeekLanguage =
-            SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
-        "German" -> localeSetting.dayOfWeekLanguage =
-            SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
-        "Italian" -> localeSetting.dayOfWeekLanguage =
-            SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
-        "Russian" -> localeSetting.dayOfWeekLanguage =
-            SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
+        timeAdjustment.timeAdjustment = settings.timeAdjustment
+        timeAdjustment.timeAdjustmentNotifications = false
     }
 
-    if (settings.dateFormat == "DD:MM") {
-        localeSetting.dateFormat = SettingsModel.Locale.DATE_FORMAT.DAY_MONTH
-    } else {
-        localeSetting.dateFormat = SettingsModel.Locale.DATE_FORMAT.MONTH_DAY
+    private fun fillPowerSavingMode(settings: Settings) {
+        val powerSaveMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
+
+        // Change only if currently not in power-saving mode,
+        // i.e. do not change from pwr. saving to not saving
+        if (!powerSaveMode.powerSavingMode && settings.powerSavingMode) {
+            powerSaveMode.powerSavingMode = true
+        }
     }
 
-    if (settings.timeFormat == "12h") {
-        localeSetting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWELVE_HOURS
-    } else {
-        localeSetting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
+    private fun fillLight(settings: Settings) {
+        val lightSetting = SettingsModel.light as SettingsModel.Light
+        lightSetting.autoLight = settings.autoLight
+        if (settings.lightDuration == "2s") {
+            lightSetting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
+        } else {
+            lightSetting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
+        }
     }
-}
 
-private fun updateUI() {
-    ProgressEvents.onNext("NeedToUpdateUI")
-}
+    private fun fillButtonTone(settings: Settings) {
+        val toneSetting = SettingsModel.buttonSound as SettingsModel.OperationSound
+        toneSetting.sound = settings.buttonTone
+    }
+
+    private fun fillLocale(settings: Settings) {
+
+        val localeSetting = SettingsModel.locale as SettingsModel.Locale
+        when (settings.language) {
+            "English" -> localeSetting.dayOfWeekLanguage =
+                SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
+            "Spanish" -> localeSetting.dayOfWeekLanguage =
+                SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
+            "French" -> localeSetting.dayOfWeekLanguage =
+                SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
+            "German" -> localeSetting.dayOfWeekLanguage =
+                SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
+            "Italian" -> localeSetting.dayOfWeekLanguage =
+                SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
+            "Russian" -> localeSetting.dayOfWeekLanguage =
+                SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
+        }
+
+        if (settings.dateFormat == "DD:MM") {
+            localeSetting.dateFormat = SettingsModel.Locale.DATE_FORMAT.DAY_MONTH
+        } else {
+            localeSetting.dateFormat = SettingsModel.Locale.DATE_FORMAT.MONTH_DAY
+        }
+
+        if (settings.timeFormat == "12h") {
+            localeSetting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWELVE_HOURS
+        } else {
+            localeSetting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
+        }
+    }
+
+    private fun updateUI() {
+        ProgressEvents.onNext("NeedToUpdateUI")
+    }
 }
