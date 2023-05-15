@@ -17,7 +17,6 @@
     app:strokeColor="@color/stroke_color"
     app:strokeWidth="1dp">
 
-    <!--    <org.avmedia.gShockPhoneSync.ui.settings.HandAdjustmentLayout-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,45 +47,46 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_margin="2dp"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:layout_gravity="end"
                     >
 
-                    <org.avmedia.gShockPhoneSync.ui.settings.HandleArrowButton
-                        android:id="@+id/arrowLeft"
+                    <org.avmedia.gShockPhoneSync.ui.settings.HandCounterClockwise
+                        android:id="@+id/handCounterClockwise"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginEnd="30dp"
-                        android:background="@android:color/transparent"
+                        android:layout_marginEnd="16dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="Move hand to the Left"
-                        app:layout_constraintEnd_toStartOf="@+id/arrowUp"
+                        app:layout_constraintEnd_toStartOf="@+id/handReset"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:src="@drawable/arrow_left" />
+                        android:src="@drawable/hand_counter_clockwise" />
 
-                    <org.avmedia.gShockPhoneSync.ui.settings.HandleArrowButton
-                        android:id="@+id/arrowUp"
+                    <org.avmedia.gShockPhoneSync.ui.settings.HandReset
+                        android:id="@+id/handReset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginEnd="30dp"
-                        android:background="@android:color/transparent"
+                        android:layout_marginEnd="16dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="Reset hand at 12 position"
-                        app:layout_constraintEnd_toStartOf="@+id/arrowRight"
+                        app:layout_constraintEnd_toStartOf="@+id/handClockwise"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:src="@drawable/arrow_up" />
+                        android:src="@drawable/hand_reset" />
 
-                    <org.avmedia.gShockPhoneSync.ui.settings.HandleArrowButton
-                        android:id="@+id/arrowRight"
+                    <org.avmedia.gShockPhoneSync.ui.settings.HandClockwise
+                        android:id="@+id/handClockwise"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginLeft="16dp"
-                        android:background="@android:color/transparent"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_marginEnd="4dp"
                         android:contentDescription="Move hand to the Right"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:src="@drawable/arrow_right" />
+                        android:src="@drawable/hand_clockwise" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

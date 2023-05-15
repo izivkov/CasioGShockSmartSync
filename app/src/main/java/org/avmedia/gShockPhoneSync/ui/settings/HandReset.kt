@@ -6,19 +6,15 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.text.Html
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
-import org.avmedia.gShockPhoneSync.R
+import timber.log.Timber
 
-open class HandleArrowButton @JvmOverloads constructor(
+open class HandReset @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : androidx.appcompat.widget.AppCompatImageButton(context, attrs, defStyleAttr) {
+) : androidx.appcompat.widget.AppCompatImageButton(context, attrs/*, defStyleAttr*/) {
 
     init {
         setOnTouchListener(OnTouchListener())
@@ -28,6 +24,7 @@ open class HandleArrowButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    Timber.i("Reset to top")
                 }
             }
             return false

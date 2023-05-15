@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="10dp"
-        android:background="@android:color/transparent"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/info"
         android:src="@drawable/info_48px"
         app:infoText="@string/actions_screen_info"

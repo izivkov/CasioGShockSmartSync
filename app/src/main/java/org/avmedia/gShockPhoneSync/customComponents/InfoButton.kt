@@ -9,16 +9,19 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.res.ColorStateList
+import android.graphics.drawable.RippleDrawable
 import android.text.Html
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import org.avmedia.gShockPhoneSync.R
 
 class InfoButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : androidx.appcompat.widget.AppCompatImageButton(context, attrs, defStyleAttr) {
+) : androidx.appcompat.widget.AppCompatImageButton(context, attrs/*, defStyleAttr*/) {
 
     private var infoText: String? = ""
 
@@ -28,7 +31,6 @@ class InfoButton @JvmOverloads constructor(
             R.styleable.InfoButton,
             defStyleAttr, 0
         ).apply {
-
             try {
                 infoText = getString(R.styleable.InfoButton_infoText)
             } finally {

@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(
@@ -29,8 +30,7 @@ class SettingsList @JvmOverloads constructor(
 
     fun init() {
         runBlocking {
-            val settingSimpleModel = api().getSettings() // update teh model
-            val settingStr = Gson().toJson(settingSimpleModel)
+            val settingStr = Gson().toJson(api().getSettings())
             SettingsModel.fromJson(settingStr)
         }
     }

@@ -31,6 +31,8 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        SettingsModel.init()
+
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         _binding?.settingsList?.init()
         return binding.root

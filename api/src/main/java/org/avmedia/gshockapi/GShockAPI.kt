@@ -797,7 +797,6 @@ class GShockAPI(private val context: Context) {
         subscribe("SETTINGS") { keyedData ->
             val data = keyedData.getString("value")
             val key = keyedData.getString("key")
-
             val model = Gson().fromJson(data, Settings::class.java)
             resultQueue.dequeue(key)?.complete(model)
         }

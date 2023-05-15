@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 
 object SettingsModel {
@@ -66,16 +67,27 @@ object SettingsModel {
         var timeAdjustmentNotifications: Boolean = LocalDataStorage.getTimeAdjustmentNotification()
     }
 
-    class HandAdjustment : Setting("Hand Adjustment") {
-    }
+    class HandAdjustment : Setting("Hand Adjustment")
 
     init {
+        init()
+    }
+
+    fun init () {
+        settings.clear()
+
         settings.add(Locale())
         settings.add(OperationSound())
         settings.add(Light())
         settings.add(PowerSavingMode())
-        settings.add(TimeAdjustment())
-        settings.add(HandAdjustment())
+
+        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B5600) {
+            settings.add(TimeAdjustment())
+        }
+
+        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
+            settings.add(HandAdjustment())
+        }
     }
 
     @Synchronized
@@ -97,8 +109,11 @@ object SettingsModel {
                     setting.powerSavingMode = value == true
                 }
                 "timeAdjustment" -> {
-                    val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
-                    setting.timeAdjustment = value == true
+                    if (WatchInfo.model == WatchInfo.WATCH_MODEL.B5600) {
+                        val setting: TimeAdjustment =
+                            settingsMap["Time Adjustment"] as TimeAdjustment
+                        setting.timeAdjustment = value == true
+                    }
                 }
                 "timeTone" -> {
                     val setting: OperationSound = settingsMap["Button Sound"] as OperationSound
