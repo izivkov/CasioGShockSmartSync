@@ -17,7 +17,7 @@
     app:strokeColor="@color/stroke_color"
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <org.avmedia.gShockPhoneSync.ui.settings.HandAdjustmentLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
@@ -92,5 +92,5 @@
 
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </org.avmedia.gShockPhoneSync.ui.settings.HandAdjustmentLayout>
 </org.avmedia.gShockPhoneSync.ui.settings.SettingsItem>

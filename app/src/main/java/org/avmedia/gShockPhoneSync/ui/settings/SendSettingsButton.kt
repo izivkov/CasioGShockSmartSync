@@ -15,7 +15,6 @@ import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.Settings
-import org.avmedia.gshockapi.WatchInfo
 
 class SendSettingsButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -53,11 +52,9 @@ class SendSettingsButton @JvmOverloads constructor(
         val powerSavingMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
         settings.powerSavingMode = powerSavingMode.powerSavingMode
 
-        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B5600) {
-            val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
-            settings.timeAdjustment = timeAdjustment.timeAdjustment
-            LocalDataStorage.setTimeAdjustmentNotification(timeAdjustment.timeAdjustmentNotifications)
-        }
+        val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
+        settings.timeAdjustment = timeAdjustment.timeAdjustment
+        LocalDataStorage.setTimeAdjustmentNotification(timeAdjustment.timeAdjustmentNotifications)
 
         val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound
         settings.buttonTone = buttonTone.sound

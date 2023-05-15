@@ -7,15 +7,9 @@
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import androidx.core.content.ContextCompat
-import org.avmedia.gShockPhoneSync.R
 import timber.log.Timber
 
 open class HandCounterClockwise @JvmOverloads constructor(

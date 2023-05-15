@@ -14,7 +14,6 @@ import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(

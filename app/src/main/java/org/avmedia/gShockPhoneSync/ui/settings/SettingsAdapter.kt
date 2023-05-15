@@ -62,8 +62,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             itemView.findViewById<MaterialCheckBox>(R.id.notify_me)
     }
 
-    inner class ViewHolderHandAdjustment(itemView: View) : ViewHolderBaseSetting(itemView) {
-    }
+    inner class ViewHolderHandAdjustment(itemView: View) : ViewHolderBaseSetting(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val context = parent.context
@@ -287,7 +286,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     private fun configureHandAdjustment(
         vhTimeAdjustment: ViewHolderHandAdjustment,
         position: Int
-    ) {}
+    ) {
+    }
 
     override fun getItemCount(): Int {
         return settings.size
