@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 object InactivityWatcher {
     private val scheduler: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private const val TIMEOUT: Long = 60 * 2
+    private const val TIMEOUT: Long = 60 * 3
     private var futureTask: ScheduledFuture<*>? = null
 
     fun start(context: Context) {

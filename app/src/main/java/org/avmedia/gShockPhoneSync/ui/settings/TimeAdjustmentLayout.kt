@@ -15,21 +15,4 @@ import org.avmedia.gshockapi.WatchInfo
 
 class TimeAdjustmentLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr), IHideableLayout {
-
-    init {
-        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
-            hide()
-        } else {
-            show()
-        }
-    }
-
-    override fun show() {
-        visibility = View.VISIBLE
-    }
-
-    override fun hide() {
-        visibility = View.GONE
-    }
-}
+) : LinearLayout(context, attrs, defStyleAttr)

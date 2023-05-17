@@ -881,4 +881,8 @@ class GShockAPI(private val context: Context) {
     fun isBluetoothEnabled(): Boolean {
         return bleScannerLocal.bluetoothAdapter.isEnabled
     }
+
+    fun resetHand() {
+        sendMessage("{action: \"RESET_HAND\", value: \"\"}")
+    }
 }

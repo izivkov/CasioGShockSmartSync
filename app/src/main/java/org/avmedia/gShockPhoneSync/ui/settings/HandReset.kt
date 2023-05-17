@@ -10,8 +10,22 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import org.avmedia.gShockPhoneSync.MainActivity
 import timber.log.Timber
 
+
+/*
+RESET:
+1a 04 12 00 00 00                                             ..
+
+COUNTERCLOCKWISE:
+1a 04 18 1d 02 00
+
+CLOCKWISE:
+1a 04 19 1c 02 00
+
+
+ */
 open class HandReset @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : androidx.appcompat.widget.AppCompatImageButton(context, attrs/*, defStyleAttr*/) {
@@ -25,6 +39,7 @@ open class HandReset @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     Timber.i("Reset to top")
+                    MainActivity.api().resetHand()
                 }
             }
             return false
