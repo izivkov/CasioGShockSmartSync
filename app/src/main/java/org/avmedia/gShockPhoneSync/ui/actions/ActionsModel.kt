@@ -60,12 +60,12 @@ object ActionsModel {
         open fun save(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
             val value = enabled
-            LocalDataStorage.putForDevice(key, value.toString(), context)
+            LocalDataStorage.put(key, value.toString(), context)
         }
 
         open fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.getForDevice(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
 
         open fun validate(context: Context): Boolean {
@@ -85,7 +85,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.getForDevice(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
     }
 
@@ -99,7 +99,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.getForDevice(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
         }
     }
 
@@ -115,7 +115,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.getForDevice(key, "true", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "true", context).toBoolean()
         }
     }
 
@@ -145,7 +145,7 @@ object ActionsModel {
         }
 
         override fun load(context: Context) {
-            super.save(context)
+            // Do nothing.
         }
     }
 
@@ -175,13 +175,13 @@ object ActionsModel {
         override fun save(context: Context) {
             super.save(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
-            LocalDataStorage.putForDevice(key, phoneNumber.toString(), context)
+            LocalDataStorage.put(key, phoneNumber.toString(), context)
         }
 
         override fun load(context: Context) {
             super.load(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
-            phoneNumber = LocalDataStorage.getForDevice(key, "", context).toString()
+            phoneNumber = LocalDataStorage.get(key, "", context).toString()
         }
 
         override fun validate(context: Context): Boolean {
@@ -221,13 +221,13 @@ object ActionsModel {
         override fun save(context: Context) {
             super.save(context)
             val key = this.javaClass.simpleName + ".cameraOrientation"
-            LocalDataStorage.putForDevice(key, cameraOrientation.toString(), context)
+            LocalDataStorage.put(key, cameraOrientation.toString(), context)
         }
 
         override fun load(context: Context) {
             super.load(context)
             val key = this.javaClass.simpleName + ".cameraOrientation"
-            cameraOrientation = if (LocalDataStorage.getForDevice(key, "BACK", context)
+            cameraOrientation = if (LocalDataStorage.get(key, "BACK", context)
                     .toString() == "BACK"
             ) CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
         }
@@ -250,7 +250,7 @@ object ActionsModel {
 
         override fun save(context: Context) {
             val key = this.javaClass.simpleName + ".emailAddress"
-            LocalDataStorage.putForDevice(key, emailAddress.toString(), context)
+            LocalDataStorage.put(key, emailAddress.toString(), context)
             super.save(context)
         }
 
@@ -258,7 +258,7 @@ object ActionsModel {
             super.load(context)
 
             val key = this.javaClass.simpleName + ".emailAddress"
-            emailAddress = LocalDataStorage.getForDevice(key, "", context).toString()
+            emailAddress = LocalDataStorage.get(key, "", context).toString()
             extraText =
                 "Sent by G-shock App:\n https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"
         }

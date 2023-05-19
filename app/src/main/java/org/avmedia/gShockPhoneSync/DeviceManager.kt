@@ -8,7 +8,8 @@ import timber.log.Timber
 
 object DeviceManager {
 
-    private var deviceSelected = false
+    var name = ""
+    var address = ""
 
     init {
         startListener()
@@ -19,18 +20,36 @@ object DeviceManager {
             when (it) {
                 ProgressEvents["DeviceName"] -> {
                     val deviceName = ProgressEvents["DeviceName"]?.payload
-                    if ((deviceName as String).contains("CASIO") && LocalDataStorage.get("LastDeviceName", "", applicationContext()) != deviceName) {
+                    if ((deviceName as String) == "") {
+                        LocalDataStorage.delete("LastDeviceName", applicationContext())
+                    }
+                    else if (deviceName.contains("CASIO") && LocalDataStorage.get(
+                            "LastDeviceName",
+                            "",
+                            applicationContext()
+                        ) != deviceName)
+                     {
                         LocalDataStorage.put("LastDeviceName", deviceName, applicationContext())
                     }
+                    name = deviceName
                 }
 
                 ProgressEvents["DeviceAddress"] -> {
                     val deviceAddress = ProgressEvents["DeviceAddress"]?.payload
-                    if (LocalDataStorage.get("LastDeviceAddress", "", applicationContext()) != deviceAddress) {
+                    if ((deviceAddress as String) == "") {
+                        LocalDataStorage.delete("LastDeviceAddress", applicationContext())
+                    }
+                    if (LocalDataStorage.get(
+                            "LastDeviceAddress",
+                            "",
+                            applicationContext()
+                        ) != deviceAddress
+                    ) {
                         LocalDataStorage.put(
                             "LastDeviceAddress", deviceAddress as String, applicationContext()
                         )
                     }
+                    address = deviceAddress as String
                 }
             }
         }, { throwable ->

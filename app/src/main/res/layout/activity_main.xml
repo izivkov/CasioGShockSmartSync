@@ -11,7 +11,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout
+    <org.avmedia.gShockPhoneSync.ui.main.ConnectionLayout
         android:id="@+id/connection_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -41,7 +41,7 @@
                     tools:layout_editor_absoluteX="0dp"
                     tools:layout_editor_absoluteY="242dp" />
 
-                <org.avmedia.gShockPhoneSync.customComponents.ConnectionSpinner
+                <org.avmedia.gShockPhoneSync.ui.main.ConnectionSpinner
                     android:id="@+id/connection_spinner"
                     style="?android:attr/progressBarStyleLarge"
                     android:layout_width="wrap_content"
@@ -61,8 +61,8 @@
                     android:contentDescription="@string/info"
                     android:src="@drawable/info_48px"
                     app:infoText="@string/connection_screen_info"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -86,17 +86,50 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <TextView
-                    android:id="@+id/last_connected_value"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
-                    android:foregroundTint="@color/dark_bg_light_secondary_text"
-                    android:text="CASIO GW5600\nd3:3d:4a:78" />
+                    android:orientation="vertical">
 
-                <org.avmedia.gShockPhoneSync.customComponents.Button
+                    <org.avmedia.gShockPhoneSync.ui.main.WatchName
+                        android:id="@+id/last_connected_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="10dp"
+                        android:text=""
+                        android:textColor="@color/dark_bg_light_hint_text" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/notify_me_prompt"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="0dp"
+                            android:layout_weight="1"
+                            android:text="Always scan for watches"
+                            android:textSize="16dp"
+                            tools:ignore="SpUsage" />
+
+                        <com.google.android.material.checkbox.MaterialCheckBox
+                            android:id="@+id/always_scan"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <org.avmedia.gShockPhoneSync.ui.main.ForgetButton
                     android:id="@+id/Forget"
                     style="@style/buttonStyle"
                     android:layout_width="wrap_content"
@@ -109,7 +142,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-    </org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout>
+    </org.avmedia.gShockPhoneSync.ui.main.ConnectionLayout>
 
     <org.avmedia.gShockPhoneSync.customComponents.MainLayout
         android:id="@+id/main_layout"

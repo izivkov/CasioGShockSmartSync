@@ -23,7 +23,7 @@ class WatchImageView @JvmOverloads constructor(
     init {
         startListener()
 
-        val lastModelUsed = LocalDataStorage.get("LastDeviceConnected", "CASIO GW-B5600", context)
+        val lastModelUsed = LocalDataStorage.get("LastDeviceName", "", context)
         if (lastModelUsed?.contains("2100") == true) {
             setImageResource(R.drawable.ga_b2100)
         } else {
