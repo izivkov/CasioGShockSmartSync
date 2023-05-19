@@ -803,7 +803,7 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    private suspend fun getTimeAdjustment(): Boolean {
+    suspend fun getTimeAdjustment(): Boolean {
         sendMessage("{ action: 'GET_TIME_ADJUSTMENT'}")
 
         val key = "11"

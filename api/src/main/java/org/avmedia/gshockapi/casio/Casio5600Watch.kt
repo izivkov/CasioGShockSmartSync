@@ -7,8 +7,6 @@
 package org.avmedia.gshockapi.casio
 
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.utils.Utils
@@ -208,7 +206,7 @@ class Casio5600Watch : BluetoothWatch() {
                     put("key", createKey(data))
                     put("value", valueJson)
                 }
-                
+
                 // TODO: INZ check this
                 SettingsDecoder.CasioIsAutoTimeOriginalValue.value = data
 

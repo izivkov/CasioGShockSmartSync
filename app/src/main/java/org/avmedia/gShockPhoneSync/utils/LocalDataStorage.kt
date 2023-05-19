@@ -31,7 +31,7 @@ object LocalDataStorage {
         return get("$key.${WatchInfo.model}", defaultValue, context)
     }
 
-    fun get(key: String, defaultValue: String?, context: Context): String? {
+    fun get(key: String, defaultValue: String? = null, context: Context): String? {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
         return sharedPreference.getString(key, null) ?: defaultValue
     }

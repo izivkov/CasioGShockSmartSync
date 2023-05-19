@@ -10,6 +10,7 @@ import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.IDataReceived
 import org.avmedia.gshockapi.casio.WatchFactory
 import org.json.JSONObject
+import timber.log.Timber
 
 /*
 This class accepts data from the watch and sends it via "emitEvent()" to whatever
@@ -24,6 +25,7 @@ object WatchDataListener {
                 if (data == null) {
                     return
                 }
+                Timber.i("---> Received data $data")
                 val dataJson = WatchFactory.watch.toJson(data)
 
                 for (topic in dataJson.keys()) {

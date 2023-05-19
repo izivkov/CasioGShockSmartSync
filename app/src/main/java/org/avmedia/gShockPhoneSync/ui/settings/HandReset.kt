@@ -10,6 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity
 import timber.log.Timber
 
@@ -39,7 +40,8 @@ open class HandReset @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     Timber.i("Reset to top")
-                    MainActivity.api().resetHand()
+                    runBlocking {
+                        MainActivity.api().resetHand() }
                 }
             }
             return false
