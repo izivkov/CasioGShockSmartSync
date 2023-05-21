@@ -88,4 +88,16 @@
     <li>At the same time, the App will update the watch\'s <b>Reminders (Events)</b> from your <b>Google Calendar</b></li>
     ]]></string>
     <string name="image_of_casio_watch">Casio Watch</string>
+    <string name="connection_mode_info">
+        <![CDATA[
+
+        <li>If you are using the app with only one watch, choose the <b>Single Watch</b> option for the fastest and most efficient connection. Once connected,
+        it will look for the same watch with every connection.</li>
+
+        <li>If you have multiple watches, select the second option. This will scan for a new watch with every connection, and will detect different watches.
+        This allows you to auto time-adjust all watches, as long they sync at different time of the day (different models sync ad different times).
+        However, this option uses slightly more battery on your phone, and it is slower.</li>
+        <b>Note</b>: <i>When switching from <b>Single</b> to <b>Multiple Watches</b>, you may need to restart the app for the setting to take effect</i>
+        ]]>
+    </string>
 </resources>

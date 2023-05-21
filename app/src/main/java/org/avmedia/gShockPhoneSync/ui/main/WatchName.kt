@@ -21,7 +21,7 @@ class WatchName @JvmOverloads constructor(
         if (name.isNullOrBlank()) {
             name = "No Watch"
         }
-        text = name
+        text = name.removePrefix("CASIO").trim()
         createSubscription()
     }
 
@@ -35,7 +35,7 @@ class WatchName @JvmOverloads constructor(
                             text = "No Watch"
                         }
                         if ((deviceName as String).contains("CASIO")) {
-                            text = deviceName
+                            text = deviceName.removePrefix("CASIO").trim()
                         }
                     }
                 }

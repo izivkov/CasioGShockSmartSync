@@ -864,6 +864,10 @@ class GShockAPI(private val context: Context) {
         Connection.disconnect(context)
     }
 
+    fun stopScan () {
+        bleScannerLocal.stopBleScan()
+    }
+
     fun preventReconnection() {
         Connection.oneTimeLock = true
     }

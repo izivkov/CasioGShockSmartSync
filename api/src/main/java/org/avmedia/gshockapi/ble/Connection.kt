@@ -251,7 +251,10 @@ object Connection : IConnection {
         // Handle Connect separately from other operations that require device to be connected
         if (operation is Connect) {
             with(operation) {
-                device.connectGatt(context, true, callback)
+                device.connectGatt(context,
+                    true,
+                    // false,
+                    callback)
             }
             return
         }

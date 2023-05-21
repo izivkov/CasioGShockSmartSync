@@ -39,7 +39,7 @@ data class BleScannerLocal(val context: Context) {
     }
 
     private val scanSettings =
-        ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+        ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build()
 
     private var isScanning = false
 
@@ -120,7 +120,6 @@ Characteristics:
             if (foundDevices.contains(result.device.toString())) {
                 return
             }
-            foundDevices.add(result.device.toString())
             ProgressEvents.onNext("DeviceAddress")
             ProgressEvents["DeviceAddress"]?.payload = result.device.toString()
 
