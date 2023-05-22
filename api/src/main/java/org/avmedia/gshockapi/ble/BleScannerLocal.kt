@@ -17,12 +17,9 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.ParcelUuid
 import androidx.appcompat.app.AppCompatActivity
-import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.CasioConstants
-import org.avmedia.gshockapi.utils.Utils
-import org.avmedia.gshockapi.utils.WatchValuesCache
 import timber.log.Timber
 
 data class BleScannerLocal(val context: Context) {
@@ -39,7 +36,10 @@ data class BleScannerLocal(val context: Context) {
     }
 
     private val scanSettings =
-        ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build()
+        ScanSettings.Builder().setScanMode(
+            // ScanSettings.SCAN_MODE_LOW_POWER
+            ScanSettings.SCAN_MODE_LOW_LATENCY
+        ).build()
 
     private var isScanning = false
 
@@ -61,6 +61,7 @@ data class BleScannerLocal(val context: Context) {
             if (!bluetoothAdapter.isEnabled || bleScanner == null) {
                 return
             }
+
             bleScanner.startScan(createFilters(), scanSettings, scanCallback)
             isScanning = true
         } else {
@@ -103,12 +104,20 @@ Characteristics:
 
     @SuppressLint("MissingPermission")
     fun stopBleScan() {
-        bleScanner.stopScan(scanCallback)
+        bleScanner.stopScan(stopScanCallback)
         isScanning = false
+    }
+
+    private val stopScanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult?) {
+            super.onScanResult(callbackType, result)
+            Timber.e("===> stopScanCallback:onScanFailed: code $result")
+        }
     }
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
 
             val name = result.scanRecord?.deviceName
             if (name != null) {
@@ -120,6 +129,8 @@ Characteristics:
             if (foundDevices.contains(result.device.toString())) {
                 return
             }
+            foundDevices.add(result.device.toString())
+
             ProgressEvents.onNext("DeviceAddress")
             ProgressEvents["DeviceAddress"]?.payload = result.device.toString()
 

@@ -24,6 +24,10 @@ object CasioTimeZone {
         val city = TimeZoneHelper.parseCity(timeZone)
 
         var worldCity = WorldCity(city, 0)
-        CasioIO.writeCmd(0xE, worldCity.createCasioString())
+        CasioIO.writeCmd(0xE,
+            // "1f004e444a414d454e4100000000000000000000"
+            // "1f01544f524f4e544f0000000000000000000000"
+            worldCity.createCasioString()
+        )
     }
 }

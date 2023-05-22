@@ -15,6 +15,7 @@ import android.net.Uri
 import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
+import org.avmedia.gShockPhoneSync.DeviceManager
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
@@ -350,7 +351,7 @@ object ActionsModel {
         NotificationProvider.createNotification(
             context,
             "G-Shock Smart Sync",
-            "Time set at $dateStr",
+            "Time set for watch ${DeviceManager.name} at $dateStr",
             NotificationManager.IMPORTANCE_DEFAULT
         )
     }
