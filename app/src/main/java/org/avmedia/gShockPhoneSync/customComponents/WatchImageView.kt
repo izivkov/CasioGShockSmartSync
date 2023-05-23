@@ -8,10 +8,8 @@ package org.avmedia.gShockPhoneSync.customComponents
 
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber

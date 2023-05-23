@@ -9,13 +9,10 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
-import android.content.res.ColorStateList
-import android.graphics.drawable.RippleDrawable
 import android.text.Html
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import org.avmedia.gShockPhoneSync.R
 

@@ -34,7 +34,7 @@ class WatchName @JvmOverloads constructor(
                         if ((deviceName as String).isNullOrBlank()) {
                             text = "No Watch"
                         }
-                        if ((deviceName as String).contains("CASIO")) {
+                        if (deviceName.contains("CASIO")) {
                             text = deviceName.removePrefix("CASIO").trim()
                         }
                     }

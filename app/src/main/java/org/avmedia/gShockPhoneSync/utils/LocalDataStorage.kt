@@ -7,7 +7,6 @@
 package org.avmedia.gShockPhoneSync.utils
 
 import android.content.Context
-import org.avmedia.gShockPhoneSync.DeviceManager
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import java.util.*
 import kotlin.time.ExperimentalTime

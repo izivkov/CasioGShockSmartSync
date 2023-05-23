@@ -8,7 +8,6 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsModel
 import org.avmedia.gShockPhoneSync.ui.events.CalendarEvents
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.casio.BluetoothWatch

@@ -12,8 +12,6 @@ import android.widget.ArrayAdapter
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 class ConnectionModeMenu @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -27,8 +25,10 @@ class ConnectionModeMenu @JvmOverloads constructor(
     }
 
     init {
-        val items = CONNECTION_MODE.values().map { it.getModeName() } // listOf("Single Watch", "Mult. Watches")
-        val adapter = ArrayAdapter(context, R.layout.connection_mode_item, R.id.connection_mode_text, items)
+        val items = CONNECTION_MODE.values()
+            .map { it.getModeName() } // listOf("Single Watch", "Mult. Watches")
+        val adapter =
+            ArrayAdapter(context, R.layout.connection_mode_item, R.id.connection_mode_text, items)
         setAdapter(adapter)
 
         val savedMode = LocalDataStorage.get("ConnectionMode", "Single Watch", context)

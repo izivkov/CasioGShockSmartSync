@@ -22,13 +22,12 @@ object DeviceManager {
                     val deviceName = ProgressEvents["DeviceName"]?.payload
                     if ((deviceName as String) == "") {
                         LocalDataStorage.delete("LastDeviceName", applicationContext())
-                    }
-                    else if (deviceName.contains("CASIO") && LocalDataStorage.get(
+                    } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
                             "LastDeviceName",
                             "",
                             applicationContext()
-                        ) != deviceName)
-                     {
+                        ) != deviceName
+                    ) {
                         LocalDataStorage.put("LastDeviceName", deviceName, applicationContext())
                     }
                     name = deviceName
@@ -46,10 +45,10 @@ object DeviceManager {
                         ) != deviceAddress
                     ) {
                         LocalDataStorage.put(
-                            "LastDeviceAddress", deviceAddress as String, applicationContext()
+                            "LastDeviceAddress", deviceAddress, applicationContext()
                         )
                     }
-                    address = deviceAddress as String
+                    address = deviceAddress
                 }
             }
         }, { throwable ->

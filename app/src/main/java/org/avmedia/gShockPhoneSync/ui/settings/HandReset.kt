@@ -41,7 +41,8 @@ open class HandReset @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     Timber.i("Reset to top")
                     runBlocking {
-                        MainActivity.api().resetHand() }
+                        MainActivity.api().resetHand()
+                    }
                 }
             }
             return false

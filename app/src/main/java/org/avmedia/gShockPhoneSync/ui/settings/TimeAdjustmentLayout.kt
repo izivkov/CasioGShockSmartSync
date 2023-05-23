@@ -8,10 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.widget.LinearLayout
-import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gshockapi.WatchInfo
 
 class TimeAdjustmentLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

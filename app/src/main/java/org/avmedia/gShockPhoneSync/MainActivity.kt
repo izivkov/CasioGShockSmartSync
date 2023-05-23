@@ -8,7 +8,6 @@ package org.avmedia.gShockPhoneSync
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -17,7 +16,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -37,7 +35,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
-import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
 
@@ -260,7 +257,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
-        val deviceAddress = when (LocalDataStorage.get ("ConnectionMode", "Single Watch", this)) {
+        val deviceAddress = when (LocalDataStorage.get("ConnectionMode", "Single Watch", this)) {
             "Single Watch" -> LocalDataStorage.get("LastDeviceAddress", "", this)
             else -> ""
         }

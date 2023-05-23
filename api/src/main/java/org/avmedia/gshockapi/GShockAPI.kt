@@ -864,7 +864,7 @@ class GShockAPI(private val context: Context) {
         Connection.disconnect(context)
     }
 
-    fun stopScan () {
+    fun stopScan() {
         bleScannerLocal.stopBleScan()
     }
 

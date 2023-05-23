@@ -1,7 +1,5 @@
 package org.avmedia.gshockapi
 
-import org.avmedia.gshockapi.ble.Connection
-
 object WatchInfo {
 
     enum class WATCH_MODEL {
@@ -11,7 +9,7 @@ object WatchInfo {
     var model = WATCH_MODEL.UNKNOWN
     private var deviceName: String = ""
 
-    fun setDeviceName (name:String) {
+    fun setDeviceName(name: String) {
         deviceName = name
 
         model = if (deviceName.contains("2100")) {
@@ -21,7 +19,7 @@ object WatchInfo {
         }
     }
 
-    fun getDeviceName () : String {
+    fun getDeviceName(): String {
         return deviceName
     }
 }

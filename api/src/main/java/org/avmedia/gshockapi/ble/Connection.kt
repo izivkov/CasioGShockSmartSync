@@ -77,7 +77,7 @@ object Connection : IConnection {
         if (!this::device.isInitialized) {
             return null
         }
-        return device?.address
+        return device.address
     }
 
     // end of interface
@@ -251,9 +251,11 @@ object Connection : IConnection {
         // Handle Connect separately from other operations that require device to be connected
         if (operation is Connect) {
             with(operation) {
-                device.connectGatt(context,
+                device.connectGatt(
+                    context,
                     true,
-                    callback)
+                    callback
+                )
             }
             return
         }

@@ -8,7 +8,6 @@ package org.avmedia.gshockapi.ble
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
-import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.casio.CasioConstants
 import java.util.*
 

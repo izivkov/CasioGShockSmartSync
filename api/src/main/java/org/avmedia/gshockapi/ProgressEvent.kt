@@ -111,7 +111,7 @@ object ProgressEvents {
      *      ProgressEvents["CustomEvent"] -> {
      *      // ...
      *    }
-     ```
+    ```
      *
      * @param eventName: Name of event to broadcast
      */

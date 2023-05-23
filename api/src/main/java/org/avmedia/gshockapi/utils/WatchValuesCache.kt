@@ -28,7 +28,7 @@ class WatchValuesCache {
         map.remove(key)
     }
 
-    fun clear () {
+    fun clear() {
         map.clear()
     }
 }
