@@ -18,6 +18,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 
 class SendTimeButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -37,8 +38,9 @@ class SendTimeButton @JvmOverloads constructor(
                     val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
                     scope.launch {
                         api().setTime(true)
-                        ProgressEvents.onNext("HomeTimeUpdated")
                         Utils.snackBar(context, "Time Set on Watch")
+                        ProgressEvents.onNext("HomeTimeUpdated")
+                        Timber.i("<+++++++++++++++++++++++++ Posting HomeTimeUpdated message")
                     }
                 }
             }

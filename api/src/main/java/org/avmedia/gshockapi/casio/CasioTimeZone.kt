@@ -7,7 +7,7 @@ object CasioTimeZone {
     class WorldCity(private val city: String, val index: Int) {
         fun createCasioString(): String {
             return ("1F" + "%02x".format(index) + Utils.toHexStr(city.take(18))
-                .padEnd(2 * 20 - 4, '0')) // pad to 20 chars
+                .padEnd(36, '0')) // pad to 40 chars
         }
     }
 
