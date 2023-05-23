@@ -16,6 +16,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +36,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
 
@@ -221,9 +223,18 @@ class MainActivity : AppCompatActivity() {
 
                         val reconnectScheduler: ScheduledExecutorService =
                             Executors.newSingleThreadScheduledExecutor()
+                            Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
                             runWithChecks()
                         }, 3L, TimeUnit.SECONDS)
+                    }
+
+                    ProgressEvents["WaitForConnection"] -> {
+                        val reconnectScheduler: ScheduledExecutorService =
+                            Executors.newSingleThreadScheduledExecutor()
+                        reconnectScheduler.schedule({
+                            runWithChecks()
+                        }, 1L, TimeUnit.SECONDS)
                     }
 
                     ProgressEvents["ActionsPermissionsNotGranted"] -> {
@@ -257,11 +268,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
-        val deviceAddress = when (LocalDataStorage.get("ConnectionMode", "Single Watch", this)) {
-            "Single Watch" -> LocalDataStorage.get("LastDeviceAddress", "", this)
-            else -> ""
-        }
+        val deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
         api().waitForConnection(deviceAddress)
+    }
+
+    fun restartApp() {
+        Handler()
+            .postDelayed(
+                {
+                    val pm: PackageManager = this.packageManager
+                    val intent =
+                        pm.getLaunchIntentForPackage(this.packageName)
+                    this.finishAffinity() // Finishes all activities.
+                    this.startActivity(intent) // Start the launch activity
+                    exitProcess(0) // System finishes and automatically relaunches us.
+                },
+                100
+            )
     }
 
     companion object {
@@ -274,6 +297,10 @@ class MainActivity : AppCompatActivity() {
 
         fun api(): GShockAPI {
             return instance!!.api
+        }
+
+        fun restartApp() {
+            instance!!.restartApp()
         }
     }
 }

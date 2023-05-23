@@ -37,8 +37,8 @@ data class BleScannerLocal(val context: Context) {
 
     private val scanSettings =
         ScanSettings.Builder().setScanMode(
-            ScanSettings.SCAN_MODE_LOW_POWER
-            // ScanSettings.SCAN_MODE_LOW_LATENCY
+            // ScanSettings.SCAN_MODE_LOW_POWER
+            ScanSettings.SCAN_MODE_LOW_LATENCY
         ).build()
 
     private var isScanning = false

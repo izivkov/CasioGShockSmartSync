@@ -12,6 +12,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.WatchFactory
 import timber.log.Timber
@@ -171,8 +172,7 @@ object Connection : IConnection {
         DeviceCharacteristics.findCharacteristic(CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID)
             ?.let {
                 enableNotifications(
-                    device,
-                    it
+                    device, it
                 )
             }
     }

@@ -97,54 +97,26 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
                         android:text=""
-                        android:textColor="@color/dark_bg_light_secondary_text" />
+                        android:textColor="@color/dark_bg_light_secondary_text"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/connection_type_menu_layout"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    <org.avmedia.gShockPhoneSync.ui.main.ForgetButton
+                        android:id="@+id/Forget"
+                        style="@style/buttonStyle"
                         android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_margin="6dp"
-                        android:textSize="18sp"
-                        android:foregroundTint="@color/dark_bg_light_secondary_text"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintEnd_toStartOf="@+id/info_connection_type"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:hint="Use with">
-
-                        <org.avmedia.gShockPhoneSync.ui.main.ConnectionModeMenu
-                            android:id="@+id/connection_mode"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:padding="10dp"
-                            android:textColor="@color/dark_bg_light_secondary_text"
-                            android:textSize="20dp" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <org.avmedia.gShockPhoneSync.customComponents.InfoButton
-                        android:id="@+id/info_connection_type"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:layout_margin="5dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/info"
-                        android:src="@drawable/info_48px"
-                        app:infoText="@string/connection_mode_info"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        android:background="@drawable/button"
+                        android:text="Forget"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        />
-
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
