@@ -20,4 +20,5 @@ interface IConnection {
     fun start()
     fun stop()
     fun getDeviceId(): String?
+    fun breakWait()
 }

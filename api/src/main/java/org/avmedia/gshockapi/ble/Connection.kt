@@ -12,7 +12,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.WatchFactory
 import timber.log.Timber
@@ -37,6 +36,8 @@ object Connection : IConnection {
     var oneTimeLock = false
     lateinit var applicationContext: Context
     private var isConnecting = false
+
+    var gatt: BluetoothGatt? = null
 
     // Interface
     override fun init(context: Context) {
@@ -251,7 +252,7 @@ object Connection : IConnection {
         // Handle Connect separately from other operations that require device to be connected
         if (operation is Connect) {
             with(operation) {
-                device.connectGatt(
+                this@Connection.gatt = device.connectGatt(
                     context,
                     true,
                     callback
@@ -273,6 +274,8 @@ object Connection : IConnection {
         when (operation) {
             is Disconnect -> with(operation) {
                 Timber.w("Disconnecting from ${device.address}")
+                gatt.close()
+                this@Connection.gatt = null
                 deviceGattMap.remove(device)
                 val event = ProgressEvents["Disconnect"]
                 event?.payload = device
@@ -389,6 +392,8 @@ object Connection : IConnection {
                         gatt.discoverServices()
                     }
 
+                    this@Connection.gatt = gatt
+
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     Timber.e("onConnectionStateChange: disconnected from $deviceAddress")
                     Timber.e("===> Closing gatt 1<===")
@@ -396,8 +401,7 @@ object Connection : IConnection {
                 }
             } else {
                 Timber.e("onConnectionStateChange: status $status encountered for $deviceAddress!")
-                Timber.e("===> Closing gatt 2<===")
-                gatt.close()
+                // gatt.close()
                 if (status == 19 || status == 8) { // disconnected by device
                     Timber.d("Got error $status")
                     //ProgressEvents.Events.Disconnect.payload = device
@@ -592,4 +596,16 @@ object Connection : IConnection {
     }
 
     private fun BluetoothDevice.isConnected() = deviceGattMap.containsKey(this)
+
+    @SuppressLint("MissingPermission")
+    override fun breakWait() {
+//        if (this@Connection.gatt != null) {
+//            this@Connection.gatt?.disconnect()
+//            this@Connection.gatt?.close()
+//            isConnecting = false
+//            signalEndOfOperation()
+//
+//            this@Connection.gatt = null
+//        }
+    }
 }

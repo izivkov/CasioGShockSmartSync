@@ -111,13 +111,22 @@ Characteristics:
     private val stopScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
-            Timber.e("===> stopScanCallback:onScanFailed: code $result")
+            Timber.e("===> stopScanCallback: code $result")
         }
     }
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
+
+            if (Connection.gatt != null) {
+                return
+            }
+
+            if (foundDevices.contains(result.device.toString())) {
+                return
+            }
+            foundDevices.add(result.device.toString())
 
             val name = result.scanRecord?.deviceName
             if (name != null) {
@@ -126,10 +135,6 @@ Characteristics:
                 ProgressEvents.onNext("DeviceName")
                 ProgressEvents["DeviceName"]?.payload = WatchInfo.getDeviceName()
             }
-            if (foundDevices.contains(result.device.toString())) {
-                return
-            }
-            foundDevices.add(result.device.toString())
 
             ProgressEvents.onNext("DeviceAddress")
             ProgressEvents["DeviceAddress"]?.payload = result.device.toString()

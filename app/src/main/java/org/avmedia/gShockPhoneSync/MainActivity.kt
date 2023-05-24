@@ -229,14 +229,6 @@ class MainActivity : AppCompatActivity() {
                         }, 3L, TimeUnit.SECONDS)
                     }
 
-                    ProgressEvents["WaitForConnection"] -> {
-                        val reconnectScheduler: ScheduledExecutorService =
-                            Executors.newSingleThreadScheduledExecutor()
-                        reconnectScheduler.schedule({
-                            runWithChecks()
-                        }, 1L, TimeUnit.SECONDS)
-                    }
-
                     ProgressEvents["ActionsPermissionsNotGranted"] -> {
                         Utils.snackBar(
                             this, "Actions not granted...Cannot access the Actions screen..."

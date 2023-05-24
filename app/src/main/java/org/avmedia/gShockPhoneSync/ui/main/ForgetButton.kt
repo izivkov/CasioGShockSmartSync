@@ -29,10 +29,10 @@ class ForgetButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    LocalDataStorage.delete("LastDeviceAddress", context)
-                    LocalDataStorage.delete("LastDeviceName", context)
+//                    LocalDataStorage.delete("LastDeviceAddress", context)
+//                    LocalDataStorage.delete("LastDeviceName", context)
 
-                    restartApp()
+                    // Connection.breakWait()
                 }
             }
             v?.performClick()
