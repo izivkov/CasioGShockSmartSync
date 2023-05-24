@@ -104,24 +104,13 @@ Characteristics:
 
     @SuppressLint("MissingPermission")
     fun stopBleScan() {
-        bleScanner.stopScan(stopScanCallback)
+        bleScanner.stopScan(scanCallback)
         isScanning = false
-    }
-
-    private val stopScanCallback = object : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult?) {
-            super.onScanResult(callbackType, result)
-            Timber.e("===> stopScanCallback: code $result")
-        }
     }
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-
-            if (Connection.gatt != null) {
-                return
-            }
 
             if (foundDevices.contains(result.device.toString())) {
                 return
