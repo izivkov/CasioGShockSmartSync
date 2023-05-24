@@ -34,6 +34,7 @@ class ForgetButton @JvmOverloads constructor(
                     LocalDataStorage.delete("LastDeviceName", context)
 
                     Connection.breakWait()
+
                     ProgressEvents.onNext("DeviceName")
                     ProgressEvents["DeviceName"]?.payload = ""
 

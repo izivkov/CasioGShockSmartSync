@@ -14,22 +14,23 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import org.avmedia.gShockPhoneSync.R
+import java.time.Duration
 
 object Utils {
 
     val Activity.contentView: View?
         get() = (findViewById<ViewGroup>(android.R.id.content))?.getChildAt(0)
 
-    fun snackBar(view: View, message: String) {
+    fun snackBar(view: View, message: String, duration: Int) {
 
-        Snackbar.make(view, message, Snackbar.LENGTH_LONG)
+        Snackbar.make(view, message, duration)
             .setActionTextColor(Color.BLUE)
             .setBackgroundTint(ContextCompat.getColor(view.context, R.color.grey_700))
             .setTextColor(Color.WHITE)
             .show()
     }
 
-    fun snackBar(context: Context, message: String) {
-        snackBar((context as Activity).contentView!!, message)
+    fun snackBar(context: Context, message: String, duration: Int = Snackbar.LENGTH_LONG) {
+        snackBar((context as Activity).contentView!!, message, duration)
     }
 }

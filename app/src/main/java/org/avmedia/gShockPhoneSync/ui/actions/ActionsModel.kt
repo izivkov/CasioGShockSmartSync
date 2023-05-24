@@ -351,7 +351,7 @@ object ActionsModel {
         NotificationProvider.createNotification(
             context,
             "G-Shock Smart Sync",
-            "Time set for watch ${DeviceManager.name} at $dateStr",
+            "Time set for watch ${DeviceManager.name}\nat $dateStr",
             NotificationManager.IMPORTANCE_DEFAULT
         )
     }

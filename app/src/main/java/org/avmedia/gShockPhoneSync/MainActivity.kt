@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -224,7 +225,7 @@ class MainActivity : AppCompatActivity() {
                         Timber.i("onDisconnect")
                         InactivityWatcher.cancel()
 
-                        Utils.snackBar(this, "Disconnected from watch!")
+                        Utils.snackBar(this, "Disconnected from watch!", Snackbar.LENGTH_SHORT)
                         val event = ProgressEvents["Disconnect"]
                         val device = ProgressEvents["Disconnect"]?.payload as BluetoothDevice
                         api().teardownConnection(device)
