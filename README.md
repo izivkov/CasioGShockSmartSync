@@ -1,5 +1,7 @@
 # Casio G-Shock Smart Sync
 
+**Note: We now support the B2100 serias of G-Shock watches!**
+
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
 
 - Sets watch's reminders from Google Calendar
@@ -9,7 +11,7 @@ I think we can do better than the official G-Shock Connected App! This app provi
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13) series watches.
+This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13), as well as the [2100](https://amzn.to/3MUDCGY) series watches.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
