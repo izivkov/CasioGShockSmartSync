@@ -599,13 +599,13 @@ object Connection : IConnection {
 
     @SuppressLint("MissingPermission")
     override fun breakWait() {
-//        if (this@Connection.gatt != null) {
-//            this@Connection.gatt?.disconnect()
-//            this@Connection.gatt?.close()
-//            isConnecting = false
-//            signalEndOfOperation()
-//
-//            this@Connection.gatt = null
-//        }
+        if (this@Connection.gatt != null) {
+            this@Connection.gatt?.disconnect()
+            this@Connection.gatt?.close()
+            isConnecting = false
+            signalEndOfOperation()
+
+            this@Connection.gatt = null
+        }
     }
 }

@@ -212,6 +212,14 @@ class MainActivity : AppCompatActivity() {
                         }, 3L, TimeUnit.SECONDS)
                     }
 
+                    ProgressEvents["WaitForConnection"] -> {
+                        val errorScheduler: ScheduledExecutorService =
+                            Executors.newSingleThreadScheduledExecutor()
+                        errorScheduler.schedule({
+                            runWithChecks()
+                        }, 1L, TimeUnit.SECONDS)
+                    }
+
                     ProgressEvents["Disconnect"] -> {
                         Timber.i("onDisconnect")
                         InactivityWatcher.cancel()
@@ -222,7 +230,6 @@ class MainActivity : AppCompatActivity() {
                         api().teardownConnection(device)
 
                         val reconnectScheduler: ScheduledExecutorService =
-                            Executors.newSingleThreadScheduledExecutor()
                             Executors.newSingleThreadScheduledExecutor()
                         reconnectScheduler.schedule({
                             runWithChecks()
@@ -265,17 +272,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun restartApp() {
-        Handler()
-            .postDelayed(
+        Handler().postDelayed(
                 {
                     val pm: PackageManager = this.packageManager
-                    val intent =
-                        pm.getLaunchIntentForPackage(this.packageName)
+                    val intent = pm.getLaunchIntentForPackage(this.packageName)
                     this.finishAffinity() // Finishes all activities.
                     this.startActivity(intent) // Start the launch activity
                     exitProcess(0) // System finishes and automatically relaunches us.
-                },
-                100
+                }, 100
             )
     }
 

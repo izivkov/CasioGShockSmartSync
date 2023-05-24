@@ -15,6 +15,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.restartApp
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
 
 class ForgetButton @JvmOverloads constructor(
@@ -29,10 +30,14 @@ class ForgetButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-//                    LocalDataStorage.delete("LastDeviceAddress", context)
-//                    LocalDataStorage.delete("LastDeviceName", context)
+                    LocalDataStorage.delete("LastDeviceAddress", context)
+                    LocalDataStorage.delete("LastDeviceName", context)
 
-                    // Connection.breakWait()
+                    Connection.breakWait()
+                    ProgressEvents.onNext("DeviceName")
+                    ProgressEvents["DeviceName"]?.payload = ""
+
+                    ProgressEvents.onNext("WaitForConnection")
                 }
             }
             v?.performClick()
