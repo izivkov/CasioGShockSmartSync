@@ -9,19 +9,21 @@ package org.avmedia.gShockPhoneSync.utils
 import android.content.Context
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import java.util.*
+import kotlin.time.ExperimentalTime
 
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
 
+    @OptIn(ExperimentalTime::class)
     fun put(key: String, value: String, context: Context) {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
         var editor = sharedPreference.edit()
-        editor.putString(key, value)
+        editor.putString("$key", value)
         editor.apply()
     }
 
-    fun get(key: String, defaultValue: String?, context: Context): String? {
+    fun get(key: String, defaultValue: String? = null, context: Context): String? {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
         return sharedPreference.getString(key, null) ?: defaultValue
     }

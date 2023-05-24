@@ -16,15 +16,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.ViewGroup
+import android.os.Handler
 import android.view.WindowManager
-import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -37,6 +37,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
 
@@ -79,11 +80,9 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
         navView.setupWithNavController(navController)
 
-        createAppEventsSubscription()
+        val deviceManager = DeviceManager
 
-        // This will run in the foreground, but not reliable. Do not use for now.
-        // val intent = Intent(this, ForegroundService::class.java)
-        // this.startService(intent)
+        createAppEventsSubscription()
 
         // ApiTest().run(this)
     }
@@ -143,8 +142,7 @@ class MainActivity : AppCompatActivity() {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        this, Manifest.permission.BLUETOOTH_CONNECT
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     return
@@ -215,14 +213,21 @@ class MainActivity : AppCompatActivity() {
                         }, 3L, TimeUnit.SECONDS)
                     }
 
+                    ProgressEvents["WaitForConnection"] -> {
+                        val errorScheduler: ScheduledExecutorService =
+                            Executors.newSingleThreadScheduledExecutor()
+                        errorScheduler.schedule({
+                            runWithChecks()
+                        }, 1L, TimeUnit.SECONDS)
+                    }
+
                     ProgressEvents["Disconnect"] -> {
                         Timber.i("onDisconnect")
                         InactivityWatcher.cancel()
 
-                        Utils.snackBar(this, "Disconnected from watch!")
+                        Utils.snackBar(this, "Disconnected from watch!", Snackbar.LENGTH_SHORT)
                         val event = ProgressEvents["Disconnect"]
-                        val device =
-                            ProgressEvents["Disconnect"]?.payload as BluetoothDevice
+                        val device = ProgressEvents["Disconnect"]?.payload as BluetoothDevice
                         api().teardownConnection(device)
 
                         val reconnectScheduler: ScheduledExecutorService =
@@ -263,14 +268,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
-        var cachedDeviceAddress: String? =
-            LocalDataStorage.get("cached device", null, this@MainActivity)
-        api().waitForConnection(cachedDeviceAddress)
+        val deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+        api().waitForConnection(deviceAddress)
+    }
 
-        val deviceId = api().getDeviceId()
-        if (deviceId != null) {
-            LocalDataStorage.put("cached device", deviceId, this@MainActivity)
-        }
+    fun restartApp() {
+        Handler().postDelayed(
+                {
+                    val pm: PackageManager = this.packageManager
+                    val intent = pm.getLaunchIntentForPackage(this.packageName)
+                    this.finishAffinity() // Finishes all activities.
+                    this.startActivity(intent) // Start the launch activity
+                    exitProcess(0) // System finishes and automatically relaunches us.
+                }, 100
+            )
     }
 
     companion object {
@@ -283,6 +294,10 @@ class MainActivity : AppCompatActivity() {
 
         fun api(): GShockAPI {
             return instance!!.api
+        }
+
+        fun restartApp() {
+            instance!!.restartApp()
         }
     }
 }

@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.json.JSONObject
 
 object SettingsModel {
@@ -62,8 +63,10 @@ object SettingsModel {
 
     class TimeAdjustment : Setting("Time Adjustment") {
         var timeAdjustment: Boolean = true
-        var timeAdjustmentNotifications: Boolean = false
+        var timeAdjustmentNotifications: Boolean = LocalDataStorage.getTimeAdjustmentNotification()
     }
+
+    class HandAdjustment : Setting("Hand Adjustment")
 
     init {
         settings.add(Locale())
@@ -71,6 +74,7 @@ object SettingsModel {
         settings.add(Light())
         settings.add(PowerSavingMode())
         settings.add(TimeAdjustment())
+        // settings.add(HandAdjustment())
     }
 
     @Synchronized

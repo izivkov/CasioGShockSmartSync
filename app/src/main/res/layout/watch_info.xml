@@ -84,7 +84,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginLeft="16dp"
-                        android:background="@android:color/transparent"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/info"
                         android:src="@drawable/info_48px"
                         app:infoText="@string/info_home_time" />

@@ -17,7 +17,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 
 class ActionsFragment : Fragment() {

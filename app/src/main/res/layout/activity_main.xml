@@ -11,44 +11,132 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout
+    <org.avmedia.gShockPhoneSync.ui.main.ConnectionLayout
         android:id="@+id/connection_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:srcCompat="@drawable/ic_gw_b5600"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="242dp"
-            android:contentDescription="@string/image_of_casio_5600_watch" />
-
-        <org.avmedia.gShockPhoneSync.customComponents.ConnectionSpinner
-            android:id="@+id/connection_dpinner"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/phone_image_card_view"
+            style="@style/CardViewStyleBlack"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clickable="false"
+            app:layout_constraintBottom_toTopOf="@+id/devices_card_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <org.avmedia.gShockPhoneSync.customComponents.InfoButton
-            android:id="@+id/info"
-            android:layout_width="wrap_content"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/phone_image_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <org.avmedia.gShockPhoneSync.customComponents.WatchImageView
+                    android:id="@+id/imageViewCasioWatch"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/image_of_casio_watch"
+                    app:srcCompat="@drawable/ic_gw_b5600"
+                    tools:layout_editor_absoluteX="0dp"
+                    tools:layout_editor_absoluteY="242dp" />
+
+                <org.avmedia.gShockPhoneSync.ui.main.ConnectionSpinner
+                    android:id="@+id/connection_spinner"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <org.avmedia.gShockPhoneSync.customComponents.InfoButton
+                    android:id="@+id/info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/info"
+                    android:src="@drawable/info_48px"
+                    app:infoText="@string/connection_screen_info"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/devices_card_view"
+            style="@style/CardViewStyleBlack"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/info"
-            android:layout_margin="20dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/info_48px"
+            android:clickable="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:infoText="@string/connection_screen_info" />
+            app:layout_constraintStart_toStartOf="parent">
 
-    </org.avmedia.gShockPhoneSync.customComponents.ConnectionLayout>
+            <LinearLayout
+                android:id="@+id/devices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <org.avmedia.gShockPhoneSync.ui.main.WatchName
+                        android:id="@+id/last_connected_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="10dp"
+                        android:text=""
+                        android:textColor="@color/dark_bg_light_secondary_text"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <org.avmedia.gShockPhoneSync.ui.main.ForgetButton
+                        android:id="@+id/Forget"
+                        style="@style/buttonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/button"
+                        android:text="Forget"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/info_device"
+                        />
+
+                    <org.avmedia.gShockPhoneSync.customComponents.InfoButton
+                        android:id="@+id/info_device"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginLeft="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/info"
+                        android:src="@drawable/info_48px"
+                        app:infoText="@string/connection_screen_device"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </org.avmedia.gShockPhoneSync.ui.main.ConnectionLayout>
 
     <org.avmedia.gShockPhoneSync.customComponents.MainLayout
         android:id="@+id/main_layout"
@@ -62,7 +150,6 @@
             android:layout_marginStart="0dp"
             android:layout_marginEnd="0dp"
             android:background="?android:attr/windowBackground"
-
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -98,12 +185,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/running_actions"
-            android:textSize="32dp"
             android:textColor="@color/colorPrimaryDark"
+            android:textSize="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </org.avmedia.gShockPhoneSync.ui.actions.ActionRunnerLayout>
 </FrameLayout>

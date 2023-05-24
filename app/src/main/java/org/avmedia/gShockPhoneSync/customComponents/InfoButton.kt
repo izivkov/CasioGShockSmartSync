@@ -18,7 +18,7 @@ import org.avmedia.gShockPhoneSync.R
 
 class InfoButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : androidx.appcompat.widget.AppCompatImageButton(context, attrs, defStyleAttr) {
+) : androidx.appcompat.widget.AppCompatImageButton(context, attrs/*, defStyleAttr*/) {
 
     private var infoText: String? = ""
 
@@ -28,7 +28,6 @@ class InfoButton @JvmOverloads constructor(
             R.styleable.InfoButton,
             defStyleAttr, 0
         ).apply {
-
             try {
                 infoText = getString(R.styleable.InfoButton_infoText)
             } finally {

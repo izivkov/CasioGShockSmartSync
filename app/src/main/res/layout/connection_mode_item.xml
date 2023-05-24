@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-28, 3:16 p.m.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="0dp">
+
+    <TextView
+        android:id="@+id/connection_mode_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:padding="8dp"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        android:textSize="18dp"
+        android:textColor="@color/dark_bg_light_secondary_text"
+        tools:ignore="MissingDefaultResource" />
+
+</LinearLayout>
