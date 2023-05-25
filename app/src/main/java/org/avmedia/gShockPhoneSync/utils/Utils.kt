@@ -14,7 +14,6 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import org.avmedia.gShockPhoneSync.R
-import java.time.Duration
 
 object Utils {
 

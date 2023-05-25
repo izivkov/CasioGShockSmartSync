@@ -32,7 +32,7 @@ open class HomeTime @JvmOverloads constructor(
         }
     }
 
-    private fun updateText (value:String) {
+    private fun updateText(value: String) {
         text = value
         invalidate()
         refreshDrawableState()
