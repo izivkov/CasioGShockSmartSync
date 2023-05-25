@@ -36,7 +36,9 @@ object NotificationProvider {
             .setSmallIcon(R.drawable.ic_menu_day)
             .setContentTitle(title)
             .setContentText(notificationText)
-            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setStyle(NotificationCompat.BigTextStyle()
+            .bigText(notificationText))
             .setAutoCancel(true)
 
         // Show the Notification

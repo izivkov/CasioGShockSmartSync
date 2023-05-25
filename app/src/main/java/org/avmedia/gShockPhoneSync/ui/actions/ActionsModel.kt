@@ -348,11 +348,16 @@ object ActionsModel {
         val dateStr =
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
 
-        val watchName = LocalDataStorage.get("LastDeviceName", "", context)
+        var msg = "Time set at $dateStr"
+        val watchName = LocalDataStorage.get("LastDeviceName", "", context)?.removePrefix("CASIO")?.trim()
+        if (watchName != null) {
+            msg += " for $watchName watch"
+        }
+
         NotificationProvider.createNotification(
             context,
             "G-Shock Smart Sync",
-            "Time set for watch $watchName at $dateStr",
+            msg,
             NotificationManager.IMPORTANCE_DEFAULT
         )
     }
