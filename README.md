@@ -23,12 +23,12 @@ This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) a
 ## General
 
 <p float="left">
-     <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
      alt="Connection Screen"
      width=200
      style="margin: 10px;" />
      
-     <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b2100.png"
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b2100.png"
      alt="Connection Screen"
      width=200
      style="margin: 10px;" />
