@@ -32,16 +32,6 @@ This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) a
      width=200
      style="margin: 10px;" />
 
-<style>
-  .img {
-    display: inline-block;
-  }
-  img.mobile-image {
-    width: 49%;
-    display: inline-block;
-  }
-</style>
-
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
 a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch` button is pressed.  
 
