@@ -22,17 +22,22 @@ This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) a
 
 ## General
 
-<p float="left">
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
-     alt="Connection Screen"
-     width=200
-     style="margin: 10px;" />
-     
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b2100.png"
-     alt="Connection Screen"
-     width=200
-     style="margin: 10px;" />
-</p>
+<div style="display:flex">
+     <div style="flex:1;padding-right:10px;">
+          <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
+               alt="Connection Screen"
+               width=200
+               style="margin: 10px;" />
+     </div>
+     <div style="flex:1;padding-left:10px;">
+          <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b2100.png"
+               align="left"
+               alt="Connection Screen"
+               width=200
+               style="margin: 10px;" />
+     </div>
+</div>
+
 
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
 a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch` button is pressed.  
