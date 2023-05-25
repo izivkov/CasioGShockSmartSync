@@ -7,7 +7,6 @@
 package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.app.Activity
-import android.app.Notification
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -349,7 +348,8 @@ object ActionsModel {
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
 
         var msg = "Time set at $dateStr"
-        val watchName = LocalDataStorage.get("LastDeviceName", "", context)?.removePrefix("CASIO")?.trim()
+        val watchName =
+            LocalDataStorage.get("LastDeviceName", "", context)?.removePrefix("CASIO")?.trim()
         if (watchName != null) {
             msg += " for $watchName watch"
         }

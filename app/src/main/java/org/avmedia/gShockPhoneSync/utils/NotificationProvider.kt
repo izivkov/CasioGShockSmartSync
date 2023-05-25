@@ -37,8 +37,10 @@ object NotificationProvider {
             .setContentTitle(title)
             .setContentText(notificationText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setStyle(NotificationCompat.BigTextStyle()
-            .bigText(notificationText))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(notificationText)
+            )
             .setAutoCancel(true)
 
         // Show the Notification

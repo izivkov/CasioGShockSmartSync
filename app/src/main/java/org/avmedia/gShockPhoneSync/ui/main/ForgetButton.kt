@@ -10,12 +10,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.restartApp
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
 
 class ForgetButton @JvmOverloads constructor(
