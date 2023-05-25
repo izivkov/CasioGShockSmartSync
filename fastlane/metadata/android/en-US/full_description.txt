@@ -1,3 +1,4 @@
+Note: We now support the B2100 series of G-Shock watches!
 
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
 
@@ -8,10 +9,11 @@ I think we can do better than the official G-Shock Connected App! This app provi
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-Here are the supported watches:
+The supported watches B500, B5600 and B2100 series:
 
 https://amzn.to/3Mt68Qb
 https://amzn.to/4194M13
+https://amzn.to/3MUDCGY
 
 General
 =======
@@ -31,7 +33,7 @@ This screen also shows your Home Time location and battery level.
 
 Alarms
 ======
-The B5600/B5000 watches have 5 alarms and a Signal or chime setting. They are first read
+The B5600/B5000/B2100 watches have 5 alarms and a Signal or chime setting. They are first read
 from the watch, and displayed in the app. The alarms can be updated by pressing 
 on the time display of each alarm. A dialog will appear which allows you to 
 select the time.
@@ -78,7 +80,7 @@ Using these actions, the watch acts like a remote control for your phone.
 
 Build Your Own App
 ==================
-For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches,
+For those who want to build their own Android app for interfacing with the G-Shock 5000/5600/B2100 watches,
 I have also created an API (library) project here: https://github.com/izivkov/GShockAPI.
 
 
