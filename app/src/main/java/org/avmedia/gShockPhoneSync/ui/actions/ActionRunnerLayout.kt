@@ -39,6 +39,12 @@ class ActionRunnerLayout @JvmOverloads constructor(
                 ProgressEvents["ButtonPressedInfoReceived"] -> {
                     ActionsModel.loadData(context)
 
+
+                    // test
+                    ActionsModel.runActionsForAutoTimeSetting(context)
+                    // test end
+
+
                     if (api().isActionButtonPressed()) {
                         show()
                         ActionsModel.runActions(context)

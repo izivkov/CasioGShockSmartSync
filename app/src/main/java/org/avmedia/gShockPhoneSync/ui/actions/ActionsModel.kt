@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.app.Activity
+import android.app.Notification
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -15,7 +16,6 @@ import android.net.Uri
 import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
-import org.avmedia.gShockPhoneSync.DeviceManager
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
@@ -348,10 +348,11 @@ object ActionsModel {
         val dateStr =
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
 
+        val watchName = LocalDataStorage.get("LastDeviceName", "", context)
         NotificationProvider.createNotification(
             context,
             "G-Shock Smart Sync",
-            "Time set for watch ${DeviceManager.name}\nat $dateStr",
+            "Time set for watch $watchName at $dateStr",
             NotificationManager.IMPORTANCE_DEFAULT
         )
     }

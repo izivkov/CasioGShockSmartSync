@@ -12,6 +12,7 @@
         tools:targetApi="s" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="com.android.alarm.permission.DISMISS_ALARM" />
     <uses-permission android:name="android.permission.INTERNET" />
