@@ -272,18 +272,6 @@ class MainActivity : AppCompatActivity() {
         api().waitForConnection(deviceAddress)
     }
 
-    fun restartApp() {
-        Handler().postDelayed(
-                {
-                    val pm: PackageManager = this.packageManager
-                    val intent = pm.getLaunchIntentForPackage(this.packageName)
-                    this.finishAffinity() // Finishes all activities.
-                    this.startActivity(intent) // Start the launch activity
-                    exitProcess(0) // System finishes and automatically relaunches us.
-                }, 100
-            )
-    }
-
     companion object {
         private var instance: MainActivity? = null
 
@@ -294,10 +282,6 @@ class MainActivity : AppCompatActivity() {
 
         fun api(): GShockAPI {
             return instance!!.api
-        }
-
-        fun restartApp() {
-            instance!!.restartApp()
         }
     }
 }
