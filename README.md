@@ -1,6 +1,6 @@
 # Casio G-Shock Smart Sync
 
-**Note: We now support the B2100 serias of G-Shock watches!**
+**<ins>Note: We now support the B2100 serias of G-Shock watches!</ins>**
 
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
 
@@ -23,12 +23,12 @@ This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) a
 ## General
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
-     alt="Connection Screen"
+     alt="B5600 Connection Screen"
      width=200
      style="margin: 10px;" />
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b2100.png"
      align="left"
-     alt="Connection Screen"
+     alt="B2100 Connection Screen"
      width=200
      style="margin: 10px;" />
 
