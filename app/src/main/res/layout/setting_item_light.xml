@@ -30,7 +30,7 @@
             android:padding="8dp"
             android:orientation="vertical">
 
-            <LinearLayout
+            <org.avmedia.gShockPhoneSync.ui.settings.AutoLightLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -52,7 +52,7 @@
                     android:textOff="Off"
                     android:textOn="On" />
 
-            </LinearLayout>
+            </org.avmedia.gShockPhoneSync.ui.settings.AutoLightLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

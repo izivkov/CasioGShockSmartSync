@@ -1,5 +1,7 @@
 # Casio G-Shock Smart Sync
 
+**<ins>Note: We now support the B2100 series of G-Shock watches!</ins>**
+
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
 
 - Sets watch's reminders from Google Calendar
@@ -9,7 +11,7 @@ I think we can do better than the official G-Shock Connected App! This app provi
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13) series watches.
+This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13), as well as the [2100](https://amzn.to/3MUDCGY) series watches.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
@@ -19,10 +21,16 @@ This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) a
      height="80">](https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync)
 
 ## General
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/ConnectingScreen.png"
-alt="Connection Screen"
-width=200
-style="margin: 10px;" />
+
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
+     alt="B5600 Connection Screen"
+     width=200
+     style="margin: 10px;" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b2100.png"
+     align="left"
+     alt="B2100 Connection Screen"
+     width=200
+     style="margin: 10px;" />
 
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
 a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch` button is pressed.  

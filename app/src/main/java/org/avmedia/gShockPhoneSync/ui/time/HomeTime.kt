@@ -8,7 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
@@ -27,19 +27,24 @@ open class HomeTime @JvmOverloads constructor(
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
-                text = api().getHomeTime()
+                updateText(api().getHomeTime())
             }
         }
+    }
+
+    private fun updateText (value:String) {
+        text = value
+        invalidate()
+        refreshDrawableState()
     }
 
     private fun createSubscription() {
         ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
             when (it) {
-                // If we have disconnected, close the menu. Otherwise this menu will appear on the connection screen.
                 ProgressEvents["HomeTimeUpdated"] -> {
-                    runBlocking {
-                        text =
-                            api().getHomeTime() // not updating for some reason. Anybody knows why?
+                    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+                    scope.launch {
+                        (this@HomeTime).updateText(api().getHomeTime()) // not updating for some reason. Anybody knows why?
                     }
                 }
             }

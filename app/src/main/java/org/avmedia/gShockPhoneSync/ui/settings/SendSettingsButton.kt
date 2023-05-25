@@ -54,7 +54,6 @@ class SendSettingsButton @JvmOverloads constructor(
 
         val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment
         settings.timeAdjustment = timeAdjustment.timeAdjustment
-
         LocalDataStorage.setTimeAdjustmentNotification(timeAdjustment.timeAdjustmentNotifications)
 
         val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound

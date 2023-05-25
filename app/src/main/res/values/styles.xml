@@ -43,6 +43,10 @@
 
     </style>
 
+    <style name="CardViewStyleBlack" parent="CardViewStyle">
+        <item name="android:backgroundTint">@color/black</item>
+    </style>
+
     <style name="ShapeAppearanceOverlay.MaterialCardView.Cut" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopRight">8dp</item>

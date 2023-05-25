@@ -29,8 +29,7 @@ class SettingsList @JvmOverloads constructor(
 
     fun init() {
         runBlocking {
-            val settingSimpleModel = api().getSettings() // update teh model
-            val settingStr = Gson().toJson(settingSimpleModel)
+            val settingStr = Gson().toJson(api().getSettings())
             SettingsModel.fromJson(settingStr)
         }
     }
