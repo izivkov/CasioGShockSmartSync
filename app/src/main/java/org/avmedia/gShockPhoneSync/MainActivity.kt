@@ -267,7 +267,8 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun waitForConnectionCached() {
         val deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
-        api().waitForConnection(deviceAddress)
+        val deviceName = LocalDataStorage.get("LastDeviceName", "", this)
+        api().waitForConnection(deviceAddress, deviceName)
     }
 
     companion object {
