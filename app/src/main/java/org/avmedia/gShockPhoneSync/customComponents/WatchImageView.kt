@@ -21,7 +21,7 @@ class WatchImageView @JvmOverloads constructor(
     init {
         startListener()
 
-        val lastModelUsed = LocalDataStorage.get("LastDeviceName", "", context)
+        val lastModelUsed = WatchInfo.getName()
         if (lastModelUsed?.contains("2100") == true) {
             setImageResource(R.drawable.ga_b2100)
         } else {
