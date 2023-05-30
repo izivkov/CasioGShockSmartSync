@@ -10,7 +10,6 @@ import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
@@ -18,7 +17,7 @@ class WatchName @JvmOverloads constructor(
 ) : androidx.appcompat.widget.AppCompatTextView(context, attrs, defStyleAttr) {
 
     init {
-        var name = WatchInfo.getName()
+        var name = LocalDataStorage.get("LastDeviceName", "", context)
         if (name.isNullOrBlank()) {
             name = "No Watch"
         }

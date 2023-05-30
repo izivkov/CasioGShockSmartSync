@@ -55,9 +55,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".DeviceManager$OtherActivity"></activity>
-
-        <profileable android:shell="true"/>
-
     </application>
 
 </manifest>

@@ -19,7 +19,6 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.*
-import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
@@ -349,7 +348,8 @@ object ActionsModel {
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
 
         var msg = "Time set at $dateStr"
-        val watchName = WatchInfo.getName()
+        val watchName =
+            LocalDataStorage.get("LastDeviceName", "", context)?.removePrefix("CASIO")?.trim()
         if (watchName != null) {
             msg += " for $watchName watch"
         }
