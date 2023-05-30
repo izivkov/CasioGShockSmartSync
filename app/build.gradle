@@ -13,8 +13,8 @@ android {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 85
-        versionName "8.5"
+        versionCode 86
+        versionName "8.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
