@@ -8,9 +8,6 @@ import timber.log.Timber
 
 object DeviceManager {
 
-    var name = ""
-    var address = ""
-
     init {
         startListener()
     }
@@ -30,7 +27,6 @@ object DeviceManager {
                     ) {
                         LocalDataStorage.put("LastDeviceName", deviceName, applicationContext())
                     }
-                    name = deviceName
                 }
 
                 ProgressEvents["DeviceAddress"] -> {
@@ -48,7 +44,6 @@ object DeviceManager {
                             "LastDeviceAddress", deviceAddress, applicationContext()
                         )
                     }
-                    address = deviceAddress
                 }
             }
         }, { throwable ->
