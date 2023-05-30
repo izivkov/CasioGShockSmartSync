@@ -9,7 +9,6 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
@@ -21,8 +20,8 @@ class WatchImageView @JvmOverloads constructor(
     init {
         startListener()
 
-        val lastModelUsed = LocalDataStorage.get("LastDeviceName", "", context)
-        if (lastModelUsed?.contains("2100") == true) {
+        val lastModelUsed = WatchInfo.getName()
+        if (lastModelUsed.contains("2100")) {
             setImageResource(R.drawable.ga_b2100)
         } else {
             setImageResource(R.drawable.ic_gw_b5600)
@@ -33,7 +32,6 @@ class WatchImageView @JvmOverloads constructor(
         ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
             when (it) {
                 ProgressEvents["DeviceName"] -> {
-                    val deviceName = ProgressEvents["DeviceName"]?.payload
                     if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
                         setImageResource(R.drawable.ga_b2100)
                     } else {

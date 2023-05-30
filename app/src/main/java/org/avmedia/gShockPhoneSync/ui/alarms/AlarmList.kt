@@ -20,7 +20,6 @@ class AlarmList @JvmOverloads constructor(
         adapter = AlarmAdapter(AlarmsModel.alarms)
         layoutManager = LinearLayoutManager(context)
 
-        //if (AlarmsModel.isEmpty()) {
         runBlocking {
             var alarms = api().getAlarms()
 
@@ -32,7 +31,6 @@ class AlarmList @JvmOverloads constructor(
                 adapter?.notifyDataSetChanged()
             }
         }
-        // }
     }
 }
 
