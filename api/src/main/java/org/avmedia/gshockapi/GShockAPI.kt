@@ -108,6 +108,7 @@ class GShockAPI(private val context: Context) {
                         DeviceCharacteristics.init(device)
 
                         cache.clear()
+                        Alarm.clear()
                         resultQueue.dequeue("waitForConnection")?.complete("OK")
                     }
                 }

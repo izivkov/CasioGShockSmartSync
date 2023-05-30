@@ -20,8 +20,6 @@ object InactivityWatcher {
     private var futureTask: ScheduledFuture<*>? = null
 
     fun start(context: Context) {
-        cancel()
-
         futureTask = scheduler.schedule({
             api().disconnect(context)
             snackBar(context, "Disconnecting due to inactivity")
