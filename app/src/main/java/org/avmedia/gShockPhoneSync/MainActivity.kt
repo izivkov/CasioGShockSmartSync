@@ -26,6 +26,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
@@ -266,7 +267,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
-        api().waitForConnection(WatchInfo.getAddress(), WatchInfo.getName())
+        val deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+        val deviceName = LocalDataStorage.get("LastDeviceName", "", this)
+        api().waitForConnection(deviceAddress, deviceName)
     }
 
     companion object {
