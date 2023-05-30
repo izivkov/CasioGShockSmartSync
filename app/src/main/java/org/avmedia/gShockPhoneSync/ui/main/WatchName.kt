@@ -23,6 +23,7 @@ class WatchName @JvmOverloads constructor(
             name = "No Watch"
         }
         text = name.removePrefix("CASIO").trim()
+
         createSubscription()
     }
 

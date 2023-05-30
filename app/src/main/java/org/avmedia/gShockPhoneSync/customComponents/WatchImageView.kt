@@ -32,7 +32,6 @@ class WatchImageView @JvmOverloads constructor(
         ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
             when (it) {
                 ProgressEvents["DeviceName"] -> {
-                    val deviceName = ProgressEvents["DeviceName"]?.payload
                     if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
                         setImageResource(R.drawable.ga_b2100)
                     } else {

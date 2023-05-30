@@ -1,0 +1,1 @@
+Improve performance when loading Alarms and Settings screens
