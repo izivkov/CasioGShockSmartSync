@@ -621,9 +621,13 @@ class GShockAPI(private val context: Context) {
      *
      * @return ArrayList<[Alarm]>
      */
+
     suspend fun getAlarms(): ArrayList<Alarm> {
-        sendMessage("{ action: 'GET_ALARMS'}")
-        val key = "GET_ALARMS"
+        return cache.getCached("GET_ALARMS", ::_getAlarms) as ArrayList<Alarm>
+    }
+
+    suspend fun _getAlarms(key: String): ArrayList<Alarm> {
+        sendMessage("{ action: '$key'}")
 
         Alarm.clear()
 
@@ -668,6 +672,9 @@ class GShockAPI(private val context: Context) {
             val gson = Gson()
             return gson.toJson(alarms)
         }
+
+        // remove from cache
+        cache.remove("GET_ALARMS")
 
         sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
     }
@@ -776,6 +783,7 @@ class GShockAPI(private val context: Context) {
      * ```
      * @return [Settings]
      */
+
     suspend fun getSettings(): Settings {
         val settings = getBasicSettings()
         val timeAdjustment = getTimeAdjustment()
@@ -784,7 +792,11 @@ class GShockAPI(private val context: Context) {
     }
 
     private suspend fun getBasicSettings(): Settings {
-        sendMessage("{ action: 'GET_SETTINGS'}")
+        return cache.getCached("GET_SETTINGS", ::_getBasicSettings) as Settings
+    }
+
+    private suspend fun _getBasicSettings(key:String): Settings {
+        sendMessage("{ action: '$key'}")
 
         val key = "13"
         var deferredResult = CompletableDeferred<Settings>()
@@ -803,8 +815,12 @@ class GShockAPI(private val context: Context) {
         return deferredResult.await()
     }
 
-    suspend fun getTimeAdjustment(): Boolean {
-        sendMessage("{ action: 'GET_TIME_ADJUSTMENT'}")
+    private suspend fun getTimeAdjustment(): Boolean {
+        return cache.getCached("GET_TIME_ADJUSTMENT", ::_getTimeAdjustment) as Boolean
+    }
+
+    private suspend fun _getTimeAdjustment(key: String): Boolean {
+        sendMessage("{ action: '$key'}")
 
         val key = "11"
         var deferredResult = CompletableDeferred<Boolean>()
@@ -842,6 +858,9 @@ class GShockAPI(private val context: Context) {
      */
     fun setSettings(settings: Settings) {
         val settingJson = Gson().toJson(settings)
+        cache.remove("GET_SETTINGS")
+        cache.remove("TIME_ADJUSTMENT")
+
         sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
         sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
     }

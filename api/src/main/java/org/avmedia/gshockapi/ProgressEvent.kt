@@ -77,6 +77,7 @@ object ProgressEvents {
 
             eventsProcessor.observeOn(AndroidSchedulers.mainThread()).doOnNext(onNextStr)
                 .doOnError(onError).subscribe({}, onError)
+
             (subscribers as LinkedHashSet).add(name)
         }
 
@@ -122,7 +123,7 @@ object ProgressEvents {
         }
 
         if (eventsProcessor.hasSubscribers()) {
-            return eventsProcessor.onNext(eventMap[eventName])
+            eventsProcessor.onNext(eventMap[eventName])
         }
     }
 

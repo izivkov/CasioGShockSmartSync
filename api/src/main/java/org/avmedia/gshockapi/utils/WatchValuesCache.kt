@@ -1,5 +1,7 @@
 package org.avmedia.gshockapi.utils
 
+import org.avmedia.gshockapi.Alarm
+import java.util.ArrayList
 import kotlin.reflect.KSuspendFunction1
 
 class WatchValuesCache {
