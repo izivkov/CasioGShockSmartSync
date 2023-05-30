@@ -21,7 +21,7 @@ class WatchImageView @JvmOverloads constructor(
         startListener()
 
         val lastModelUsed = WatchInfo.getName()
-        if (lastModelUsed.contains("2100") == true) {
+        if (lastModelUsed.contains("2100")) {
             setImageResource(R.drawable.ga_b2100)
         } else {
             setImageResource(R.drawable.ic_gw_b5600)
