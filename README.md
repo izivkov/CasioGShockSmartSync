@@ -107,4 +107,9 @@ This screen allows you to set up the watch's settings. You can auto prefill the 
 ## Build Your Own App
 For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches, I have also created an API (library) project [here](https://github.com/izivkov/GShockAPI). 
 
+## Similar Project
+If you rather not use a mobile app, but still like to set the time on your G-Shock to the correct time,
+here is a [Python program](https://github.com/izivkov/GShockTimeServer) which can run as a server on a regular PC or Raspberry PI with Bluetooth interface.
+The project is still WIP, but you can give it a try.
+
 
