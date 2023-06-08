@@ -1,6 +1,6 @@
 # Casio G-Shock Smart Sync
 
-**<ins>Note: We now support the B2100 series of G-Shock watches!</ins>**
+**<ins>[Note: We now support the B2100 series of G-Shock watches!](https://amzn.to/3MUDCGY)</ins>**
 
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
 
