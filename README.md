@@ -1,12 +1,13 @@
 # Casio G-Shock Smart Sync
 
 ## Announcements
-**<ins>[We now support the B2100 series of G-Shock watches!](https://amzn.to/3MUDCGY)</ins>**
+- [We now support the B2100 series of G-Shock watches!](https://amzn.to/3MUDCGY)
 
-**<ins>We just completed a new Python-based [GShockTimeServer](https://github.com/izivkov/GShockTimeServer) project.
+- We just completed a new Python-based [GShockTimeServer](https://github.com/izivkov/GShockTimeServer) project.
 The server runs on any desktop, [Raspberry Pi](https://amzn.to/43vt0UM)-type device, or even on [Pi Zero](https://amzn.to/3J1Tgho). 
-It keeps your watches with correct time without any mobile app.</ins>**
+It keeps your watches with correct time without any mobile app.
 
+## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
 
 - Sets watch's reminders from Google Calendar
