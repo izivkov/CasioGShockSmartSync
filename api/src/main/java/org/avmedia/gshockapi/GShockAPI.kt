@@ -6,15 +6,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
-import org.avmedia.gshockapi.apiIO.ButtonPressedIO
-import org.avmedia.gshockapi.apiIO.CasioIO
+import org.avmedia.gshockapi.apiIO.*
 import org.avmedia.gshockapi.ble.BleScannerLocal
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.Connection.sendMessage
-import org.avmedia.gshockapi.ble.DeviceCharacteristics
 import org.avmedia.gshockapi.casio.*
 import org.avmedia.gshockapi.apiIO.CasioIO.request
-import org.avmedia.gshockapi.apiIO.WatchValuesCache
 import org.avmedia.gshockapi.utils.*
 import org.avmedia.gshockapi.utils.Utils.getBooleanSafe
 import org.json.JSONObject
@@ -55,7 +52,6 @@ class GShockAPI(private val context: Context) {
 
     private var bleScannerLocal: BleScannerLocal = BleScannerLocal(context)
     private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
-    private val cache = WatchValuesCache()
 
     /**
      * This function waits for the watch to connect to the phone.
@@ -75,59 +71,16 @@ class GShockAPI(private val context: Context) {
      * ```
      */
 
-    suspend fun waitForConnection(deviceId: String? = "", deviceName:String? = ""): String {
-        var connectedStatus = _waitForConnection(deviceId, deviceName)
+    suspend fun waitForConnection(deviceId: String? = "", deviceName:String? = "") {
+        val connectedStatus = WaitForConnectionIO.request(context, bleScannerLocal, deviceId, deviceName)
         if (connectedStatus == "OK") {
             init()
         }
-        return connectedStatus
-    }
-
-    private suspend fun _waitForConnection(deviceId: String? = "", deviceName:String? = ""): String {
-
-        if (Connection.isConnected() || Connection.isConnecting()) {
-            return "Connecting"
-        }
-
-        Connection.init(context)
-        WatchDataListener.init()
-
-        bleScannerLocal = BleScannerLocal(context)
-        bleScannerLocal.startConnection(deviceId, deviceName)
-
-        val deferredResult = CompletableDeferred<String>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                "waitForConnection", deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        fun waitForConnectionSetupComplete() {
-            ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
-                when (it) {
-                    ProgressEvents["ConnectionSetupComplete"] -> {
-                        val device =
-                            ProgressEvents.getPayload("ConnectionSetupComplete") as BluetoothDevice
-                        DeviceCharacteristics.init(device)
-
-                        cache.clear()
-                        resultQueue.dequeue("waitForConnection")?.complete("OK")
-                    }
-                }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
-        }
-
-        waitForConnectionSetupComplete()
-
-        return deferredResult.await()
     }
 
     private suspend fun init(): Boolean {
         WatchFactory.watch.init()
-        resultQueue.clear()
+        ApiIO.init ()
         getPressedButton()
 
         ProgressEvents.onNext("ButtonPressedInfoReceived")
@@ -235,30 +188,7 @@ class GShockAPI(private val context: Context) {
      * @return returns the name of the watch as a String. i.e. "GW-B5600"
      */
     suspend fun getWatchName(): String {
-        val key = "23"
-        return cache.getCached(key, ::_getWatchName) as String
-    }
-
-    private suspend fun _getWatchName(key: String): String {
-
-        request(key)
-
-        var deferredResult = CompletableDeferred<String>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("CASIO_WATCH_NAME") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            resultQueue.dequeue(key)
-                ?.complete(Utils.trimNonAsciiCharacters(Utils.toAsciiString(data, 1)))
-        }
-
-        return deferredResult.await()
+        return WatchNameIO.request()
     }
 
     /**
@@ -267,29 +197,7 @@ class GShockAPI(private val context: Context) {
      * @return returns the Daylight Saving Time state of the watch as a String.
      */
     suspend fun getDSTWatchState(state: BluetoothWatch.DTS_STATE): String {
-        val key = "1d0${state.state}"
-        return cache.getCached(key, ::_getDSTWatchState) as String
-    }
-
-    private suspend fun _getDSTWatchState(key: String): String {
-
-        request(key)
-
-        var deferredResult = CompletableDeferred<String>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("CASIO_DST_WATCH_STATE") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            resultQueue.dequeue(key)?.complete(data)
-        }
-
-        return deferredResult.await()
+        return DstWatchStateIO.request(state)
     }
 
     /**
@@ -301,29 +209,7 @@ class GShockAPI(private val context: Context) {
      * @return Daylight Saving Time state of the requested World City as a String.
      */
     suspend fun getDSTForWorldCities(cityNumber: Int): String {
-        val key = "1e0$cityNumber"
-        return cache.getCached(key, ::_getDSTForWorldCities) as String
-    }
-
-    private suspend fun _getDSTForWorldCities(key: String): String {
-
-        request(key)
-
-        var deferredResult = CompletableDeferred<String>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("CASIO_DST_SETTING") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            resultQueue.dequeue(key)?.complete(data)
-        }
-
-        return deferredResult.await()
+        return DstForWorldCitiesIO.request(cityNumber) as String
     }
 
     /**
@@ -335,29 +221,7 @@ class GShockAPI(private val context: Context) {
      * @return The name of the requested World City as a String.
      */
     suspend fun getWorldCities(cityNumber: Int): String {
-        val key = "1f0$cityNumber"
-        return cache.getCached(key, ::_getWorldCities) as String
-    }
-
-    private suspend fun _getWorldCities(key: String): String {
-
-        request(key)
-
-        var deferredResult = CompletableDeferred<String>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("CASIO_WORLD_CITIES") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            resultQueue.dequeue(key)?.complete(data)
-        }
-
-        return deferredResult.await()
+        return WorldCitiesIO.request(cityNumber) as String
     }
 
     /**
@@ -366,11 +230,7 @@ class GShockAPI(private val context: Context) {
      * @return The name of Home City as a String.
      */
     suspend fun getHomeTime(): String {
-        val homeCityRaw = cache.getCached(
-            "1f00", ::_getWorldCities
-        ) as String // get home time from the first city in the list
-
-        return Utils.toAsciiString(homeCityRaw, 2)
+       return HomeTimeIO.request()
     }
 
     /**
@@ -379,28 +239,7 @@ class GShockAPI(private val context: Context) {
      * @return the battery level in percent as a String. E.g.: "83"
      */
     suspend fun getBatteryLevel(): String {
-        return cache.getCached("28", ::_getBatteryLevel) as String
-    }
-
-    private suspend fun _getBatteryLevel(key: String): String {
-
-        request(key)
-
-        val deferredResult = CompletableDeferred<String>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("CASIO_WATCH_CONDITION") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            resultQueue.dequeue(key)?.complete(BatteryLevelDecoder.decodeValue(data))
-        }
-
-        return deferredResult.await()
+        return BatteryLevelIO.request() as String
     }
 
     /**
@@ -409,34 +248,8 @@ class GShockAPI(private val context: Context) {
      * @return The timer number in seconds as an Int. E.g.: 180 means the timer is set for 3 minutes.
      */
     suspend fun getTimer(): Int {
-        return cache.getCached("18", ::_getTimer) as Int
+        return TimerIO.request()
     }
-
-    private suspend fun _getTimer(key: String): Int {
-
-        request(key)
-
-        fun getTimer(data: String): String {
-            return TimerDecoder.decodeValue(data)
-        }
-
-        var deferredResult = CompletableDeferred<Int>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("CASIO_TIMER") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            resultQueue.dequeue(key)?.complete(getTimer(data).toInt())
-        }
-
-        return deferredResult.await()
-    }
-
 
     /**
      * Set Timer value in seconds.
@@ -444,8 +257,7 @@ class GShockAPI(private val context: Context) {
      * @param timerValue Timer number of seconds as an Int.  E.g.: 180 means the timer will be set for 3 minutes.
      */
     fun setTimer(timerValue: Int) {
-        cache.remove("18")
-        sendMessage("{action: \"SET_TIMER\", value: $timerValue}")
+        TimerIO.set (timerValue)
     }
 
     /**
@@ -456,44 +268,9 @@ class GShockAPI(private val context: Context) {
      * @return appInfo string from the watch.
      */
     suspend fun getAppInfo(): String {
-        return cache.getCached("22", ::_getAppInfo) as String
+        return AppInfoIO.request() as String
     }
 
-    private suspend fun _getAppInfo(key: String): String {
-
-        request(key)
-
-        fun setAppInfo(data: String): Unit {
-            // App info:
-            // This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.
-            // It is a hard-coded value, which is what the official app does as well.
-
-            // If watch was reset, the app info will come as:
-            // 0x22 FF FF FF FF FF FF FF FF FF FF 00
-            // In this case, set it to the hardcoded value bellow, so 'D' button will work again.
-            val appInfoCompactStr = Utils.toCompactString(data)
-            if (appInfoCompactStr == "22FFFFFFFFFFFFFFFFFFFF00") {
-                CasioIO.writeCmd(0xE, "223488F4E5D5AFC829E06D02")
-            }
-        }
-
-        var deferredResult = CompletableDeferred<String>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("CASIO_APP_INFORMATION") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            resultQueue.dequeue(key)?.complete(data)
-            setAppInfo(data)
-        }
-
-        return deferredResult.await()
-    }
 
     /**
      * Sets the current time on the watch from the time on the phone. In addition, it can optionally set the Home Time
@@ -504,77 +281,15 @@ class GShockAPI(private val context: Context) {
      */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setTime(changeHomeTime: Boolean = true) {
-
-        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
-            initializeForSettingTimeForB2100()
-        } else {
-            initializeForSettingTimeForB5600()
-        }
+        TimeIO.set()
 
         // Update the HomeTime according to the current TimeZone
         val city = CasioTimeZone.TimeZoneHelper.parseCity(TimeZone.getDefault().id)
-        val homeTime = getHomeTime()
+        val homeTime = HomeTimeIO.request()
         if (changeHomeTime && homeTime.uppercase() != city.uppercase()) {
             CasioTimeZone.setHomeTime(TimeZone.getDefault().id)
             setHomeTime(TimeZone.getDefault().id)
         }
-
-        sendMessage(
-            "{action: \"SET_TIME\", value: ${
-                Clock.systemDefaultZone().millis()
-            }}"
-        )
-    }
-
-    /**
-     * This function is internally called by [setTime] to initialize some values.
-     */
-    private suspend fun initializeForSettingTimeForB5600() {
-        // Before we can set time, we must read and write back these values.
-        // Why? Not sure, ask Casio
-
-        suspend fun <T> readAndWrite(function: KSuspendFunction1<T, String>, param: T) {
-            val ret: String = function(param)
-            val shortStr = Utils.toCompactString(ret)
-            CasioIO.writeCmd(0xE, shortStr)
-        }
-
-        readAndWrite(::getDSTWatchState, BluetoothWatch.DTS_STATE.ZERO)
-        readAndWrite(::getDSTWatchState, BluetoothWatch.DTS_STATE.TWO)
-        readAndWrite(::getDSTWatchState, BluetoothWatch.DTS_STATE.FOUR)
-
-        readAndWrite(::getDSTForWorldCities, 0)
-        readAndWrite(::getDSTForWorldCities, 1)
-        readAndWrite(::getDSTForWorldCities, 2)
-        readAndWrite(::getDSTForWorldCities, 3)
-        readAndWrite(::getDSTForWorldCities, 4)
-        readAndWrite(::getDSTForWorldCities, 5)
-
-        readAndWrite(::getWorldCities, 0)
-        readAndWrite(::getWorldCities, 1)
-        readAndWrite(::getWorldCities, 2)
-        readAndWrite(::getWorldCities, 3)
-        readAndWrite(::getWorldCities, 4)
-        readAndWrite(::getWorldCities, 5)
-    }
-
-    private suspend fun initializeForSettingTimeForB2100() {
-        // Before we can set time, we must read and write back these values.
-        // Why? Not sure, ask Casio
-
-        suspend fun <T> readAndWrite(function: KSuspendFunction1<T, String>, param: T) {
-            val ret: String = function(param)
-            val shortStr = Utils.toCompactString(ret)
-            CasioIO.writeCmd(0xE, shortStr)
-        }
-
-        readAndWrite(::getDSTWatchState, BluetoothWatch.DTS_STATE.ZERO)
-
-        readAndWrite(::getDSTForWorldCities, 0)
-        readAndWrite(::getDSTForWorldCities, 1)
-
-        readAndWrite(::getWorldCities, 0)
-        readAndWrite(::getWorldCities, 1)
     }
 
     /**
@@ -584,37 +299,7 @@ class GShockAPI(private val context: Context) {
      */
 
     suspend fun getAlarms(): ArrayList<Alarm> {
-        return cache.getCached("GET_ALARMS", ::_getAlarms) as ArrayList<Alarm>
-    }
-
-    suspend fun _getAlarms(key: String): ArrayList<Alarm> {
-        sendMessage("{ action: '$key'}")
-
-        Alarm.clear()
-
-        var deferredResult = CompletableDeferred<ArrayList<Alarm>>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("ALARMS") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = "GET_ALARMS"
-
-            fun fromJson(jsonStr: String) {
-                val gson = Gson()
-                val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
-                Alarm.alarms.addAll(alarmArr)
-            }
-
-            fromJson(data)
-            if (Alarm.alarms.size > 1) {
-                resultQueue.dequeue(key)?.complete(Alarm.alarms)
-            }
-        }
-        return deferredResult.await()
+        return AlarmsIO.request()
     }
 
     /**
@@ -623,21 +308,7 @@ class GShockAPI(private val context: Context) {
      * @param ArrayList<[Alarm]>
      */
     fun setAlarms(alarms: ArrayList<Alarm>) {
-        if (alarms.isEmpty()) {
-            Timber.d("Alarm model not initialised! Cannot set alarm")
-            return
-        }
-
-        @Synchronized
-        fun toJson(): String {
-            val gson = Gson()
-            return gson.toJson(alarms)
-        }
-
-        // remove from cache
-        cache.remove("GET_ALARMS")
-
-        sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
+        AlarmsIO.set(alarms)
     }
 
     /**
@@ -650,7 +321,7 @@ class GShockAPI(private val context: Context) {
 
         val events = ArrayList<Event>()
 
-        events.add(getEventFromWatch(1))
+        events.add(EventsIO.request(1))
         events.add(getEventFromWatch(2))
         events.add(getEventFromWatch(3))
         events.add(getEventFromWatch(4))
@@ -658,7 +329,6 @@ class GShockAPI(private val context: Context) {
 
         return events
     }
-
 
     /**
      * Gets a single event (reminder) from the watch.
@@ -668,34 +338,7 @@ class GShockAPI(private val context: Context) {
      */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getEventFromWatch(eventNumber: Int): Event {
-        request("30${eventNumber}") // reminder title
-        request("31${eventNumber}") // reminder time
-
-        var deferredResult = CompletableDeferred<Event>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                "310${eventNumber}", deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        var title = ""
-        subscribe("REMINDERS") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            val reminderJson = JSONObject(data)
-            when (reminderJson.keys().next()) {
-                "title" -> {
-                    title = reminderJson["title"] as String
-                }
-                "time" -> {
-                    reminderJson.put("title", title)
-                    val event = Event(reminderJson)
-                    resultQueue.dequeue(key)?.complete(event)
-                }
-            }
-        }
-        return deferredResult.await()
+        return EventsIO.request(eventNumber)
     }
 
     /**
@@ -704,33 +347,7 @@ class GShockAPI(private val context: Context) {
      * @param ArrayList<[Event]>
      */
     fun setEvents(events: ArrayList<Event>) {
-
-        if (events.isEmpty()) {
-            Timber.d("Events model not initialised! Cannot set reminders")
-            return
-        }
-
-        @Synchronized
-        fun toJson(events: ArrayList<Event>): String {
-            val gson = Gson()
-            return gson.toJson(events)
-        }
-
-        fun getSelectedEvents(events: ArrayList<Event>): String {
-            val selectedEvents = events.filter { it.selected } as ArrayList<Event>
-            return toJson(selectedEvents)
-        }
-
-        sendMessage("{action: \"SET_REMINDERS\", value: ${getSelectedEvents(events)} }")
-    }
-
-    private fun subscribe(subject: String, onDataReceived: (JSONObject) -> Unit): Unit {
-        WatchDataEvents.addSubject(subject)
-
-        // receive values from the commands we issued in start()
-        WatchDataEvents.subscribe(this.javaClass.canonicalName, subject) {
-            onDataReceived(it as JSONObject)
-        }
+        EventsIO.set(events)
     }
 
     /**
@@ -745,6 +362,7 @@ class GShockAPI(private val context: Context) {
      * @return [Settings]
      */
 
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getSettings(): Settings {
         val settings = getBasicSettings()
         val timeAdjustment = getTimeAdjustment()
@@ -752,58 +370,15 @@ class GShockAPI(private val context: Context) {
         return settings
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private suspend fun getBasicSettings(): Settings {
-        return cache.getCached("GET_SETTINGS", ::_getBasicSettings) as Settings
-    }
-
-    private suspend fun _getBasicSettings(key:String): Settings {
-        sendMessage("{ action: '$key'}")
-
-        val key = "13"
-        var deferredResult = CompletableDeferred<Settings>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("SETTINGS") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-            val model = Gson().fromJson(data, Settings::class.java)
-            resultQueue.dequeue(key)?.complete(model)
-        }
-        return deferredResult.await()
+        return SettingsIO.request()
     }
 
     private suspend fun getTimeAdjustment(): Boolean {
-        return cache.getCached("GET_TIME_ADJUSTMENT", ::_getTimeAdjustment) as Boolean
+        return TimeAdjustmentIO.request()
     }
 
-    private suspend fun _getTimeAdjustment(key: String): Boolean {
-        sendMessage("{ action: '$key'}")
-
-        val key = "11"
-        var deferredResult = CompletableDeferred<Boolean>()
-        resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        subscribe("TIME_ADJUSTMENT") { keyedData ->
-
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            val dataJson = JSONObject(data)
-            val timeAdjustment = dataJson.getBooleanSafe("timeAdjustment") == true
-
-            resultQueue.dequeue(key)?.complete(timeAdjustment)
-        }
-
-        return deferredResult.await()
-    }
 
     /**
      * Set settings to the watch. Populate a [Settings] and call this function. Example:
@@ -818,12 +393,8 @@ class GShockAPI(private val context: Context) {
      * @param settings
      */
     fun setSettings(settings: Settings) {
-        val settingJson = Gson().toJson(settings)
-        cache.remove("GET_SETTINGS")
-        cache.remove("TIME_ADJUSTMENT")
-
-        sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
-        sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
+        SettingsIO.set(settings)
+        TimeAdjustmentIO.set(settings)
     }
 
     /**
@@ -853,8 +424,7 @@ class GShockAPI(private val context: Context) {
     }
 
     private fun setHomeTime(id: String) {
-        cache.remove("1f00")
-        CasioTimeZone.setHomeTime(id)
+        HomeTimeIO.set(id)
     }
 
     /**

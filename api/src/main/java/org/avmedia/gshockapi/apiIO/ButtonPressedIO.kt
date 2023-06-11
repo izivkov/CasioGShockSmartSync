@@ -2,16 +2,12 @@ package org.avmedia.gshockapi.apiIO
 
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.casio.BluetoothWatch
-import org.avmedia.gshockapi.utils.ResultQueue
 import org.avmedia.gshockapi.utils.Utils
 
-object ButtonPressedIO: ApiIO() {
+object ButtonPressedIO {
 
-    suspend fun request(): Any {
-        val key = "10"
-
-        // call directly the function, do not use the cache
-        return getPressedButton(key)
+    suspend fun request(): BluetoothWatch.WATCH_BUTTON {
+        return ApiIO.request("10", ::getPressedButton) as BluetoothWatch.WATCH_BUTTON
     }
 
     private suspend fun getPressedButton(key: String): BluetoothWatch.WATCH_BUTTON {
@@ -20,13 +16,13 @@ object ButtonPressedIO: ApiIO() {
 
         val deferredResultButton = CompletableDeferred<BluetoothWatch.WATCH_BUTTON>()
 
-        resultQueue.enqueue(
+        ApiIO.resultQueue.enqueue(
             ResultQueue.KeyedResult(
                 key, deferredResultButton as CompletableDeferred<Any>
             )
         )
 
-        subscribe("BUTTON_PRESSED") { keyedData ->
+        ApiIO.subscribe("BUTTON_PRESSED") { keyedData ->
             /*
             RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
             LEFT BUTTON:  0x10 17 62 07 38 85 CD 7F ->01<- 03 0F FF FF FF FF 24 00 00 00
@@ -48,16 +44,16 @@ object ButtonPressedIO: ApiIO() {
                 }
             }
 
-            resultQueue.dequeue(key)?.complete(ret)
+            ApiIO.resultQueue.dequeue(key)?.complete(ret)
         }
 
         return deferredResultButton.await()
     }
 
     fun get (): BluetoothWatch.WATCH_BUTTON {
-        return get("10") as BluetoothWatch.WATCH_BUTTON
+        return ApiIO.get("10") as BluetoothWatch.WATCH_BUTTON
     }
     fun put (value: Any) {
-        put("10", value)
+        ApiIO.put("10", value)
     }
 }

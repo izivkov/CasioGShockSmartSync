@@ -1,4 +1,4 @@
-package org.avmedia.gshockapi.utils
+package org.avmedia.gshockapi.apiIO
 
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.ProgressEvents

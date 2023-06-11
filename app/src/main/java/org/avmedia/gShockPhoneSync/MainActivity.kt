@@ -80,7 +80,6 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         val deviceManager = DeviceManager
-
         createAppEventsSubscription()
 
         // ApiTest().run(this)
