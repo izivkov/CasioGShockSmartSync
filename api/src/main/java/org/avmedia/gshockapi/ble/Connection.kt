@@ -11,11 +11,14 @@ import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.MessageDispatcher
 import org.avmedia.gshockapi.casio.WatchFactory
 import timber.log.Timber
 import java.time.LocalDateTime
@@ -90,8 +93,9 @@ object Connection : IConnection {
         return isConnecting
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun sendMessage(message: String) {
-        WatchFactory.watch.callWriter(message)
+        MessageDispatcher.callWriter(message)
     }
 
     override fun start() {

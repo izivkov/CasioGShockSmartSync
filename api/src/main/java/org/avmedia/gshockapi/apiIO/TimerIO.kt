@@ -2,7 +2,11 @@ package org.avmedia.gshockapi.apiIO
 
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.ble.Connection
+import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.TimerDecoder
+import org.avmedia.gshockapi.casio.TimerEncoder
+import org.avmedia.gshockapi.casio.WatchFactory
+import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 
 object TimerIO {
@@ -46,5 +50,15 @@ object TimerIO {
         val dataJson = JSONObject().put("key", ApiIO.createKey(data)).put("value", data)
         json.put("CASIO_TIMER", dataJson)
         return json
+    }
+    fun sendToWatch(message:String) {
+        WatchFactory.watch.writeCmd(
+            0x000c,
+            Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_TIMER.code.toByte())
+        )
+    }
+    fun sendToWatchSet(message:String) {
+        val seconds = JSONObject(message).get("value").toString()
+        WatchFactory.watch.writeCmd(0x000e, TimerEncoder.encode(seconds))
     }
 }

@@ -1,6 +1,9 @@
 package org.avmedia.gshockapi.apiIO
 
+import android.bluetooth.BluetoothGattCharacteristic
 import kotlinx.coroutines.CompletableDeferred
+import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.ble.DeviceCharacteristics
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.WatchDataEvents
 import org.json.JSONObject
@@ -51,7 +54,6 @@ object ApiIO {
     fun put(key:String, value: Any) : Any? {
         return cache.put (key, value)
     }
-
 
     fun createKey(data: String): String {
 

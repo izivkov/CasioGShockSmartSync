@@ -6,6 +6,9 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.ble.Connection
+import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.SettingsEncoder
+import org.avmedia.gshockapi.casio.WatchFactory
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 
@@ -152,5 +155,17 @@ pwr. saving off:00010000
         }
 
         return JSONObject(Gson().toJson(settings))
+    }
+
+    fun sendToWatch(message:String) {
+        WatchFactory.watch.writeCmd(
+            0x000c,
+            Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte())
+        )
+    }
+
+    fun sendToWatchSet(message:String) {
+        val settings = JSONObject(message).get("value") as JSONObject
+        WatchFactory.watch.writeCmd(0x000e, SettingsEncoder.encode(settings))
     }
 }

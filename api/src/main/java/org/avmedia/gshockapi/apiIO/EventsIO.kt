@@ -6,7 +6,9 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.ble.Connection
-import org.avmedia.gshockapi.casio.ReminderDecoder
+import org.avmedia.gshockapi.casio.*
+import org.avmedia.gshockapi.utils.Utils
+import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -88,5 +90,24 @@ object EventsIO {
         )
     }
 
+    fun sendToWatchSet(message:String) {
+        val remindersJsonArr: JSONArray = JSONObject(message).get("value") as JSONArray
+        (0 until remindersJsonArr.length()).forEachIndexed { index, element ->
+            val reminderJson = remindersJsonArr.getJSONObject(element)
+            val title = ReminderEncoder.reminderTitleFromJson(reminderJson)
+            WatchFactory.watch.writeCmd(
+                0x000e, Utils.byteArrayOfInts(
+                    CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code, index + 1
+                ) + title
+            )
 
+            var reminderTime = IntArray(0)
+            reminderTime += CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code
+            reminderTime += index + 1
+            reminderTime += ReminderEncoder.reminderTimeFromJson(reminderJson)
+            WatchFactory.watch.writeCmd(0x000e, Utils.byteArrayOfIntArray(reminderTime))
+        }
+
+        Timber.i("Got reminders $remindersJsonArr")
+    }
 }

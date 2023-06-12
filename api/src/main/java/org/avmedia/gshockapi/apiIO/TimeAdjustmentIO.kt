@@ -4,6 +4,9 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.ble.Connection
+import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.SettingsEncoder
+import org.avmedia.gshockapi.casio.WatchFactory
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.Utils.getBooleanSafe
 import org.json.JSONObject
@@ -75,5 +78,25 @@ object TimeAdjustmentIO {
 
     object CasioIsAutoTimeOriginalValue {
         var value = ""
+    }
+
+    fun sendToWatch(message:String) {
+        WatchFactory.watch.writeCmd(
+            0x000c,
+            Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code.toByte())
+        )
+    }
+
+    fun sendToWatchSet(message:String) {
+        val settings = JSONObject(message).get("value") as JSONObject
+        // add the original string from Casio, so we do not mess up any ot the other settings.
+        settings.put(
+            "casioIsAutoTimeOriginalValue",
+            TimeAdjustmentIO.CasioIsAutoTimeOriginalValue.value
+        )
+        val encodedTimeAdj = SettingsEncoder.encodeTimeAdjustment(settings)
+        if (encodedTimeAdj.isNotEmpty()) {
+            WatchFactory.watch.writeCmd(0x000e, encodedTimeAdj)
+        }
     }
 }

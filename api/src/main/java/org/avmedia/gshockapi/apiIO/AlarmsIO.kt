@@ -5,8 +5,11 @@ import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.casio.AlarmDecoder
-import org.avmedia.gshockapi.casio.BluetoothWatch
+import org.avmedia.gshockapi.casio.Alarms
+import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.WatchFactory
 import org.avmedia.gshockapi.utils.Utils
+import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.ArrayList
@@ -72,5 +75,28 @@ object AlarmsIO {
             JSONObject().put("value", AlarmDecoder.toJson(data).get("ALARMS"))
                 .put("key", "GET_ALARMS")
         )
+    }
+
+    // watch senders
+    fun sendToWatch(message:String) {
+        // get alarm 1
+        WatchFactory.watch.writeCmd(
+            0x000c,
+            Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code.toByte())
+        )
+
+        // get the rest of the alarms
+        WatchFactory.watch.writeCmd(
+            0x000c,
+            Utils.byteArray(CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code.toByte())
+        )
+    }
+
+    fun sendToWatchSet(message:String) {
+        val alarmsJsonArr: JSONArray = JSONObject(message).get("value") as JSONArray
+        val alarmCasio0 = Alarms.fromJsonAlarmFirstAlarm(alarmsJsonArr[0] as JSONObject)
+        WatchFactory.watch.writeCmd(0x000e, alarmCasio0)
+        var alarmCasio: ByteArray = Alarms.fromJsonAlarmSecondaryAlarms(alarmsJsonArr)
+        WatchFactory.watch.writeCmd(0x000e, alarmCasio)
     }
 }

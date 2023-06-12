@@ -8,6 +8,7 @@ package org.avmedia.gshockapi.utils
 
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.IDataReceived
+import org.avmedia.gshockapi.casio.MessageDispatcher
 import org.avmedia.gshockapi.casio.WatchFactory
 import org.json.JSONObject
 import timber.log.Timber
@@ -26,7 +27,7 @@ object WatchDataListener {
                     return
                 }
                 Timber.i("---> Received data $data")
-                val dataJson = WatchFactory.watch.toJson(data)
+                val dataJson = MessageDispatcher.toJson(data)
 
                 for (topic in dataJson.keys()) {
                     val value: JSONObject = dataJson.getJSONObject(topic)

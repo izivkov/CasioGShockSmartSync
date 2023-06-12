@@ -2,14 +2,17 @@ package org.avmedia.gshockapi.apiIO
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.casio.BluetoothWatch
-import org.avmedia.gshockapi.casio.CasioTimeZone
+import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.TimeEncoder
+import org.avmedia.gshockapi.casio.WatchFactory
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 import java.util.*
 import kotlin.reflect.KSuspendFunction1
 
@@ -92,5 +95,18 @@ object TimeIO {
 
         readAndWrite(::getWorldCities, 0)
         readAndWrite(::getWorldCities, 1)
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun sendToWatchSet(message:String) {
+        val dateTimeMs: Long = JSONObject(message).get("value") as Long
+
+        val dateTime = Instant.ofEpochMilli(dateTimeMs).atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
+
+        val timeData = TimeEncoder.prepareCurrentTime(dateTime)
+        var timeCommand =
+            Utils.byteArrayOfInts(CasioConstants.CHARACTERISTICS.CASIO_CURRENT_TIME.code) + timeData
+
+        WatchFactory.watch.writeCmd(0x000e, timeCommand)
     }
 }
