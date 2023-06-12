@@ -2,6 +2,7 @@ package org.avmedia.gshockapi.apiIO
 
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.casio.BluetoothWatch
+import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 
 object WorldCitiesIO {
@@ -29,5 +30,18 @@ object WorldCitiesIO {
         }
 
         return deferredResult.await()
+    }
+
+    fun toJson (data:String): JSONObject {
+        val json = JSONObject()
+        val dataJson = JSONObject().put("key", ApiIO.createKey(data)).put("value", data)
+        val characteristicsArray = Utils.toIntArray(data)
+        if (characteristicsArray[1] == 0) {
+            // 0x1F 00 ... Only the first World City contains the home time.
+            // Send this data on topic "HOME_TIME" to be received by HomeTime custom component.
+            json.put("HOME_TIME", dataJson)
+        }
+        json.put("CASIO_WORLD_CITIES", dataJson)
+        return json
     }
 }

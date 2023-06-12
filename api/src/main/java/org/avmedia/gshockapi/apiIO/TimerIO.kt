@@ -2,7 +2,6 @@ package org.avmedia.gshockapi.apiIO
 
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.ble.Connection
-import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.casio.TimerDecoder
 import org.json.JSONObject
 
@@ -37,8 +36,15 @@ object TimerIO {
         return deferredResult.await()
     }
 
-    fun set (timerValue: Int) {
+    fun set(timerValue: Int) {
         ApiIO.cache.remove("18")
         Connection.sendMessage("{action: \"SET_TIMER\", value: $timerValue}")
+    }
+
+    fun toJson(data: String): JSONObject {
+        val json = JSONObject()
+        val dataJson = JSONObject().put("key", ApiIO.createKey(data)).put("value", data)
+        json.put("CASIO_TIMER", dataJson)
+        return json
     }
 }

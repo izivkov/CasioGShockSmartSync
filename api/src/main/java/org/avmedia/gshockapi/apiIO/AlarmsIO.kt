@@ -4,8 +4,10 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ble.Connection
+import org.avmedia.gshockapi.casio.AlarmDecoder
 import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.utils.Utils
+import org.json.JSONObject
 import timber.log.Timber
 import java.util.ArrayList
 
@@ -38,6 +40,7 @@ object AlarmsIO {
             }
 
             fromJson(data)
+
             if (Alarm.alarms.size > 1) {
                 ApiIO.resultQueue.dequeue(key)?.complete(Alarm.alarms)
             }
@@ -61,5 +64,13 @@ object AlarmsIO {
         ApiIO.cache.remove("GET_ALARMS")
 
         Connection.sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
+    }
+
+    fun toJson (data:String): JSONObject {
+        return JSONObject().put(
+            "ALARMS",
+            JSONObject().put("value", AlarmDecoder.toJson(data).get("ALARMS"))
+                .put("key", "GET_ALARMS")
+        )
     }
 }

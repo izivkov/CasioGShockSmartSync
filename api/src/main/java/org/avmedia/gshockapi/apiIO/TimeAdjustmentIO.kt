@@ -1,19 +1,12 @@
 package org.avmedia.gshockapi.apiIO
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
-import org.avmedia.gshockapi.Alarm
-import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.ble.Connection
-import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.Utils.getBooleanSafe
 import org.json.JSONObject
-import timber.log.Timber
-import java.util.ArrayList
 
 object TimeAdjustmentIO {
 
@@ -50,5 +43,37 @@ object TimeAdjustmentIO {
         val settingJson = Gson().toJson(settings)
         ApiIO.cache.remove("TIME_ADJUSTMENT")
         Connection.sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
+    }
+
+    fun toJson(data: String): JSONObject {
+        val timeAdjustmentSet = isTimeAdjustmentSet(data)
+
+        val valueJson = toJsonTimeAdjustment(timeAdjustmentSet)
+        val dataJson = JSONObject().apply {
+            put("key", ApiIO.createKey(data))
+            put("value", valueJson)
+        }
+
+        CasioIsAutoTimeOriginalValue.value = data
+
+        return JSONObject().apply {
+            put("TIME_ADJUSTMENT", dataJson)
+        }
+    }
+
+    fun isTimeAdjustmentSet(data: String): Boolean {
+        // syncing off: 110f0f0f0600500004000100->80<-37d2
+        // syncing on:  110f0f0f0600500004000100->00<-37d2
+
+        CasioIsAutoTimeOriginalValue.value = data // save original data for future use
+        return Utils.toIntArray(data)[12] == 0
+    }
+
+    fun toJsonTimeAdjustment(isTimeAdjustmentSet: Boolean): JSONObject {
+        return JSONObject("{\"timeAdjustment\": ${isTimeAdjustmentSet} }")
+    }
+
+    object CasioIsAutoTimeOriginalValue {
+        var value = ""
     }
 }

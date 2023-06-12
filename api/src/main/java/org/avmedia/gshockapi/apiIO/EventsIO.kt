@@ -4,14 +4,11 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
-import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.ble.Connection
-import org.avmedia.gshockapi.casio.BluetoothWatch
-import org.avmedia.gshockapi.utils.Utils
+import org.avmedia.gshockapi.casio.ReminderDecoder
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.ArrayList
 
 object EventsIO {
 
@@ -72,5 +69,24 @@ object EventsIO {
 
         Connection.sendMessage("{action: \"SET_REMINDERS\", value: ${getSelectedEvents(events)} }")
     }
+
+    fun toJson(data: String): JSONObject {
+        val reminderJson = JSONObject()
+        val value = ReminderDecoder.reminderTimeToJson(data + 2)
+        reminderJson.put(
+            "REMINDERS",
+            JSONObject().put("key", ApiIO.createKey(data)).put("value", value)
+        )
+        return reminderJson
+    }
+
+    fun toJsonTitle(data: String): JSONObject {
+        return JSONObject().put(
+            "REMINDERS",
+            JSONObject().put("key", ApiIO.createKey(data))
+                .put("value", ReminderDecoder.reminderTitleToJson(data))
+        )
+    }
+
 
 }

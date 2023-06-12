@@ -3,6 +3,7 @@ package org.avmedia.gshockapi.apiIO
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.casio.BluetoothWatch
 import org.avmedia.gshockapi.utils.Utils
+import org.json.JSONObject
 
 object AppInfoIO {
 
@@ -44,5 +45,12 @@ object AppInfoIO {
         }
 
         return deferredResult.await()
+    }
+
+    fun toJson (data:String): JSONObject {
+        val json = JSONObject()
+        val dataJson = JSONObject().put("key", ApiIO.createKey(data)).put("value", data)
+        json.put("CASIO_APP_INFORMATION", dataJson)
+        return json
     }
 }
