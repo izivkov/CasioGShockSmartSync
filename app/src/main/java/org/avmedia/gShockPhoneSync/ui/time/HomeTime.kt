@@ -8,10 +8,13 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
-import kotlinx.coroutines.*
+import android.view.View
+import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import java.util.*
+
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -27,24 +30,18 @@ open class HomeTime @JvmOverloads constructor(
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
-                updateText(api().getHomeTime())
+                text = api().getHomeTime()
             }
         }
-    }
-
-    private fun updateText(value: String) {
-        text = value
-        invalidate()
-        refreshDrawableState()
     }
 
     private fun createSubscription() {
         ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
             when (it) {
                 ProgressEvents["HomeTimeUpdated"] -> {
-                    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-                    scope.launch {
-                        (this@HomeTime).updateText(api().getHomeTime()) // not updating for some reason. Anybody knows why?
+                    runBlocking {
+                        // not updating for some reason. Anybody knows why?
+                        text = api().getHomeTime()
                     }
                 }
             }

@@ -10,7 +10,7 @@ import org.avmedia.gShockPhoneSync.ui.events.CalendarEvents
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.Settings
-import org.avmedia.gshockapi.casio.BluetoothWatch
+import org.avmedia.gshockapi.apiIO.CasioIO
 
 class ApiTest {
     fun run(context: Context) {
@@ -72,9 +72,9 @@ class ApiTest {
     }
 
     private suspend fun getDTSState() {
-        println("TDS STATE ZERO: ${api().getDSTWatchState(BluetoothWatch.DTS_STATE.ZERO)}")
-        println("TDS STATE TWO: ${api().getDSTWatchState(BluetoothWatch.DTS_STATE.TWO)}")
-        println("TDS STATE FOUR: ${api().getDSTWatchState(BluetoothWatch.DTS_STATE.FOUR)}")
+        println("TDS STATE ZERO: ${api().getDSTWatchState(CasioIO.DTS_STATE.ZERO)}")
+        println("TDS STATE TWO: ${api().getDSTWatchState(CasioIO.DTS_STATE.TWO)}")
+        println("TDS STATE FOUR: ${api().getDSTWatchState(CasioIO.DTS_STATE.FOUR)}")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

@@ -1,1 +1,0 @@
-Minor fixes related to setting time for the B2100.

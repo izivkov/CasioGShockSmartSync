@@ -10,6 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
@@ -33,6 +34,7 @@ class ForgetButton @JvmOverloads constructor(
                     LocalDataStorage.delete("LastDeviceAddress", context)
                     LocalDataStorage.delete("LastDeviceName", context)
 
+                    api().stopScan()
                     Connection.breakWait()
 
                     ProgressEvents.onNext("DeviceName")
