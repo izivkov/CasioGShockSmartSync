@@ -1,1 +1,0 @@
-Bug fixes in Auto-time setting

@@ -1,1 +1,0 @@
-Fixed a permission's issue related to Actions screen for Android 11 and newer.
