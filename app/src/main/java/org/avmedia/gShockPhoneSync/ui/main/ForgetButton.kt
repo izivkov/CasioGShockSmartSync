@@ -21,51 +21,41 @@ class ForgetButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : Button(context, attrs, defStyleAttr) {
 
-    private var doNotInterrupt = false
-
     init {
         setOnTouchListener(OnTouchListener())
         listenForConnection()
     }
 
     private fun listenForConnection() {
-        ProgressEvents.subscriber.start(
-            this.javaClass.canonicalName,
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
 
             {
                 when (it) {
                     ProgressEvents["ConnectionStarted"] -> {
-                        doNotInterrupt = true
+                        isEnabled = false
                         Timber.d("... Do not interrupt...")
                     }
 
-                    ProgressEvents["WatchInitializationCompleted"],
-                    ProgressEvents["ConnectionFailed"],
-                    ProgressEvents["Disconnect"] -> {
-                        doNotInterrupt = false
+                    ProgressEvents["WatchInitializationCompleted"], ProgressEvents["ConnectionFailed"], ProgressEvents["Disconnect"] -> {
+                        isEnabled = true
                         Timber.d("... Can be interrupted...")
                     }
                 }
-            },
-            { throwable -> Timber.d("Got error on subscribe: $throwable") })
+            }, { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
 
     inner class OnTouchListener : View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    if (!doNotInterrupt) {
-                        WatchInfo.reset()
+                    WatchInfo.reset()
 
-                        LocalDataStorage.delete("LastDeviceAddress", context)
-                        LocalDataStorage.delete("LastDeviceName", context)
+                    LocalDataStorage.delete("LastDeviceAddress", context)
+                    LocalDataStorage.delete("LastDeviceName", context)
 
-                        Connection.breakWait()
-                        ProgressEvents.onNext("DeviceName", "")
-                        ProgressEvents.onNext("WaitForConnection")
-                    } else {
-                        Timber.d("... Cannot be interrupted...")
-                    }
+                    Connection.breakWait()
+                    ProgressEvents.onNext("DeviceName", "")
+                    ProgressEvents.onNext("WaitForConnection")
                 }
             }
             v?.performClick()
