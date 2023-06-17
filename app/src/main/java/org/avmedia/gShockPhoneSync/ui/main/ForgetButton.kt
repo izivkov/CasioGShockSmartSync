@@ -10,37 +10,62 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
+import timber.log.Timber
 
 class ForgetButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : Button(context, attrs, defStyleAttr) {
 
+    private var doNotInterrupt = false
+
     init {
         setOnTouchListener(OnTouchListener())
+        listenForConnection()
+    }
+
+    private fun listenForConnection() {
+        ProgressEvents.subscriber.start(
+            this.javaClass.canonicalName,
+
+            {
+                when (it) {
+                    ProgressEvents["ConnectionStarted"] -> {
+                        doNotInterrupt = true
+                        Timber.d("... Do not interrupt...")
+                    }
+
+                    ProgressEvents["WatchInitializationCompleted"],
+                    ProgressEvents["ConnectionFailed"],
+                    ProgressEvents["Disconnect"] -> {
+                        doNotInterrupt = false
+                        Timber.d("... Can be interrupted...")
+                    }
+                }
+            },
+            { throwable -> Timber.d("Got error on subscribe: $throwable") })
     }
 
     inner class OnTouchListener : View.OnTouchListener {
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    WatchInfo.reset()
+                    if (!doNotInterrupt) {
+                        WatchInfo.reset()
 
-                    LocalDataStorage.delete("LastDeviceAddress", context)
-                    LocalDataStorage.delete("LastDeviceName", context)
+                        LocalDataStorage.delete("LastDeviceAddress", context)
+                        LocalDataStorage.delete("LastDeviceName", context)
 
-                    api().stopScan()
-                    Connection.breakWait()
-
-                    ProgressEvents.onNext("DeviceName")
-                    ProgressEvents["DeviceName"]?.payload = ""
-
-                    ProgressEvents.onNext("WaitForConnection")
+                        Connection.breakWait()
+                        ProgressEvents.onNext("DeviceName", "")
+                        ProgressEvents.onNext("WaitForConnection")
+                    } else {
+                        Timber.d("... Cannot be interrupted...")
+                    }
                 }
             }
             v?.performClick()

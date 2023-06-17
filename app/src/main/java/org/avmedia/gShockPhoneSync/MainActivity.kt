@@ -224,8 +224,7 @@ class MainActivity : AppCompatActivity() {
                         InactivityWatcher.cancel()
 
                         Utils.snackBar(this, "Disconnected from watch!", Snackbar.LENGTH_SHORT)
-                        val event = ProgressEvents["Disconnect"]
-                        val device = ProgressEvents["Disconnect"]?.payload as BluetoothDevice
+                        val device = ProgressEvents.getPayload("Disconnect") as BluetoothDevice
                         api().teardownConnection(device)
 
                         val reconnectScheduler: ScheduledExecutorService =

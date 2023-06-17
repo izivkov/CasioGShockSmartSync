@@ -16,7 +16,7 @@ object DeviceManager {
         ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
             when (it) {
                 ProgressEvents["DeviceName"] -> {
-                    val deviceName = ProgressEvents["DeviceName"]?.payload
+                    val deviceName = ProgressEvents.getPayload("DeviceName")
                     if ((deviceName as String) == "") {
                         LocalDataStorage.delete("LastDeviceName", applicationContext())
                     } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
@@ -30,7 +30,7 @@ object DeviceManager {
                 }
 
                 ProgressEvents["DeviceAddress"] -> {
-                    val deviceAddress = ProgressEvents["DeviceAddress"]?.payload
+                    val deviceAddress = ProgressEvents.getPayload("DeviceAddress")
                     if ((deviceAddress as String) == "") {
                         LocalDataStorage.delete("LastDeviceAddress", applicationContext())
                     }

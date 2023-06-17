@@ -32,7 +32,7 @@ class WatchName @JvmOverloads constructor(
             {
                 when (it) {
                     ProgressEvents["DeviceName"] -> {
-                        val deviceName = ProgressEvents["DeviceName"]?.payload
+                        val deviceName = ProgressEvents.getPayload("DeviceName")
                         if ((deviceName as String).isNullOrBlank()) {
                             text = "No Watch"
                         }
