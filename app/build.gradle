@@ -13,8 +13,8 @@ android {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 89
-        versionName "8.9"
+        versionCode 90
+        versionName "9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -44,7 +44,7 @@ configurations {
 
 dependencies {
     // This is a library to interact with the CASIO GShock 5000/5600 watches
-    implementation 'com.github.izivkov:GShockAPI:1.2.1'
+    implementation 'com.github.izivkov:GShockAPI:1.2.2'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //noinspection GradleDependency

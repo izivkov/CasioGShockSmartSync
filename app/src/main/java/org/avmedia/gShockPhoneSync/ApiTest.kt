@@ -10,7 +10,7 @@ import org.avmedia.gShockPhoneSync.ui.events.CalendarEvents
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.Settings
-import org.avmedia.gshockapi.apiIO.CasioIO
+import org.avmedia.gshockapi.io.CasioIO
 
 class ApiTest {
     fun run(context: Context) {
