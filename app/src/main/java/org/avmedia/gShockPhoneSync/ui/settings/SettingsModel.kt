@@ -99,7 +99,7 @@ object SettingsModel {
                     val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
                     setting.timeAdjustment = value == true
                 }
-                "timeTone" -> {
+                "buttonTone" -> {
                     val setting: OperationSound = settingsMap["Button Sound"] as OperationSound
                     setting.sound = value == true
                 }
