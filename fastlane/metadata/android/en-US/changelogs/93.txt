@@ -1,0 +1,2 @@
+Fixed setting HOME-TIME twice when setting time.
+
