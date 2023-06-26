@@ -10,6 +10,9 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsAdapter
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsList
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -17,8 +20,15 @@ class EventList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
+    object AdapterValue {
+        var adapter: EventAdapter? = null
+    }
+
     init {
-        adapter = EventAdapter(EventsModel.events)
+        // Save adapter for re-use
+        adapter = AdapterValue.adapter ?: EventAdapter(EventsModel.events).also { AdapterValue.adapter = it }
+        // adapter = EventAdapter(EventsModel.events)
+
         layoutManager = LinearLayoutManager(context)
 
         listenForUpdateRequest()

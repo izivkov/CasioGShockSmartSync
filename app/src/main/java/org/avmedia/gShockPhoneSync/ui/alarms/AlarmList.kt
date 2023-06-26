@@ -11,13 +11,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.ui.events.EventAdapter
+import org.avmedia.gShockPhoneSync.ui.events.EventList
+import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 
 class AlarmList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
+    object AdapterValue {
+        var adapter: AlarmAdapter? = null
+    }
+
     init {
-        adapter = AlarmAdapter(AlarmsModel.alarms)
+        // Save adapter for re-use
+        adapter = AdapterValue.adapter ?:  AlarmAdapter(AlarmsModel.alarms).also { AdapterValue.adapter = it }
+        // adapter = AlarmAdapter(AlarmsModel.alarms)
+
         layoutManager = LinearLayoutManager(context)
 
         runBlocking {
