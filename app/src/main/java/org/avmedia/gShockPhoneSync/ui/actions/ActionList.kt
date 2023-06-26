@@ -9,10 +9,6 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmAdapter
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsAdapter
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsList
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -20,13 +16,12 @@ class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    object AdapterValue {
+    object Cache {
         var adapter: ActionAdapter? = null
     }
 
     init {
-        adapter = AdapterValue.adapter ?: ActionAdapter(ActionsModel.actions).also { AdapterValue.adapter = it }
-        // adapter = ActionAdapter(ActionsModel.actions)
+        adapter = Cache.adapter ?: ActionAdapter(ActionsModel.actions).also { Cache.adapter = it }
         layoutManager = LinearLayoutManager(context)
     }
 
