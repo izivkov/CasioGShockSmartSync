@@ -4,7 +4,7 @@
  * Last modified 2022-05-07, 7:52 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.ui.setting
+package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 
 // This adapter handles a heterogeneous list of settings.
@@ -35,7 +34,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     inner class ViewHolderLocale(itemView: View) : ViewHolderBaseSetting(itemView) {
         val timeFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.time_format_group)
         val dateFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.date_format_group)
-        val language: org.avmedia.gShockPhoneSync.ui.settings.LanguageMenu =
+        val language: LanguageMenu =
             itemView.findViewById(R.id.language_menu)
     }
 
@@ -176,27 +175,24 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhLocale.language.setText(setting.dayOfWeekLanguage.value, false)
 
-        vhLocale.timeFormat.setOnCheckedChangeListener(
-            RadioGroup.OnCheckedChangeListener { _, checkedId ->
-                if (checkedId == R.id.twelve_hours) {
-                    setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWELVE_HOURS
-                } else {
-                    setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
-                }
-            })
+        vhLocale.timeFormat.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.twelve_hours) {
+                setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWELVE_HOURS
+            } else {
+                setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
+            }
+        })
 
-        vhLocale.dateFormat.setOnCheckedChangeListener(
-            RadioGroup.OnCheckedChangeListener { _, checkedId ->
-                if (checkedId == R.id.month_day) {
-                    setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.MONTH_DAY
-                } else {
-                    setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.DAY_MONTH
-                }
-            })
+        vhLocale.dateFormat.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.month_day) {
+                setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.MONTH_DAY
+            } else {
+                setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.DAY_MONTH
+            }
+        })
 
         val listener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            val selectedItem = parent.getItemAtPosition(position)
-                .toString()
+            val selectedItem = parent.getItemAtPosition(position).toString()
             when (selectedItem) {
                 "English" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
@@ -230,14 +226,13 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             setting.autoLight = isChecked
         })
 
-        vhLight.duration.setOnCheckedChangeListener(
-            RadioGroup.OnCheckedChangeListener { _, checkedId ->
-                if (checkedId == R.id.two_seconds) {
-                    setting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
-                } else {
-                    setting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
-                }
-            })
+        vhLight.duration.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.two_seconds) {
+                setting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
+            } else {
+                setting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
+            }
+        })
     }
 
     private fun configureSound(vhOperationSound: ViewHolderOperationSound, position: Int) {
@@ -251,8 +246,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     private fun configurePowerSavingMode(
-        vhPowerSavingMode: ViewHolderPowerSavingMode,
-        position: Int
+        vhPowerSavingMode: ViewHolderPowerSavingMode, position: Int
     ) {
         val setting: SettingsModel.PowerSavingMode =
             settings[position] as SettingsModel.PowerSavingMode
@@ -264,8 +258,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     private fun configureTimeAdjustment(
-        vhTimeAdjustment: ViewHolderTimeAdjustment,
-        position: Int
+        vhTimeAdjustment: ViewHolderTimeAdjustment, position: Int
     ) {
         val setting: SettingsModel.TimeAdjustment =
             settings[position] as SettingsModel.TimeAdjustment
@@ -284,8 +277,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     private fun configureHandAdjustment(
-        vhTimeAdjustment: ViewHolderHandAdjustment,
-        position: Int
+        vhTimeAdjustment: ViewHolderHandAdjustment, position: Int
     ) {
     }
 

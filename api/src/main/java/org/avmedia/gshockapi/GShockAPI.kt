@@ -11,7 +11,6 @@ import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.Connection.sendMessage
 import org.avmedia.gshockapi.casio.*
 import org.avmedia.gshockapi.utils.*
-import java.time.Clock
 import java.util.*
 
 /**
@@ -278,23 +277,7 @@ class GShockAPI(private val context: Context) {
      */
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setTime(changeHomeTime: Boolean = true) {
-        TimeIO.set()
-
-        // Update the HomeTime according to the current TimeZone
-        val city = CasioTimeZone.TimeZoneHelper.parseCity(TimeZone.getDefault().id)
-        val homeTime = HomeTimeIO.request()
-        if (changeHomeTime && homeTime.uppercase() != city.uppercase()) {
-            setHomeTime(TimeZone.getDefault().id)
-        }
-
-
-        // test
-        Connection.sendMessage(
-            "{action: \"SET_TIME\", value: ${
-                Clock.systemDefaultZone().millis()
-            }}"
-        )
-        // end test
+        TimeIO.set(changeHomeTime)
     }
 
     /**

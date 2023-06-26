@@ -15,4 +15,8 @@ class WatchInfo @JvmOverloads constructor(
 
     init {
     }
+
+    override fun refreshDrawableState() {
+        super.refreshDrawableState()
+    }
 }

@@ -17,6 +17,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -26,11 +28,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
+import org.avmedia.gShockPhoneSync.ui.time.HomeTime
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Executors
@@ -256,6 +258,15 @@ class MainActivity : AppCompatActivity() {
                         val navController =
                             findNavController(R.id.nav_host_fragment_activity_gshock_screens)
                         navController.navigate(R.id.navigation_home)
+                    }
+
+                    ProgressEvents["HomeTimeUpdated"] -> {
+                        // This is really ugly, but I cannot update home time value
+                        // inside the HomeTime. Anybody knows why, let me know.
+                        val textView :HomeTime = findViewById(R.id.home_time)
+                        runBlocking {
+                            textView.update()
+                        }
                     }
                 }
             }, { throwable ->

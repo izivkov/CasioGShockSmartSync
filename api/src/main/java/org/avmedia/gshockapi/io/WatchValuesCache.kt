@@ -6,14 +6,14 @@ class WatchValuesCache {
     private val map = mutableMapOf<String, Any>()
 
     suspend fun getCached(key: String): Any? {
-        return get(key)
+        return get(key.uppercase())
     }
 
     suspend fun getCached(key: String, func: KSuspendFunction1<String, Any>): Any {
         val cachedResult = get(key)
         if (cachedResult == null) {
             val funcResult = func(key)
-            put(key, funcResult)
+            put(key.uppercase(), funcResult)
             return funcResult
         }
 
@@ -21,15 +21,15 @@ class WatchValuesCache {
     }
 
     fun put(key: String, value: Any) {
-        map[key] = value
+        map[key.uppercase()] = value
     }
 
     fun get(key: String): Any? {
-        return map[key]
+        return map[key.uppercase()]
     }
 
     fun remove(key: String) {
-        map.remove(key)
+        map.remove(key.uppercase())
     }
 
     fun clear() {

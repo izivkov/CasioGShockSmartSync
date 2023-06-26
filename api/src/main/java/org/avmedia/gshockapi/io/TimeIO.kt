@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.CasioTimeZone
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 import java.time.Clock
@@ -18,11 +19,18 @@ import kotlin.reflect.KSuspendFunction1
 object TimeIO {
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun set() {
+    suspend fun set(changeHomeTime: Boolean) {
         if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
             initializeForSettingTimeForB2100()
         } else {
             initializeForSettingTimeForB5600()
+        }
+
+        // Update the HomeTime according to the current TimeZone
+        val city = CasioTimeZone.TimeZoneHelper.parseCity(TimeZone.getDefault().id)
+        val homeTime = HomeTimeIO.request()
+        if (changeHomeTime && homeTime.uppercase() != city.uppercase()) {
+            HomeTimeIO.set(TimeZone.getDefault().id)
         }
 
         Connection.sendMessage(
@@ -40,8 +48,7 @@ object TimeIO {
         return DstWatchStateIO.request(state)
     }
 
-    private suspend fun
-            getDSTForWorldCities(cityNum: Int): String {
+    private suspend fun getDSTForWorldCities(cityNum: Int): String {
         return DstForWorldCitiesIO.request(cityNum)
     }
 
@@ -100,8 +107,8 @@ object TimeIO {
     fun sendToWatchSet(message: String) {
         val dateTimeMs: Long = JSONObject(message).get("value") as Long
 
-        val dateTime = Instant.ofEpochMilli(dateTimeMs).atZone(ZoneId.systemDefault())
-            .toLocalDateTime()
+        val dateTime =
+            Instant.ofEpochMilli(dateTimeMs).atZone(ZoneId.systemDefault()).toLocalDateTime()
 
         val timeData = TimeEncoder.prepareCurrentTime(dateTime)
         var timeCommand =

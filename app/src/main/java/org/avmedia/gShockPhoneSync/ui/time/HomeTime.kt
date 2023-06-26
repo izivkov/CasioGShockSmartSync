@@ -8,21 +8,24 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
+import android.util.LongSparseArray
+import android.view.ContentInfo
+import android.view.translation.ViewTranslationResponse
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
-import java.util.*
-
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     init {
+        // not working, so I commented it out for now.
+        // The value is updated from the Main Activity
+
         // Listen on HomeTime update events
-        createSubscription()
+        // createSubscription()
     }
 
     // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
@@ -40,8 +43,11 @@ open class HomeTime @JvmOverloads constructor(
             when (it) {
                 ProgressEvents["HomeTimeUpdated"] -> {
                     runBlocking {
-                        // not updating for some reason. Anybody knows why?
-                        text = api().getHomeTime()
+                        // This does not work for me...
+                        // Not updating for some reason. Anybody knows why?
+
+                        val homeCity = api().getHomeTime()
+                        text = homeCity
                     }
                 }
             }
@@ -49,5 +55,13 @@ open class HomeTime @JvmOverloads constructor(
             Timber.d("Got error on subscribe: $throwable")
             throwable.printStackTrace()
         })
+    }
+
+    override fun setText(text: CharSequence?, type: BufferType?) {
+        super.setText(text, type)
+    }
+
+    suspend fun update() {
+        text = api().getHomeTime()
     }
 }

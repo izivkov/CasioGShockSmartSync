@@ -29,8 +29,9 @@ object CasioTimeZone {
         var worldCity = WorldCity(city, 0)
 
         Timber.i("----> Setting Home time")
+        val encodedHomeCity = worldCity.createCasioString()
         CasioIO.writeCmd(
-            0xE, worldCity.createCasioString()
+            0xE, encodedHomeCity
         )
     }
 }

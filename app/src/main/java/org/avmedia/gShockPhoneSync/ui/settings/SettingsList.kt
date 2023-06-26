@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.setting.SettingsAdapter
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -20,10 +19,14 @@ class SettingsList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    init {
-        adapter = SettingsAdapter(SettingsModel.settings)
-        layoutManager = LinearLayoutManager(context)
+    object AdapterValue {
+        var adapter: SettingsAdapter? = null
+    }
 
+    init {
+        // Save adapter for re-use
+        adapter = AdapterValue.adapter ?: SettingsAdapter(SettingsModel.settings).also { AdapterValue.adapter = it }
+        layoutManager = LinearLayoutManager(context)
         listenForUpdateRequest()
     }
 

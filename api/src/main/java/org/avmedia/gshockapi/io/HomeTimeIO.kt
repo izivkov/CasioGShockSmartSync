@@ -11,7 +11,7 @@ object HomeTimeIO {
     }
 
     fun set(id: String) {
-        CachedIO.cache.remove("1f00")
         CasioTimeZone.setHomeTime(id)
+        CachedIO.cache.remove("1F00")
     }
 }
