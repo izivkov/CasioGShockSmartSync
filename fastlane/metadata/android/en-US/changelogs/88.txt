@@ -1,1 +1,0 @@
-Use updated G-Shock API, improve performance.
