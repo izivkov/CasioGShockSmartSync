@@ -9,7 +9,7 @@ I think we can do better than the official G-Shock Connected App! This app provi
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-The supported watches B500, B5600 and B2100 series:
+The supported watches B5000, B5600 and B2100 series:
 
 https://amzn.to/3Mt68Qb
 https://amzn.to/4194M13
