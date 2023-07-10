@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -127,11 +128,20 @@ object ActionsModel {
             mp.setAudioAttributes(
                 AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
             )
-
             try {
                 mp.setDataSource(context, alarmUri)
                 mp.prepare()
                 mp.start()
+                mp.isLooping = true
+                AlertDialog.Builder(context)
+                    .setTitle("Find phone")
+                    .setMessage("Stop ringing?")
+                    .setPositiveButton("STOP!") { dialog, _ ->
+                        mp.stop(); dialog.cancel()
+                    }
+                    .setCancelable(false)
+                    .create()
+                    .show()
             } catch (e: IOException) {
                 Timber.e(e)
             }
