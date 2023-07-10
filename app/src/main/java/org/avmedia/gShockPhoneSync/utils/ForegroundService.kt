@@ -3,6 +3,7 @@ package org.avmedia.gShockPhoneSync.utils
 import android.R
 import android.app.*
 import android.app.Notification.Builder
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
 import android.os.IBinder
 import org.avmedia.gShockPhoneSync.MainActivity
@@ -16,7 +17,7 @@ class ForegroundService : Service() {
             this, 0, Intent(
                 this,
                 MainActivity::class.java
-            ), 0
+            ), FLAG_IMMUTABLE
         )
         val notification: Notification = Builder(applicationContext, CHANNEL_ID)
             .setContentTitle("Waiting for Connections")
