@@ -138,6 +138,7 @@ object CasioConstants {
         CASIO_REMINDER_TIME(0x31),
         CASIO_TIMER(0x18),
         ERROR(0xFF),
+        UNKNOWN (0x0A)
     }
 
     enum class Model {

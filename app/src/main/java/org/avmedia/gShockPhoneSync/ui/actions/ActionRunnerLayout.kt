@@ -44,6 +44,9 @@ class ActionRunnerLayout @JvmOverloads constructor(
                         ActionsModel.runActions(context)
                     } else if (api().isAutoTimeStarted()) {
                         ActionsModel.runActionsForAutoTimeSetting(context)
+                    } else if (api().isFindPhoneButtonPressed()) {
+                        show()
+                        ActionsModel.runActionFindPhone(context)
                     }
                 }
                 ProgressEvents["Disconnect"] -> {

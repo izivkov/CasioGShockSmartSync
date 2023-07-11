@@ -179,6 +179,17 @@ class GShockAPI(private val context: Context) {
     }
 
     /**
+     * This function tells us if the connection was initiated by ling-pressing the lower-right button on the
+     * watch, used to activate FIND PHONE action
+     *
+     * @return **true** if button pressed to activate FIND PHONE function, **false** otherwise.
+     */
+    fun isFindPhoneButtonPressed(): Boolean {
+        val button = ButtonPressedIO.get()
+        return button == CasioIO.WATCH_BUTTON.FIND_PHONE
+    }
+
+    /**
      * Get the name of the watch.
      *
      * @return returns the name of the watch as a String. i.e. "GW-B5600"

@@ -54,12 +54,16 @@ object MessageDispatcher {
         CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code to TimeAdjustmentIO::toJson,
 
         CasioConstants.CHARACTERISTICS.ERROR.code to ErrorIO::toJson,
+        CasioConstants.CHARACTERISTICS.UNKNOWN.code to UnknownIO::toJson,
     )
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun toJson(data: String): JSONObject {
         val intArray = Utils.toIntArray(data)
         val key = intArray[0]
+        if (toJsonConverters[key] == null) {
+            println("Unknown key: $key")
+        }
         return toJsonConverters[key]!!.invoke(data)
     }
 }

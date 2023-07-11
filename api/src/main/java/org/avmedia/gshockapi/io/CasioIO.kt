@@ -19,7 +19,7 @@ object CasioIO {
     private lateinit var writer: (BluetoothDevice, BluetoothGattCharacteristic, ByteArray) -> Unit
 
     enum class WATCH_BUTTON {
-        UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, NO_BUTTON, INVALID
+        UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, NO_BUTTON, FIND_PHONE, INVALID
     }
 
     enum class DTS_STATE(val state: Int) { ZERO(0), TWO(2), FOUR(4) }
