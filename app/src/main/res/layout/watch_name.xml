@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
+  ~ Copyright (c) 2022 . All rights reserved.
+  ~ Last modified 2022-03-29, 8:03 p.m.
+  -->
+
+<org.avmedia.gShockPhoneSync.ui.time.WatchNameCard xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/watch_name_card"
+    style="@style/CardViewStyle"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:clickable="false"
+    app:layout_constraintTop_toBottomOf="@+id/timer_card_view"
+    app:layout_constraintBottom_toTopOf="@+id/watch_info_layout"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    >
+        <org.avmedia.gShockPhoneSync.ui.time.WatchName
+            android:id="@+id/watch_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text=""
+            android:textSize="20pt"
+ />
+
+</org.avmedia.gShockPhoneSync.ui.time.WatchNameCard>

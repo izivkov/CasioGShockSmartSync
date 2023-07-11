@@ -9,14 +9,6 @@ package org.avmedia.gShockPhoneSync.ui.time
 import android.content.Context
 import android.util.AttributeSet
 
-class WatchInfo @JvmOverloads constructor(
+class WatchInfoCard @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
-
-    init {
-    }
-
-    override fun refreshDrawableState() {
-        super.refreshDrawableState()
-    }
-}
+) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr)
