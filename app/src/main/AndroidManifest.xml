@@ -39,6 +39,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <service android:name=".utils.ForegroundService" />
+        <receiver android:name=".utils.PhoneFinder" />
 
         <activity
             android:name="org.avmedia.gShockPhoneSync.MainActivity"

@@ -24,6 +24,7 @@ class ForegroundService : Service() {
             .setContentText(input)
             .setSmallIcon(R.drawable.ic_menu_day)
             .setContentIntent(pendingIntent)
+            .setOngoing(true)
             .build()
 
         startForeground(1, notification)
