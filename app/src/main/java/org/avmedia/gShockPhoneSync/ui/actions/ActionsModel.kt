@@ -7,10 +7,14 @@
 package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import com.google.gson.Gson
@@ -22,6 +26,7 @@ import org.avmedia.gShockPhoneSync.utils.*
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.Clock
@@ -42,6 +47,7 @@ object ActionsModel {
         actions.add(SetEventsAction("Set Reminders from Google Calender", false))
         actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.BACK))
         actions.add(ToggleFlashlightAction("Toggle Flashlight", false))
+        actions.add(FindPhoneAction("Find Phone", false))
         actions.add(StartVoiceAssistAction("Start Voice Assist", true))
 
         actions.add(Separator("Emergency Actions:", false))
@@ -96,6 +102,49 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             Flashlight.toggle(context)
+        }
+
+        override fun load(context: Context) {
+            val key = this.javaClass.simpleName + ".enabled"
+            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+        }
+    }
+
+    class FindPhoneAction(override var title: String, override var enabled: Boolean) :
+        Action(title, enabled) {
+
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+
+            var alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            if (alarmUri == null) {
+                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+            }
+            if (alarmUri == null) {
+                Timber.e("ringAlarm", "Unable to get default sound URI")
+                return
+            }
+            val mp = MediaPlayer()
+            mp.setAudioAttributes(
+                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
+            )
+            try {
+                mp.setDataSource(context, alarmUri)
+                mp.prepare()
+                mp.start()
+                mp.isLooping = true
+                AlertDialog.Builder(context)
+                    .setTitle("Find phone")
+                    .setMessage("Stop ringing?")
+                    .setPositiveButton("STOP!") { dialog, _ ->
+                        mp.stop(); dialog.cancel()
+                    }
+                    .setCancelable(false)
+                    .create()
+                    .show()
+            } catch (e: IOException) {
+                Timber.e(e)
+            }
         }
 
         override fun load(context: Context) {
