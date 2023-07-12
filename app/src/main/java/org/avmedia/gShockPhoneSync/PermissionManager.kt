@@ -27,6 +27,7 @@ data class PermissionManager(val context: Context) {
     private var PERMISSION_ALL = 1
     private var PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.RECEIVE_BOOT_COMPLETED,
     )
 
     init {

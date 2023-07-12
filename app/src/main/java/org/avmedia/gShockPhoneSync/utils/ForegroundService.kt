@@ -4,6 +4,8 @@ import android.R
 import android.app.*
 import android.app.Notification.Builder
 import android.app.PendingIntent.FLAG_IMMUTABLE
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import org.avmedia.gShockPhoneSync.MainActivity
@@ -44,4 +46,11 @@ class ForegroundService : Service() {
         )
         getSystemService(NotificationManager::class.java).createNotificationChannel(serviceChannel)
     }
+
+    class Autostart : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            context.startForegroundService(Intent(context, ForegroundService::class.java))
+        }
+    }
 }
+

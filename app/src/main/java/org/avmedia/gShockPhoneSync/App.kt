@@ -7,6 +7,6 @@ import org.avmedia.gShockPhoneSync.utils.ForegroundService
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        startService(Intent(this, ForegroundService::class.java))
+        startForegroundService(Intent(this, ForegroundService::class.java))
     }
 }
