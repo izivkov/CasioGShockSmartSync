@@ -16,6 +16,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -97,8 +98,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runWithChecks() {
-
-        findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+        navigateHome()
 
         if (!isBluetoothEnabled()!!) {
             turnOnBLE()
@@ -240,24 +240,18 @@ class MainActivity : AppCompatActivity() {
                         Utils.snackBar(
                             this, "Actions not granted...Cannot access the Actions screen..."
                         )
-                        val navController =
-                            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        navController.navigate(R.id.navigation_home)
+                        navigateHome()
                     }
 
                     ProgressEvents["CalendarPermissionsNotGranted"] -> {
                         Utils.snackBar(
                             this, "Calendar not granted...Cannot access the Actions screen..."
                         )
-                        val navController =
-                            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        navController.navigate(R.id.navigation_home)
+                        navigateHome()
                     }
 
                     ProgressEvents["WatchInitializationCompleted"] -> {
-                        val navController =
-                            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        navController.navigate(R.id.navigation_home)
+                        navigateHome()
                     }
 
                     ProgressEvents["HomeTimeUpdated"] -> {
@@ -273,6 +267,14 @@ class MainActivity : AppCompatActivity() {
                 Timber.d("Got error on subscribe: $throwable")
                 throwable.printStackTrace()
             })
+    }
+
+    private fun navigateHome() {
+        if (findViewById<View>(R.id.nav_host_fragment_activity_gshock_screens) != null) {
+            val navController =
+                findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+            navController.navigate(R.id.navigation_home)
+        }
     }
 
     private suspend fun waitForConnectionCached() {
