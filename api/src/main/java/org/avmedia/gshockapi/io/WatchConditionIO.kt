@@ -49,7 +49,8 @@ object WatchConditionIO {
             val bytes = Utils.byteArrayOfIntArray(intArr.drop(1).toIntArray())
 
             if (bytes != null && bytes.size >= 2) {
-                val batteryLevel: Int = (bytes[0].toInt() * 5).coerceIn(0, 100)
+                // Battery level between 14 and 20. Scale accordingly to %
+                val batteryLevel: Int  = (bytes[0].toInt() - 14) * 100 / (20-14).coerceIn(0, 100)
                 val temperature: Int = bytes[1].toInt()
 
                 return WatchConditionValue(batteryLevel, temperature)
