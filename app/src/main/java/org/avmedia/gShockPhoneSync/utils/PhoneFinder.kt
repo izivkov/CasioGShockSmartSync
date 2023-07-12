@@ -17,7 +17,10 @@ import timber.log.Timber
 class PhoneFinder : BroadcastReceiver() {
     companion object {
         val CHANNEL_ID = "G_SHOCK_PHONE_FINDER_CHANNEL"
+        val NOTIFICATION_ID = 0
+
         var mp: MediaPlayer? = null
+        var resetVolume: () -> Unit? = {}
 
         fun ring(context: Context) {
             // get alarm uri
@@ -32,16 +35,19 @@ class PhoneFinder : BroadcastReceiver() {
 
             // set volume to maximum
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            while (
-                audioManager.getStreamVolume(AudioManager.STREAM_ALARM) <
-                audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            ) {
-                audioManager.adjustStreamVolume(
+            val previousVolume =audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+            resetVolume = {
+                audioManager.setStreamVolume(
                     AudioManager.STREAM_ALARM,
-                    AudioManager.ADJUST_RAISE,
-                    AudioManager.FLAG_PLAY_SOUND
+                    previousVolume,
+                    AudioManager.FLAG_SHOW_UI
                 )
             }
+            audioManager.setStreamVolume(
+                AudioManager.STREAM_ALARM,
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+                AudioManager.FLAG_SHOW_UI
+            )
 
             // init media player
             mp = MediaPlayer()
@@ -64,7 +70,7 @@ class PhoneFinder : BroadcastReceiver() {
                 )
             )
             notificationManager.notify(
-                0,
+                NOTIFICATION_ID,
                 NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ring)
                     .setContentTitle("Phone finder")
@@ -90,6 +96,7 @@ class PhoneFinder : BroadcastReceiver() {
             mp!!.release()
             mp = null
         }
+        resetVolume()
     }
 
 }
