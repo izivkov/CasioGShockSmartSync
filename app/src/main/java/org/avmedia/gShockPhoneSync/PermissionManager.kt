@@ -34,6 +34,9 @@ data class PermissionManager(val context: Context) {
             PERMISSIONS += Manifest.permission.BLUETOOTH_SCAN
             PERMISSIONS += Manifest.permission.BLUETOOTH_CONNECT
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            PERMISSIONS += Manifest.permission.POST_NOTIFICATIONS
+        }
     }
 
     private fun hasPermissions(context: Context, permissions: Array<String>): Boolean =
