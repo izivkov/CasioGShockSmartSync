@@ -359,6 +359,10 @@ object ActionsModel {
         }
     }
 
+    fun runActionFindPhone(context: Context) {
+        runFilteredActions(context, actions.filterIsInstance<FindPhoneAction>())
+    }
+
     private fun showTimeSyncNotification(context: Context) {
         val dateStr =
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
