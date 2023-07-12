@@ -87,6 +87,7 @@ class PhoneFinder : BroadcastReceiver() {
         // stop ringing
         if (mp != null) {
             mp!!.stop()
+            mp!!.release()
             mp = null
         }
     }
