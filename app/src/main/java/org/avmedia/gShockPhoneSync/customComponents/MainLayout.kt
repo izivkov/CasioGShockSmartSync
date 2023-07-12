@@ -38,7 +38,7 @@ class MainLayout @JvmOverloads constructor(
             {
                 when (it) {
                     ProgressEvents["WatchInitializationCompleted"] -> {
-                        if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
+                        if (!api().isActionButtonPressed() && !api().isAutoTimeStarted() && !api().isFindPhoneButtonPressed()) {
                             println("MainLayout: show")
                             show()
                         }

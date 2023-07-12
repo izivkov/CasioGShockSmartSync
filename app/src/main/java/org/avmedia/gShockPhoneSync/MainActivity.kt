@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     private val api = GShockAPI(this)
     private val testCrash = false
 
-    var requestBluetooth =
+    private var requestBluetooth =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 Utils.snackBar(this, "Bluetooth enabled.")
@@ -56,10 +56,6 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }
-
-    init {
-        instance = this
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -281,6 +277,10 @@ class MainActivity : AppCompatActivity() {
         api().waitForConnection(deviceAddress, deviceName)
     }
 
+    init {
+        instance = this
+    }
+
     companion object {
         private var instance: MainActivity? = null
 
@@ -290,7 +290,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun api(): GShockAPI {
-            return instance!!.api
+            return this.instance!!.api
         }
     }
 }

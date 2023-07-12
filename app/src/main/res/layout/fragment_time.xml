@@ -29,6 +29,8 @@
 
     <include layout="@layout/timer" />
 
+    <include layout="@layout/watch_name" />
+
     <include layout="@layout/watch_info" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
