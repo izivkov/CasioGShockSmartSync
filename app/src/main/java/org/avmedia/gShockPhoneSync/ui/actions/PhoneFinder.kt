@@ -131,7 +131,6 @@ class PhoneFinder : BroadcastReceiver() {
             }
 
             fun cancelAction() {
-                Timber.i("cancelling ring")
                 executor?.shutdownNow()
             }
         }
