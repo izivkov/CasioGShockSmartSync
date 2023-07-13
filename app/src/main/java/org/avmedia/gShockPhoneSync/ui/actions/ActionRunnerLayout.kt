@@ -38,7 +38,6 @@ class ActionRunnerLayout @JvmOverloads constructor(
             when (it) {
                 ProgressEvents["ButtonPressedInfoReceived"] -> {
                     ActionsModel.loadData(context)
-
                     if (api().isActionButtonPressed()) {
                         show()
                         ActionsModel.runActions(context)
