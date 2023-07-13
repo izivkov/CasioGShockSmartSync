@@ -4,12 +4,13 @@
  * Last modified 2022-05-13, 10:56 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.utils
+package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraManager.TorchCallback
 import androidx.core.content.getSystemService
+import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
 

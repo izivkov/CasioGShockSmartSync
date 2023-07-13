@@ -54,14 +54,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
     }
 
-    inner class ViewHolderActionFindPhone(itemView: View) :
-        RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById<TextView>(R.id.title)
-        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
-        val actionEnabled: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
-    }
-
     inner class ViewHolderActionPhoneCall(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById<TextView>(R.id.title)
         val actionEnabled: SwitchMaterial =
@@ -90,9 +82,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         }
         if (actions[position] is ActionsModel.ToggleFlashlightAction) {
             return ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal
-        }
-        if (actions[position] is ActionsModel.FindPhoneAction) {
-            return ACTION_TYPES.FIND_PHONE.ordinal
         }
         if (actions[position] is ActionsModel.Separator) {
             return ACTION_TYPES.SEPARATOR.ordinal
@@ -140,11 +129,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 val vFlashlight: View =
                     inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderActionToggleFlashlight(vFlashlight)
-            }
-            ACTION_TYPES.FIND_PHONE.ordinal -> {
-                val vFindPhone: View =
-                    inflater.inflate(R.layout.action_item, parent, false)
-                ViewHolderActionFindPhone(vFindPhone)
             }
             ACTION_TYPES.SEPARATOR.ordinal -> {
                 val vSeparator: View = inflater.inflate(R.layout.separator_item, parent, false)
@@ -194,10 +178,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal -> {
                 val vhFlashlight = viewHolder as ViewHolderActionToggleFlashlight
                 configureActionToggleFlashlight(vhFlashlight, position)
-            }
-            ACTION_TYPES.FIND_PHONE.ordinal -> {
-                val vhFindPhone = viewHolder as ViewHolderActionFindPhone
-                configureActionFindPhone(vhFindPhone, position)
             }
             ACTION_TYPES.SEPARATOR.ordinal -> {
                 val vhSeparator = viewHolder as ViewHolderActionSeparator
@@ -404,21 +384,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhFlashlight.icon.setImageResource(R.drawable.flashlight)
 
         vhFlashlight.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            action.enabled = isChecked
-        })
-    }
-
-    private fun configureActionFindPhone(
-        vhFindPhone: ViewHolderActionFindPhone,
-        position: Int
-    ) {
-        val action: ActionsModel.FindPhoneAction =
-            actions[position] as ActionsModel.FindPhoneAction
-        vhFindPhone.actionEnabled.isChecked = action.enabled
-        vhFindPhone.title.text = action.title
-        vhFindPhone.icon.setImageResource(R.drawable.ring)
-
-        vhFindPhone.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         })
     }

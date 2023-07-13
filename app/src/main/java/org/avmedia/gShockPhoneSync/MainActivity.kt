@@ -16,6 +16,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -56,6 +57,10 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }
+
+    init {
+        instance = this
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -236,24 +241,18 @@ class MainActivity : AppCompatActivity() {
                         Utils.snackBar(
                             this, "Actions not granted...Cannot access the Actions screen..."
                         )
-                        val navController =
-                            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        navController.navigate(R.id.navigation_home)
+                        navigateHome()
                     }
 
                     ProgressEvents["CalendarPermissionsNotGranted"] -> {
                         Utils.snackBar(
                             this, "Calendar not granted...Cannot access the Actions screen..."
                         )
-                        val navController =
-                            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        navController.navigate(R.id.navigation_home)
+                        navigateHome()
                     }
 
                     ProgressEvents["WatchInitializationCompleted"] -> {
-                        val navController =
-                            findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-                        navController.navigate(R.id.navigation_home)
+                        navigateHome()
                     }
 
                     ProgressEvents["HomeTimeUpdated"] -> {
@@ -271,14 +270,18 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
+    private fun navigateHome() {
+        if (findViewById<View>(R.id.nav_host_fragment_activity_gshock_screens) != null) {
+            val navController =
+                findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+            navController.navigate(R.id.navigation_home)
+        }
+    }
+
     private suspend fun waitForConnectionCached() {
         val deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
         val deviceName = LocalDataStorage.get("LastDeviceName", "", this)
         api().waitForConnection(deviceAddress, deviceName)
-    }
-
-    init {
-        instance = this
     }
 
     companion object {
@@ -290,7 +293,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun api(): GShockAPI {
-            return this.instance!!.api
+            return instance!!.api
         }
     }
 }

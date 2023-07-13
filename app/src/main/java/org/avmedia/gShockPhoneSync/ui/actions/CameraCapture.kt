@@ -4,7 +4,7 @@
  * Last modified 2022-05-13, 10:56 p.m.
  */
 
-package org.avmedia.gShockPhoneSync.utils
+package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -26,6 +26,7 @@ import androidx.core.content.getSystemService
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_16_9_VALUE
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_4_3_VALUE
+import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.Utils.contentView
 import timber.log.Timber
 import java.text.SimpleDateFormat
