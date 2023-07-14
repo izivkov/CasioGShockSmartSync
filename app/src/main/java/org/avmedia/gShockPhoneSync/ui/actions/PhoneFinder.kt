@@ -95,9 +95,9 @@ class PhoneFinder : BroadcastReceiver() {
                     val z = event.values[2]
 
                     if (abs(x) > 1 || abs(y) > 1 || abs(z) > 1) {
-                        stopRing()
                         sensorManager.unregisterListener(this)
                         RingCanceler.cancelAction()
+                        stopRing()
                     }
                 }
             }
