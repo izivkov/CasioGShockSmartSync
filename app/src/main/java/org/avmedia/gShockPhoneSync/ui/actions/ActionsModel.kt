@@ -79,7 +79,6 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            // sendMessage("{action: \"SET_REMINDERS\", value: ${EventsModel.getSelectedEvents()}}")
             api().setEvents(EventsModel.events)
             Utils.snackBar(context, "Events Sent to Watch")
         }
@@ -359,7 +358,7 @@ object ActionsModel {
     }
 
     fun runActionFindPhone(context: Context) {
-        runFilteredActions(context, actions.filterIsInstance<FindPhoneAction>())
+        runFilteredActions(context, listOf(FindPhoneAction("Find Phone", true)))
     }
 
     private fun showTimeSyncNotification(context: Context) {
