@@ -18,10 +18,8 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class PhoneFinder : BroadcastReceiver() {
+class PhoneFinder {
     companion object {
-        val CHANNEL_ID = "G_SHOCK_PHONE_FINDER_CHANNEL"
-        val NOTIFICATION_ID = 0
 
         var mp: MediaPlayer? = null
         var resetVolume: () -> Unit? = {}
@@ -109,7 +107,7 @@ class PhoneFinder : BroadcastReceiver() {
                 stopRing()
             }
 
-            // Stop ring after 30 seconds if not found
+            // Stop ring after 30 seconds if phone not found.
             RingCanceler.callFunctionAfterDelay(30000, ::cancelRing)
 
             sensorManager.registerListener(
@@ -134,9 +132,5 @@ class PhoneFinder : BroadcastReceiver() {
                 executor?.shutdownNow()
             }
         }
-    }
-
-    override fun onReceive(context: Context?, intent: Intent?) {
-        stopRing()
     }
 }
