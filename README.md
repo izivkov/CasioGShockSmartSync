@@ -1,9 +1,9 @@
 # Casio G-Shock Smart Sync
 
 ## Announcements
-- We implemented the `Find Phone` function, by long-pressing the LOWER-RIGHT watch button (FIND apperas on the watch's display). The phone will stop palying sound once it is picked up, or after 30 seconds.
+- We implemented the `Find Phone` function, by long-pressing the LOWER-RIGHT button (FIND should apper on the watch's display). The phone will stop playing sound once it is picked up, or after 30 seconds.
 
-- Fixed a wrong `battery level` display on the `Time Screen`. It works with my two watches, but we need more testing, so please post if it works for you here.
+- Fixed a wrong `battery level` display on the `Time Screen`. It works with my two watches, but we need more testing, so please post a message here works for you.
 
 - We now also show the temparure of the watch, bellow the battery indicator.
 
