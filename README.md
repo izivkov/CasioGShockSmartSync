@@ -1,11 +1,11 @@
 # Casio G-Shock Smart Sync
 
 ## Announcements
-- [We now support the B2100 series of G-Shock watches!](https://amzn.to/3MUDCGY)
+- We implemented the `Find Phone` function, by long-pressing the LOWER-RIGHT watch button (FIND apperas on the watch's display). The phone will stop palying sound once it is picked up, or after 30 seconds.
 
-- We just completed a new Python-based [GShockTimeServer](https://github.com/izivkov/GShockTimeServer) project.
-The server runs on any desktop, [Raspberry Pi](https://amzn.to/43vt0UM)-type device, or even on [Pi Zero](https://amzn.to/3J1Tgho). 
-It keeps your watches with correct time without any mobile app.
+- Fixed a wrong `battery level` display on the `Time Screen`. It works with my two watches, but we need more testing, so please post if it works for you here.
+
+- We now also show the temparure of the watch, bellow the battery indicator.
 
 ## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
