@@ -41,7 +41,6 @@ class SendTimeButton @JvmOverloads constructor(
                         api().setTime()
                         Utils.snackBar(context, "Time Set on Watch")
                         ProgressEvents.onNext("HomeTimeUpdated")
-                        Timber.i("<+++++++++++++++++++++++++ Posting HomeTimeUpdated message")
                     }
                 }
             }

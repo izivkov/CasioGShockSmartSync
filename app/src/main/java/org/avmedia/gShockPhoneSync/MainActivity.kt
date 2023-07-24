@@ -286,20 +286,6 @@ class MainActivity : AppCompatActivity() {
         api().waitForConnection(deviceAddress, deviceName)
     }
 
-
-    class TimezoneChangedReceiver : BroadcastReceiver() {
-
-        init {
-            val timezoneChangedReceiver = Intent(instance?.applicationContext, TimezoneChangedReceiver::class.java)
-            timezoneChangedReceiver.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        }
-
-        override fun onReceive(context: Context, intent: Intent) {
-            println ("Timezone changed...")
-            api().setTimezone(TimeZone.getDefault().id)
-        }
-    }
-
     companion object {
         private var instance: MainActivity? = null
 

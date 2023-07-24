@@ -56,17 +56,6 @@
         </activity>
         <activity android:name=".DeviceManager$OtherActivity"></activity>
 
-        <receiver
-            android:name=".MainActivity$TimezoneChangedReceiver"
-            android:enabled="true"
-            android:exported="true">
-
-            <intent-filter >
-                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
-            </intent-filter>
-
-        </receiver>
-
     </application>
 
 </manifest>
