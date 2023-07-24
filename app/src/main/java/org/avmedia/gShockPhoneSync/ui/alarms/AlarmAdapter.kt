@@ -14,6 +14,7 @@ import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.timepicker.TimeFormat
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.Alarm
 import timber.log.Timber
@@ -48,7 +49,11 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
         try {
             val sdf = SimpleDateFormat("H:mm")
             val dateObj: Date = sdf.parse(alarm.hour.toString() + ":" + alarm.minute.toString())
-            val time = SimpleDateFormat("K:mm aa").format(dateObj)
+
+            val timeFormat = if (java.text.SimpleDateFormat()
+                    .toPattern().split(" ")[1][0] == 'h') "K:mm aa" else "H:mm"
+
+            val time = SimpleDateFormat(timeFormat).format(dateObj)
             timeView.text = time
             alarmEnabled.isChecked = alarm.enabled
 

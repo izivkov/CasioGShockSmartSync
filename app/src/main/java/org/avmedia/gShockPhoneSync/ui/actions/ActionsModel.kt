@@ -123,7 +123,7 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             runBlocking {
-                api().setTime(TimeZone.getDefault().id)
+                api().setTime()
             }
         }
 

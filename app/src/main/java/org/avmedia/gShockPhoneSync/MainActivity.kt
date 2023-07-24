@@ -11,8 +11,10 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_RECEIVER_FOREGROUND
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -282,6 +284,20 @@ class MainActivity : AppCompatActivity() {
         val deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
         val deviceName = LocalDataStorage.get("LastDeviceName", "", this)
         api().waitForConnection(deviceAddress, deviceName)
+    }
+
+
+    class TimezoneChangedReceiver : BroadcastReceiver() {
+
+        init {
+            val timezoneChangedReceiver = Intent(instance?.applicationContext, TimezoneChangedReceiver::class.java)
+            timezoneChangedReceiver.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        }
+
+        override fun onReceive(context: Context, intent: Intent) {
+            println ("Timezone changed...")
+            api().setTimezone(TimeZone.getDefault().id)
+        }
     }
 
     companion object {

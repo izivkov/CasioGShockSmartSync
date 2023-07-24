@@ -15,7 +15,9 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 import org.avmedia.gshockapi.Alarm
+import java.text.SimpleDateFormat
 import kotlin.reflect.KFunction
 
 class AlarmItem @JvmOverloads constructor(
@@ -32,9 +34,10 @@ class AlarmItem @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    val timeFormat = if (SimpleDateFormat().toPattern().split(" ")[1][0] == 'h') TimeFormat.CLOCK_12H else TimeFormat.CLOCK_24H
                     val picker =
                         MaterialTimePicker.Builder()
-                            .setTimeFormat(TimeFormat.CLOCK_12H)
+                            .setTimeFormat(timeFormat)
                             .setHour(alarm.hour)
                             .setMinute(alarm.minute)
                             .build()

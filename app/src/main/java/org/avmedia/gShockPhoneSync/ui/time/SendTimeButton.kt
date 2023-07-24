@@ -38,7 +38,7 @@ class SendTimeButton @JvmOverloads constructor(
 
                     val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
                     scope.launch {
-                        api().setTime(TimeZone.getDefault().id)
+                        api().setTime()
                         Utils.snackBar(context, "Time Set on Watch")
                         ProgressEvents.onNext("HomeTimeUpdated")
                         Timber.i("<+++++++++++++++++++++++++ Posting HomeTimeUpdated message")
