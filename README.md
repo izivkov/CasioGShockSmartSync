@@ -1,11 +1,9 @@
 # Casio G-Shock Smart Sync
 
 ## Announcements
-- We implemented the `Find Phone` function, by long-pressing the LOWER-RIGHT button (FIND should appear on the watch's display). The phone will stop playing sound once it is picked up, or after 30 seconds.
+- Improved TimeZone handling when setting time.
 
-- Fixed a wrong `battery level` display on the `Time Screen`. It works with my two watches, but we need more testing, so please post a messages [here](https://github.com/izivkov/CasioGShockSmartSync/issues/43) if works or not for you.
-
-- We now also show the temperature of the watch, bellow the battery indicator.
+- Now the app respects 12/24 hours phone setting in the Alarms screen.
 
 ## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
