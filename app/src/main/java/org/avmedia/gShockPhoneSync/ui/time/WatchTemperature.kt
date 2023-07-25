@@ -35,10 +35,10 @@ class WatchTemperature @JvmOverloads constructor(
         if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
                 val temperature = api().getWatchTemperature()
-                val fmtFr = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
+                val fmt = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
                 val ms = LocaleData.getMeasurementSystem(ULocale.forLocale(Locale.getDefault()))
                 val measureF = if (ms == LocaleData.MeasurementSystem.US) Measure(((temperature * 9 / 5) + 32), MeasureUnit.FAHRENHEIT) else Measure(temperature, MeasureUnit.CELSIUS)
-                text = fmtFr.format(measureF)
+                text = fmt.format(measureF)
             }
         }
     }
