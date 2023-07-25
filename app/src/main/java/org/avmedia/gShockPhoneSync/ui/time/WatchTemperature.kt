@@ -8,7 +8,10 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.icu.text.MeasureFormat
 import android.icu.util.LocaleData
+import android.icu.util.Measure
+import android.icu.util.MeasureUnit
 import android.icu.util.ULocale
 import android.os.Build
 import android.util.AttributeSet
@@ -18,6 +21,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import java.text.DecimalFormat
 import java.util.*
+
 
 class WatchTemperature @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -31,9 +35,10 @@ class WatchTemperature @JvmOverloads constructor(
         if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
                 val temperature = api().getWatchTemperature()
-
+                val fmtFr = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
                 val ms = LocaleData.getMeasurementSystem(ULocale.forLocale(Locale.getDefault()))
-                text = if (ms == LocaleData.MeasurementSystem.US) "${DecimalFormat("###").format((temperature * 9 / 5) + 32)}ºF" else "${temperature}ºC"
+                val measureF = if (ms == LocaleData.MeasurementSystem.US) Measure(((temperature * 9 / 5) + 32), MeasureUnit.FAHRENHEIT) else Measure(temperature, MeasureUnit.CELSIUS)
+                text = fmtFr.format(measureF)
             }
         }
     }
