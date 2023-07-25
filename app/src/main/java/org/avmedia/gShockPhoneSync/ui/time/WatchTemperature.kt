@@ -37,8 +37,8 @@ class WatchTemperature @JvmOverloads constructor(
                 val temperature = api().getWatchTemperature()
                 val fmt = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
                 val ms = LocaleData.getMeasurementSystem(ULocale.forLocale(Locale.getDefault()))
-                val measureF = if (ms == LocaleData.MeasurementSystem.US) Measure(((temperature * 9 / 5) + 32), MeasureUnit.FAHRENHEIT) else Measure(temperature, MeasureUnit.CELSIUS)
-                text = fmt.format(measureF)
+                val measure = if (ms == LocaleData.MeasurementSystem.US) Measure(((temperature * 9 / 5) + 32), MeasureUnit.FAHRENHEIT) else Measure(temperature, MeasureUnit.CELSIUS)
+                text = fmt.format(measure)
             }
         }
     }
