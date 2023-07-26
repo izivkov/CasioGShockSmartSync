@@ -1,0 +1,1 @@
+Fixes to Timezone, temperature display.
