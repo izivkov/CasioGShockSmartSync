@@ -9,17 +9,15 @@ package org.avmedia.gShockPhoneSync.ui.time
 import android.annotation.SuppressLint
 import android.content.Context
 import android.icu.text.MeasureFormat
-import android.icu.util.LocaleData
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
-import android.icu.util.ULocale
 import android.os.Build
+import android.telephony.TelephonyManager
 import android.util.AttributeSet
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import java.text.DecimalFormat
 import java.util.*
 
 
@@ -35,11 +33,16 @@ class WatchTemperature @JvmOverloads constructor(
         if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
                 val temperature = api().getWatchTemperature()
+
+                val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                val countryCodeValue = tm.networkCountryIso
+                val isUS = (countryCodeValue.isNotEmpty() && countryCodeValue.uppercase() == "US")
                 val fmt = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
-                val ms = LocaleData.getMeasurementSystem(ULocale.forLocale(Locale.getDefault()))
-                val measure = if (ms == LocaleData.MeasurementSystem.US) Measure(((temperature * 9 / 5) + 32), MeasureUnit.FAHRENHEIT) else Measure(temperature, MeasureUnit.CELSIUS)
+                val measure = if (isUS) Measure(((temperature * 9 / 5) + 32), MeasureUnit.FAHRENHEIT) else Measure(temperature, MeasureUnit.CELSIUS)
+
                 text = fmt.format(measure)
             }
         }
     }
 }
+
