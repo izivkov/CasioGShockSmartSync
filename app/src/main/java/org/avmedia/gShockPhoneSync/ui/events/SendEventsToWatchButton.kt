@@ -29,7 +29,6 @@ class SendEventsToWatchButton @JvmOverloads constructor(
                 MotionEvent.ACTION_UP -> {
                     api().setEvents(EventsModel.events)
                     Utils.snackBar(context, "Events Sent to Watch")
-
                 }
             }
             v?.performClick()
