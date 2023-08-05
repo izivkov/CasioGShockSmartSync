@@ -129,7 +129,6 @@ object CalendarEvents {
         private var registered = false
 
         init {
-            // Looper.prepare()
         }
 
         private val calendarObserver = object : ContentObserver(Handler()) {
