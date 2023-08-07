@@ -1,0 +1,2 @@
+- Sort Calendar Event by starting time.
+- Updated info messages.

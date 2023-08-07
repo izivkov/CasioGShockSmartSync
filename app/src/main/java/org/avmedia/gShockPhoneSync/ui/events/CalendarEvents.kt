@@ -67,7 +67,7 @@ object CalendarEvents {
             mProjection,
             selection,
             selectionArgs,
-            CalendarContract.Events.DTSTART + " ASC" //  null
+            CalendarContract.Events.DTSTART + " ASC" // could be null
         )
 
         CalendarObserver.register(cr, uri)
