@@ -5,7 +5,6 @@
   ~ Copyright (c) 2022 . All rights reserved.
   ~ Last modified 2022-03-28, 3:16 p.m.
   -->
-
 <org.avmedia.gShockPhoneSync.ui.actions.ActionItem xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
