@@ -4,7 +4,7 @@
 
 We like to add support for more G-Shock models. Please help us raise money to allows us to get access to more watches for development:
 
-https://ko-fi.com/ivozivkov
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H2OMYG2)
 
 ## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
