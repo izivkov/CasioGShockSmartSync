@@ -2,7 +2,7 @@
 
 ## Announcements
 
-We like to add support for the GB-5600(A|B) watches. Please help us raise money to purchase this and other watches so we can add support in the app:
+We like to add support for G-Shock watches. Please help us raise money to allows us to get access to more watches for development:
 
 https://ko-fi.com/ivozivkov
 
