@@ -1,9 +1,10 @@
 # Casio G-Shock Smart Sync
 
 ## Announcements
-- Improved TimeZone handling when setting time.
 
-- Now the app respects 12/24 hours phone setting in the Alarms screen.
+We like to add support for the GB-5600 watches. Please help us raise money to purchase this and other watches so we can add support in the app:
+
+https://ko-fi.com/ivozivkov
 
 ## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
