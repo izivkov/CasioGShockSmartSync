@@ -2,7 +2,7 @@
 
 ## Announcements
 
-We like to add support for G-Shock watches. Please help us raise money to allows us to get access to more watches for development:
+We like to add support for more G-Shock models. Please help us raise money to allows us to get access to more watches for development:
 
 https://ko-fi.com/ivozivkov
 
