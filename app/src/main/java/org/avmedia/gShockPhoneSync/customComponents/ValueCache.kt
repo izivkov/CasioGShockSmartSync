@@ -19,16 +19,4 @@ object ValueCache {
         return valueMap[name]?.value
     }
 
-    fun remove(name: String) {
-        valueMap.remove(name)
-    }
-
-    fun isSet(name: String): Boolean {
-        val value = valueMap[name] ?: return false
-        return value.isSet
-    }
-
-    fun clear() {
-        valueMap.clear()
-    }
 }

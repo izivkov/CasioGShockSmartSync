@@ -8,11 +8,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    //noinspection GrDeprecatedAPIUsage
+    compileSdkVersion 34
     defaultConfig {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdkVersion 26
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 101
         versionName "10.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -95,7 +96,7 @@ dependencies {
     implementation 'com.github.PhilJay:RRule:1.0.3'
 }
 
-task ktlint(type: JavaExec, group: "verification") {
+tasks.register('ktlint', JavaExec) {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     // main = "com.pinterest.ktlint.Main"
@@ -103,7 +104,7 @@ task ktlint(type: JavaExec, group: "verification") {
 }
 check.dependsOn ktlint
 
-task ktlintFormat(type: JavaExec, group: "formatting") {
+tasks.register('ktlintFormat', JavaExec) {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktlint
     // main = "com.pinterest.ktlint.Main"

@@ -8,18 +8,10 @@ package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.content.Context
 import android.util.AttributeSet
-import kotlin.reflect.KFunction
 
 class ActionItem @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
-    private lateinit var onDataChanged: KFunction<Unit>
     private lateinit var action: ActionsModel.Action
-
-    init {}
-
-    fun setActionData(action: ActionsModel.Action) {
-        this.action = action
-    }
 }

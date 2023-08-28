@@ -6,9 +6,9 @@
 
 package org.avmedia.gShockPhoneSync.ui.main
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
@@ -19,7 +19,7 @@ class WatchName @JvmOverloads constructor(
 
     init {
         var name = WatchInfo.getName()
-        if (name.isNullOrBlank()) {
+        if (name.isBlank()) {
             name = "No Watch"
         }
         text = name.removePrefix("CASIO").trim()
@@ -27,13 +27,14 @@ class WatchName @JvmOverloads constructor(
         createSubscription()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun createSubscription() {
         ProgressEvents.subscriber.start(this.javaClass.canonicalName,
             {
                 when (it) {
                     ProgressEvents["DeviceName"] -> {
                         val deviceName = ProgressEvents.getPayload("DeviceName")
-                        if ((deviceName as String).isNullOrBlank()) {
+                        if ((deviceName as String).isBlank()) {
                             text = "No Watch"
                         }
                         if (deviceName.contains("CASIO")) {

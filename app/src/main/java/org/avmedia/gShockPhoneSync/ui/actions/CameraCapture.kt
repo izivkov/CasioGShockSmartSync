@@ -10,19 +10,19 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
-import android.hardware.camera2.CameraManager
-import android.hardware.display.DisplayManager
 import android.media.MediaActionSound
 import android.os.Build
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.view.WindowMetrics
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.camera.core.AspectRatio
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.FLASH_MODE_AUTO
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_16_9_VALUE
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel.FileSpecs.RATIO_4_3_VALUE
@@ -30,27 +30,20 @@ import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gShockPhoneSync.utils.Utils.contentView
 import timber.log.Timber
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-typealias LumaListener = (luma: Double) -> Unit
-
 class CameraCapture(val context: Context, private val cameraSelector: CameraSelector) {
-    private var cameraManager: CameraManager? = context.getSystemService() as CameraManager?
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
     private lateinit var viewBinding: FragmentActionsBinding
     private var currentContextView = (context as Activity).contentView
 
     data class ScreenSize(val width: Int, val height: Int)
-
-    private val displayManager by lazy {
-        context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
-    }
 
     fun start() {
         currentContextView = (context as Activity).contentView
@@ -61,7 +54,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
 
     @SuppressLint("WrongConstant")
     private fun startCamera() {
-        viewBinding.viewFinder.alpha = 1F
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
@@ -102,7 +94,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
 
         // restore the context, so se can continue running normal
         (context as Activity).setContentView(currentContextView)
-        viewBinding.viewFinder.alpha = 0f
     }
 
     private fun aspectRatio(width: Int, height: Int): Int {
@@ -120,7 +111,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             val h = windowMetrics.bounds.height()
             ScreenSize(w, h)
         } else {
-            val displayMetrics: DisplayMetrics = DisplayMetrics()
+            val displayMetrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
             ScreenSize(displayMetrics.widthPixels, displayMetrics.heightPixels)
         }
@@ -175,7 +166,6 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
     }
 
     companion object {
-        private const val TAG = "CameraCapture3"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
     }
 }

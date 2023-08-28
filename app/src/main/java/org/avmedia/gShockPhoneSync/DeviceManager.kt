@@ -52,7 +52,4 @@ object DeviceManager {
         })
     }
 
-    fun deviceSelected(): Boolean {
-        return false
-    }
 }

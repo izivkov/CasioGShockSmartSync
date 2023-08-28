@@ -38,7 +38,7 @@ class SendSettingsButton @JvmOverloads constructor(
     }
 
     private fun updateSettings() {
-        var settings = Settings()
+        val settings = Settings()
 
         val localeSetting = SettingsModel.locale as SettingsModel.Locale
         settings.language = localeSetting.dayOfWeekLanguage.value

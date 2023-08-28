@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="IconXmlAndPng">
+        <ignore path="/home/ivo/projects/CasioGShockSmartSync/app/src/main/res/mipmap-hdpi/ic_launcher.png" />
+        <ignore path="/home/ivo/projects/CasioGShockSmartSync/app/src/main/res/mipmap-mdpi/ic_launcher.png" />
+        <ignore path="/home/ivo/projects/CasioGShockSmartSync/app/src/main/res/mipmap-xhdpi/ic_launcher.png" />
+        <ignore path="/home/ivo/projects/CasioGShockSmartSync/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" />
+    </issue>
+</lint>

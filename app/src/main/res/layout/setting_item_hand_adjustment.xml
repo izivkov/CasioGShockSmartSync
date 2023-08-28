@@ -32,20 +32,20 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                tools:ignore="UselessParent">
 
                 <TextView
-                    android:id="@+id/hand_adjustment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="6dp"
-                    android:text="Hand Adjustment"
+                    android:text="@string/hand_adjustment"
                     android:textSize="20dp"
                     tools:ignore="SpUsage" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
                     android:layout_gravity="center_vertical"
@@ -53,13 +53,12 @@
                     >
 
                     <org.avmedia.gShockPhoneSync.ui.settings.HandCounterClockwise
-                        android:id="@+id/handCounterClockwise"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginEnd="16dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Move hand to the Left"
+                        android:contentDescription="@string/move_hand_to_the_left"
                         app:layout_constraintEnd_toStartOf="@+id/handReset"
                         app:layout_constraintTop_toTopOf="parent"
                         android:src="@drawable/hand_counter_clockwise" />
@@ -71,7 +70,7 @@
                         android:layout_gravity="center"
                         android:layout_marginEnd="16dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Reset hand at 12 position"
+                        android:contentDescription="@string/reset_hand_at_12_position"
                         app:layout_constraintEnd_toStartOf="@+id/handClockwise"
                         app:layout_constraintTop_toTopOf="parent"
                         android:src="@drawable/hand_reset" />
@@ -83,7 +82,7 @@
                         android:layout_gravity="center"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_marginEnd="4dp"
-                        android:contentDescription="Move hand to the Right"
+                        android:contentDescription="@string/move_hand_to_the_right"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         android:src="@drawable/hand_clockwise" />

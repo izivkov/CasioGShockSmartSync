@@ -6,20 +6,19 @@
 
 package org.avmedia.gShockPhoneSync.ui.alarms
 
+import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.google.android.material.timepicker.TimeFormat
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.Alarm
 import timber.log.Timber
 import java.text.ParseException
-import java.util.*
+import java.util.Date
 
 class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
     RecyclerView.Adapter<AlarmAdapter.ViewHolder>() {
@@ -29,8 +28,8 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Your holder should contain and initialize a member variable
         // for any view that will be set as you render a row
-        val timeView: TextView = itemView.findViewById<TextView>(R.id.time)
-        val alarmEnabled: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.alarmEnabled)
+        val timeView: TextView = itemView.findViewById(R.id.time)
+        val alarmEnabled: SwitchMaterial = itemView.findViewById(R.id.alarmEnabled)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -41,6 +40,7 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
         return ViewHolder(alarmView)
     }
 
+    @SuppressLint("SimpleDateFormat")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         Timber.i("onBindViewHolder called...alarms.size: ${alarms.size}")
         val alarm: Alarm = alarms[position]
@@ -57,9 +57,9 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
             timeView.text = time
             alarmEnabled.isChecked = alarm.enabled
 
-            alarmEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            alarmEnabled.setOnCheckedChangeListener { buttonView, isChecked ->
                 alarm.enabled = isChecked
-            })
+            }
 
             (viewHolder.itemView as AlarmItem).setAlarmData(alarm)
             (viewHolder.itemView as AlarmItem).setOnDataChange(::notifyDataSetChanged)

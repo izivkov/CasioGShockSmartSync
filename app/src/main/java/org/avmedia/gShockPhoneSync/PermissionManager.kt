@@ -7,19 +7,12 @@
 package org.avmedia.gShockPhoneSync
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
-import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
-import java.util.*
 
 data class PermissionManager(val context: Context) {
 
@@ -51,23 +44,6 @@ data class PermissionManager(val context: Context) {
 
     fun hasAllPermissions(): Boolean {
         return hasPermissions(context, PERMISSIONS)
-    }
-
-    @SuppressLint("MissingPermission")
-    fun promptEnableBluetooth() {
-        if (!(context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter.isEnabled) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            try {
-                (context as Activity).startActivityForResult(
-                    enableBtIntent,
-                    ENABLE_BLUETOOTH_REQUEST_CODE
-                )
-                Timber.i("Return from startActivityForResult")
-            } catch (e: SecurityException) {
-                Utils.snackBar(context, "Please turn on BlueTooth and restart the app...")
-                (context as Activity).finish()
-            }
-        }
     }
 
     fun onRequestPermissionsResult(

@@ -6,17 +6,20 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.NotificationManager.INTERRUPTION_FILTER_ALL
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.Settings
+import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 object AutoConfigurator {
 
+    @SuppressLint("SimpleDateFormat")
     suspend fun configure(context: Context): Settings {
         val settings = Settings()
         val currentLocale: Locale = Locale.getDefault()
@@ -30,8 +33,8 @@ object AutoConfigurator {
             "ru" -> settings.language = "Russian"
             else -> settings.language = "English"
         }
-
-        var dateTimePettern = SimpleDateFormat().toPattern()
+        
+        val dateTimePattern = SimpleDateFormat().toPattern()
 
         // fr: dd/MM/y HH:mm
         // es: d/M/yy H:mm
@@ -43,8 +46,8 @@ object AutoConfigurator {
         //
         // https://help.gooddata.com/cloudconnect/manual/date-and-time-format.html
 
-        val datePattern = dateTimePettern.split(" ")[0]
-        val timePattern = dateTimePettern.split(" ")[1]
+        val datePattern = dateTimePattern.split(" ")[0]
+        val timePattern = dateTimePattern.split(" ")[1]
 
         if (datePattern.lowercase().startsWith("d")) {
             settings.dateFormat = "DD:MM"
@@ -70,7 +73,7 @@ object AutoConfigurator {
         // for auto-light, we may want to use day/time to set off/on
 
         // Power Save mode
-        val batteryLevel: Int = api().getBatteryLevel().toInt()
+        val batteryLevel: Int = api().getBatteryLevel()
         settings.powerSavingMode = batteryLevel <= 15
 
         return settings

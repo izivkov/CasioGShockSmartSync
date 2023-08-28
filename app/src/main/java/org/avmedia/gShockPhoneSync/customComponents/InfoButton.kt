@@ -6,9 +6,9 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.text.Html
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -39,6 +39,7 @@ class InfoButton @JvmOverloads constructor(
     }
 
     inner class OnTouchListener : View.OnTouchListener {
+        @SuppressLint("ClickableViewAccessibility")
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -46,9 +47,9 @@ class InfoButton @JvmOverloads constructor(
 
                     dialogBuilder.setMessage(Html.fromHtml(infoText, FROM_HTML_MODE_LEGACY))
                         .setCancelable(false)
-                        .setPositiveButton("OK", DialogInterface.OnClickListener { dialog, _ ->
+                        .setPositiveButton("OK") { dialog, _ ->
                             dialog.cancel()
-                        })
+                        }
 
                     val alert = dialogBuilder.create()
                     alert.setTitle("Info:")

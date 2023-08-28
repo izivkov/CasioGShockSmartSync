@@ -12,12 +12,10 @@
     tools:context=".MainActivity">
 
     <org.avmedia.gShockPhoneSync.ui.main.ConnectionLayout
-        android:id="@+id/connection_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/phone_image_card_view"
             style="@style/CardViewStyleBlack"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -28,12 +26,10 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/phone_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <org.avmedia.gShockPhoneSync.customComponents.WatchImageView
-                    android:id="@+id/imageViewCasioWatch"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/image_of_casio_watch"
@@ -42,7 +38,6 @@
                     tools:layout_editor_absoluteY="242dp" />
 
                 <org.avmedia.gShockPhoneSync.ui.main.ConnectionSpinner
-                    android:id="@+id/connection_spinner"
                     style="?android:attr/progressBarStyleLarge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -78,7 +73,6 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <LinearLayout
-                android:id="@+id/devices"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -92,7 +86,6 @@
                     android:layout_gravity="center_vertical">
 
                     <org.avmedia.gShockPhoneSync.ui.main.WatchName
-                        android:id="@+id/last_connected_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
@@ -104,14 +97,13 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <org.avmedia.gShockPhoneSync.ui.main.ForgetButton
-                        android:id="@+id/Forget"
                         style="@style/buttonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_margin="5dp"
                         android:background="@drawable/button"
-                        android:text="Forget"
+                        android:text="@string/forget"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/info_device"
@@ -121,8 +113,8 @@
                         android:id="@+id/info_device"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginLeft="40dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginStart="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/info"
                         android:src="@drawable/info_48px"
@@ -139,7 +131,6 @@
     </org.avmedia.gShockPhoneSync.ui.main.ConnectionLayout>
 
     <org.avmedia.gShockPhoneSync.customComponents.MainLayout
-        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -176,17 +167,15 @@
     </org.avmedia.gShockPhoneSync.customComponents.MainLayout>
 
     <org.avmedia.gShockPhoneSync.ui.actions.ActionRunnerLayout
-        android:id="@+id/action_runner_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/action_runner_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/running_actions"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="32dp"
+            android:textSize="32sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

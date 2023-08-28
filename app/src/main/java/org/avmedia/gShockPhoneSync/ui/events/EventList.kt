@@ -5,6 +5,7 @@
  */
 package org.avmedia.gShockPhoneSync.ui.events
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
@@ -29,6 +30,7 @@ class EventList @JvmOverloads constructor(
         waitForPermissions()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun waitForPermissions() {
         ProgressEvents.subscriber.start(this.javaClass.canonicalName + "waitForPermissions",
 
@@ -47,6 +49,7 @@ class EventList @JvmOverloads constructor(
             })
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun listenForUpdateRequest() {
         ProgressEvents.subscriber.start(this.javaClass.canonicalName + "listenForUpdateRequest", {
             when (it) {

@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.ui.alarms
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -15,7 +16,6 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsModel
 import org.avmedia.gshockapi.Alarm
 import java.text.SimpleDateFormat
 import kotlin.reflect.KFunction
@@ -28,9 +28,8 @@ class AlarmItem @JvmOverloads constructor(
     private lateinit var alarm: Alarm
     private lateinit var alarmTime: TextView
 
-    init {}
-
     inner class OnTouchListener : View.OnTouchListener {
+        @SuppressLint("SimpleDateFormat")
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -61,10 +60,11 @@ class AlarmItem @JvmOverloads constructor(
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     fun setAlarmData(alarm: Alarm) {
         this.alarm = alarm
 
-        alarmTime = findViewById<TextView>(R.id.time)
+        alarmTime = findViewById(R.id.time)
         alarmTime.setOnTouchListener(OnTouchListener())
 
         alarmTime.performClick()

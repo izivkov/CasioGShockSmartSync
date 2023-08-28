@@ -1,14 +1,19 @@
 package org.avmedia.gShockPhoneSync.utils
 
+//noinspection SuspiciousImport
 import android.R
-import android.app.*
+import android.app.Notification
 import android.app.Notification.Builder
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import org.avmedia.gShockPhoneSync.MainActivity
 
 class ForegroundService : Service() {
-    val CHANNEL_ID: String = "CHANNEL_ONE"
+    private val CHANNEL_ID: String = "CHANNEL_ONE"
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val input = intent.getStringExtra("inputExtra")
         createNotificationChannel()
@@ -16,7 +21,7 @@ class ForegroundService : Service() {
             this, 0, Intent(
                 this,
                 MainActivity::class.java
-            ), 0
+            ), PendingIntent.FLAG_IMMUTABLE
         )
         val notification: Notification = Builder(applicationContext, CHANNEL_ID)
             .setContentTitle("Waiting for Connections")

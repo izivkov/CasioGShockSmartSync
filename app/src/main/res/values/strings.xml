@@ -6,7 +6,6 @@
 
 <resources>
     <string name="app_name">Casio G-Shock Smart Sync</string>
-    <string name="title_activity_gshock_screens">GshockScreens</string>
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
     <string name="title_events">Events</string>
@@ -36,13 +35,11 @@
     <string name="actions_screen_info"><![CDATA[The selected actions are run when the user <b>short-presses</b> the <b>LOWER-RIGHT</b> watch button from the initial screen. With these actions, the watch acts as a remote control for your phone.]]></string>
     <string name="feb_22_mar_24">Feb-22 - Mar-24</string>
     <string name="weekly">WEEKLY</string>
-    <string name="title_goes_here">Title goes here</string>
     <string name="action_item">Action Item</string>
     <string name="voice_assistant">Voice Assistant</string>
     <string name="front_cam">Front Cam</string>
     <string name="back_cam">Back Cam</string>
     <string name="take_a_photo">Take a photo</string>
-    <string name="image_of_casio_5600_watch">Image of Casio 5600 watch</string>
     <string name="info">Info</string>
     <string name="daily">Daily</string>
     <string name="_12_00">12:00</string>
@@ -79,7 +76,6 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="timerDialogTitle">Timer</string>
-    <string name="initial_timer_value">00:00:00</string>
     <string name="info_home_time">
         <![CDATA[<b>Home Time</b> shows the watch\'s time zone.
         When the app sets the watch\'s time (either manually or automatically), it will also set the <b>Home Time,
@@ -98,4 +94,23 @@
 
         <li>The app will auto-detect the model of the watch.</li>
         ]]></string>
+    <string name="forget">Forget</string>
+    <string name="hand_adjustment">Hand Adjustment</string>
+    <string name="move_hand_to_the_left">Move hand to the Left</string>
+    <string name="reset_hand_at_12_position">Reset hand at 12 position</string>
+    <string name="move_hand_to_the_right">Move hand to the Right</string>
+    <string name="auto_light">Auto Light</string>
+    <string name="off">Off</string>
+    <string name="on">On</string>
+    <string name="illumination_period">Illumination Period</string>
+    <string name="_2s">2s</string>
+    <string name="_4s">4s</string>
+    <string name="mm_dd">MM:DD</string>
+    <string name="dd_mm">DD:MM</string>
+    <string name="time_adjustment">Time Adjustment</string>
+    <string name="notify_me">Notify me</string>
+    <string name="timer">Timer</string>
+    <string name="_00_00_00">00:00:00</string>
+    <string name="_00">00</string>
+    <string name="semi_column">:</string>
 </resources>

@@ -28,7 +28,6 @@
     <!-- Recycling view -->
 
     <org.avmedia.gShockPhoneSync.ui.alarms.AlarmList
-        android:id="@+id/alarmList"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -60,7 +59,6 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <org.avmedia.gShockPhoneSync.ui.alarms.SendAlarmsToWatchButton
-            android:id="@+id/SendAlarmsButton"
             style="@style/buttonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -70,7 +68,6 @@
             tools:ignore="MissingConstraints" />
 
         <org.avmedia.gShockPhoneSync.ui.alarms.SendAlarmsToPhoneButton
-            android:id="@+id/SendAlarmsToPhoneButton"
             style="@style/buttonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -80,7 +77,6 @@
             tools:ignore="MissingConstraints" />
 
         <org.avmedia.gShockPhoneSync.customComponents.InfoButton
-            android:id="@+id/info_alarms"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/info"

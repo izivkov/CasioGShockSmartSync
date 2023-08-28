@@ -193,7 +193,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             }
             ACTION_TYPES.MAP.ordinal -> {
                 val vhMap = viewHolder as ViewHolderMap
-                configureMap(vhMap, position)
+                configureMap(position)
             }
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vhTime = viewHolder as ViewHolderSetTime
@@ -326,7 +326,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureMap(
-        vhBaseAction: ViewHolderMap,
         position: Int
     ) {
         val action: ActionsModel.Action = actions[position]

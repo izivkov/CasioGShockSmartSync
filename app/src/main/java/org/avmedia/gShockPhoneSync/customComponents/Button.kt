@@ -22,23 +22,12 @@ open class Button @JvmOverloads constructor(
         visibility = VISIBLE
     }
 
-    fun hide() {
-        visibility = INVISIBLE
-    }
-
     @SuppressLint("CheckResult")
-    protected fun subscribe(subject: String, onDataReceived: (String) -> Unit) {
+    protected fun subscribe(subject: String, ignoredOnDataReceived: (String) -> Unit) {
         WatchDataEvents.addSubject(subject)
         WatchDataEvents.subscribe(this.javaClass.canonicalName, subject, onNext = {
-            onDataReceived(it as String)
+            ignoredOnDataReceived(it as String)
         })
-    }
-
-    protected open fun setOnOffStateConditions(value: String) {
-        if (value == "true") onState() else offState()
-    }
-
-    protected open fun offState() {
     }
 
     protected open fun onState() {

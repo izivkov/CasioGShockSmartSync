@@ -10,7 +10,6 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
@@ -27,10 +26,10 @@ class EventAdapter(private val events: ArrayList<Event>) :
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Your holder should contain and initialize a member variable
         // for any view that will be set as you render a row
-        val titleView: TextView = itemView.findViewById<TextView>(R.id.title)
-        val frequencyView: TextView = itemView.findViewById<TextView>(R.id.frequency)
-        val periodView: TextView = itemView.findViewById<TextView>(R.id.period)
-        val selectedView: MaterialCheckBox = itemView.findViewById<MaterialCheckBox>(R.id.selected)
+        val titleView: TextView = itemView.findViewById(R.id.title)
+        val frequencyView: TextView = itemView.findViewById(R.id.frequency)
+        val periodView: TextView = itemView.findViewById(R.id.period)
+        val selectedView: MaterialCheckBox = itemView.findViewById(R.id.selected)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -57,7 +56,7 @@ class EventAdapter(private val events: ArrayList<Event>) :
                 viewHolder.selectedView.isEnabled = true
             }
 
-            viewHolder.selectedView.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            viewHolder.selectedView.setOnCheckedChangeListener { buttonView, isChecked ->
                 if (isChecked && EventsModel.getSelectedCount() == EventsModel.MAX_REMINDERS) {
                     Utils.snackBar(
                         buttonView.context,
@@ -68,7 +67,7 @@ class EventAdapter(private val events: ArrayList<Event>) :
                 } else {
                     event.selected = isChecked
                 }
-            })
+            }
 
             (viewHolder.itemView as EventItem).setEventData(event)
             (viewHolder.itemView as EventItem).setOnDataChange(::notifyDataSetChanged)

@@ -13,19 +13,17 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
-import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
-import org.avmedia.gShockPhoneSync.utils.*
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gShockPhoneSync.utils.NotificationProvider
+import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
-import java.io.File
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.time.Clock
-import java.util.*
+import java.util.Date
 
 object ActionsModel {
 
@@ -53,7 +51,6 @@ object ActionsModel {
     abstract class Action(
         open var title: String,
         open var enabled: Boolean,
-        var isEmergency: Boolean = false,
         var runMode: RUN_MODE = RUN_MODE.SYNC
     ) {
         abstract fun run(context: Context)
@@ -141,7 +138,7 @@ object ActionsModel {
     }
 
     class StartVoiceAssistAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled, false, RUN_MODE.ASYNC) {
+        Action(title, enabled, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             try {
@@ -172,7 +169,7 @@ object ActionsModel {
 
     class PhoneDialAction(
         override var title: String, override var enabled: Boolean, var phoneNumber: String
-    ) : Action(title, enabled, true) {
+    ) : Action(title, enabled) {
         init {
             Timber.d("PhoneDialAction")
         }
@@ -189,7 +186,7 @@ object ActionsModel {
         override fun save(context: Context) {
             super.save(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
-            LocalDataStorage.put(key, phoneNumber.toString(), context)
+            LocalDataStorage.put(key, phoneNumber, context)
         }
 
         override fun load(context: Context) {
@@ -216,7 +213,7 @@ object ActionsModel {
         override var title: String,
         override var enabled: Boolean,
         var cameraOrientation: CAMERA_ORIENTATION
-    ) : Action(title, enabled, false, RUN_MODE.ASYNC) {
+    ) : Action(title, enabled, RUN_MODE.ASYNC) {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
         }
@@ -251,8 +248,8 @@ object ActionsModel {
         override var title: String,
         override var enabled: Boolean,
         var emailAddress: String,
-        var extraText: String
-    ) : Action(title, enabled, true) {
+        private var extraText: String
+    ) : Action(title, enabled) {
         init {
             Timber.d("EmailLocationAction: emailAddress: $emailAddress")
             Timber.d("EmailLocationAction: extraText: $extraText")
@@ -264,7 +261,7 @@ object ActionsModel {
 
         override fun save(context: Context) {
             val key = this.javaClass.simpleName + ".emailAddress"
-            LocalDataStorage.put(key, emailAddress.toString(), context)
+            LocalDataStorage.put(key, emailAddress, context)
             super.save(context)
         }
 
@@ -278,50 +275,11 @@ object ActionsModel {
         }
     }
 
-    fun clear() {
-        actions.clear()
-    }
-
-    fun isEmpty(): Boolean {
-        return actions.size == 0
-    }
-
-    @Synchronized
-    fun fromJson(jsonStr: String) {
-        val gson = Gson()
-        val actionStr = gson.fromJson(jsonStr, Array<Action>::class.java)
-        actions.addAll(actionStr)
-    }
-
-    @Synchronized
-    fun toJson(): String {
-        val gson = Gson()
-        return gson.toJson(actions)
-    }
-
     object FileSpecs {
 
-        const val TAG = "CasioGShockSync"
-        const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
-        const val PHOTO_EXTENSION = ".jpg"
         const val RATIO_4_3_VALUE = 4.0 / 3.0
         const val RATIO_16_9_VALUE = 16.0 / 9.0
 
-        /** Helper function used to create a timestamped file */
-        fun createFile(baseFolder: File, format: String, extension: String) = File(
-            baseFolder,
-            SimpleDateFormat(format, Locale.US).format(System.currentTimeMillis()) + extension
-        )
-
-        fun getOutputDirectory(context: Context): File {
-            val appContext = context.applicationContext
-
-            val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-                File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() }
-            }
-
-            return if (mediaDir != null && mediaDir.exists()) mediaDir else appContext.filesDir
-        }
     }
 
     /*
@@ -405,16 +363,4 @@ object ActionsModel {
         }
     }
 
-    fun hasTimeSet(): Boolean {
-        if (api().isAutoTimeStarted()) {
-            return true
-        }
-
-        actions.forEach {
-            if (it.enabled && it is SetTimeAction) {
-                return true
-            }
-        }
-        return false
-    }
 }

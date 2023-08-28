@@ -8,18 +8,11 @@ package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import kotlin.reflect.KFunction
 
 class SettingsItem @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
 
-    private lateinit var onDataChanged: KFunction<Unit>
     private lateinit var setting: SettingsModel.Setting
 
-    init {}
-
-    fun setSettingData(setting: SettingsModel.Setting) {
-        this.setting = setting
-    }
 }

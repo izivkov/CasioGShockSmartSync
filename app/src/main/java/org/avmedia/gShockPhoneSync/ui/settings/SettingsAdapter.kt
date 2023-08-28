@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.CompoundButton
 import android.widget.RadioGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
@@ -32,33 +31,33 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     inner class ViewHolderLocale(itemView: View) : ViewHolderBaseSetting(itemView) {
-        val timeFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.time_format_group)
-        val dateFormat: RadioGroup = itemView.findViewById<RadioGroup>(R.id.date_format_group)
+        val timeFormat: RadioGroup = itemView.findViewById(R.id.time_format_group)
+        val dateFormat: RadioGroup = itemView.findViewById(R.id.date_format_group)
         val language: LanguageMenu =
             itemView.findViewById(R.id.language_menu)
     }
 
     inner class ViewHolderOperationSound(itemView: View) : ViewHolderBaseSetting(itemView) {
-        val soundOnOff: SwitchMaterial = itemView.findViewById<SwitchMaterial>(R.id.sound_on_off)
+        val soundOnOff: SwitchMaterial = itemView.findViewById(R.id.sound_on_off)
     }
 
     inner class ViewHolderLight(itemView: View) : ViewHolderBaseSetting(itemView) {
         val autoLight: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.auto_light_on_off)
-        val duration: RadioGroup = itemView.findViewById<RadioGroup>(R.id.light_duration_group)
+            itemView.findViewById(R.id.auto_light_on_off)
+        val duration: RadioGroup = itemView.findViewById(R.id.light_duration_group)
     }
 
     inner class ViewHolderPowerSavingMode(itemView: View) : ViewHolderBaseSetting(itemView) {
         val powerSavingMode: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.power_saving_on_off)
+            itemView.findViewById(R.id.power_saving_on_off)
     }
 
     inner class ViewHolderTimeAdjustment(itemView: View) : ViewHolderBaseSetting(itemView) {
         val timeAdjustment: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.time_adjustment_on_off)
+            itemView.findViewById(R.id.time_adjustment_on_off)
 
         val timeAdjustmentNotification: MaterialCheckBox =
-            itemView.findViewById<MaterialCheckBox>(R.id.notify_me)
+            itemView.findViewById(R.id.notify_me)
     }
 
     inner class ViewHolderHandAdjustment(itemView: View) : ViewHolderBaseSetting(itemView)
@@ -129,7 +128,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             }
             SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
                 val vhHandAdjustment = viewHolder as ViewHolderHandAdjustment
-                configureHandAdjustment(vhHandAdjustment, position)
+                configureHandAdjustment(position)
             }
         }
     }
@@ -175,21 +174,21 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhLocale.language.setText(setting.dayOfWeekLanguage.value, false)
 
-        vhLocale.timeFormat.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { _, checkedId ->
+        vhLocale.timeFormat.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.twelve_hours) {
                 setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWELVE_HOURS
             } else {
                 setting.timeFormat = SettingsModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
             }
-        })
+        }
 
-        vhLocale.dateFormat.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { _, checkedId ->
+        vhLocale.dateFormat.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.month_day) {
                 setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.MONTH_DAY
             } else {
                 setting.dateFormat = SettingsModel.Locale.DATE_FORMAT.DAY_MONTH
             }
-        })
+        }
 
         val listener = AdapterView.OnItemClickListener { parent, view, position, id ->
             val selectedItem = parent.getItemAtPosition(position).toString()
@@ -222,17 +221,17 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             vhLight.duration.check(R.id.four_seconds)
         }
 
-        vhLight.autoLight.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhLight.autoLight.setOnCheckedChangeListener { _, isChecked ->
             setting.autoLight = isChecked
-        })
+        }
 
-        vhLight.duration.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { _, checkedId ->
+        vhLight.duration.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.two_seconds) {
                 setting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
             } else {
                 setting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
             }
-        })
+        }
     }
 
     private fun configureSound(vhOperationSound: ViewHolderOperationSound, position: Int) {
@@ -240,9 +239,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             settings[position] as SettingsModel.OperationSound
         vhOperationSound.soundOnOff.isChecked = setting.sound == true
 
-        vhOperationSound.soundOnOff.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhOperationSound.soundOnOff.setOnCheckedChangeListener { _, isChecked ->
             setting.sound = isChecked
-        })
+        }
     }
 
     private fun configurePowerSavingMode(
@@ -252,9 +251,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             settings[position] as SettingsModel.PowerSavingMode
         vhPowerSavingMode.powerSavingMode.isChecked = setting.powerSavingMode == true
 
-        vhPowerSavingMode.powerSavingMode.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhPowerSavingMode.powerSavingMode.setOnCheckedChangeListener { _, isChecked ->
             setting.powerSavingMode = isChecked
-        })
+        }
     }
 
     private fun configureTimeAdjustment(
@@ -266,18 +265,18 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         vhTimeAdjustment.timeAdjustmentNotification.isChecked =
             setting.timeAdjustmentNotifications == true
 
-        vhTimeAdjustment.timeAdjustment.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhTimeAdjustment.timeAdjustment.setOnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustment = isChecked
-        })
+        }
 
-        vhTimeAdjustment.timeAdjustmentNotification.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhTimeAdjustment.timeAdjustmentNotification.setOnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustmentNotifications = isChecked
             LocalDataStorage.setTimeAdjustmentNotification(setting.timeAdjustmentNotifications)
-        })
+        }
     }
 
     private fun configureHandAdjustment(
-        vhTimeAdjustment: ViewHolderHandAdjustment, position: Int
+        position: Int
     ) {
     }
 

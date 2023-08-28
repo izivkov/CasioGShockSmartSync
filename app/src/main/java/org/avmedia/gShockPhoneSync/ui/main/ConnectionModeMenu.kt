@@ -17,7 +17,7 @@ class ConnectionModeMenu @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : MaterialAutoCompleteTextView(context, attrs, defStyleAttr) {
 
-    enum class CONNECTION_MODE(val _modeName: String) {
+    enum class CONNECTION_MODE(private val _modeName: String) {
         SINGLE("Single Watch"),
         MULTIPLE("Mult. Watches");
 
@@ -36,8 +36,7 @@ class ConnectionModeMenu @JvmOverloads constructor(
 
         setOnItemClickListener { adapterView, _, i, _ ->
             val selectedItem = adapterView.getItemAtPosition(i).toString()
-            val selectedItemStr = selectedItem.toString()
-            LocalDataStorage.put("ConnectionMode", selectedItemStr, context)
+            LocalDataStorage.put("ConnectionMode", selectedItem, context)
         }
     }
 }

@@ -34,22 +34,18 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/home_time_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/home_time_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:textSize="20dp"
                     android:text="@string/home_time" />
 
                 <org.avmedia.gShockPhoneSync.customComponents.InfoButton
-                    android:id="@+id/info_home_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -91,13 +87,11 @@
             android:orientation="vertical">
 
             <org.avmedia.gShockPhoneSync.ui.time.BatteryView
-                android:id="@+id/battery_view"
                 android:layout_width="20dp"
                 android:layout_height="wrap_content"
                 android:rotation="90" />
 
             <org.avmedia.gShockPhoneSync.ui.time.WatchTemperature
-                android:id="@+id/watch_temperature"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

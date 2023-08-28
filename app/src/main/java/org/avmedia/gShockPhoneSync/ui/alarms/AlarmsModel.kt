@@ -13,10 +13,6 @@ object AlarmsModel {
 
     val alarms = ArrayList<Alarm>()
 
-    fun clear() {
-        alarms.clear()
-    }
-
     fun isEmpty(): Boolean {
         return alarms.size == 0
     }

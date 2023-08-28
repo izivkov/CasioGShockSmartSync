@@ -8,18 +8,15 @@ package org.avmedia.gShockPhoneSync.utils
 
 import android.content.Context
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
-import java.util.*
-import kotlin.time.ExperimentalTime
 
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
 
-    @OptIn(ExperimentalTime::class)
     fun put(key: String, value: String, context: Context) {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-        var editor = sharedPreference.edit()
-        editor.putString("$key", value)
+        val editor = sharedPreference.edit()
+        editor.putString(key, value)
         editor.apply()
     }
 
@@ -30,28 +27,9 @@ object LocalDataStorage {
 
     fun delete(key: String, context: Context) {
         val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-        var editor = sharedPreference.edit()
+        val editor = sharedPreference.edit()
         editor.remove(key)
         editor.apply()
-    }
-
-    fun clear(context: Context) {
-        val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-        var editor = sharedPreference.edit()
-        editor.clear()
-        editor.apply()
-    }
-
-    fun getTimezoneForFutureUse(context: Context): String {
-        var timeZone = ""
-        val timeZoneChanged: Boolean =
-            get("timezone", "", context) != TimeZone.getDefault().id
-        if (timeZoneChanged) {
-            timeZone = TimeZone.getDefault().id
-            put("timezone", TimeZone.getDefault().id, context)
-        }
-
-        return timeZone
     }
 
     private fun getBoolean(key: String): Boolean {

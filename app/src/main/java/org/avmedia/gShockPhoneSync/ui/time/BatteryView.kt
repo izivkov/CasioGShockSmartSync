@@ -4,11 +4,17 @@
  * Last modified 2022-03-29, 6:14 p.m.
  */
 
+@file:Suppress("SameParameterValue", "SameParameterValue", "SameParameterValue")
+
 package org.avmedia.gShockPhoneSync.ui.time
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.PaintDrawable
 import android.util.AttributeSet
 import android.view.View
@@ -18,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 
+@Suppress("SameParameterValue")
 class BatteryView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -42,8 +49,6 @@ class BatteryView @JvmOverloads constructor(
     private var borderStrokeWidthPercent = 4
     private var borderStroke: Float = 0f
 
-    // Percent
-    private var percentPaint = Paint()
     private var percentRect = RectF()
     private var percentRectTopMin = 0f
     private var percent: Int = 0
@@ -121,6 +126,7 @@ class BatteryView @JvmOverloads constructor(
         }
     }
 
+    @Suppress("SameParameterValue")
     private fun getBitmap(
         drawableId: Int,
         desireWidth: Int? = null,

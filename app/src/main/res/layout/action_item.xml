@@ -25,7 +25,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:padding="6dp">
+            android:padding="6dp"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:id="@+id/icon"

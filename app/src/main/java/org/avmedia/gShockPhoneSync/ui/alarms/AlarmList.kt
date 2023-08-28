@@ -5,6 +5,7 @@
  */
 package org.avmedia.gShockPhoneSync.ui.alarms
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 
+@SuppressLint("NotifyDataSetChanged")
 class AlarmList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
@@ -25,7 +27,7 @@ class AlarmList @JvmOverloads constructor(
         layoutManager = LinearLayoutManager(context)
 
         runBlocking {
-            var alarms = api().getAlarms()
+            val alarms = api().getAlarms()
 
             // update the model
             AlarmsModel.alarms.clear()

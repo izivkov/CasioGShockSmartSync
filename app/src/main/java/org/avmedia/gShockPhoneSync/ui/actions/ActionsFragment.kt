@@ -27,9 +27,6 @@ class ActionsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    init {
-    }
-
     @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -58,8 +55,7 @@ class ActionsFragment : Fragment() {
 
         _binding = FragmentActionsBinding.inflate(inflater, container, false)
         _binding?.actionList?.init()
-        val root: View = binding.root
-        return root
+        return binding.root
     }
 
     override fun onDestroyView() {

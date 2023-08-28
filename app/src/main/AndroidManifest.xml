@@ -26,6 +26,12 @@
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
     <application
         android:allowBackup="false"
@@ -35,9 +41,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="DataExtractionRules,GoogleAppIndexingWarning"
+        tools:targetApi="s">
 
-        <service android:name=".utils.ForegroundService" />
+        <service android:name=".utils.ForegroundService"
+             android:foregroundServiceType="shortService"/>
 
         <activity
             android:name="org.avmedia.gShockPhoneSync.MainActivity"
@@ -46,7 +54,6 @@
             android:rotationAnimation="seamless"
             android:resizeableActivity="true"
             android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
-            tools:targetApi="O"
             >
 
             <intent-filter>
@@ -54,7 +61,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DeviceManager$OtherActivity"></activity>
 
     </application>
 

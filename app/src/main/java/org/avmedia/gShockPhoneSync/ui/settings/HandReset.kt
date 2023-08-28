@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -27,7 +28,7 @@ CLOCKWISE:
 
 
  */
-open class HandReset @JvmOverloads constructor(
+class HandReset @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : androidx.appcompat.widget.AppCompatImageButton(context, attrs/*, defStyleAttr*/) {
 
@@ -36,6 +37,7 @@ open class HandReset @JvmOverloads constructor(
     }
 
     inner class OnTouchListener : View.OnTouchListener {
+        @SuppressLint("ClickableViewAccessibility")
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {

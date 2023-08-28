@@ -34,7 +34,6 @@
             android:paddingBottom="20dp">
 
             <TextView
-                android:id="@+id/localViewTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
@@ -44,7 +43,6 @@
                 tools:ignore="SpUsage" />
 
             <TextClock
-                android:id="@+id/textClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
@@ -63,7 +61,6 @@
                 tools:ignore="NestedWeights">
 
                 <org.avmedia.gShockPhoneSync.ui.time.TimeZoneTextView
-                    android:id="@+id/textTimeZone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
@@ -87,7 +84,6 @@
             android:orientation="vertical">
 
             <org.avmedia.gShockPhoneSync.ui.time.SendTimeButton
-                android:id="@+id/SendTime"
                 style="@style/buttonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

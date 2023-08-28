@@ -13,7 +13,11 @@ import com.philjay.WeekdayNum
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
 import timber.log.Timber
-import java.time.*
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
@@ -32,7 +36,7 @@ object RRuleValues {
     ): Values {
         val rruleValues = Values()
 
-        if (rrule != null && rrule.isNotEmpty()) {
+        if (!rrule.isNullOrEmpty()) {
 
             if (!validateRule(rrule)) {
                 rruleValues.incompatible = true
@@ -42,7 +46,7 @@ object RRuleValues {
             val rruleObj = RRule(rrule)
 
             fun isCompatible(rruleObj: RRule): Boolean {
-                val validNumberOnly = listOf<Int>(0)
+                val validNumberOnly = listOf(0)
                 val numberArr = rruleObj.byDay.map { it.number }
 
                 val validByMonth = rruleObj.byMonth.isEmpty()
@@ -169,7 +173,7 @@ object RRuleValues {
         while (i < components.size) {
             val component = components[i]
             if (component == "UNTIL") {
-                var untilValue = components[i + 1]
+                val untilValue = components[i + 1]
                 try {
                     LocalDateTime.parse(untilValue, dateFormatter).toInstant(ZoneOffset.UTC)
                 } catch (e: DateTimeParseException) {
@@ -193,7 +197,7 @@ object RRuleValues {
     }
 
     private fun createDaysOfWeek(weekDays: ArrayList<WeekdayNum>): ArrayList<DayOfWeek>? {
-        var days: ArrayList<DayOfWeek>? = ArrayList()
+        val days: ArrayList<DayOfWeek>? = ArrayList()
         weekDays.forEach {
             when (it.weekday.name) {
                 "Monday" -> days?.add(DayOfWeek.MONDAY)

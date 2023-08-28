@@ -22,7 +22,6 @@
         android:maxLines="1"
         android:padding="8dp"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        android:textSize="20dp"
         tools:ignore="MissingDefaultResource" />
 
 </LinearLayout>

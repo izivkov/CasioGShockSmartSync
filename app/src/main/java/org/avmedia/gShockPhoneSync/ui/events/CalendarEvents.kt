@@ -21,15 +21,13 @@ import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.ProgressEvents
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.*
+import java.util.Calendar
 
 object CalendarEvents {
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getEventsFromCalendar(context: Context): ArrayList<Event> {
         return getEvents(context)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Range")
     private fun getEvents(context: Context): ArrayList<Event> {
         val events: ArrayList<Event> = ArrayList()
@@ -127,9 +125,6 @@ object CalendarEvents {
 
     private object CalendarObserver {
         private var registered = false
-
-        init {
-        }
 
         private val calendarObserver = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {

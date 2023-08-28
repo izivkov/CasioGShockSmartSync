@@ -24,8 +24,6 @@ class EventsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    init {}
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,8 +47,7 @@ class EventsFragment : Fragment() {
             )
         )
 
-        val root: View = binding.root
-        return root
+        return binding.root
     }
 
     override fun onDestroyView() {

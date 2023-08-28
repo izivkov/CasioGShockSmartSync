@@ -28,14 +28,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:padding="8dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            tools:ignore="UselessParent">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                tools:ignore="UselessParent">
 
                 <TextView
-                    android:id="@+id/operational_sound"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="6dp"
@@ -49,8 +50,8 @@
                     android:id="@+id/sound_on_off"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textOff="Off"
-                    android:textOn="On" />
+                    android:textOff="@string/off"
+                    android:textOn="@string/on" />
 
             </LinearLayout>
         </LinearLayout>

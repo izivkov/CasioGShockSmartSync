@@ -19,7 +19,7 @@ import kotlin.math.abs
 class PhoneFinder {
     companion object {
 
-        var mp: MediaPlayer? = null
+        private var mp: MediaPlayer? = null
         var resetVolume: () -> Unit? = {}
 
         fun ring(context: Context) {

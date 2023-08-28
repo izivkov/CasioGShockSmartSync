@@ -7,7 +7,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/settings_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.settings.SettingsFragment">
@@ -45,7 +44,6 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <org.avmedia.gShockPhoneSync.customComponents.InfoButton
-            android:id="@+id/info_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/info"
@@ -56,7 +54,6 @@
             app:infoText="@string/auto_fill_help" />
 
         <org.avmedia.gShockPhoneSync.ui.settings.AutoFillValuesButton
-            android:id="@+id/AutoConfigureButton"
             style="@style/buttonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,7 +62,6 @@
             android:text="@string/auto_configure_settings" />
 
         <org.avmedia.gShockPhoneSync.ui.settings.SendSettingsButton
-            android:id="@+id/SendSettings"
             style="@style/buttonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
