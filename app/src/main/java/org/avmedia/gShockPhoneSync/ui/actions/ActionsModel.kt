@@ -25,6 +25,9 @@ import java.text.DateFormat
 import java.time.Clock
 import java.util.Date
 
+@Suppress("ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
+    "ClassName", "ClassName"
+)
 object ActionsModel {
 
     val actions = ArrayList<Action>()

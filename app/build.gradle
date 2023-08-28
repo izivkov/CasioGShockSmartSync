@@ -3,6 +3,7 @@
  * Copyright (c) 2022 . All rights reserved.
  * Last modified 2022-03-29, 11:54 p.m.
  */
+//file:noinspection DifferentStdlibGradleVersion
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'

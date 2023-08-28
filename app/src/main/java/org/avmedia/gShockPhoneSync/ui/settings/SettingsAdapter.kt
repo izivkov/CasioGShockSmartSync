@@ -4,6 +4,8 @@
  * Last modified 2022-05-07, 7:52 p.m.
  */
 
+@file:Suppress("EmptyMethod", "EmptyMethod")
+
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.view.LayoutInflater
@@ -128,7 +130,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             }
             SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
                 val vhHandAdjustment = viewHolder as ViewHolderHandAdjustment
-                configureHandAdjustment(position)
+                configureHandAdjustment()
             }
         }
     }
@@ -276,7 +278,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     }
 
     private fun configureHandAdjustment(
-        position: Int
     ) {
     }
 

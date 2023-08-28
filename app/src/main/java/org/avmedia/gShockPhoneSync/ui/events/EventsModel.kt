@@ -7,7 +7,6 @@
 package org.avmedia.gShockPhoneSync.ui.events
 
 import android.content.Context
-import com.google.gson.Gson
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
 import java.time.Instant
@@ -23,16 +22,6 @@ object EventsModel {
     fun refresh(context: Context) {
         events.clear()
         events.addAll(CalendarEvents.getEventsFromCalendar(context))
-    }
-
-    fun clear() {
-        events.clear()
-    }
-
-    @Synchronized
-    fun toJson(events: ArrayList<Event>): String {
-        val gson = Gson()
-        return gson.toJson(events)
     }
 
     fun getSelectedCount(): Int {

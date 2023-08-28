@@ -10,4 +10,4 @@
     android:layout_width="match_parent"
     android:layout_height="150dp"
     android:layout_margin="3dp"
-    app:cardElevation="2dp"></org.avmedia.gShockPhoneSync.ui.actions.ActionItem>
+    app:cardElevation="2dp" />

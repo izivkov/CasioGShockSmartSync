@@ -4,6 +4,8 @@
  * Last modified 2022-04-11, 12:40 p.m.
  */
 
+@file:Suppress("PrivatePropertyName", "PrivatePropertyName", "PrivatePropertyName")
+
 package org.avmedia.gShockPhoneSync
 
 import android.Manifest
@@ -16,7 +18,6 @@ import org.avmedia.gshockapi.ProgressEvents
 
 data class PermissionManager(val context: Context) {
 
-    private var ENABLE_BLUETOOTH_REQUEST_CODE = 3
     private var PERMISSION_ALL = 1
     private var PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,

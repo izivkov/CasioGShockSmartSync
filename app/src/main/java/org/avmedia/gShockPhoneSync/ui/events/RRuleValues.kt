@@ -197,7 +197,7 @@ object RRuleValues {
     }
 
     private fun createDaysOfWeek(weekDays: ArrayList<WeekdayNum>): ArrayList<DayOfWeek>? {
-        val days: ArrayList<DayOfWeek>? = ArrayList()
+        val days: ArrayList<DayOfWeek> = ArrayList()
         weekDays.forEach {
             when (it.weekday.name) {
                 "Monday" -> days?.add(DayOfWeek.MONDAY)

@@ -10,7 +10,6 @@
             <stroke android:width="2dp" android:color="@color/colorPrimaryDark" />
             <corners android:bottomLeftRadius="6dp" android:bottomRightRadius="6dp" android:topLeftRadius="6dp" android:topRightRadius="6dp" />
             <padding android:bottom="10dp" android:left="10dp" android:right="10dp" android:top="10dp" />
-            <ripple android:color="@color/colorPrimaryDark" />
         </shape>
     </item>
 

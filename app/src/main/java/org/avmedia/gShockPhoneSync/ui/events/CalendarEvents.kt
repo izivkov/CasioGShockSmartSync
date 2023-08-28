@@ -12,10 +12,8 @@ import android.content.Context
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.provider.CalendarContract
-import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.ProgressEvents

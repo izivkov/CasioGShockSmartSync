@@ -11,8 +11,4 @@ import android.util.AttributeSet
 
 class SettingsItem @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr) {
-
-    private lateinit var setting: SettingsModel.Setting
-
-}
+) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr)

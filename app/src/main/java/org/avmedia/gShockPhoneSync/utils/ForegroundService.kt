@@ -13,6 +13,9 @@ import android.os.IBinder
 import org.avmedia.gShockPhoneSync.MainActivity
 
 class ForegroundService : Service() {
+    @Suppress(
+        "PrivatePropertyName"
+    )
     private val CHANNEL_ID: String = "CHANNEL_ONE"
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         val input = intent.getStringExtra("inputExtra")

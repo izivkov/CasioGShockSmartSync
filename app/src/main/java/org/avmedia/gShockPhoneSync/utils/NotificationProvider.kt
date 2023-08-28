@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
 object NotificationProvider {
-    val CHANNEL_ID = "G_SHOCK_SMART_SYNC_CHANNEL"
+    private const val CHANNEL_ID = "G_SHOCK_SMART_SYNC_CHANNEL"
 
     fun createNotification(
         context: Context,

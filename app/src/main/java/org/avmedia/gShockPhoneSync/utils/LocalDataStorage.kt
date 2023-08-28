@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.utils
 import android.content.Context
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
+@Suppress("SameParameterValue", "SameParameterValue")
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"

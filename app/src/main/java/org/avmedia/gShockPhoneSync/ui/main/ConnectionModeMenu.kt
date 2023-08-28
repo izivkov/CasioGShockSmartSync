@@ -13,10 +13,12 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 
+@Suppress("ClassName")
 class ConnectionModeMenu @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : MaterialAutoCompleteTextView(context, attrs, defStyleAttr) {
 
+    @Suppress("unused")
     enum class CONNECTION_MODE(private val _modeName: String) {
         SINGLE("Single Watch"),
         MULTIPLE("Mult. Watches");

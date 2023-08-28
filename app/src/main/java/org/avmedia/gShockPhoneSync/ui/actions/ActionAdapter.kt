@@ -4,6 +4,12 @@
  * Last modified 2022-05-07, 7:52 p.m.
  */
 
+@file:Suppress("ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
+    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
+    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
+    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression"
+)
+
 package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.view.LayoutInflater
@@ -17,6 +23,9 @@ import timber.log.Timber
 
 // This adapter handles a heterogeneous list of actions.
 
+@Suppress("ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
+    "ClassName", "ClassName", "unused", "unused", "unused"
+)
 class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -25,53 +34,52 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     open inner class ViewHolderBaseAction(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById<TextView>(R.id.title)
-        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
+        val title: TextView = itemView.findViewById(R.id.title)
+        var icon: ImageView = itemView.findViewById(R.id.icon)
 
         val actionEnabled: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+            itemView.findViewById(R.id.actionEnabled)
     }
 
     inner class ViewHolderSetTime(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderSetEvents(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView)
-    inner class ViewHolderStartVoiceAssis(itemView: View) : ViewHolderBaseAction(itemView)
+    inner class ViewHolderStartVoiceAssist(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderMap(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     inner class ViewHolderActionTakePhoto(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById<TextView>(R.id.title)
-        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
-        val radioGroup: RadioGroup = itemView.findViewById<RadioGroup>(R.id.cameraOrientationGroup)
+        val title: TextView = itemView.findViewById(R.id.title)
+        var icon: ImageView = itemView.findViewById(R.id.icon)
+        val radioGroup: RadioGroup = itemView.findViewById(R.id.cameraOrientationGroup)
         val actionEnabled: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+            itemView.findViewById(R.id.actionEnabled)
     }
 
     inner class ViewHolderActionToggleFlashlight(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById<TextView>(R.id.title)
-        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
+        val title: TextView = itemView.findViewById(R.id.title)
+        var icon: ImageView = itemView.findViewById(R.id.icon)
         val actionEnabled: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+            itemView.findViewById(R.id.actionEnabled)
     }
 
     inner class ViewHolderActionPhoneCall(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById<TextView>(R.id.title)
+        val title: TextView = itemView.findViewById(R.id.title)
         val actionEnabled: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
+            itemView.findViewById(R.id.actionEnabled)
         var phoneNumber: TextView =
-            itemView.findViewById<TextView>(R.id.phone_number)
+            itemView.findViewById(R.id.phone_number)
     }
 
     inner class ViewHolderActionSendEmail(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById<TextView>(R.id.title)
-        var icon: ImageView = itemView.findViewById<ImageView>(R.id.icon)
+        val title: TextView = itemView.findViewById(R.id.title)
         val actionEnabled: SwitchMaterial =
-            itemView.findViewById<SwitchMaterial>(R.id.actionEnabled)
-        val emailAddress: TextView = itemView.findViewById<TextView>(R.id.email_address)
+            itemView.findViewById(R.id.actionEnabled)
+        val emailAddress: TextView = itemView.findViewById(R.id.email_address)
     }
 
     inner class ViewHolderActionSeparator(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val title: TextView = itemView.findViewById<TextView>(R.id.title)
+        val title: TextView = itemView.findViewById(R.id.title)
     }
 
     // Returns the view type of the item at position for the purposes of view recycling.
@@ -156,7 +164,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             }
             ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal -> {
                 val vVoiceAssistant: View = inflater.inflate(R.layout.action_item, parent, false)
-                ViewHolderStartVoiceAssis(vVoiceAssistant)
+                ViewHolderStartVoiceAssist(vVoiceAssistant)
             }
             else -> {
                 val vAction: View = inflater.inflate(R.layout.action_item, parent, false)
@@ -208,7 +216,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 configureLocation(vhLocation, position)
             }
             ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal -> {
-                val vhVoiceAssistant = viewHolder as ViewHolderStartVoiceAssis
+                val vhVoiceAssistant = viewHolder as ViewHolderStartVoiceAssist
                 configureVoiceAssistant(vhVoiceAssistant, position)
             }
             else -> {
@@ -220,7 +228,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     }
 
     private fun configureVoiceAssistant(
-        vhVoiceAssistant: ViewHolderStartVoiceAssis,
+        vhVoiceAssistant: ViewHolderStartVoiceAssist,
         position: Int
     ) {
         val action: ActionsModel.StartVoiceAssistAction =
@@ -229,9 +237,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhVoiceAssistant.actionEnabled.isChecked = action.enabled
         vhVoiceAssistant.icon.setImageResource(R.drawable.voice_assist)
 
-        vhVoiceAssistant.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhVoiceAssistant.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
     }
 
     private fun configureLocation(vhLocation: ViewHolderSaveLocation, position: Int) {
@@ -241,9 +249,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhLocation.actionEnabled.isChecked = action.enabled
         vhLocation.icon.setImageResource(R.drawable.location)
 
-        vhLocation.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhLocation.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
     }
 
     private fun configureTime(vhTime: ViewHolderSetTime, position: Int) {
@@ -252,9 +260,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhTime.actionEnabled.isChecked = action.enabled
         vhTime.icon.setImageResource(R.drawable.time)
 
-        vhTime.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhTime.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
     }
 
     private fun configureEvents(vhEvents: ViewHolderSetEvents, position: Int) {
@@ -263,9 +271,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhEvents.actionEnabled.isChecked = action.enabled
         vhEvents.icon.setImageResource(R.drawable.events)
 
-        vhEvents.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhEvents.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
     }
 
     private fun configureSendEmail(
@@ -278,9 +286,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhEmail.actionEnabled.isChecked = action.enabled
         vhEmail.emailAddress.text = action.emailAddress
 
-        vhEmail.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhEmail.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
 
         vhEmail.emailAddress.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
@@ -302,9 +310,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhPhoneCall.actionEnabled.isChecked = action.enabled
         vhPhoneCall.phoneNumber.text = action.phoneNumber
 
-        vhPhoneCall.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhPhoneCall.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
 
         vhPhoneCall.phoneNumber.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
             if (!hasFocus) {
@@ -339,9 +347,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhBaseAction.actionEnabled.isChecked = action.enabled
         vhBaseAction.title.text = action.title
 
-        vhBaseAction.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhBaseAction.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             actions[position].enabled = isChecked
-        })
+        }
     }
 
     private fun configureActionTakePhoto(
@@ -358,18 +366,17 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         else
             vhPhoto.radioGroup.check(R.id.back)
 
-        vhPhoto.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhPhoto.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
 
-        vhPhoto.radioGroup.setOnCheckedChangeListener(
-            RadioGroup.OnCheckedChangeListener { group, checkedId ->
-                if (checkedId == R.id.front) {
-                    action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.FRONT
-                } else {
-                    action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.BACK
-                }
-            })
+        vhPhoto.radioGroup.setOnCheckedChangeListener { group, checkedId ->
+            if (checkedId == R.id.front) {
+                action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.FRONT
+            } else {
+                action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.BACK
+            }
+        }
     }
 
     private fun configureActionToggleFlashlight(
@@ -382,9 +389,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhFlashlight.title.text = action.title
         vhFlashlight.icon.setImageResource(R.drawable.flashlight)
 
-        vhFlashlight.actionEnabled.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        vhFlashlight.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
-        })
+        }
     }
 
     override fun getItemCount(): Int {

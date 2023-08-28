@@ -55,7 +55,7 @@
         <item name="cornerSizeBottomLeft">8dp</item>
     </style>
 
-    <style name="AppTheme.MaterialTimePickerTheme" parent="ThemeOverlay.MaterialComponents.TimePicker"></style>
+    <style name="AppTheme.MaterialTimePickerTheme" parent="ThemeOverlay.MaterialComponents.TimePicker" />
 
     <declare-styleable name="BatteryView">
         <attr name="bv_percent" format="integer" />

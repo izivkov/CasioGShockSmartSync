@@ -13,7 +13,6 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.Settings
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 

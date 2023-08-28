@@ -6,7 +6,6 @@
 
 package org.avmedia.gShockPhoneSync.ui.alarms
 
-import com.google.gson.Gson
 import org.avmedia.gshockapi.Alarm
 
 object AlarmsModel {
@@ -17,9 +16,4 @@ object AlarmsModel {
         return alarms.size == 0
     }
 
-    @Synchronized
-    fun toJson(): String {
-        val gson = Gson()
-        return gson.toJson(alarms)
-    }
 }
