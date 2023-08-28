@@ -196,17 +196,17 @@ object RRuleValues {
         }
     }
 
-    private fun createDaysOfWeek(weekDays: ArrayList<WeekdayNum>): ArrayList<DayOfWeek>? {
+    private fun createDaysOfWeek(weekDays: ArrayList<WeekdayNum>): ArrayList<DayOfWeek> {
         val days: ArrayList<DayOfWeek> = ArrayList()
         weekDays.forEach {
             when (it.weekday.name) {
-                "Monday" -> days?.add(DayOfWeek.MONDAY)
-                "Tuesday" -> days?.add(DayOfWeek.TUESDAY)
-                "Wednesday" -> days?.add(DayOfWeek.WEDNESDAY)
-                "Thursday" -> days?.add(DayOfWeek.THURSDAY)
-                "Friday" -> days?.add(DayOfWeek.FRIDAY)
-                "Saturday" -> days?.add(DayOfWeek.SATURDAY)
-                else -> days?.add(DayOfWeek.SUNDAY)
+                "Monday" -> days.add(DayOfWeek.MONDAY)
+                "Tuesday" -> days.add(DayOfWeek.TUESDAY)
+                "Wednesday" -> days.add(DayOfWeek.WEDNESDAY)
+                "Thursday" -> days.add(DayOfWeek.THURSDAY)
+                "Friday" -> days.add(DayOfWeek.FRIDAY)
+                "Saturday" -> days.add(DayOfWeek.SATURDAY)
+                else -> days.add(DayOfWeek.SUNDAY)
             }
         }
 
