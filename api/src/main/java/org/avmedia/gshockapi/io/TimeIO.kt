@@ -150,7 +150,6 @@ object TimeIO {
 
         for (i in 0 until WatchInfo.dstCount) {
             readAndWrite(dtsStates[i].function, dtsStates[i].param)
-            Timber.i(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> writeDST: $i")
         }
     }
 
