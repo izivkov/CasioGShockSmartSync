@@ -18,7 +18,7 @@ class AutoLightLayout @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) hide() else show()
+        if (WatchInfo.hasAutoLight) show() else hide()
     }
 
     override fun show() {

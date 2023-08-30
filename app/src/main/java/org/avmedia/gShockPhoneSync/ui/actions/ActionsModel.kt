@@ -327,7 +327,7 @@ object ActionsModel {
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
 
         var msg = "Time set at $dateStr"
-        val watchName = WatchInfo.getName()
+        val watchName = WatchInfo.name
         if (watchName != null) {
             msg += " for $watchName watch"
         }

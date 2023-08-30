@@ -18,11 +18,11 @@ class WatchName @JvmOverloads constructor(
 ) : androidx.appcompat.widget.AppCompatTextView(context, attrs, defStyleAttr) {
 
     init {
-        var name = WatchInfo.getName()
-        if (name.isBlank()) {
-            name = "No Watch"
+        var shortName = WatchInfo.shortName
+        if (shortName.isBlank()) {
+            shortName = "No Watch"
         }
-        text = name.removePrefix("CASIO").trim()
+        text =  shortName
 
         createSubscription()
     }

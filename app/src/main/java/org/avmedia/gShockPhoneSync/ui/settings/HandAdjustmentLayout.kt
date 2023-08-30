@@ -18,7 +18,7 @@ class HandAdjustmentLayout @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr), IHideableLayout {
 
     init {
-        if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) show() else hide()
+        if (WatchInfo.model == WatchInfo.WATCH_MODEL.GA) show() else hide()
     }
 
     override fun show() {

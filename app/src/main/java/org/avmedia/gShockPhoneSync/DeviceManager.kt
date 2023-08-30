@@ -13,7 +13,7 @@ object DeviceManager {
     }
 
     private fun startListener() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String, {
             when (it) {
                 ProgressEvents["DeviceName"] -> {
                     val deviceName = ProgressEvents.getPayload("DeviceName")

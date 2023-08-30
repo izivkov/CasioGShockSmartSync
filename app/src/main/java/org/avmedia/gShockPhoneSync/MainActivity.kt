@@ -36,12 +36,14 @@ import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.util.Timer
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -79,9 +81,7 @@ class MainActivity : AppCompatActivity() {
             Timber.plant(Timber.DebugTree())
         }
 
-        val navView: BottomNavigationView = binding.navView
-        val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-        navView.setupWithNavController(navController)
+        setupNavigation()
 
         val deviceManager = DeviceManager
         createAppEventsSubscription()
@@ -128,6 +128,13 @@ class MainActivity : AppCompatActivity() {
         // We want to run the app only from the main screen, so
         // we do some checks in the runWithChecks() method.
         runWithChecks()
+    }
+
+    private fun setupNavigation() {
+        val navView: BottomNavigationView = binding.navView
+
+        val navController = findNavController(R.id.nav_host_fragment_activity_gshock_screens)
+        navView.setupWithNavController(navController)
     }
 
     // @SuppressLint("MissingPermission")
@@ -250,6 +257,13 @@ class MainActivity : AppCompatActivity() {
                             this, "Calendar not granted...Cannot access the Actions screen..."
                         )
                         navigateHome()
+                    }
+
+                    ProgressEvents["DeviceName"] -> {
+                        if (!WatchInfo.hasReminders) {
+                            val navView: BottomNavigationView = binding.navView
+                            navView.menu.removeItem(R.id.navigation_events)
+                        }
                     }
 
                     ProgressEvents["WatchInitializationCompleted"] -> {

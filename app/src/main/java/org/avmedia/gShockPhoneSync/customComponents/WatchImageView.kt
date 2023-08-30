@@ -20,8 +20,7 @@ class WatchImageView @JvmOverloads constructor(
     init {
         startListener()
 
-        val lastModelUsed = WatchInfo.getName()
-        if (lastModelUsed.contains("2100")) {
+        if (WatchInfo.model == WatchInfo.WATCH_MODEL.GA) {
             setImageResource(R.drawable.ga_b2100)
         } else {
             setImageResource(R.drawable.ic_gw_b5600)
@@ -32,7 +31,7 @@ class WatchImageView @JvmOverloads constructor(
         ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
             when (it) {
                 ProgressEvents["DeviceName"] -> {
-                    if (WatchInfo.model == WatchInfo.WATCH_MODEL.B2100) {
+                    if (WatchInfo.model == WatchInfo.WATCH_MODEL.GA) {
                         setImageResource(R.drawable.ga_b2100)
                     } else {
                         setImageResource(R.drawable.ic_gw_b5600)
