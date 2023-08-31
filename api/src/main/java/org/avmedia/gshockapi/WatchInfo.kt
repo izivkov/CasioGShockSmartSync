@@ -11,65 +11,17 @@ object WatchInfo {
         GA, GW, DW, UNKNOWN
     }
 
-    var model = WATCH_MODEL.UNKNOWN
-
-    val worldCitiesCount by lazy {
-        when (model) {
-            WATCH_MODEL.GA -> 2
-            WATCH_MODEL.GW -> 6
-            WATCH_MODEL.DW -> 2
-            else -> 0
-        }
-    }
-
-    val dstCount by lazy {
-        when (model) {
-            WATCH_MODEL.GA -> 1
-            WATCH_MODEL.GW -> 3
-            WATCH_MODEL.DW -> 1
-            else -> 1
-        }
-    }
-
-    val alarmCount by lazy {
-        when (model) {
-            WATCH_MODEL.GA -> 5
-            WATCH_MODEL.GW -> 5
-            WATCH_MODEL.DW -> 5
-            else -> 5
-        }
-    }
-
-    val reminderCount by lazy {
-        when (model) {
-            WATCH_MODEL.GA -> 6
-            WATCH_MODEL.GW -> 6
-            WATCH_MODEL.DW -> 0
-            else -> 6
-        }
-    }
-
-    val hasAutoLight by lazy {
-        when (model) {
-            WATCH_MODEL.GW -> true
-            WATCH_MODEL.GA -> false
-            WATCH_MODEL.DW -> false
-            else -> false
-        }
-    }
-
-    val hasReminders by lazy {
-        when (model) {
-            WATCH_MODEL.GW -> true
-            WATCH_MODEL.GA -> true
-            WATCH_MODEL.DW -> false
-            else -> false
-        }
-    }
-
     var name: String = ""
     var shortName = ""
     private var address: String = ""
+
+    var model = WATCH_MODEL.UNKNOWN
+
+    var worldCitiesCount = 2
+    var dstCount = 3
+    var alarmCount = 5
+    var hasAutoLight = false
+    var hasReminders = false
 
     fun setNameAndModel(name: String) {
         this.name = name
@@ -86,6 +38,46 @@ object WatchInfo {
             shortName.startsWith("DW") -> WATCH_MODEL.DW
             else -> WATCH_MODEL.UNKNOWN
         }
+
+        this.hasReminders =
+            when (model) {
+                WATCH_MODEL.GW -> true
+                WATCH_MODEL.GA -> true
+                WATCH_MODEL.DW -> false
+                else -> false
+            }
+
+        this.hasAutoLight =
+            when (model) {
+                WATCH_MODEL.GW -> true
+                WATCH_MODEL.GA -> false
+                WATCH_MODEL.DW -> true
+                else -> false
+            }
+
+        this.alarmCount =
+            when (model) {
+                WATCH_MODEL.GA -> 5
+                WATCH_MODEL.GW -> 5
+                WATCH_MODEL.DW -> 5
+                else -> 5
+            }
+
+        this.worldCitiesCount =
+            when (model) {
+                WATCH_MODEL.GW -> 6
+                WATCH_MODEL.GA -> 2
+                WATCH_MODEL.DW -> 2
+                else -> 0
+            }
+
+        this.dstCount =
+            when (model) {
+                WATCH_MODEL.GW -> 3
+                WATCH_MODEL.GA -> 1
+                WATCH_MODEL.DW -> 1
+                else -> 1
+            }
 
         ProgressEvents.onNext("DeviceName", this.name)
     }
