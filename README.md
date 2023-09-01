@@ -2,7 +2,7 @@
 
 ## Announcements
 
-We have now added support for the DW-B5600 watches (module 3509).
+We have now added support for the *DW-B5600* watches (module 3509).
 
 We like to add support for more G-Shock models. Please help us raise money to allows us to get access to more watches for development:
 
