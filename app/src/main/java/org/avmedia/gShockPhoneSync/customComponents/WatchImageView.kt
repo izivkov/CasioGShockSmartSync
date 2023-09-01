@@ -19,28 +19,38 @@ class WatchImageView @JvmOverloads constructor(
 
     init {
         startListener()
-
-        if (WatchInfo.model == WatchInfo.WATCH_MODEL.GA) {
-            setImageResource(R.drawable.ga_b2100)
-        } else {
-            setImageResource(R.drawable.ic_gw_b5600)
-        }
+        setImageResource()
     }
 
     private fun startListener() {
         ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
             when (it) {
                 ProgressEvents["DeviceName"] -> {
-                    if (WatchInfo.model == WatchInfo.WATCH_MODEL.GA) {
-                        setImageResource(R.drawable.ga_b2100)
-                    } else {
-                        setImageResource(R.drawable.ic_gw_b5600)
-                    }
+                    setImageResource()
                 }
             }
         }, { throwable ->
             Timber.d("Got error on subscribe: $throwable")
             throwable.printStackTrace()
         })
+    }
+    private fun setImageResource() {
+        when (WatchInfo.model) {
+            WatchInfo.WATCH_MODEL.GA -> {
+                setImageResource(R.drawable.ga_b2100)
+            }
+
+            WatchInfo.WATCH_MODEL.GW -> {
+                setImageResource(R.drawable.ic_gw_b5600)
+            }
+
+            WatchInfo.WATCH_MODEL.DW -> {
+                setImageResource(R.drawable.dw_b5600g_7)
+            }
+
+            else -> {
+                setImageResource(R.drawable.ic_gw_b5600)
+            }
+        }
     }
 }
