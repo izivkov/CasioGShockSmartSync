@@ -2,6 +2,8 @@
 
 ## Announcements
 
+We have now added support for the DW-B5600 watches (module 3509).
+
 We like to add support for more G-Shock models. Please help us raise money to allows us to get access to more watches for development:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H2OMYG2)
