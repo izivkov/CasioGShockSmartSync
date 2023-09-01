@@ -36,6 +36,11 @@ This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) a
      alt="B2100 Connection Screen"
      width=200
      style="margin: 10px;" />
+<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-dw-b5600.png"
+     align="left"
+     alt="B2100 Connection Screen"
+     width=200
+     style="margin: 10px;" />
 
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
 a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch` button is pressed.  
