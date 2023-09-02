@@ -40,7 +40,9 @@ object ActionsModel {
         // actions.add(MapAction("Map", false))
         // actions.add(SetLocationAction("Save location to G-maps", false))
         actions.add(SetTimeAction("Set Time", true))
-        actions.add(SetEventsAction("Set Reminders from Google Calender", false))
+        if (WatchInfo.hasReminders) {
+            actions.add(SetEventsAction("Set Reminders from Google Calender", false))
+        }
         actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.BACK))
         actions.add(ToggleFlashlightAction("Toggle Flashlight", false))
         actions.add(StartVoiceAssistAction("Start Voice Assist", true))
@@ -310,7 +312,8 @@ object ActionsModel {
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
-        runFilteredActions(context, actions.filter { it is SetTimeAction || it is SetEventsAction })
+        val filteredActions: List<Action> = actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders )}
+        runFilteredActions(context, filteredActions)
 
         // show notification if configured
         if (LocalDataStorage.getTimeAdjustmentNotification()) {

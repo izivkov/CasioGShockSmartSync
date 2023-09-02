@@ -100,8 +100,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun runWithChecks() {
 
-        findNavController(R.id.nav_host_fragment_activity_gshock_screens)
-
         if (!isBluetoothEnabled()!!) {
             turnOnBLE()
             return
@@ -260,10 +258,8 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     ProgressEvents["DeviceName"] -> {
-                        if (!WatchInfo.hasReminders) {
-                            val navView: BottomNavigationView = binding.navView
-                            navView.menu.removeItem(R.id.navigation_events)
-                        }
+                        val navView: BottomNavigationView = binding.navView
+                        navView.menu.findItem(R.id.navigation_events).isVisible = WatchInfo.hasReminders
                     }
 
                     ProgressEvents["WatchInitializationCompleted"] -> {

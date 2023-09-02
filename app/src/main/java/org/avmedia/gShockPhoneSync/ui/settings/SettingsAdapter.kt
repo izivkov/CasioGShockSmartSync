@@ -218,9 +218,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         vhLight.autoLight.isChecked = setting.autoLight == true
 
         if (setting.duration == SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS) {
-            vhLight.duration.check(R.id.two_seconds)
+            vhLight.duration.check(R.id.light_short)
         } else {
-            vhLight.duration.check(R.id.four_seconds)
+            vhLight.duration.check(R.id.light_long)
         }
 
         vhLight.autoLight.setOnCheckedChangeListener { _, isChecked ->
@@ -228,7 +228,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
 
         vhLight.duration.setOnCheckedChangeListener { _, checkedId ->
-            if (checkedId == R.id.two_seconds) {
+            if (checkedId == R.id.light_short) {
                 setting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
             } else {
                 setting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS

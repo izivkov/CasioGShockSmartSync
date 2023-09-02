@@ -4,11 +4,7 @@
  * Last modified 2022-05-07, 7:52 p.m.
  */
 
-@file:Suppress("ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
-    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
-    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression",
-    "RedundantSuppression", "RedundantSuppression", "RedundantSuppression", "RedundantSuppression"
-)
+@file:Suppress("ClassName", "RedundantSuppression")
 
 package org.avmedia.gShockPhoneSync.ui.actions
 

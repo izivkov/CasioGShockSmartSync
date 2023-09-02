@@ -41,11 +41,12 @@ class WatchImageView @JvmOverloads constructor(
             }
 
             WatchInfo.WATCH_MODEL.GW -> {
+                // setImageResource(R.drawable.dw_b5600)
                 setImageResource(R.drawable.ic_gw_b5600)
             }
 
             WatchInfo.WATCH_MODEL.DW -> {
-                setImageResource(R.drawable.dw_b5600g_7)
+                setImageResource(R.drawable.dw_b5600)
             }
 
             else -> {

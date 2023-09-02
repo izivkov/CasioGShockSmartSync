@@ -76,19 +76,19 @@
                     android:checkedButton="@+id/front"
                     android:orientation="horizontal">
 
-                    <RadioButton
-                        android:id="@+id/two_seconds"
+                    <org.avmedia.gShockPhoneSync.ui.settings.RadioButtonLightShort
+                        android:id="@+id/light_short"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
-                        android:text="@string/_2s" />
+                         />
 
-                    <RadioButton
-                        android:id="@+id/four_seconds"
+                    <org.avmedia.gShockPhoneSync.ui.settings.RadioButtonLightLong
+                        android:id="@+id/light_long"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="@string/_4s" />
+                        />
                 </RadioGroup>
             </LinearLayout>
 
