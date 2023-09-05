@@ -119,7 +119,7 @@ This screen allows you to set up the watch's settings. You can auto prefill the 
 ## Where are my World Cities?
 Using an app to manually swap between Home Time and World Time is a bit silly. Your phone already knows where you are. 
 When setting time, this app will also set the Home Time, Timezone and DST state to your current location. 
-So when traveling to another timezone, just set time and you are good to go.
+So when travelling to another timezone, just set time and you are good to go.
 
 ## Build Your Own App
 For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches, I have also created an API (library) project [here](https://github.com/izivkov/GShockAPI). 
