@@ -82,8 +82,8 @@ Where are my World Cities?
 ==========================
 Using an app to manually swap between Home Time and World Time is a bit silly.
 Your phone already knows where you are. When setting time, this app will also
-set the Home Time, Timezone and DST to your current location.
-So when travelling to another timezone, set time and you are good to go.
+set the Home Time, Timezone and DST state to your current location.
+So when travelling to another timezone, just set time and you are good to go.
 
 Build Your Own App
 ==================
