@@ -142,10 +142,13 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             }
 
             SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
-                val vhHandAdjustment = viewHolder as ViewHolderHandAdjustment
                 configureHandAdjustment()
             }
         }
+    }
+
+    private fun configureHandAdjustment() {
+        // EMPTY
     }
 
     // Returns the view type of the item at position for the purposes of view recycling.
@@ -205,8 +208,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             }
         }
 
-        val listener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            when (parent.getItemAtPosition(position).toString()) {
+        val listener = AdapterView.OnItemClickListener { parent, _, position1, _ ->
+            when (parent.getItemAtPosition(position1).toString()) {
                 "English" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
 

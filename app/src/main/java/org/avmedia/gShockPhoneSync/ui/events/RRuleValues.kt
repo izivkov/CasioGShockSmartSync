@@ -75,7 +75,7 @@ object RRuleValues {
 
                     rruleValues.localEndDate = instant.atZone(zone).toLocalDate()
 
-                } else if (rruleObjVal.count != null) {
+                } else {
                     val numberOfPeriods: Long = (rruleObjVal.count - 1).toLong()
                     if (numberOfPeriods > 0) {
                         when (rruleObjVal.freq) {
@@ -144,7 +144,7 @@ object RRuleValues {
     ): LocalDate {
         var endDate = startDate
 
-        if (daysOfWeek == null || daysOfWeek.isEmpty()) {
+        if (daysOfWeek.isEmpty()) {
             return endDate
         }
 

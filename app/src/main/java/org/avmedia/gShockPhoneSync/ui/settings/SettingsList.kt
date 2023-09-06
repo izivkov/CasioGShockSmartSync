@@ -45,7 +45,7 @@ class SettingsList @JvmOverloads constructor(
     }
 
     private fun listenForUpdateRequest() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String, {
             when (it) {
                 // Somebody has made a change to the model...need to update the UI
                 ProgressEvents["NeedToUpdateUI"] -> {

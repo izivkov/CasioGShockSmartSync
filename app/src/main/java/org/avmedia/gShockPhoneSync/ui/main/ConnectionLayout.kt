@@ -25,7 +25,7 @@ class ConnectionLayout @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String,
             {
                 when (it) {
                     ProgressEvents["ButtonPressedInfoReceived"] -> {

@@ -29,7 +29,7 @@ class WatchName @JvmOverloads constructor(
 
     @SuppressLint("SetTextI18n")
     private fun createSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String,
             {
                 when (it) {
                     ProgressEvents["DeviceName"] -> {

@@ -82,8 +82,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupNavigation()
-
-        val deviceManager = DeviceManager
         createAppEventsSubscription()
 
         // ApiTest().run(this)
@@ -181,7 +179,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
+        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String,
 
             {
                 when (it) {
