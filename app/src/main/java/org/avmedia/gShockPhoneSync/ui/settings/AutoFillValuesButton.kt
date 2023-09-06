@@ -89,14 +89,19 @@ class AutoFillValuesButton @JvmOverloads constructor(
         when (settings.language) {
             "English" -> localeSetting.dayOfWeekLanguage =
                 SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
+
             "Spanish" -> localeSetting.dayOfWeekLanguage =
                 SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
+
             "French" -> localeSetting.dayOfWeekLanguage =
                 SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
+
             "German" -> localeSetting.dayOfWeekLanguage =
                 SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
+
             "Italian" -> localeSetting.dayOfWeekLanguage =
                 SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
+
             "Russian" -> localeSetting.dayOfWeekLanguage =
                 SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
         }

@@ -51,7 +51,8 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
             val dateObj: Date = sdf.parse(alarm.hour.toString() + ":" + alarm.minute.toString())
 
             val timeFormat = if (java.text.SimpleDateFormat()
-                    .toPattern().split(" ")[1][0] == 'h') "K:mm aa" else "H:mm"
+                    .toPattern().split(" ")[1][0] == 'h'
+            ) "K:mm aa" else "H:mm"
 
             val time = SimpleDateFormat(timeFormat).format(dateObj)
             timeView.text = time

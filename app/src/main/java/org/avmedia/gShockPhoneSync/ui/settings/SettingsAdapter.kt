@@ -4,7 +4,7 @@
  * Last modified 2022-05-07, 7:52 p.m.
  */
 
-@file:Suppress("EmptyMethod", "EmptyMethod")
+@file:Suppress("EmptyMethod", "EmptyMethod", "ClassName")
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
@@ -21,9 +21,11 @@ import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 
 // This adapter handles a heterogeneous list of settings.
 
+@Suppress("ClassName")
 class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    @Suppress("ClassName")
     enum class SETTINGS_TYPES {
         LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, UNKNOWN
     }
@@ -73,30 +75,36 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vSetting: View = inflater.inflate(R.layout.setting_item_locale, parent, false)
                 ViewHolderLocale(vSetting)
             }
+
             SETTINGS_TYPES.OPERATION_SOUND.ordinal -> {
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_operation_sound, parent, false)
                 ViewHolderOperationSound(vSetting)
             }
+
             SETTINGS_TYPES.LIGHT.ordinal -> {
                 val vSetting: View = inflater.inflate(R.layout.setting_item_light, parent, false)
                 ViewHolderLight(vSetting)
             }
+
             SETTINGS_TYPES.POWER_SAVING_MODE.ordinal -> {
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_power_saving_mode, parent, false)
                 ViewHolderPowerSavingMode(vSetting)
             }
+
             SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal -> {
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_time_adjustment, parent, false)
                 ViewHolderTimeAdjustment(vSetting)
             }
+
             SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_hand_adjustment, parent, false)
                 ViewHolderHandAdjustment(vSetting)
             }
+
             else -> {
                 val vSetting: View = inflater.inflate(R.layout.setting_item_locale, parent, false)
                 ViewHolderLocale(vSetting)
@@ -112,22 +120,27 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vhLocale = viewHolder as ViewHolderLocale
                 configureLocale(vhLocale, position)
             }
+
             SETTINGS_TYPES.LIGHT.ordinal -> {
                 val vhLight = viewHolder as ViewHolderLight
                 configureLight(vhLight, position)
             }
+
             SETTINGS_TYPES.OPERATION_SOUND.ordinal -> {
                 val vhOperationSound = viewHolder as ViewHolderOperationSound
                 configureSound(vhOperationSound, position)
             }
+
             SETTINGS_TYPES.POWER_SAVING_MODE.ordinal -> {
                 val vhPowerSavingMode = viewHolder as ViewHolderPowerSavingMode
                 configurePowerSavingMode(vhPowerSavingMode, position)
             }
+
             SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal -> {
                 val vhTimeAdjustment = viewHolder as ViewHolderTimeAdjustment
                 configureTimeAdjustment(vhTimeAdjustment, position)
             }
+
             SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
                 val vhHandAdjustment = viewHolder as ViewHolderHandAdjustment
                 configureHandAdjustment()
@@ -193,18 +206,22 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
 
         val listener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            val selectedItem = parent.getItemAtPosition(position).toString()
-            when (selectedItem) {
+            when (parent.getItemAtPosition(position).toString()) {
                 "English" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
+
                 "Spanish" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
+
                 "French" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
+
                 "German" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
+
                 "Italian" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
+
                 "Russian" -> setting.dayOfWeekLanguage =
                     SettingsModel.Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
             }
@@ -275,10 +292,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             setting.timeAdjustmentNotifications = isChecked
             LocalDataStorage.setTimeAdjustmentNotification(setting.timeAdjustmentNotifications)
         }
-    }
-
-    private fun configureHandAdjustment(
-    ) {
     }
 
     override fun getItemCount(): Int {

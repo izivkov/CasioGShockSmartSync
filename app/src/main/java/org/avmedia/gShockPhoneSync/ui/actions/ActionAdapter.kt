@@ -11,7 +11,10 @@ package org.avmedia.gShockPhoneSync.ui.actions
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.RadioGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import org.avmedia.gShockPhoneSync.R
@@ -19,7 +22,8 @@ import timber.log.Timber
 
 // This adapter handles a heterogeneous list of actions.
 
-@Suppress("ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
+@Suppress(
+    "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
     "ClassName", "ClassName", "unused", "unused", "unused"
 )
 class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
@@ -124,44 +128,54 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 val vMap: View = inflater.inflate(R.layout.action_map_item, parent, false)
                 ViewHolderMap(vMap)
             }
+
             ACTION_TYPES.PHOTO.ordinal -> {
                 val vPhoto: View =
                     inflater.inflate(R.layout.action_take_photo_item, parent, false)
                 ViewHolderActionTakePhoto(vPhoto)
             }
+
             ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal -> {
                 val vFlashlight: View =
                     inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderActionToggleFlashlight(vFlashlight)
             }
+
             ACTION_TYPES.SEPARATOR.ordinal -> {
                 val vSeparator: View = inflater.inflate(R.layout.separator_item, parent, false)
                 ViewHolderActionSeparator(vSeparator)
             }
+
             ACTION_TYPES.PHONE_CALL.ordinal -> {
                 val vPhoneCall: View = inflater.inflate(R.layout.phone_call_item, parent, false)
                 ViewHolderActionPhoneCall(vPhoneCall)
             }
+
             ACTION_TYPES.EMAIL.ordinal -> {
                 val vEmail: View = inflater.inflate(R.layout.email_item, parent, false)
                 ViewHolderActionSendEmail(vEmail)
             }
+
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vSetTime: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderSetTime(vSetTime)
             }
+
             ACTION_TYPES.SET_EVENTS.ordinal -> {
                 val vSetEvents: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderSetEvents(vSetEvents)
             }
+
             ACTION_TYPES.LOCATION.ordinal -> {
                 val vLocation: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderSaveLocation(vLocation)
             }
+
             ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal -> {
                 val vVoiceAssistant: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderStartVoiceAssist(vVoiceAssistant)
             }
+
             else -> {
                 val vAction: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderBaseAction(vAction)
@@ -179,42 +193,52 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 val vhPhoto = viewHolder as ViewHolderActionTakePhoto
                 configureActionTakePhoto(vhPhoto, position)
             }
+
             ACTION_TYPES.TOGGLE_FLASHLIGHT.ordinal -> {
                 val vhFlashlight = viewHolder as ViewHolderActionToggleFlashlight
                 configureActionToggleFlashlight(vhFlashlight, position)
             }
+
             ACTION_TYPES.SEPARATOR.ordinal -> {
                 val vhSeparator = viewHolder as ViewHolderActionSeparator
                 configureSeparator(vhSeparator, position)
             }
+
             ACTION_TYPES.PHONE_CALL.ordinal -> {
                 val vhPhoneCall = viewHolder as ViewHolderActionPhoneCall
                 configurePhoneCall(vhPhoneCall, position)
             }
+
             ACTION_TYPES.EMAIL.ordinal -> {
                 val vhEmail = viewHolder as ViewHolderActionSendEmail
                 configureSendEmail(vhEmail, position)
             }
+
             ACTION_TYPES.MAP.ordinal -> {
                 val vhMap = viewHolder as ViewHolderMap
                 configureMap(position)
             }
+
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vhTime = viewHolder as ViewHolderSetTime
                 configureTime(vhTime, position)
             }
+
             ACTION_TYPES.SET_EVENTS.ordinal -> {
                 val vhEvents = viewHolder as ViewHolderSetEvents
                 configureEvents(vhEvents, position)
             }
+
             ACTION_TYPES.LOCATION.ordinal -> {
                 val vhLocation = viewHolder as ViewHolderSaveLocation
                 configureLocation(vhLocation, position)
             }
+
             ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal -> {
                 val vhVoiceAssistant = viewHolder as ViewHolderStartVoiceAssist
                 configureVoiceAssistant(vhVoiceAssistant, position)
             }
+
             else -> {
                 val vhBaseAction: ViewHolderBaseAction =
                     viewHolder as ViewHolderBaseAction

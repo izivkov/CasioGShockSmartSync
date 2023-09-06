@@ -37,8 +37,12 @@ class WatchTemperature @JvmOverloads constructor(
                 val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
                 val countryCodeValue = tm.networkCountryIso
                 val isUS = (countryCodeValue.isNotEmpty() && countryCodeValue.uppercase() == "US")
-                val fmt = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
-                val measure = if (isUS) Measure(((temperature * 9 / 5) + 32), MeasureUnit.FAHRENHEIT) else Measure(temperature, MeasureUnit.CELSIUS)
+                val fmt =
+                    MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
+                val measure = if (isUS) Measure(
+                    ((temperature * 9 / 5) + 32),
+                    MeasureUnit.FAHRENHEIT
+                ) else Measure(temperature, MeasureUnit.CELSIUS)
 
                 text = fmt.format(measure)
             }

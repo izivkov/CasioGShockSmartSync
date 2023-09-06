@@ -4,6 +4,8 @@
  * Last modified 2022-03-20, 7:47 p.m.
  */
 
+@file:Suppress("ClassName")
+
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -95,18 +97,22 @@ object SettingsModel {
                         settingsMap["Power Saving Mode"] as PowerSavingMode
                     setting.powerSavingMode = value == true
                 }
+
                 "timeAdjustment" -> {
                     val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
                     setting.timeAdjustment = value == true
                 }
+
                 "buttonTone" -> {
                     val setting: OperationSound = settingsMap["Button Sound"] as OperationSound
                     setting.sound = value == true
                 }
+
                 "autoLight" -> {
                     val setting: Light = settingsMap["Light"] as Light
                     setting.autoLight = value == true
                 }
+
                 "lightDuration" -> {
                     val setting: Light = settingsMap["Light"] as Light
                     if (value == Light.LIGHT_DURATION.TWO_SECONDS.value) {
@@ -115,6 +121,7 @@ object SettingsModel {
                         setting.duration = Light.LIGHT_DURATION.FOUR_SECONDS
                     }
                 }
+
                 "timeFormat" -> {
                     val setting: Locale = settingsMap["Locale"] as Locale
                     if (value == Locale.TIME_FORMAT.TWELVE_HOURS.value) {
@@ -123,6 +130,7 @@ object SettingsModel {
                         setting.timeFormat = Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
                     }
                 }
+
                 "dateFormat" -> {
                     val setting: Locale = settingsMap["Locale"] as Locale
                     if (value == Locale.DATE_FORMAT.MONTH_DAY.value) {
@@ -131,19 +139,25 @@ object SettingsModel {
                         setting.dateFormat = Locale.DATE_FORMAT.DAY_MONTH
                     }
                 }
+
                 "language" -> {
                     val setting: Locale = settingsMap["Locale"] as Locale
                     when (value) {
                         Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH.value -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
+
                         Locale.DAY_OF_WEEK_LANGUAGE.SPANISH.value -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
+
                         Locale.DAY_OF_WEEK_LANGUAGE.FRENCH.value -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
+
                         Locale.DAY_OF_WEEK_LANGUAGE.GERMAN.value -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
+
                         Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN.value -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
+
                         Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN.value -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
                     }

@@ -4,7 +4,7 @@
  * Last modified 2022-04-11, 12:40 p.m.
  */
 
-@file:Suppress("PrivatePropertyName", "PrivatePropertyName", "PrivatePropertyName")
+@file:Suppress("PrivatePropertyName")
 
 package org.avmedia.gShockPhoneSync
 

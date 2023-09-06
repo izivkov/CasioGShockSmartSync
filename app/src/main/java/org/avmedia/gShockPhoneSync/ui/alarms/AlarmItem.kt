@@ -33,7 +33,9 @@ class AlarmItem @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    val timeFormat = if (SimpleDateFormat().toPattern().split(" ")[1][0] == 'h') TimeFormat.CLOCK_12H else TimeFormat.CLOCK_24H
+                    val timeFormat = if (SimpleDateFormat().toPattern()
+                            .split(" ")[1][0] == 'h'
+                    ) TimeFormat.CLOCK_12H else TimeFormat.CLOCK_24H
                     val picker =
                         MaterialTimePicker.Builder()
                             .setTimeFormat(timeFormat)

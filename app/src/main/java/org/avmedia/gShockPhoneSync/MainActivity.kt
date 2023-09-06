@@ -259,7 +259,8 @@ class MainActivity : AppCompatActivity() {
 
                     ProgressEvents["DeviceName"] -> {
                         val navView: BottomNavigationView = binding.navView
-                        navView.menu.findItem(R.id.navigation_events).isVisible = WatchInfo.hasReminders
+                        navView.menu.findItem(R.id.navigation_events).isVisible =
+                            WatchInfo.hasReminders
                     }
 
                     ProgressEvents["WatchInitializationCompleted"] -> {
@@ -269,7 +270,7 @@ class MainActivity : AppCompatActivity() {
                     ProgressEvents["HomeTimeUpdated"] -> {
                         // This is really ugly, but I cannot update home time value
                         // inside the HomeTime. Anybody knows why, let me know.
-                        val textView :HomeTime = findViewById(R.id.home_time)
+                        val textView: HomeTime = findViewById(R.id.home_time)
                         runBlocking {
                             textView.update()
                         }

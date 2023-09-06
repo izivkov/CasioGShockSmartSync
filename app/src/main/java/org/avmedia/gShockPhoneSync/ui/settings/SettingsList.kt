@@ -25,7 +25,8 @@ class SettingsList @JvmOverloads constructor(
     }
 
     init {
-        adapter = Cache.adapter ?: SettingsAdapter(SettingsModel.settings).also { Cache.adapter = it }
+        adapter =
+            Cache.adapter ?: SettingsAdapter(SettingsModel.settings).also { Cache.adapter = it }
         layoutManager = LinearLayoutManager(context)
         listenForUpdateRequest()
     }

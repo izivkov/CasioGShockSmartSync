@@ -25,8 +25,8 @@ import java.text.DateFormat
 import java.time.Clock
 import java.util.Date
 
-@Suppress("ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
-    "ClassName", "ClassName"
+@Suppress(
+    "ClassName",
 )
 object ActionsModel {
 
@@ -312,7 +312,8 @@ object ActionsModel {
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
-        val filteredActions: List<Action> = actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders )}
+        val filteredActions: List<Action> =
+            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) }
         runFilteredActions(context, filteredActions)
 
         // show notification if configured

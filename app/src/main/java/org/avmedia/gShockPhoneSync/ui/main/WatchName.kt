@@ -22,7 +22,7 @@ class WatchName @JvmOverloads constructor(
         if (shortName.isBlank()) {
             shortName = "No Watch"
         }
-        text =  shortName
+        text = shortName
 
         createSubscription()
     }

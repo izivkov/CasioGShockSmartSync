@@ -33,6 +33,7 @@ class ConnectionLayout @JvmOverloads constructor(
                             hide()
                         }
                     }
+
                     ProgressEvents["WatchInitializationCompleted"] -> {
                         if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
                             println("connectionLayout: hide")

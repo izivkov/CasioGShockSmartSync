@@ -43,6 +43,7 @@ class MainLayout @JvmOverloads constructor(
                             show()
                         }
                     }
+
                     ProgressEvents["Disconnect"] -> {
                         println("MainLayout: hide")
                         hide()

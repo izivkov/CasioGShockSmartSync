@@ -34,6 +34,7 @@ class WatchImageView @JvmOverloads constructor(
             throwable.printStackTrace()
         })
     }
+
     private fun setImageResource() {
         when (WatchInfo.model) {
             WatchInfo.WATCH_MODEL.GA -> {

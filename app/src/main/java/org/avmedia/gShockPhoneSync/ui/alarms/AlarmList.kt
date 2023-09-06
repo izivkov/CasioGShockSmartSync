@@ -23,7 +23,7 @@ class AlarmList @JvmOverloads constructor(
     }
 
     init {
-        adapter = Cache.adapter ?:  AlarmAdapter(AlarmsModel.alarms).also { Cache.adapter = it }
+        adapter = Cache.adapter ?: AlarmAdapter(AlarmsModel.alarms).also { Cache.adapter = it }
         layoutManager = LinearLayoutManager(context)
 
         runBlocking {

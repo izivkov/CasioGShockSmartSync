@@ -29,6 +29,9 @@ object RRuleValues {
         var repeatPeriod: RepeatPeriod = RepeatPeriod.NEVER
     )
 
+    @Suppress(
+        "SpellCheckingInspection"
+    )
     fun getValues(
         rrule: String?,
         startDate: EventDate,
@@ -85,6 +88,7 @@ object RRuleValues {
                                     )
                                         .plusDays(numberOfPeriods)
                             }
+
                             Frequency.Weekly -> {
                                 val weekDays = rruleObjVal.byDay
 
@@ -98,6 +102,7 @@ object RRuleValues {
                                     numberOfPeriods.toInt()
                                 )
                             }
+
                             Frequency.Monthly -> {
                                 rruleValues.localEndDate =
                                     LocalDate.of(
@@ -107,6 +112,7 @@ object RRuleValues {
                                     )
                                         .plusMonths(numberOfPeriods)
                             }
+
                             Frequency.Yearly -> {
                                 rruleValues.localEndDate =
                                     LocalDate.of(

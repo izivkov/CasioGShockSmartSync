@@ -32,7 +32,7 @@ object AutoConfigurator {
             "ru" -> settings.language = "Russian"
             else -> settings.language = "English"
         }
-        
+
         val dateTimePattern = SimpleDateFormat().toPattern()
 
         // fr: dd/MM/y HH:mm
