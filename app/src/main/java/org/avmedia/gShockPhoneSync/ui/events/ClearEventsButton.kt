@@ -14,7 +14,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
 
-class SendEventsToWatchButton @JvmOverloads constructor(
+class ClearEventsButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : Button(context, attrs, defStyleAttr) {
 
@@ -26,8 +26,8 @@ class SendEventsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    api().setEvents(EventsModel.events)
-                    Utils.snackBar(context, "Events Sent to Watch")
+                    api().clearEvents()
+                    Utils.snackBar(context, "All Watch Reminders cleared")
                 }
             }
             v?.performClick()
