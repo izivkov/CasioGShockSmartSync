@@ -1,1 +1,2 @@
-Add support for the GMW watches.
+- Adjust battery level
+
