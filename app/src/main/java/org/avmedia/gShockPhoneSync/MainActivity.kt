@@ -66,8 +66,10 @@ class MainActivity : AppCompatActivity() {
         instance = this
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -290,7 +292,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
-        val deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+        var deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+        if (!api().validate(deviceAddress)) {
+            deviceAddress = null
+        }
+
         val deviceName = LocalDataStorage.get("LastDeviceName", "", this)
         api().waitForConnection(deviceAddress, deviceName)
     }

@@ -13,7 +13,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
-import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -24,6 +23,10 @@ import timber.log.Timber
 import java.text.DateFormat
 import java.time.Clock
 import java.util.Date
+
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Suppress(
     "ClassName",
@@ -124,7 +127,7 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            runBlocking {
+            GlobalScope.launch {
                 api().setTime()
             }
         }
@@ -349,7 +352,7 @@ object ActionsModel {
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
                     // Run in background for speed.
-                    runBlocking {
+                    GlobalScope.launch {
                         runIt(it, context)
                     }
                 } else {
