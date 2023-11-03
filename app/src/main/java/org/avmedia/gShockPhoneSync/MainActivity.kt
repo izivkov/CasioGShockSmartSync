@@ -21,15 +21,13 @@ import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.ui.time.HomeTime
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -43,7 +41,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -92,8 +89,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun run() {
 
-        val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-        scope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             Timber.i("=============== >>>> *** Waiting for connection... ***")
             waitForConnectionCached()
         }
@@ -272,9 +268,8 @@ class MainActivity : AppCompatActivity() {
                         // This is really ugly, but I cannot update home time value
                         // inside the HomeTime. Anybody knows why, let me know.
                         val textView: HomeTime = findViewById(R.id.home_time)
-                        runBlocking {
-                            textView.update()
-                        }
+                        textView.update()
+                        Timber.d("HomeTimeUpdated")
                     }
                 }
             }, { throwable ->
@@ -293,7 +288,7 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun waitForConnectionCached() {
         var deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
-        if (!api().validate(deviceAddress)) {
+        if (!api().validateBluetoothAddress(deviceAddress)) {
             deviceAddress = null
         }
 

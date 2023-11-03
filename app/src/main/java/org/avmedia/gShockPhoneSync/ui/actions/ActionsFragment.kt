@@ -15,6 +15,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gshockapi.ProgressEvents
 
@@ -55,6 +57,9 @@ class ActionsFragment : Fragment() {
 
         _binding = FragmentActionsBinding.inflate(inflater, container, false)
         _binding?.actionList?.init()
+
+        actionsFragmentScope = lifecycleScope
+
         return binding.root
     }
 
@@ -62,5 +67,9 @@ class ActionsFragment : Fragment() {
         super.onDestroyView()
         _binding?.actionList?.shutdown()
         _binding = null
+    }
+
+    companion object {
+        var actionsFragmentScope: LifecycleCoroutineScope? = null
     }
 }

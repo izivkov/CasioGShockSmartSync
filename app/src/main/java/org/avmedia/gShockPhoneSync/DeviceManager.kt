@@ -1,10 +1,10 @@
 package org.avmedia.gShockPhoneSync
 
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
-
 
 object DeviceManager {
 
@@ -38,7 +38,7 @@ object DeviceManager {
                             "LastDeviceAddress",
                             "",
                             applicationContext()
-                        ) != deviceAddress
+                        ) != deviceAddress && api().validateBluetoothAddress(deviceAddress)
                     ) {
                         LocalDataStorage.put(
                             "LastDeviceAddress", deviceAddress, applicationContext()
@@ -51,5 +51,4 @@ object DeviceManager {
             throwable.printStackTrace()
         })
     }
-
 }

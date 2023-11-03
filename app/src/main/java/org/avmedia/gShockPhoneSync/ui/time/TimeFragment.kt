@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentTimeBinding
 
 class TimeFragment : Fragment() {
@@ -28,6 +30,7 @@ class TimeFragment : Fragment() {
     ): View {
 
         _binding = FragmentTimeBinding.inflate(inflater, container, false)
+        timeFragmentScope = lifecycleScope
         return binding.root
     }
 
@@ -35,4 +38,9 @@ class TimeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    companion object {
+        var timeFragmentScope: LifecycleCoroutineScope? = null
+    }
 }
+

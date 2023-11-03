@@ -7,6 +7,7 @@
 package org.avmedia.gShockPhoneSync.ui.time
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.icu.text.MeasureFormat
 import android.icu.util.Measure
@@ -15,11 +16,12 @@ import android.os.Build
 import android.telephony.TelephonyManager
 import android.util.AttributeSet
 import androidx.annotation.RequiresApi
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
 import java.util.*
-
 
 class WatchTemperature @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -31,7 +33,7 @@ class WatchTemperature @JvmOverloads constructor(
         super.onFinishInflate()
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            runBlocking {
+            timeFragmentScope?.launch(Dispatchers.IO) {
                 val temperature = api().getWatchTemperature()
 
                 val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
@@ -44,7 +46,9 @@ class WatchTemperature @JvmOverloads constructor(
                     MeasureUnit.FAHRENHEIT
                 ) else Measure(temperature, MeasureUnit.CELSIUS)
 
-                text = fmt.format(measure)
+                (context as Activity).runOnUiThread {
+                    text = fmt.format(measure)
+                }
             }
         }
     }

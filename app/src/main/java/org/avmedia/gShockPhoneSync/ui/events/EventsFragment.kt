@@ -13,6 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentEventsBinding
 import org.avmedia.gshockapi.ProgressEvents
 
@@ -30,6 +32,8 @@ class EventsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
+
+        eventsFragmentScope = lifecycleScope
 
         val requestMultiplePermissions = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -53,5 +57,9 @@ class EventsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        var eventsFragmentScope: LifecycleCoroutineScope? = null
     }
 }

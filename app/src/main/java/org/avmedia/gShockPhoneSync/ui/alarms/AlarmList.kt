@@ -10,8 +10,11 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsFragment.Companion.alarmsFragmentScope
 
 @SuppressLint("NotifyDataSetChanged")
 class AlarmList @JvmOverloads constructor(
@@ -33,7 +36,7 @@ class AlarmList @JvmOverloads constructor(
             AlarmsModel.alarms.clear()
             AlarmsModel.alarms.addAll(alarms)
 
-            runBlocking {
+            alarmsFragmentScope?.launch(Dispatchers.IO) {
                 adapter?.notifyDataSetChanged()
             }
         }

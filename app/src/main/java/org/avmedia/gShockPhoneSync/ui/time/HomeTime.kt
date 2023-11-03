@@ -6,11 +6,13 @@
 
 package org.avmedia.gShockPhoneSync.ui.time
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
-import kotlinx.coroutines.runBlocking
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -20,17 +22,21 @@ open class HomeTime @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            runBlocking {
+            timeFragmentScope?.launch(Dispatchers.IO) {
                 text = api().getHomeTime()
             }
         }
     }
 
     override fun setText(text: CharSequence?, type: BufferType?) {
-        super.setText(text, type)
+        (context as Activity).runOnUiThread {
+            super.setText(text, type)
+        }
     }
 
-    suspend fun update() {
-        text = api().getHomeTime()
+    fun update() {
+        timeFragmentScope?.launch(Dispatchers.IO) {
+            text = api().getHomeTime()
+        }
     }
 }

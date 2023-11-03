@@ -63,7 +63,8 @@ class BatteryView @JvmOverloads constructor(
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
             runBlocking {
-                setPercent(api().getBatteryLevel())
+                val percent = api().getBatteryLevel()
+                setPercent(percent)
             }
         }
     }

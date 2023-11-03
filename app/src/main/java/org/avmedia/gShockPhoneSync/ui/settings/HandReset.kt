@@ -11,8 +11,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.settingsFragmentScope
 import timber.log.Timber
 
 
@@ -42,7 +44,7 @@ class HandReset @JvmOverloads constructor(
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     Timber.i("Reset to top")
-                    runBlocking {
+                    settingsFragmentScope?.launch(Dispatchers.IO) {
                         MainActivity.api().resetHand()
                     }
                 }

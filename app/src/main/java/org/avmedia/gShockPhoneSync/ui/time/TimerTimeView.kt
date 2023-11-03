@@ -10,9 +10,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
 import timber.log.Timber
 
 
@@ -27,7 +29,7 @@ class TimerTimeView @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            runBlocking {
+            timeFragmentScope?.launch(Dispatchers.IO) {
                 text = makeLongString(api().getTimer())
             }
         }

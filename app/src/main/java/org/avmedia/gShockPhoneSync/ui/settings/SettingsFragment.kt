@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentSettingsBinding
 import timber.log.Timber
 
@@ -33,11 +35,16 @@ class SettingsFragment : Fragment() {
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         _binding?.settingsList?.init()
+        settingsFragmentScope = lifecycleScope
         return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        var settingsFragmentScope: LifecycleCoroutineScope? = null
     }
 }

@@ -11,8 +11,10 @@ import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.settingsFragmentScope
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -32,7 +34,7 @@ class SettingsList @JvmOverloads constructor(
     }
 
     fun init() {
-        runBlocking {
+        settingsFragmentScope?.launch(Dispatchers.IO) {
             val settingStr = Gson().toJson(api().getSettings())
             SettingsModel.fromJson(settingStr)
         }
