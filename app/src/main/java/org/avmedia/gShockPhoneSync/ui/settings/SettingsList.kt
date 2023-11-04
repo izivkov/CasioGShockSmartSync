@@ -6,6 +6,7 @@
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.settingsFragmentScope
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.ble.DeviceCharacteristics
+import org.avmedia.gshockapi.io.CachedIO
 import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(
@@ -47,16 +51,12 @@ class SettingsList @JvmOverloads constructor(
     }
 
     private fun listenForUpdateRequest() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String, {
-            when (it) {
-                // Somebody has made a change to the model...need to update the UI
-                ProgressEvents["NeedToUpdateUI"] -> {
-                    updateUI()
-                }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+        val eventActions = arrayOf(
+            EventAction("NeedToUpdateUI") { _ ->
+                updateUI()
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 }

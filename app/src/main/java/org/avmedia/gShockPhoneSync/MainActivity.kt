@@ -32,6 +32,7 @@ import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.ui.time.HomeTime
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -178,104 +179,73 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String,
 
-            {
-                when (it) {
-                    ProgressEvents["ConnectionSetupComplete"] -> {
-                        InactivityWatcher.start(this)
-                    }
-
-                    ProgressEvents["ConnectionFailed"] -> {
-                        runWithChecks()
-                    }
-
-                    ProgressEvents["FineLocationPermissionNotGranted"] -> {
-                        Utils.snackBar(
-                            this,
-                            "\"Fine Location\" Permission Not Granted! Clear the App's Cache to try again."
-                        )
-                        Timer("SettingUp", false).schedule(6000) {
-                            finish()
-                        }
-                    }
-
-                    ProgressEvents["FineLocationPermissionGranted"] -> {
-                        Timber.i("FineLocationPermissionGranted")
-                    }
-
-                    ProgressEvents["ApiError"] -> {
-                        Utils.snackBar(
-                            this,
-                            "ApiError! Something went wrong - Make sure the official G-Shock app in not running, to prevent interference."
-                        )
-
-                        val errorScheduler: ScheduledExecutorService =
-                            Executors.newSingleThreadScheduledExecutor()
-                        errorScheduler.schedule({
-                            api().disconnect(this)
-                        }, 3L, TimeUnit.SECONDS)
-                    }
-
-                    ProgressEvents["WaitForConnection"] -> {
-                        val errorScheduler: ScheduledExecutorService =
-                            Executors.newSingleThreadScheduledExecutor()
-                        errorScheduler.schedule({
-                            runWithChecks()
-                        }, 1L, TimeUnit.SECONDS)
-                    }
-
-                    ProgressEvents["Disconnect"] -> {
-                        Timber.i("onDisconnect")
-                        InactivityWatcher.cancel()
-
-                        Utils.snackBar(this, "Disconnected from watch!", Snackbar.LENGTH_SHORT)
-                        val device = ProgressEvents.getPayload("Disconnect") as BluetoothDevice
-                        api().teardownConnection(device)
-
-                        val reconnectScheduler: ScheduledExecutorService =
-                            Executors.newSingleThreadScheduledExecutor()
-                        reconnectScheduler.schedule({
-                            runWithChecks()
-                        }, 3L, TimeUnit.SECONDS)
-                    }
-
-                    ProgressEvents["ActionsPermissionsNotGranted"] -> {
-                        Utils.snackBar(
-                            this, "Actions not granted...Cannot access the Actions screen..."
-                        )
-                        navigateHome()
-                    }
-
-                    ProgressEvents["CalendarPermissionsNotGranted"] -> {
-                        Utils.snackBar(
-                            this, "Calendar not granted...Cannot access the Actions screen..."
-                        )
-                        navigateHome()
-                    }
-
-                    ProgressEvents["DeviceName"] -> {
-                        val navView: BottomNavigationView = binding.navView
-                        navView.menu.findItem(R.id.navigation_events).isVisible =
-                            WatchInfo.hasReminders
-                    }
-
-                    ProgressEvents["WatchInitializationCompleted"] -> {
-                        navigateHome()
-                    }
-
-                    ProgressEvents["HomeTimeUpdated"] -> {
-                        // This is really ugly, but I cannot update home time value
-                        // inside the HomeTime. Anybody knows why, let me know.
-                        val textView: HomeTime = findViewById(R.id.home_time)
-                        textView.update()
-                        Timber.d("HomeTimeUpdated")
-                    }
+        val eventActions = arrayOf(
+            EventAction("ConnectionSetupComplete") { _ ->
+                InactivityWatcher.start(this)
+            },
+            EventAction("ConnectionFailed") { _ -> runWithChecks() },
+            EventAction("FineLocationPermissionNotGranted") { _ ->
+                Utils.snackBar(
+                    this,
+                    "\"Fine Location\" Permission Not Granted! Clear the App's Cache to try again."
+                )
+                Timer("SettingUp", false).schedule(6000) {
+                    finish()
                 }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
+            },
+            EventAction("FineLocationPermissionGranted") { _ -> Timber.i("FineLocationPermissionGranted") },
+            EventAction("ApiError") { _ ->
+                Utils.snackBar(
+                    this,
+                    "ApiError! Something went wrong - Make sure the official G-Shock app in not running, to prevent interference."
+                )
+                val errorScheduler: ScheduledExecutorService =
+                    Executors.newSingleThreadScheduledExecutor()
+                errorScheduler.schedule({
+                    api().disconnect(this)
+                }, 3L, TimeUnit.SECONDS)
+            },
+            EventAction("WaitForConnection") { _ -> runWithChecks() },
+            EventAction("Disconnect") { _ ->
+                Timber.i("onDisconnect")
+                InactivityWatcher.cancel()
+                Utils.snackBar(this, "Disconnected from watch!", Snackbar.LENGTH_SHORT)
+                val device = ProgressEvents.getPayload("Disconnect") as BluetoothDevice
+                api().teardownConnection(device)
+                val reconnectScheduler: ScheduledExecutorService =
+                    Executors.newSingleThreadScheduledExecutor()
+                reconnectScheduler.schedule({
+                    runWithChecks()
+                }, 3L, TimeUnit.SECONDS)
+            },
+            EventAction("ActionsPermissionsNotGranted") { _ ->
+                Utils.snackBar(
+                    this,
+                    "Actions not granted...Cannot access the Actions screen..."
+                )
+            },
+            EventAction("CalendarPermissionsNotGranted") { _ ->
+                Utils.snackBar(
+                    this,
+                    "Calendar not granted...Cannot access the Actions screen..."
+                )
+            },
+            EventAction("DeviceName") { _ ->
+                val navView: BottomNavigationView = binding.navView
+                navView.menu.findItem(R.id.navigation_events).isVisible =
+                    WatchInfo.hasReminders
+            },
+            EventAction("WatchInitializationCompleted") { event -> navigateHome() },
+            EventAction("HomeTimeUpdated") { _ ->
+                // This is really ugly, but I cannot update home time value
+                // inside the HomeTime. Anybody knows why, let me know.
+                val textView: HomeTime = findViewById(R.id.home_time)
+                textView.update()
+                Timber.d("HomeTimeUpdated")
             })
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     private fun navigateHome() {

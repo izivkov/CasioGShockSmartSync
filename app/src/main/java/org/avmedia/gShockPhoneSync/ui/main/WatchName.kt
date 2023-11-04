@@ -7,10 +7,14 @@
 package org.avmedia.gShockPhoneSync.ui.main
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockapi.ble.DeviceCharacteristics
+import org.avmedia.gshockapi.io.CachedIO
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
@@ -29,22 +33,18 @@ class WatchName @JvmOverloads constructor(
 
     @SuppressLint("SetTextI18n")
     private fun createSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String,
-            {
-                when (it) {
-                    ProgressEvents["DeviceName"] -> {
-                        val deviceName = ProgressEvents.getPayload("DeviceName")
-                        if ((deviceName as String).isBlank()) {
-                            text = "No Watch"
-                        }
-                        if (deviceName.contains("CASIO")) {
-                            text = deviceName.removePrefix("CASIO").trim()
-                        }
-                    }
+        val eventActions = arrayOf(
+            EventAction("DeviceName") { _ ->
+                val deviceName = ProgressEvents.getPayload("DeviceName")
+                if ((deviceName as String).isBlank()) {
+                    text = "No Watch"
                 }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
+                if (deviceName.contains("CASIO")) {
+                    text = deviceName.removePrefix("CASIO").trim()
+                }
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 }

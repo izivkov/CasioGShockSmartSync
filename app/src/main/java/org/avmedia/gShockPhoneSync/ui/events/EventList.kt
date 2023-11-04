@@ -7,11 +7,15 @@ package org.avmedia.gShockPhoneSync.ui.events
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.ble.DeviceCharacteristics
+import org.avmedia.gshockapi.io.CachedIO
 import timber.log.Timber
 
 class EventList @JvmOverloads constructor(
@@ -32,38 +36,29 @@ class EventList @JvmOverloads constructor(
 
     @SuppressLint("NotifyDataSetChanged")
     private fun waitForPermissions() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName + "waitForPermissions",
-
-            {
-                when (it) {
-                    ProgressEvents["CalendarPermissionsGranted"] -> {
-                        EventsModel.refresh(context)
-                        (context as Activity).runOnUiThread {
-                            adapter?.notifyDataSetChanged()
-                        }
-                    }
+        val eventActions = arrayOf(
+            EventAction("CalendarPermissionsGranted") { _ ->
+                EventsModel.refresh(context)
+                (context as Activity).runOnUiThread {
+                    adapter?.notifyDataSetChanged()
                 }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun listenForUpdateRequest() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName + "listenForUpdateRequest", {
-            when (it) {
-                // Somebody has made a change to the model...need to update the UI
-                ProgressEvents["CalendarUpdated"] -> {
-                    EventsModel.refresh(context)
-                    (context as Activity).runOnUiThread {
-                        adapter?.notifyDataSetChanged()
-                    }
+        val eventActions = arrayOf(
+            EventAction("CalendarUpdated") { _ ->
+                EventsModel.refresh(context)
+                (context as Activity).runOnUiThread {
+                    adapter?.notifyDataSetChanged()
                 }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName  + "listenForUpdateRequest", eventActions)
     }
 }

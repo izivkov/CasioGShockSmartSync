@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
@@ -23,16 +24,14 @@ class WatchImageView @JvmOverloads constructor(
     }
 
     private fun startListener() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
-            when (it) {
-                ProgressEvents["DeviceName"] -> {
-                    setImageResource()
-                }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+
+        val eventActions = arrayOf(
+            EventAction("DeviceName") { _ ->
+                setImageResource()
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     private fun setImageResource() {

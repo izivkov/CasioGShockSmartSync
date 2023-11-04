@@ -481,8 +481,6 @@ object Connection : IConnection {
 
             if (pendingOperation is Connect) {
                 ProgressEvents.onNext("ConnectionSetupComplete", gatt.device)
-                println("onNext ConnectionSetupComplete")
-
                 signalEndOfOperation()
             }
         }

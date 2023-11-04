@@ -15,13 +15,17 @@
 
 package org.avmedia.gShockPhoneSync.ui.actions
 
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.ble.DeviceCharacteristics
+import org.avmedia.gshockapi.io.CachedIO
 import timber.log.Timber
 
 class ActionRunnerLayout @JvmOverloads constructor(
@@ -34,29 +38,26 @@ class ActionRunnerLayout @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
-            when (it) {
-                ProgressEvents["ButtonPressedInfoReceived"] -> {
-                    ActionsModel.loadData(context)
-                    if (api().isActionButtonPressed()) {
-                        show()
-                        ActionsModel.runActions(context)
-                    } else if (api().isAutoTimeStarted()) {
-                        ActionsModel.runActionsForAutoTimeSetting(context)
-                    } else if (api().isFindPhoneButtonPressed()) {
-                        show()
-                        ActionsModel.runActionFindPhone(context)
-                    }
-                }
 
-                ProgressEvents["Disconnect"] -> {
-                    hide()
+        val eventActions = arrayOf(
+            EventAction("ButtonPressedInfoReceived") { _ ->
+                ActionsModel.loadData(context)
+                if (api().isActionButtonPressed()) {
+                    show()
+                    ActionsModel.runActions(context)
+                } else if (api().isAutoTimeStarted()) {
+                    ActionsModel.runActionsForAutoTimeSetting(context)
+                } else if (api().isFindPhoneButtonPressed()) {
+                    show()
+                    ActionsModel.runActionFindPhone(context)
                 }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+            },
+            EventAction("Disconnect") { _ ->
+                hide()
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     override fun show() {

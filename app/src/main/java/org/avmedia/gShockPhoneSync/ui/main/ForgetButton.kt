@@ -6,15 +6,19 @@
 
 package org.avmedia.gShockPhoneSync.ui.main
 
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
+import org.avmedia.gshockapi.ble.DeviceCharacteristics
+import org.avmedia.gshockapi.io.CachedIO
 import timber.log.Timber
 
 class ForgetButton @JvmOverloads constructor(
@@ -27,21 +31,23 @@ class ForgetButton @JvmOverloads constructor(
     }
 
     private fun listenForConnection() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
 
-            {
-                when (it) {
-                    ProgressEvents["ConnectionStarted"] -> {
-                        isEnabled = false
-                        Timber.d("... Do not interrupt...")
-                    }
+        val eventActions = arrayOf(
+            EventAction("ConnectionStarted") { _ ->
+                isEnabled = false
+            },
+            EventAction("WatchInitializationCompleted") { _ ->
+                isEnabled = true
+            },
+            EventAction("ConnectionFailed") { _ ->
+                isEnabled = true
+            },
+            EventAction("Disconnect") { _ ->
+                isEnabled = true
+            },
+        )
 
-                    ProgressEvents["WatchInitializationCompleted"], ProgressEvents["ConnectionFailed"], ProgressEvents["Disconnect"] -> {
-                        isEnabled = true
-                        Timber.d("... Can be interrupted...")
-                    }
-                }
-            }, { throwable -> Timber.d("Got error on subscribe: $throwable") })
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     inner class OnTouchListener : View.OnTouchListener {

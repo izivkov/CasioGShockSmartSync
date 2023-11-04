@@ -3,6 +3,7 @@ package org.avmedia.gshockapi.io
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import kotlinx.coroutines.CompletableDeferred
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.ble.BleScannerLocal
 import org.avmedia.gshockapi.ble.Connection
@@ -46,21 +47,18 @@ object WaitForConnectionIO {
         )
 
         fun waitForConnectionSetupComplete() {
-            ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
-                when (it) {
-                    ProgressEvents["ConnectionSetupComplete"] -> {
-                        val device =
-                            ProgressEvents.getPayload("ConnectionSetupComplete") as BluetoothDevice
-                        DeviceCharacteristics.init(device)
+            val eventActions = arrayOf(
+                EventAction("ConnectionSetupComplete") { _ ->
+                    val device =
+                        ProgressEvents.getPayload("ConnectionSetupComplete") as BluetoothDevice
+                    DeviceCharacteristics.init(device)
 
-                        CachedIO.clearCache()
-                        CachedIO.resultQueue.dequeue("waitForConnection")?.complete("OK")
-                    }
-                }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
+                    CachedIO.clearCache()
+                    CachedIO.resultQueue.dequeue("waitForConnection")?.complete("OK")
+                },
+            )
+
+            ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
         }
 
         waitForConnectionSetupComplete()

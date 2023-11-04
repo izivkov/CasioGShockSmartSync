@@ -10,6 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ProgressBar
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -23,23 +24,22 @@ class ConnectionSpinner @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(
-            this.javaClass.canonicalName,
-
-            {
-                when (it) {
-                    ProgressEvents["ConnectionStarted"] -> {
-                        visibility = View.VISIBLE
-                    }
-
-                    ProgressEvents["WatchInitializationCompleted"],
-                    ProgressEvents["ConnectionFailed"],
-                    ProgressEvents["Disconnect"] -> {
-                        visibility = View.INVISIBLE
-                    }
-                }
+        val eventActions = arrayOf(
+            EventAction("ConnectionStarted") { _ ->
+                visibility = View.VISIBLE
             },
-            { throwable -> Timber.d("Got error on subscribe: $throwable") })
+            EventAction("WatchInitializationCompleted") { _ ->
+                visibility = View.INVISIBLE
+            },
+            EventAction("ConnectionFailed") { _ ->
+                visibility = View.INVISIBLE
+            },
+            EventAction("Disconnect") { _ ->
+                visibility = View.INVISIBLE
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 }
 

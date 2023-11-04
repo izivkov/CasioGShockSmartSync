@@ -54,6 +54,16 @@ import timber.log.Timber
  *
  */
 
+interface IEventAction {
+    val label: String
+    val action: (event: Events) -> Unit
+}
+
+data class EventAction(
+    override val label: String,
+    override val action: (event: Events) -> Unit
+) : IEventAction
+
 object ProgressEvents {
 
     val subscriber = Subscriber()
@@ -69,7 +79,9 @@ object ProgressEvents {
          * @param name This should be a unique name to prevent multiple subscriptions. Only one
          * subscription per name is allowed. The caller can use its class name (`this.javaClass.canonicalName`) to ensure uniqueness:
          */
+
         @SuppressLint("CheckResult")
+        @Deprecated("This method is deprecated. Use runEventActions() instead.")
         fun start(
             name: String,
             onNextStr: Consumer<in Events>,
@@ -89,10 +101,53 @@ object ProgressEvents {
             (subscribers as LinkedHashSet).add(name)
         }
 
-        val onError = { throwable: Throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
+        /**
+         * Call this from anywhere to start listening to [ProgressEvents].
+         *
+         * @param name This should be a unique name to prevent multiple subscriptions. Only one
+         * subscription per name is allowed. The caller can use its class name (`this.javaClass.canonicalName`) to ensure uniqueness:
+         */
+        @SuppressLint("CheckResult")
+        fun runEventActions(name: String, eventActions: Array<EventAction>) {
+
+            if (subscribers.contains(name)) {
+                return // do not allow multiple subscribers with same name
+            }
+
+            fun getKeyByValue(map: Map<String, Events>, targetValue: Events): String? {
+                return map.entries.firstOrNull { it.value == targetValue }?.key
+            }
+
+            val runActions: () -> Unit = {
+                eventActions.forEach { eventAction ->
+
+                    val filterOld = { event: Events ->
+                        val key = getKeyByValue(eventMap, event)
+                        key != null && key == eventAction.label
+                    }
+
+                    val filter = { event: Events ->
+                        reverseEventMap[event] != null && reverseEventMap[event] == eventAction.label
+                    }
+
+                    val onError = { throwable: Throwable ->
+                        Timber.d("Got error on subscribe: $throwable")
+                        throwable.printStackTrace()
+                    }
+
+                    eventsProcessor.observeOn(AndroidSchedulers.mainThread())
+                        .filter { event -> filter(event) }
+                        .doOnNext(eventAction.action)
+                        .doOnError(onError)
+                        .subscribe({}, onError)
+                }
+            }
+
+            (subscribers as LinkedHashSet).add(name)
+
+            runActions()
         }
+
 
         /**
          * Stop listening on [ProgressEvents]
@@ -155,7 +210,9 @@ object ProgressEvents {
             return
         }
 
-        eventMap[eventName] = Events()
+        val newEvent = Events()
+        eventMap[eventName] = newEvent
+        reverseEventMap[newEvent] = eventName
     }
 
     fun getPayload(eventName: String): Any? {
@@ -213,4 +270,6 @@ object ProgressEvents {
         Pair("HomeTimeUpdated", Events()),
         Pair("ApiError", Events()),
     )
+
+    private var reverseEventMap = eventMap.entries.associateBy({ it.value }, { it.key }).toMutableMap()
 }
