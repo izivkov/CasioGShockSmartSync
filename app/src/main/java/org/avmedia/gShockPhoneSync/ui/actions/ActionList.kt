@@ -34,7 +34,7 @@ class ActionList @JvmOverloads constructor(
 
     private fun watchForDisconnect() {
         val eventActions = arrayOf(
-            EventAction("Disconnect") { _ ->
+            EventAction("Disconnect") {
                 shutdown()
             },
         )

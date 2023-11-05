@@ -48,7 +48,7 @@ object WaitForConnectionIO {
 
         fun waitForConnectionSetupComplete() {
             val eventActions = arrayOf(
-                EventAction("ConnectionSetupComplete") { _ ->
+                EventAction("ConnectionSetupComplete") {
                     val device =
                         ProgressEvents.getPayload("ConnectionSetupComplete") as BluetoothDevice
                     DeviceCharacteristics.init(device)

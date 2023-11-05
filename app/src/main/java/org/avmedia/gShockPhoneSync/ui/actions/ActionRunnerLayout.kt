@@ -40,7 +40,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
     private fun createAppEventsSubscription() {
 
         val eventActions = arrayOf(
-            EventAction("ButtonPressedInfoReceived") { _ ->
+            EventAction("ButtonPressedInfoReceived") {
                 ActionsModel.loadData(context)
                 if (api().isActionButtonPressed()) {
                     show()
@@ -52,7 +52,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
                     ActionsModel.runActionFindPhone(context)
                 }
             },
-            EventAction("Disconnect") { _ ->
+            EventAction("Disconnect") {
                 hide()
             },
         )

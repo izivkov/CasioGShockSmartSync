@@ -52,7 +52,7 @@ class SettingsList @JvmOverloads constructor(
 
     private fun listenForUpdateRequest() {
         val eventActions = arrayOf(
-            EventAction("NeedToUpdateUI") { _ ->
+            EventAction("NeedToUpdateUI") {
                 updateUI()
             },
         )

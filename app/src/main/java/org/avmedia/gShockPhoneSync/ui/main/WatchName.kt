@@ -34,7 +34,7 @@ class WatchName @JvmOverloads constructor(
     @SuppressLint("SetTextI18n")
     private fun createSubscription() {
         val eventActions = arrayOf(
-            EventAction("DeviceName") { _ ->
+            EventAction("DeviceName") {
                 val deviceName = ProgressEvents.getPayload("DeviceName")
                 if ((deviceName as String).isBlank()) {
                     text = "No Watch"

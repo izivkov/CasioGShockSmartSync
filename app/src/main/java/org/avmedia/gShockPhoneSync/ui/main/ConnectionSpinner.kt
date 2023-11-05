@@ -25,16 +25,16 @@ class ConnectionSpinner @JvmOverloads constructor(
 
     private fun createAppEventsSubscription() {
         val eventActions = arrayOf(
-            EventAction("ConnectionStarted") { _ ->
+            EventAction("ConnectionStarted") {
                 visibility = View.VISIBLE
             },
-            EventAction("WatchInitializationCompleted") { _ ->
+            EventAction("WatchInitializationCompleted") {
                 visibility = View.INVISIBLE
             },
-            EventAction("ConnectionFailed") { _ ->
+            EventAction("ConnectionFailed") {
                 visibility = View.INVISIBLE
             },
-            EventAction("Disconnect") { _ ->
+            EventAction("Disconnect") {
                 visibility = View.INVISIBLE
             },
         )

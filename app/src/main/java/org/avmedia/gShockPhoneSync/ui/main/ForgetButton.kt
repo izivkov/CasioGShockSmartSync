@@ -33,16 +33,16 @@ class ForgetButton @JvmOverloads constructor(
     private fun listenForConnection() {
 
         val eventActions = arrayOf(
-            EventAction("ConnectionStarted") { _ ->
+            EventAction("ConnectionStarted") {
                 isEnabled = false
             },
-            EventAction("WatchInitializationCompleted") { _ ->
+            EventAction("WatchInitializationCompleted") {
                 isEnabled = true
             },
-            EventAction("ConnectionFailed") { _ ->
+            EventAction("ConnectionFailed") {
                 isEnabled = true
             },
-            EventAction("Disconnect") { _ ->
+            EventAction("Disconnect") {
                 isEnabled = true
             },
         )

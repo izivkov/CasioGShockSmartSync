@@ -30,18 +30,18 @@ class ConnectionLayout @JvmOverloads constructor(
 
     private fun createAppEventsSubscription() {
         val eventActions = arrayOf(
-            EventAction("ButtonPressedInfoReceived") { _ ->
+            EventAction("ButtonPressedInfoReceived") {
                 if (api().isActionButtonPressed()) {
                     hide()
                 }
             },
-            EventAction("WatchInitializationCompleted") { _ ->
+            EventAction("WatchInitializationCompleted") {
                 if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
                     println("connectionLayout: hide")
                     hide()
                 }
             },
-            EventAction("Disconnect") { _ ->
+            EventAction("Disconnect") {
                 println("connectionLayout: show")
                 show()
             },

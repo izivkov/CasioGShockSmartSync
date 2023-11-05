@@ -37,7 +37,7 @@ class EventList @JvmOverloads constructor(
     @SuppressLint("NotifyDataSetChanged")
     private fun waitForPermissions() {
         val eventActions = arrayOf(
-            EventAction("CalendarPermissionsGranted") { _ ->
+            EventAction("CalendarPermissionsGranted") {
                 EventsModel.refresh(context)
                 (context as Activity).runOnUiThread {
                     adapter?.notifyDataSetChanged()
@@ -51,7 +51,7 @@ class EventList @JvmOverloads constructor(
     @SuppressLint("NotifyDataSetChanged")
     private fun listenForUpdateRequest() {
         val eventActions = arrayOf(
-            EventAction("CalendarUpdated") { _ ->
+            EventAction("CalendarUpdated") {
                 EventsModel.refresh(context)
                 (context as Activity).runOnUiThread {
                     adapter?.notifyDataSetChanged()

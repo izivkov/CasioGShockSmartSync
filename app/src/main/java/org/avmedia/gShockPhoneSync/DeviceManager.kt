@@ -19,7 +19,7 @@ object DeviceManager {
     private fun startListener() {
 
         val eventActions = arrayOf(
-            EventAction("DeviceName") { _ ->
+            EventAction("DeviceName") {
                 val deviceName = ProgressEvents.getPayload("DeviceName")
                 if ((deviceName as String) == "") {
                     LocalDataStorage.delete("LastDeviceName", applicationContext())
@@ -33,7 +33,7 @@ object DeviceManager {
                 }
             },
 
-            EventAction("DeviceAddress") { _ ->
+            EventAction("DeviceAddress") {
                 val deviceAddress = ProgressEvents.getPayload("DeviceAddress")
                 if ((deviceAddress as String) == "") {
                     LocalDataStorage.delete("LastDeviceAddress", applicationContext())

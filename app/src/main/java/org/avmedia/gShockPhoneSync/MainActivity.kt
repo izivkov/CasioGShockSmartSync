@@ -181,11 +181,11 @@ class MainActivity : AppCompatActivity() {
     private fun createAppEventsSubscription() {
 
         val eventActions = arrayOf(
-            EventAction("ConnectionSetupComplete") { _ ->
+            EventAction("ConnectionSetupComplete") {
                 InactivityWatcher.start(this)
             },
-            EventAction("ConnectionFailed") { _ -> runWithChecks() },
-            EventAction("FineLocationPermissionNotGranted") { _ ->
+            EventAction("ConnectionFailed") {runWithChecks() },
+            EventAction("FineLocationPermissionNotGranted") {
                 Utils.snackBar(
                     this,
                     "\"Fine Location\" Permission Not Granted! Clear the App's Cache to try again."
@@ -194,8 +194,8 @@ class MainActivity : AppCompatActivity() {
                     finish()
                 }
             },
-            EventAction("FineLocationPermissionGranted") { _ -> Timber.i("FineLocationPermissionGranted") },
-            EventAction("ApiError") { _ ->
+            EventAction("FineLocationPermissionGranted") {Timber.i("FineLocationPermissionGranted") },
+            EventAction("ApiError") {
                 Utils.snackBar(
                     this,
                     "ApiError! Something went wrong - Make sure the official G-Shock app in not running, to prevent interference."
@@ -206,8 +206,8 @@ class MainActivity : AppCompatActivity() {
                     api().disconnect(this)
                 }, 3L, TimeUnit.SECONDS)
             },
-            EventAction("WaitForConnection") { _ -> runWithChecks() },
-            EventAction("Disconnect") { _ ->
+            EventAction("WaitForConnection") {runWithChecks() },
+            EventAction("Disconnect") {
                 Timber.i("onDisconnect")
                 InactivityWatcher.cancel()
                 Utils.snackBar(this, "Disconnected from watch!", Snackbar.LENGTH_SHORT)
@@ -219,30 +219,29 @@ class MainActivity : AppCompatActivity() {
                     runWithChecks()
                 }, 3L, TimeUnit.SECONDS)
             },
-            EventAction("ActionsPermissionsNotGranted") { _ ->
+            EventAction("ActionsPermissionsNotGranted") {
                 Utils.snackBar(
                     this,
                     "Actions not granted...Cannot access the Actions screen..."
                 )
             },
-            EventAction("CalendarPermissionsNotGranted") { _ ->
+            EventAction("CalendarPermissionsNotGranted") {
                 Utils.snackBar(
                     this,
                     "Calendar not granted...Cannot access the Actions screen..."
                 )
             },
-            EventAction("DeviceName") { _ ->
+            EventAction("DeviceName") {
                 val navView: BottomNavigationView = binding.navView
                 navView.menu.findItem(R.id.navigation_events).isVisible =
                     WatchInfo.hasReminders
             },
-            EventAction("WatchInitializationCompleted") { event -> navigateHome() },
-            EventAction("HomeTimeUpdated") { _ ->
+            EventAction("WatchInitializationCompleted") {navigateHome() },
+            EventAction("HomeTimeUpdated") {
                 // This is really ugly, but I cannot update home time value
                 // inside the HomeTime. Anybody knows why, let me know.
                 val textView: HomeTime = findViewById(R.id.home_time)
                 textView.update()
-                Timber.d("HomeTimeUpdated")
             })
 
         ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)

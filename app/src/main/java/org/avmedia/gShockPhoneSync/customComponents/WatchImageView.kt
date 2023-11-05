@@ -26,7 +26,7 @@ class WatchImageView @JvmOverloads constructor(
     private fun startListener() {
 
         val eventActions = arrayOf(
-            EventAction("DeviceName") { _ ->
+            EventAction("DeviceName") {
                 setImageResource()
             },
         )

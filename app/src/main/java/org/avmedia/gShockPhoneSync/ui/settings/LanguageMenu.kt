@@ -32,7 +32,7 @@ class LanguageMenu @JvmOverloads constructor(
     private fun createSubscription() {
 
         val eventActions = arrayOf(
-            EventAction("Disconnect") { _ ->
+            EventAction("Disconnect") {
                 dismissDropDown()
             },
         )

@@ -56,18 +56,17 @@ import timber.log.Timber
 
 interface IEventAction {
     val label: String
-    val action: (event: Events) -> Unit
+    val action: () -> Unit
 }
 
-data class EventAction(
+data class EventAction (
     override val label: String,
-    override val action: (event: Events) -> Unit
+    override val action: () -> Unit
 ) : IEventAction
 
 object ProgressEvents {
 
     val subscriber = Subscriber()
-
     private val eventsProcessor: PublishProcessor<Events> = PublishProcessor.create()
 
     class Subscriber {
@@ -93,7 +92,7 @@ object ProgressEvents {
             }
 
             eventsProcessor.observeOn(AndroidSchedulers.mainThread())
-                .filter { event -> filter == null || filter(event) }
+                .filter { event -> filter(event) }
                 .doOnNext(onNextStr)
                 .doOnError(onError)
                 .subscribe({}, onError)
@@ -114,20 +113,16 @@ object ProgressEvents {
                 return // do not allow multiple subscribers with same name
             }
 
-            fun getKeyByValue(map: Map<String, Events>, targetValue: Events): String? {
-                return map.entries.firstOrNull { it.value == targetValue }?.key
-            }
-
             val runActions: () -> Unit = {
                 eventActions.forEach { eventAction ->
 
-                    val filterOld = { event: Events ->
-                        val key = getKeyByValue(eventMap, event)
-                        key != null && key == eventAction.label
+                    val filter = { event: Events ->
+                        val nameOfEvent = reverseEventMap[event]
+                        nameOfEvent != null && nameOfEvent == eventAction.label
                     }
 
-                    val filter = { event: Events ->
-                        reverseEventMap[event] != null && reverseEventMap[event] == eventAction.label
+                    val onNext = { _ : Events ->
+                        eventAction.action()
                     }
 
                     val onError = { throwable: Throwable ->
@@ -137,7 +132,7 @@ object ProgressEvents {
 
                     eventsProcessor.observeOn(AndroidSchedulers.mainThread())
                         .filter { event -> filter(event) }
-                        .doOnNext(eventAction.action)
+                        .doOnNext(onNext)
                         .doOnError(onError)
                         .subscribe({}, onError)
                 }
