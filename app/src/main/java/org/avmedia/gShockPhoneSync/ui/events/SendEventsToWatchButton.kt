@@ -28,14 +28,6 @@ class SendEventsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-
-                    // INZ test
-                    GlobalScope.launch {
-                        val events = api().getEventsFromWatch()
-                        println("events: $events")
-                    }
-                    // INZ test end
-
                     api().setEvents(EventsModel.events)
                     Utils.snackBar(context, "Events Sent to Watch")
                 }

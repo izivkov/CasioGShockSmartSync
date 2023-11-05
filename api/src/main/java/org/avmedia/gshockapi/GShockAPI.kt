@@ -348,7 +348,7 @@ class GShockAPI(private val context: Context) {
 
         val events = ArrayList<Event>()
 
-        events.add(EventsIO.request(1))
+        events.add(getEventFromWatch(1))
         events.add(getEventFromWatch(2))
         events.add(getEventFromWatch(3))
         events.add(getEventFromWatch(4))
@@ -363,7 +363,7 @@ class GShockAPI(private val context: Context) {
      * @param eventNumber The index of the event 1..5
      * @return [Event]
      */
-    suspend fun getEventFromWatch(eventNumber: Int): Event {
+    private suspend fun getEventFromWatch(eventNumber: Int): Event {
         return EventsIO.request(eventNumber)
     }
 

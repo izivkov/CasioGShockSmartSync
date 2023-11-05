@@ -21,19 +21,21 @@ import java.util.*
 object EventsIO {
 
     private object DeferredValueHolder {
-        var deferredResult = CompletableDeferred<Event>()
+        lateinit var deferredResult: CompletableDeferred<Event>
     }
 
     private object AccumulatedValueHolder {
-        var reminderJson = JSONObject()
+        var title = ""
     }
 
     suspend fun request(eventNumber: Int): Event {
-        AccumulatedValueHolder.reminderJson = JSONObject()
+        AccumulatedValueHolder.title = ""
         return CachedIO.request(eventNumber.toString(), ::getEventFromWatch) as Event
     }
 
     private suspend fun getEventFromWatch(eventNumber: String): Event {
+        DeferredValueHolder.deferredResult = CompletableDeferred<Event>()
+
         CasioIO.request("30${eventNumber}") // reminder title
         CasioIO.request("31${eventNumber}") // reminder time
 
@@ -64,18 +66,16 @@ object EventsIO {
     fun toJson(data: String): JSONObject {
 
         val decoded = ReminderDecoder.reminderTimeToJson(data + 2)
-
-        AccumulatedValueHolder.reminderJson.put("time", decoded.get("time"))
-
-        val event = Event(AccumulatedValueHolder.reminderJson)
-        // DeferredValueHolder.deferredResult.complete(event)
+        decoded.put ("title", AccumulatedValueHolder.title)
+        val event = Event(decoded)
+        DeferredValueHolder.deferredResult.complete(event)
 
         return JSONObject()
     }
 
     fun toJsonTitle(data: String): JSONObject {
         val decoded = ReminderDecoder.reminderTitleToJson(data + 2)
-        AccumulatedValueHolder.reminderJson.put("title", decoded.get("title"))
+        AccumulatedValueHolder.title = decoded.get("title") as String
         return JSONObject()
     }
 
