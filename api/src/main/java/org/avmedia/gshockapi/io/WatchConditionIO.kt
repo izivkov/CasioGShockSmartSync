@@ -9,6 +9,10 @@ import kotlin.math.roundToInt
 
 object WatchConditionIO {
 
+    private object DeferredValueHolder {
+        var deferredResult: CompletableDeferred<WatchConditionValue> = CompletableDeferred()
+    }
+
     class WatchConditionValue(val batteryLevel: Int, val temperature: Int)
 
     suspend fun request(): WatchConditionValue {
@@ -18,29 +22,12 @@ object WatchConditionIO {
     private suspend fun getWatchCondition(key: String): WatchConditionValue {
 
         CasioIO.request(key)
-
-        val deferredResult = CompletableDeferred<WatchConditionValue>()
-        CachedIO.resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        CachedIO.subscribe("CASIO_WATCH_CONDITION") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            CachedIO.resultQueue.dequeue(key)?.complete(WatchConditionDecoder.decodeValue(data))
-        }
-
-        return deferredResult.await()
+        return DeferredValueHolder.deferredResult.await()
     }
 
     fun toJson(data: String): JSONObject {
-        val json = JSONObject()
-        val dataJson = JSONObject().put("key", CachedIO.createKey(data)).put("value", data)
-        json.put("CASIO_WATCH_CONDITION", dataJson)
-        return json
+        DeferredValueHolder.deferredResult.complete(WatchConditionDecoder.decodeValue(data))
+        return JSONObject()
     }
 
     object WatchConditionDecoder {

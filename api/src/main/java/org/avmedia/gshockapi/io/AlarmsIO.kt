@@ -16,39 +16,17 @@ import timber.log.Timber
 @RequiresApi(Build.VERSION_CODES.O)
 object AlarmsIO {
 
+    private object DeferredValueHolder {
+        var deferredResult: CompletableDeferred<ArrayList<Alarm>> = CompletableDeferred()
+    }
     suspend fun request(): ArrayList<Alarm> {
         return CachedIO.request("GET_ALARMS", ::getAlarms) as ArrayList<Alarm>
     }
 
     private suspend fun getAlarms(key: String): ArrayList<Alarm> {
-        Connection.sendMessage("{ action: '$key'}")
-
         Alarm.clear()
-
-        var deferredResult = CompletableDeferred<ArrayList<Alarm>>()
-        CachedIO.resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        CachedIO.subscribe("ALARMS") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = "GET_ALARMS"
-
-            fun fromJson(jsonStr: String) {
-                val gson = Gson()
-                val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
-                Alarm.alarms.addAll(alarmArr)
-            }
-
-            fromJson(data)
-
-            if (Alarm.alarms.size > 1) {
-                CachedIO.resultQueue.dequeue(key)?.complete(Alarm.alarms)
-            }
-        }
-        return deferredResult.await()
+        Connection.sendMessage("{ action: '$key'}")
+        return DeferredValueHolder.deferredResult.await()
     }
 
     fun set(alarms: ArrayList<Alarm>) {
@@ -65,16 +43,25 @@ object AlarmsIO {
 
         // remove from cache
         CachedIO.cache.remove("GET_ALARMS")
-
         Connection.sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
     }
 
     fun toJson(data: String): JSONObject {
-        return JSONObject().put(
-            "ALARMS",
-            JSONObject().put("value", AlarmDecoder.toJson(data).get("ALARMS"))
-                .put("key", "GET_ALARMS")
-        )
+
+        fun fromJson(jsonStr: String) {
+            val gson = Gson()
+            val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
+            Alarm.alarms.addAll(alarmArr)
+        }
+
+        val decoded = AlarmDecoder.toJson(data).get("ALARMS")
+        fromJson(decoded.toString())
+
+        if (Alarm.alarms.size > 1) {
+            DeferredValueHolder.deferredResult.complete(Alarm.alarms)
+        }
+
+        return JSONObject()
     }
 
     // watch senders

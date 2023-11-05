@@ -10,6 +10,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -26,6 +28,14 @@ class SendEventsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
+
+                    // INZ test
+                    GlobalScope.launch {
+                        val events = api().getEventsFromWatch()
+                        println("events: $events")
+                    }
+                    // INZ test end
+
                     api().setEvents(EventsModel.events)
                     Utils.snackBar(context, "Events Sent to Watch")
                 }

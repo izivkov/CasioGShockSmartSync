@@ -11,10 +11,6 @@ object WatchNameIO {
         return WatchInfo.name
     }
 
-    suspend fun requestLong(): String {
-        return CachedIO.request("23", ::getWatchName) as String
-    }
-
     private suspend fun getWatchName(key: String): String {
 
         CasioIO.request(key)

@@ -47,7 +47,7 @@ object MessageDispatcher {
         CasioConstants.CHARACTERISTICS.CASIO_TIMER.code to TimerIO::toJson,
         CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code to WorldCitiesIO::toJson,
         CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code to DstWatchStateIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code to WatchNameIO::toJson,
+        // CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code to WatchNameIO::toJson,
         CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code to WatchConditionIO::toJson,
         CasioConstants.CHARACTERISTICS.CASIO_APP_INFORMATION.code to AppInfoIO::toJson,
         CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code to ButtonPressedIO::toJson,

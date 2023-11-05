@@ -10,6 +10,10 @@ import org.json.JSONObject
 @RequiresApi(Build.VERSION_CODES.O)
 object DstForWorldCitiesIO {
 
+    private object DeferredValueHolder {
+        val deferredResult = CompletableDeferred<String>()
+    }
+
     suspend fun request(cityNumber: Int): String {
         return CachedIO.request("1e0$cityNumber", ::getDSTForWorldCities) as String
     }
@@ -18,13 +22,6 @@ object DstForWorldCitiesIO {
 
         CasioIO.request(key)
 
-        var deferredResult = CompletableDeferred<String>()
-        CachedIO.resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
         CachedIO.subscribe("CASIO_DST_SETTING") { keyedData: JSONObject ->
             val data = keyedData.getString("value")
             val key = keyedData.getString("key")
@@ -32,7 +29,7 @@ object DstForWorldCitiesIO {
             CachedIO.resultQueue.dequeue(key)?.complete(data)
         }
 
-        return deferredResult.await()
+        return DeferredValueHolder.deferredResult.await()
     }
 
     /*
@@ -61,9 +58,7 @@ object DstForWorldCitiesIO {
     }
 
     fun toJson(data: String): JSONObject {
-        val json = JSONObject()
-        val dataJson = JSONObject().put("key", CachedIO.createKey(data)).put("value", data)
-        json.put("CASIO_DST_SETTING", dataJson)
-        return json
+        DeferredValueHolder.deferredResult.complete(data)
+        return JSONObject()
     }
 }
