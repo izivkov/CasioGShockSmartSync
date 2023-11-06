@@ -11,7 +11,7 @@ import org.json.JSONObject
 object DstForWorldCitiesIO {
 
     private object DeferredValueHolder {
-        val deferredResult = CompletableDeferred<String>()
+        lateinit var deferredResult: CompletableDeferred<String>
     }
 
     suspend fun request(cityNumber: Int): String {
@@ -19,6 +19,8 @@ object DstForWorldCitiesIO {
     }
 
     private suspend fun getDSTForWorldCities(key: String): String {
+
+        DeferredValueHolder.deferredResult = CompletableDeferred<String>()
 
         CasioIO.request(key)
 

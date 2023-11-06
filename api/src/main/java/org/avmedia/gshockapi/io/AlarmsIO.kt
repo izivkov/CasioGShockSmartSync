@@ -17,13 +17,14 @@ import timber.log.Timber
 object AlarmsIO {
 
     private object DeferredValueHolder {
-        var deferredResult: CompletableDeferred<ArrayList<Alarm>> = CompletableDeferred()
+        lateinit var deferredResult: CompletableDeferred<ArrayList<Alarm>>
     }
     suspend fun request(): ArrayList<Alarm> {
         return CachedIO.request("GET_ALARMS", ::getAlarms) as ArrayList<Alarm>
     }
 
     private suspend fun getAlarms(key: String): ArrayList<Alarm> {
+        DeferredValueHolder.deferredResult = CompletableDeferred()
         Alarm.clear()
         Connection.sendMessage("{ action: '$key'}")
         return DeferredValueHolder.deferredResult.await()

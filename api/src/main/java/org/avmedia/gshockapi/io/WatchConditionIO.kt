@@ -10,7 +10,7 @@ import kotlin.math.roundToInt
 object WatchConditionIO {
 
     private object DeferredValueHolder {
-        var deferredResult: CompletableDeferred<WatchConditionValue> = CompletableDeferred()
+        lateinit var deferredResult: CompletableDeferred<WatchConditionValue>
     }
 
     class WatchConditionValue(val batteryLevel: Int, val temperature: Int)
@@ -20,7 +20,7 @@ object WatchConditionIO {
     }
 
     private suspend fun getWatchCondition(key: String): WatchConditionValue {
-
+        DeferredValueHolder.deferredResult =  CompletableDeferred()
         CasioIO.request(key)
         return DeferredValueHolder.deferredResult.await()
     }

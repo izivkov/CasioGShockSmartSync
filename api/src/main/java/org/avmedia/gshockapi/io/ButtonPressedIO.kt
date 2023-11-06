@@ -7,7 +7,7 @@ import org.json.JSONObject
 object ButtonPressedIO {
 
     private object DeferredValueHolder {
-        val deferredResult = CompletableDeferred<CasioIO.WATCH_BUTTON>()
+        lateinit var deferredResult: CompletableDeferred<CasioIO.WATCH_BUTTON>
     }
 
     suspend fun request(): CasioIO.WATCH_BUTTON {
@@ -15,7 +15,7 @@ object ButtonPressedIO {
     }
 
     private suspend fun getPressedButton(key: String): CasioIO.WATCH_BUTTON {
-
+        DeferredValueHolder.deferredResult = CompletableDeferred()
         CasioIO.request(key)
         return DeferredValueHolder.deferredResult.await()
     }

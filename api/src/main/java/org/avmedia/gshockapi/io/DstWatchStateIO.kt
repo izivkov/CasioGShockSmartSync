@@ -7,7 +7,7 @@ import org.json.JSONObject
 object DstWatchStateIO {
 
     private object DeferredValueHolder {
-        val deferredResult = CompletableDeferred<String>()
+        lateinit var deferredResult: CompletableDeferred<String>
     }
 
     suspend fun request(state: CasioIO.DTS_STATE): String {
@@ -15,6 +15,7 @@ object DstWatchStateIO {
     }
 
     private suspend fun getDSTWatchState(key: String): String {
+        DeferredValueHolder.deferredResult = CompletableDeferred()
         CasioIO.request(key)
         return DeferredValueHolder.deferredResult.await()
     }

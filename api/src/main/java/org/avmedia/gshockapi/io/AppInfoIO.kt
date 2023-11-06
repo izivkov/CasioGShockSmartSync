@@ -7,7 +7,7 @@ import org.json.JSONObject
 object AppInfoIO {
 
     private object DeferredValueHolder {
-        val deferredResult = CompletableDeferred<String>()
+        lateinit var deferredResult: CompletableDeferred<String>
     }
 
     suspend fun request(): String {
@@ -15,9 +15,8 @@ object AppInfoIO {
     }
 
     private suspend fun getAppInfo(key: String): String {
-
+        DeferredValueHolder.deferredResult = CompletableDeferred()
         CasioIO.request(key)
-
         return DeferredValueHolder.deferredResult.await()
     }
 
