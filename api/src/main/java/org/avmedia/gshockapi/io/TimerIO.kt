@@ -11,6 +11,10 @@ import org.json.JSONObject
 @RequiresApi(Build.VERSION_CODES.O)
 object TimerIO {
 
+    private object DeferredValueHolder {
+        lateinit var deferredResult: CompletableDeferred<Int>
+    }
+
     suspend fun request(): Int {
         val timerValue = CachedIO.request("18", TimerIO::getTimer)
         return timerValue as Int
@@ -18,27 +22,9 @@ object TimerIO {
 
     private suspend fun getTimer(key: String): Int {
 
+        DeferredValueHolder.deferredResult = CompletableDeferred()
         CasioIO.request(key)
-
-        fun getTimer(data: String): String {
-            return TimerDecoder.decodeValue(data)
-        }
-
-        var deferredResult = CompletableDeferred<Int>()
-        CachedIO.resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        CachedIO.subscribe("CASIO_TIMER") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            CachedIO.resultQueue.dequeue(key)?.complete(getTimer(data).toInt())
-        }
-
-        return deferredResult.await()
+        return DeferredValueHolder.deferredResult.await()
     }
 
     fun set(timerValue: Int) {
@@ -47,10 +33,10 @@ object TimerIO {
     }
 
     fun toJson(data: String): JSONObject {
-        val json = JSONObject()
-        val dataJson = JSONObject().put("key", CachedIO.createKey(data)).put("value", data)
-        json.put("CASIO_TIMER", dataJson)
-        return json
+        val decoded = TimerDecoder.decodeValue(data)
+        val decodedInt = decoded.toInt()
+        DeferredValueHolder.deferredResult.complete(decodedInt)
+        return JSONObject()
     }
 
     fun sendToWatch(message: String) {

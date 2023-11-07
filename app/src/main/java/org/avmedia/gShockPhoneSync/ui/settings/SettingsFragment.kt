@@ -34,8 +34,8 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        settingsFragmentScope = lifecycleScope // call this before init...
         _binding?.settingsList?.init()
-        settingsFragmentScope = lifecycleScope
         return binding.root
     }
 

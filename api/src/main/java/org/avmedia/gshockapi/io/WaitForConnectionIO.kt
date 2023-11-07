@@ -13,6 +13,10 @@ import timber.log.Timber
 
 object WaitForConnectionIO {
 
+    private object DeferredValueHolder {
+        lateinit var deferredResult: CompletableDeferred<String>
+    }
+
     suspend fun request(
         context: Context,
         bleScannerLocal: BleScannerLocal,
@@ -33,18 +37,13 @@ object WaitForConnectionIO {
             return "Connecting"
         }
 
+        DeferredValueHolder.deferredResult = CompletableDeferred()
+
         Connection.init(context)
         WatchDataListener.init()
 
         // TODO: remove  bleScannerLocal = BleScannerLocal(context)
         bleScannerLocal.startConnection(deviceId, deviceName)
-
-        val deferredResult = CompletableDeferred<String>()
-        CachedIO.resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                "waitForConnection", deferredResult as CompletableDeferred<Any>
-            )
-        )
 
         fun waitForConnectionSetupComplete() {
             val eventActions = arrayOf(
@@ -54,7 +53,7 @@ object WaitForConnectionIO {
                     DeviceCharacteristics.init(device)
 
                     CachedIO.clearCache()
-                    CachedIO.resultQueue.dequeue("waitForConnection")?.complete("OK")
+                    DeferredValueHolder.deferredResult.complete("OK")
                 },
             )
 
@@ -62,6 +61,6 @@ object WaitForConnectionIO {
         }
 
         waitForConnectionSetupComplete()
-        return deferredResult.await()
+        return DeferredValueHolder.deferredResult.await()
     }
 }

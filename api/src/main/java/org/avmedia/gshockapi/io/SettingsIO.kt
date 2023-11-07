@@ -13,6 +13,10 @@ import kotlin.experimental.or
 
 object SettingsIO {
 
+    private object DeferredValueHolder {
+        lateinit var deferredResult: CompletableDeferred<Settings>
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun request(): Settings {
         return CachedIO.request("GET_SETTINGS", ::getBasicSettings) as Settings
@@ -20,23 +24,9 @@ object SettingsIO {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private suspend fun getBasicSettings(key: String): Settings {
+        DeferredValueHolder.deferredResult = CompletableDeferred<Settings>()
         Connection.sendMessage("{ action: '$key'}")
-
-        val key = "13"
-        var deferredResult = CompletableDeferred<Settings>()
-        CachedIO.resultQueue.enqueue(
-            ResultQueue.KeyedResult(
-                key, deferredResult as CompletableDeferred<Any>
-            )
-        )
-
-        CachedIO.subscribe("SETTINGS") { keyedData ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-            val model = Gson().fromJson(data, Settings::class.java)
-            CachedIO.resultQueue.dequeue(key)?.complete(model)
-        }
-        return deferredResult.await()
+        return DeferredValueHolder.deferredResult.await()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -47,11 +37,12 @@ object SettingsIO {
     }
 
     fun toJson(data: String): JSONObject {
-        val dataJson = JSONObject().put("key", CachedIO.createKey(data))
-            .put("value", decodeToJson(data))
-        val settingsJson = JSONObject()
-        settingsJson.put("SETTINGS", dataJson)
-        return settingsJson
+
+        val jsonData = decodeToJson(data).toString()
+        val model = Gson().fromJson(jsonData, Settings::class.java)
+        DeferredValueHolder.deferredResult.complete(model)
+
+        return JSONObject()
     }
 
     /*

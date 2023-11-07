@@ -61,7 +61,6 @@ If the timezone has no DST, we set the flag to 0
  */
 @RequiresApi(Build.VERSION_CODES.O)
 object TimeIO {
-    init {}
 
     private var timeZone: String = TimeZone.getDefault().id
     private var casioTimezone = CasioTimeZoneHelper.findTimeZone(timeZone)

@@ -76,7 +76,6 @@ object SettingsModel {
         settings.add(Light())
         settings.add(PowerSavingMode())
         settings.add(TimeAdjustment())
-        // settings.add(HandAdjustment())
     }
 
     @Synchronized
