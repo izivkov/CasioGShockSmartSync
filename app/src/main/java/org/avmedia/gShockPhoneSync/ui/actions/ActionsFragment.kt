@@ -33,6 +33,8 @@ class ActionsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        actionsFragmentScope = lifecycleScope
+
         val requestMultiplePermissions = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -57,8 +59,6 @@ class ActionsFragment : Fragment() {
 
         _binding = FragmentActionsBinding.inflate(inflater, container, false)
         _binding?.actionList?.init()
-
-        actionsFragmentScope = lifecycleScope
 
         return binding.root
     }
