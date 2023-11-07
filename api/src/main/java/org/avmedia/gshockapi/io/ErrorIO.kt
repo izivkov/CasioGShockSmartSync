@@ -1,6 +1,7 @@
 package org.avmedia.gshockapi.io
 
 import org.json.JSONObject
+import timber.log.Timber
 
 object ErrorIO {
 
@@ -8,10 +9,7 @@ object ErrorIO {
         return "ERROR"
     }
 
-    fun toJson(data: String): JSONObject {
-        val json = JSONObject()
-        val dataJson = JSONObject().put("key", "ERROR").put("value", data)
-        json.put("ERROR", dataJson)
-        return json
+    fun onReceived(data: String) {
+        Timber.d("ErrorIO: onReceived: $data")
     }
 }

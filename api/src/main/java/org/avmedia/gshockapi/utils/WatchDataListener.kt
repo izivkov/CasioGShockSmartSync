@@ -11,30 +11,17 @@ import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.IDataReceived
 import org.avmedia.gshockapi.casio.MessageDispatcher
-import org.json.JSONObject
-import timber.log.Timber
 
 /*
-This class accepts data from the watch and sends it via "emitEvent()" to whatever
-component is interested in it. Components would subscribe to receive
-data by "topic". The "topic" is the key of the JSON object of the data.
+This class accepts data from the watch and calls dataReceived() method on MessageDispatcher class.
+From there, the appropriate onReceived() method is called for the corresponding IO class.
  */
+@RequiresApi(Build.VERSION_CODES.O)
 object WatchDataListener {
-
     fun init() {
         val dataReceived: IDataReceived = object : IDataReceived {
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun dataReceived(data: String?) {
-                if (data == null) {
-                    return
-                }
-                Timber.i("---> Received data $data")
-                val dataJson = MessageDispatcher.toJson(data)
-
-                for (topic in dataJson.keys()) {
-                    val value: JSONObject = dataJson.getJSONObject(topic)
-                    WatchDataEvents.emitEvent(topic, value)
-                }
+                data?.let { MessageDispatcher.onReceived(it) }
             }
         }
 

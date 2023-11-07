@@ -21,16 +21,7 @@ object DstForWorldCitiesIO {
     private suspend fun getDSTForWorldCities(key: String): String {
 
         DeferredValueHolder.deferredResult = CompletableDeferred<String>()
-
         CasioIO.request(key)
-
-        CachedIO.subscribe("CASIO_DST_SETTING") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            CachedIO.resultQueue.dequeue(key)?.complete(data)
-        }
-
         return DeferredValueHolder.deferredResult.await()
     }
 
@@ -59,8 +50,7 @@ object DstForWorldCitiesIO {
         return Utils.fromByteArrayToHexStrWithSpaces(dstByteArray)
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
         DeferredValueHolder.deferredResult.complete(data)
-        return JSONObject()
     }
 }

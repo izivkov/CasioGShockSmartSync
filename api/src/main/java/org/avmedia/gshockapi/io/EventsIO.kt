@@ -63,20 +63,17 @@ object EventsIO {
         Connection.sendMessage("{action: \"SET_REMINDERS\", value: ${getSelectedEvents(events)} }")
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived (data: String) {
 
         val decoded = ReminderDecoder.reminderTimeToJson(data + 2)
         decoded.put ("title", AccumulatedValueHolder.title)
         val event = Event(decoded)
         DeferredValueHolder.deferredResult.complete(event)
-
-        return JSONObject()
     }
 
-    fun toJsonTitle(data: String): JSONObject {
+    fun onReceivedTitle (data: String) {
         val decoded = ReminderDecoder.reminderTitleToJson(data + 2)
         AccumulatedValueHolder.title = decoded.get("title") as String
-        return JSONObject()
     }
 
     fun sendToWatchSet(message: String) {

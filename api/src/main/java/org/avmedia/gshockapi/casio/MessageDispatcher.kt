@@ -18,7 +18,6 @@ object MessageDispatcher {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private val watchSenders = mapOf<String, (String) -> Unit>(
-        "RESET_HAND" to HandIO::sendToWatch,
         "GET_ALARMS" to AlarmsIO::sendToWatch,
         "SET_ALARMS" to AlarmsIO::sendToWatchSet,
         "SET_REMINDERS" to EventsIO::sendToWatchSet,
@@ -38,33 +37,33 @@ object MessageDispatcher {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private val toJsonConverters = mapOf<Int, (String) -> JSONObject>(
-        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code to AlarmsIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code to AlarmsIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code to DstForWorldCitiesIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code to EventsIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code to EventsIO::toJsonTitle,
-        CasioConstants.CHARACTERISTICS.CASIO_TIMER.code to TimerIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code to WorldCitiesIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code to DstWatchStateIO::toJson,
-        // CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code to WatchNameIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code to WatchConditionIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_APP_INFORMATION.code to AppInfoIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code to ButtonPressedIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code to SettingsIO::toJson,
-        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code to TimeAdjustmentIO::toJson,
+    private val dataReceivedMessages = mapOf<Int, (String) -> Unit>(
+        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code to AlarmsIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code to AlarmsIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_DST_SETTING.code to DstForWorldCitiesIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code to EventsIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code to EventsIO::onReceivedTitle,
+        CasioConstants.CHARACTERISTICS.CASIO_TIMER.code to TimerIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_WORLD_CITIES.code to WorldCitiesIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_DST_WATCH_STATE.code to DstWatchStateIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code to WatchNameIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code to WatchConditionIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_APP_INFORMATION.code to AppInfoIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code to ButtonPressedIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code to SettingsIO::onReceived,
+        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code to TimeAdjustmentIO::onReceived,
 
-        CasioConstants.CHARACTERISTICS.ERROR.code to ErrorIO::toJson,
-        CasioConstants.CHARACTERISTICS.UNKNOWN.code to UnknownIO::toJson,
+        CasioConstants.CHARACTERISTICS.ERROR.code to ErrorIO::onReceived,
+        CasioConstants.CHARACTERISTICS.UNKNOWN.code to UnknownIO::onReceived,
     )
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
         val intArray = Utils.toIntArray(data)
         val key = intArray[0]
-        if (toJsonConverters[key] == null) {
+        if (dataReceivedMessages[key] == null) {
             Timber.e("GShockAPI", "Unknown key: $key")
         }
-        return toJsonConverters[key]!!.invoke(data)
+        dataReceivedMessages[key]!!.invoke(data)
     }
 }

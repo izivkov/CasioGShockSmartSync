@@ -1,20 +1,15 @@
 package org.avmedia.gshockapi.io
 
-import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.utils.Utils
-import org.avmedia.gshockapi.utils.WatchDataEvents
-import org.json.JSONObject
 import java.util.Locale
 import kotlin.reflect.KSuspendFunction1
 
 object CachedIO {
 
     val cache = WatchValuesCache()
-    val resultQueue = ResultQueue<CompletableDeferred<Any>>()
 
     fun init() {
         cache.clear()
-        resultQueue.clear()
     }
 
     fun clearCache() {
@@ -31,14 +26,14 @@ object CachedIO {
         return value
     }
 
-    fun subscribe(subject: String, onDataReceived: (JSONObject) -> Unit): Unit {
-        WatchDataEvents.addSubject(subject)
-
-        // receive values from the commands we issued in start()
-        WatchDataEvents.subscribe(this.javaClass.canonicalName, subject) {
-            onDataReceived(it as JSONObject)
-        }
-    }
+//    fun subscribe(subject: String, onDataReceived: (JSONObject) -> Unit): Unit {
+//        WatchDataEvents.addSubject(subject)
+//
+//        // receive values from the commands we issued in start()
+//        WatchDataEvents.subscribe(this.javaClass.canonicalName, subject) {
+//            onDataReceived(it as JSONObject)
+//        }
+//    }
 
     fun get(key: String): Any? {
         return cache.get(key)

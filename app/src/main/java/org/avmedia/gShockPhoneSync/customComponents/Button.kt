@@ -8,10 +8,8 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gshockapi.utils.WatchDataEvents
 
 @Suppress("EmptyMethod", "EmptyMethod")
 open class Button @JvmOverloads constructor(
@@ -20,14 +18,6 @@ open class Button @JvmOverloads constructor(
 
     open fun show() {
         visibility = VISIBLE
-    }
-
-    @SuppressLint("CheckResult")
-    protected fun subscribe(subject: String, ignoredOnDataReceived: (String) -> Unit) {
-        WatchDataEvents.addSubject(subject)
-        WatchDataEvents.subscribe(this.javaClass.canonicalName as String, subject, onNext = {
-            ignoredOnDataReceived(it as String)
-        })
     }
 
     protected open fun onState() {

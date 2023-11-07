@@ -21,8 +21,7 @@ object WatchNameIO {
         return DeferredValueHolder.deferredResult.await()
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
         DeferredValueHolder.deferredResult.complete(Utils.trimNonAsciiCharacters(Utils.toAsciiString(data, 1)))
-        return JSONObject()
     }
 }

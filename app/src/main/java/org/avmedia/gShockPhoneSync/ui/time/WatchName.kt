@@ -11,13 +11,12 @@ import android.util.AttributeSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
+) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     override fun onFinishInflate() {
         super.onFinishInflate()

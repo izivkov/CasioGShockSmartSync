@@ -20,7 +20,7 @@ object AppInfoIO {
         return DeferredValueHolder.deferredResult.await()
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
 
         fun setAppInfo(data: String): Unit {
             // App info:
@@ -38,7 +38,5 @@ object AppInfoIO {
 
         setAppInfo(data)
         DeferredValueHolder.deferredResult.complete(data)
-
-        return JSONObject()
     }
 }

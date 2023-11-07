@@ -19,13 +19,12 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
 import java.util.*
 
 class WatchTemperature @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
+) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("SetTextI18n")

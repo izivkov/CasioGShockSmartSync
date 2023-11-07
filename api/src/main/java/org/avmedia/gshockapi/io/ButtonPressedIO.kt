@@ -28,7 +28,7 @@ object ButtonPressedIO {
         CachedIO.put("10", value)
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived (data: String) {
 
         /*
         RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
@@ -51,6 +51,5 @@ object ButtonPressedIO {
             }
         }
         DeferredValueHolder.deferredResult.complete(ret)
-        return JSONObject()
     }
 }

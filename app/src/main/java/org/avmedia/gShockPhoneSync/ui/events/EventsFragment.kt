@@ -31,9 +31,9 @@ class EventsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentEventsBinding.inflate(inflater, container, false)
+        eventsFragmentScope = lifecycleScope // call this first
 
-        eventsFragmentScope = lifecycleScope
+        _binding = FragmentEventsBinding.inflate(inflater, container, false)
 
         val requestMultiplePermissions = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()

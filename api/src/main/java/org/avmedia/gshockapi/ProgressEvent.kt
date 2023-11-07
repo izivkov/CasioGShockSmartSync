@@ -90,14 +90,13 @@ object ProgressEvents {
             if (subscribers.contains(name)) {
                 return // do not allow multiple subscribers with same name
             }
+            (subscribers as LinkedHashSet).add(name)
 
             eventsProcessor.observeOn(AndroidSchedulers.mainThread())
                 .filter { event -> filter(event) }
                 .doOnNext(onNextStr)
                 .doOnError(onError)
                 .subscribe({}, onError)
-
-            (subscribers as LinkedHashSet).add(name)
         }
 
         /**
@@ -112,6 +111,7 @@ object ProgressEvents {
             if (subscribers.contains(name)) {
                 return // do not allow multiple subscribers with same name
             }
+            (subscribers as LinkedHashSet).add(name)
 
             val runActions: () -> Unit = {
                 eventActions.forEach { eventAction ->
@@ -137,8 +137,6 @@ object ProgressEvents {
                         .subscribe({}, onError)
                 }
             }
-
-            (subscribers as LinkedHashSet).add(name)
 
             runActions()
         }

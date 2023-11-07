@@ -48,7 +48,6 @@ import java.util.*
 class GShockAPI(private val context: Context) {
 
     private var bleScannerLocal: BleScannerLocal = BleScannerLocal(context)
-    private val resultQueue = ResultQueue<CompletableDeferred<Any>>()
 
     /**
      * This function waits for the watch to connect to the phone.
@@ -310,6 +309,7 @@ class GShockAPI(private val context: Context) {
      *  ```
      */
     suspend fun setTime(timeZone: String = TimeZone.getDefault().id) {
+
         if (!ZoneId.getAvailableZoneIds().contains(timeZone)) {
             Timber.e("GShockAPI", "setTime: Invalid timezone $timeZone passed")
             ProgressEvents.onNext("ApiError")

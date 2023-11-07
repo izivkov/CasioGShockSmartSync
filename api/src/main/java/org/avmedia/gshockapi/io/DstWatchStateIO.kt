@@ -40,8 +40,7 @@ object DstWatchStateIO {
         return Utils.fromByteArrayToHexStrWithSpaces(newValue)
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
         DeferredValueHolder.deferredResult.complete(data)
-        return JSONObject()
     }
 }

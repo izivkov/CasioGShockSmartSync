@@ -8,10 +8,6 @@ object UnknownIO {
         return "UNKNOWN"
     }
 
-    fun toJson(data: String): JSONObject {
-        val json = JSONObject()
-        val dataJson = JSONObject().put("key", "UNKNOWN").put("value", data)
-        json.put("UNKNOWN", dataJson)
-        return json
+    fun onReceived(data: String) {
     }
 }

@@ -17,20 +17,11 @@ object WorldCitiesIO {
     private suspend fun getWorldCities(key: String): String {
         DeferredValueHolder.deferredResult = CompletableDeferred()
         CasioIO.request(key)
-
-        CachedIO.subscribe("CASIO_WORLD_CITIES") { keyedData: JSONObject ->
-            val data = keyedData.getString("value")
-            val key = keyedData.getString("key")
-
-            CachedIO.resultQueue.dequeue(key)?.complete(data)
-        }
-
         return DeferredValueHolder.deferredResult.await()
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
         DeferredValueHolder.deferredResult.complete(data)
-        return JSONObject()
     }
 
     fun parseCity(timeZone: String): String? {

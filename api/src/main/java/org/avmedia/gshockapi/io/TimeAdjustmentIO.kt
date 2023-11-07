@@ -34,11 +34,10 @@ object TimeAdjustmentIO {
         Connection.sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived (data: String) {
         val timeAdjustmentSet = isTimeAdjustmentSet(data)
         CasioIsAutoTimeOriginalValue.value = data
         DeferredValueHolder.deferredResult.complete(timeAdjustmentSet)
-        return JSONObject()
     }
 
     private fun isTimeAdjustmentSet(data: String): Boolean {

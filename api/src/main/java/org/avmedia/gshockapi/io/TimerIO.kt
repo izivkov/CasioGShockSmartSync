@@ -32,11 +32,10 @@ object TimerIO {
         Connection.sendMessage("{action: \"SET_TIMER\", value: $timerValue}")
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
         val decoded = TimerDecoder.decodeValue(data)
         val decodedInt = decoded.toInt()
         DeferredValueHolder.deferredResult.complete(decodedInt)
-        return JSONObject()
     }
 
     fun sendToWatch(message: String) {

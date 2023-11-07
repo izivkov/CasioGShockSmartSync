@@ -36,13 +36,10 @@ object SettingsIO {
         Connection.sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
     }
 
-    fun toJson(data: String): JSONObject {
-
+    fun onReceived (data: String) {
         val jsonData = decodeToJson(data).toString()
         val model = Gson().fromJson(jsonData, Settings::class.java)
         DeferredValueHolder.deferredResult.complete(model)
-
-        return JSONObject()
     }
 
     /*

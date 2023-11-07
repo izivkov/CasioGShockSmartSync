@@ -47,7 +47,7 @@ object AlarmsIO {
         Connection.sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
     }
 
-    fun toJson(data: String): JSONObject {
+    fun onReceived(data: String) {
 
         fun fromJson(jsonStr: String) {
             val gson = Gson()
@@ -61,8 +61,6 @@ object AlarmsIO {
         if (Alarm.alarms.size > 1) {
             DeferredValueHolder.deferredResult.complete(Alarm.alarms)
         }
-
-        return JSONObject()
     }
 
     // watch senders

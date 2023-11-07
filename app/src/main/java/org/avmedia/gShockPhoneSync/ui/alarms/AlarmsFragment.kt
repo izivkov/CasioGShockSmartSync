@@ -26,7 +26,8 @@ class AlarmsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        alarmsFragmentScope = lifecycleScope
+        alarmsFragmentScope = lifecycleScope // call this first
+
         _binding = FragmentAlarmsBinding.inflate(inflater, container, false)
         return binding.root
     }
