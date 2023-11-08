@@ -58,7 +58,7 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
             timeView.text = time
             alarmEnabled.isChecked = alarm.enabled
 
-            alarmEnabled.setOnCheckedChangeListener { buttonView, isChecked ->
+            alarmEnabled.setOnCheckedChangeListener { _, isChecked ->
                 alarm.enabled = isChecked
             }
 

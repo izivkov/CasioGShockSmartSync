@@ -214,11 +214,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 configureSendEmail(vhEmail, position)
             }
 
-            ACTION_TYPES.MAP.ordinal -> {
-                val vhMap = viewHolder as ViewHolderMap
-                configureMap(position)
-            }
-
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vhTime = viewHolder as ViewHolderSetTime
                 configureTime(vhTime, position)
@@ -390,7 +385,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             action.enabled = isChecked
         }
 
-        vhPhoto.radioGroup.setOnCheckedChangeListener { group, checkedId ->
+        vhPhoto.radioGroup.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.front) {
                 action.cameraOrientation = ActionsModel.CAMERA_ORIENTATION.FRONT
             } else {

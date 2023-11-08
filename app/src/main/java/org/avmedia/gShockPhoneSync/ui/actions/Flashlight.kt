@@ -42,10 +42,6 @@ object Flashlight {
 
     fun toggle(context: Context) {
         cameraManager = (context.getSystemService() as CameraManager?)!!
-        if (cameraManager == null) {
-            Utils.snackBar(context, "Flashlight not available")
-            return
-        }
 
         cameraManager.registerTorchCallback(torchCallback, null)
         turnOnOff(context, !currentState)

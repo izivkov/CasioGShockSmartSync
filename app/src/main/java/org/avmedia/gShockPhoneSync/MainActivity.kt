@@ -48,7 +48,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
-    private val deviceManager = DeviceManager
 
     private var requestBluetooth =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -244,7 +243,7 @@ class MainActivity : AppCompatActivity() {
                 textView.update()
             })
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
+        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
     }
 
     private fun navigateHome() {

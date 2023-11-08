@@ -47,6 +47,6 @@ object DeviceManager {
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
+        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
     }
 }

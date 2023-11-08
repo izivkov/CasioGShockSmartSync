@@ -31,8 +31,8 @@ CLOCKWISE:
 
  */
 class HandReset @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : androidx.appcompat.widget.AppCompatImageButton(context, attrs/*, defStyleAttr*/) {
+    context: Context, attrs: AttributeSet? = null
+) : androidx.appcompat.widget.AppCompatImageButton(context, attrs) {
 
     init {
         setOnTouchListener(OnTouchListener())

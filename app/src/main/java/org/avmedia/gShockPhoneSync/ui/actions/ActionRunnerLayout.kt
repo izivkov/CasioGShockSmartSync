@@ -53,7 +53,7 @@ class ActionRunnerLayout @JvmOverloads constructor(
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
+        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
     }
 
     override fun show() {

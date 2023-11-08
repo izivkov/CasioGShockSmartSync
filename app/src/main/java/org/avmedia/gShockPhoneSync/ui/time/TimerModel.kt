@@ -8,8 +8,8 @@ object TimerModel {
 
     fun set(time: String) {
         inSeconds = try {
-            val time = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm:ss"))
-            time.hour * 3600 + time.minute * 60 + time.second
+            val localTime = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm:ss"))
+            localTime.hour * 3600 + localTime.minute * 60 + localTime.second
         } catch (e: Error) {
             0
         }

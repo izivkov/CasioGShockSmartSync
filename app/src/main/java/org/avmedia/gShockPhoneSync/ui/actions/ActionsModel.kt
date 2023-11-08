@@ -33,8 +33,8 @@ object ActionsModel {
 
     val actions = ArrayList<Action>()
 
-    enum class RUN_MODE(value: Int) {
-        SYNC(0), ASYNC(1),
+    enum class RUN_MODE() {
+        SYNC, ASYNC,
     }
 
     init {
@@ -211,8 +211,8 @@ object ActionsModel {
         }
     }
 
-    enum class CAMERA_ORIENTATION(cameraOrientation: String) {
-        FRONT("FRONT"), BACK("BACK");
+    enum class CAMERA_ORIENTATION() {
+        FRONT, BACK;
     }
 
     class PhotoAction(
@@ -333,9 +333,7 @@ object ActionsModel {
 
         var msg = "Time set at $dateStr"
         val watchName = WatchInfo.name
-        if (watchName != null) {
-            msg += " for $watchName watch"
-        }
+        msg += " for $watchName watch"
 
         NotificationProvider.createNotification(
             context,

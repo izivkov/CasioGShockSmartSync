@@ -103,8 +103,6 @@
     <string name="off">Off</string>
     <string name="on">On</string>
     <string name="illumination_period">Illumination Period</string>
-    <string name="_2s">2s</string>
-    <string name="_4s">4s</string>
     <string name="mm_dd">MM:DD</string>
     <string name="dd_mm">DD:MM</string>
     <string name="time_adjustment">Time Adjustment</string>
@@ -113,5 +111,4 @@
     <string name="_00_00_00">00:00:00</string>
     <string name="_00">00</string>
     <string name="semi_column">:</string>
-    <string name="clear_all_reminders_on_watch">Clear all\non watch</string>
 </resources>
