@@ -49,6 +49,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
 
+    // do not delete this. DeviceManager needs to be running to save the last device name to reuse on nect start.
+    private lateinit var deviceManager: DeviceManager
+
     private var requestBluetooth =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
@@ -61,6 +64,9 @@ class MainActivity : AppCompatActivity() {
 
     init {
         instance = this
+
+        // do not delete this. DeviceManager needs to be running to save the last device name to reuse on nect start.
+        deviceManager = DeviceManager
     }
 
 
