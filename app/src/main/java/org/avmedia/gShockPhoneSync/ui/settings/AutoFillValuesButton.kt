@@ -13,7 +13,7 @@ import android.view.View
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.customComponents.Button
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.settingsFragmentScope
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.getFragmentScope
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.Settings
 
@@ -41,7 +41,7 @@ class AutoFillValuesButton @JvmOverloads constructor(
 
     private fun autoFill() {
 
-        settingsFragmentScope?.launch(Dispatchers.IO) {
+        getFragmentScope().launch(Dispatchers.IO) {
             val settings = AutoConfigurator.configure(context)
             fillLocale(settings)
             fillButtonTone(settings)

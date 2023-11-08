@@ -9,8 +9,8 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -31,16 +31,13 @@ class ActionList @JvmOverloads constructor(
     }
 
     private fun watchForDisconnect() {
-        ProgressEvents.subscriber.start(
-            this.javaClass.canonicalName,
-            {
-                when (it) {
-                    ProgressEvents["Disconnect"] -> {
-                        shutdown()
-                    }
-                }
+        val eventActions = arrayOf(
+            EventAction("Disconnect") {
+                shutdown()
             },
-            { throwable -> Timber.d("Got error on subscribe: $throwable") })
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     fun shutdown() {

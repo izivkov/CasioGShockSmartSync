@@ -79,7 +79,7 @@
     <string name="info_home_time">
         <![CDATA[<b>Home Time</b> shows the watch\'s time zone.
         When the app sets the watch\'s time (either manually or automatically), it will also set the <b>Home Time,
-        Time Offset and DST</b> (if applicable) to the current time zone. So there is no need for swapping your <b>World Time</b> and <b>Home Time</b>
+        Time Offset</b> and <b>DST</b> (if applicable) to the current time zone. So there is no need for swapping your <b>World Time</b> and <b>Home Time</b>
         when travelling to another timezone.]]>
     </string>
     <string name="time_adjustment_info" ><![CDATA[

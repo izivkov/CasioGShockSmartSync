@@ -26,13 +26,15 @@ class EventsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    init {
+        eventsFragmentScope = lifecycleScope
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        eventsFragmentScope = lifecycleScope
-
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
 
         val requestMultiplePermissions = registerForActivityResult(
@@ -60,6 +62,12 @@ class EventsFragment : Fragment() {
     }
 
     companion object {
-        var eventsFragmentScope: LifecycleCoroutineScope? = null
+        private lateinit var eventsFragmentScope: LifecycleCoroutineScope
+        fun getFragmentScope(): LifecycleCoroutineScope {
+            if (!this::eventsFragmentScope.isInitialized) {
+                ProgressEvents.onNext("ApiError")
+            }
+            return eventsFragmentScope
+        }
     }
 }

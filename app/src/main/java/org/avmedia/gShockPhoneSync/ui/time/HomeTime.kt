@@ -12,7 +12,7 @@ import android.util.AttributeSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -22,7 +22,7 @@ open class HomeTime @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            timeFragmentScope?.launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) {
                 text = api().getHomeTime()
             }
         }
@@ -35,7 +35,7 @@ open class HomeTime @JvmOverloads constructor(
     }
 
     fun update() {
-        timeFragmentScope?.launch(Dispatchers.IO) {
+        getFragmentScope().launch(Dispatchers.IO) {
             text = api().getHomeTime()
         }
     }

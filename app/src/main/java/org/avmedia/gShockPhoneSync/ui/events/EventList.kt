@@ -11,6 +11,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -32,38 +33,35 @@ class EventList @JvmOverloads constructor(
 
     @SuppressLint("NotifyDataSetChanged")
     private fun waitForPermissions() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName + "waitForPermissions",
-
-            {
-                when (it) {
-                    ProgressEvents["CalendarPermissionsGranted"] -> {
-                        EventsModel.refresh(context)
-                        (context as Activity).runOnUiThread {
-                            adapter?.notifyDataSetChanged()
-                        }
-                    }
-                }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun listenForUpdateRequest() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName + "listenForUpdateRequest", {
-            when (it) {
-                // Somebody has made a change to the model...need to update the UI
-                ProgressEvents["CalendarUpdated"] -> {
+        val eventActions = arrayOf(
+            EventAction("CalendarPermissionsGranted") {
+                if (EventsModel.events.isEmpty()) {
                     EventsModel.refresh(context)
                     (context as Activity).runOnUiThread {
                         adapter?.notifyDataSetChanged()
                     }
                 }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun listenForUpdateRequest() {
+        val eventActions = arrayOf(
+            EventAction("CalendarUpdated") {
+                Timber.d("CalendarUpdated, events: ${EventsModel.events.size}")
+                EventsModel.refresh(context)
+                (context as Activity).runOnUiThread {
+                    adapter?.notifyDataSetChanged()
+                }
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(
+            this.javaClass.canonicalName + "listenForUpdateRequest",
+            eventActions
+        )
     }
 }

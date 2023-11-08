@@ -3,8 +3,8 @@ package org.avmedia.gShockPhoneSync
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 object DeviceManager {
 
@@ -13,42 +13,40 @@ object DeviceManager {
     }
 
     private fun startListener() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String, {
-            when (it) {
-                ProgressEvents["DeviceName"] -> {
-                    val deviceName = ProgressEvents.getPayload("DeviceName")
-                    if ((deviceName as String) == "") {
-                        LocalDataStorage.delete("LastDeviceName", applicationContext())
-                    } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
-                            "LastDeviceName",
-                            "",
-                            applicationContext()
-                        ) != deviceName
-                    ) {
-                        LocalDataStorage.put("LastDeviceName", deviceName, applicationContext())
-                    }
-                }
 
-                ProgressEvents["DeviceAddress"] -> {
-                    val deviceAddress = ProgressEvents.getPayload("DeviceAddress")
-                    if ((deviceAddress as String) == "") {
-                        LocalDataStorage.delete("LastDeviceAddress", applicationContext())
-                    }
-                    if (LocalDataStorage.get(
-                            "LastDeviceAddress",
-                            "",
-                            applicationContext()
-                        ) != deviceAddress && api().validateBluetoothAddress(deviceAddress)
-                    ) {
-                        LocalDataStorage.put(
-                            "LastDeviceAddress", deviceAddress, applicationContext()
-                        )
-                    }
+        val eventActions = arrayOf(
+            EventAction("DeviceName") {
+                val deviceName = ProgressEvents.getPayload("DeviceName")
+                if ((deviceName as String) == "") {
+                    LocalDataStorage.delete("LastDeviceName", applicationContext())
+                } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
+                        "LastDeviceName",
+                        "",
+                        applicationContext()
+                    ) != deviceName
+                ) {
+                    LocalDataStorage.put("LastDeviceName", deviceName, applicationContext())
                 }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+            },
+
+            EventAction("DeviceAddress") {
+                val deviceAddress = ProgressEvents.getPayload("DeviceAddress")
+                if ((deviceAddress as String) == "") {
+                    LocalDataStorage.delete("LastDeviceAddress", applicationContext())
+                }
+                if (LocalDataStorage.get(
+                        "LastDeviceAddress",
+                        "",
+                        applicationContext()
+                    ) != deviceAddress && api().validateBluetoothAddress(deviceAddress)
+                ) {
+                    LocalDataStorage.put(
+                        "LastDeviceAddress", deviceAddress, applicationContext()
+                    )
+                }
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 }

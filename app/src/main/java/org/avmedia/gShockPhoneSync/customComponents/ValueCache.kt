@@ -18,5 +18,4 @@ object ValueCache {
     fun get(name: String): String? {
         return valueMap[name]?.value
     }
-
 }

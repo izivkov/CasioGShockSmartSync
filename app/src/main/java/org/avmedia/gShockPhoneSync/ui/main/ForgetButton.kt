@@ -12,10 +12,10 @@ import android.view.MotionEvent
 import android.view.View
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
-import timber.log.Timber
 
 class ForgetButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -27,21 +27,23 @@ class ForgetButton @JvmOverloads constructor(
     }
 
     private fun listenForConnection() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
 
-            {
-                when (it) {
-                    ProgressEvents["ConnectionStarted"] -> {
-                        isEnabled = false
-                        Timber.d("... Do not interrupt...")
-                    }
+        val eventActions = arrayOf(
+            EventAction("ConnectionStarted") {
+                isEnabled = false
+            },
+            EventAction("WatchInitializationCompleted") {
+                isEnabled = true
+            },
+            EventAction("ConnectionFailed") {
+                isEnabled = true
+            },
+            EventAction("Disconnect") {
+                isEnabled = true
+            },
+        )
 
-                    ProgressEvents["WatchInitializationCompleted"], ProgressEvents["ConnectionFailed"], ProgressEvents["Disconnect"] -> {
-                        isEnabled = true
-                        Timber.d("... Can be interrupted...")
-                    }
-                }
-            }, { throwable -> Timber.d("Got error on subscribe: $throwable") })
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     inner class OnTouchListener : View.OnTouchListener {

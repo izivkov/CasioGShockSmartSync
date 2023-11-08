@@ -12,8 +12,8 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 class ConnectionLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -25,31 +25,25 @@ class ConnectionLayout @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String,
-            {
-                when (it) {
-                    ProgressEvents["ButtonPressedInfoReceived"] -> {
-                        if (api().isActionButtonPressed()) {
-                            hide()
-                        }
-                    }
-
-                    ProgressEvents["WatchInitializationCompleted"] -> {
-                        if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
-                            println("connectionLayout: hide")
-                            hide()
-                        }
-                    }
-
-                    ProgressEvents["Disconnect"] -> {
-                        println("connectionLayout: show")
-                        show()
-                    }
+        val eventActions = arrayOf(
+            EventAction("ButtonPressedInfoReceived") {
+                if (api().isActionButtonPressed()) {
+                    hide()
                 }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
+            },
+            EventAction("WatchInitializationCompleted") {
+                if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
+                    println("connectionLayout: hide")
+                    hide()
+                }
+            },
+            EventAction("Disconnect") {
+                println("connectionLayout: show")
+                show()
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     override fun show() {

@@ -14,9 +14,9 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.settingsFragmentScope
+import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.getFragmentScope
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,7 +34,7 @@ class SettingsList @JvmOverloads constructor(
     }
 
     fun init() {
-        settingsFragmentScope?.launch(Dispatchers.IO) {
+        getFragmentScope().launch(Dispatchers.IO) {
             val settingStr = Gson().toJson(api().getSettings())
             SettingsModel.fromJson(settingStr)
         }
@@ -47,16 +47,12 @@ class SettingsList @JvmOverloads constructor(
     }
 
     private fun listenForUpdateRequest() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName as String, {
-            when (it) {
-                // Somebody has made a change to the model...need to update the UI
-                ProgressEvents["NeedToUpdateUI"] -> {
-                    updateUI()
-                }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+        val eventActions = arrayOf(
+            EventAction("NeedToUpdateUI") {
+                updateUI()
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 }

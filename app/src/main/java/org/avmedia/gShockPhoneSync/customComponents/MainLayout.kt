@@ -21,8 +21,8 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 class MainLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,25 +34,20 @@ class MainLayout @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName,
-            {
-                when (it) {
-                    ProgressEvents["WatchInitializationCompleted"] -> {
-                        if (!api().isActionButtonPressed() && !api().isAutoTimeStarted() && !api().isFindPhoneButtonPressed()) {
-                            println("MainLayout: show")
-                            show()
-                        }
-                    }
-
-                    ProgressEvents["Disconnect"] -> {
-                        println("MainLayout: hide")
-                        hide()
-                    }
+        val eventActions = arrayOf(
+            EventAction("WatchInitializationCompleted") {
+                if (!api().isActionButtonPressed() && !api().isAutoTimeStarted() && !api().isFindPhoneButtonPressed()) {
+                    println("MainLayout: show")
+                    show()
                 }
-            }, { throwable ->
-                Timber.d("Got error on subscribe: $throwable")
-                throwable.printStackTrace()
-            })
+            },
+            EventAction("Disconnect") {
+                println("MainLayout: hide")
+                hide()
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     override fun show() {

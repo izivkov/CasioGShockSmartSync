@@ -11,19 +11,18 @@ import android.util.AttributeSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
+) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     override fun onFinishInflate() {
         super.onFinishInflate()
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            timeFragmentScope?.launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) {
                 val name = api().getWatchName()
                 Timber.i(">>> setting watch name to $name")
                 text = name

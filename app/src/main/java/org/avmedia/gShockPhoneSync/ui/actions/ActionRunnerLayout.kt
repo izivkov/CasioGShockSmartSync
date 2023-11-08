@@ -21,8 +21,8 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 class ActionRunnerLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,29 +34,26 @@ class ActionRunnerLayout @JvmOverloads constructor(
     }
 
     private fun createAppEventsSubscription() {
-        ProgressEvents.subscriber.start(this.javaClass.canonicalName, {
-            when (it) {
-                ProgressEvents["ButtonPressedInfoReceived"] -> {
-                    ActionsModel.loadData(context)
-                    if (api().isActionButtonPressed()) {
-                        show()
-                        ActionsModel.runActions(context)
-                    } else if (api().isAutoTimeStarted()) {
-                        ActionsModel.runActionsForAutoTimeSetting(context)
-                    } else if (api().isFindPhoneButtonPressed()) {
-                        show()
-                        ActionsModel.runActionFindPhone(context)
-                    }
-                }
 
-                ProgressEvents["Disconnect"] -> {
-                    hide()
+        val eventActions = arrayOf(
+            EventAction("ButtonPressedInfoReceived") {
+                ActionsModel.loadData(context)
+                if (api().isActionButtonPressed()) {
+                    show()
+                    ActionsModel.runActions(context)
+                } else if (api().isAutoTimeStarted()) {
+                    ActionsModel.runActionsForAutoTimeSetting(context)
+                } else if (api().isFindPhoneButtonPressed()) {
+                    show()
+                    ActionsModel.runActionFindPhone(context)
                 }
-            }
-        }, { throwable ->
-            Timber.d("Got error on subscribe: $throwable")
-            throwable.printStackTrace()
-        })
+            },
+            EventAction("Disconnect") {
+                hide()
+            },
+        )
+
+        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName, eventActions)
     }
 
     override fun show() {

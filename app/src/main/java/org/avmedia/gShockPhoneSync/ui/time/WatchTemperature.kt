@@ -19,13 +19,12 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.customComponents.CacheableSubscribableTextView
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 import java.util.*
 
 class WatchTemperature @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : CacheableSubscribableTextView(context, attrs, defStyleAttr) {
+) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
 
     @RequiresApi(Build.VERSION_CODES.P)
     @SuppressLint("SetTextI18n")
@@ -33,7 +32,7 @@ class WatchTemperature @JvmOverloads constructor(
         super.onFinishInflate()
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            timeFragmentScope?.launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) {
                 val temperature = api().getWatchTemperature()
 
                 val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager

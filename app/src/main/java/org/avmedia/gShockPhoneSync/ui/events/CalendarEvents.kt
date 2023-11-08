@@ -101,8 +101,7 @@ object CalendarEvents {
                 continue // do not add expired events
             }
 
-            val selected =
-                events.size < EventsModel.MAX_REMINDERS
+            val selected = events.size < EventsModel.MAX_REMINDERS
             events.add(
                 Event(
                     title,

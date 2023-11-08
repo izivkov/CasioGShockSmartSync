@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentAlarmsBinding
+import org.avmedia.gshockapi.ProgressEvents
 
 class AlarmsFragment : Fragment() {
 
@@ -21,12 +22,16 @@ class AlarmsFragment : Fragment() {
 
     private val binding get() = _binding!!
 
+    init {
+        alarmsFragmentScope = lifecycleScope
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        alarmsFragmentScope = lifecycleScope
+
         _binding = FragmentAlarmsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -37,6 +42,12 @@ class AlarmsFragment : Fragment() {
     }
 
     companion object {
-        var alarmsFragmentScope: LifecycleCoroutineScope? = null
+        private lateinit var alarmsFragmentScope: LifecycleCoroutineScope
+        fun getFragmentScope(): LifecycleCoroutineScope {
+            if (!this::alarmsFragmentScope.isInitialized) {
+                ProgressEvents.onNext("ApiError")
+            }
+            return alarmsFragmentScope
+        }
     }
 }

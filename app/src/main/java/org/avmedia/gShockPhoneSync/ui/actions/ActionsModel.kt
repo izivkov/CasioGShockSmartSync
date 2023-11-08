@@ -15,7 +15,7 @@ import android.net.Uri
 import androidx.camera.core.CameraSelector
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.actions.ActionsFragment.Companion.actionsFragmentScope
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsFragment.Companion.getFragmentScope
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.NotificationProvider
@@ -125,7 +125,7 @@ object ActionsModel {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            actionsFragmentScope?.launch {
+            getFragmentScope().launch {
                 api().setTime()
             }
         }
@@ -349,7 +349,7 @@ object ActionsModel {
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
-                    actionsFragmentScope?.launch {
+                    getFragmentScope().launch {
                         runIt(it, context)
                     }
                 } else {
