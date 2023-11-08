@@ -7,15 +7,12 @@ package org.avmedia.gShockPhoneSync.ui.events
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.ble.DeviceCharacteristics
-import org.avmedia.gshockapi.io.CachedIO
 import timber.log.Timber
 
 class EventList @JvmOverloads constructor(
@@ -62,6 +59,9 @@ class EventList @JvmOverloads constructor(
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.canonicalName  + "listenForUpdateRequest", eventActions)
+        ProgressEvents.subscriber.runEventActions(
+            this.javaClass.canonicalName + "listenForUpdateRequest",
+            eventActions
+        )
     }
 }

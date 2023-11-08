@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
             EventAction("ConnectionSetupComplete") {
                 InactivityWatcher.start(this)
             },
-            EventAction("ConnectionFailed") {runWithChecks() },
+            EventAction("ConnectionFailed") { runWithChecks() },
             EventAction("FineLocationPermissionNotGranted") {
                 Utils.snackBar(
                     this,
@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity() {
                     finish()
                 }
             },
-            EventAction("FineLocationPermissionGranted") {Timber.i("FineLocationPermissionGranted") },
+            EventAction("FineLocationPermissionGranted") { Timber.i("FineLocationPermissionGranted") },
             EventAction("ApiError") {
                 Utils.snackBar(
                     this,
@@ -206,7 +206,7 @@ class MainActivity : AppCompatActivity() {
                     api().disconnect(this)
                 }, 3L, TimeUnit.SECONDS)
             },
-            EventAction("WaitForConnection") {runWithChecks() },
+            EventAction("WaitForConnection") { runWithChecks() },
             EventAction("Disconnect") {
                 Timber.i("onDisconnect")
                 InactivityWatcher.cancel()
@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity() {
                 navView.menu.findItem(R.id.navigation_events).isVisible =
                     WatchInfo.hasReminders
             },
-            EventAction("WatchInitializationCompleted") {navigateHome() },
+            EventAction("WatchInitializationCompleted") { navigateHome() },
             EventAction("HomeTimeUpdated") {
                 // This is really ugly, but I cannot update home time value
                 // inside the HomeTime. Anybody knows why, let me know.

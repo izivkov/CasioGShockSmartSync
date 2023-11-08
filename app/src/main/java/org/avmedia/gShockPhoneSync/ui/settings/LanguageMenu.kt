@@ -6,7 +6,6 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.ArrayAdapter
@@ -14,9 +13,6 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.ble.DeviceCharacteristics
-import org.avmedia.gshockapi.io.CachedIO
-import timber.log.Timber
 
 class LanguageMenu @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

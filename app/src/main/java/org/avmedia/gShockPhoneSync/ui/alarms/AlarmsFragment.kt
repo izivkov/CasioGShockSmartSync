@@ -42,8 +42,8 @@ class AlarmsFragment : Fragment() {
     }
 
     companion object {
-        private lateinit var alarmsFragmentScope:  LifecycleCoroutineScope
-        fun getFragmentScope (): LifecycleCoroutineScope {
+        private lateinit var alarmsFragmentScope: LifecycleCoroutineScope
+        fun getFragmentScope(): LifecycleCoroutineScope {
             if (!this::alarmsFragmentScope.isInitialized) {
                 ProgressEvents.onNext("ApiError")
             }

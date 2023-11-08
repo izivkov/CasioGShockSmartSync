@@ -15,7 +15,6 @@
 
 package org.avmedia.gShockPhoneSync.ui.actions
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
@@ -24,9 +23,6 @@ import org.avmedia.gShockPhoneSync.IHideableLayout
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.ble.DeviceCharacteristics
-import org.avmedia.gshockapi.io.CachedIO
-import timber.log.Timber
 
 class ActionRunnerLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

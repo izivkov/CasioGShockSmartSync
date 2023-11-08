@@ -15,7 +15,6 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentSettingsBinding
 import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
 
 class SettingsFragment : Fragment() {
 
@@ -45,9 +44,9 @@ class SettingsFragment : Fragment() {
     }
 
     companion object {
-        private lateinit var settingsFragmentScope:  LifecycleCoroutineScope
+        private lateinit var settingsFragmentScope: LifecycleCoroutineScope
 
-        fun getFragmentScope (): LifecycleCoroutineScope {
+        fun getFragmentScope(): LifecycleCoroutineScope {
             if (!this::settingsFragmentScope.isInitialized) {
                 ProgressEvents.onNext("ApiError")
             }

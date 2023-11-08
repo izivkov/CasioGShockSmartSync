@@ -44,8 +44,8 @@ class TimeFragment : Fragment() {
     }
 
     companion object {
-        private lateinit var timeFragmentScope:  LifecycleCoroutineScope
-        fun getFragmentScope (): LifecycleCoroutineScope {
+        private lateinit var timeFragmentScope: LifecycleCoroutineScope
+        fun getFragmentScope(): LifecycleCoroutineScope {
             if (!this::timeFragmentScope.isInitialized) {
                 ProgressEvents.onNext("ApiError")
             }

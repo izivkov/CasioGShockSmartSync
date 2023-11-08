@@ -12,7 +12,6 @@ import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
-import timber.log.Timber
 
 class WatchImageView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

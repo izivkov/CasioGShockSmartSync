@@ -7,15 +7,11 @@
 package org.avmedia.gShockPhoneSync.ui.main
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockapi.ble.DeviceCharacteristics
-import org.avmedia.gshockapi.io.CachedIO
-import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

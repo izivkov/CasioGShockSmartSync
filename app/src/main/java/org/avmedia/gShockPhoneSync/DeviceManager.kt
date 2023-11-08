@@ -1,14 +1,10 @@
 package org.avmedia.gShockPhoneSync
 
-import android.bluetooth.BluetoothDevice
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.ble.DeviceCharacteristics
-import org.avmedia.gshockapi.io.CachedIO
-import timber.log.Timber
 
 object DeviceManager {
 
