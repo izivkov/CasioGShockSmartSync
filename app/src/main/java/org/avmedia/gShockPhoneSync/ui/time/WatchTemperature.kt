@@ -19,7 +19,7 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 import java.util.*
 
 class WatchTemperature @JvmOverloads constructor(
@@ -32,7 +32,7 @@ class WatchTemperature @JvmOverloads constructor(
         super.onFinishInflate()
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            timeFragmentScope?.launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) {
                 val temperature = api().getWatchTemperature()
 
                 val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager

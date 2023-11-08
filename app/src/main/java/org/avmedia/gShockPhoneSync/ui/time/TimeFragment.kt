@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentTimeBinding
+import org.avmedia.gshockapi.ProgressEvents
 
 class TimeFragment : Fragment() {
 
@@ -23,6 +24,10 @@ class TimeFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    init {
+        timeFragmentScope = lifecycleScope
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -30,7 +35,6 @@ class TimeFragment : Fragment() {
     ): View {
 
         _binding = FragmentTimeBinding.inflate(inflater, container, false)
-        timeFragmentScope = lifecycleScope
         return binding.root
     }
 
@@ -40,7 +44,13 @@ class TimeFragment : Fragment() {
     }
 
     companion object {
-        var timeFragmentScope: LifecycleCoroutineScope? = null
+        private lateinit var timeFragmentScope:  LifecycleCoroutineScope
+        fun getFragmentScope (): LifecycleCoroutineScope {
+            if (!this::timeFragmentScope.isInitialized) {
+                ProgressEvents.onNext("ApiError")
+            }
+            return timeFragmentScope
+        }
     }
 }
 

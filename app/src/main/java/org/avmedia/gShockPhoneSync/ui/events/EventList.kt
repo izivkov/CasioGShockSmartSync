@@ -38,9 +38,11 @@ class EventList @JvmOverloads constructor(
     private fun waitForPermissions() {
         val eventActions = arrayOf(
             EventAction("CalendarPermissionsGranted") {
-                EventsModel.refresh(context)
-                (context as Activity).runOnUiThread {
-                    adapter?.notifyDataSetChanged()
+                if (EventsModel.events.isEmpty()) {
+                    EventsModel.refresh(context)
+                    (context as Activity).runOnUiThread {
+                        adapter?.notifyDataSetChanged()
+                    }
                 }
             },
         )
@@ -52,6 +54,7 @@ class EventList @JvmOverloads constructor(
     private fun listenForUpdateRequest() {
         val eventActions = arrayOf(
             EventAction("CalendarUpdated") {
+                Timber.d("CalendarUpdated, events: ${EventsModel.events.size}")
                 EventsModel.refresh(context)
                 (context as Activity).runOnUiThread {
                     adapter?.notifyDataSetChanged()

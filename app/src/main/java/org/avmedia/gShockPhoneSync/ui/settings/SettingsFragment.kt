@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentSettingsBinding
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
 class SettingsFragment : Fragment() {
@@ -25,7 +26,7 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
 
     init {
-        Timber.d("Created SettingsFragment")
+        settingsFragmentScope = lifecycleScope
     }
 
     override fun onCreateView(
@@ -33,8 +34,6 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        settingsFragmentScope = lifecycleScope // call this first
-
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         _binding?.settingsList?.init()
         return binding.root
@@ -46,6 +45,13 @@ class SettingsFragment : Fragment() {
     }
 
     companion object {
-        var settingsFragmentScope: LifecycleCoroutineScope? = null
+        private lateinit var settingsFragmentScope:  LifecycleCoroutineScope
+
+        fun getFragmentScope (): LifecycleCoroutineScope {
+            if (!this::settingsFragmentScope.isInitialized) {
+                ProgressEvents.onNext("ApiError")
+            }
+            return settingsFragmentScope
+        }
     }
 }

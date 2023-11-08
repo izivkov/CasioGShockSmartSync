@@ -11,7 +11,7 @@ import android.util.AttributeSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 import timber.log.Timber
 
 class WatchName @JvmOverloads constructor(
@@ -22,7 +22,7 @@ class WatchName @JvmOverloads constructor(
         super.onFinishInflate()
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            timeFragmentScope?.launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) {
                 val name = api().getWatchName()
                 Timber.i(">>> setting watch name to $name")
                 text = name

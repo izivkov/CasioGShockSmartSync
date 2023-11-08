@@ -14,7 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsFragment.Companion.alarmsFragmentScope
+import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsFragment.Companion.getFragmentScope
 
 @SuppressLint("NotifyDataSetChanged")
 class AlarmList @JvmOverloads constructor(
@@ -36,7 +36,7 @@ class AlarmList @JvmOverloads constructor(
             AlarmsModel.alarms.clear()
             AlarmsModel.alarms.addAll(alarms)
 
-            alarmsFragmentScope?.launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) {
                 adapter?.notifyDataSetChanged()
             }
         }

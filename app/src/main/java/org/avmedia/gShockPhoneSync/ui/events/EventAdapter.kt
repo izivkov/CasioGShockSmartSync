@@ -60,7 +60,7 @@ class EventAdapter(private val events: ArrayList<Event>) :
                 if (isChecked && EventsModel.getSelectedCount() == EventsModel.MAX_REMINDERS) {
                     Utils.snackBar(
                         buttonView.context,
-                        "Max ${EventsModel.MAX_REMINDERS} items selected. Please unselect some first."
+                        "${EventsModel.MAX_REMINDERS} items selected. Please unselect some first."
                     )
                     viewHolder.selectedView.isChecked = false
                     event.selected = false
@@ -69,8 +69,9 @@ class EventAdapter(private val events: ArrayList<Event>) :
                 }
             }
 
+            fun dummy(){}
             (viewHolder.itemView as EventItem).setEventData(event)
-            (viewHolder.itemView as EventItem).setOnDataChange(::notifyDataSetChanged)
+            (viewHolder.itemView as EventItem).setOnDataChange(  ::dummy /*::notifyDataSetChanged*/)
         } catch (e: ParseException) {
             e.printStackTrace()
         }

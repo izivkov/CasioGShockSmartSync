@@ -29,12 +29,14 @@ class ActionsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    init {
+        actionsFragmentScope = lifecycleScope
+    }
+
     @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        actionsFragmentScope = lifecycleScope // call this first
-
         val requestMultiplePermissions = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -70,6 +72,13 @@ class ActionsFragment : Fragment() {
     }
 
     companion object {
-        var actionsFragmentScope: LifecycleCoroutineScope? = null
+        private lateinit var actionsFragmentScope:  LifecycleCoroutineScope
+
+        fun getFragmentScope (): LifecycleCoroutineScope {
+            if (!this::actionsFragmentScope.isInitialized) {
+                ProgressEvents.onNext("ApiError")
+            }
+            return actionsFragmentScope
+        }
     }
 }

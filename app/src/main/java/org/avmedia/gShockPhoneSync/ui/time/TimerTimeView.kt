@@ -14,7 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.timeFragmentScope
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 import timber.log.Timber
 
 
@@ -29,7 +29,7 @@ class TimerTimeView @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            timeFragmentScope?.launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) {
                 text = makeLongString(api().getTimer())
             }
         }
