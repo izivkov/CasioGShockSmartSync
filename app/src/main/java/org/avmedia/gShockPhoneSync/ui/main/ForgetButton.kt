@@ -43,7 +43,7 @@ class ForgetButton @JvmOverloads constructor(
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
+        ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }
 
     inner class OnTouchListener : View.OnTouchListener {

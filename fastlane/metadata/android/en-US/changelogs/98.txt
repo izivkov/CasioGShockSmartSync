@@ -1,5 +1,0 @@
-- Improved TimeZone handling when setting time.
-
-- Now the app respects 12/24 hours phone setting in the Alarms screen.
-
-

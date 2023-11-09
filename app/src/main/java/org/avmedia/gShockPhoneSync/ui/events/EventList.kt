@@ -44,7 +44,7 @@ class EventList @JvmOverloads constructor(
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
+        ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -59,7 +59,7 @@ class EventList @JvmOverloads constructor(
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(
+        ProgressEvents.runEventActions(
             this.javaClass.name + "listenForUpdateRequest",
             eventActions
         )

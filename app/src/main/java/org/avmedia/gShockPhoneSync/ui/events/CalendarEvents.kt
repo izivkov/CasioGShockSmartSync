@@ -123,6 +123,7 @@ object CalendarEvents {
     private object CalendarObserver {
         private var registered = false
 
+        @Suppress("DEPRECATION")
         private val calendarObserver = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {
                 ProgressEvents.onNext("CalendarUpdated")

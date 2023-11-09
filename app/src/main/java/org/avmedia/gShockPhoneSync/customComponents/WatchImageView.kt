@@ -30,7 +30,7 @@ class WatchImageView @JvmOverloads constructor(
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
+        ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }
 
     private fun setImageResource() {

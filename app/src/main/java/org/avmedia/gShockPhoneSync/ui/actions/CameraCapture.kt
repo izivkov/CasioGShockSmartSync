@@ -112,6 +112,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
             ScreenSize(w, h)
         } else {
             val displayMetrics = DisplayMetrics()
+            @Suppress("DEPRECATION")
             activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
             ScreenSize(displayMetrics.widthPixels, displayMetrics.heightPixels)
         }

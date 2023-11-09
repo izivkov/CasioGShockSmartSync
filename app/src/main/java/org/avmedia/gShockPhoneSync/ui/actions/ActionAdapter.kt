@@ -348,12 +348,6 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhBaseAction.title.text = action.title
     }
 
-    private fun configureMap(
-        position: Int
-    ) {
-        val action: ActionsModel.Action = actions[position]
-    }
-
     private fun configureBaseActionViewHolder(
         vhBaseAction: ViewHolderBaseAction,
         position: Int

@@ -53,6 +53,6 @@ class SettingsList @JvmOverloads constructor(
             },
         )
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
+        ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }
 }

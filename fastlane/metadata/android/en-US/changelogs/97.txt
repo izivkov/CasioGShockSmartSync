@@ -1,7 +1,0 @@
-- Implemented the Find Phone function, by long-pressing the LOWER-RIGHT button (FIND should appear on the watch's display).
-The phone will stop playing sound once it is picked up, or after 30 seconds.
-
-- Fixed a wrong battery level display on the Time Screen. It works with my two watches, but we need more testing, so please post a messages here if works or not for you.
-
-- Now also show the temperature of the watch, bellow the battery indicator.
-

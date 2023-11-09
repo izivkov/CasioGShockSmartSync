@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     private val api = GShockAPI(this)
 
     // do not delete this. DeviceManager needs to be running to save the last device name to reuse on nect start.
-    private lateinit var deviceManager: DeviceManager
+    private var deviceManager: DeviceManager
 
     private var requestBluetooth =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -249,7 +249,7 @@ class MainActivity : AppCompatActivity() {
                 textView.update()
             })
 
-        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
+        ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }
 
     private fun navigateHome() {
