@@ -21,6 +21,7 @@ import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -280,6 +281,10 @@ class MainActivity : AppCompatActivity() {
 
         fun api(): GShockAPI {
             return instance!!.api
+        }
+
+        fun getLifecycleScope(): LifecycleCoroutineScope {
+            return instance!!.lifecycleScope
         }
     }
 }

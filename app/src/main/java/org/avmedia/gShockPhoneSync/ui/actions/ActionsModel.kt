@@ -14,8 +14,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
 import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.actions.ActionsFragment.Companion.getFragmentScope
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.NotificationProvider
@@ -33,7 +33,7 @@ object ActionsModel {
 
     val actions = ArrayList<Action>()
 
-    enum class RUN_MODE() {
+    enum class RUN_MODE {
         SYNC, ASYNC,
     }
 
@@ -78,10 +78,11 @@ object ActionsModel {
     }
 
     class SetEventsAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled) {
+        Action(title, enabled, RUN_MODE.ASYNC) {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
+            EventsModel.refresh(context)
             api().setEvents(EventsModel.events)
             Utils.snackBar(context, "Events Sent to Watch")
         }
@@ -121,11 +122,13 @@ object ActionsModel {
     }
 
     class SetTimeAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled) {
+        Action(title, enabled, RUN_MODE.ASYNC) {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            getFragmentScope().launch {
+
+            // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
+            MainActivity.getLifecycleScope().launch {
                 api().setTime()
             }
         }
@@ -211,7 +214,7 @@ object ActionsModel {
         }
     }
 
-    enum class CAMERA_ORIENTATION() {
+    enum class CAMERA_ORIENTATION {
         FRONT, BACK;
     }
 
@@ -347,7 +350,8 @@ object ActionsModel {
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
-                    getFragmentScope().launch {
+                    // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
+                    MainActivity.getLifecycleScope().launch {
                         runIt(it, context)
                     }
                 } else {

@@ -16,7 +16,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.lifecycleScope
 import org.avmedia.gShockPhoneSync.databinding.FragmentActionsBinding
 import org.avmedia.gshockapi.ProgressEvents
 
@@ -28,10 +27,6 @@ class ActionsFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
-    init {
-        actionsFragmentScope = lifecycleScope
-    }
 
     @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreateView(
@@ -73,12 +68,5 @@ class ActionsFragment : Fragment() {
 
     companion object {
         private lateinit var actionsFragmentScope: LifecycleCoroutineScope
-
-        fun getFragmentScope(): LifecycleCoroutineScope {
-            if (!this::actionsFragmentScope.isInitialized) {
-                ProgressEvents.onNext("ApiError")
-            }
-            return actionsFragmentScope
-        }
     }
 }
