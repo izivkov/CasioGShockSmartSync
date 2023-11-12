@@ -82,9 +82,9 @@ object RRuleValues {
                             Frequency.Daily -> {
                                 rruleValues.localEndDate =
                                     LocalDate.of(
-                                        startDate.year!!,
-                                        startDate.month!!,
-                                        startDate.day!!
+                                        startDate.year,
+                                        startDate.month,
+                                        startDate.day
                                     )
                                         .plusDays(numberOfPeriods)
                             }
@@ -94,9 +94,9 @@ object RRuleValues {
 
                                 rruleValues.localEndDate = calculateEndDate(
                                     LocalDate.of(
-                                        startDate.year!!,
-                                        startDate.month!!,
-                                        startDate.day!!
+                                        startDate.year,
+                                        startDate.month,
+                                        startDate.day
                                     ),
                                     weekDays,
                                     numberOfPeriods.toInt()
@@ -106,9 +106,9 @@ object RRuleValues {
                             Frequency.Monthly -> {
                                 rruleValues.localEndDate =
                                     LocalDate.of(
-                                        startDate.year!!,
-                                        startDate.month!!,
-                                        startDate.day!!
+                                        startDate.year,
+                                        startDate.month,
+                                        startDate.day
                                     )
                                         .plusMonths(numberOfPeriods)
                             }
@@ -116,9 +116,9 @@ object RRuleValues {
                             Frequency.Yearly -> {
                                 rruleValues.localEndDate =
                                     LocalDate.of(
-                                        startDate.year!!,
-                                        startDate.month!!,
-                                        startDate.day!!
+                                        startDate.year,
+                                        startDate.month,
+                                        startDate.day
                                     )
                                         .plusYears(numberOfPeriods)
                             }
@@ -128,8 +128,14 @@ object RRuleValues {
 
                 rruleValues.repeatPeriod = toEventRepeatPeriod(rruleObjVal.freq)
                 if (rruleValues.repeatPeriod == RepeatPeriod.WEEKLY) {
-                    val weekDays = rruleObjVal.byDay
-                    rruleValues.daysOfWeek = createDaysOfWeek(weekDays)
+                    if (rruleObjVal.byDay.isEmpty()) {
+                        rruleValues.daysOfWeek = ArrayList<DayOfWeek>()
+                        val dayOfWeek = LocalDate.of(startDate.year, startDate.month, startDate.day).dayOfWeek
+                        rruleValues.daysOfWeek!!.add(dayOfWeek)
+                    } else {
+                        val weekDays = rruleObjVal.byDay
+                        rruleValues.daysOfWeek = createDaysOfWeek(weekDays)
+                    }
                 }
             }
         }

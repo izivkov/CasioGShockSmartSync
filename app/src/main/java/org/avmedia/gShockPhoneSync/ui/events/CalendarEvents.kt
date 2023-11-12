@@ -96,7 +96,7 @@ object CalendarEvents {
                 )
             }
 
-            val end = LocalDate.of(endDate.year!!, endDate.month!!, endDate.day!!)
+            val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
             if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) {
                 continue // do not add expired events
             }
