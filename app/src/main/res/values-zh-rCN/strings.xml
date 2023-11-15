@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Casio G-Shock Smart Sync</string>
+    <string name="title_time">时间</string>
+    <string name="title_alarms">闹钟</string>
+    <string name="title_events">事件</string>
+    <string name="title_settings">设置</string>
+    <string name="events">事件</string>
+    <string name="alarms">闹钟</string>
+    <string name="time">时间</string>
+    <string name="send_alarms_to_watch">发送到手表</string>
+    <string name="enabled">开启</string>
+    <string name="disabled">关闭</string>
+    <string name="send_alarms_to_phone">发送到手机</string>
+    <string name="send_events_to_watch">发送到手表待办项</string>
+    <string name="connection_screen_info"><![CDATA[要进入下一步, 按住 手表<b>左下</b> 按钮3秒
+    在两声“哔”响后, App会进入时间设置页
+    <p><b>确保卡西欧官方应用未在运行, 否则会导致功能冲突.</b></p>
+    <p>要执行由 <b>Actions</b> 页定义的功能, 短按手表 <b>右下</b> 按钮. Actions 可以指定为你的手机上的一个功能或者软件, 比如说 <b>照个相</b>.
+    使用Actions功能时, 这块手表就如同手机的远程控制器一样</p>]]></string>
+    <string name="alarms_screen_info"><![CDATA[The <b>B5600/B5000/B2100</b> 手表有5组闹钟设定并且在此处可以调整“整点提醒”设置
+    闹钟设定可以通过点按闹钟页面的时间值调整. 此时会弹出窗口要求设置脑中的时间
+    当闹钟设置好后, 你可以把闹钟设置应用到手表或者这个手机的闹钟应用.]]></string>
+    <string name="events_screen_info"><![CDATA[这一页显示来自于 <b>Google Calendar</b> 的待办事项并允许你将其发送到手表的
+    <b>reminders</b>.\n\n如果手表没有出现待办事项, 确保你的确在Google Calander设置有在未来的待办事项, 或者有尚未过期的重复事项]]>\n</string>
+    <string name="actions">Actions</string>
+    <string name="title_actions">Actions</string>
+    <string name="actions_screen_info"><![CDATA[选定的动作会在用户 <b>短按</b> 手表首屏的 <b>右下</b> 按钮后运行. 此时你的手表会像是手机的遥控一样]]></string>
+    <string name="feb_22_mar_24">2月22-5月24</string>
+    <string name="weekly">每周</string>
+    <string name="action_item">动作对象</string>
+    <string name="voice_assistant">语音助手</string>
+    <string name="front_cam">前摄像头</string>
+    <string name="back_cam">后摄像头</string>
+    <string name="take_a_photo">照相</string>
+    <string name="info">信息</string>
+    <string name="daily">每日</string>
+    <string name="_12_00">12:00</string>
+    <string name="email_item">电子邮件对象</string>
+    <string name="email_example_com">me@example.com</string>
+    <string name="watch_alarms">手表闹钟</string>
+    <string name="signal_chime">整点提醒</string>
+    <string name="google_calender_events">Google Calender时间</string>
+    <string name="local_time">本地时间</string>
+    <string name="send_to_watch">发送到手表</string>
+    <string name="_416_555_6789">416–555–6789</string>
+    <string name="phonecall_item">手机呼叫</string>
+    <string name="home_time">家乡时间</string>
+    <string name="running_actions">正在执行的动作</string>
+    <string name="title_placeholder">标题占位符</string>
+    <string name="settings">设置</string>
+    <string name="send_to_watch_settings">发送到手表</string>
+    <string name="auto_configure_settings">自动填充</string>
+    <string name="time_format">时间格式</string>
+    <string name="_12h">12小时制</string>
+    <string name="_24h">24小时制</string>
+    <string name="date_format">日期格式</string>
+    <string name="language">语言</string>
+    <string name="operational_sound">按键音</string>
+    <string name="power_saving_mode">省电模式</string>
+    <string name="select_language">选择语言</string>
+    <string name="auto_fill_help">"<![CDATA[自动填充值的产生方式：
+        <li>时间日期与语言设置均从手机设置中获取</li>
+        <li>按键音仅在手机置于勿扰模式时关闭</li>
+        <li>在手表电量降至15%时自动开启省电模式</li>
+        注意: <i>即使条件发生变化（如 勿扰模式的变动）这些值在再次发送之前不会改变，</i>
+        ]]>\n    "</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确认</string>
+    <string name="timerDialogTitle">计时器</string>
+    <string name="info_home_time">"\n        <![CDATA[<b>Home Time</b> 显示这个手表的时区
+        当APP设置手表的时区时 (自动/手动设置效果相同), 这也会设置手表的 <b>Home Time,
+        时钟偏移</b> 和 <b>DST（夏令时）</b> (如果可以应用修改) 至当前时区. 因此也省去了旅游时调整 <b>世界时间</b> 和 <b>Home Time</b>的麻烦
+        ]]>\n    "</string>
+    <string name="time_adjustment_info"><![CDATA[
+    <li><b>时间调整</b> 允许APP以一天四次的频率自动校准手表的时间</li>
+    <li>与此同时, APP也会从你的<b>Google Calendar</b>同步手表的 <b>待办 (事件)</b></li>
+    ]]></string>
+    <string name="image_of_casio_watch">卡西欧手表</string>
+    <string name="connection_screen_device">" <![CDATA[
+        <li>默认情况下，这个软件会尝试连接到上一次连接的手表. 如果你要连接到不同的手表,
+       按下 <b>忘记</b> 按钮, 像往常一样连接新的手表. 从这时开始, 该应用会连接到
+        这个新手表.</li>
+
+        <li>该软件会自动检测手表型号.</li>
+        ]]>"</string>
+    <string name="forget">忘记</string>
+    <string name="hand_adjustment">手臂调整</string>
+    <string name="move_hand_to_the_left">移动至左臂</string>
+    <string name="reset_hand_at_12_position">重置指针至12点钟方向</string>
+    <string name="move_hand_to_the_right">移动至右臂</string>
+    <string name="auto_light">自动灯光</string>
+    <string name="off">关</string>
+    <string name="on">开</string>
+    <string name="illumination_period">照明周期</string>
+    <string name="mm_dd">月:日</string>
+    <string name="dd_mm">日:月</string>
+    <string name="time_adjustment">时间调整</string>
+    <string name="notify_me">提醒我</string>
+    <string name="timer">计时器</string>
+    <string name="_00_00_00">00:00:00</string>
+    <string name="_00">00</string>
+    <string name="semi_column">:</string>
+</resources>
