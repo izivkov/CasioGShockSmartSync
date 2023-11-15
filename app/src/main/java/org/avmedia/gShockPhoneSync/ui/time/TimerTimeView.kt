@@ -17,7 +17,6 @@ import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 import timber.log.Timber
 
-
 class TimerTimeView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {

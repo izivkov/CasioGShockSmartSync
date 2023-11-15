@@ -111,4 +111,14 @@
     <string name="_00_00_00">00:00:00</string>
     <string name="_00">00</string>
     <string name="semi_column">:</string>
+
+    <!-- New -->
+    <string name="no_watch">No Watch</string>
+    <string name="set_time">Set Time</string>
+    <string name="set_reminders">Set Reminders from Google Calender</string>
+    <string name="take_photo">Take a photo</string>
+    <string name="toggle_flashlight">Toggle Flashlight</string>
+    <string name="start_voice_assistant">Start Voice Assist</string>
+    <string name="emergency_actions">Emergency Actions:</string>
+    <string name="make_phonecall">Make a phone call</string>
 </resources>

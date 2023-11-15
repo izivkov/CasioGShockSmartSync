@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.ui.main
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -20,7 +21,7 @@ class WatchName @JvmOverloads constructor(
     init {
         var shortName = WatchInfo.shortName
         if (shortName.isBlank()) {
-            shortName = "No Watch"
+            shortName = resources.getString(R.string.no_watch)
         }
         text = shortName
 

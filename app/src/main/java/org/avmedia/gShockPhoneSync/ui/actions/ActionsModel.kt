@@ -13,9 +13,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.camera.core.CameraSelector
+import androidx.core.content.ContextCompat.getString
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
+import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.NotificationProvider
@@ -40,17 +43,28 @@ object ActionsModel {
     init {
         // actions.add(MapAction("Map", false))
         // actions.add(SetLocationAction("Save location to G-maps", false))
-        actions.add(SetTimeAction("Set Time", true))
+
+        val setTimeText = applicationContext().getString(R.string.set_time)
+        actions.add(SetTimeAction(setTimeText, true))
+
         if (WatchInfo.hasReminders) {
-            actions.add(SetEventsAction("Set Reminders from Google Calender", false))
+            val setReminderText = applicationContext().getString(R.string.set_reminders)
+            actions.add(SetEventsAction(setReminderText, false))
         }
-        actions.add(PhotoAction("Take a photo", false, CAMERA_ORIENTATION.BACK))
-        actions.add(ToggleFlashlightAction("Toggle Flashlight", false))
+        val takePhotoText = applicationContext().getString(R.string.take_photo)
+        actions.add(PhotoAction(takePhotoText, false, CAMERA_ORIENTATION.BACK))
+
+        val toggleFlashlightText = applicationContext().getString(R.string.toggle_flashlight)
+        actions.add(ToggleFlashlightAction(toggleFlashlightText, false))
+
+        var voiceAssistantText = applicationContext().getString(R.string.start_voice_assistant)
         actions.add(StartVoiceAssistAction("Start Voice Assist", true))
 
-        actions.add(Separator("Emergency Actions:", false))
+        var emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
+        actions.add(Separator(emergencyActionsText, false))
 
-        actions.add(PhoneDialAction("Make a phone call", true, ""))
+        var makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
+        actions.add(PhoneDialAction(makePhoneCallText, true, ""))
         // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
     }
 
