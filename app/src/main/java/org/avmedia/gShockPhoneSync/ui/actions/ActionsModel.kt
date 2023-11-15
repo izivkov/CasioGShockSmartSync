@@ -58,7 +58,7 @@ object ActionsModel {
         actions.add(ToggleFlashlightAction(toggleFlashlightText, false))
 
         var voiceAssistantText = applicationContext().getString(R.string.start_voice_assistant)
-        actions.add(StartVoiceAssistAction("Start Voice Assist", true))
+        actions.add(StartVoiceAssistAction(voiceAssistantText, true))
 
         var emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
         actions.add(Separator(emergencyActionsText, false))

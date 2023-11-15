@@ -34,7 +34,8 @@ class WatchName @JvmOverloads constructor(
             EventAction("DeviceName") {
                 val deviceName = ProgressEvents.getPayload("DeviceName")
                 if ((deviceName as String).isBlank()) {
-                    text = "No Watch"
+                    text = resources.getString(R.string.no_watch)
+
                 }
                 if (deviceName.contains("CASIO")) {
                     text = deviceName.removePrefix("CASIO").trim()
