@@ -2,7 +2,7 @@
 
 ## Announcements
 
-We have now added support for the **DW-B5600** watches (module 3509).
+Added support for Simplified Chinese.
 
 ## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:

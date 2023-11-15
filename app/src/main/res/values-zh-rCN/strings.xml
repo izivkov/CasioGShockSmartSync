@@ -100,8 +100,6 @@
     <string name="_00_00_00">00:00:00</string>
     <string name="_00">00</string>
     <string name="semi_column">:</string>
-
-    <!-- New -->
     <string name="no_watch">未添加手表</string>
     <string name="set_time">自动设置事件</string>
     <string name="set_reminders">自动从Google Calender添加待办</string>
