@@ -26,7 +26,7 @@
     <string name="actions">Actions</string>
     <string name="title_actions">Actions</string>
     <string name="actions_screen_info"><![CDATA[选定的动作会在用户 <b>短按</b> 手表首屏的 <b>右下</b> 按钮后运行. 此时你的手表会像是手机的遥控一样]]></string>
-    <string name="feb_22_mar_24">2月22-5月24</string>
+    <string name="feb_22_mar_24">2月22至5月24</string>
     <string name="weekly">每周</string>
     <string name="action_item">动作对象</string>
     <string name="voice_assistant">语音助手</string>
