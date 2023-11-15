@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Casio G-Shock Smart Sync</string>
     <string name="title_time">时间</string>
     <string name="title_alarms">闹钟</string>
     <string name="title_events">事件</string>
@@ -103,12 +102,12 @@
     <string name="semi_column">:</string>
 
     <!-- New -->
-    <string name="no_watch">No Watch</string>
-    <string name="set_time">Set Time</string>
-    <string name="set_reminders">Set Reminders from Google Calender</string>
-    <string name="take_photo">Take a photo</string>
-    <string name="toggle_flashlight">Toggle Flashlight</string>
-    <string name="start_voice_assistant">Start Voice Assist</string>
-    <string name="emergency_actions">Emergency Actions:</string>
-    <string name="make_phonecall">Make a phone call</string>
+    <string name="no_watch">未添加手表</string>
+    <string name="set_time">自动设置事件</string>
+    <string name="set_reminders">自动从Google Calender添加待办</string>
+    <string name="take_photo">照相</string>
+    <string name="toggle_flashlight">启动闪光灯</string>
+    <string name="start_voice_assistant">启动语音助手</string>
+    <string name="emergency_actions">触发应急时的行为:</string>
+    <string name="make_phonecall">拨打电话</string>
 </resources>
