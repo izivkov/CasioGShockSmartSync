@@ -39,7 +39,7 @@
     <string name="email_example_com">me@example.com</string>
     <string name="watch_alarms">手表闹钟</string>
     <string name="signal_chime">整点提醒</string>
-    <string name="google_calender_events">Google Calendar事件</string>
+    <string name="google_calendar_events">Google Calendar事件</string>
     <string name="local_time">本地时间</string>
     <string name="send_to_watch">发送到手表</string>
     <string name="_416_555_6789">416–555–6789</string>
