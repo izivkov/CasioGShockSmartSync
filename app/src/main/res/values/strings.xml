@@ -47,7 +47,7 @@
     <string name="email_example_com">me@example.com</string>
     <string name="watch_alarms">Watch Alarms</string>
     <string name="signal_chime">Signal (chime)</string>
-    <string name="google_calender_events">Google Calender Events</string>
+    <string name="google_calender_events">Google Calendar Events</string>
     <string name="local_time">Local Time</string>
     <string name="send_to_watch">Send to Watch</string>
     <string name="_416_555_6789">416–555–6789</string>
@@ -113,7 +113,7 @@
     <string name="semi_column">:</string>
     <string name="no_watch">No Watch</string>
     <string name="set_time">Set Time</string>
-    <string name="set_reminders">Set Reminders from Google Calender</string>
+    <string name="set_reminders">Set Reminders from Google Calendar</string>
     <string name="take_photo">Take a photo</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>
     <string name="start_voice_assistant">Start Voice Assist</string>
