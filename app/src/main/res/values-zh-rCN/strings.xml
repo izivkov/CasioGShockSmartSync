@@ -102,7 +102,7 @@
     <string name="semi_column">:</string>
     <string name="no_watch">无手表</string>
     <string name="set_time">自动设置时间</string>
-    <string name="set_reminders">自动从Google Calender添加待办</string>
+    <string name="set_reminders">自动从Google Calendar添加待办</string>
     <string name="take_photo">照相</string>
     <string name="toggle_flashlight">启动闪光灯</string>
     <string name="start_voice_assistant">启动语音助手</string>
