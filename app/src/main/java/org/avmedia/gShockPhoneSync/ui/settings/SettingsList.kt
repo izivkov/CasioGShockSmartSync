@@ -17,6 +17,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.getFragmentScope
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 
 class SettingsList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -37,11 +38,16 @@ class SettingsList @JvmOverloads constructor(
         getFragmentScope().launch(Dispatchers.IO) {
             val settingStr = Gson().toJson(api().getSettings())
             SettingsModel.fromJson(settingStr)
+            ProgressEvents.onNext("NeedToUpdateUI")
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun updateUI() {
+        if (adapter == null) {
+            ProgressEvents.onNext("ApiError")
+            return
+        }
         adapter?.notifyDataSetChanged()
         ProgressEvents.onNext("SettingsLoaded")
     }
