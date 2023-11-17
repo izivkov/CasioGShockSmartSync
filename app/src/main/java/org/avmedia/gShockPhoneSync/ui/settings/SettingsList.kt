@@ -38,6 +38,9 @@ class SettingsList @JvmOverloads constructor(
         getFragmentScope().launch(Dispatchers.IO) {
             val settingStr = Gson().toJson(api().getSettings())
             SettingsModel.fromJson(settingStr)
+
+            // Sometimes, especially is production, the UI does not update.
+            // Add this here to make sure the UI is updated
             ProgressEvents.onNext("NeedToUpdateUI")
         }
     }
