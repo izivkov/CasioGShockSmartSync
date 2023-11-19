@@ -24,8 +24,8 @@ object EventsModel {
         events.addAll(CalendarEvents.getEventsFromCalendar(context))
     }
 
-    fun getSelectedCount(): Int {
-        return (events.filter { it.selected } as ArrayList<Event>).size
+    fun getEnabledCount(): Int {
+        return (events.filter { it.enabled } as ArrayList<Event>).size
     }
 
     fun createEventDate(timeMs: Long, zone: ZoneId): EventDate {

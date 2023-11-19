@@ -101,7 +101,7 @@ object CalendarEvents {
                 continue // do not add expired events
             }
 
-            val selected = events.size < EventsModel.MAX_REMINDERS
+            val enabled = events.size < EventsModel.MAX_REMINDERS
             events.add(
                 Event(
                     title,
@@ -109,9 +109,8 @@ object CalendarEvents {
                     endDate,
                     repeatPeriod,
                     daysOfWeek,
-                    true,
+                    enabled,
                     incompatible,
-                    selected
                 )
             )
         }
