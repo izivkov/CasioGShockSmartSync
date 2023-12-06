@@ -33,12 +33,10 @@ class ConnectionLayout @JvmOverloads constructor(
             },
             EventAction("WatchInitializationCompleted") {
                 if (!api().isActionButtonPressed() && !api().isAutoTimeStarted()) {
-                    println("connectionLayout: hide")
                     hide()
                 }
             },
             EventAction("Disconnect") {
-                println("connectionLayout: show")
                 show()
             },
         )

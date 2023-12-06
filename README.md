@@ -2,7 +2,12 @@
 
 ## Announcements
 
-Added support for Simplified Chinese.
+Incorporating Google Fit into the app to replace the "Move" app.
+
+We have started a discussion here:
+https://github.com/izivkov/CasioGShockSmartSync/discussions/60
+
+Please give us feedback on this topic.
 
 ## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:

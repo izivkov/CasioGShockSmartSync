@@ -37,12 +37,10 @@ class MainLayout @JvmOverloads constructor(
         val eventActions = arrayOf(
             EventAction("WatchInitializationCompleted") {
                 if (!api().isActionButtonPressed() && !api().isAutoTimeStarted() && !api().isFindPhoneButtonPressed()) {
-                    println("MainLayout: show")
                     show()
                 }
             },
             EventAction("Disconnect") {
-                println("MainLayout: hide")
                 hide()
             },
         )
