@@ -6,7 +6,7 @@ package org.avmedia.gshockapi
  */
 object WatchInfo {
     enum class WATCH_MODEL {
-        GA, GW, DW, GMW, UNKNOWN
+        GA, GW, DW, GMW, GPR, GST, UNKNOWN
     }
 
     var name: String = ""
@@ -22,6 +22,7 @@ object WatchInfo {
     var hasReminders = false
     var shortLightDuration = ""
     var longLightDuration = ""
+    var weekLanguageSupported = true
 
     /**
      * Info about the model.
@@ -35,6 +36,7 @@ object WatchInfo {
         var hasReminders: Boolean,
         var shortLightDuration: String,
         val longLightDuration: String,
+        val weekLanguageSupported: Boolean = true,
     )
 
     private val models = listOf(
@@ -46,7 +48,17 @@ object WatchInfo {
             hasAutoLight = true,
             hasReminders = true,
             shortLightDuration = "2s",
-            longLightDuration = "4s"
+            longLightDuration = "4s",
+        ),
+        ModelInfo(
+            WATCH_MODEL.GST,
+            6,
+            3,
+            5,
+            hasAutoLight = true,
+            hasReminders = true,
+            shortLightDuration = "2s",
+            longLightDuration = "4s",
         ),
         ModelInfo(
             WATCH_MODEL.GMW,
@@ -67,6 +79,17 @@ object WatchInfo {
             hasReminders = true,
             shortLightDuration = "1.5s",
             longLightDuration = "3s"
+        ),
+        ModelInfo(
+            WATCH_MODEL.GPR,
+            2,
+            1,
+            5,
+            hasAutoLight = true,
+            hasReminders = true,
+            shortLightDuration = "1.5s",
+            longLightDuration = "3s",
+            weekLanguageSupported = false
         ),
         ModelInfo(
             WATCH_MODEL.DW,
@@ -120,6 +143,7 @@ object WatchInfo {
         this.dstCount = modelMap[model]!!.dstCount
         this.shortLightDuration = modelMap[model]!!.shortLightDuration
         this.longLightDuration = modelMap[model]!!.longLightDuration
+        this.weekLanguageSupported = modelMap[model]!!.weekLanguageSupported
 
         ProgressEvents.onNext("DeviceName", this.name)
     }
