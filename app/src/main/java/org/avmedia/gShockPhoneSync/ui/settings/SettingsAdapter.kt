@@ -9,9 +9,10 @@
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.annotation.SuppressLint
-import android.text.Editable
+import android.content.Context
+import android.text.InputFilter
+import android.text.Spanned
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -22,7 +23,9 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.ui.time.TimerTimeView
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+
 
 // This adapter handles a heterogeneous list of settings.
 
@@ -309,16 +312,47 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhTimeAdjustment.adjustmentTimeMinutes.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
-                setting.adjustmentTimeMinutes = vhTimeAdjustment.adjustmentTimeMinutes.text.toString().toInt()
+                val userInput = vhTimeAdjustment.adjustmentTimeMinutes.text.toString()
+                val adjustedMinutes = userInput.toIntOrNull() ?: 0
+                setting.adjustmentTimeMinutes = adjustedMinutes
+
                 true // Return true to indicate that the event has been consumed
             } else {
                 false // Return false to allow the system to handle the event
             }
         }
 
+        vhTimeAdjustment.adjustmentTimeMinutes.filters = arrayOf(
+            InputFilter.LengthFilter(2), TimerTimeView.InputFilterMinMax(0, 59)
+        )
+
         vhTimeAdjustment.timeAdjustmentNotification.setOnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustmentNotifications = isChecked
             LocalDataStorage.setTimeAdjustmentNotification(setting.timeAdjustmentNotifications)
+        }
+    }
+
+    class InputFilterMinMax(private var min: Int, private var max: Int) : InputFilter {
+
+        override fun filter(
+            source: CharSequence,
+            start: Int,
+            end: Int,
+            dest: Spanned,
+            dstart: Int,
+            dend: Int
+        ): CharSequence? {
+            try {
+                val input = Integer.parseInt(dest.toString() + source.toString())
+                if (isInRange(min, max, input))
+                    return null
+            } catch (_: NumberFormatException) {
+            }
+            return ""
+        }
+
+        private fun isInRange(a: Int, b: Int, c: Int): Boolean {
+            return if (b > a) c in a..b else c in b..a
         }
     }
 

@@ -52,7 +52,16 @@ object TimeAdjustmentIO {
 
     private fun timeOfAdjustmentMinutes(data: String): Int {
         // syncing off: 110f0f0f060050000400010080->37<-d2
-        return Utils.toIntArray(data)[13]
+        val minutesRead = Utils.toIntArray(data)[13]
+
+        val range = 0..59
+        val minutes = if (minutesRead in range) {
+            minutesRead
+        } else {
+            30
+        }
+
+        return minutes
     }
 
     object CasioIsAutoTimeOriginalValue {

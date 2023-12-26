@@ -83,7 +83,9 @@ object SettingsModel {
     fun fromJson(jsonStr: String) {
         /*
         jsonStr:
-        {"adjustmentTimeMinutes":23, "autoLight":true,"dateFormat":"MM:DD","language":"Spanish","lightDuration":"4s","powerSavingMode":true, "timeAdjustment":true, "timeFormat":"12h","timeTone":false}
+        {"adjustmentTimeMinutes":23, "autoLight":true,"dateFormat":"MM:DD",
+        "language":"Spanish","lightDuration":"4s","powerSavingMode":true,
+        "timeAdjustment":true, "timeFormat":"12h","timeTone":false}
          */
 
         val jsonObj = JSONObject(jsonStr)
