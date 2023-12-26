@@ -8,14 +8,19 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
+import android.annotation.SuppressLint
+import android.text.Editable
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.RadioGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.textfield.TextInputEditText
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 
@@ -59,6 +64,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     inner class ViewHolderTimeAdjustment(itemView: View) : ViewHolderBaseSetting(itemView) {
         val timeAdjustment: SwitchMaterial =
             itemView.findViewById(R.id.time_adjustment_on_off)
+
+        val adjustmentTimeMinutes: TextInputEditText =
+            itemView.findViewById(R.id.adjustment_time_minutes)
 
         val timeAdjustmentNotification: MaterialCheckBox =
             itemView.findViewById(R.id.notify_me)
@@ -278,17 +286,34 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun configureTimeAdjustment(
         vhTimeAdjustment: ViewHolderTimeAdjustment, position: Int
     ) {
         val setting: SettingsModel.TimeAdjustment =
             settings[position] as SettingsModel.TimeAdjustment
         vhTimeAdjustment.timeAdjustment.isChecked = setting.timeAdjustment == true
+
+        vhTimeAdjustment.adjustmentTimeMinutes.setText(setting.adjustmentTimeMinutes.toString())
+
         vhTimeAdjustment.timeAdjustmentNotification.isChecked =
             setting.timeAdjustmentNotifications == true
 
         vhTimeAdjustment.timeAdjustment.setOnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustment = isChecked
+        }
+
+        vhTimeAdjustment.adjustmentTimeMinutes.setOnClickListener {
+            vhTimeAdjustment.adjustmentTimeMinutes.selectAll()
+        }
+
+        vhTimeAdjustment.adjustmentTimeMinutes.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
+                setting.adjustmentTimeMinutes = vhTimeAdjustment.adjustmentTimeMinutes.text.toString().toInt()
+                true // Return true to indicate that the event has been consumed
+            } else {
+                false // Return false to allow the system to handle the event
+            }
         }
 
         vhTimeAdjustment.timeAdjustmentNotification.setOnCheckedChangeListener { _, isChecked ->

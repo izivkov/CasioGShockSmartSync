@@ -108,4 +108,10 @@
     <string name="start_voice_assistant">启动语音助手</string>
     <string name="emergency_actions">触发应急时的行为:</string>
     <string name="make_phonecall">拨打电话</string>
+    <string name="adjustment_time_info"><![CDATA[
+        <li>自动时间调整每天发生4次，有时在12:00上午、6:00上午、12:00下午和6:00下午之后</li>
+        <li>这个设置用于确定时间调整发生在每小时后的分钟数。因此，如果你将这个值设置为25，时间调整将在 00:25、06:25、12:25和18:25进行</li>
+        <li>如果你有多个手表，你可以分别控制它们的时间设置。</li>
+    ]]></string>
+    <string name="adjustment_time_minutes">何时运行\n（小时后的分钟数</string>
 </resources>

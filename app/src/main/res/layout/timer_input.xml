@@ -41,6 +41,6 @@
         android:hint="@string/_00"
         android:inputType="number"
         android:maxLength="2"
-        android:textSize="34sp" />
+        android:textSize="20sp" />
 
 </LinearLayout>

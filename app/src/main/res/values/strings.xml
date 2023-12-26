@@ -119,5 +119,11 @@
     <string name="start_voice_assistant">Start Voice Assist</string>
     <string name="emergency_actions">Emergency Actions:</string>
     <string name="make_phonecall">Make a phone call</string>
+    <string name="adjustment_time_info"><![CDATA[
+        <li>Automatic time adjustment occurs 4 times per day, sometime after the hours of 12:00AM, 6:00AM, 12:00PM and 6:00PM.</li>
+        <li>This setting sets the number of minutes after the hour when time adjustment occurs. So if you set this value to 25, time adjustment will happen at 12:25AM, 6:25AM, 12:25PM and 6:25PM.</li>
+        <li>If you have multiple watches, you can control when to set their time individually.</li>
+        ]]></string>
+    <string name="adjustment_time_minutes">When to run\n(minutes after hour)</string>
 </resources>
 

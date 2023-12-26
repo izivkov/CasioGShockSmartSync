@@ -262,7 +262,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
-        var deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+
+        // INZ test
+        // var deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+        var deviceAddress = null
+        // END TEST
+
         if (!api().validateBluetoothAddress(deviceAddress)) {
             deviceAddress = null
         }

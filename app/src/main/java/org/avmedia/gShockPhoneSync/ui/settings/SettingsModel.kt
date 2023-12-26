@@ -65,6 +65,7 @@ object SettingsModel {
 
     class TimeAdjustment : Setting("Time Adjustment") {
         var timeAdjustment: Boolean = true
+        var adjustmentTimeMinutes: Int = 0
         var timeAdjustmentNotifications: Boolean = LocalDataStorage.getTimeAdjustmentNotification()
     }
 
@@ -82,7 +83,7 @@ object SettingsModel {
     fun fromJson(jsonStr: String) {
         /*
         jsonStr:
-        {"autoLight":true,"dateFormat":"MM:DD","language":"Spanish","lightDuration":"4s","powerSavingMode":true, "timeAdjustment":true, "timeFormat":"12h","timeTone":false}
+        {"adjustmentTimeMinutes":23, "autoLight":true,"dateFormat":"MM:DD","language":"Spanish","lightDuration":"4s","powerSavingMode":true, "timeAdjustment":true, "timeFormat":"12h","timeTone":false}
          */
 
         val jsonObj = JSONObject(jsonStr)
@@ -100,6 +101,11 @@ object SettingsModel {
                 "timeAdjustment" -> {
                     val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
                     setting.timeAdjustment = value == true
+                }
+
+                "adjustmentTimeMinutes" -> {
+                    val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
+                    setting.adjustmentTimeMinutes = value as Int
                 }
 
                 "buttonTone" -> {
