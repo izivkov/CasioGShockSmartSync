@@ -2,12 +2,11 @@
 
 ## Announcements
 
-Incorporating Google Fit into the app to replace the "Move" app.
+Added support for the following watches:
 
-We have started a discussion here:
-https://github.com/izivkov/CasioGShockSmartSync/discussions/60
-
-Please give us feedback on this topic.
+- GST-B500 (module 5684)
+- MSG-B100
+- G-B001
 
 ## What is it
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
