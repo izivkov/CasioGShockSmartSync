@@ -262,19 +262,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun waitForConnectionCached() {
+        // Use this variable to control whether we should try to scan each time for the watch,
+        // or reuse the last saved address. If set tto false, the connection is a bit slower,
+        // but the app can connect to multiple watches without pressing "FORGET".
+        // Also, auto-time-sync will work for multiple watches
+        val reuseAddress = false
 
-        // INZ test
-        // var deviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
-        var deviceAddress = null
-        // END TEST
+        var deviceAddress: String? = null
 
-        if (!api().validateBluetoothAddress(deviceAddress)) {
-            deviceAddress = null
+        if (reuseAddress) {
+            val savedDeviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+            if (api().validateBluetoothAddress(savedDeviceAddress)) {
+                deviceAddress = savedDeviceAddress
+            }
         }
 
         val deviceName = LocalDataStorage.get("LastDeviceName", "", this)
         api().waitForConnection(deviceAddress, deviceName)
     }
+
 
     companion object {
         private var instance: MainActivity? = null

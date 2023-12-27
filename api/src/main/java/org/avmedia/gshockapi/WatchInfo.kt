@@ -6,7 +6,7 @@ package org.avmedia.gshockapi
  */
 object WatchInfo {
     enum class WATCH_MODEL {
-        GA, GW, DW, GMW, GPR, GST, UNKNOWN
+        GA, GW, DW, GMW, GPR, GST, MSG, GB001, UNKNOWN
     }
 
     var name: String = ""
@@ -52,13 +52,13 @@ object WatchInfo {
         ),
         ModelInfo(
             WATCH_MODEL.GST,
-            6,
-            3,
+            2,
+            1,
             5,
-            hasAutoLight = true,
+            hasAutoLight = false,
             hasReminders = true,
-            shortLightDuration = "2s",
-            longLightDuration = "4s",
+            shortLightDuration = "1.5s",
+            longLightDuration = "3s",
         ),
         ModelInfo(
             WATCH_MODEL.GMW,
@@ -72,6 +72,26 @@ object WatchInfo {
         ),
         ModelInfo(
             WATCH_MODEL.GA,
+            2,
+            1,
+            5,
+            hasAutoLight = false,
+            hasReminders = true,
+            shortLightDuration = "1.5s",
+            longLightDuration = "3s"
+        ),
+        ModelInfo(
+            WATCH_MODEL.GB001,
+            2,
+            1,
+            5,
+            hasAutoLight = true,
+            hasReminders = false,
+            shortLightDuration = "1.5s",
+            longLightDuration = "3s"
+        ),
+        ModelInfo(
+            WATCH_MODEL.MSG,
             2,
             1,
             5,
@@ -107,7 +127,7 @@ object WatchInfo {
             1,
             5,
             hasAutoLight = false,
-            hasReminders = false,
+            hasReminders = true,
             shortLightDuration = "1.5s",
             longLightDuration = "3s"
         )
@@ -137,6 +157,8 @@ object WatchInfo {
             shortName.startsWith("GMW") -> WATCH_MODEL.GMW
             shortName.startsWith("GST") -> WATCH_MODEL.GST
             shortName.startsWith("GPR") -> WATCH_MODEL.GPR
+            shortName.startsWith("MSG") -> WATCH_MODEL.MSG
+            shortName.startsWith("G-B001") -> WATCH_MODEL.GB001
             else -> WATCH_MODEL.UNKNOWN
         }
 
