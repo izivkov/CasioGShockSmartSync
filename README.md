@@ -14,6 +14,7 @@ I think we can do better than the official G-Shock Connected App! This app provi
 - Sets watch's reminders from Google Calendar
 - Automatically sets correct timezone when travelling. No need to switch between Word Time and Home time
 - Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
+- Allows you to set when auto-time adjustment will run.
 - Auto-configure most watch settings from phone's configuration.
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
