@@ -4,11 +4,11 @@
 
 Added support for the following watches:
 
-- GST-B500 (module 5684)
-- MSG-B100
-- G-B001
+- GST-B500 (module 5684).
+- MSG-B100.
+- G-B001.
 
-## What is it
+## What is it?
 I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
 
 - Sets watch's reminders from Google Calendar
