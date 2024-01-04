@@ -9,7 +9,7 @@ Added support for the following watches:
 - G-B001.
 
 ## What is it?
-I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
+I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
 
 - Sets watch's reminders from Google Calendar
 - Automatically sets correct timezone when travelling. No need to switch between Word Time and Home time
