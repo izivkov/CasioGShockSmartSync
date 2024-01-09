@@ -1,2 +1,0 @@
-- Run actions in background to prevent some rare crashes.
-- Added code to check for valid BT address

@@ -1,3 +1,0 @@
-- Added support for Simplified Chinese.
-- Fix for recurring weekly event, when the weekday is not selected.
-- Re-calibrate battery display.

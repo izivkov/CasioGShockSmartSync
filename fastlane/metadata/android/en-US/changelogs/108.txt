@@ -1,3 +1,0 @@
-- Changed to non-blocking processing wherever possible.
-- Fixed selection of reminders when more than 5 google calendar events present.
-- Re-calibrate battery level.
