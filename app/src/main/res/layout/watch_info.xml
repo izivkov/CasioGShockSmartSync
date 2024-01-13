@@ -25,7 +25,7 @@
         android:layout_marginTop="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <org.avmedia.gShockPhoneSync.ui.time.HomeTimeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -66,8 +66,7 @@
                 android:textSize="18dp"
                 tools:ignore="SpUsage" />
 
-        </LinearLayout>
-
+        </org.avmedia.gShockPhoneSync.ui.time.HomeTimeLayout>
     </org.avmedia.gShockPhoneSync.ui.time.WatchInfoCard>
 
     <org.avmedia.gShockPhoneSync.ui.time.WatchInfoCard

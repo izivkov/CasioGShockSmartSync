@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ProgressDialog.show
 import android.content.Context
 import android.icu.text.MeasureFormat
 import android.icu.util.Measure
@@ -15,11 +16,13 @@ import android.icu.util.MeasureUnit
 import android.os.Build
 import android.telephony.TelephonyManager
 import android.util.AttributeSet
+import android.view.View
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
+import org.avmedia.gshockapi.WatchInfo
 import java.util.*
 
 class WatchTemperature @JvmOverloads constructor(
@@ -30,6 +33,14 @@ class WatchTemperature @JvmOverloads constructor(
     @SuppressLint("SetTextI18n")
     override fun onFinishInflate() {
         super.onFinishInflate()
+
+        visibility = if (WatchInfo.worldCities)
+            View.VISIBLE
+        else {
+            View.GONE
+            return
+        }
+
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
             getFragmentScope().launch(Dispatchers.IO) {
