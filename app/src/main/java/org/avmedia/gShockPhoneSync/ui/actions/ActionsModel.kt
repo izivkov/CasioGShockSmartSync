@@ -11,7 +11,10 @@ import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.net.Uri
+import android.os.SystemClock
+import android.view.KeyEvent
 import androidx.camera.core.CameraSelector
 import androidx.core.content.ContextCompat.getString
 import kotlinx.coroutines.launch
@@ -58,7 +61,10 @@ object ActionsModel {
         actions.add(ToggleFlashlightAction(toggleFlashlightText, false))
 
         var voiceAssistantText = applicationContext().getString(R.string.start_voice_assistant)
-        actions.add(StartVoiceAssistAction(voiceAssistantText, true))
+        actions.add(StartVoiceAssistAction(voiceAssistantText, false))
+
+        var nextTrackText = "Skip to next track"
+        actions.add(NextTrack(nextTrackText, false))
 
         var emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
         actions.add(Separator(emergencyActionsText, false))
@@ -172,6 +178,25 @@ object ActionsModel {
         }
     }
 
+    class NextTrack (override var title: String, override var enabled: Boolean) :
+        Action(title, enabled, RUN_MODE.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            try {
+                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val eventTime = SystemClock.uptimeMillis()
+
+                val downEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT, 0)
+                audioManager.dispatchMediaKeyEvent(downEvent)
+
+                val upEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT, 0)
+                audioManager.dispatchMediaKeyEvent(upEvent)
+
+            } catch (e: ActivityNotFoundException) {
+                Utils.snackBar(context, "Cannot go to Next Track!")
+            }
+        }
+    }
     class Separator(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {

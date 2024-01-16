@@ -106,6 +106,7 @@
     <string name="take_photo">照相</string>
     <string name="toggle_flashlight">启动闪光灯</string>
     <string name="start_voice_assistant">启动语音助手</string>
+    <string name="next_track">跳转到下一个曲目</string>
     <string name="emergency_actions">触发应急时的行为:</string>
     <string name="make_phonecall">拨打电话</string>
     <string name="adjustment_time_info"><![CDATA[
@@ -114,4 +115,8 @@
         <li>如果你有多个手表，你可以分别控制它们的时间设置。</li>
     ]]></string>
     <string name="adjustment_time_minutes">何时运行\n（小时后的分钟数</string>
+    <string name="skip_to_next_track_info"><![CDATA[
+        <li>如果您正在使用Spotify、YouTube或YTMusic等媒体播放器播放音乐或视频，此操作将跳转到下一首歌曲或视频。</li>
+        <li>如果此应用程序在前台运行且播放器在后台运行，则效果最佳。对于视频，最佳效果是使用分屏显示此应用程序和播放器都在前台。</li>
+        ]]></string>
 </resources>

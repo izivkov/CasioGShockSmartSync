@@ -30,7 +30,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     enum class ACTION_TYPES {
-        BASE_ACTION, SEPARATOR, MAP, PHOTO, PHONE_CALL, LOCATION, EMAIL, SET_TIME, ACTIVATE_VOICE_ASSISTANT, SET_EVENTS, TOGGLE_FLASHLIGHT, FIND_PHONE
+        BASE_ACTION, SEPARATOR, MAP, PHOTO, PHONE_CALL, LOCATION, EMAIL, SET_TIME, ACTIVATE_VOICE_ASSISTANT, NEXT_TRACK, SET_EVENTS, TOGGLE_FLASHLIGHT, FIND_PHONE
     }
 
     open inner class ViewHolderBaseAction(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -45,6 +45,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     inner class ViewHolderSetEvents(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderStartVoiceAssist(itemView: View) : ViewHolderBaseAction(itemView)
+    inner class ViewHolderNextTrack(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderMap(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     inner class ViewHolderActionTakePhoto(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -112,6 +113,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         if (actions[position] is ActionsModel.StartVoiceAssistAction) {
             return ACTION_TYPES.ACTIVATE_VOICE_ASSISTANT.ordinal
         }
+        if (actions[position] is ActionsModel.NextTrack) {
+            return ACTION_TYPES.NEXT_TRACK.ordinal
+        }
         if (actions[position] is ActionsModel.SetEventsAction) {
             return ACTION_TYPES.SET_EVENTS.ordinal
         }
@@ -176,6 +180,11 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 ViewHolderStartVoiceAssist(vVoiceAssistant)
             }
 
+            ACTION_TYPES.NEXT_TRACK.ordinal -> {
+                val vNextTrack: View = inflater.inflate(R.layout.action_skip_track_item, parent, false)
+                ViewHolderNextTrack(vNextTrack)
+            }
+
             else -> {
                 val vAction: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderBaseAction(vAction)
@@ -234,6 +243,11 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 configureVoiceAssistant(vhVoiceAssistant, position)
             }
 
+            ACTION_TYPES.NEXT_TRACK.ordinal -> {
+                val vhNextTrack = viewHolder as ViewHolderNextTrack
+                configureNextTrack(vhNextTrack, position)
+            }
+
             else -> {
                 val vhBaseAction: ViewHolderBaseAction =
                     viewHolder as ViewHolderBaseAction
@@ -253,6 +267,20 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhVoiceAssistant.icon.setImageResource(R.drawable.voice_assist)
 
         vhVoiceAssistant.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            action.enabled = isChecked
+        }
+    }
+    private fun configureNextTrack(
+        vhNextTrack: ViewHolderNextTrack,
+        position: Int
+    ) {
+        val action: ActionsModel.NextTrack =
+            actions[position] as ActionsModel.NextTrack
+        vhNextTrack.title.text = action.title
+        vhNextTrack.actionEnabled.isChecked = action.enabled
+        vhNextTrack.icon.setImageResource(R.drawable.skip_next)
+
+        vhNextTrack.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         }
     }

@@ -117,6 +117,7 @@
     <string name="take_photo">Take a photo</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>
     <string name="start_voice_assistant">Start Voice Assist</string>
+    <string name="next_track">Skip to next track</string>
     <string name="emergency_actions">Emergency Actions:</string>
     <string name="make_phonecall">Make a phone call</string>
     <string name="adjustment_time_info"><![CDATA[
@@ -125,5 +126,9 @@
         <li>If you have multiple watches, you can control when to set their time individually.</li>
         ]]></string>
     <string name="adjustment_time_minutes">When to run\n(minutes after hour)</string>
+    <string name="skip_to_next_track_info"><![CDATA[
+        <li>If you are playing music or a video in a media player such as Spotify, YouTube, or YTMusic, this action will skip to the next song or video.</li>
+        <li>It works most effectively when this app is in the foreground, and the player is running in the background. For videos, it works optimally if you use Split Screen to display both this app and the player in the foreground.</li>
+        ]]></string>
 </resources>
 
