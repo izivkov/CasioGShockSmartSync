@@ -1,0 +1,3 @@
+- Added support for the GBD-800 model.
+
+
