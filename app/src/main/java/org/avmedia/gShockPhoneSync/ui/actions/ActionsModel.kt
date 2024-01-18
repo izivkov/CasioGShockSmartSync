@@ -16,7 +16,6 @@ import android.net.Uri
 import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.camera.core.CameraSelector
-import androidx.core.content.ContextCompat.getString
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
@@ -389,6 +388,7 @@ object ActionsModel {
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
+                    Timber.d("running ${it.javaClass.simpleName}")
                     // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
                     MainActivity.getLifecycleScope().launch {
                         runIt(it, context)

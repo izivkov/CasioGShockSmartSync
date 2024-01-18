@@ -31,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.ui.time.HomeTime
+import org.avmedia.gShockPhoneSync.utils.ForegroundService
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
@@ -90,6 +91,10 @@ class MainActivity : AppCompatActivity() {
 
         setupNavigation()
         createAppEventsSubscription()
+
+        // This will run in the foreground, but not reliable. Do not use for now.
+        // val intent = Intent(this, ForegroundService::class.java)
+        // this.startService(intent)
 
         // ApiTest().run(this)
     }
@@ -266,7 +271,11 @@ class MainActivity : AppCompatActivity() {
         // or reuse the last saved address. If set tto false, the connection is a bit slower,
         // but the app can connect to multiple watches without pressing "FORGET".
         // Also, auto-time-sync will work for multiple watches
-        val reuseAddress = false
+
+        // Note: Consequently, we discovered that the Bluetooth scanning cannot be performed in the background,
+        // so actions will fail. If this flag is true, no scanning will be performed.
+        // Leave it to true.
+        val reuseAddress = true
 
         var deviceAddress: String? = null
 

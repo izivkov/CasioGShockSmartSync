@@ -127,8 +127,7 @@
         ]]></string>
     <string name="adjustment_time_minutes">When to run\n(minutes after hour)</string>
     <string name="skip_to_next_track_info"><![CDATA[
-        <li>If you are playing music or a video in a media player such as Spotify, YouTube, or YTMusic, this action will skip to the next song or video.</li>
-        <li>It works most effectively when this app is in the foreground, and the player is running in the background. For videos, it works optimally if you use Split Screen to display both this app and the player in the foreground.</li>
+        If you are playing music or a video in a media player such as Spotify, YouTube, or YTMusic on your phone, this action will skip to the next song or video.
         ]]></string>
 </resources>
 

@@ -116,7 +116,6 @@
     ]]></string>
     <string name="adjustment_time_minutes">何时运行\n（小时后的分钟数</string>
     <string name="skip_to_next_track_info"><![CDATA[
-        <li>如果您正在使用Spotify、YouTube或YTMusic等媒体播放器播放音乐或视频，此操作将跳转到下一首歌曲或视频。</li>
-        <li>如果此应用程序在前台运行且播放器在后台运行，则效果最佳。对于视频，最佳效果是使用分屏显示此应用程序和播放器都在前台。</li>
+        如果你正在使用手机上的媒体播放器，比如Spotify、YouTube或YTMusic播放音乐或视频，这个操作将跳到下一首歌曲或视频。
         ]]></string>
 </resources>

@@ -1,2 +1,0 @@
-- Added support for the following watches: GST-B500 (module 5684), MSG-B100, G-B001.
-- Added the ability to set time when watch auto-syncs its time.
