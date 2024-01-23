@@ -128,6 +128,7 @@
     <string name="adjustment_time_minutes">When to run\n(minutes after hour)</string>
     <string name="skip_to_next_track_info"><![CDATA[
         If you are playing music or a video in a media player such as Spotify, YouTube, or YTMusic on your phone, this action will skip to the next song or video.
+        It also works with Android Auto
         ]]></string>
 </resources>
 

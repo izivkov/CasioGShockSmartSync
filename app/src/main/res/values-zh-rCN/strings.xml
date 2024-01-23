@@ -117,5 +117,6 @@
     <string name="adjustment_time_minutes">何时运行\n（小时后的分钟数</string>
     <string name="skip_to_next_track_info"><![CDATA[
         如果你正在使用手机上的媒体播放器，比如Spotify、YouTube或YTMusic播放音乐或视频，这个操作将跳到下一首歌曲或视频。
+        它还兼容Android Auto。
         ]]></string>
 </resources>
