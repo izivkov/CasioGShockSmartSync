@@ -9,6 +9,15 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('/home/ivo/projects/sshkeys/keystore.jks')
+            storePassword 'Guest@ccess1@3'
+            keyAlias 'myalias'
+            keyPassword 'Guest@ccess1@3'
+        }
+    }
+
     //noinspection GrDeprecatedAPIUsage
     compileSdkVersion 34
     defaultConfig {
