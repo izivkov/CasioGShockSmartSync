@@ -13,7 +13,7 @@ android {
         debug {
             storeFile file('/home/ivo/projects/sshkeys/keystore.jks')
             storePassword 'Guest@ccess1@3'
-            keyAlias 'myalias'
+            keyAlias 'your_key_alias'
             keyPassword 'Guest@ccess1@3'
         }
     }
@@ -55,7 +55,7 @@ configurations {
 
 dependencies {
     // This is a library to interact with the CASIO GShock B5000/B5600/B2100 watches
-    implementation 'com.github.izivkov:GShockAPI:1.4.14'
+    implementation 'com.github.izivkov:GShockAPI:1.4.15'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //noinspection GradleDependency
