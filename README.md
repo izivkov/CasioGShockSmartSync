@@ -4,10 +4,6 @@
 
 Added support for the following watches:
 
-- GST-B500 (module 5684).
-- MSG-B100.
-- G-B001.
-
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
 
@@ -19,7 +15,13 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-This app supports the G-Shock Square Bluetooth [5600](https://amzn.to/3Mt68Qb) and [5000](https://amzn.to/4194M13), as well as the [2100](https://amzn.to/3MUDCGY) series watches.
+# Supported Watches
+
+[G(M)W-5600](https://amzn.to/3Mt68Qb), [G(M)W-5000](https://amzn.to/4194M13), [2100](https://amzn.to/3MUDCGY), GST-B500, MSG-B100, G-B001, GBD-800 (Partial support), MRG-B5000
+
+[Let me know](mailto: izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
+
+
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
