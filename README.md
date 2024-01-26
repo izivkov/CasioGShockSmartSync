@@ -17,9 +17,9 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 
 # Supported Watches
 
-[G(M)W-5600](https://amzn.to/3Mt68Qb), [G(M)W-5000](https://amzn.to/4194M13), [2100](https://amzn.to/3MUDCGY), GST-B500, MSG-B100, G-B001, GBD-800 (Partial support), MRG-B5000
+[G(M)W-5600](https://amzn.to/3Mt68Qb), [G(M)W-5000](https://amzn.to/4194M13), [GA-B2100](https://amzn.to/3MUDCGY), GST-B500, MSG-B100, G-B001, GBD-800 (Partial support), MRG-B5000
 
-[Let me know](mailto: izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
+[Let me know](mailto:izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
 
 
 
