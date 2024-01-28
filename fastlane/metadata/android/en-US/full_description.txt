@@ -9,18 +9,9 @@ I think we can do better than the official G-Shock Connected App! This app provi
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-The supported watches B5000, B5600 and B2100 series:
-
-https://amzn.to/3Mt68Qb
-https://amzn.to/4194M13
-https://amzn.to/3MUDCGY
-
-General
-=======
-The app works by sending commands to the watch via Bluetooth (BLE). The watch 
-data is not persisted on the phone, but instead is read from the watch each 
-time a connection is established. Any changes on the app are sent back to the 
-watch, only when the Send to Watch button is pressed.
+Supported Watches
+=================
+G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 (Partial support), MRG-B5000, GCW-B5000
 
 Setting Time
 ============
@@ -46,23 +37,14 @@ watch's alarms.
 
 Events
 ======
-Make sure you have set your phone to auto-sync to your google account. 
-Otherwise, adding events in your phone will not be reflected to the Google 
-account, and you will not be able to see the events in the app.
-
 This screen displays Events from your Google Calendar and allows you to send 
-these events to the watch's reminders. (don't confuse these with reminders in 
-the Google Calendar app. These reminders are special features and are not
-accessible programmatically).
+these events to the watch's reminders.
 
-There are many ways to set calendar events in Google Calendar. Events could be 
-one time, repeating daily, weekly, monthly or yearly, or some complex period 
-such as every second Thursday of the month. There are also events which occur 
-number of times only (count events), like repeat this event 12 times every 
-Monday. Not all event types can be supported on the watch, but this app 
+Events could be one time, repeating daily, weekly, monthly or yearly, or some complex period
+such as every second Thursday of the month. Not all event types can be supported on the watch, but this app
 attempts to adopt the calendar events to the watch as much as possible. The 
 only not supported event types are daily and complex events, such as every
-second Thursday of the month. Count events are simulated on the watch with
+second Thursday of the month. Events occurring number of times are simulated on the watch with
 a start and end date, matching the event start time, count and frequency.
 In case the calendar event cannot be adopted to a watch reminder, the app
 will display the event as Incompatible. Only future events and recurring
