@@ -280,13 +280,13 @@ class MainActivity : AppCompatActivity() {
         var deviceAddress: String? = null
 
         if (reuseAddress) {
-            val savedDeviceAddress = LocalDataStorage.get("LastDeviceAddress", "", this)
+            val savedDeviceAddress = LocalDataStorage.get("LastDeviceAddress", "")
             if (api().validateBluetoothAddress(savedDeviceAddress)) {
                 deviceAddress = savedDeviceAddress
             }
         }
 
-        val deviceName = LocalDataStorage.get("LastDeviceName", "", this)
+        val deviceName = LocalDataStorage.get("LastDeviceName", "")
         api().waitForConnection(deviceAddress, deviceName)
     }
 

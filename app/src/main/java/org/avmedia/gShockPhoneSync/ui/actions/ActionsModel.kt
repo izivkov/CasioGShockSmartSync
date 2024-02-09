@@ -88,7 +88,7 @@ object ActionsModel {
 
         open fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
 
         open fun validate(context: Context): Boolean {
@@ -108,7 +108,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
     }
 
@@ -122,7 +122,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
     }
 
@@ -136,7 +136,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
     }
 
@@ -154,7 +154,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "true", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "true").toBoolean()
         }
     }
 
@@ -239,7 +239,7 @@ object ActionsModel {
         override fun load(context: Context) {
             super.load(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
-            phoneNumber = LocalDataStorage.get(key, "", context).toString()
+            phoneNumber = LocalDataStorage.get(key, "").toString()
         }
 
         override fun validate(context: Context): Boolean {
@@ -285,7 +285,7 @@ object ActionsModel {
         override fun load(context: Context) {
             super.load(context)
             val key = this.javaClass.simpleName + ".cameraOrientation"
-            cameraOrientation = if (LocalDataStorage.get(key, "BACK", context)
+            cameraOrientation = if (LocalDataStorage.get(key, "BACK")
                     .toString() == "BACK"
             ) CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
         }
@@ -316,7 +316,7 @@ object ActionsModel {
             super.load(context)
 
             val key = this.javaClass.simpleName + ".emailAddress"
-            emailAddress = LocalDataStorage.get(key, "", context).toString()
+            emailAddress = LocalDataStorage.get(key, "").toString()
             extraText =
                 "Sent by G-shock App:\n https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"
         }
