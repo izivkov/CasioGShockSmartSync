@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity() {
 
         // ApiTest().run(this)
 
+        // TODO: remove this later
         LocalDataStorage.migrateSharedPreferencesToDataStore(this)
     }
 

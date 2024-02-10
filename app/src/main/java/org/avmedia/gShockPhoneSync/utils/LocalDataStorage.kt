@@ -19,34 +19,10 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
 object LocalDataStorage {
 
-    init {
-        // migrateSharedPreferencesToDataStore(applicationContext())
-    }
-
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
 
     private val Context.sharedPreferences
         get() = getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-
-    private val Context.dataStore by preferencesDataStore(name = STORAGE_NAME,
-        produceMigrations = { context ->
-            listOf(SharedPreferencesMigration(context, STORAGE_NAME))
-        })
-
-    fun migrateSharedPreferencesToDataStore(context: Context) {
-        val sharedPrefs = context.sharedPreferences
-        val editor = sharedPrefs.edit()
-        val data = sharedPrefs.all
-
-        runBlocking {
-            context.dataStore.edit { preferences ->
-                for ((key, value) in data) {
-                    preferences[stringPreferencesKey(key)] = value.toString()
-                }
-            }
-        }
-        editor.clear().apply() // Clear SharedPreferences after migration
-    }
 
     fun put(key: String, value: String) {
         runBlocking { //  MainActivity.getLifecycleScope().launch {
@@ -105,5 +81,26 @@ object LocalDataStorage {
             }
             stringBuilder.toString()
         }
+    }
+
+    // Migration related
+    private val Context.dataStore by preferencesDataStore(name = STORAGE_NAME,
+        produceMigrations = { context ->
+            listOf(SharedPreferencesMigration(context, STORAGE_NAME))
+        })
+
+    fun migrateSharedPreferencesToDataStore(context: Context) {
+        val sharedPrefs = context.sharedPreferences
+        val editor = sharedPrefs.edit()
+        val data = sharedPrefs.all
+
+        runBlocking {
+            context.dataStore.edit { preferences ->
+                for ((key, value) in data) {
+                    preferences[stringPreferencesKey(key)] = value.toString()
+                }
+            }
+        }
+        editor.clear().apply() // Clear SharedPreferences after migration
     }
 }
