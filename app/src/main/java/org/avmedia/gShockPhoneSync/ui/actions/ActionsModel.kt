@@ -83,7 +83,7 @@ object ActionsModel {
         open fun save(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
             val value = enabled
-            LocalDataStorage.put(key, value.toString(), context)
+            LocalDataStorage.put(key, value.toString())
         }
 
         open fun load(context: Context) {
@@ -233,7 +233,7 @@ object ActionsModel {
         override fun save(context: Context) {
             super.save(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
-            LocalDataStorage.put(key, phoneNumber, context)
+            LocalDataStorage.put(key, phoneNumber)
         }
 
         override fun load(context: Context) {
@@ -279,7 +279,7 @@ object ActionsModel {
         override fun save(context: Context) {
             super.save(context)
             val key = this.javaClass.simpleName + ".cameraOrientation"
-            LocalDataStorage.put(key, cameraOrientation.toString(), context)
+            LocalDataStorage.put(key, cameraOrientation.toString())
         }
 
         override fun load(context: Context) {
@@ -308,7 +308,7 @@ object ActionsModel {
 
         override fun save(context: Context) {
             val key = this.javaClass.simpleName + ".emailAddress"
-            LocalDataStorage.put(key, emailAddress, context)
+            LocalDataStorage.put(key, emailAddress)
             super.save(context)
         }
 

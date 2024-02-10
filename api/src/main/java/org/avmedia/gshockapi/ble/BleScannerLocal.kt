@@ -53,6 +53,7 @@ data class BleScannerLocal(val context: Context) {
             if (device.type != BluetoothDevice.DEVICE_TYPE_UNKNOWN) Connection.connect(
                 device, context
             )
+            return
         }
         if (isScanning) return
         if (!bluetoothAdapter.isEnabled || bleScanner == null) return
@@ -103,6 +104,7 @@ data class BleScannerLocal(val context: Context) {
             super.onScanResult(callbackType, result)
 
             if (foundDevices.contains(result.device.toString())) {
+                stopBleScan()
                 return
             }
             foundDevices.add(result.device.toString())

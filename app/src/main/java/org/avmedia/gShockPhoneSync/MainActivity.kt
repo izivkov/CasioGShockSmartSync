@@ -97,6 +97,8 @@ class MainActivity : AppCompatActivity() {
         // this.startService(intent)
 
         // ApiTest().run(this)
+
+        LocalDataStorage.migrateSharedPreferencesToDataStore(this)
     }
 
     private fun run() {

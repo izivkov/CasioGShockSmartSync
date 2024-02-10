@@ -24,7 +24,7 @@ object DeviceManager {
                         ""
                     ) != deviceName
                 ) {
-                    LocalDataStorage.put("LastDeviceName", deviceName, applicationContext())
+                    LocalDataStorage.put("LastDeviceName", deviceName)
                 }
             },
 

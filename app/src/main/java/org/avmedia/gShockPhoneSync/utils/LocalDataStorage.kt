@@ -7,23 +7,49 @@
 package org.avmedia.gShockPhoneSync.utils
 
 import android.content.Context
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
-
-private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
-private val Context.dataStore by preferencesDataStore(STORAGE_NAME)
 
 object LocalDataStorage {
 
-    fun put(key: String, value: String, context: Context? = null) {
-        MainActivity.getLifecycleScope().launch {
+    init {
+        // migrateSharedPreferencesToDataStore(applicationContext())
+    }
+
+    private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
+
+    private val Context.sharedPreferences
+        get() = getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
+
+    private val Context.dataStore by preferencesDataStore(name = STORAGE_NAME,
+        produceMigrations = { context ->
+            listOf(SharedPreferencesMigration(context, STORAGE_NAME))
+        })
+
+    fun migrateSharedPreferencesToDataStore(context: Context) {
+        val sharedPrefs = context.sharedPreferences
+        val editor = sharedPrefs.edit()
+        val data = sharedPrefs.all
+
+        runBlocking {
+            context.dataStore.edit { preferences ->
+                for ((key, value) in data) {
+                    preferences[stringPreferencesKey(key)] = value.toString()
+                }
+            }
+        }
+        editor.clear().apply() // Clear SharedPreferences after migration
+    }
+
+    fun put(key: String, value: String) {
+        runBlocking { //  MainActivity.getLifecycleScope().launch {
             applicationContext().dataStore.edit { preferences ->
                 preferences[stringPreferencesKey(key)] = value
             }
@@ -34,14 +60,14 @@ object LocalDataStorage {
         var value: String?
         runBlocking {
             val preferences = applicationContext().dataStore.data.first()
-            value = (preferences as Preferences)[stringPreferencesKey(key)] ?: defaultValue
+            value = preferences[stringPreferencesKey(key)] ?: defaultValue
         }
 
         return value
     }
 
     fun delete(key: String) {
-        MainActivity.getLifecycleScope().launch {
+        runBlocking { // MainActivity.getLifecycleScope().launch {
             applicationContext().dataStore.edit { preferences ->
                 preferences.remove(stringPreferencesKey(key))
             }
@@ -49,7 +75,7 @@ object LocalDataStorage {
     }
 
     private fun getBoolean(key: String): Boolean {
-        var booleanVal = false
+        var booleanVal: Boolean
         runBlocking {
             booleanVal = get(key, "false")?.toBoolean() ?: false
         }
@@ -57,7 +83,7 @@ object LocalDataStorage {
     }
 
     private fun putBoolean(key: String, value: Boolean) {
-        MainActivity.getLifecycleScope().launch {
+        runBlocking { // MainActivity.getLifecycleScope().launch {
             put(key, value.toString())
         }
     }
