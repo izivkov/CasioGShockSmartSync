@@ -13,7 +13,7 @@ android {
         debug {
             storeFile file('/home/ivo/projects/sshkeys/keystore.jks')
             storePassword 'Guest@ccess1@3'
-            keyAlias 'your_key_alias'
+            keyAlias 'update'
             keyPassword 'Guest@ccess1@3'
         }
     }
