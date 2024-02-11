@@ -14,7 +14,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
 object LocalDataStorage {
@@ -25,7 +27,7 @@ object LocalDataStorage {
         get() = getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
 
     fun put(key: String, value: String) {
-        runBlocking { //  MainActivity.getLifecycleScope().launch {
+        MainActivity.getLifecycleScope().launch {
             applicationContext().dataStore.edit { preferences ->
                 preferences[stringPreferencesKey(key)] = value
             }
@@ -38,12 +40,11 @@ object LocalDataStorage {
             val preferences = applicationContext().dataStore.data.first()
             value = preferences[stringPreferencesKey(key)] ?: defaultValue
         }
-
         return value
     }
 
     fun delete(key: String) {
-        runBlocking { // MainActivity.getLifecycleScope().launch {
+        runBlocking {
             applicationContext().dataStore.edit { preferences ->
                 preferences.remove(stringPreferencesKey(key))
             }
@@ -59,7 +60,7 @@ object LocalDataStorage {
     }
 
     private fun putBoolean(key: String, value: Boolean) {
-        runBlocking { // MainActivity.getLifecycleScope().launch {
+        MainActivity.getLifecycleScope().launch {
             put(key, value.toString())
         }
     }

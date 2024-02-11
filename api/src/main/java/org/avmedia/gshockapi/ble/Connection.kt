@@ -488,6 +488,9 @@ object Connection : IConnection {
             }
 
             if (pendingOperation is Connect) {
+                WatchInfo.setNameAndModel(gatt.device.name.trimEnd('\u0000'))
+                WatchInfo.setAddress(gatt.device.address)
+
                 ProgressEvents.onNext("ConnectionSetupComplete", gatt.device)
 
                 // new

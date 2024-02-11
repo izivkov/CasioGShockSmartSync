@@ -59,16 +59,16 @@ object ActionsModel {
         val toggleFlashlightText = applicationContext().getString(R.string.toggle_flashlight)
         actions.add(ToggleFlashlightAction(toggleFlashlightText, false))
 
-        var voiceAssistantText = applicationContext().getString(R.string.start_voice_assistant)
+        val voiceAssistantText = applicationContext().getString(R.string.start_voice_assistant)
         actions.add(StartVoiceAssistAction(voiceAssistantText, false))
 
-        var nextTrackText = "Skip to next track"
+        val nextTrackText = "Skip to next track"
         actions.add(NextTrack(nextTrackText, false))
 
-        var emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
+        val emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
         actions.add(Separator(emergencyActionsText, false))
 
-        var makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
+        val makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
         actions.add(PhoneDialAction(makePhoneCallText, true, ""))
         // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
     }
@@ -355,7 +355,11 @@ object ActionsModel {
 
     fun runActionsForAutoTimeSetting(context: Context) {
         val filteredActions: List<Action> =
-            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) }
+            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders
+                    // For security reasons, only set calender events if this is not the first time this watch is connected to the app.
+                    && !WatchInfo.firstConnectionToThisDevice
+                    )}
+
         runFilteredActions(context, filteredActions)
 
         // show notification if configured
@@ -410,5 +414,4 @@ object ActionsModel {
             it.save(context)
         }
     }
-
 }

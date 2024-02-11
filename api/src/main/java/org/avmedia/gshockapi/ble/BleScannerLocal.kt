@@ -53,10 +53,12 @@ data class BleScannerLocal(val context: Context) {
             if (device.type != BluetoothDevice.DEVICE_TYPE_UNKNOWN) Connection.connect(
                 device, context
             )
+            WatchInfo.firstConnectionToThisDevice = false
             return
         }
         if (isScanning) return
         if (!bluetoothAdapter.isEnabled || bleScanner == null) return
+        WatchInfo.firstConnectionToThisDevice = true
         scanSettings.describeContents()
         bleScanner.startScan(createFilters(), scanSettings, scanCallback)
         isScanning = true

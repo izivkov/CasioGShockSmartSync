@@ -12,7 +12,7 @@ object WatchNameIO {
 
     suspend fun request(): String {
         // return WatchInfo.name
-        return getWatchName("23")
+        return CachedIO.request("23", ::getWatchName) as String
     }
 
     private suspend fun getWatchName(key: String): String {
