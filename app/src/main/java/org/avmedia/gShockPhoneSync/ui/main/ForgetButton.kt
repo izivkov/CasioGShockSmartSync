@@ -52,8 +52,8 @@ class ForgetButton @JvmOverloads constructor(
                 MotionEvent.ACTION_UP -> {
                     WatchInfo.reset()
 
-                    LocalDataStorage.delete("LastDeviceAddress", context)
-                    LocalDataStorage.delete("LastDeviceName", context)
+                    LocalDataStorage.delete("LastDeviceAddress")
+                    LocalDataStorage.delete("LastDeviceName")
 
                     Connection.breakWait()
                     ProgressEvents.onNext("DeviceName", "")

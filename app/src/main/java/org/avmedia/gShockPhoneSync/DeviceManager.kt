@@ -18,30 +18,28 @@ object DeviceManager {
             EventAction("DeviceName") {
                 val deviceName = ProgressEvents.getPayload("DeviceName")
                 if ((deviceName as String) == "") {
-                    LocalDataStorage.delete("LastDeviceName", applicationContext())
+                    LocalDataStorage.delete("LastDeviceName")
                 } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
                         "LastDeviceName",
-                        "",
-                        applicationContext()
+                        ""
                     ) != deviceName
                 ) {
-                    LocalDataStorage.put("LastDeviceName", deviceName, applicationContext())
+                    LocalDataStorage.put("LastDeviceName", deviceName)
                 }
             },
 
             EventAction("DeviceAddress") {
                 val deviceAddress = ProgressEvents.getPayload("DeviceAddress")
                 if ((deviceAddress as String) == "") {
-                    LocalDataStorage.delete("LastDeviceAddress", applicationContext())
+                    LocalDataStorage.delete("LastDeviceAddress")
                 }
                 if (LocalDataStorage.get(
                         "LastDeviceAddress",
-                        "",
-                        applicationContext()
+                        ""
                     ) != deviceAddress && api().validateBluetoothAddress(deviceAddress)
                 ) {
                     LocalDataStorage.put(
-                        "LastDeviceAddress", deviceAddress, applicationContext()
+                        "LastDeviceAddress", deviceAddress
                     )
                 }
             },

@@ -59,16 +59,16 @@ object ActionsModel {
         val toggleFlashlightText = applicationContext().getString(R.string.toggle_flashlight)
         actions.add(ToggleFlashlightAction(toggleFlashlightText, false))
 
-        var voiceAssistantText = applicationContext().getString(R.string.start_voice_assistant)
+        val voiceAssistantText = applicationContext().getString(R.string.start_voice_assistant)
         actions.add(StartVoiceAssistAction(voiceAssistantText, false))
 
-        var nextTrackText = "Skip to next track"
+        val nextTrackText = "Skip to next track"
         actions.add(NextTrack(nextTrackText, false))
 
-        var emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
+        val emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
         actions.add(Separator(emergencyActionsText, false))
 
-        var makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
+        val makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
         actions.add(PhoneDialAction(makePhoneCallText, true, ""))
         // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
     }
@@ -83,12 +83,12 @@ object ActionsModel {
         open fun save(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
             val value = enabled
-            LocalDataStorage.put(key, value.toString(), context)
+            LocalDataStorage.put(key, value.toString())
         }
 
         open fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
 
         open fun validate(context: Context): Boolean {
@@ -108,7 +108,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
     }
 
@@ -122,7 +122,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
     }
 
@@ -136,7 +136,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "false").toBoolean()
         }
     }
 
@@ -154,7 +154,7 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "true", context).toBoolean()
+            enabled = LocalDataStorage.get(key, "true").toBoolean()
         }
     }
 
@@ -233,13 +233,13 @@ object ActionsModel {
         override fun save(context: Context) {
             super.save(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
-            LocalDataStorage.put(key, phoneNumber, context)
+            LocalDataStorage.put(key, phoneNumber)
         }
 
         override fun load(context: Context) {
             super.load(context)
             val key = this.javaClass.simpleName + ".phoneNumber"
-            phoneNumber = LocalDataStorage.get(key, "", context).toString()
+            phoneNumber = LocalDataStorage.get(key, "").toString()
         }
 
         override fun validate(context: Context): Boolean {
@@ -279,13 +279,13 @@ object ActionsModel {
         override fun save(context: Context) {
             super.save(context)
             val key = this.javaClass.simpleName + ".cameraOrientation"
-            LocalDataStorage.put(key, cameraOrientation.toString(), context)
+            LocalDataStorage.put(key, cameraOrientation.toString())
         }
 
         override fun load(context: Context) {
             super.load(context)
             val key = this.javaClass.simpleName + ".cameraOrientation"
-            cameraOrientation = if (LocalDataStorage.get(key, "BACK", context)
+            cameraOrientation = if (LocalDataStorage.get(key, "BACK")
                     .toString() == "BACK"
             ) CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
         }
@@ -308,7 +308,7 @@ object ActionsModel {
 
         override fun save(context: Context) {
             val key = this.javaClass.simpleName + ".emailAddress"
-            LocalDataStorage.put(key, emailAddress, context)
+            LocalDataStorage.put(key, emailAddress)
             super.save(context)
         }
 
@@ -316,7 +316,7 @@ object ActionsModel {
             super.load(context)
 
             val key = this.javaClass.simpleName + ".emailAddress"
-            emailAddress = LocalDataStorage.get(key, "", context).toString()
+            emailAddress = LocalDataStorage.get(key, "").toString()
             extraText =
                 "Sent by G-shock App:\n https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"
         }
@@ -355,7 +355,8 @@ object ActionsModel {
 
     fun runActionsForAutoTimeSetting(context: Context) {
         val filteredActions: List<Action> =
-            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) }
+            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders)}
+
         runFilteredActions(context, filteredActions)
 
         // show notification if configured
@@ -410,5 +411,4 @@ object ActionsModel {
             it.save(context)
         }
     }
-
 }

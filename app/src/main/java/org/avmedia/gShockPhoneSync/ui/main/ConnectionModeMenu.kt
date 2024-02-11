@@ -32,12 +32,12 @@ class ConnectionModeMenu @JvmOverloads constructor(
             ArrayAdapter(context, R.layout.connection_mode_item, R.id.connection_mode_text, items)
         setAdapter(adapter)
 
-        val savedMode = LocalDataStorage.get("ConnectionMode", "Single Watch", context)
+        val savedMode = LocalDataStorage.get("ConnectionMode", "Single Watch")
         setText(savedMode, false)
 
         setOnItemClickListener { adapterView, _, i, _ ->
             val selectedItem = adapterView.getItemAtPosition(i).toString()
-            LocalDataStorage.put("ConnectionMode", selectedItem, context)
+            LocalDataStorage.put("ConnectionMode", selectedItem)
         }
     }
 }

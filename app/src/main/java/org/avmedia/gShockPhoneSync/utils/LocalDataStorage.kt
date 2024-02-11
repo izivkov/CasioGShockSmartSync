@@ -7,38 +7,62 @@
 package org.avmedia.gShockPhoneSync.utils
 
 import android.content.Context
+import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
-@Suppress("SameParameterValue", "SameParameterValue")
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
 
-    fun put(key: String, value: String, context: Context) {
-        val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-        val editor = sharedPreference.edit()
-        editor.putString(key, value)
-        editor.apply()
+    private val Context.sharedPreferences
+        get() = getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
+
+    fun put(key: String, value: String) {
+        MainActivity.getLifecycleScope().launch {
+            applicationContext().dataStore.edit { preferences ->
+                preferences[stringPreferencesKey(key)] = value
+            }
+        }
     }
 
-    fun get(key: String, defaultValue: String? = null, context: Context): String? {
-        val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-        return sharedPreference.getString(key, null) ?: defaultValue
+    fun get(key: String, defaultValue: String? = null): String? {
+        var value: String?
+        runBlocking {
+            val preferences = applicationContext().dataStore.data.first()
+            value = preferences[stringPreferencesKey(key)] ?: defaultValue
+        }
+        return value
     }
 
-    fun delete(key: String, context: Context) {
-        val sharedPreference = context.getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-        val editor = sharedPreference.edit()
-        editor.remove(key)
-        editor.apply()
+    fun delete(key: String) {
+        runBlocking {
+            applicationContext().dataStore.edit { preferences ->
+                preferences.remove(stringPreferencesKey(key))
+            }
+        }
     }
 
     private fun getBoolean(key: String): Boolean {
-        return get(key, "false", applicationContext()) == "true"
+        var booleanVal: Boolean
+        runBlocking {
+            booleanVal = get(key, "false")?.toBoolean() ?: false
+        }
+        return booleanVal
     }
 
     private fun putBoolean(key: String, value: Boolean) {
-        put(key, value.toString(), applicationContext())
+        MainActivity.getLifecycleScope().launch {
+            put(key, value.toString())
+        }
     }
 
     fun getTimeAdjustmentNotification(): Boolean {
@@ -47,5 +71,37 @@ object LocalDataStorage {
 
     fun setTimeAdjustmentNotification(value: Boolean) {
         putBoolean("timeAdjustmentNotification", value)
+    }
+
+    fun getAllData(): Flow<String> {
+        return applicationContext().dataStore.data.map { preferences ->
+            val allEntries = preferences.asMap()
+            val stringBuilder = StringBuilder()
+            allEntries.forEach { (key, value) ->
+                stringBuilder.append("$key: $value\n")
+            }
+            stringBuilder.toString()
+        }
+    }
+
+    // Migration related
+    private val Context.dataStore by preferencesDataStore(name = STORAGE_NAME,
+        produceMigrations = { context ->
+            listOf(SharedPreferencesMigration(context, STORAGE_NAME))
+        })
+
+    fun migrateSharedPreferencesToDataStore(context: Context) {
+        val sharedPrefs = context.sharedPreferences
+        val editor = sharedPrefs.edit()
+        val data = sharedPrefs.all
+
+        runBlocking {
+            context.dataStore.edit { preferences ->
+                for ((key, value) in data) {
+                    preferences[stringPreferencesKey(key)] = value.toString()
+                }
+            }
+        }
+        editor.clear().apply() // Clear SharedPreferences after migration
     }
 }
