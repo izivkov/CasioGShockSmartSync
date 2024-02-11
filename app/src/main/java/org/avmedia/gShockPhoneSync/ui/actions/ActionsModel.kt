@@ -355,10 +355,7 @@ object ActionsModel {
 
     fun runActionsForAutoTimeSetting(context: Context) {
         val filteredActions: List<Action> =
-            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders
-                    // For security reasons, only set calender events if this is not the first time this watch is connected to the app.
-                    && !WatchInfo.firstConnectionToThisDevice
-                    )}
+            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders)}
 
         runFilteredActions(context, filteredActions)
 
