@@ -19,11 +19,12 @@ import org.avmedia.gshockapi.ProgressEvents
 data class PermissionManager(val context: Context) {
 
     private var PERMISSION_ALL = 1
-    private var PERMISSIONS = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-    )
+    private var PERMISSIONS = arrayOf<String>()
 
     init {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+            PERMISSIONS += Manifest.permission.ACCESS_FINE_LOCATION
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PERMISSIONS += Manifest.permission.BLUETOOTH_SCAN
             PERMISSIONS += Manifest.permission.BLUETOOTH_CONNECT
