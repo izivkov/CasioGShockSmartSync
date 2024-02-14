@@ -1,7 +1,6 @@
 package org.avmedia.gShockPhoneSync
 
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents

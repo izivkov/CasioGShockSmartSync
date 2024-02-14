@@ -181,7 +181,8 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             }
 
             ACTION_TYPES.NEXT_TRACK.ordinal -> {
-                val vNextTrack: View = inflater.inflate(R.layout.action_skip_track_item, parent, false)
+                val vNextTrack: View =
+                    inflater.inflate(R.layout.action_skip_track_item, parent, false)
                 ViewHolderNextTrack(vNextTrack)
             }
 
@@ -270,6 +271,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             action.enabled = isChecked
         }
     }
+
     private fun configureNextTrack(
         vhNextTrack: ViewHolderNextTrack,
         position: Int

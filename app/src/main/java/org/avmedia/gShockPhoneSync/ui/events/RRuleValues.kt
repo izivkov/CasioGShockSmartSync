@@ -130,7 +130,8 @@ object RRuleValues {
                 if (rruleValues.repeatPeriod == RepeatPeriod.WEEKLY) {
                     if (rruleObjVal.byDay.isEmpty()) {
                         rruleValues.daysOfWeek = ArrayList<DayOfWeek>()
-                        val dayOfWeek = LocalDate.of(startDate.year, startDate.month, startDate.day).dayOfWeek
+                        val dayOfWeek =
+                            LocalDate.of(startDate.year, startDate.month, startDate.day).dayOfWeek
                         rruleValues.daysOfWeek!!.add(dayOfWeek)
                     } else {
                         val weekDays = rruleObjVal.byDay

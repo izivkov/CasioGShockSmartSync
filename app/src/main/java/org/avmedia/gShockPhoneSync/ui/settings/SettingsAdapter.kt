@@ -9,7 +9,6 @@
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.text.InputFilter
 import android.text.Spanned
 import android.view.LayoutInflater

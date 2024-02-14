@@ -177,7 +177,7 @@ object ActionsModel {
         }
     }
 
-    class NextTrack (override var title: String, override var enabled: Boolean) :
+    class NextTrack(override var title: String, override var enabled: Boolean) :
         Action(title, enabled, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -185,10 +185,22 @@ object ActionsModel {
                 val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                 val eventTime = SystemClock.uptimeMillis()
 
-                val downEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT, 0)
+                val downEvent = KeyEvent(
+                    eventTime,
+                    eventTime,
+                    KeyEvent.ACTION_DOWN,
+                    KeyEvent.KEYCODE_MEDIA_NEXT,
+                    0
+                )
                 audioManager.dispatchMediaKeyEvent(downEvent)
 
-                val upEvent = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT, 0)
+                val upEvent = KeyEvent(
+                    eventTime,
+                    eventTime,
+                    KeyEvent.ACTION_UP,
+                    KeyEvent.KEYCODE_MEDIA_NEXT,
+                    0
+                )
                 audioManager.dispatchMediaKeyEvent(upEvent)
 
             } catch (e: ActivityNotFoundException) {
@@ -196,6 +208,7 @@ object ActionsModel {
             }
         }
     }
+
     class Separator(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
@@ -355,7 +368,7 @@ object ActionsModel {
 
     fun runActionsForAutoTimeSetting(context: Context) {
         val filteredActions: List<Action> =
-            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders)}
+            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) }
 
         runFilteredActions(context, filteredActions)
 

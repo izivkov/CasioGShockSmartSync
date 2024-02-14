@@ -6,16 +6,11 @@
 
 package org.avmedia.gShockPhoneSync.ui.time
 
-import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.IHideableLayout
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 import org.avmedia.gshockapi.WatchInfo
 
 class HomeTimeLayout @JvmOverloads constructor(
@@ -25,6 +20,7 @@ class HomeTimeLayout @JvmOverloads constructor(
     init {
         hide()
     }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (WatchInfo.worldCities) show() else hide()

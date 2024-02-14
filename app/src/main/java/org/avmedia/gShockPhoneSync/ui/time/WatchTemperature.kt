@@ -8,7 +8,6 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ProgressDialog.show
 import android.content.Context
 import android.icu.text.MeasureFormat
 import android.icu.util.Measure
