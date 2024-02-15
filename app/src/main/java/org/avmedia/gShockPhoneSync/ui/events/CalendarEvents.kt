@@ -40,6 +40,7 @@ object CalendarEvents {
             CalendarContract.Events.HAS_ALARM,
             CalendarContract.Events.RRULE,
             CalendarContract.Events.ALL_DAY,
+            CalendarContract.Events._ID,
         )
 
         val calendar: Calendar = Calendar.getInstance()
@@ -50,12 +51,12 @@ object CalendarEvents {
 
         val selection =
             """
-            ${CalendarContract.Events.HAS_ALARM} = "1"
-            and (${CalendarContract.Events.DTEND} >= ${calendar.timeInMillis}
+            (${CalendarContract.Events.DTEND} >= ${calendar.timeInMillis}
             or ${CalendarContract.Events.RRULE} IS NOT NULL)
+            and ${CalendarContract.Events.CALENDAR_ACCESS_LEVEL} = ?
             """.trimIndent()
 
-        val selectionArgs: Array<String>? = null
+        val selectionArgs = arrayOf(CalendarContract.Calendars.CAL_ACCESS_OWNER.toString())
 
         val uri: Uri = CalendarContract.Events.CONTENT_URI
         cur = cr.query(
