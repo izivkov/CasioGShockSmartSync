@@ -132,11 +132,20 @@
         ]]></string>
     <string name="set_prayer_alarms">Set Prayer Alarms</string>
     <string name="prayer_times_info"><![CDATA[
-<li>This action will set the 5 alarms on the watch to the Muslim prayers <b>Fajr</b>, <b>Dhuhr</b>, <b>Asr</b>, <b>Maghrib</b>, and <b>Isha</b> times.</li>
-<li>The times vary based on your location and current date, so for best accuracy, run this action daily.
-If this action is enabled, the alarms will also be automatically updated during the auto-time adjustment, 4 times per day.</li>
-<li>Because of different calculation methods, the times may vary. If you are in North America, the <b>Islamic Society of North America</b> method is used.
-Otherwise, the <b>Muslim World League</b> method is used.</li>
+        <li>This action will set the 5 alarms on the watch to the Muslim prayers <b>Fajr</b>, <b>Dhuhr</b>, <b>Asr</b>, <b>Maghrib</b>, and <b>Isha</b> times.</li>
+        <li>The times vary based on your location and current date, so for best accuracy, run this action daily.
+        If this action is enabled, the alarms will also be automatically updated during the auto-time adjustment, 4 times per day.</li>
+        <li>The following calculation methods are used, based on your location:
+            <b>NORTH AMERICA</b>,
+            <b>EGYPTIAN</b>,
+            <b>DUBAI</b>,
+            <b>UMM AL QURA</b>,
+            <b>QATAR</b>,
+            <b>SINGAPORE</b>,
+            <b>KUWAIT</b>,
+            <b>QATAR</b>, defaulting to
+            <b>MUSLIM WORLD LEAGUE</b>.
+        </li>
     ]]></string>
 </resources>
 

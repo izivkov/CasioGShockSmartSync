@@ -28,19 +28,20 @@ object PrayerAlarms {
 
         val coordinates = getLocation(context)
         if (coordinates == null) {
-            Utils.snackBar (context, "Could not obtain your location. Make sure FINE_LOCATION permission os granted.")
+            Utils.snackBar(
+                context,
+                "Could not obtain your location. Make sure FINE_LOCATION permission os granted."
+            )
             return null
         }
         val today = LocalDate.now()
         val date = DateComponents(today.year, today.monthValue, today.dayOfMonth);
 
-        val calculationMethod =
-            if (isInNorthAmerica()) CalculationMethod.NORTH_AMERICA.parameters else CalculationMethod.MUSLIM_WORLD_LEAGUE.parameters
-
-        val parameters = calculationMethod
+        val parameters = getCalculationMethodForLocation().parameters
             .copy(
                 // madhab = Madhab.HANAFI,
-                prayerAdjustments = PrayerAdjustments(fajr = 2))
+                prayerAdjustments = PrayerAdjustments(fajr = 2)
+            )
 
         val prayerTimes = PrayerTimes(coordinates, date, parameters)
 
@@ -52,6 +53,20 @@ object PrayerAlarms {
         alarms.add(prayerTimeToAlarm(prayerTimes.isha))
 
         return alarms
+    }
+
+    private fun getCalculationMethodForLocation(): CalculationMethod {
+        return when (Locale.getDefault().country.uppercase(Locale.US)) {
+            "US", "CA" -> CalculationMethod.NORTH_AMERICA
+            "EG" -> CalculationMethod.EGYPTIAN
+            "PK" -> CalculationMethod.KARACHI
+            "SA" -> CalculationMethod.UMM_AL_QURA
+            "AE" -> CalculationMethod.DUBAI
+            "QA" -> CalculationMethod.QATAR
+            "KW" -> CalculationMethod.KUWAIT
+            "SG" -> CalculationMethod.SINGAPORE
+            else -> CalculationMethod.MUSLIM_WORLD_LEAGUE
+        }
     }
 
     private fun prayerTimeToAlarm(prayerTime: kotlinx.datetime.Instant): Alarm {
