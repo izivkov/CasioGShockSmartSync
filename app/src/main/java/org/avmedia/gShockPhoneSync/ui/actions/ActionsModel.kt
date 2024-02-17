@@ -216,7 +216,7 @@ object ActionsModel {
         Action(title, enabled, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            val alarms = PrayerAlarms.getPrayerAlarms(context)
+            val alarms = PrayerAlarms.createPrayerAlarms(context)
             if (alarms == null) {
                 Utils.snackBar (context, "Could not set prayer alarms")
                 return

@@ -11,7 +11,6 @@ import android.content.Context
 import android.location.LocationManager
 import com.batoulapps.adhan2.CalculationMethod
 import com.batoulapps.adhan2.Coordinates
-import com.batoulapps.adhan2.Madhab
 import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
@@ -25,7 +24,7 @@ import java.util.Locale
 
 object PrayerAlarms {
 
-    fun getPrayerAlarms(context: Context): java.util.ArrayList<Alarm>? {
+    fun createPrayerAlarms(context: Context): java.util.ArrayList<Alarm>? {
 
         val coordinates = getLocation(context)
         if (coordinates == null) {
