@@ -51,6 +51,9 @@ class ActionsFragment : Fragment() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             requiredPermissions += Manifest.permission.WRITE_EXTERNAL_STORAGE
         }
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            requiredPermissions += Manifest.permission.ACCESS_FINE_LOCATION
+        }
 
         requestMultiplePermissions.launch(requiredPermissions)
 

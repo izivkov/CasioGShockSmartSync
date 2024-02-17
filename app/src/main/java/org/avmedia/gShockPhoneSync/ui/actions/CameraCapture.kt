@@ -42,9 +42,7 @@ class CameraCapture(val context: Context, private val cameraSelector: CameraSele
     private var imageCapture: ImageCapture? = null
     private lateinit var viewBinding: FragmentActionsBinding
     private var currentContextView = (context as Activity).contentView
-
     data class ScreenSize(val width: Int, val height: Int)
-
     fun start() {
         currentContextView = (context as Activity).contentView
         viewBinding = FragmentActionsBinding.inflate(context.layoutInflater)

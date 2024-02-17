@@ -65,6 +65,9 @@ object ActionsModel {
         val nextTrackText = "Skip to next track"
         actions.add(NextTrack(nextTrackText, false))
 
+        val PrayerAlarmsText = "Set Prayer Alarms"
+        actions.add(PrayerAlarmsAction(PrayerAlarmsText, false))
+
         val emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
         actions.add(Separator(emergencyActionsText, false))
 
@@ -205,6 +208,25 @@ object ActionsModel {
 
             } catch (e: ActivityNotFoundException) {
                 Utils.snackBar(context, "Cannot go to Next Track!")
+            }
+        }
+    }
+
+    class PrayerAlarmsAction(override var title: String, override var enabled: Boolean) :
+        Action(title, enabled, RUN_MODE.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            val alarms = PrayerAlarms.getPrayerAlarms(context)
+            if (alarms == null) {
+                Utils.snackBar (context, "Could not set prayer alarms")
+                return
+            }
+            MainActivity.getLifecycleScope().launch {
+                // getAlarms need to be run first, otherwise setAlarms() will not work
+                api().getAlarms()
+
+                api().setAlarms(alarms)
+                Utils.snackBar(context, "Set Prayer Alarms")
             }
         }
     }
@@ -368,7 +390,8 @@ object ActionsModel {
 
     fun runActionsForAutoTimeSetting(context: Context) {
         val filteredActions: List<Action> =
-            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) }
+            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) ||
+                    (action is PrayerAlarmsAction && action.enabled) }
 
         runFilteredActions(context, filteredActions)
 
