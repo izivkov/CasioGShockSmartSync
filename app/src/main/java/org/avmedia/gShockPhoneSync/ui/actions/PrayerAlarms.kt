@@ -39,7 +39,10 @@ object PrayerAlarms {
             if (isInNorthAmerica()) CalculationMethod.NORTH_AMERICA.parameters else CalculationMethod.MUSLIM_WORLD_LEAGUE.parameters
 
         val parameters = calculationMethod
-            .copy(madhab = Madhab.HANAFI, prayerAdjustments = PrayerAdjustments(fajr = 2))
+            .copy(
+                // madhab = Madhab.HANAFI,
+                prayerAdjustments = PrayerAdjustments(fajr = 2))
+
         val prayerTimes = PrayerTimes(coordinates, date, parameters)
 
         val alarms = ArrayList<Alarm>()

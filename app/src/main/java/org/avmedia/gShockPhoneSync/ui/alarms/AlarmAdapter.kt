@@ -62,6 +62,15 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
             }
         }
 
+        // Replaces 0:33 with 12:33
+        fun from0to12(formattedTime: String): String {
+            return if (formattedTime.startsWith("0")) {
+                "12${formattedTime.substring(1)}"
+            } else {
+                formattedTime
+            }
+        }
+
         try {
             val sdf = SimpleDateFormat("H:mm")
             val dateObj: Date = sdf.parse(alarm.hour.toString() + ":" + alarm.minute.toString())
@@ -71,7 +80,7 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
             ) "K:mm aa" else "H:mm"
 
             val time = SimpleDateFormat(timeFormat).format(dateObj)
-            timeView.text = time
+            timeView.text = if (timeFormat.contains("aa")) from0to12(time) else time
 
             alarmEnabled.isChecked = alarm.enabled
             alarmEnabled.setOnCheckedChangeListener { _, isChecked ->
