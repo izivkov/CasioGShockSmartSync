@@ -80,11 +80,6 @@ object PrayerAlarms {
         return localDateTime.hour to localDateTime.minute
     }
 
-    private fun isInNorthAmerica(): Boolean {
-        val country = Locale.getDefault().country
-        return country.equals("US", ignoreCase = true) || country.equals("CA", ignoreCase = true)
-    }
-
     @SuppressLint("MissingPermission")
     fun getLocation(context: Context): Coordinates? {
 
