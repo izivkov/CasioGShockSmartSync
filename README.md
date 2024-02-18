@@ -2,7 +2,7 @@
 
 ## Announcements
 
-Added support for the following watches:
+Added an **action** to set alarms for Muslim prayer times.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
