@@ -6,3 +6,9 @@ handle: 0x000b, char properties: 0x04, char value handle: 0x000c, uuid: 26eb002c
 handle: 0x000d, char properties: 0x18, char value handle: 0x000e, uuid: 26eb002d-b012-49a8-b1f8-394fb2032b0f
 handle: 0x0010, char properties: 0x18, char value handle: 0x0011, uuid: 26eb0023-b012-49a8-b1f8-394fb2032b0f
 handle: 0x0013, char properties: 0x14, char value handle: 0x0014, uuid: 26eb0024-b012-49a8-b1f8-394fb2032b0f
+
+Location of DataStore data file:
+/data/data/org.avmedia.gshockGoogleSync/files/datastore/CASIO_GOOGLE_SYNC_STORAGE.preferences_pb
+
+Issue found here:
+https://issuetracker.google.com/issues/242755161
