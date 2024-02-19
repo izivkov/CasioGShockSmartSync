@@ -6,3 +6,4 @@
 
 include ':app'
 rootProject.name='Casio G-Shock Square Smart Sync'
+include ':api'
