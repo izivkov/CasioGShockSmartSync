@@ -180,25 +180,7 @@ object RRuleValues {
     }
 
     private fun validateRule(rule: String): Boolean {
-        val dateFormatter =
-            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC)
-
-        var i = 0
-        val name = "RRULE"
-        val components = rule.replace("$name:", "").split(";", "=")
-        while (i < components.size) {
-            val component = components[i]
-            if (component == "UNTIL") {
-                val untilValue = components[i + 1]
-                try {
-                    LocalDateTime.parse(untilValue, dateFormatter).toInstant(ZoneOffset.UTC)
-                } catch (e: DateTimeParseException) {
-                    Timber.e("Invalid Calendar Date: $component}: $untilValue")
-                    return false
-                }
-            }
-            ++i
-        }
+        // TODO: Add validation here.
         return true
     }
 
