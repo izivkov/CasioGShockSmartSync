@@ -42,7 +42,7 @@ object RRuleValues {
         val rruleValues = Values()
 
         if (!_rrule.isNullOrEmpty()) {
-            var rrule = rruleUntilFix(_rrule)
+            val rrule = rruleUntilFix(_rrule)
 
             if (!validateRule(rrule)) {
                 rruleValues.incompatible = true
