@@ -2,7 +2,7 @@
 
 ## Announcements
 
-Added support for the following watches:
+Added an **action** to set alarms for Muslim prayer times.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
@@ -122,6 +122,10 @@ This screen allows you to set up the watch's settings. You can auto prefill the 
 Using an app to manually swap between Home Time and World Time is a bit silly. Your phone already knows where you are. 
 When setting time, this app will also set the Home Time, Timezone and DST state to your current location. 
 So when travelling to another timezone, just set time and you are good to go.
+
+## Troubleshooting ##
+It has been reported that on some Android 14 devices, after connecting the watch the first time, that watch will not connect automatically again, until the FORGET button is pressed.
+In this case, pair the watch **manually** using Bluetooth from the Android setting. After that, the app should work normally.
 
 ## Build Your Own App
 For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches, I have also created an API (library) project [here](https://github.com/izivkov/GShockAPI). 

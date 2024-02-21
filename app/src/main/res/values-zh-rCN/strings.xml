@@ -119,4 +119,21 @@
         如果你正在使用手机上的媒体播放器，比如Spotify、YouTube或YTMusic播放音乐或视频，这个操作将跳到下一首歌曲或视频。
         它还兼容Android Auto。
         ]]></string>
+    <string name="set_prayer_alarms">设置祈祷闹钟</string>
+    <string name="prayer_times_info"><![CDATA[
+        <li>此操作将把手表上的 5 个闹钟设置为穆斯林祈祷 <b>Fajr</b>、<b>Dhuhr</b>、<b>Asr</b>、<b>Maghrib</b> 和 <b>Isha</b> 时间。</li>
+        <li>由于时间根据您的位置和当前日期而变化，因此为了最佳准确性，请每天运行此操作。
+        如果设置了此操作，闹钟也将在自动校时期间自动更新，每天 4 次。</li>
+        <li>以下是根据您的位置使用的计算方法：
+            <b>北美</b>、
+            <b>埃及</b>、
+            <b>迪拜</b>、
+            <b>乌姆盖斯拉</b>、
+            <b>卡塔尔</b>、
+            <b>新加坡</b>、
+            <b>科威特</b>，以及
+            <b>穆斯林世界联盟</b>（其他地方）。
+        </li>
+        <li>请发送建议和更正至 <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
+        ]]></string>
 </resources>

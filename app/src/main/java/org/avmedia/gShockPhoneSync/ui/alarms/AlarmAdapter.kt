@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.alarms
 
 import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +19,11 @@ import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.Alarm
 import timber.log.Timber
 import java.text.ParseException
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
+import java.util.Locale
 
 class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
     RecyclerView.Adapter<AlarmAdapter.ViewHolder>() {
@@ -46,6 +51,26 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
         val alarm: Alarm = alarms[position]
         val timeView = viewHolder.timeView
         val alarmEnabled = viewHolder.alarmEnabled
+
+        fun formatTime(time: LocalTime, locale: Locale): String {
+            val formatter = DateTimeFormatter.ofPattern("h:mm a", locale)
+            val formattedTime = formatter.format(time)
+            return if (formattedTime.startsWith("0")) {
+                "12${formattedTime.substring(2)}"
+            } else {
+                formattedTime
+            }
+        }
+
+        // Replaces 0:33 with 12:33
+        fun from0to12(formattedTime: String): String {
+            return if (formattedTime.startsWith("0")) {
+                "12${formattedTime.substring(1)}"
+            } else {
+                formattedTime
+            }
+        }
+
         try {
             val sdf = SimpleDateFormat("H:mm")
             val dateObj: Date = sdf.parse(alarm.hour.toString() + ":" + alarm.minute.toString())
@@ -55,9 +80,9 @@ class AlarmAdapter(private val alarms: ArrayList<Alarm>) :
             ) "K:mm aa" else "H:mm"
 
             val time = SimpleDateFormat(timeFormat).format(dateObj)
-            timeView.text = time
-            alarmEnabled.isChecked = alarm.enabled
+            timeView.text = if (timeFormat.contains("aa")) from0to12(time) else time
 
+            alarmEnabled.isChecked = alarm.enabled
             alarmEnabled.setOnCheckedChangeListener { _, isChecked ->
                 alarm.enabled = isChecked
             }

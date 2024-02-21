@@ -30,7 +30,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     enum class ACTION_TYPES {
-        BASE_ACTION, SEPARATOR, MAP, PHOTO, PHONE_CALL, LOCATION, EMAIL, SET_TIME, ACTIVATE_VOICE_ASSISTANT, NEXT_TRACK, SET_EVENTS, TOGGLE_FLASHLIGHT, FIND_PHONE
+        BASE_ACTION, SEPARATOR, MAP, PHOTO, PHONE_CALL,
+        LOCATION, EMAIL, SET_TIME, ACTIVATE_VOICE_ASSISTANT, NEXT_TRACK,
+        SET_EVENTS, TOGGLE_FLASHLIGHT, FIND_PHONE, _PRAYER_ALARMS
     }
 
     open inner class ViewHolderBaseAction(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -46,8 +48,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderStartVoiceAssist(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderNextTrack(itemView: View) : ViewHolderBaseAction(itemView)
-    inner class ViewHolderMap(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class ViewHolderSetPrayerAlarms(itemView: View) : ViewHolderBaseAction(itemView)
 
+    inner class ViewHolderMap(itemView: View) : RecyclerView.ViewHolder(itemView)
     inner class ViewHolderActionTakePhoto(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.title)
         var icon: ImageView = itemView.findViewById(R.id.icon)
@@ -115,6 +118,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         }
         if (actions[position] is ActionsModel.NextTrack) {
             return ACTION_TYPES.NEXT_TRACK.ordinal
+        }
+        if (actions[position] is ActionsModel.PrayerAlarmsAction) {
+            return ACTION_TYPES._PRAYER_ALARMS.ordinal
         }
         if (actions[position] is ActionsModel.SetEventsAction) {
             return ACTION_TYPES.SET_EVENTS.ordinal
@@ -186,6 +192,12 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 ViewHolderNextTrack(vNextTrack)
             }
 
+            ACTION_TYPES._PRAYER_ALARMS.ordinal -> {
+                val vPrayer: View =
+                    inflater.inflate(R.layout.action_prayer_item, parent, false)
+                ViewHolderSetPrayerAlarms(vPrayer)
+            }
+
             else -> {
                 val vAction: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderBaseAction(vAction)
@@ -249,6 +261,11 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
                 configureNextTrack(vhNextTrack, position)
             }
 
+            ACTION_TYPES._PRAYER_ALARMS.ordinal -> {
+                val vhPrayerAlarms = viewHolder as ViewHolderSetPrayerAlarms
+                configurePrayer(vhPrayerAlarms, position)
+            }
+
             else -> {
                 val vhBaseAction: ViewHolderBaseAction =
                     viewHolder as ViewHolderBaseAction
@@ -283,6 +300,21 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhNextTrack.icon.setImageResource(R.drawable.skip_next)
 
         vhNextTrack.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            action.enabled = isChecked
+        }
+    }
+
+    private fun configurePrayer(
+        vhPrayAlarms: ViewHolderSetPrayerAlarms,
+        position: Int
+    ) {
+        val action: ActionsModel.PrayerAlarmsAction =
+            actions[position] as ActionsModel.PrayerAlarmsAction
+        vhPrayAlarms.title.text = action.title
+        vhPrayAlarms.actionEnabled.isChecked = action.enabled
+        vhPrayAlarms.icon.setImageResource(R.drawable.prayer_times)
+
+        vhPrayAlarms.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         }
     }
