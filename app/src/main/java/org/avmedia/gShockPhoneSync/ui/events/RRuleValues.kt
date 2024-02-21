@@ -14,12 +14,14 @@ import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
 import timber.log.Timber
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.time.temporal.TemporalAccessor
 
 object RRuleValues {
     data class Values(
@@ -33,13 +35,14 @@ object RRuleValues {
         "SpellCheckingInspection"
     )
     fun getValues(
-        rrule: String?,
+        _rrule: String?,
         startDate: EventDate,
         zone: ZoneId
     ): Values {
         val rruleValues = Values()
 
-        if (!rrule.isNullOrEmpty()) {
+        if (!_rrule.isNullOrEmpty()) {
+            var rrule = rruleUntilFix(_rrule)
 
             if (!validateRule(rrule)) {
                 rruleValues.incompatible = true
@@ -224,5 +227,20 @@ object RRuleValues {
         }
 
         return days
+    }
+
+    private fun rruleUntilFix(rrule: String): String {
+        val components = rrule.split(";", "=")
+        val index = components.indexOf("UNTIL")
+        if (index == -1) return rrule
+
+        val untilValue = components[index + 1]
+        return try {
+            DateTimeFormatter.ofPattern("yyyyMMdd").parse(untilValue)
+            val newUntilValue = untilValue + "T000000Z"
+            rrule.replace(untilValue, newUntilValue)
+        } catch (_: DateTimeParseException) {
+            rrule
+        }
     }
 }
