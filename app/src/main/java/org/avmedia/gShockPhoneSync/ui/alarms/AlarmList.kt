@@ -30,17 +30,15 @@ class AlarmList @JvmOverloads constructor(
         adapter = Cache.adapter ?: AlarmAdapter(AlarmsModel.alarms).also { Cache.adapter = it }
         layoutManager = LinearLayoutManager(context)
 
-        getFragmentScope().launch(Dispatchers.IO) {
+        getFragmentScope().launch(Dispatchers.Main) { // Must run on MainActivity
             val alarms = api().getAlarms()
+
             // update the model
             AlarmsModel.alarms.clear()
             AlarmsModel.alarms.addAll(alarms)
             ProgressEvents.onNext("Alarms Loaded")
 
-            MainActivity.getLifecycleScope().launch {
-                // Must run on MainActivity
-                adapter?.notifyDataSetChanged()
-            }
+            adapter?.notifyDataSetChanged()
         }
     }
 }

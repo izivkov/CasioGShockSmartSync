@@ -156,14 +156,14 @@ private class GShockManagerImpl(
             writeCharacteristic = getCharacteristic(
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
             )
+            // inform the caller that we have connected
+            onConnected(gatt.device.name, gatt.device.address)
+
             ProgressEvents.onNext("ConnectionSetupComplete", gatt.device)
 
             // new
             ProgressEvents.onNext("DeviceName", gatt.device.name)
             ProgressEvents.onNext("DeviceAddress", gatt.device.address)
-
-            // inform the caller that we have connected
-            onConnected(gatt.device.name, gatt.device.address)
 
             return true
         }
@@ -198,41 +198,8 @@ private class GShockManagerImpl(
         writeCharacteristic(
             characteristic,
             data,
-            getWriteType(characteristic)
+            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
         ).await()
-    }
-
-    private fun getWriteType(characteristic: BluetoothGattCharacteristic): Int {
-        fun BluetoothGattCharacteristic.containsProperty(property: Int): Boolean =
-            properties and property != 0
-
-        fun BluetoothGattCharacteristic.isReadable(): Boolean =
-            containsProperty(BluetoothGattCharacteristic.PROPERTY_READ)
-
-        fun BluetoothGattCharacteristic.isWritable(): Boolean =
-            containsProperty(BluetoothGattCharacteristic.PROPERTY_WRITE)
-
-        fun BluetoothGattCharacteristic.isWritableWithoutResponse(): Boolean =
-            containsProperty(BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)
-
-        fun BluetoothGattCharacteristic.isIndicatable(): Boolean =
-            containsProperty(BluetoothGattCharacteristic.PROPERTY_INDICATE)
-
-        fun BluetoothGattCharacteristic.isNotifiable(): Boolean =
-            containsProperty(BluetoothGattCharacteristic.PROPERTY_NOTIFY)
-
-        val writeType = when {
-            characteristic.isWritable() -> BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-            characteristic.isWritableWithoutResponse() -> {
-                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-            }
-
-            else -> {
-                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-            }
-        }
-
-        return writeType
     }
 
     companion object {

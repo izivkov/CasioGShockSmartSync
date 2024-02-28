@@ -22,8 +22,10 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
 
 @Suppress("SameParameterValue")
 class BatteryView @JvmOverloads constructor(
@@ -63,7 +65,7 @@ class BatteryView @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            TimeFragment.getFragmentScope().launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.IO) { // mist be Main because it is updating the UI
                 val percent = api().getBatteryLevel()
                 setPercent(percent)
             }

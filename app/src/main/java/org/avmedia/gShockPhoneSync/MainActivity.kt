@@ -289,6 +289,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val deviceName = LocalDataStorage.get("LastDeviceName", "")
+
+        // INZ new
+        ProgressEvents.onNext("DeviceName", deviceName)
+
         api().waitForConnection(deviceAddress, deviceName)
     }
 

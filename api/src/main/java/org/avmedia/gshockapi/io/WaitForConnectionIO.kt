@@ -38,7 +38,6 @@ object WaitForConnectionIO {
         DeferredValueHolder.deferredResult = CompletableDeferred()
         WatchDataListener.init()
 
-        // TODO: remove  bleScannerLocal = BleScannerLocal(context)
         Connection.startConnection(context, deviceId, deviceName)
 
         fun waitForConnectionSetupComplete() {

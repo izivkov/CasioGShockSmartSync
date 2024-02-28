@@ -33,7 +33,6 @@ object Connection {
         bleManager?.release()
     }
 
-    // TODO
     fun isConnected() :Boolean {
         return bleManager?.connectionState == ConnectionState.CONNECTED
     }
@@ -44,10 +43,6 @@ object Connection {
 
     fun teardownConnection(device: BluetoothDevice) {
         bleManager?.release()
-    }
-
-    fun getDeviceId(): String? {
-        return null
     }
 
     fun validateAddress(address: String?): Boolean {
@@ -74,16 +69,6 @@ object Connection {
         }
     }
 
-    fun isBluetoothEnabled(): Boolean {
-
-        // TODO: Needs implementation
-        return true
-    }
-
-    fun stopBleScan() {
-        // TODO("Not yet implemented")
-    }
-
     fun startConnection(context:Context, deviceId: String?, deviceName: String?) {
         scope.launch {
             var address = deviceId
@@ -101,7 +86,20 @@ object Connection {
             connect()
         }
     }
-    fun breakWait() {
+
+    // TODO:
+
+    fun isBluetoothEnabled(): Boolean {
+
+        // TODO: Needs implementation
+        return true
+    }
+
+    fun stopBleScan() {
         // TODO("Not yet implemented")
+    }
+
+    fun breakWait() {
+        bleManager?.release()
     }
 }

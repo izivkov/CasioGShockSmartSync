@@ -6,6 +6,7 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.R
@@ -19,32 +20,39 @@ class WatchImageView @JvmOverloads constructor(
 
     init {
         startListener()
-        setImageResource()
     }
 
     private fun startListener() {
 
         val eventActions = arrayOf(
             EventAction("DeviceName") {
-                setImageResource()
+                setImageResource(ProgressEvents.getPayload("DeviceName") as String)
             },
         )
 
         ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }
 
-    private fun setImageResource() {
-        when (WatchInfo.model) {
-            WatchInfo.WATCH_MODEL.GA -> {
+    private fun setImageResource(deviceName: String) {
+        when  {
+            "GA" in deviceName -> {
+                setImageResource(R.drawable.ga_b2100)
+            }
+            "GMA" in deviceName -> {
                 setImageResource(R.drawable.ga_b2100)
             }
 
-            WatchInfo.WATCH_MODEL.GW -> {
-                // setImageResource(R.drawable.dw_b5600)
+            "GW" in deviceName -> {
+                setImageResource(R.drawable.ic_gw_b5600)
+            }
+            "GMW" in deviceName -> {
                 setImageResource(R.drawable.ic_gw_b5600)
             }
 
-            WatchInfo.WATCH_MODEL.DW -> {
+            "DW" in deviceName -> {
+                setImageResource(R.drawable.dw_b5600)
+            }
+            "DMW" in deviceName -> {
                 setImageResource(R.drawable.dw_b5600)
             }
 
