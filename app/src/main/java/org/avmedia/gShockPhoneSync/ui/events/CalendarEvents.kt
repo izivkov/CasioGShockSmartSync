@@ -53,7 +53,8 @@ object CalendarEvents {
             """
             (${CalendarContract.Events.DTEND} >= ${calendar.timeInMillis}
             or ${CalendarContract.Events.RRULE} IS NOT NULL)
-            and ${CalendarContract.Events.CALENDAR_ACCESS_LEVEL} = ?
+            and (${CalendarContract.Events.CALENDAR_ACCESS_LEVEL} = ?
+            or ${CalendarContract.Events.HAS_ALARM} = "1")
             """.trimIndent()
 
         val selectionArgs = arrayOf(CalendarContract.Calendars.CAL_ACCESS_OWNER.toString())
