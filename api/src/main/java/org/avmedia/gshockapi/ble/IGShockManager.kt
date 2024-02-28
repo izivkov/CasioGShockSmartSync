@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.observer.ConnectionObserver
@@ -19,8 +18,10 @@ enum class ConnectionState {
     CONNECTING, CONNECTED, DISCONNECTED, DISCONNECTING
 }
 
+typealias onConnectedType = (String, String) -> Unit
+
 interface GSHock {
-    suspend fun connect()
+    suspend fun connect(onConnected: (String, String) -> Unit)
     fun release()
     fun setDataCallback(dataCallback: IDataReceived?)
     fun enableNotifications()
@@ -41,8 +42,8 @@ private class GShockManagerImpl(
     private lateinit var writeCharacteristic: BluetoothGattCharacteristic
     var dataReceivedCallback: IDataReceived? = null
     private lateinit var device: BluetoothDevice
-
     override var connectionState = ConnectionState.DISCONNECTED
+    private lateinit var onConnected: onConnectedType
 
     init {
         connectionObserver = ConnectionEventHandler()
@@ -71,11 +72,15 @@ private class GShockManagerImpl(
     @SuppressLint("MissingPermission")
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    override suspend fun connect() = connect(device)
-        .retry(3, 300)
-        .useAutoConnect(false)
-        .timeout(10000 * 60 * 1000)
-        .enqueue()
+    override suspend fun connect(onConnected: onConnectedType) {
+        this.onConnected = onConnected
+
+        connect(device)
+            .retry(3, 300)
+            .useAutoConnect(false)
+            .timeout(10000 * 60 * 1000)
+            .enqueue()
+    }
 
     override fun release() {
         // Cancel all coroutines.
@@ -156,6 +161,9 @@ private class GShockManagerImpl(
             // new
             ProgressEvents.onNext("DeviceName", gatt.device.name)
             ProgressEvents.onNext("DeviceAddress", gatt.device.address)
+
+            // inform the caller that we have connected
+            onConnected(gatt.device.name, gatt.device.address)
 
             return true
         }

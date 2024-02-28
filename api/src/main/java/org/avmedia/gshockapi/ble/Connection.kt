@@ -10,6 +10,7 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.MessageDispatcher
 import timber.log.Timber
 
@@ -19,7 +20,13 @@ object Connection {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private suspend fun connect() {
-        val connection = bleManager?.connect()
+
+        fun onConnected (name: String, address: String) {
+            WatchInfo.setNameAndModel(name.trimEnd('\u0000'))
+            WatchInfo.setAddress(address)
+        }
+
+        bleManager?.connect(::onConnected)
     }
 
     fun disconnect() {

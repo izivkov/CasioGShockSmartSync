@@ -8,6 +8,8 @@ package org.avmedia.gShockPhoneSync.ui.alarms
 
 import android.content.Context
 import android.util.AttributeSet
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
 
 class AlarmChimeSwitch @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -19,10 +21,16 @@ class AlarmChimeSwitch @JvmOverloads constructor(
                 AlarmsModel.alarms[0].hasHourlyChime = isChecked
             }
         }
+
+        waitForAlarmsLoaded()
     }
 
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        isChecked = AlarmsModel.alarms[0].hasHourlyChime
+    private fun waitForAlarmsLoaded() {
+        val eventActions = arrayOf(
+            EventAction("Alarms Loaded") {
+                isChecked = AlarmsModel.alarms.getOrNull(0)?.hasHourlyChime ?: false
+            }
+        )
+        ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }
 }

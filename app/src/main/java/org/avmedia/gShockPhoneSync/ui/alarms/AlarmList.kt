@@ -12,9 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsFragment.Companion.getFragmentScope
+import org.avmedia.gshockapi.ProgressEvents
 
 @SuppressLint("NotifyDataSetChanged")
 class AlarmList @JvmOverloads constructor(
@@ -29,17 +30,19 @@ class AlarmList @JvmOverloads constructor(
         adapter = Cache.adapter ?: AlarmAdapter(AlarmsModel.alarms).also { Cache.adapter = it }
         layoutManager = LinearLayoutManager(context)
 
-        runBlocking {
+        getFragmentScope().launch(Dispatchers.IO) {
             val alarms = api().getAlarms()
-
             // update the model
             AlarmsModel.alarms.clear()
             AlarmsModel.alarms.addAll(alarms)
+            ProgressEvents.onNext("Alarms Loaded")
 
-            getFragmentScope().launch(Dispatchers.IO) {
+            MainActivity.getLifecycleScope().launch {
+                // Must run on MainActivity
                 adapter?.notifyDataSetChanged()
             }
         }
     }
 }
+
 

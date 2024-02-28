@@ -29,6 +29,7 @@ object AlarmsIO {
         DeferredValueHolder.deferredResult = CompletableDeferred()
         Alarm.clear()
         Connection.sendMessage("{ action: '$key'}")
+
         return DeferredValueHolder.deferredResult.await()
     }
 
