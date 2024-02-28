@@ -44,8 +44,6 @@ import java.util.*
 @RequiresApi(Build.VERSION_CODES.O)
 class GShockAPI(private val context: Context) {
 
-    // private var bleScannerLocal: BleScannerLocal = BleScannerLocal(context)
-
     /**
      * This function waits for the watch to connect to the phone.
      * When connected, it returns and emmits a `ConnectionSetupComplete` event, which
@@ -65,10 +63,8 @@ class GShockAPI(private val context: Context) {
      */
 
     suspend fun waitForConnection(deviceId: String? = "", deviceName: String? = "") {
-        // bleScannerLocal.stopBleScan()
-
         val connectedStatus =
-            WaitForConnectionIO.request(context, bleScannerLocal, deviceId, deviceName)
+            WaitForConnectionIO.request(context, deviceId, deviceName)
         if (connectedStatus == "OK") {
             init()
         }
@@ -446,11 +442,7 @@ class GShockAPI(private val context: Context) {
     }
 
     fun stopScan() {
-        bleScannerLocal.stopBleScan()
-    }
-
-    fun preventReconnection() {
-        Connection.oneTimeLock = true
+        Connection.stopBleScan()
     }
 
     /**
@@ -459,7 +451,12 @@ class GShockAPI(private val context: Context) {
      * @return *true* if enables, *false* otherwise.
      */
     fun isBluetoothEnabled(): Boolean {
-        return bleScannerLocal.bluetoothAdapter.isEnabled
+        return Connection.isBluetoothEnabled()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun sendMessage(message: String) {
+        MessageDispatcher.sendToWatch(message)
     }
 
     fun resetHand() {
@@ -468,5 +465,9 @@ class GShockAPI(private val context: Context) {
 
     fun validateBluetoothAddress(deviceAddress: String?): Boolean {
         return Connection.validateAddress(deviceAddress)
+    }
+
+    fun preventReconnection ():Boolean {
+        return true
     }
 }

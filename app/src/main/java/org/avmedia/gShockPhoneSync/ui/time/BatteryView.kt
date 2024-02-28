@@ -20,7 +20,8 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 
@@ -62,7 +63,7 @@ class BatteryView @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            runBlocking {
+            TimeFragment.getFragmentScope().launch(Dispatchers.IO) {
                 val percent = api().getBatteryLevel()
                 setPercent(percent)
             }

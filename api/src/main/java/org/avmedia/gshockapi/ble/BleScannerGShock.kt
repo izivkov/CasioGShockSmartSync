@@ -40,7 +40,7 @@ object BleScannerGShock {
             scanMode = BleScanMode.SCAN_MODE_LOW_LATENCY,
         )
 
-        val scope = CoroutineScope(Dispatchers.Main)
+        val scope = CoroutineScope(Dispatchers.IO)
         BleScanner(context).scan(filters = gShockFilters, settings = gShockSettings)
             .filter {
                 val device: ServerDevice = it.device

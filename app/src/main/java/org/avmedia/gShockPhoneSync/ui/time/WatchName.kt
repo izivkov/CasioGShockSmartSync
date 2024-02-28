@@ -8,6 +8,8 @@ package org.avmedia.gShockPhoneSync.ui.time
 
 import android.content.Context
 import android.util.AttributeSet
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gshockapi.WatchInfo
 
@@ -19,7 +21,9 @@ class WatchName @JvmOverloads constructor(
         super.onFinishInflate()
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            text = WatchInfo.name
+            TimeFragment.getFragmentScope().launch(Dispatchers.IO) {
+                text = WatchInfo.name
+            }
         }
     }
 }

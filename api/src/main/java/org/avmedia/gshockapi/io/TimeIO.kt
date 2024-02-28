@@ -3,6 +3,7 @@ package org.avmedia.gshockapi.io
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.CasioTimeZoneHelper
 import org.avmedia.gshockapi.utils.Utils

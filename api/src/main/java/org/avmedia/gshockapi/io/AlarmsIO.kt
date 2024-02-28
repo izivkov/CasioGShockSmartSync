@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Alarm
+import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.casio.Alarms
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.utils.Utils

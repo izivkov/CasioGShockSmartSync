@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.utils.WatchDataListener
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -18,16 +19,14 @@ object WaitForConnectionIO {
 
     suspend fun request(
         context: Context,
-        bleScannerLocal: BleScannerLocal,
         deviceId: String? = "",
         deviceName: String? = ""
     ): String {
-        return waitForConnection(context, bleScannerLocal, deviceId, deviceName)
+        return waitForConnection(context, deviceId, deviceName)
     }
 
     private suspend fun waitForConnection(
         context: Context,
-        bleScannerLocal: BleScannerLocal,
         deviceId: String? = "",
         deviceName: String? = ""
     ): String {
@@ -37,20 +36,16 @@ object WaitForConnectionIO {
         }
 
         DeferredValueHolder.deferredResult = CompletableDeferred()
-
-        Connection.init(context)
         WatchDataListener.init()
 
         // TODO: remove  bleScannerLocal = BleScannerLocal(context)
-        bleScannerLocal.startConnection(deviceId, deviceName)
+        Connection.startConnection(context, deviceId, deviceName)
 
         fun waitForConnectionSetupComplete() {
             val eventActions = arrayOf(
                 EventAction("ConnectionSetupComplete") {
                     val device =
                         ProgressEvents.getPayload("ConnectionSetupComplete") as BluetoothDevice
-
-                    DeviceCharacteristics.init(device)
 
                     CachedIO.clearCache()
                     DeferredValueHolder.deferredResult.complete("OK")

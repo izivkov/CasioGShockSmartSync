@@ -7,41 +7,40 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothAdapter.getDefaultAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.casio.MessageDispatcher
 import timber.log.Timber
 
 object Connection {
 
-    private lateinit var bleManager: GShockManager
+    private  var bleManager: IGShockManager? = null
+    private val scope = CoroutineScope(Dispatchers.IO)
 
-    @SuppressLint("MissingPermission")
-    fun initialize(context: Context, deviceAddress: String) {
-        val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
-        // val deviceAddress = "00:11:22:33:44:55" // Example MAC address
-        val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(deviceAddress)
-
-        bleManager = GShockManager(context = context, device = device as BluetoothDevice)
-    }
-
-    suspend fun connect() {
-        val connection = bleManager.connect()
-        println(connection)
+    private suspend fun connect() {
+        val connection = bleManager?.connect()
     }
 
     fun disconnect() {
-        bleManager.release()
+        bleManager?.release()
     }
 
     // TODO
     fun isConnected() :Boolean {
-        return true
+        return bleManager?.connectionState == ConnectionState.CONNECTED
+    }
+
+    fun isConnecting(): Boolean {
+        return bleManager?.connectionState == ConnectionState.CONNECTING
     }
 
     fun teardownConnection(device: BluetoothDevice) {
-        bleManager.release()
+        bleManager?.release()
     }
 
     fun getDeviceId(): String? {
-        return
+        return null
     }
 
     fun validateAddress(address: String?): Boolean {
@@ -51,5 +50,51 @@ object Connection {
             Timber.e("Invalid Bluetooth Address")
             false
         }
+    }
+
+    @SuppressLint("NewApi")
+    fun sendMessage(message: String) {
+        MessageDispatcher.sendToWatch(message)
+    }
+
+    fun setDataCallback(dataCallback: IDataReceived) {
+        bleManager?.setDataCallback(dataCallback)
+    }
+
+    fun write(handle: Int, data: ByteArray) {
+        scope.launch {
+            bleManager?.write(handle, data)
+        }
+    }
+
+    fun isBluetoothEnabled(): Boolean {
+
+        // TODO: Needs implementation
+        return true
+    }
+
+    fun stopBleScan() {
+        // TODO("Not yet implemented")
+    }
+
+    fun startConnection(context:Context, deviceId: String?, deviceName: String?) {
+        scope.launch {
+            var address = deviceId
+            if (address == null) {
+                val devInfo = BleScannerGShock.scan(context).await()
+                address = devInfo.address
+            }
+            val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
+            val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(address)
+
+            if (bleManager == null) {
+                bleManager = IGShockManager(context)
+            }
+            bleManager?.setDevice(device as BluetoothDevice)
+            connect()
+        }
+    }
+    fun breakWait() {
+        // TODO("Not yet implemented")
     }
 }
