@@ -201,7 +201,7 @@ private class GShockManagerImpl(
             characteristic,
             data,
             writeType
-        ).await()
+        ).enqueue()
     }
 
     companion object {

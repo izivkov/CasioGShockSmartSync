@@ -6,28 +6,34 @@ import android.os.ParcelUuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleNumOfMatches
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanMode
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerMatchMode
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerSettings
 import no.nordicsemi.android.kotlin.ble.core.scanner.FilteredServiceUuid
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
-import no.nordicsemi.android.kotlin.ble.core.scanner.BleNumOfMatches
-import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanMode
-import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerMatchMode
 
-object BleScannerGShock {
+object GShockScanner {
     @SuppressLint("MissingPermission")
     val CASIO_SERVICE_UUID = "00001804-0000-1000-8000-00805f9b34fb"
 
-    data class DeviceInfo (val name:String, val address:String)
-    private var deferredResult: CompletableDeferred<DeviceInfo> = CompletableDeferred()
+    data class DeviceInfo(val name: String, val address: String)
+    private lateinit var scannerFlow: Job
 
     @SuppressLint("MissingPermission")
     suspend fun scan(context: Context): CompletableDeferred<DeviceInfo> {
+
+        val deferredResult: CompletableDeferred<DeviceInfo> = CompletableDeferred()
 
         val gShockFilters: List<BleScanFilter> = listOf(
             BleScanFilter(serviceUuid = FilteredServiceUuid(ParcelUuid.fromString(CASIO_SERVICE_UUID)))
@@ -41,19 +47,38 @@ object BleScannerGShock {
         )
 
         val scope = CoroutineScope(Dispatchers.IO)
-        BleScanner(context).scan(filters = gShockFilters, settings = gShockSettings)
+        val deviceSet = mutableSetOf<String>()
+        cancelFlow()
+        scannerFlow = BleScanner(context).scan(filters = gShockFilters, settings = gShockSettings)
             .filter {
                 val device: ServerDevice = it.device
                 val ret = (device.name as String).startsWith("CASIO")
                 ret
             }
+            .onStart { }
             .onEach {
                 val device = it.device
-                deferredResult.complete(DeviceInfo(device.name as String, device.address))
-                scope.cancel("End scanning")
+                if (device.address !in deviceSet) {
+                    deviceSet.add(device.address)
+                    deferredResult.complete(DeviceInfo(device.name as String, device.address))
+                    cancelFlow()
+                    scope.cancel("End scanning")
+                }
+            }
+            .cancellable()
+            .catch { e ->
+                println("Scanning error $e")
             }
             .launchIn(scope)
 
         return deferredResult
     }
+
+    fun cancelFlow() {
+        if (::scannerFlow.isInitialized) {
+            scannerFlow.cancel()
+        }
+    }
+
+    // new
 }

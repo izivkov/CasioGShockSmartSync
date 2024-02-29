@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.MessageDispatcher
-import timber.log.Timber
 
 object Connection {
 
@@ -46,12 +45,7 @@ object Connection {
     }
 
     fun validateAddress(address: String?): Boolean {
-        return if (address != null && BluetoothAdapter.checkBluetoothAddress(address)) {
-            true
-        } else {
-            Timber.e("Invalid Bluetooth Address")
-            false
-        }
+        return address != null && BluetoothAdapter.checkBluetoothAddress(address)
     }
 
     @SuppressLint("NewApi")
@@ -73,7 +67,8 @@ object Connection {
         scope.launch {
             var address = deviceId
             if (address == null) {
-                val devInfo = BleScannerGShock.scan(context).await()
+                stopBleScan()
+                val devInfo = GShockScanner.scan(context).await()
                 address = devInfo.address
             }
             val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
@@ -96,7 +91,7 @@ object Connection {
     }
 
     fun stopBleScan() {
-        // TODO("Not yet implemented")
+        GShockScanner.cancelFlow()
     }
 
     fun breakWait() {
