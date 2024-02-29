@@ -6,7 +6,9 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothAdapter.getDefaultAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -80,14 +82,6 @@ object Connection {
             bleManager?.setDevice(device as BluetoothDevice)
             connect()
         }
-    }
-
-    // TODO:
-
-    fun isBluetoothEnabled(): Boolean {
-
-        // TODO: Needs implementation
-        return true
     }
 
     fun stopBleScan() {

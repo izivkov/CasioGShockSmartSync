@@ -79,6 +79,4 @@ object GShockScanner {
             scannerFlow.cancel()
         }
     }
-
-    // new
 }
