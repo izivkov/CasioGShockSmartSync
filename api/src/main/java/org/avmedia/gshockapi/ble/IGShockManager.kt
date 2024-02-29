@@ -195,10 +195,12 @@ private class GShockManagerImpl(
     override suspend fun write(handle: Int, data: ByteArray) {
 
         val characteristic = if (handle == 0xC) readCharacteristic else writeCharacteristic
+        val writeType = if (handle == 0xC) BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE else BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+
         writeCharacteristic(
             characteristic,
             data,
-            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+            writeType
         ).await()
     }
 

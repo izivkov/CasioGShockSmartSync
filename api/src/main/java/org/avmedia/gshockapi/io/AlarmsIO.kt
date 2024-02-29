@@ -85,7 +85,7 @@ object AlarmsIO {
         val alarmsJsonArr: JSONArray = JSONObject(message).get("value") as JSONArray
         val alarmCasio0 = Alarms.fromJsonAlarmFirstAlarm(alarmsJsonArr[0] as JSONObject)
         CasioIO.writeCmd(0x000e, alarmCasio0)
-        var alarmCasio: ByteArray = Alarms.fromJsonAlarmSecondaryAlarms(alarmsJsonArr)
+        val alarmCasio: ByteArray = Alarms.fromJsonAlarmSecondaryAlarms(alarmsJsonArr)
         CasioIO.writeCmd(0x000e, alarmCasio)
     }
 
