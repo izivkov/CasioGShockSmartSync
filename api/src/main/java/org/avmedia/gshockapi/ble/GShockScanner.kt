@@ -56,7 +56,6 @@ object GShockScanner {
         val deviceSet = mutableSetOf<String>()
         cancelFlow()
 
-
         scannerFlow = BleScanner(context).scan(filters = gShockFilters, settings = gShockSettings)
             .filter {
                 val device: ServerDevice = it.device
@@ -69,7 +68,7 @@ object GShockScanner {
                 deferredResult.complete(DeviceInfo("", ""))
             }
             .onCompletion {
-                // If we have not found any watches, resolve the promise to the app will not lock.
+                // If we have not found any watches, resolve the promise so the app will not lock.
                 if (deferredResult.isActive) {
                     deferredResult.complete(DeviceInfo("", ""))
                 }
