@@ -6,6 +6,7 @@ import kotlin.reflect.KSuspendFunction1
 
 object CachedIO {
 
+    private var cacheOff = false
     val cache = WatchValuesCache()
 
     fun init() {
@@ -17,7 +18,7 @@ object CachedIO {
     }
 
     suspend fun request(key: String, func: KSuspendFunction1<String, Any>): Any {
-        val value = cache.getCached(key)
+        val value = if (cacheOff) null else cache.getCached(key)
         if (value == null) {
             val funcResult = func(key)
             cache.put(key, funcResult)

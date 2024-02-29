@@ -1,18 +1,23 @@
 package org.avmedia.gshockapi.ble
 
 import android.annotation.SuppressLint
+import android.bluetooth.le.ScanCallback
 import android.content.Context
+import android.net.wifi.ScanResult
 import android.os.ParcelUuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.onStart
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleNumOfMatches
@@ -22,6 +27,7 @@ import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerMatchMode
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerSettings
 import no.nordicsemi.android.kotlin.ble.core.scanner.FilteredServiceUuid
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
+import org.avmedia.gshockapi.ProgressEvents
 
 object GShockScanner {
     @SuppressLint("MissingPermission")
@@ -49,6 +55,8 @@ object GShockScanner {
         val scope = CoroutineScope(Dispatchers.IO)
         val deviceSet = mutableSetOf<String>()
         cancelFlow()
+
+
         scannerFlow = BleScanner(context).scan(filters = gShockFilters, settings = gShockSettings)
             .filter {
                 val device: ServerDevice = it.device
@@ -56,6 +64,15 @@ object GShockScanner {
                 ret
             }
             .onStart { }
+            .onEmpty {
+                ProgressEvents.onNext("ApiError", "No devices found while scanning")
+                deferredResult.complete(DeviceInfo("", ""))
+            }
+            .onCompletion {
+                if (deferredResult.isActive) {
+                    deferredResult.complete(DeviceInfo("", ""))
+                }
+            }
             .onEach {
                 val device = it.device
                 if (device.address !in deviceSet) {
@@ -67,7 +84,8 @@ object GShockScanner {
             }
             .cancellable()
             .catch { e ->
-                println("Scanning error $e")
+                ProgressEvents.onNext("ApiError", "Scanning Error $e")
+                deferredResult.complete(DeviceInfo("", ""))
             }
             .launchIn(scope)
 

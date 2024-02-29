@@ -73,15 +73,26 @@ object Connection {
                 val devInfo = GShockScanner.scan(context).await()
                 address = devInfo.address
             }
-            val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
-            val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(address)
+            if (address != "") {
+                val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
+                val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(address)
 
-            if (bleManager == null) {
-                bleManager = IGShockManager(context)
+                if (bleManager == null) {
+                    bleManager = IGShockManager(context)
+                }
+                bleManager?.setDevice(device as BluetoothDevice)
+                connect()
             }
-            bleManager?.setDevice(device as BluetoothDevice)
-            connect()
         }
+    }
+
+    fun isBluetoothEnabled(context:Context): Boolean {
+        val bluetoothAdapter: BluetoothAdapter by lazy {
+            val bluetoothManager =
+                context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
+            bluetoothManager.adapter
+        }
+        return bluetoothAdapter.isEnabled
     }
 
     fun stopBleScan() {

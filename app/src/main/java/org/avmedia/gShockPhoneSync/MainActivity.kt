@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun runWithChecks() {
 
-        if (!isBluetoothEnabled()!!) {
+        if (!api().isBluetoothEnabled(this)) {
             turnOnBLE()
             return
         }
@@ -169,13 +169,6 @@ class MainActivity : AppCompatActivity() {
             // startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             requestBluetooth.launch(enableBtIntent)
         }
-    }
-
-    private fun isBluetoothEnabled(): Boolean? {
-        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-
-        return bluetoothAdapter?.isEnabled
     }
 
     override fun onUserInteraction() {

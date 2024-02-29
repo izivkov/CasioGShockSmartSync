@@ -444,6 +444,15 @@ class GShockAPI(private val context: Context) {
         Connection.stopBleScan()
     }
 
+    /**
+     * Tells us if Bluetooth is currently enabled on the phone. If not, the app can take action to enable it.
+     *
+     * @return *true* if enables, *false* otherwise.
+     */
+    fun isBluetoothEnabled(context:Context): Boolean {
+        return Connection.isBluetoothEnabled(context)
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun sendMessage(message: String) {
         MessageDispatcher.sendToWatch(message)
