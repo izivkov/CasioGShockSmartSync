@@ -69,6 +69,7 @@ object GShockScanner {
                 deferredResult.complete(DeviceInfo("", ""))
             }
             .onCompletion {
+                // If we have not found any watches, resolve the promise to the app will not lock.
                 if (deferredResult.isActive) {
                     deferredResult.complete(DeviceInfo("", ""))
                 }
