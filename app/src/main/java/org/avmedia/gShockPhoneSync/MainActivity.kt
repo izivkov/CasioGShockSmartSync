@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
 
-    // do not delete this. DeviceManager needs to be running to save the last device name to reuse on nect start.
+    // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
     private var deviceManager: DeviceManager
 
     private var requestBluetooth =
@@ -69,7 +69,6 @@ class MainActivity : AppCompatActivity() {
         // do not delete this. DeviceManager needs to be running to save the last device name to reuse on nect start.
         deviceManager = DeviceManager
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -281,7 +280,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val deviceName = LocalDataStorage.get("LastDeviceName", "")
+        val deviceName = LocalDataStorage.get("LastDeviceName", null)
 
         // INZ new
         ProgressEvents.onNext("DeviceName", deviceName)
