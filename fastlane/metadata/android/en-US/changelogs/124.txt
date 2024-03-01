@@ -1,0 +1,2 @@
+- Changed to https://github.com/NordicSemiconductor/Kotlin-BLE-Library library for BLE communications. This should address some issues with
+BLE on Android 14.

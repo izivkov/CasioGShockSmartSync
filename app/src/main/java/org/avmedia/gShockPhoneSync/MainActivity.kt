@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val deviceName = LocalDataStorage.get("LastDeviceName", null)
+        val deviceName = LocalDataStorage.get("LastDeviceName", "")
 
         // INZ new
         ProgressEvents.onNext("DeviceName", deviceName)

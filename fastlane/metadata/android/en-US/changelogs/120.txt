@@ -1,2 +1,0 @@
-- Add support for GCW-B5000 watch
-- Improve battery indicator accuracy

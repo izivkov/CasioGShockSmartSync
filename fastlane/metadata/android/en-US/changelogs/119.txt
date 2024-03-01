@@ -1,4 +1,0 @@
-- Added an action to skip to the nest track while playing media files on the phone.
-- Improved reliability of running actions.
-
-
