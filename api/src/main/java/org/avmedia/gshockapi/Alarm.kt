@@ -11,7 +11,11 @@ open class Alarm(
     }
 
     companion object {
-        val alarms: ArrayList<Alarm> = ArrayList<Alarm>()
+        var alarms: ArrayList<Alarm> = ArrayList()
+
+        fun addSorted(source: ArrayList<Alarm>) {
+            alarms.addAll(if (source.size == 1) 0 else alarms.size, source)
+        }
 
         fun clear() {
             alarms.clear()

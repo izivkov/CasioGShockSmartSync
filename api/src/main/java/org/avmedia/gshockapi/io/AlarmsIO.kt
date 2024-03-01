@@ -55,13 +55,13 @@ object AlarmsIO {
         fun fromJson(jsonStr: String) {
             val gson = Gson()
             val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
-            Alarm.alarms.addAll(alarmArr)
+            Alarm.addSorted(ArrayList(alarmArr.toList()))
         }
 
         val decoded = AlarmDecoder.toJson(data).get("ALARMS")
         fromJson(decoded.toString())
 
-        if (Alarm.alarms.size > 1) {
+        if (Alarm.alarms.size == 5) {
             DeferredValueHolder.deferredResult.complete(Alarm.alarms)
         }
     }
@@ -91,6 +91,11 @@ object AlarmsIO {
 
     object AlarmDecoder {
         private const val HOURLY_CHIME_MASK = 0b10000000
+        private val alarmsQueue = mutableListOf<ArrayList<Int>>()
+
+        fun toJsonNew(command: String) {
+            alarmsQueue.add(Utils.toIntArray(command))
+        }
 
         fun toJson(command: String): JSONObject {
             val jsonResponse = JSONObject()
