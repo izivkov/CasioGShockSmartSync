@@ -28,11 +28,6 @@ object CasioIO {
     }
 
     fun init() {
-        // Connection.enableNotifications()
-    }
-
-    fun setWriter(writer: (BluetoothDevice, BluetoothGattCharacteristic, ByteArray) -> Unit) {
-        this.writer = writer
     }
 
     fun writeCmd(handle: Int, bytesArray: ByteArray) {

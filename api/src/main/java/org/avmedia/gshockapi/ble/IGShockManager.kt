@@ -11,6 +11,7 @@ import kotlinx.coroutines.cancel
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.casio.CasioConstants
 import timber.log.Timber
 import java.util.*
 
@@ -202,35 +203,6 @@ private class GShockManagerImpl(
             data,
             writeType
         ).enqueue()
-    }
-
-    companion object {
-
-        object CasioConstants {
-            val WATCH_FEATURES_SERVICE_UUID: UUID =
-                UUID.fromString("26eb000d-b012-49a8-b1f8-394fb2032b0f")
-
-            val CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID: UUID =
-                UUID.fromString("26eb002c-b012-49a8-b1f8-394fb2032b0f")
-            val CASIO_ALL_FEATURES_CHARACTERISTIC_UUID: UUID =
-                UUID.fromString("26eb002d-b012-49a8-b1f8-394fb2032b0f")
-            val CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID: UUID =
-                UUID.fromString("26eb0023-b012-49a8-b1f8-394fb2032b0f")
-            val CASIO_CONVOY_CHARACTERISTIC_UUID: UUID =
-                UUID.fromString("26eb0024-b012-49a8-b1f8-394fb2032b0f")
-
-            val CASIO_NOTIFICATION_CHARACTERISTIC_UUID: UUID =
-                UUID.fromString("26eb0030-b012-49a8-b1f8-394fb2032b0f")
-
-            val CASIO_GET_DEVICE_NAME: UUID =
-                UUID.fromString("00002a00-0000-1000-8000-00805f9b34fb") // returns 0x43 41 53 49 4F 20 47 57 2D 42 35 36 30 30 00 00 (CASIO GW-B5600)
-            val CASIO_APPEARANCE: UUID = UUID.fromString("00002a01-0000-1000-8000-00805f9b34fb")
-            val TX_POWER_LEVEL_CHARACTERISTIC_UUID: UUID =
-                UUID.fromString("00002a07-0000-1000-8000-00805f9b34fb")
-
-            val SERIAL_NUMBER_STRING: UUID =
-                UUID.fromString("00002a25-0000-1000-8000-00805f9b34fb")
-        }
     }
 }
 
