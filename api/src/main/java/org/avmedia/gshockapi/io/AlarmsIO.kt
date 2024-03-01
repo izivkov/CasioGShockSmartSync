@@ -55,7 +55,7 @@ object AlarmsIO {
         fun fromJson(jsonStr: String) {
             val gson = Gson()
             val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
-            Alarm.addSorted(ArrayList(alarmArr.toList()))
+            Alarm.addSorted(alarmArr)
         }
 
         val decoded = AlarmDecoder.toJson(data).get("ALARMS")

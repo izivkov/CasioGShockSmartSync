@@ -13,8 +13,8 @@ open class Alarm(
     companion object {
         var alarms: ArrayList<Alarm> = ArrayList()
 
-        fun addSorted(source: ArrayList<Alarm>) {
-            alarms.addAll(if (source.size == 1) 0 else alarms.size, source)
+        fun addSorted(source: Array<Alarm>) {
+            alarms.addAll(if (source.size == 1) 0 else alarms.size, ArrayList(source.toList()))
         }
 
         fun clear() {
