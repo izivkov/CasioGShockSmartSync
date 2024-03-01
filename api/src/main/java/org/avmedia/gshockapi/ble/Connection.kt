@@ -67,23 +67,34 @@ object Connection {
 
     fun startConnection(context:Context, deviceId: String?, deviceName: String?) {
         scope.launch {
-            var address = deviceId
-            if (address == null) {
+            if (deviceId == null) {
                 stopBleScan()
-                val devInfo = GShockScanner.scan(context).await()
-                address = devInfo.address
-            }
-            if (address != "") {
-                val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
-                val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(address)
 
-                if (bleManager == null) {
-                    bleManager = IGShockManager(context)
+                fun onScanCompleted(deviceInfo: GShockScanner.DeviceInfo?) {
+                    scope.launch {
+                        connect(deviceInfo?.address, context)
+                    }
                 }
-                bleManager?.setDevice(device as BluetoothDevice)
-                connect()
+
+                GShockScanner.scan(context, ::onScanCompleted)
+            } else {
+                connect(deviceId, context)
             }
         }
+    }
+
+    private suspend fun connect (address: String?, context: Context) {
+        if (address == null) {
+            return
+        }
+        val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
+        val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(address)
+
+        if (bleManager == null) {
+            bleManager = IGShockManager(context)
+        }
+        bleManager?.setDevice(device as BluetoothDevice)
+        connect()
     }
 
     fun isBluetoothEnabled(context:Context): Boolean {

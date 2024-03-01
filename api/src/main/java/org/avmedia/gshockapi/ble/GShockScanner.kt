@@ -1,16 +1,12 @@
 package org.avmedia.gshockapi.ble
 
 import android.annotation.SuppressLint
-import android.bluetooth.le.ScanCallback
 import android.content.Context
-import android.net.wifi.ScanResult
 import android.os.ParcelUuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
@@ -34,12 +30,14 @@ object GShockScanner {
     val CASIO_SERVICE_UUID = "00001804-0000-1000-8000-00805f9b34fb"
 
     data class DeviceInfo(val name: String, val address: String)
+
     private lateinit var scannerFlow: Job
 
     @SuppressLint("MissingPermission")
-    suspend fun scan(context: Context): CompletableDeferred<DeviceInfo> {
-
-        val deferredResult: CompletableDeferred<DeviceInfo> = CompletableDeferred()
+    suspend fun scan(
+        context: Context,
+        scanCallback: (DeviceInfo?) -> Unit
+    ) {
 
         val gShockFilters: List<BleScanFilter> = listOf(
             BleScanFilter(serviceUuid = FilteredServiceUuid(ParcelUuid.fromString(CASIO_SERVICE_UUID)))
@@ -65,31 +63,26 @@ object GShockScanner {
             .onStart { }
             .onEmpty {
                 ProgressEvents.onNext("ApiError", "No devices found while scanning")
-                deferredResult.complete(DeviceInfo("", ""))
+                scanCallback(null)
             }
             .onCompletion {
                 // If we have not found any watches, resolve the promise so the app will not lock.
-                if (deferredResult.isActive) {
-                    deferredResult.complete(DeviceInfo("", ""))
-                }
+                scanCallback(null)
             }
             .onEach {
                 val device = it.device
                 if (device.address !in deviceSet) {
                     deviceSet.add(device.address)
-                    deferredResult.complete(DeviceInfo(device.name as String, device.address))
+                    scanCallback(DeviceInfo(device.name as String, device.address))
                     cancelFlow()
-                    scope.cancel("End scanning")
                 }
             }
             .cancellable()
             .catch { e ->
                 ProgressEvents.onNext("ApiError", "Scanning Error $e")
-                deferredResult.complete(DeviceInfo("", ""))
+                scanCallback(null)
             }
             .launchIn(scope)
-
-        return deferredResult
     }
 
     fun cancelFlow() {
