@@ -28,7 +28,7 @@ class TimerTimeView @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
-            getFragmentScope().launch(Dispatchers.IO) {
+            getFragmentScope().launch(Dispatchers.Main) {
                 text = makeLongString(api().getTimer())
             }
         }

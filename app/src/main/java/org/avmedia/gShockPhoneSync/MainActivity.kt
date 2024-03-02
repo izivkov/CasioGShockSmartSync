@@ -26,7 +26,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
@@ -201,10 +200,12 @@ class MainActivity : AppCompatActivity() {
             },
             EventAction("FineLocationPermissionGranted") { Timber.i("FineLocationPermissionGranted") },
             EventAction("ApiError") {
-                Utils.snackBar(
-                    this,
-                    "ApiError! Something went wrong - Make sure the official G-Shock app in not running, to prevent interference."
-                )
+
+                val message = ProgressEvents.getPayload("ApiError") as String?
+                    ?: "ApiError! Something went wrong - Make sure the official G-Shock app in not running, to prevent interference."
+
+                Utils.snackBar(this, message)
+
                 val errorScheduler: ScheduledExecutorService =
                     Executors.newSingleThreadScheduledExecutor()
                 errorScheduler.schedule({
@@ -284,7 +285,6 @@ class MainActivity : AppCompatActivity() {
 
         // INZ new
         ProgressEvents.onNext("DeviceName", deviceName)
-
         api().waitForConnection(deviceAddress, deviceName)
     }
 
