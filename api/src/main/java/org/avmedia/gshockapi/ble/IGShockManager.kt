@@ -61,7 +61,6 @@ private class GShockManagerImpl(
         }
 
         enableNotifications(writeCharacteristic).enqueue()
-
         ProgressEvents.onNext("BleManagerInitialized")
     }
 
