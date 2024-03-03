@@ -51,8 +51,6 @@ private class GShockManagerImpl(
 
     override fun initialize() {
         super.initialize()
-        ProgressEvents.onNext("BleManagerInitialized")
-
         setNotificationCallback(writeCharacteristic).with { _, data ->
             Timber.i("Received data from characteristic: ${data.value}")
 
@@ -63,6 +61,8 @@ private class GShockManagerImpl(
         }
 
         enableNotifications(writeCharacteristic).enqueue()
+
+        ProgressEvents.onNext("BleManagerInitialized")
     }
 
     @SuppressLint("MissingPermission")
