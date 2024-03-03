@@ -57,7 +57,12 @@ object CalendarEvents {
             or ${CalendarContract.Events.HAS_ALARM} = "1")
             """.trimIndent()
 
-        val selectionArgs = arrayOf(CalendarContract.Calendars.CAL_ACCESS_OWNER.toString())
+        // Use this for non-google calendar
+        // or ${CalendarContract.Events.TITLE} = "LOCAL"
+
+        val selectionArgs = arrayOf(
+            CalendarContract.Calendars.CAL_ACCESS_OWNER.toString()
+        )
 
         val uri: Uri = CalendarContract.Events.CONTENT_URI
         cur = cr.query(
@@ -117,7 +122,6 @@ object CalendarEvents {
             )
         }
         cur.close()
-
         return events
     }
 
