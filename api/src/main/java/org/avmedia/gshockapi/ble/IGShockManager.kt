@@ -52,12 +52,14 @@ private class GShockManagerImpl(
     override fun initialize() {
         super.initialize()
         setNotificationCallback(writeCharacteristic).with { _, data ->
-            Timber.i("Received data from characteristic: ${data.value}")
 
             fun ByteArray.toHexString(): String =
                 joinToString(separator = " ", prefix = "0x") { String.format("%02X", it) }
 
-            dataReceivedCallback?.dataReceived(data.value?.toHexString())
+            val hexData = data.value?.toHexString()
+            Timber.i("Received data: $hexData")
+
+            dataReceivedCallback?.dataReceived(hexData)
         }
 
         enableNotifications(writeCharacteristic).enqueue()
@@ -71,7 +73,7 @@ private class GShockManagerImpl(
         this.onConnected = onConnected
 
         connect(device)
-            .retry(3, 300)
+            // .retry(3, 300)
             .useAutoConnect(false)
             .timeout(30 * 24 * 60 * 1000)
             .enqueue()
@@ -138,6 +140,8 @@ private class GShockManagerImpl(
             ProgressEvents.onNext("ConnectionSetupComplete", device)
             ProgressEvents.onNext("DeviceName", device.name)
             ProgressEvents.onNext("DeviceAddress", device.address)
+
+            Timber.i("onDeviceReady: Sent all messages.")
         }
 
         override fun onDeviceDisconnecting(device: BluetoothDevice) {

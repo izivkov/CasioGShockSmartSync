@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.MessageDispatcher
+import timber.log.Timber
 
 object Connection {
 
@@ -26,6 +27,7 @@ object Connection {
         fun onConnected (name: String, address: String) {
             WatchInfo.setNameAndModel(name.trimEnd('\u0000'))
             WatchInfo.setAddress(address)
+            Timber.i("onConnected() end")
         }
 
         bleManager?.connect(device, ::onConnected)
@@ -68,7 +70,7 @@ object Connection {
 
     fun startConnection(context:Context, deviceId: String?, deviceName: String?) {
         scope.launch {
-            if (deviceId == null) {
+            if (deviceId.isNullOrEmpty()) {
                 stopBleScan()
 
                 fun onScanCompleted(deviceInfo: GShockScanner.DeviceInfo?) {
@@ -85,7 +87,7 @@ object Connection {
     }
 
     private suspend fun connect (address: String?, context: Context) {
-        if (address == null || address == "") {
+        if (address.isNullOrEmpty()) {
             return
         }
         val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()

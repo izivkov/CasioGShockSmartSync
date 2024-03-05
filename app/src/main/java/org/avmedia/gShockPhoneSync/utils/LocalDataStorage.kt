@@ -11,6 +11,8 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -22,12 +24,13 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private val Context.sharedPreferences
         get() = getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
 
     fun put(key: String, value: String) {
-        MainActivity.getLifecycleScope().launch {
+        scope.launch {
             applicationContext().dataStore.edit { preferences ->
                 preferences[stringPreferencesKey(key)] = value
             }
@@ -44,7 +47,7 @@ object LocalDataStorage {
     }
 
     fun delete(key: String) {
-        runBlocking {
+        scope.launch {
             applicationContext().dataStore.edit { preferences ->
                 preferences.remove(stringPreferencesKey(key))
             }
@@ -60,7 +63,7 @@ object LocalDataStorage {
     }
 
     private fun putBoolean(key: String, value: Boolean) {
-        MainActivity.getLifecycleScope().launch {
+        scope.launch {
             put(key, value.toString())
         }
     }
