@@ -11,6 +11,7 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
 object LocalDataStorage {
@@ -46,6 +46,18 @@ object LocalDataStorage {
         return value
     }
 
+    // Not used
+    suspend fun getAsync(key: String, defaultValue: String? = null): String? {
+        val deferred = CompletableDeferred<String?>()
+        applicationContext().dataStore.data
+            .map { preferences ->
+                preferences[stringPreferencesKey(key)]
+            }
+            .first()
+            .let { deferred.complete(it) }
+        return deferred.await()
+    }
+
     fun delete(key: String) {
         scope.launch {
             applicationContext().dataStore.edit { preferences ->
@@ -55,11 +67,7 @@ object LocalDataStorage {
     }
 
     private fun getBoolean(key: String): Boolean {
-        var booleanVal: Boolean
-        runBlocking {
-            booleanVal = get(key, "false")?.toBoolean() ?: false
-        }
-        return booleanVal
+        return get(key, "false")?.toBoolean() ?: false
     }
 
     private fun putBoolean(key: String, value: Boolean) {

@@ -1,0 +1,1 @@
+Fix possible deadlock when deleting LocalStorage
