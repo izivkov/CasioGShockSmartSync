@@ -2,7 +2,7 @@
 
 ## Announcements
 
-Added support for Edufice watches.
+Added support for Edifice watches.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
@@ -19,7 +19,7 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 
 The app will connect in a "promiscuous" mode to any watch that wants to connect to it. Surprisingly, many watches will work "right off the bat". Here are some watches which are reported to work with the app:
 
-G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1000 (Partial support), MRG-B5000, GCW-B5000
+G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, most Edifice watches.
 
 [Let us know](mailto:izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
 
