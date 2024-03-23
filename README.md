@@ -17,7 +17,7 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 
 # Supported Watches
 
-The app will try to connect and addopt to any watch that wants to connect to it. Surprisingly, many Casio models will work "right off the bat". Here are some watches which are reported to work with the app:
+The app will try to connect and addopt to any Casio watch that wants to connect to it (not just GShock). Surprisingly, many models will work "right off the bat". Here are some watches which are reported to work with the app:
 
 G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, most Edifice watches.
 
