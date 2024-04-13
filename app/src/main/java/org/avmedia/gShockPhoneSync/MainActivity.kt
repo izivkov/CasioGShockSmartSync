@@ -165,7 +165,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             // startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-            requestBluetooth.launch(enableBtIntent)
+            try {
+                requestBluetooth.launch(enableBtIntent)
+            } catch (e: SecurityException) {
+                Utils.snackBar(this, "You have no permissions to turn on Bluetooth. Please turn it on manually.")
+            }
         }
     }
 
@@ -284,7 +288,8 @@ class MainActivity : AppCompatActivity() {
         val deviceName = LocalDataStorage.get("LastDeviceName", "")
 
         // INZ new
-        ProgressEvents.onNext("DeviceName", deviceName)
+        // ProgressEvents.onNext("DeviceName", deviceName)
+
         api().waitForConnection(deviceAddress, deviceName)
     }
 
