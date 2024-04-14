@@ -168,7 +168,10 @@ class MainActivity : AppCompatActivity() {
             try {
                 requestBluetooth.launch(enableBtIntent)
             } catch (e: SecurityException) {
-                Utils.snackBar(this, "You have no permissions to turn on Bluetooth. Please turn it on manually.")
+                Utils.snackBar(
+                    this,
+                    "You have no permissions to turn on Bluetooth. Please turn it on manually."
+                )
             }
         }
     }
@@ -216,7 +219,10 @@ class MainActivity : AppCompatActivity() {
                     api().disconnect(this)
                 }, 3L, TimeUnit.SECONDS)
             },
-            EventAction("WaitForConnection") { runWithChecks() },
+            EventAction("WaitForConnection") {
+                Timber.i("WaitForConnection message received...")
+                runWithChecks()
+            },
             EventAction("Disconnect") {
                 Timber.i("onDisconnect")
                 InactivityWatcher.cancel()
@@ -250,8 +256,10 @@ class MainActivity : AppCompatActivity() {
             EventAction("HomeTimeUpdated") {
                 // This is really ugly, but I cannot update home time value
                 // inside the HomeTime. Anybody knows why, let me know.
-                val textView: HomeTime = findViewById(R.id.home_time)
-                textView.update()
+                if (WatchInfo.worldCities) {
+                    val textView: HomeTime = findViewById(R.id.home_time)
+                    textView.update()
+                }
             })
 
         ProgressEvents.runEventActions(this.javaClass.name, eventActions)
@@ -286,10 +294,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val deviceName = LocalDataStorage.get("LastDeviceName", "")
+        Timber.i("returned dev name: $deviceName")
 
         // INZ new
-        // ProgressEvents.onNext("DeviceName", deviceName)
-
+        ProgressEvents.onNext("DeviceName", deviceName)
         api().waitForConnection(deviceAddress, deviceName)
     }
 

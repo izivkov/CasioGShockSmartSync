@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
+import org.avmedia.gshockapi.WatchInfo
 
 open class HomeTime @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -23,7 +24,7 @@ open class HomeTime @JvmOverloads constructor(
         super.onFinishInflate()
         if (api().isConnected() && api().isNormalButtonPressed()) {
             getFragmentScope().launch(Dispatchers.IO) {
-                text = api().getHomeTime()
+                text = if (WatchInfo.worldCities) api().getHomeTime() else "N/A"
             }
         }
     }

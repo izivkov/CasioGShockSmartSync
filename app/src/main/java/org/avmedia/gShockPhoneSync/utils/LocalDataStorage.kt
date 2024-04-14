@@ -26,6 +26,13 @@ object LocalDataStorage {
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    init {
+        // load in memory, so can perform sync operation
+        scope.launch {
+            applicationContext().dataStore.data.first()
+        }
+    }
+
     private val Context.sharedPreferences
         get() = getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
 
@@ -63,6 +70,12 @@ object LocalDataStorage {
             applicationContext().dataStore.edit { preferences ->
                 preferences.remove(stringPreferencesKey(key))
             }
+        }
+    }
+
+    suspend fun deleteAsync(key: String) {
+        applicationContext().dataStore.edit { preferences ->
+            preferences.remove(stringPreferencesKey(key))
         }
     }
 

@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
-import org.avmedia.gshockapi.WatchInfo
 import java.util.*
 
 class WatchTemperature @JvmOverloads constructor(
@@ -32,13 +31,7 @@ class WatchTemperature @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        visibility = if (WatchInfo.worldCities)
-            View.VISIBLE
-        else {
-            View.GONE
-            return
-        }
-
+        visibility = View.VISIBLE
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
             getFragmentScope().launch(Dispatchers.IO) {

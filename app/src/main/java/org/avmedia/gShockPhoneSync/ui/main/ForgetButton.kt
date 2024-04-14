@@ -10,6 +10,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
@@ -52,12 +55,14 @@ class ForgetButton @JvmOverloads constructor(
                 MotionEvent.ACTION_UP -> {
                     WatchInfo.reset()
 
-                    LocalDataStorage.delete("LastDeviceAddress")
-                    LocalDataStorage.delete("LastDeviceName")
+                    CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+                        LocalDataStorage.deleteAsync("LastDeviceAddress")
+                        LocalDataStorage.deleteAsync("LastDeviceName")
 
-                    Connection.breakWait()
-                    ProgressEvents.onNext("DeviceName", "")
-                    ProgressEvents.onNext("WaitForConnection")
+                        Connection.breakWait()
+                        ProgressEvents.onNext("DeviceName", "")
+                        ProgressEvents.onNext("WaitForConnection")
+                    }
                 }
             }
             v?.performClick()

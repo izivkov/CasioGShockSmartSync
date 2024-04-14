@@ -4,7 +4,7 @@
   ~ Last modified 2022-03-29, 6:28 p.m.
   -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--
         parent="Theme.MaterialComponents.Light.NoActionBar">

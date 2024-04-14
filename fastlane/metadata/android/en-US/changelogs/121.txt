@@ -1,4 +1,0 @@
-- Migrated from SharedPreferences to DataStore for compatibility with new devices.
-- Fixed some connection problems when multiple watches used.
-
-

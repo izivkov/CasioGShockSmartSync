@@ -17,13 +17,9 @@ class HomeTimeLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), IHideableLayout {
 
-    init {
-        hide()
-    }
-
     override fun onFinishInflate() {
         super.onFinishInflate()
-        if (WatchInfo.worldCities) show() else hide()
+        show()
     }
 
     override fun show() {

@@ -1,4 +1,0 @@
-- Added new action to set alarms according to muslim prayers.
-- Fixed Google calender events to display all events, not just the ones with alarms set.
-
-
