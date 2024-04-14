@@ -53,23 +53,9 @@ object LocalDataStorage {
         return value
     }
 
-    // Not used
-    suspend fun getAsync(key: String, defaultValue: String? = null): String? {
-        val deferred = CompletableDeferred<String?>()
-        applicationContext().dataStore.data
-            .map { preferences ->
-                preferences[stringPreferencesKey(key)]
-            }
-            .first()
-            .let { deferred.complete(it) }
-        return deferred.await()
-    }
-
     fun delete(key: String) {
         scope.launch {
-            applicationContext().dataStore.edit { preferences ->
-                preferences.remove(stringPreferencesKey(key))
-            }
+            deleteAsync(key)
         }
     }
 
