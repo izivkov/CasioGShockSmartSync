@@ -1,8 +1,5 @@
 package org.avmedia.gShockPhoneSync
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
@@ -20,9 +17,7 @@ object DeviceManager {
             EventAction("DeviceName") {
                 val deviceName = ProgressEvents.getPayload("DeviceName")
                 if ((deviceName as String) == "") {
-                    CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
-                        LocalDataStorage.deleteAsync("LastDeviceName")
-                    }
+                    LocalDataStorage.delete("LastDeviceName")
                 } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
                         "LastDeviceName",
                         ""
@@ -35,9 +30,7 @@ object DeviceManager {
             EventAction("DeviceAddress") {
                 val deviceAddress = ProgressEvents.getPayload("DeviceAddress")
                 if ((deviceAddress as String) == "") {
-                    CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
-                        LocalDataStorage.deleteAsync("LastDeviceAddress")
-                    }
+                    LocalDataStorage.delete("LastDeviceAddress")
                 }
                 if (LocalDataStorage.get(
                         "LastDeviceAddress",
