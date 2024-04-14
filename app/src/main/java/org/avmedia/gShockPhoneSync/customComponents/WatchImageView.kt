@@ -6,13 +6,11 @@
 
 package org.avmedia.gShockPhoneSync.customComponents
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 
 class WatchImageView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,10 +32,11 @@ class WatchImageView @JvmOverloads constructor(
     }
 
     private fun setImageResource(deviceName: String) {
-        when  {
+        when {
             "GA" in deviceName -> {
                 setImageResource(R.drawable.ga_b2100)
             }
+
             "GMA" in deviceName -> {
                 setImageResource(R.drawable.ga_b2100)
             }
@@ -45,6 +44,7 @@ class WatchImageView @JvmOverloads constructor(
             "GW" in deviceName -> {
                 setImageResource(R.drawable.ic_gw_b5600)
             }
+
             "GMW" in deviceName -> {
                 setImageResource(R.drawable.ic_gw_b5600)
             }
@@ -52,6 +52,7 @@ class WatchImageView @JvmOverloads constructor(
             "DW" in deviceName -> {
                 setImageResource(R.drawable.dw_b5600)
             }
+
             "DMW" in deviceName -> {
                 setImageResource(R.drawable.dw_b5600)
             }

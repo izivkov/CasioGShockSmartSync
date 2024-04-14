@@ -218,7 +218,7 @@ object ActionsModel {
             Timber.d("running ${this.javaClass.simpleName}")
             val alarms = PrayerAlarms.createPrayerAlarms(context)
             if (alarms == null) {
-                Utils.snackBar (context, "Could not set prayer alarms")
+                Utils.snackBar(context, "Could not set prayer alarms")
                 return
             }
             MainActivity.getLifecycleScope().launch {
@@ -390,8 +390,10 @@ object ActionsModel {
 
     fun runActionsForAutoTimeSetting(context: Context) {
         val filteredActions: List<Action> =
-            actions.filter { action -> action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) ||
-                    (action is PrayerAlarmsAction && action.enabled) }
+            actions.filter { action ->
+                action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) ||
+                        (action is PrayerAlarmsAction && action.enabled)
+            }
 
         runFilteredActions(context, filteredActions)
 
