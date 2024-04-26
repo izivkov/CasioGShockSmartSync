@@ -391,7 +391,7 @@ object ActionsModel {
     fun runActionsForAutoTimeSetting(context: Context) {
         val filteredActions: List<Action> =
             actions.filter { action ->
-                action is SetTimeAction || (action is SetEventsAction && WatchInfo.hasReminders) ||
+                action is SetTimeAction || (action is SetEventsAction && action.enabled && WatchInfo.hasReminders) ||
                         (action is PrayerAlarmsAction && action.enabled)
             }
 

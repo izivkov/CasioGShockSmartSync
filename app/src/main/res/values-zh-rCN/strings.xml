@@ -73,7 +73,7 @@
         ]]>\n    "</string>
     <string name="time_adjustment_info"><![CDATA[
     <li><b>时间调整</b> 允许APP以一天四次的频率自动校准手表的时间</li>
-    <li>与此同时, APP也会从你的<b>Google Calendar</b>同步手表的 <b>待办 (事件)</b></li>
+    <li>同时，如果启用了“从 Google 日历设置提醒”的操作，该应用程序将会从您的 Google 日历更新手表上的提醒（事件）。</li>
     ]]></string>
     <string name="image_of_casio_watch">卡西欧手表</string>
     <string name="connection_screen_device">" <![CDATA[
