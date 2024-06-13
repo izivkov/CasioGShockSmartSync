@@ -11,7 +11,7 @@ apply plugin: 'kotlin-android'
 android {
     signingConfigs {
         debug {
-            storeFile file('/home/ivo/projects/sshkeys/keystore.jks')
+            storeFile file('/home/izivkov/projects/sshkeys/keystore.jks')
             storePassword 'Guest@ccess1@3'
             keyAlias 'upload'
             keyPassword 'Guest@ccess1@3'
