@@ -12,7 +12,6 @@ import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.casio.CasioConstants
-import org.avmedia.gshockapi.utils.Utils
 import timber.log.Timber
 import java.util.*
 
@@ -33,7 +32,6 @@ interface GSHock {
     fun enableNotifications()
     abstract var connectionState: ConnectionState
     suspend fun write(handle: GET_SET_MODE, data: ByteArray)
-    suspend fun write(characteristic: BluetoothGattCharacteristic, data: ByteArray)
 }
 
 class IGShockManager(
@@ -164,23 +162,13 @@ private class GShockManagerImpl(
     @SuppressLint("NewApi", "MissingPermission")
     override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
         gatt.getService(CasioConstants.WATCH_FEATURES_SERVICE_UUID)?.apply {
-//            readCharacteristicHolder = getCharacteristic(
-//                CasioConstants.CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID,
-//            )
-
-            // INZ new
-            readCharacteristicHolder = BluetoothGattCharacteristic(
-                UUID.fromString("26eb001d-b012-49a8-b1f8-394fb2032b0f"),
-                // UUID.fromString("26eb000f-b012-49a8-b1f8-394fb2032b0f"),
-                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE,
-                BluetoothGattCharacteristic.PERMISSION_WRITE or BluetoothGattCharacteristic.PERMISSION_WRITE_ENCRYPTED
+            readCharacteristicHolder = getCharacteristic(
+                CasioConstants.CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID,
             )
-            // INZ end
 
             writeCharacteristicHolder = getCharacteristic(
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
             )
-
             return true
         }
         return false
@@ -223,14 +211,6 @@ private class GShockManagerImpl(
             characteristic,
             data,
             writeType
-        ).enqueue()
-    }
-
-    override suspend fun write(characteristic: BluetoothGattCharacteristic, data: ByteArray) {
-        writeCharacteristic(
-            characteristic,
-            data,
-            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
         ).enqueue()
     }
 }

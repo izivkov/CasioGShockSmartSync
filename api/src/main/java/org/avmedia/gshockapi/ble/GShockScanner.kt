@@ -41,7 +41,7 @@ object GShockScanner {
     ) {
 
         val gShockFilters: List<BleScanFilter> = listOf(
-            // BleScanFilter(serviceUuid = FilteredServiceUuid(ParcelUuid.fromString(CASIO_SERVICE_UUID)))
+            BleScanFilter(serviceUuid = FilteredServiceUuid(ParcelUuid.fromString(CASIO_SERVICE_UUID)))
         )
 
         val gShockSettings = BleScannerSettings(
@@ -58,7 +58,9 @@ object GShockScanner {
         scannerFlow = BleScanner(context).scan(filters = gShockFilters, settings = gShockSettings)
             .filter {
                 val device: ServerDevice = it.device
-                device.name?.startsWith("CASIO") ?: false            }
+                val ret = (device.name as String).startsWith("CASIO")
+                ret
+            }
             .onStart {
                 ProgressEvents.onNext("BLE Scanning Started")
             }

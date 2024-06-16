@@ -9,6 +9,7 @@
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 
 object SettingsModel {
@@ -76,7 +77,9 @@ object SettingsModel {
         settings.add(OperationSound())
         settings.add(Light())
         settings.add(PowerSavingMode())
-        settings.add(TimeAdjustment())
+        if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
+            settings.add(TimeAdjustment())
+        }
     }
 
     @Synchronized
@@ -101,13 +104,19 @@ object SettingsModel {
                 }
 
                 "timeAdjustment" -> {
-                    val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
-                    setting.timeAdjustment = value == true
+                    if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
+                        val setting: TimeAdjustment =
+                            settingsMap["Time Adjustment"] as TimeAdjustment
+                        setting.timeAdjustment = value == true
+                    }
                 }
 
                 "adjustmentTimeMinutes" -> {
-                    val setting: TimeAdjustment = settingsMap["Time Adjustment"] as TimeAdjustment
-                    setting.adjustmentTimeMinutes = value as Int
+                    if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
+                        val setting: TimeAdjustment =
+                            settingsMap["Time Adjustment"] as TimeAdjustment
+                        setting.adjustmentTimeMinutes = value as Int
+                    }
                 }
 
                 "buttonTone" -> {

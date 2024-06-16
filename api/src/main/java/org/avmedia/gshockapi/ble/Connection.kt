@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothAdapter.getDefaultAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
@@ -66,12 +65,6 @@ object Connection {
     fun write(handle: GET_SET_MODE, data: ByteArray) {
         scope.launch {
             bleManager?.write(handle, data)
-        }
-    }
-
-    fun writeCharacteristic(characteristic: BluetoothGattCharacteristic, data: ByteArray) {
-        scope.launch {
-            bleManager?.write(characteristic, data)
         }
     }
 

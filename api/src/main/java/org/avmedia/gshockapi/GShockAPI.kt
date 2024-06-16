@@ -1,7 +1,6 @@
 package org.avmedia.gshockapi
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -12,9 +11,6 @@ import org.avmedia.gshockapi.utils.*
 import timber.log.Timber
 import java.time.ZoneId
 import java.util.*
-
-import no.nordicsemi.android.ble.BleManager
-
 
 /**
  * This class contains all the API functions. This should the the main interface to the library.
@@ -82,7 +78,7 @@ class GShockAPI(private val context: Context) {
         getPressedButton()
 
         ProgressEvents.onNext("ButtonPressedInfoReceived")
-        // getAppInfo() // this call re-enables lower-right button after watch reset.
+        getAppInfo() // this call re-enables lower-right button after watch reset.
         ProgressEvents.onNext("WatchInitializationCompleted")
         return true
     }
@@ -141,12 +137,7 @@ class GShockAPI(private val context: Context) {
     /* Do not get value from cache, because we do not want to
     get all values here. */
     suspend fun getPressedButton(): CasioIO.WATCH_BUTTON {
-
-        // INZ
-        // val value = ButtonPressedIO.request()
-        val value = CasioIO.WATCH_BUTTON.UPPER_LEFT
-
-
+        val value = ButtonPressedIO.request()
         ButtonPressedIO.put(value)
         return value
     }
@@ -477,32 +468,5 @@ class GShockAPI(private val context: Context) {
 
     fun preventReconnection ():Boolean {
         return true
-    }
-
-
-
-    // GB5600
-    fun gb5600Test () {
-        val initCharacteristic = BluetoothGattCharacteristic(
-            UUID.fromString("00002a06-0000-1000-8000-00805f9b34fb"),
-            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT,
-            BluetoothGattCharacteristic.PERMISSION_WRITE or BluetoothGattCharacteristic.PERMISSION_WRITE_ENCRYPTED
-        )
-
-        Connection.writeCharacteristic(
-            initCharacteristic,
-            byteArrayOf(0)
-        )
-
-        val timeCharacteristic = BluetoothGattCharacteristic(
-            UUID.fromString("26eb000f-b012-49a8-b1f8-394fb2032b0f"),
-            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT,
-            BluetoothGattCharacteristic.PERMISSION_WRITE or BluetoothGattCharacteristic.PERMISSION_WRITE_ENCRYPTED
-        )
-
-        Connection.writeCharacteristic(
-            timeCharacteristic,
-            byteArrayOf(-43, 85, 87, 81, 72, 44, 1, 2, 0, 0)
-        )
     }
 }

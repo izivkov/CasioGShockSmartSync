@@ -46,7 +46,10 @@ object ButtonPressedIO {
                 2 -> CasioIO.WATCH_BUTTON.FIND_PHONE
                 4 -> CasioIO.WATCH_BUTTON.LOWER_RIGHT
                 3 -> CasioIO.WATCH_BUTTON.NO_BUTTON // auto time set, no button pressed. Run actions to set time and calender only.
-                else -> CasioIO.WATCH_BUTTON.INVALID
+
+                // For ECB-30D Possible values: 10, 0xE, 0xB
+
+                else -> CasioIO.WATCH_BUTTON.LOWER_LEFT
             }
         }
         DeferredValueHolder.deferredResult.complete(ret)

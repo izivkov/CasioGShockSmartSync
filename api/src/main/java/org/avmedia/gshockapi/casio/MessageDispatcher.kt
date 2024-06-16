@@ -12,7 +12,6 @@ import org.avmedia.gshockapi.io.*
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.*
 
 object MessageDispatcher {
 
@@ -54,7 +53,8 @@ object MessageDispatcher {
         CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code to TimeAdjustmentIO::onReceived,
 
         CasioConstants.CHARACTERISTICS.ERROR.code to ErrorIO::onReceived,
-        CasioConstants.CHARACTERISTICS.UNKNOWN.code to UnknownIO::onReceived,
+        CasioConstants.CHARACTERISTICS.FIND_PHONE.code to RunActionsIO::onReceived, // always-connected watches, use PHONE FINDER to invoke actions...
+        CasioConstants.CHARACTERISTICS.CMD_SET_TIMEMODE.code to UnknownIO::onReceived,
     )
 
     @RequiresApi(Build.VERSION_CODES.O)

@@ -21,7 +21,7 @@ object Utils {
     fun byteArrayOfIntArray(intArray: IntArray) =
         ByteArray(intArray.size) { pos -> intArray[pos].toByte() }
 
-    fun toByteArray(string: String): ByteArray {
+    private fun toByteArray(string: String): ByteArray {
         val charset = Charsets.UTF_8
         return string.toByteArray(charset)
     }

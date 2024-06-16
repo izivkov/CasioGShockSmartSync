@@ -72,7 +72,7 @@ object ActionsModel {
         actions.add(Separator(emergencyActionsText, false))
 
         val makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
-        actions.add(PhoneDialAction(makePhoneCallText, true, ""))
+        actions.add(PhoneDialAction(makePhoneCallText, false, ""))
         // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
     }
 
@@ -92,6 +92,7 @@ object ActionsModel {
         open fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
             enabled = LocalDataStorage.get(key, "false").toBoolean()
+            Timber.d("Load value: $key, $enabled")
         }
 
         open fun validate(context: Context): Boolean {

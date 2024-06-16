@@ -193,7 +193,15 @@ class MainActivity : AppCompatActivity() {
 
         val eventActions = arrayOf(
             EventAction("ConnectionSetupComplete") {
-                InactivityWatcher.start(this)
+                // if this watch is always connected, like the ECB-30D, set time here
+                // Auto-time adjustment will not happen
+                if (WatchInfo.alwaysConnected) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        api().setTime()
+                    }
+                } else {
+                    InactivityWatcher.start(this)
+                }
             },
             EventAction("ConnectionFailed") { runWithChecks() },
             EventAction("FineLocationPermissionNotGranted") {

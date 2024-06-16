@@ -9,23 +9,15 @@ import java.util.UUID
 
 object CasioConstants {
 
-    /*
-    Init:  00002a06-0000-1000-8000-00805f9b34fb
-    Write: 26eb000f-b012-49a8-b1f8-394fb2032b0f
-     */
-
     val WATCH_FEATURES_SERVICE_UUID: UUID =
-        // UUID.fromString("26eb000d-b012-49a8-b1f8-394fb2032b0f")
-        UUID.fromString("26eb0002-b012-49a8-b1f8-394fb2032b0f")
+        UUID.fromString("26eb000d-b012-49a8-b1f8-394fb2032b0f")
 
     // Modern Watches - All Features
     val CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID: UUID =
-        // UUID.fromString("26eb002c-b012-49a8-b1f8-394fb2032b0f")
-        UUID.fromString("00002a2b-0000-1000-8000-00805f9b34fb")
+        UUID.fromString("26eb002c-b012-49a8-b1f8-394fb2032b0f")
 
     val CASIO_ALL_FEATURES_CHARACTERISTIC_UUID: UUID =
-        // UUID.fromString("26eb002d-b012-49a8-b1f8-394fb2032b0f")
-        UUID.fromString("00002a0f-0000-1000-8000-00805f9b34fb")
+        UUID.fromString("26eb002d-b012-49a8-b1f8-394fb2032b0f")
 
     enum class CHARACTERISTICS(val code: Int) {
         CASIO_WATCH_NAME(0x23),
@@ -45,6 +37,9 @@ object CasioConstants {
         CASIO_REMINDER_TIME(0x31),
         CASIO_TIMER(0x18),
         ERROR(0xFF),
-        UNKNOWN(0x0A)
+
+        // ECB-30
+        CMD_SET_TIMEMODE(0x47),
+        FIND_PHONE(0x0A),
     }
 }
