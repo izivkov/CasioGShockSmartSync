@@ -165,6 +165,7 @@ pwr. saving off:00010000
             val MASK_BUTTON_TONE_OFF = 0b00000010
             val MASK_LIGHT_OFF = 0b00000100
             val POWER_SAVING_MODE = 0b00010000
+            val SOUND_ON = 0b01000100
 
             val arr = ByteArray(12)
             arr[0] = CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte()
@@ -180,6 +181,9 @@ pwr. saving off:00010000
             if (settings.get("powerSavingMode") == false) {
                 arr[1] = (arr[1] or POWER_SAVING_MODE.toByte())
             }
+
+            // This should be on if you like to hear alarms, times, etc, for ECB-30
+            arr[1] = (arr[1] or SOUND_ON.toByte())
 
             if (settings.get("lightDuration") == "4s") {
                 arr[2] = 1
