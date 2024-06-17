@@ -56,6 +56,9 @@ object PrayerAlarms {
     }
 
     private fun getCalculationMethodForLocation(): CalculationMethod {
+        if (isInTurkeyOrEurope())
+            return CalculationMethod.TURKEY
+
         return when (Locale.getDefault().country.uppercase(Locale.US)) {
             "US", "CA" -> CalculationMethod.NORTH_AMERICA
             "EG" -> CalculationMethod.EGYPTIAN
@@ -67,6 +70,25 @@ object PrayerAlarms {
             "SG" -> CalculationMethod.SINGAPORE
             else -> CalculationMethod.MUSLIM_WORLD_LEAGUE
         }
+    }
+
+    private fun isInTurkeyOrEurope(): Boolean {
+        val country = Locale.getDefault().country
+        return isTurkey(country) || isEurope(country)
+    }
+
+    private fun isTurkey(countryCode: String): Boolean {
+        return countryCode.equals("TR", ignoreCase = true)
+    }
+
+    private fun isEurope(countryCode: String): Boolean {
+        val europeanCountries = setOf(
+            "AL", "AD", "AM", "AT", "AZ", "BY", "BE", "BA", "BG", "HR", "CY", "CZ", "DK", "EE",
+            "FI", "FR", "GE", "DE", "GR", "HU", "IS", "IE", "IT", "KZ", "XK", "LV", "LI", "LT",
+            "LU", "MT", "MD", "MC", "ME", "NL", "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS",
+            "SK", "SI", "ES", "SE", "CH", "UA", "GB", "VA"
+        )
+        return europeanCountries.contains(countryCode.uppercase())
     }
 
     private fun prayerTimeToAlarm(prayerTime: kotlinx.datetime.Instant): Alarm {

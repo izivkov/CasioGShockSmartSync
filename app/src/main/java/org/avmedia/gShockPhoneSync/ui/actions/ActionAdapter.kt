@@ -23,8 +23,7 @@ import timber.log.Timber
 // This adapter handles a heterogeneous list of actions.
 
 @Suppress(
-    "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName", "ClassName",
-    "ClassName", "ClassName", "unused", "unused", "unused"
+    "ClassName", "unused"
 )
 class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -43,6 +42,7 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             itemView.findViewById(R.id.actionEnabled)
     }
 
+    inner class ViewHolderFindPhone(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderSetTime(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderSetEvents(itemView: View) : ViewHolderBaseAction(itemView)
     inner class ViewHolderSaveLocation(itemView: View) : ViewHolderBaseAction(itemView)
@@ -110,6 +110,9 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         if (actions[position] is ActionsModel.SetTimeAction) {
             return ACTION_TYPES.SET_TIME.ordinal
         }
+        if (actions[position] is ActionsModel.FindPhoneAction) {
+            return ACTION_TYPES.FIND_PHONE.ordinal
+        }
         if (actions[position] is ActionsModel.SetLocationAction) {
             return ACTION_TYPES.LOCATION.ordinal
         }
@@ -169,6 +172,11 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vSetTime: View = inflater.inflate(R.layout.action_item, parent, false)
                 ViewHolderSetTime(vSetTime)
+            }
+
+            ACTION_TYPES.FIND_PHONE.ordinal -> {
+                val vFindPhone: View = inflater.inflate(R.layout.action_item, parent, false)
+                ViewHolderFindPhone(vFindPhone)
             }
 
             ACTION_TYPES.SET_EVENTS.ordinal -> {
@@ -239,6 +247,11 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
             ACTION_TYPES.SET_TIME.ordinal -> {
                 val vhTime = viewHolder as ViewHolderSetTime
                 configureTime(vhTime, position)
+            }
+
+            ACTION_TYPES.FIND_PHONE.ordinal -> {
+                val vhFindPhone = viewHolder as ViewHolderFindPhone
+                configureFindPhone(vhFindPhone, position)
             }
 
             ACTION_TYPES.SET_EVENTS.ordinal -> {
@@ -338,6 +351,17 @@ class ActionAdapter(private val actions: ArrayList<ActionsModel.Action>) :
         vhTime.icon.setImageResource(R.drawable.time)
 
         vhTime.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            action.enabled = isChecked
+        }
+    }
+
+    private fun configureFindPhone(vhFindPhone: ViewHolderFindPhone, position: Int) {
+        val action: ActionsModel.FindPhoneAction = actions[position] as ActionsModel.FindPhoneAction
+        vhFindPhone.title.text = action.title
+        vhFindPhone.actionEnabled.isChecked = action.enabled
+        vhFindPhone.icon.setImageResource(R.drawable.find_phone)
+
+        vhFindPhone.actionEnabled.setOnCheckedChangeListener { _, isChecked ->
             action.enabled = isChecked
         }
     }

@@ -31,7 +31,7 @@ object WatchInfo {
     var batteryLevelUpperLimit = 20
 
     var alwaysConnected = false
-    private var findButtonUserDefined = false
+    var findButtonUserDefined = false
 
     /**
      * Info about the model.

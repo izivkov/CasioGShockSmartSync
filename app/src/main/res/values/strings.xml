@@ -113,6 +113,7 @@
     <string name="semi_column">:</string>
     <string name="no_watch">No Watch</string>
     <string name="set_time">Set Time</string>
+    <string name="find_phone">Find Phone</string>
     <string name="set_reminders">Set Reminders from Google Calendar</string>
     <string name="take_photo">Take a photo</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>
@@ -137,6 +138,7 @@
         If this action is enabled, the alarms will also be automatically updated during the auto-time adjustment, 4 times per day.</li>
         <li>The following calculation methods are used, based on your location:
             <b>NORTH AMERICA</b>,
+            <b>DİYANET</b>,
             <b>EGYPTIAN</b>,
             <b>DUBAI</b>,
             <b>UMM AL QURA</b>,

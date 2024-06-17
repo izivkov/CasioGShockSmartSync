@@ -53,6 +53,10 @@ class WatchImageView @JvmOverloads constructor(
                 setImageResource(R.drawable.dw_b5600)
             }
 
+            "ECB" in deviceName -> {
+                setImageResource(R.drawable.ecb_30d)
+            }
+
             "DMW" in deviceName -> {
                 setImageResource(R.drawable.dw_b5600)
             }
