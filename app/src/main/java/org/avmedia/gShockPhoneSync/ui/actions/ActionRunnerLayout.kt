@@ -36,6 +36,10 @@ class ActionRunnerLayout @JvmOverloads constructor(
     private fun createAppEventsSubscription() {
 
         val eventActions = arrayOf(
+            EventAction("RunActions") {
+                ActionsModel.loadData(context)
+                ActionsModel.runActions(context)
+            },
             EventAction("ButtonPressedInfoReceived") {
                 ActionsModel.loadData(context)
                 if (api().isActionButtonPressed()) {

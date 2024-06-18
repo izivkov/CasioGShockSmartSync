@@ -102,6 +102,7 @@
     <string name="semi_column">:</string>
     <string name="no_watch">无手表</string>
     <string name="set_time">自动设置时间</string>
+    <string name="find_phone">查找手机</string>
     <string name="set_reminders">自动从Google Calendar添加待办</string>
     <string name="take_photo">照相</string>
     <string name="toggle_flashlight">启动闪光灯</string>
@@ -126,6 +127,7 @@
         如果设置了此操作，闹钟也将在自动校时期间自动更新，每天 4 次。</li>
         <li>以下是根据您的位置使用的计算方法：
             <b>北美</b>、
+            <b>迪亚内特</b>、
             <b>埃及</b>、
             <b>迪拜</b>、
             <b>乌姆盖斯拉</b>、

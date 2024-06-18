@@ -46,6 +46,11 @@ object ActionsModel {
         // actions.add(MapAction("Map", false))
         // actions.add(SetLocationAction("Save location to G-maps", false))
 
+        if (WatchInfo.findButtonUserDefined) {
+            val findPhoneText = applicationContext().getString(R.string.find_phone)
+            actions.add(FindPhoneAction(findPhoneText, true))
+        }
+
         val setTimeText = applicationContext().getString(R.string.set_time)
         actions.add(SetTimeAction(setTimeText, true))
 
@@ -65,14 +70,14 @@ object ActionsModel {
         val nextTrackText = "Skip to next track"
         actions.add(NextTrack(nextTrackText, false))
 
-        val PrayerAlarmsText = "Set Prayer Alarms"
-        actions.add(PrayerAlarmsAction(PrayerAlarmsText, false))
+        val prayerAlarmsText = "Set Prayer Alarms"
+        actions.add(PrayerAlarmsAction(prayerAlarmsText, false))
 
         val emergencyActionsText = applicationContext().getString(R.string.emergency_actions)
         actions.add(Separator(emergencyActionsText, false))
 
         val makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
-        actions.add(PhoneDialAction(makePhoneCallText, true, ""))
+        actions.add(PhoneDialAction(makePhoneCallText, false, ""))
         // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
     }
 
@@ -92,6 +97,7 @@ object ActionsModel {
         open fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
             enabled = LocalDataStorage.get(key, "false").toBoolean()
+            Timber.d("Load value: $key, $enabled")
         }
 
         open fun validate(context: Context): Boolean {
@@ -139,7 +145,9 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "false").toBoolean()
+            enabled =
+                LocalDataStorage.get(key, if (WatchInfo.findButtonUserDefined) "true" else "false")
+                    .toBoolean()
         }
     }
 
@@ -157,7 +165,9 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, "true").toBoolean()
+            enabled =
+                LocalDataStorage.get(key, if (WatchInfo.findButtonUserDefined) "false" else "true")
+                    .toBoolean()
         }
     }
 
@@ -398,7 +408,9 @@ object ActionsModel {
         runFilteredActions(context, filteredActions)
 
         // show notification if configured
-        if (LocalDataStorage.getTimeAdjustmentNotification()) {
+        if (LocalDataStorage.getTimeAdjustmentNotification()
+            && !WatchInfo.alwaysConnected
+        ) { // only create notification for not-always connected watches.
             showTimeSyncNotification(context)
         }
     }

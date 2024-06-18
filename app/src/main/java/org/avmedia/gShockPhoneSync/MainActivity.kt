@@ -29,6 +29,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
+import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.ui.time.HomeTime
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -193,7 +194,16 @@ class MainActivity : AppCompatActivity() {
 
         val eventActions = arrayOf(
             EventAction("ConnectionSetupComplete") {
-                InactivityWatcher.start(this)
+                // if this watch is always connected, like the ECB-30D, set time here
+                // Auto-time adjustment will not happen
+                if (WatchInfo.alwaysConnected) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        // api().setTime()
+                        ActionsModel.runActionsForAutoTimeSetting(this@MainActivity as Context)
+                    }
+                } else {
+                    InactivityWatcher.start(this)
+                }
             },
             EventAction("ConnectionFailed") { runWithChecks() },
             EventAction("FineLocationPermissionNotGranted") {

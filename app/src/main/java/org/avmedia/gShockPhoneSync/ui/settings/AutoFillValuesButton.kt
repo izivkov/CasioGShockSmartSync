@@ -16,6 +16,7 @@ import org.avmedia.gShockPhoneSync.customComponents.Button
 import org.avmedia.gShockPhoneSync.ui.settings.SettingsFragment.Companion.getFragmentScope
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.Settings
+import org.avmedia.gshockapi.WatchInfo
 
 
 class AutoFillValuesButton @JvmOverloads constructor(
@@ -47,7 +48,10 @@ class AutoFillValuesButton @JvmOverloads constructor(
             fillButtonTone(settings)
             fillLight(settings)
             fillPowerSavingMode(settings)
-            fillTimeAdjustment(settings)
+
+            if (!WatchInfo.alwaysConnected) {
+                fillTimeAdjustment(settings)
+            }
 
             updateUI()
         }
