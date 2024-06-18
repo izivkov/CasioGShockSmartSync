@@ -35,7 +35,7 @@ object PrayerAlarms {
             return null
         }
         val today = LocalDate.now()
-        val date = DateComponents(today.year, today.monthValue, today.dayOfMonth);
+        val date = DateComponents(today.year, today.monthValue, today.dayOfMonth)
 
         val parameters = getCalculationMethodForLocation().parameters
             .copy(

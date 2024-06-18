@@ -7,7 +7,8 @@ import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GET_SET_MODE
-import org.avmedia.gshockapi.casio.*
+import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.ReminderMasks
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.Utils.getBooleanSafe
 import org.avmedia.gshockapi.utils.Utils.getJSONArraySafe
@@ -16,7 +17,6 @@ import org.avmedia.gshockapi.utils.Utils.getStringSafe
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 object EventsIO {

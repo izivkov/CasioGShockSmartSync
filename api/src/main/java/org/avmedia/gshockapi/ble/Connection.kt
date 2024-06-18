@@ -19,12 +19,12 @@ import timber.log.Timber
 
 object Connection {
 
-    private  var bleManager: IGShockManager? = null
+    private var bleManager: IGShockManager? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private suspend fun connect(device: BluetoothDevice) {
 
-        fun onConnected (name: String, address: String) {
+        fun onConnected(name: String, address: String) {
             WatchInfo.setNameAndModel(name.trimEnd('\u0000'))
             WatchInfo.setAddress(address)
             Timber.i("onConnected() end")
@@ -37,7 +37,7 @@ object Connection {
         bleManager?.release()
     }
 
-    fun isConnected() :Boolean {
+    fun isConnected(): Boolean {
         return bleManager?.connectionState == ConnectionState.CONNECTED
     }
 
@@ -68,7 +68,7 @@ object Connection {
         }
     }
 
-    fun startConnection(context:Context, deviceId: String?, deviceName: String?) {
+    fun startConnection(context: Context, deviceId: String?, deviceName: String?) {
         scope.launch {
             if (deviceId.isNullOrEmpty()) {
                 stopBleScan()
@@ -86,7 +86,7 @@ object Connection {
         }
     }
 
-    private suspend fun connect (address: String?, context: Context) {
+    private suspend fun connect(address: String?, context: Context) {
         if (address.isNullOrEmpty()) {
             return
         }
@@ -103,7 +103,7 @@ object Connection {
         connect(device)
     }
 
-    fun isBluetoothEnabled(context:Context): Boolean {
+    fun isBluetoothEnabled(context: Context): Boolean {
         val bluetoothAdapter: BluetoothAdapter by lazy {
             val bluetoothManager =
                 context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager

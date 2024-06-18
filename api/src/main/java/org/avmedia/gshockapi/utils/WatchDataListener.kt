@@ -6,7 +6,6 @@
 
 package org.avmedia.gshockapi.utils
 
-import android.bluetooth.BluetoothDevice
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.EventAction
@@ -14,8 +13,6 @@ import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.IDataReceived
 import org.avmedia.gshockapi.casio.MessageDispatcher
-import org.avmedia.gshockapi.io.CachedIO
-import org.avmedia.gshockapi.io.WaitForConnectionIO
 
 /*
 This class accepts data from the watch and calls dataReceived() method on MessageDispatcher class.

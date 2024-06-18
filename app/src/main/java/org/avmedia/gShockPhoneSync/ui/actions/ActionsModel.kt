@@ -145,7 +145,9 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, if (WatchInfo.findButtonUserDefined) "true" else "false").toBoolean()
+            enabled =
+                LocalDataStorage.get(key, if (WatchInfo.findButtonUserDefined) "true" else "false")
+                    .toBoolean()
         }
     }
 
@@ -163,7 +165,9 @@ object ActionsModel {
 
         override fun load(context: Context) {
             val key = this.javaClass.simpleName + ".enabled"
-            enabled = LocalDataStorage.get(key, if (WatchInfo.findButtonUserDefined) "false" else "true").toBoolean()
+            enabled =
+                LocalDataStorage.get(key, if (WatchInfo.findButtonUserDefined) "false" else "true")
+                    .toBoolean()
         }
     }
 
@@ -404,7 +408,9 @@ object ActionsModel {
         runFilteredActions(context, filteredActions)
 
         // show notification if configured
-        if (LocalDataStorage.getTimeAdjustmentNotification()) {
+        if (LocalDataStorage.getTimeAdjustmentNotification()
+            && !WatchInfo.alwaysConnected
+        ) { // only create notification for not-always connected watches.
             showTimeSyncNotification(context)
         }
     }
