@@ -50,8 +50,10 @@ class SendSettingsButton @JvmOverloads constructor(
         settings.autoLight = lightSetting.autoLight
         settings.lightDuration = lightSetting.duration.value
 
-        val powerSavingMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
-        settings.powerSavingMode = powerSavingMode.powerSavingMode
+        if (WatchInfo.hasPowerSavingMode) {
+            val powerSavingMode = SettingsModel.powerSavingMode as SettingsModel.PowerSavingMode
+            settings.powerSavingMode = powerSavingMode.powerSavingMode
+        }
 
         if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
             val timeAdjustment = SettingsModel.timeAdjustment as SettingsModel.TimeAdjustment

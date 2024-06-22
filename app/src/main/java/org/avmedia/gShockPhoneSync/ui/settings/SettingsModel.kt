@@ -76,7 +76,9 @@ object SettingsModel {
         settings.add(Locale())
         settings.add(OperationSound())
         settings.add(Light())
-        settings.add(PowerSavingMode())
+        if (WatchInfo.hasPowerSavingMode) {
+            settings.add(PowerSavingMode())
+        }
         if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
             settings.add(TimeAdjustment())
         }
@@ -98,9 +100,11 @@ object SettingsModel {
             val value = jsonObj.get(key)
             when (key) {
                 "powerSavingMode" -> {
-                    val setting: PowerSavingMode =
-                        settingsMap["Power Saving Mode"] as PowerSavingMode
-                    setting.powerSavingMode = value == true
+                    if (WatchInfo.hasPowerSavingMode) {
+                        val setting: PowerSavingMode =
+                            settingsMap["Power Saving Mode"] as PowerSavingMode
+                        setting.powerSavingMode = value == true
+                    }
                 }
 
                 "timeAdjustment" -> {

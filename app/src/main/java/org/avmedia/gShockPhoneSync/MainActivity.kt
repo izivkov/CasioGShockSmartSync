@@ -8,14 +8,17 @@ package org.avmedia.gShockPhoneSync
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
+import org.avmedia.gShockPhoneSync.ui.settings.DnDSetter
 import org.avmedia.gShockPhoneSync.ui.time.HomeTime
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
@@ -49,6 +53,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
+    private lateinit var dndModeReceiver: DnDModeReceiver
+    private lateinit var dndSetter: DnDSetter
+
 
     // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
     private var deviceManager: DeviceManager
@@ -68,6 +75,7 @@ class MainActivity : AppCompatActivity() {
 
         // do not delete this. DeviceManager needs to be running to save the last device name to reuse on nect start.
         deviceManager = DeviceManager
+        dndSetter = DnDSetter
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,6 +94,10 @@ class MainActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+
+        dndModeReceiver = DnDModeReceiver()
+        val filter = IntentFilter(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED)
+        registerReceiver(dndModeReceiver, filter)
 
         setupNavigation()
         createAppEventsSubscription()
@@ -180,6 +192,15 @@ class MainActivity : AppCompatActivity() {
     override fun onUserInteraction() {
         super.onUserInteraction()
         InactivityWatcher.resetTimer(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(dndModeReceiver)
+    }
+
+    override fun onPause() {
+        super.onPause()
     }
 
     @SuppressLint("RestrictedApi")

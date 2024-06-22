@@ -47,7 +47,10 @@ class AutoFillValuesButton @JvmOverloads constructor(
             fillLocale(settings)
             fillButtonTone(settings)
             fillLight(settings)
-            fillPowerSavingMode(settings)
+
+            if (WatchInfo.hasPowerSavingMode) {
+                fillPowerSavingMode(settings)
+            }
 
             if (!WatchInfo.alwaysConnected) {
                 fillTimeAdjustment(settings)
@@ -90,7 +93,6 @@ class AutoFillValuesButton @JvmOverloads constructor(
     }
 
     private fun fillLocale(settings: Settings) {
-
         val localeSetting = SettingsModel.locale as SettingsModel.Locale
         when (settings.language) {
             "English" -> localeSetting.dayOfWeekLanguage =
