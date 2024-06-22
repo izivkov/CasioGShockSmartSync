@@ -33,6 +33,7 @@ object WatchInfo {
     var alwaysConnected = false
     var findButtonUserDefined = false
     var hasPowerSavingMode = true
+    var hasDnD = false
 
     /**
      * Info about the model.
@@ -53,7 +54,8 @@ object WatchInfo {
         val batteryLevelUpperLimit: Int = 20,
         val alwaysConnected: Boolean = false,
         val findButtonUserDefined: Boolean = false,
-        val hasPowerSavingMode: Boolean = true
+        val hasPowerSavingMode: Boolean = true,
+        val hasDnD:Boolean = false,
     )
 
     // @formatter:off
@@ -70,7 +72,8 @@ object WatchInfo {
         ModelInfo(WATCH_MODEL.DW, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s"),
         ModelInfo(WATCH_MODEL.GBD, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = false, temperature = false),
         ModelInfo(WATCH_MODEL.EQB, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = false, temperature = false),
-        ModelInfo(WATCH_MODEL.ECB, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = true, temperature = true, alwaysConnected = true, findButtonUserDefined=true, hasPowerSavingMode=false),
+        ModelInfo(WATCH_MODEL.ECB, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = true, temperature = true,
+            alwaysConnected = true, findButtonUserDefined=true, hasPowerSavingMode=false, hasDnD = true),
         ModelInfo(WATCH_MODEL.UNKNOWN, 2, 1, 5, hasAutoLight = true, hasReminders = true, shortLightDuration = "1.5s", longLightDuration = "3s")
     )
     // @formatter:on
@@ -125,6 +128,7 @@ object WatchInfo {
         this.alwaysConnected = modelMap[model]!!.alwaysConnected
         this.findButtonUserDefined = modelMap[model]!!.findButtonUserDefined
         this.hasPowerSavingMode = modelMap[model]!!.hasPowerSavingMode
+        this.hasDnD = modelMap[model]!!.hasDnD
 
         ProgressEvents.onNext("DeviceName", this.name)
     }

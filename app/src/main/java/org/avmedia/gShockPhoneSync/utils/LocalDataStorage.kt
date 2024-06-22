@@ -82,6 +82,14 @@ object LocalDataStorage {
         putBoolean("timeAdjustmentNotification", value)
     }
 
+    fun getMirrorPhoneDnd(): Boolean {
+        return getBoolean("mirrorPhoneDnD")
+    }
+
+    fun setMirrorPhoneDnD(value: Boolean) {
+        putBoolean("mirrorPhoneDnD", value)
+    }
+
     fun getAllData(): Flow<String> {
         return applicationContext().dataStore.data.map { preferences ->
             val allEntries = preferences.asMap()

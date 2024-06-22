@@ -114,7 +114,7 @@ pwr. saving off:00010000
         settings.buttonTone = settingArray[1] and MASK_BUTTON_TONE_OFF == 0
         settings.autoLight = settingArray[1] and MASK_AUTO_LIGHT_OFF == 0
         settings.powerSavingMode = settingArray[1] and POWER_SAVING_MODE == 0
-        settings.doNotDisturb = settingArray[1] and DO_NOT_DISTURB_OFF == 0
+        settings.DnD = settingArray[1] and DO_NOT_DISTURB_OFF == 0
 
         if (settingArray[4] == 1) {
             settings.dateFormat = "DD:MM"
@@ -179,7 +179,7 @@ pwr. saving off:00010000
                 arr[1] = (arr[1] or POWER_SAVING_MODE.toByte())
             }
 
-            if (settings.get("doNotDisturb") == false) {
+            if (settings.get("DnD") == false) {
                 arr[1] = (arr[1] or DO_NOT_DISTURB_OFF.toByte())
             }
 

@@ -44,5 +44,5 @@ class Settings {
     var adjustmentTimeMinutes = 30
 
     // for always-connected watches only, like the ECB-30
-    var doNotDisturb = false
+    var DnD = false
 }

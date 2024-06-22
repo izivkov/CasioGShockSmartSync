@@ -149,5 +149,7 @@
         </li>
         <li>For suggestions and corrections contact <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
     ]]></string>
+    <string name="do_not_disturb_dnd">Do Not Disturb (DnD)</string>
+    <string name="mirror_phone_s_dnd">Mirror Phone\'s DnD</string>
 </resources>
 

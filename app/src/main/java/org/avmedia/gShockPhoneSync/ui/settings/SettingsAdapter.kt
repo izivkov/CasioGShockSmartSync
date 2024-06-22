@@ -34,7 +34,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
     @Suppress("ClassName")
     enum class SETTINGS_TYPES {
-        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, UNKNOWN
+        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, DO_NOT_DISTURB, UNKNOWN
     }
 
     open inner class ViewHolderBaseSetting(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -74,6 +74,14 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             itemView.findViewById(R.id.notify_me)
     }
 
+    inner class ViewHolderDnD(itemView: View) : ViewHolderBaseSetting(itemView) {
+        val dnd: SwitchMaterial =
+            itemView.findViewById(R.id.dnd_on_off)
+
+        val mirrorPhone: MaterialCheckBox =
+            itemView.findViewById(R.id.mirror_phone)
+    }
+
     inner class ViewHolderHandAdjustment(itemView: View) : ViewHolderBaseSetting(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -107,6 +115,12 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_time_adjustment, parent, false)
                 ViewHolderTimeAdjustment(vSetting)
+            }
+
+            SETTINGS_TYPES.DO_NOT_DISTURB.ordinal -> {
+                val vSetting: View =
+                    inflater.inflate(R.layout.setting_item_dnd, parent, false)
+                ViewHolderDnD(vSetting)
             }
 
             SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
@@ -151,6 +165,11 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 configureTimeAdjustment(vhTimeAdjustment, position)
             }
 
+            SETTINGS_TYPES.DO_NOT_DISTURB.ordinal -> {
+                val vhDnD = viewHolder as ViewHolderDnD
+                configureDnD(vhDnD, position)
+            }
+
             SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal -> {
                 configureHandAdjustment()
             }
@@ -178,6 +197,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
         if (settings[position] is SettingsModel.TimeAdjustment) {
             return SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal
+        }
+        if (settings[position] is SettingsModel.DnD) {
+            return SETTINGS_TYPES.DO_NOT_DISTURB.ordinal
         }
         if (settings[position] is SettingsModel.HandAdjustment) {
             return SETTINGS_TYPES.HAND_ADJUSTMENT.ordinal
@@ -328,6 +350,26 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         vhTimeAdjustment.timeAdjustmentNotification.setOnCheckedChangeListener { _, isChecked ->
             setting.timeAdjustmentNotifications = isChecked
             LocalDataStorage.setTimeAdjustmentNotification(setting.timeAdjustmentNotifications)
+        }
+    }
+
+    private fun configureDnD(
+        vhDnD: ViewHolderDnD, position: Int
+    ) {
+        val setting: SettingsModel.DnD =
+            settings[position] as SettingsModel.DnD
+        vhDnD.dnd.isChecked = setting.dnd == true
+
+        vhDnD.mirrorPhone.isChecked =
+            setting.mirrorPhone == true
+
+        vhDnD.dnd.setOnCheckedChangeListener { _, isChecked ->
+            setting.dnd = isChecked
+        }
+
+        vhDnD.mirrorPhone.setOnCheckedChangeListener { _, isChecked ->
+            setting.mirrorPhone = isChecked
+            LocalDataStorage.setMirrorPhoneDnD(setting.mirrorPhone)
         }
     }
 

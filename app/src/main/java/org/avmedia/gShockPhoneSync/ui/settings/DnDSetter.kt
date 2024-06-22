@@ -20,7 +20,7 @@ object DnDSetter {
                         getLifecycleScope().launch(Dispatchers.IO) {
                             Timber.i("DnDSetter: got DnD On")
                             val settings = api().getSettings()
-                            settings.doNotDisturb = true
+                            settings.DnD = true
                             api().setSettings(settings)
                         }
                     }
@@ -30,7 +30,7 @@ object DnDSetter {
                         getLifecycleScope().launch(Dispatchers.IO) {
                             Timber.i("DnDSetter: got DnD Off")
                             val settings = api().getSettings()
-                            settings.doNotDisturb = false
+                            settings.DnD = false
                             api().setSettings(settings)
                         }
                     }

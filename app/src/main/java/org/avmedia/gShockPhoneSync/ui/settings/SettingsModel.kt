@@ -11,6 +11,7 @@ package org.avmedia.gShockPhoneSync.ui.settings
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
+import timber.log.Timber
 
 object SettingsModel {
     val settings = ArrayList<Setting>()
@@ -25,6 +26,7 @@ object SettingsModel {
     val buttonSound by lazy { settingsMap["Button Sound"] }
     val powerSavingMode by lazy { settingsMap["Power Saving Mode"] }
     val timeAdjustment by lazy { settingsMap["Time Adjustment"] }
+    val dnd by lazy { settingsMap["DnD"] }
     val light by lazy { settingsMap["Light"] }
 
     class Locale : Setting("Locale") {
@@ -70,6 +72,11 @@ object SettingsModel {
         var timeAdjustmentNotifications: Boolean = LocalDataStorage.getTimeAdjustmentNotification()
     }
 
+    class DnD : Setting("DnD") {
+        var dnd: Boolean = true
+        var mirrorPhone: Boolean = LocalDataStorage.getMirrorPhoneDnd()
+    }
+
     class HandAdjustment : Setting("Hand Adjustment")
 
     init {
@@ -82,6 +89,10 @@ object SettingsModel {
         if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
             settings.add(TimeAdjustment())
         }
+
+        if (WatchInfo.hasDnD) {
+            settings.add(DnD())
+        }
     }
 
     @Synchronized
@@ -90,13 +101,14 @@ object SettingsModel {
         jsonStr:
         {"adjustmentTimeMinutes":23, "autoLight":true,"dateFormat":"MM:DD",
         "language":"Spanish","lightDuration":"4s","powerSavingMode":true,
-        "timeAdjustment":true, "timeFormat":"12h","timeTone":false}
+        "timeAdjustment":true, "timeFormat":"12h","timeTone":false, "DnD": "false"}
          */
 
         val jsonObj = JSONObject(jsonStr)
         val keys = jsonObj.keys()
         while (keys.hasNext()) {
             val key: String = keys.next()
+            Timber.i ("Key: $key")
             val value = jsonObj.get(key)
             when (key) {
                 "powerSavingMode" -> {
@@ -120,6 +132,14 @@ object SettingsModel {
                         val setting: TimeAdjustment =
                             settingsMap["Time Adjustment"] as TimeAdjustment
                         setting.adjustmentTimeMinutes = value as Int
+                    }
+                }
+
+                "DnD" -> {
+                    if (WatchInfo.hasDnD) {
+                        val setting: DnD =
+                            settingsMap["DnD"] as DnD
+                        setting.dnd = value == true
                     }
                 }
 
