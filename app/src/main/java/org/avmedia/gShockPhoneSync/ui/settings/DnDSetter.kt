@@ -4,8 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.getLifecycleScope
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 object DnDSetter {
@@ -16,7 +18,7 @@ object DnDSetter {
 
             val dnDSetActions = arrayOf(
                 EventAction("DnD On") {
-                    if (connected) {
+                    if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
                         getLifecycleScope().launch(Dispatchers.IO) {
                             Timber.i("DnDSetter: got DnD On")
                             val settings = api().getSettings()
@@ -26,7 +28,7 @@ object DnDSetter {
                     }
                 },
                 EventAction("DnD Off") {
-                    if (connected) {
+                    if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
                         getLifecycleScope().launch(Dispatchers.IO) {
                             Timber.i("DnDSetter: got DnD Off")
                             val settings = api().getSettings()

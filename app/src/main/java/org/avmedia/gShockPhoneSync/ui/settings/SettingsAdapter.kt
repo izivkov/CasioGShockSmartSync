@@ -9,6 +9,8 @@
 package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
+import android.content.Context
 import android.text.InputFilter
 import android.text.Spanned
 import android.view.LayoutInflater
@@ -21,9 +23,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.withContext
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.time.TimerTimeView
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
 
 
 // This adapter handles a heterogeneous list of settings.
@@ -36,6 +41,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     enum class SETTINGS_TYPES {
         LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, DO_NOT_DISTURB, UNKNOWN
     }
+
+    private lateinit var context:Context
 
     open inner class ViewHolderBaseSetting(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // add common functionality here
@@ -85,7 +92,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     inner class ViewHolderHandAdjustment(itemView: View) : ViewHolderBaseSetting(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val context = parent.context
+        context = parent.context
         val inflater = LayoutInflater.from(context)
 
         val viewHolder: RecyclerView.ViewHolder = when (viewType) {
@@ -359,9 +366,17 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         val setting: SettingsModel.DnD =
             settings[position] as SettingsModel.DnD
         vhDnD.dnd.isChecked = setting.dnd == true
+        vhDnD.mirrorPhone.isChecked = setting.mirrorPhone
+        vhDnD.dnd.isEnabled = !vhDnD.mirrorPhone.isChecked
 
-        vhDnD.mirrorPhone.isChecked =
-            setting.mirrorPhone == true
+        // enable / disable DnD based on Phone Mirroring
+        fun isDoNotDisturbOn(context: Context): Boolean {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            return notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
+        }
+        if (vhDnD.mirrorPhone.isChecked) {
+            vhDnD.dnd.isChecked = !isDoNotDisturbOn(context)
+        }
 
         vhDnD.dnd.setOnCheckedChangeListener { _, isChecked ->
             setting.dnd = isChecked
@@ -370,7 +385,26 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         vhDnD.mirrorPhone.setOnCheckedChangeListener { _, isChecked ->
             setting.mirrorPhone = isChecked
             LocalDataStorage.setMirrorPhoneDnD(setting.mirrorPhone)
+            vhDnD.dnd.isEnabled = !isChecked
+
+            if (setting.mirrorPhone) {
+                vhDnD.dnd.isChecked = isDoNotDisturbOn(context)
+            }
         }
+
+        val dnDSetActions = arrayOf(
+            EventAction("DnD On") {
+                if (vhDnD.mirrorPhone.isChecked) {
+                    vhDnD.dnd.isChecked = true
+                }
+            },
+            EventAction("DnD Off") {
+                if (vhDnD.mirrorPhone.isChecked) {
+                    vhDnD.dnd.isChecked = false
+                }
+            },
+        )
+        ProgressEvents.runEventActions(this.javaClass.name, dnDSetActions)
     }
 
     class InputFilterMinMax(private var min: Int, private var max: Int) : InputFilter {

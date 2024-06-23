@@ -62,11 +62,16 @@ class SendSettingsButton @JvmOverloads constructor(
             LocalDataStorage.setTimeAdjustmentNotification(timeAdjustment.timeAdjustmentNotifications)
         }
 
+        if (WatchInfo.hasDnD) {
+            val dnd = SettingsModel.dnd as SettingsModel.DnD
+            settings.DnD = dnd.dnd
+            LocalDataStorage.setMirrorPhoneDnD(dnd.mirrorPhone)
+        }
+
         val buttonTone = SettingsModel.buttonSound as SettingsModel.OperationSound
         settings.buttonTone = buttonTone.sound
 
         api().setSettings(settings)
-
         Utils.snackBar(context, "Settings Sent to Watch")
     }
 }
