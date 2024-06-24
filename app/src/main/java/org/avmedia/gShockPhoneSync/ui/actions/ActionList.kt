@@ -16,12 +16,12 @@ class ActionList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    object Cache {
+    companion object {
         var adapter: ActionAdapter? = null
     }
 
     init {
-        adapter = Cache.adapter ?: ActionAdapter(ActionsModel.actions).also { Cache.adapter = it }
+        adapter = ActionAdapter(ActionsModel.getActions())
         layoutManager = LinearLayoutManager(context)
     }
 

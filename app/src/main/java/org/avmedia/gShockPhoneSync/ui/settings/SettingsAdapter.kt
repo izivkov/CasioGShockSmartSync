@@ -365,6 +365,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
     ) {
         val setting: SettingsModel.DnD =
             settings[position] as SettingsModel.DnD
+
         vhDnD.dnd.isChecked = setting.dnd == true
         vhDnD.mirrorPhone.isChecked = setting.mirrorPhone
         vhDnD.dnd.isEnabled = !vhDnD.mirrorPhone.isChecked
@@ -375,7 +376,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             return notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
         }
         if (vhDnD.mirrorPhone.isChecked) {
-            vhDnD.dnd.isChecked = !isDoNotDisturbOn(context)
+            val isDnDOn = isDoNotDisturbOn(context)
+            vhDnD.dnd.isChecked = isDnDOn
         }
 
         vhDnD.dnd.setOnCheckedChangeListener { _, isChecked ->
@@ -388,7 +390,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             vhDnD.dnd.isEnabled = !isChecked
 
             if (setting.mirrorPhone) {
-                vhDnD.dnd.isChecked = isDoNotDisturbOn(context)
+                val isDnDOn = isDoNotDisturbOn(context)
+                vhDnD.dnd.isChecked = isDnDOn
             }
         }
 

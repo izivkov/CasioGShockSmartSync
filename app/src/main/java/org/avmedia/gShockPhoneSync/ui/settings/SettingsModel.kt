@@ -14,7 +14,7 @@ import org.json.JSONObject
 import timber.log.Timber
 
 object SettingsModel {
-    val settings = ArrayList<Setting>()
+    private val settings = ArrayList<Setting>()
 
     abstract class Setting(open var title: String)
 
@@ -83,16 +83,9 @@ object SettingsModel {
         settings.add(Locale())
         settings.add(OperationSound())
         settings.add(Light())
-        if (WatchInfo.hasPowerSavingMode) {
-            settings.add(PowerSavingMode())
-        }
-        if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
-            settings.add(TimeAdjustment())
-        }
-
-        if (WatchInfo.hasDnD) {
-            settings.add(DnD())
-        }
+        settings.add(PowerSavingMode())
+        settings.add(TimeAdjustment())
+        settings.add(DnD())
     }
 
     @Synchronized
@@ -108,7 +101,7 @@ object SettingsModel {
         val keys = jsonObj.keys()
         while (keys.hasNext()) {
             val key: String = keys.next()
-            Timber.i ("Key: $key")
+            Timber.i("Key: $key")
             val value = jsonObj.get(key)
             when (key) {
                 "powerSavingMode" -> {
@@ -204,5 +197,20 @@ object SettingsModel {
                 }
             }
         }
+    }
+
+    fun getSettings(): ArrayList<Setting> {
+        return filter(settings)
+    }
+
+    private fun filter(settings: ArrayList<Setting>): ArrayList<Setting> {
+        return settings.filter { setting ->
+            when (setting) {
+                is PowerSavingMode -> WatchInfo.hasPowerSavingMode
+                is TimeAdjustment -> !WatchInfo.alwaysConnected
+                is DnD -> WatchInfo.hasDnD
+                else -> true
+            }
+        } as ArrayList<Setting>
     }
 }

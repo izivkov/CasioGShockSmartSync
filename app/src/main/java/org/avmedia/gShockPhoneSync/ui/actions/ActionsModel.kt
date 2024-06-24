@@ -36,7 +36,7 @@ import java.util.Date
 )
 object ActionsModel {
 
-    val actions = ArrayList<Action>()
+    private val actions = ArrayList<Action>()
 
     enum class RUN_MODE {
         SYNC, ASYNC,
@@ -46,18 +46,15 @@ object ActionsModel {
         // actions.add(MapAction("Map", false))
         // actions.add(SetLocationAction("Save location to G-maps", false))
 
-        if (WatchInfo.findButtonUserDefined) {
-            val findPhoneText = applicationContext().getString(R.string.find_phone)
-            actions.add(FindPhoneAction(findPhoneText, true))
-        }
+        val findPhoneText = applicationContext().getString(R.string.find_phone)
+        actions.add(FindPhoneAction(findPhoneText, true))
 
         val setTimeText = applicationContext().getString(R.string.set_time)
         actions.add(SetTimeAction(setTimeText, true))
 
-        if (WatchInfo.hasReminders) {
-            val setReminderText = applicationContext().getString(R.string.set_reminders)
-            actions.add(SetEventsAction(setReminderText, false))
-        }
+        val setReminderText = applicationContext().getString(R.string.set_reminders)
+        actions.add(SetEventsAction(setReminderText, false))
+
         val takePhotoText = applicationContext().getString(R.string.take_photo)
         actions.add(PhotoAction(takePhotoText, false, CAMERA_ORIENTATION.BACK))
 
@@ -79,6 +76,20 @@ object ActionsModel {
         val makePhoneCallText = applicationContext().getString(R.string.make_phonecall)
         actions.add(PhoneDialAction(makePhoneCallText, false, ""))
         // actions.add(EmailLocationAction("Send my location by email", true, "", "Come get me"))
+    }
+
+    fun getActions(): ArrayList<Action> {
+        return filter(actions)
+    }
+
+    private fun filter(actions: ArrayList<Action>): ArrayList<Action> {
+        return actions.filter { action ->
+            when (action) {
+                is FindPhoneAction -> WatchInfo.findButtonUserDefined
+                is SetEventsAction -> WatchInfo.hasReminders
+                else -> true
+            }
+        } as ArrayList<Action>
     }
 
     abstract class Action(

@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
+import org.avmedia.gshockapi.WatchInfo
 
 @Suppress("SameParameterValue")
 class BatteryView @JvmOverloads constructor(
@@ -57,12 +58,22 @@ class BatteryView @JvmOverloads constructor(
     private var percentageBitmap: Bitmap? = null
 
     init {
-        percentageBitmap = getBitmap(R.drawable.stripes)
+        if (WatchInfo.hasBatteryLevel) {
+            visibility = VISIBLE
+            percentageBitmap = getBitmap(R.drawable.stripes)
+        } else {
+            visibility = GONE
+        }
     }
 
     // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
     override fun onFinishInflate() {
         super.onFinishInflate()
+
+        if (!WatchInfo.hasBatteryLevel) {
+            return
+        }
+
         if (api().isConnected() && api().isNormalButtonPressed()) {
             getFragmentScope().launch(Dispatchers.IO) { // mist be Main because it is updating the UI
                 val percent = api().getBatteryLevel()
@@ -102,6 +113,10 @@ class BatteryView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
+        if (!WatchInfo.hasBatteryLevel) {
+            return
+        }
+
         drawTop(canvas)
         drawBody(canvas)
         drawProgress(canvas, percent)

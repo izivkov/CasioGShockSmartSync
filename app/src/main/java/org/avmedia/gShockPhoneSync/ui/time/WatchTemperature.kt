@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
+import org.avmedia.gshockapi.WatchInfo
 import java.util.Locale
 
 class WatchTemperature @JvmOverloads constructor(
@@ -32,6 +33,11 @@ class WatchTemperature @JvmOverloads constructor(
         super.onFinishInflate()
 
         visibility = View.VISIBLE
+
+        if (!WatchInfo.hasTemperature) {
+            text = "N/A"
+            return
+        }
 
         if (api().isConnected() && api().isNormalButtonPressed()) {
             getFragmentScope().launch(Dispatchers.IO) {

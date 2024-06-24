@@ -22,13 +22,12 @@ class SettingsList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    object Cache {
+    companion object  {
         var adapter: SettingsAdapter? = null
     }
 
     init {
-        adapter =
-            Cache.adapter ?: SettingsAdapter(SettingsModel.settings).also { Cache.adapter = it }
+        adapter = SettingsAdapter(SettingsModel.getSettings())
         layoutManager = LinearLayoutManager(context)
         listenForUpdateRequest()
     }
