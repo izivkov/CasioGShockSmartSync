@@ -52,7 +52,7 @@
                     android:layout_margin="0dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/info_48px"
-                    app:infoText="When selected, all alarms, timers, hourly chimes on the watch will be silenced." />
+                    app:infoText="@string/DnD_info_message" />
 
                 <org.avmedia.gShockPhoneSync.ui.settings.DnDSelector
                     android:id="@+id/dnd_on_off"

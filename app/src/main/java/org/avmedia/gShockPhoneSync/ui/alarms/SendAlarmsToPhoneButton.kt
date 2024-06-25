@@ -53,7 +53,7 @@ class SendAlarmsToPhoneButton @JvmOverloads constructor(
             Calendar.SUNDAY
         )
 
-        AlarmsModel.alarms.forEachIndexed { index, alarm ->
+        AlarmsModel.getAlarms().forEachIndexed { index, alarm ->
             if (alarm.enabled) {
                 val intent = Intent(
                     AlarmClock.ACTION_SET_ALARM

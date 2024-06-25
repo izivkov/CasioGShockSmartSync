@@ -27,7 +27,7 @@ class SendAlarmsToWatchButton @JvmOverloads constructor(
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             when (event?.action) {
                 MotionEvent.ACTION_UP -> {
-                    api().setAlarms(AlarmsModel.alarms)
+                    api().setAlarms(AlarmsModel.getAlarms())
                     Utils.snackBar(context, "Alarms Sent to Watch")
                 }
             }

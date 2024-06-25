@@ -10,10 +10,21 @@ import org.avmedia.gshockapi.Alarm
 
 object AlarmsModel {
 
-    val alarms = ArrayList<Alarm>()
+    private val alarms = ArrayList<Alarm>()
 
     fun isEmpty(): Boolean {
         return alarms.size == 0
     }
 
+    fun getAlarms(): ArrayList<Alarm> {
+        return alarms
+    }
+
+    fun clear() {
+        alarms.clear()
+    }
+
+    fun addAll(alarms: ArrayList<Alarm>) {
+        this.alarms.addAll(alarms)
+    }
 }

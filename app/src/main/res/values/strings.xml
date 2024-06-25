@@ -151,5 +151,10 @@
     ]]></string>
     <string name="do_not_disturb_dnd">Do Not Disturb (DnD)</string>
     <string name="mirror_phone_s_dnd">Mirror Phone\'s DnD</string>
+    <string name="DnD_info_message"><![CDATA[
+    When selected, all alarms, timers, hourly chimes on the watch will be silenced.
+    <li>When manually turning ON/OFF, the DnD will take effect after the <b>Send to Watch</b> button is pressed.<\li>
+    <li>When mirroring, it will take effect immediately upon changing the DnD setting on the phone, no matter what screen you are in currently.<\li>
+    ]]></string>
 </resources>
 

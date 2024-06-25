@@ -21,20 +21,20 @@ class AlarmList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    object Cache {
-        var adapter: AlarmAdapter? = null
+    companion object {
+        private var adapter: AlarmAdapter? = null
     }
 
     init {
-        adapter = Cache.adapter ?: AlarmAdapter(AlarmsModel.alarms).also { Cache.adapter = it }
+        adapter = AlarmAdapter(AlarmsModel.getAlarms())
         layoutManager = LinearLayoutManager(context)
 
         getFragmentScope().launch(Dispatchers.Main) { // Must run on MainActivity
             val alarms = api().getAlarms()
 
             // update the model
-            AlarmsModel.alarms.clear()
-            AlarmsModel.alarms.addAll(alarms)
+            AlarmsModel.clear()
+            AlarmsModel.addAll(alarms)
             ProgressEvents.onNext("Alarms Loaded")
 
             adapter?.notifyDataSetChanged()

@@ -18,7 +18,7 @@ class AlarmChimeSwitch @JvmOverloads constructor(
     init {
         setOnCheckedChangeListener { _, isChecked ->
             if (!AlarmsModel.isEmpty()) {
-                AlarmsModel.alarms[0].hasHourlyChime = isChecked
+                AlarmsModel.getAlarms()[0].hasHourlyChime = isChecked
             }
         }
 
@@ -28,7 +28,7 @@ class AlarmChimeSwitch @JvmOverloads constructor(
     private fun waitForAlarmsLoaded() {
         val eventActions = arrayOf(
             EventAction("Alarms Loaded") {
-                isChecked = AlarmsModel.alarms.getOrNull(0)?.hasHourlyChime ?: false
+                isChecked = AlarmsModel.getAlarms().getOrNull(0)?.hasHourlyChime ?: false
             }
         )
         ProgressEvents.runEventActions(this.javaClass.name, eventActions)
