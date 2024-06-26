@@ -2,9 +2,9 @@
 
 ## Announcements
 
-Added support for the Edifice ECB-30 watch. [Here](https://github.com/izivkov/CasioGShockSmartSync/issues/84#issuecomment-2190312054) are more details on this watch.
+Added support for the Edifice **ECB-30** watch. [Here](https://github.com/izivkov/CasioGShockSmartSync/issues/84#issuecomment-2190312054) are more details on this watch.
 
-We have not tested the older ECB-10 and ECB-20 watches, but they will probably work as well. If you have these watches, please give feedback in this thread.
+We have not tested the older **ECB-10** and **ECB-20** watches, but they will probably work as well. If you have these watches, please give feedback in this thread.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
@@ -21,7 +21,7 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 
 The app will try to connect and addopt to any Casio watch that wants to connect to it (not just G-Shock). Surprisingly, many models will work "right off the bat". Here are some watches which are reported to work with the app:
 
-G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, most Edifice watches, most Protrek models.
+G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
 
 [Let us know](mailto:izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
 
