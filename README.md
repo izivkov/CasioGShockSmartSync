@@ -4,7 +4,7 @@
 
 Added support for the Edifice **ECB-30** watch. [Here](https://github.com/izivkov/CasioGShockSmartSync/issues/84#issuecomment-2190312054) are more details on this watch.
 
-We have not tested the older **ECB-10** and **ECB-20** watches, but they will probably work as well. If you have these watches, please give feedback in this thread.
+We have not tested the older **ECB-10** and **ECB-20** watches, but they will probably work as well. If you have these watches, please give feedback in [this](https://github.com/izivkov/CasioGShockSmartSync/issues/84) thread.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
