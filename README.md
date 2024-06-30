@@ -35,6 +35,7 @@ G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1
 
 ## General
 
+<p float="left">
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
      alt="B5600 Connection Screen"
      width=200
@@ -54,7 +55,7 @@ G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1
      alt="B2100 Connection Screen"
      width=200
      style="margin: 10px;" />
-
+</p>
 
 
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
