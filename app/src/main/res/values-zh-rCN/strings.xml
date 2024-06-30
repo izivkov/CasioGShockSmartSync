@@ -24,7 +24,7 @@
     <b>reminders</b>.\n\n如果手表没有出现待办事项, 确保你的确在Google Calander设置有在未来的待办事项, 或者有尚未过期的重复事项]]>\n</string>
     <string name="actions">Actions</string>
     <string name="title_actions">Actions</string>
-    <string name="DnD_info_message"><![CDATA[
+    <string name="git_info_message"><![CDATA[
     当选中时，手表上的所有闹钟、计时器和整点报时将被静音。
     <li>手动开/关时，按下<b>发送到手表</b>按钮后，请勿打扰模式（DnD）才会生效。</li>
     <li>镜像时，无论当前在哪个屏幕，手机上的请勿打扰设置一旦更改，都会立即生效。</li>
