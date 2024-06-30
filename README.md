@@ -55,6 +55,8 @@ G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1
      width=200
      style="margin: 10px;" />
 
+
+
 The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone, but instead is read from the watch each time 
 a connection is established. Any changes on the app are sent back to the watch, only when the `Send to Watch` button is pressed.  
 
