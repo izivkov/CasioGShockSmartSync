@@ -12,7 +12,7 @@ and this app incorporates many of their suggestions. It caters to users who pref
 offering features like calendar integration and prayer alarms.
 
 I also hope some of the ideas from this project will be adopted in the official app. I would be happy to collaborate with 
-Casio on a technical level to add fitness features and other enhancements I have in mind. If interested, reach out to me at izivkov@gmail.com
+Casio to add support on some of the no-longer supported watches, such as the GB-5600 series. If interested, reach out to me at izivkov@gmail.com
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
