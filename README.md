@@ -6,14 +6,6 @@ Added support for the Edifice **ECB-30** watch. [Here](https://github.com/izivko
 
 We have not tested the older **ECB-10** and **ECB-20** watches, but they will probably work as well. If you have these watches, please give feedback in [this](https://github.com/izivkov/CasioGShockSmartSync/issues/84) thread.
 
-## A Message to Casio
-I believe there is room for an open-source alternative to Casio's app, and I hope Casio views this project positively. We continuously receive feedback from users,
-and this app incorporates many of their suggestions. It caters to users who prefer not to share personal information, while also enhancing Casio watch sales by 
-offering features like calendar integration and prayer alarms.
-
-I also hope some of the ideas from this project will be adopted in the official app. I would be happy to collaborate with 
-Casio to add support on some of the no-longer supported watches, such as the GB-5600 series. If interested, reach out to me at izivkov@gmail.com
-
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
 
@@ -148,5 +140,16 @@ For those who want to build their own Android app for interfacing with the G-Sho
 If you rather not use a mobile app, but still like to set the time on your G-Shock to the correct time,
 here is a [Python program](https://github.com/izivkov/GShockTimeServer) which can run as a server on a regular PC or Raspberry PI with Bluetooth interface.
 The project is still WIP, but you can give it a try.
+
+## A Message to Casio
+I believe there is room for an open-source alternative to Casio's app, and I hope Casio views this project positively. We continuously receive feedback from users,
+and this app incorporates many of their suggestions. It caters to users who prefer not to share personal information, while also enhancing Casio watch sales by
+offering features like calendar integration and prayer alarms.
+
+I also hope some of the ideas from this project will be adopted in the official app. I would be happy to collaborate with
+Casio to add support on some of the no-longer supported watches, such as the GB-5600 series. If interested, reach out to me at izivkov@gmail.com
+
+
+
 
 
