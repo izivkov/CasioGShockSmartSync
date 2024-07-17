@@ -9,6 +9,7 @@ package org.avmedia.gShockPhoneSync.customComponents
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 
@@ -17,6 +18,9 @@ class WatchImageView @JvmOverloads constructor(
 ) : androidx.appcompat.widget.AppCompatImageView(context, attrs, defStyleAttr) {
 
     init {
+        val deviceName = LocalDataStorage.get("LastDeviceName", "")
+        setImageResource(deviceName ?: "GW")
+
         startListener()
     }
 

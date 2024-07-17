@@ -156,5 +156,6 @@
     <li>When manually turning ON/OFF, the DnD will take effect after the <b>Send to Watch</b> button is pressed.<\li>
     <li>When mirroring, it will take effect immediately upon changing the DnD setting on the phone, no matter what screen you are in currently.<\li>
     ]]></string>
+    <string name="auto_light_at_night_only">Autolight at night only</string>
 </resources>
 

@@ -10,6 +10,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -19,13 +20,14 @@ class WatchName @JvmOverloads constructor(
 ) : androidx.appcompat.widget.AppCompatTextView(context, attrs, defStyleAttr) {
 
     init {
-        var shortName = WatchInfo.shortName
-        if (shortName.isBlank()) {
-            shortName = resources.getString(R.string.no_watch)
-        }
-        text = shortName
-
         createSubscription()
+
+        val deviceName = LocalDataStorage.get("LastDeviceName", "")
+        text = if (deviceName.isNullOrBlank()) {
+            resources.getString(R.string.no_watch)
+        } else {
+            deviceName.removePrefix("CASIO").trim()
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -35,7 +37,6 @@ class WatchName @JvmOverloads constructor(
                 val deviceName = ProgressEvents.getPayload("DeviceName")
                 if ((deviceName as String).isBlank()) {
                     text = resources.getString(R.string.no_watch)
-
                 }
                 if (deviceName.contains("CASIO")) {
                     text = deviceName.removePrefix("CASIO").trim()

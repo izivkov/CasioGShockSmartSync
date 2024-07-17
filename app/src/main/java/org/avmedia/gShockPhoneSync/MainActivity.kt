@@ -29,7 +29,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
@@ -325,10 +327,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         val deviceName = LocalDataStorage.get("LastDeviceName", "")
-        Timber.i("returned dev name: $deviceName")
-
-        // INZ new
-        ProgressEvents.onNext("DeviceName", deviceName)
         api().waitForConnection(deviceAddress, deviceName)
     }
 
