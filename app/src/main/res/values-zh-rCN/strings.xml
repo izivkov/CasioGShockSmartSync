@@ -143,4 +143,8 @@
         </li>
         <li>请发送建议和更正至 <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
         ]]></string>
+
+    <string name="auto_light_at_night_only">“仅在夜间自动亮灯”</string>
+    <string name="keep_alive">“保持唤醒（耗电更多）”</string>
+
 </resources>

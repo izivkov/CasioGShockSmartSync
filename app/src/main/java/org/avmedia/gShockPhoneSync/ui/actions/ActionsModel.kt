@@ -23,7 +23,7 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gShockPhoneSync.utils.NotificationProvider
+import org.avmedia.gShockPhoneSync.services.NotificationProvider
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber

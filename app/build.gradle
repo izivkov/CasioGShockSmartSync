@@ -103,6 +103,12 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     implementation 'com.github.PhilJay:RRule:1.0.3'
+
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
+
+    // Night Watcher
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation "com.luckycatlabs:SunriseSunsetCalculator:1.2"
 }
 
 tasks.register('ktlint', JavaExec) {

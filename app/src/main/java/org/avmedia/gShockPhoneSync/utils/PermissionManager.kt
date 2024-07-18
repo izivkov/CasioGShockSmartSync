@@ -6,7 +6,7 @@
 
 @file:Suppress("PrivatePropertyName")
 
-package org.avmedia.gShockPhoneSync
+package org.avmedia.gShockPhoneSync.utils
 
 import android.Manifest
 import android.app.Activity

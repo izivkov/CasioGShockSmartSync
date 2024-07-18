@@ -90,6 +90,14 @@ object LocalDataStorage {
         putBoolean("mirrorPhoneDnD", value)
     }
 
+    fun getKeepAlive(): Boolean {
+        return getBoolean("keepAlive")
+    }
+
+    fun setKeepAlive(value: Boolean) {
+        putBoolean("keepAlive", value)
+    }
+
     fun getAllData(): Flow<String> {
         return applicationContext().dataStore.data.map { preferences ->
             val allEntries = preferences.asMap()
@@ -101,24 +109,17 @@ object LocalDataStorage {
         }
     }
 
+    fun getAutoLightNightOnly(): Boolean {
+        return getBoolean("autoLightNightOnly")
+    }
+
+    fun setAutoLightNightOnly(value: Boolean) {
+        putBoolean("autoLightNightOnly", value)
+    }
+
     // Migration related
     private val Context.dataStore by preferencesDataStore(name = STORAGE_NAME,
         produceMigrations = { context ->
             listOf(SharedPreferencesMigration(context, STORAGE_NAME))
         })
-
-    fun migrateSharedPreferencesToDataStore(context: Context) {
-        val sharedPrefs = context.sharedPreferences
-        val editor = sharedPrefs.edit()
-        val data = sharedPrefs.all
-
-        runBlocking {
-            context.dataStore.edit { preferences ->
-                for ((key, value) in data) {
-                    preferences[stringPreferencesKey(key)] = value.toString()
-                }
-            }
-        }
-        editor.clear().apply() // Clear SharedPreferences after migration
-    }
 }

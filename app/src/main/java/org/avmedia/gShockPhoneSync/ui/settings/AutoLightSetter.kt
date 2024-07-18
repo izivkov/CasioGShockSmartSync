@@ -7,27 +7,26 @@ import org.avmedia.gShockPhoneSync.MainActivity.Companion.getLifecycleScope
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 
-object DnDSetter {
+object AutoLightSetter {
     private var connected = false
 
     init {
-        val dnDSetActions = arrayOf(
-            EventAction("DnD On") {
-                if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
+        val autoLightSetActions = arrayOf(
+            EventAction("onSunrise") {
+                if (connected && LocalDataStorage.getAutoLightNightOnly()) {
                     getLifecycleScope().launch(Dispatchers.IO) {
                         val settings = api().getSettings()
-                        settings.DnD = true
+                        settings.autoLight = false
                         api().setSettings(settings)
                     }
                 }
             },
-            EventAction("DnD Off") {
-                if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
+            EventAction("onSunset") {
+                if (connected && LocalDataStorage.getAutoLightNightOnly()) {
                     getLifecycleScope().launch(Dispatchers.IO) {
                         val settings = api().getSettings()
-                        settings.DnD = false
+                        settings.autoLight = true
                         api().setSettings(settings)
                     }
                 }
@@ -40,6 +39,6 @@ object DnDSetter {
             },
         )
 
-        ProgressEvents.runEventActions(this.javaClass.name, dnDSetActions)
+        ProgressEvents.runEventActions(this.javaClass.name, autoLightSetActions)
     }
 }

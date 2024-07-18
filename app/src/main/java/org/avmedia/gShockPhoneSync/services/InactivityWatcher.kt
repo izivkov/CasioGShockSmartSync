@@ -4,7 +4,7 @@
  * Last modified 2022-03-30, 9:09 a.m.
  */
 
-package org.avmedia.gShockPhoneSync
+package org.avmedia.gShockPhoneSync.services
 
 import android.content.Context
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api

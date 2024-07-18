@@ -1,10 +1,9 @@
-package org.avmedia.gShockPhoneSync
+package org.avmedia.gShockPhoneSync.services
 
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 

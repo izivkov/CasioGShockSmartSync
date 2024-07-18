@@ -1,4 +1,4 @@
-package org.avmedia.gShockPhoneSync.utils
+package org.avmedia.gShockPhoneSync.services
 
 //noinspection SuspiciousImport
 import android.R

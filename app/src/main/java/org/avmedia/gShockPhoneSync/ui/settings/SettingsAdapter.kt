@@ -25,6 +25,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.withContext
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.services.KeepAliveManager
 import org.avmedia.gShockPhoneSync.ui.time.TimerTimeView
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
@@ -39,7 +40,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
     @Suppress("ClassName")
     enum class SETTINGS_TYPES {
-        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, DO_NOT_DISTURB, UNKNOWN
+        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, DO_NOT_DISTURB, KEEP_ALIVE, UNKNOWN
     }
 
     private lateinit var context:Context
@@ -59,9 +60,16 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         val soundOnOff: SwitchMaterial = itemView.findViewById(R.id.sound_on_off)
     }
 
+    inner class ViewHolderKeepAlive(itemView: View) : ViewHolderBaseSetting(itemView) {
+        val keepAliveOnOff: SwitchMaterial = itemView.findViewById(R.id.keep_alive_on_off)
+    }
+
     inner class ViewHolderLight(itemView: View) : ViewHolderBaseSetting(itemView) {
         val autoLight: SwitchMaterial =
             itemView.findViewById(R.id.auto_light_on_off)
+
+        val nightOnly:MaterialCheckBox = itemView.findViewById(R.id.night_only)
+
         val duration: RadioGroup = itemView.findViewById(R.id.light_duration_group)
     }
 
@@ -118,6 +126,12 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 ViewHolderPowerSavingMode(vSetting)
             }
 
+            SETTINGS_TYPES.KEEP_ALIVE.ordinal -> {
+                val vSetting: View =
+                    inflater.inflate(R.layout.setting_item_keep_alive, parent, false)
+                ViewHolderKeepAlive(vSetting)
+            }
+
             SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal -> {
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_time_adjustment, parent, false)
@@ -162,6 +176,11 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 configureSound(vhOperationSound, position)
             }
 
+            SETTINGS_TYPES.KEEP_ALIVE.ordinal -> {
+                val vhKeepAlive = viewHolder as ViewHolderKeepAlive
+                configureKeepAlive(vhKeepAlive, position)
+            }
+
             SETTINGS_TYPES.POWER_SAVING_MODE.ordinal -> {
                 val vhPowerSavingMode = viewHolder as ViewHolderPowerSavingMode
                 configurePowerSavingMode(vhPowerSavingMode, position)
@@ -198,6 +217,9 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
         if (settings[position] is SettingsModel.OperationSound) {
             return SETTINGS_TYPES.OPERATION_SOUND.ordinal
+        }
+        if (settings[position] is SettingsModel.KeepAlive) {
+            return SETTINGS_TYPES.KEEP_ALIVE.ordinal
         }
         if (settings[position] is SettingsModel.PowerSavingMode) {
             return SETTINGS_TYPES.POWER_SAVING_MODE.ordinal
@@ -272,29 +294,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         vhLocale.language.onItemClickListener = listener
     }
 
-    private fun configureLight(vhLight: ViewHolderLight, position: Int) {
-        val setting: SettingsModel.Light = settings[position] as SettingsModel.Light
-        vhLight.autoLight.isChecked = setting.autoLight == true
-
-        if (setting.duration == SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS) {
-            vhLight.duration.check(R.id.light_short)
-        } else {
-            vhLight.duration.check(R.id.light_long)
-        }
-
-        vhLight.autoLight.setOnCheckedChangeListener { _, isChecked ->
-            setting.autoLight = isChecked
-        }
-
-        vhLight.duration.setOnCheckedChangeListener { _, checkedId ->
-            if (checkedId == R.id.light_short) {
-                setting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
-            } else {
-                setting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
-            }
-        }
-    }
-
     private fun configureSound(vhOperationSound: ViewHolderOperationSound, position: Int) {
         val setting: SettingsModel.OperationSound =
             settings[position] as SettingsModel.OperationSound
@@ -302,6 +301,22 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhOperationSound.soundOnOff.setOnCheckedChangeListener { _, isChecked ->
             setting.sound = isChecked
+        }
+    }
+
+    private fun configureKeepAlive(vhKeepAlive: ViewHolderKeepAlive, position: Int) {
+        val setting: SettingsModel.KeepAlive =
+            settings[position] as SettingsModel.KeepAlive
+        vhKeepAlive.keepAliveOnOff.isChecked = setting.keepAlive == true
+
+        vhKeepAlive.keepAliveOnOff.setOnCheckedChangeListener { _, isChecked ->
+            setting.keepAlive = isChecked
+            LocalDataStorage.setKeepAlive(isChecked)
+            if (isChecked) {
+                KeepAliveManager.start(context)
+            } else {
+                KeepAliveManager.stop(context)
+            }
         }
     }
 
@@ -408,6 +423,37 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             },
         )
         ProgressEvents.runEventActions(this.javaClass.name, dnDSetActions)
+    }
+
+    private fun configureLight(vhLight: ViewHolderLight, position: Int) {
+        val setting: SettingsModel.Light = settings[position] as SettingsModel.Light
+        vhLight.autoLight.isChecked = setting.autoLight == true
+        vhLight.nightOnly.isChecked = setting.nightOnly
+        vhLight.autoLight.isEnabled = !setting.nightOnly
+
+        if (setting.duration == SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS) {
+            vhLight.duration.check(R.id.light_short)
+        } else {
+            vhLight.duration.check(R.id.light_long)
+        }
+
+        vhLight.autoLight.setOnCheckedChangeListener { _, isChecked ->
+            setting.autoLight = isChecked
+        }
+
+        vhLight.duration.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.light_short) {
+                setting.duration = SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS
+            } else {
+                setting.duration = SettingsModel.Light.LIGHT_DURATION.FOUR_SECONDS
+            }
+        }
+
+        vhLight.nightOnly.setOnCheckedChangeListener { _, isChecked ->
+            setting.nightOnly = isChecked
+            LocalDataStorage.setAutoLightNightOnly(setting.nightOnly)
+            vhLight.autoLight.isEnabled = !isChecked
+        }
     }
 
     class InputFilterMinMax(private var min: Int, private var max: Int) : InputFilter {

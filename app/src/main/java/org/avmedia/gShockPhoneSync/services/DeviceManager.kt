@@ -1,4 +1,4 @@
-package org.avmedia.gShockPhoneSync
+package org.avmedia.gShockPhoneSync.services
 
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage

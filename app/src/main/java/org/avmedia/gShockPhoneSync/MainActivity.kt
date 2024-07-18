@@ -18,7 +18,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,15 +28,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
+import org.avmedia.gShockPhoneSync.services.DeviceManager
+import org.avmedia.gShockPhoneSync.services.DnDModeReceiver
+import org.avmedia.gShockPhoneSync.services.InactivityWatcher
+import org.avmedia.gShockPhoneSync.services.KeepAliveManager
+import org.avmedia.gShockPhoneSync.services.NightWatcher
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
+import org.avmedia.gShockPhoneSync.ui.settings.AutoLightSetter
 import org.avmedia.gShockPhoneSync.ui.settings.DnDSetter
 import org.avmedia.gShockPhoneSync.ui.time.HomeTime
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
+import org.avmedia.gShockPhoneSync.utils.PermissionManager
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.GShockAPI
@@ -57,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     private val api = GShockAPI(this)
     private lateinit var dndModeReceiver: DnDModeReceiver
     private lateinit var dndSetter: DnDSetter
-
+    private lateinit var autoLightSetter: AutoLightSetter
 
     // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
     private var deviceManager: DeviceManager
@@ -75,9 +79,10 @@ class MainActivity : AppCompatActivity() {
     init {
         instance = this
 
-        // do not delete this. DeviceManager needs to be running to save the last device name to reuse on nect start.
+        // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
         deviceManager = DeviceManager
         dndSetter = DnDSetter
+        autoLightSetter = AutoLightSetter
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,14 +109,10 @@ class MainActivity : AppCompatActivity() {
         setupNavigation()
         createAppEventsSubscription()
 
-        // This will run in the foreground, but not reliable. Do not use for now.
-        // val intent = Intent(this, ForegroundService::class.java)
-        // this.startService(intent)
-
+        if (LocalDataStorage.getKeepAlive()) {
+            KeepAliveManager.start(this)
+        }
         // ApiTest().run(this)
-
-        // TODO: remove this later
-        LocalDataStorage.migrateSharedPreferencesToDataStore(this)
     }
 
     private fun run() {
@@ -199,10 +200,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(dndModeReceiver)
-    }
-
-    override fun onPause() {
-        super.onPause()
+        KeepAliveManager.stop(this)
     }
 
     @SuppressLint("RestrictedApi")
@@ -221,8 +219,8 @@ class MainActivity : AppCompatActivity() {
                 // Auto-time adjustment will not happen
                 if (WatchInfo.alwaysConnected) {
                     lifecycleScope.launch(Dispatchers.IO) {
-                        // api().setTime()
                         ActionsModel.runActionsForAutoTimeSetting(this@MainActivity as Context)
+                        NightWatcher.setupSunriseSunsetTasks(this@MainActivity as Context)
                     }
                 } else {
                     InactivityWatcher.start(this)
@@ -293,7 +291,8 @@ class MainActivity : AppCompatActivity() {
                     val textView: HomeTime = findViewById(R.id.home_time)
                     textView.update()
                 }
-            })
+            },
+        )
 
         ProgressEvents.runEventActions(this.javaClass.name, eventActions)
     }

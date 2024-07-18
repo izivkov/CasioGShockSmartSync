@@ -85,7 +85,7 @@ object ProgressEvents {
          * subscription per name is allowed. The caller can use its class name (`this.javaClass.canonicalName`) to ensure uniqueness:
          */
         fun runEventActions(name: String, eventActions: Array<EventAction>) {
-            Timber.i ("==============>> runEventActions")
+            Timber.i ("==============>> runEventActions: ${eventActions.map { it.label }.toTypedArray()}")
             if (subscribers.contains(name)) {
                 return // do not allow multiple subscribers with same name
             }

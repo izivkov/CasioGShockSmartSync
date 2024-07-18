@@ -10,7 +10,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
-import org.avmedia.gShockPhoneSync.IHideableLayout
+import org.avmedia.gShockPhoneSync.utils.IHideableLayout
 import org.avmedia.gshockapi.WatchInfo
 
 class NightOnlyAutoLightLayout @JvmOverloads constructor(

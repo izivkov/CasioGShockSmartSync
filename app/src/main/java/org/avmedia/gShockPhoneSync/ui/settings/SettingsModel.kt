@@ -28,6 +28,8 @@ object SettingsModel {
     val timeAdjustment by lazy { settingsMap["Time Adjustment"] }
     val dnd by lazy { settingsMap["DnD"] }
     val light by lazy { settingsMap["Light"] }
+    val keep_alive by lazy { settingsMap["Keep Alive"] }
+    val autoLightNightOnly by lazy { settingsMap["Auto Light Night Only"] }
 
     class Locale : Setting("Locale") {
         enum class TIME_FORMAT(val value: String) {
@@ -60,6 +62,7 @@ object SettingsModel {
 
         var autoLight: Boolean = false
         var duration: LIGHT_DURATION = LIGHT_DURATION.TWO_SECONDS
+        var nightOnly: Boolean = LocalDataStorage.getAutoLightNightOnly()
     }
 
     class PowerSavingMode : Setting("Power Saving Mode") {
@@ -77,6 +80,11 @@ object SettingsModel {
         var mirrorPhone: Boolean = LocalDataStorage.getMirrorPhoneDnd()
     }
 
+    class KeepAlive : Setting("Keep Alive") {
+        var dnd: Boolean = true
+        var keepAlive: Boolean = LocalDataStorage.getKeepAlive()
+    }
+
     class HandAdjustment : Setting("Hand Adjustment")
 
     init {
@@ -86,6 +94,7 @@ object SettingsModel {
         settings.add(PowerSavingMode())
         settings.add(TimeAdjustment())
         settings.add(DnD())
+        settings.add(KeepAlive())
     }
 
     @Synchronized
@@ -139,6 +148,11 @@ object SettingsModel {
                 "buttonTone" -> {
                     val setting: OperationSound = settingsMap["Button Sound"] as OperationSound
                     setting.sound = value == true
+                }
+
+                "keepAlive" -> {
+                    val setting: KeepAlive = settingsMap["Keep Alive"] as KeepAlive
+                    setting.keepAlive = value == true
                 }
 
                 "autoLight" -> {

@@ -4,7 +4,7 @@
  * Last modified 2022-03-29, 11:24 a.m.
  */
 
-package org.avmedia.gShockPhoneSync
+package org.avmedia.gShockPhoneSync.utils
 
 interface IHideableLayout {
     fun show()
