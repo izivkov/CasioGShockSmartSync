@@ -24,8 +24,8 @@ android {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdkVersion 26
         targetSdkVersion 34
-        versionCode 132
-        versionName "13.2"
+        versionCode 133
+        versionName "13.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -55,7 +55,7 @@ configurations {
 
 dependencies {
     // This is a library to interact with the CASIO GShock B5000/B5600/B2100 watches
-    // implementation 'com.github.izivkov:GShockAPI:1.4.27'
+    implementation 'com.github.izivkov:GShockAPI:1.4.28'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //noinspection GradleDependency
@@ -74,7 +74,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.batoulapps.adhan:adhan2:0.0.5'
-    implementation project(path: ':api')
+    // implementation project(path: ':api')
 
     def camerax_version = "1.1.0"
     //noinspection GradleDependency

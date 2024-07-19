@@ -24,7 +24,6 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import org.avmedia.gShockPhoneSync.R
-import org.avmedia.gShockPhoneSync.services.KeepAliveManager
 import org.avmedia.gShockPhoneSync.services.NightWatcher
 import org.avmedia.gShockPhoneSync.ui.time.TimerTimeView
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
@@ -40,7 +39,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
     @Suppress("ClassName")
     enum class SETTINGS_TYPES {
-        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, DO_NOT_DISTURB, KEEP_ALIVE, UNKNOWN
+        LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, DO_NOT_DISTURB, UNKNOWN
     }
 
     private lateinit var context: Context
@@ -58,10 +57,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
     inner class ViewHolderOperationSound(itemView: View) : ViewHolderBaseSetting(itemView) {
         val soundOnOff: SwitchMaterial = itemView.findViewById(R.id.sound_on_off)
-    }
-
-    inner class ViewHolderKeepAlive(itemView: View) : ViewHolderBaseSetting(itemView) {
-        val keepAliveOnOff: SwitchMaterial = itemView.findViewById(R.id.keep_alive_on_off)
     }
 
     inner class ViewHolderLight(itemView: View) : ViewHolderBaseSetting(itemView) {
@@ -126,12 +121,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 ViewHolderPowerSavingMode(vSetting)
             }
 
-            SETTINGS_TYPES.KEEP_ALIVE.ordinal -> {
-                val vSetting: View =
-                    inflater.inflate(R.layout.setting_item_keep_alive, parent, false)
-                ViewHolderKeepAlive(vSetting)
-            }
-
             SETTINGS_TYPES.TIME_ADJUSTMENT.ordinal -> {
                 val vSetting: View =
                     inflater.inflate(R.layout.setting_item_time_adjustment, parent, false)
@@ -176,11 +165,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
                 configureSound(vhOperationSound, position)
             }
 
-            SETTINGS_TYPES.KEEP_ALIVE.ordinal -> {
-                val vhKeepAlive = viewHolder as ViewHolderKeepAlive
-                configureKeepAlive(vhKeepAlive, position)
-            }
-
             SETTINGS_TYPES.POWER_SAVING_MODE.ordinal -> {
                 val vhPowerSavingMode = viewHolder as ViewHolderPowerSavingMode
                 configurePowerSavingMode(vhPowerSavingMode, position)
@@ -217,9 +201,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         }
         if (settings[position] is SettingsModel.OperationSound) {
             return SETTINGS_TYPES.OPERATION_SOUND.ordinal
-        }
-        if (settings[position] is SettingsModel.KeepAlive) {
-            return SETTINGS_TYPES.KEEP_ALIVE.ordinal
         }
         if (settings[position] is SettingsModel.PowerSavingMode) {
             return SETTINGS_TYPES.POWER_SAVING_MODE.ordinal
@@ -301,22 +282,6 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhOperationSound.soundOnOff.setOnCheckedChangeListener { _, isChecked ->
             setting.sound = isChecked
-        }
-    }
-
-    private fun configureKeepAlive(vhKeepAlive: ViewHolderKeepAlive, position: Int) {
-        val setting: SettingsModel.KeepAlive =
-            settings[position] as SettingsModel.KeepAlive
-        vhKeepAlive.keepAliveOnOff.isChecked = setting.keepAlive == true
-
-        vhKeepAlive.keepAliveOnOff.setOnCheckedChangeListener { _, isChecked ->
-            setting.keepAlive = isChecked
-            LocalDataStorage.setKeepAlive(isChecked)
-            if (isChecked) {
-                KeepAliveManager.start(context)
-            } else {
-                KeepAliveManager.stop(context)
-            }
         }
     }
 
