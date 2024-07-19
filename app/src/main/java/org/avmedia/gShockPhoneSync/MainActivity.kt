@@ -79,8 +79,10 @@ class MainActivity : AppCompatActivity() {
 
         // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
         deviceManager = DeviceManager
-        DnDSetter.start()
-        AutoLightSetter.start()
+        if (WatchInfo.alwaysConnected) {
+            DnDSetter.start()
+            AutoLightSetter.start()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         setupNavigation()
         createAppEventsSubscription()
 
-        // if (LocalDataStorage.getKeepAlive()) KeepAliveManager.start(this)
+        // KeepAliveManager.start(this)
 
         // ApiTest().run(this)
     }
@@ -197,7 +199,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(dndModeReceiver)
-        KeepAliveManager.stop(this)
+        // KeepAliveManager.stop(this)
     }
 
     @SuppressLint("RestrictedApi")

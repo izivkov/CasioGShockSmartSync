@@ -13,6 +13,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import org.avmedia.gshockapi.WatchInfo
 
 object KeepAliveManager {
 
