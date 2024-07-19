@@ -11,7 +11,7 @@ import org.avmedia.gshockapi.ProgressEvents
 object AutoLightSetter {
     private var connected = false
 
-    init {
+    fun start() {
         val autoLightSetActions = arrayOf(
             EventAction("onSunrise") {
                 if (connected && LocalDataStorage.getAutoLightNightOnly()) {

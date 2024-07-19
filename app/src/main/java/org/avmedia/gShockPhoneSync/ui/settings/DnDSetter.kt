@@ -12,34 +12,34 @@ import org.avmedia.gshockapi.WatchInfo
 object DnDSetter {
     private var connected = false
 
-    init {
-        val dnDSetActions = arrayOf(
-            EventAction("DnD On") {
-                if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
-                    getLifecycleScope().launch(Dispatchers.IO) {
-                        val settings = api().getSettings()
-                        settings.DnD = true
-                        api().setSettings(settings)
+    fun start() {
+            val dnDSetActions = arrayOf(
+                EventAction("DnD On") {
+                    if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
+                        getLifecycleScope().launch(Dispatchers.IO) {
+                            val settings = api().getSettings()
+                            settings.DnD = true
+                            api().setSettings(settings)
+                        }
                     }
-                }
-            },
-            EventAction("DnD Off") {
-                if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
-                    getLifecycleScope().launch(Dispatchers.IO) {
-                        val settings = api().getSettings()
-                        settings.DnD = false
-                        api().setSettings(settings)
+                },
+                EventAction("DnD Off") {
+                    if (connected && WatchInfo.hasDnD && LocalDataStorage.getMirrorPhoneDnd()) {
+                        getLifecycleScope().launch(Dispatchers.IO) {
+                            val settings = api().getSettings()
+                            settings.DnD = false
+                            api().setSettings(settings)
+                        }
                     }
-                }
-            },
-            EventAction("Disconnect") {
-                connected = false
-            },
-            EventAction("WatchInitializationCompleted") {
-                connected = true
-            },
-        )
+                },
+                EventAction("Disconnect") {
+                    connected = false
+                },
+                EventAction("WatchInitializationCompleted") {
+                    connected = true
+                },
+            )
 
-        ProgressEvents.runEventActions(this.javaClass.name, dnDSetActions)
-    }
+            ProgressEvents.runEventActions(this.javaClass.name, dnDSetActions)
+        }
 }

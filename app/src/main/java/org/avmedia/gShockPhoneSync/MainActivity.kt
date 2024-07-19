@@ -60,8 +60,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionManager: PermissionManager
     private val api = GShockAPI(this)
     private lateinit var dndModeReceiver: DnDModeReceiver
-    private lateinit var dndSetter: DnDSetter
-    private lateinit var autoLightSetter: AutoLightSetter
 
     // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
     private var deviceManager: DeviceManager
@@ -81,8 +79,8 @@ class MainActivity : AppCompatActivity() {
 
         // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
         deviceManager = DeviceManager
-        dndSetter = DnDSetter
-        autoLightSetter = AutoLightSetter
+        DnDSetter.start()
+        AutoLightSetter.start()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
