@@ -31,19 +31,11 @@ object NightWatcher {
 
     class SunriseSunsetWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
         override fun doWork(): Result {
-            fun playChime() {
-                val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
-                toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 500) // 500 ms duration
-                toneGenerator.release()
-            }
-
             val isSunrise = inputData.getBoolean("isSunrise", true)
             if (isSunrise) {
                 ProgressEvents.onNext("onSunrise")
-                playChime()
             } else {
                 ProgressEvents.onNext("onSunset")
-                playChime()
             }
             return Result.success()
         }

@@ -29,6 +29,7 @@ import org.avmedia.gShockPhoneSync.ui.time.TimerTimeView
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 
 
 // This adapter handles a heterogeneous list of settings.
@@ -348,7 +349,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         vhDnD.dnd.isChecked = setting.dnd == true
         vhDnD.mirrorPhone.isChecked = setting.mirrorPhone
-        vhDnD.dnd.isEnabled = !vhDnD.mirrorPhone.isChecked
+        vhDnD.dnd.isEnabled = !vhDnD.mirrorPhone.isChecked || !WatchInfo.alwaysConnected
 
         // enable / disable DnD based on Phone Mirroring
         fun isDoNotDisturbOn(context: Context): Boolean {
@@ -395,7 +396,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         val setting: SettingsModel.Light = settings[position] as SettingsModel.Light
         vhLight.autoLight.isChecked = setting.autoLight == true
         vhLight.nightOnly.isChecked = setting.nightOnly
-        vhLight.autoLight.isEnabled = !setting.nightOnly
+        vhLight.autoLight.isEnabled = !setting.nightOnly || !WatchInfo.alwaysConnected
 
         if (setting.duration == SettingsModel.Light.LIGHT_DURATION.TWO_SECONDS) {
             vhLight.duration.check(R.id.light_short)
