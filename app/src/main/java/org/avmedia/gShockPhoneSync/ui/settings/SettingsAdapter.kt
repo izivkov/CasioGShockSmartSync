@@ -23,9 +23,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.withContext
 import org.avmedia.gShockPhoneSync.R
 import org.avmedia.gShockPhoneSync.services.KeepAliveManager
+import org.avmedia.gShockPhoneSync.services.NightWatcher
 import org.avmedia.gShockPhoneSync.ui.time.TimerTimeView
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
@@ -43,7 +43,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         LOCALE, OPERATION_SOUND, LIGHT, POWER_SAVING_MODE, TIME_ADJUSTMENT, HAND_ADJUSTMENT, DO_NOT_DISTURB, KEEP_ALIVE, UNKNOWN
     }
 
-    private lateinit var context:Context
+    private lateinit var context: Context
 
     open inner class ViewHolderBaseSetting(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // add common functionality here
@@ -68,7 +68,7 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
         val autoLight: SwitchMaterial =
             itemView.findViewById(R.id.auto_light_on_off)
 
-        val nightOnly:MaterialCheckBox = itemView.findViewById(R.id.night_only)
+        val nightOnly: MaterialCheckBox = itemView.findViewById(R.id.night_only)
 
         val duration: RadioGroup = itemView.findViewById(R.id.light_duration_group)
     }
@@ -387,7 +387,8 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
 
         // enable / disable DnD based on Phone Mirroring
         fun isDoNotDisturbOn(context: Context): Boolean {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             return notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
         }
         if (vhDnD.mirrorPhone.isChecked) {
@@ -453,6 +454,10 @@ class SettingsAdapter(private val settings: ArrayList<SettingsModel.Setting>) :
             setting.nightOnly = isChecked
             LocalDataStorage.setAutoLightNightOnly(setting.nightOnly)
             vhLight.autoLight.isEnabled = !isChecked
+
+            if (setting.nightOnly) {
+                ProgressEvents.onNext(if (NightWatcher.isNight()) "onSunset" else "onSunrise")
+            }
         }
     }
 

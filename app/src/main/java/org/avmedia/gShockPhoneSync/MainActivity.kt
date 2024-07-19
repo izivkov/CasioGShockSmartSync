@@ -107,9 +107,8 @@ class MainActivity : AppCompatActivity() {
         setupNavigation()
         createAppEventsSubscription()
 
-        if (LocalDataStorage.getKeepAlive()) {
-            KeepAliveManager.start(this)
-        }
+        if (LocalDataStorage.getKeepAlive()) KeepAliveManager.start(this)
+
         // ApiTest().run(this)
     }
 
