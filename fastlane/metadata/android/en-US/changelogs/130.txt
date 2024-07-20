@@ -1,1 +1,0 @@
-Now auto-update reminders only if "Calendar" action us set.

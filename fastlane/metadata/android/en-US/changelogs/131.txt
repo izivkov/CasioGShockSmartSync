@@ -1,3 +1,0 @@
-- Added support for Edifice ECB-10, ECB-20 and ECB-30 watches
-- Added "Diyanet" calculation got Muslim Prayer Alarms for Türkiye and Europe.
-

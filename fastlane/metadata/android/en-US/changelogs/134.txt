@@ -1,0 +1,3 @@
+- For always-connected watches Edifice ECB-30, auto-light can now be automatically turned on at night only.
+- Improved performance by moving from RxJava to Kotlin Flows
+
