@@ -33,6 +33,9 @@ G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 and GBD-H1
      alt="Get it on Google Play"
      height="80">](https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync)
 
+**_Note_: **I am trying to get more people to find out about this app. I have tried to get it reviewed by some of the YouTube channels specializing in G-Shocks with limited success. 
+If you like this app, please ask reviewers to give it a try. Thank you.**
+
 ## General
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/mainscreen-b5600.png"
