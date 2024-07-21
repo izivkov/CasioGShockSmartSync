@@ -85,7 +85,6 @@ object ProgressEvents {
          * subscription per name is allowed. The caller can use its class name (`this.javaClass.canonicalName`) to ensure uniqueness:
          */
         fun runEventActions(name: String, eventActions: Array<EventAction>) {
-            Timber.i ("==============>> runEventActions: ${eventActions.map { it.label }.toTypedArray()}")
             if (subscribers.contains(name)) {
                 return // do not allow multiple subscribers with same name
             }
@@ -97,7 +96,6 @@ object ProgressEvents {
 
                 val onNext: (Events) -> Unit = { event ->
                     val nameOfEvent = reverseEventMap[event]
-                    Timber.i ("=>> onNext: $nameOfEvent")
                     if (nameOfEvent != null) {
                         actionMap[nameOfEvent]?.action?.invoke()
                     }
