@@ -1,0 +1,2 @@
+- Removed non-FOSS library com.google.android.gms:play-services-location
+
