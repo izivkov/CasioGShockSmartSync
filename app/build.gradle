@@ -107,7 +107,6 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.9.0"
 
     // Night Watcher
-    implementation 'com.google.android.gms:play-services-location:21.3.0'
     implementation "com.luckycatlabs:SunriseSunsetCalculator:1.2"
 }
 

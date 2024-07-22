@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.media.AudioManager
-import android.media.ToneGenerator
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
 import androidx.core.app.NotificationManagerCompat
@@ -13,10 +11,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import org.avmedia.gshockapi.WatchInfo
 
 object KeepAliveManager {
-
     fun start(context: Context) {
         val immediateWorkRequest = OneTimeWorkRequestBuilder<LongRunningWorker>().build()
         WorkManager.getInstance(context).enqueue(immediateWorkRequest)

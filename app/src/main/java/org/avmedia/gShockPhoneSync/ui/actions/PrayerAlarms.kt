@@ -104,31 +104,24 @@ object PrayerAlarms {
 
     @SuppressLint("MissingPermission")
     fun getLocation(context: Context): Coordinates? {
-
-        val locationManager =
-            context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Get last known location from GPS_PROVIDER
-        val lastLocation =
-            locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        val lastLocationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
 
-        // If lastLocation is null, try network provider
-        if (lastLocation == null) {
-            val lastKnownLocationNetwork =
-                locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                    ?: return null
-            // Use lastKnownLocationNetwork if available
-            return Coordinates(
-                lastKnownLocationNetwork.latitude,
-                lastKnownLocationNetwork.longitude
-            )
+        // If lastLocationGPS is null, try NETWORK_PROVIDER
+        return if (lastLocationGPS != null) {
+            Coordinates(lastLocationGPS.latitude, lastLocationGPS.longitude)
         } else {
-            // Use lastLocation
-            val latitude = lastLocation.latitude
-            val longitude = lastLocation.longitude
-
-            return Coordinates(latitude, longitude)
+            val lastLocationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            if (lastLocationNetwork != null) {
+                Coordinates(
+                    lastLocationNetwork.latitude,
+                    lastLocationNetwork.longitude
+                )
+            } else {
+                null
+            }
         }
     }
-
 }
