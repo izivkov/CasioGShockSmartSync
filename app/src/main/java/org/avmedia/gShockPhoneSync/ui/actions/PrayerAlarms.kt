@@ -6,14 +6,14 @@
 
 package org.avmedia.gShockPhoneSync.ui.actions
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.location.LocationManager
 import com.batoulapps.adhan2.CalculationMethod
 import com.batoulapps.adhan2.Coordinates
 import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
+import org.avmedia.gShockPhoneSync.services.LocationProvider
+import org.avmedia.gShockPhoneSync.services.NightWatcher
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.Alarm
 import java.time.Instant
@@ -26,8 +26,8 @@ object PrayerAlarms {
 
     fun createPrayerAlarms(context: Context): java.util.ArrayList<Alarm>? {
 
-        val coordinates = getLocation(context)
-        if (coordinates == null) {
+        val location = LocationProvider.getLocation(context)
+        if (location == null) {
             Utils.snackBar(
                 context,
                 "Could not obtain your location. Make sure FINE_LOCATION permission os granted."
@@ -43,7 +43,7 @@ object PrayerAlarms {
                 prayerAdjustments = PrayerAdjustments(fajr = 2)
             )
 
-        val prayerTimes = PrayerTimes(coordinates, date, parameters)
+        val prayerTimes = PrayerTimes(Coordinates(location.latitude, location.longitude), date, parameters)
 
         val alarms = ArrayList<Alarm>()
         alarms.add(prayerTimeToAlarm(prayerTimes.fajr))
@@ -100,28 +100,5 @@ object PrayerAlarms {
         val instant = Instant.ofEpochMilli(epochMilliseconds)
         val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
         return localDateTime.hour to localDateTime.minute
-    }
-
-    @SuppressLint("MissingPermission")
-    fun getLocation(context: Context): Coordinates? {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        // Get last known location from GPS_PROVIDER
-        val lastLocationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-
-        // If lastLocationGPS is null, try NETWORK_PROVIDER
-        return if (lastLocationGPS != null) {
-            Coordinates(lastLocationGPS.latitude, lastLocationGPS.longitude)
-        } else {
-            val lastLocationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-            if (lastLocationNetwork != null) {
-                Coordinates(
-                    lastLocationNetwork.latitude,
-                    lastLocationNetwork.longitude
-                )
-            } else {
-                null
-            }
-        }
     }
 }

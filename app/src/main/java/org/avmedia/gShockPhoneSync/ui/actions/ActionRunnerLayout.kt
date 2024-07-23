@@ -50,6 +50,8 @@ class ActionRunnerLayout @JvmOverloads constructor(
                 } else if (api().isFindPhoneButtonPressed()) {
                     show()
                     ActionsModel.runActionFindPhone(context)
+                } else {
+                    ActionsModel.runOnConnectAction(context)
                 }
             },
             EventAction("Disconnect") {

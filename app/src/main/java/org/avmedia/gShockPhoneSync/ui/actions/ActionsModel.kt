@@ -21,10 +21,11 @@ import org.avmedia.gShockPhoneSync.MainActivity
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gShockPhoneSync.R
+import org.avmedia.gShockPhoneSync.services.NotificationProvider
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
-import org.avmedia.gShockPhoneSync.services.NotificationProvider
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.text.DateFormat
@@ -50,7 +51,8 @@ object ActionsModel {
         actions.add(FindPhoneAction(findPhoneText, true))
 
         val setTimeText = applicationContext().getString(R.string.set_time)
-        actions.add(SetTimeAction(setTimeText, true))
+        val timeAction = SetTimeAction(setTimeText, true)
+        actions.add(timeAction)
 
         val setReminderText = applicationContext().getString(R.string.set_reminders)
         actions.add(SetEventsAction(setReminderText, false))
@@ -95,7 +97,8 @@ object ActionsModel {
     abstract class Action(
         open var title: String,
         open var enabled: Boolean,
-        var runMode: RUN_MODE = RUN_MODE.SYNC
+        var runMode: RUN_MODE = RUN_MODE.SYNC,
+        val runOnConnect: Boolean = false,
     ) {
         abstract fun run(context: Context)
 
@@ -117,13 +120,13 @@ object ActionsModel {
     }
 
     class SetEventsAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled, RUN_MODE.ASYNC) {
+        Action(title, enabled, RUN_MODE.ASYNC, true) {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(context)
             api().setEvents(EventsModel.events)
-            Utils.snackBar(context, "Events Sent to Watch")
+            // Utils.snackBar(context, "Events Sent to Watch")
         }
 
         override fun load(context: Context) {
@@ -163,7 +166,7 @@ object ActionsModel {
     }
 
     class SetTimeAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled, RUN_MODE.ASYNC) {
+        Action(title, enabled, RUN_MODE.ASYNC, false) {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -234,7 +237,7 @@ object ActionsModel {
     }
 
     class PrayerAlarmsAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled, RUN_MODE.ASYNC) {
+        Action(title, enabled, RUN_MODE.ASYNC, true) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             val alarms = PrayerAlarms.createPrayerAlarms(context)
@@ -247,7 +250,7 @@ object ActionsModel {
                 api().getAlarms()
 
                 api().setAlarms(alarms)
-                Utils.snackBar(context, "Set Prayer Alarms")
+                // Utils.snackBar(context, "Set Prayer Alarms")
             }
         }
     }
@@ -410,13 +413,14 @@ object ActionsModel {
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
-        val filteredActions: List<Action> =
-            actions.filter { action ->
-                action is SetTimeAction || (action is SetEventsAction && action.enabled && WatchInfo.hasReminders) ||
-                        (action is PrayerAlarmsAction && action.enabled)
-            }
+        if (!WatchInfo.alwaysConnected) {
+            val filteredActions: List<Action> =
+                actions.filterIsInstance<SetTimeAction>()
 
-        runFilteredActions(context, filteredActions)
+            runFilteredActions(context, filteredActions)
+        }
+
+        runOnConnectAction(context)
 
         // show notification if configured
         if (LocalDataStorage.getTimeAdjustmentNotification()
@@ -424,6 +428,16 @@ object ActionsModel {
         ) { // only create notification for not-always connected watches.
             showTimeSyncNotification(context)
         }
+    }
+
+    fun runOnConnectAction(context: Context) {
+        val filteredActions: List<Action> =
+            actions.filter { action ->
+                action.runOnConnect && action.enabled ||
+                        (action is SetTimeAction && WatchInfo.alwaysConnected)
+            }
+
+        runFilteredActions(context, filteredActions)
     }
 
     fun runActionFindPhone(context: Context) {
@@ -465,6 +479,8 @@ object ActionsModel {
         actions.forEach {
             it.load(context)
         }
+
+        ProgressEvents.onNext("ActionsLoaded")
     }
 
     fun saveData(context: Context) {

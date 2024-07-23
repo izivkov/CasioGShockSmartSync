@@ -218,7 +218,6 @@ class MainActivity : AppCompatActivity() {
                 // Auto-time adjustment will not happen
                 if (WatchInfo.alwaysConnected) {
                     lifecycleScope.launch(Dispatchers.IO) {
-                        ActionsModel.runActionsForAutoTimeSetting(this@MainActivity as Context)
                         NightWatcher.setupSunriseSunsetTasks(this@MainActivity as Context)
                     }
                 } else {
