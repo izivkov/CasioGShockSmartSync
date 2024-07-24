@@ -95,9 +95,9 @@ object ActionsModel {
     }
 
     enum class RunEnvironment {
-        NORMAL_CONNECTION,
-        ACTION_BUTTON_PRESSED,
-        AUTO_TIME_ADJUSTMENT
+        NORMAL_CONNECTION,      // Connected by long-pressing the LOWER-LEFT button
+        ACTION_BUTTON_PRESSED,  // Connected by short-pressing the LOWER-RIGHT button
+        AUTO_TIME_ADJUSTMENT    // Connected automatically during auto time update
     }
 
     abstract class Action(
@@ -195,7 +195,7 @@ object ActionsModel {
             title,
             enabled,
             RUN_MODE.ASYNC,
-        ) { // only set time when connecting for alwaysConnected watches.
+        ) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
