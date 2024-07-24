@@ -38,20 +38,29 @@ class ActionRunnerLayout @JvmOverloads constructor(
         val eventActions = arrayOf(
             EventAction("RunActions") {
                 ActionsModel.loadData(context)
-                ActionsModel.runActions(context)
+                ActionsModel.runActionsForActionButton(context)
             },
+
+            /*
+            1. If we pressed the Action Button, run just the selected actions.
+            2. If we connected via AutoTime (without pressing a button), run TimeSet action, plus OnConnectActions actions:
+               currently, Google Calender Events, and Prayer Alarms.
+            3. We we connected by long-pressing the lower-left button, run OnConnectActions, and SetTime if this is always-connected watch
+               like the ECB-30.
+            **/
             EventAction("ButtonPressedInfoReceived") {
                 ActionsModel.loadData(context)
+
                 if (api().isActionButtonPressed()) {
                     show()
-                    ActionsModel.runActions(context)
+                    ActionsModel.runActionsForActionButton(context)
                 } else if (api().isAutoTimeStarted()) {
                     ActionsModel.runActionsForAutoTimeSetting(context)
                 } else if (api().isFindPhoneButtonPressed()) {
                     show()
                     ActionsModel.runActionFindPhone(context)
-                } else {
-                    ActionsModel.runOnConnectAction(context)
+                } else if (api().isNormalButtonPressed()) {
+                    ActionsModel.runActionForConnection(context)
                 }
             },
             EventAction("Disconnect") {

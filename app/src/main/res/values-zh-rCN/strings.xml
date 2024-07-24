@@ -144,6 +144,14 @@
         <li>请发送建议和更正至 <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
         ]]></string>
 
+    <string name="do_not_disturb_dnd">请勿打扰 (DnD)</string>
+    <string name="mirror_phone_s_dnd">镜像电话的 DnD</string>
+    <string name="DnD_info_message"><![CDATA[
+    选择后，手表上的所有闹钟、定时器、整点报时都将静音。
+    <li>手动开启/关闭时，按下<b>发送到手表</b>按钮后，免打扰才会生效。<\li>
+    <li>镜像时，更改手机上的免打扰设置后，无论当前处于哪个屏幕，都会立即生效。<\li>
+    ]]></string>
+
     <string name="auto_light_at_night_only">“仅在夜间自动亮灯”</string>
     <string name="keep_alive">“保持唤醒（耗电更多）”</string>
 

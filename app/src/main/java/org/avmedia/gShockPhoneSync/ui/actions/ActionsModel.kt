@@ -25,7 +25,6 @@ import org.avmedia.gShockPhoneSync.services.NotificationProvider
 import org.avmedia.gShockPhoneSync.ui.events.EventsModel
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
-import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.text.DateFormat
@@ -52,6 +51,7 @@ object ActionsModel {
 
         val setTimeText = applicationContext().getString(R.string.set_time)
         val timeAction = SetTimeAction(setTimeText, true)
+
         actions.add(timeAction)
 
         val setReminderText = applicationContext().getString(R.string.set_reminders)
@@ -94,12 +94,25 @@ object ActionsModel {
         } as ArrayList<Action>
     }
 
+    enum class RunEnvironment {
+        NORMAL_CONNECTION,
+        ACTION_BUTTON_PRESSED,
+        AUTO_TIME_ADJUSTMENT
+    }
+
     abstract class Action(
         open var title: String,
         open var enabled: Boolean,
         var runMode: RUN_MODE = RUN_MODE.SYNC,
-        val runOnConnect: Boolean = false,
     ) {
+        open fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            return when (runEnvironment) {
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
+                RunEnvironment.NORMAL_CONNECTION -> false
+                RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
+            }
+        }
+
         abstract fun run(context: Context)
 
         open fun save(context: Context) {
@@ -119,8 +132,18 @@ object ActionsModel {
         }
     }
 
-    class SetEventsAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled, RUN_MODE.ASYNC, true) {
+    class SetEventsAction(
+        override var title: String, override var enabled: Boolean
+    ) :
+        Action(title, enabled, RUN_MODE.ASYNC) {
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            return when (runEnvironment) {
+                RunEnvironment.NORMAL_CONNECTION -> enabled && WatchInfo.hasReminders
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && WatchInfo.hasReminders
+                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && WatchInfo.hasReminders
+            }
+        }
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -165,8 +188,22 @@ object ActionsModel {
         }
     }
 
-    class SetTimeAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled, RUN_MODE.ASYNC, false) {
+    class SetTimeAction(
+        override var title: String, override var enabled: Boolean
+    ) :
+        Action(
+            title,
+            enabled,
+            RUN_MODE.ASYNC,
+        ) { // only set time when connecting for alwaysConnected watches.
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            return when (runEnvironment) {
+                RunEnvironment.NORMAL_CONNECTION -> WatchInfo.alwaysConnected
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
+                RunEnvironment.AUTO_TIME_ADJUSTMENT -> true
+            }
+        }
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -236,8 +273,19 @@ object ActionsModel {
         }
     }
 
-    class PrayerAlarmsAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled, RUN_MODE.ASYNC, true) {
+    class PrayerAlarmsAction(
+        override var title: String, override var enabled: Boolean
+    ) :
+        Action(title, enabled, RUN_MODE.ASYNC) {
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            return when (runEnvironment) {
+                RunEnvironment.NORMAL_CONNECTION -> enabled
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
+                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled
+            }
+        }
+
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             val alarms = PrayerAlarms.createPrayerAlarms(context)
@@ -248,7 +296,6 @@ object ActionsModel {
             MainActivity.getLifecycleScope().launch {
                 // getAlarms need to be run first, otherwise setAlarms() will not work
                 api().getAlarms()
-
                 api().setAlarms(alarms)
                 // Utils.snackBar(context, "Set Prayer Alarms")
             }
@@ -385,7 +432,6 @@ object ActionsModel {
 
         const val RATIO_4_3_VALUE = 4.0 / 3.0
         const val RATIO_16_9_VALUE = 16.0 / 9.0
-
     }
 
     /*
@@ -408,19 +454,23 @@ object ActionsModel {
         }
     }
 
-    fun runActions(context: Context) {
-        runFilteredActions(context, actions.filter { it.enabled })
+    fun runActionsForActionButton(context: Context) {
+        runFilteredActions(
+            context,
+            actions.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) })
+    }
+
+    fun runActionForConnection(context: Context) {
+        runFilteredActions(context, actions.filter {
+            Timber.i("===========> ${it.title}, ${it.enabled}")
+            it.shouldRun(RunEnvironment.NORMAL_CONNECTION)
+        })
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
-        if (!WatchInfo.alwaysConnected) {
-            val filteredActions: List<Action> =
-                actions.filterIsInstance<SetTimeAction>()
-
-            runFilteredActions(context, filteredActions)
-        }
-
-        runOnConnectAction(context)
+        runFilteredActions(
+            context,
+            actions.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) })
 
         // show notification if configured
         if (LocalDataStorage.getTimeAdjustmentNotification()
@@ -428,16 +478,6 @@ object ActionsModel {
         ) { // only create notification for not-always connected watches.
             showTimeSyncNotification(context)
         }
-    }
-
-    fun runOnConnectAction(context: Context) {
-        val filteredActions: List<Action> =
-            actions.filter { action ->
-                action.runOnConnect && action.enabled ||
-                        (action is SetTimeAction && WatchInfo.alwaysConnected)
-            }
-
-        runFilteredActions(context, filteredActions)
     }
 
     fun runActionFindPhone(context: Context) {
@@ -465,7 +505,7 @@ object ActionsModel {
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
                     Timber.d("running ${it.javaClass.simpleName}")
-                    // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
+                    // actions are run on the main lifecycle scope, because the Actions Fragment never gets created.
                     MainActivity.getLifecycleScope().launch {
                         runIt(it, context)
                     }
@@ -479,8 +519,6 @@ object ActionsModel {
         actions.forEach {
             it.load(context)
         }
-
-        ProgressEvents.onNext("ActionsLoaded")
     }
 
     fun saveData(context: Context) {
