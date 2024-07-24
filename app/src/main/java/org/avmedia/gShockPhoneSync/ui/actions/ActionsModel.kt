@@ -462,7 +462,6 @@ object ActionsModel {
 
     fun runActionForConnection(context: Context) {
         runFilteredActions(context, actions.filter {
-            Timber.i("===========> ${it.title}, ${it.enabled}")
             it.shouldRun(RunEnvironment.NORMAL_CONNECTION)
         })
     }
