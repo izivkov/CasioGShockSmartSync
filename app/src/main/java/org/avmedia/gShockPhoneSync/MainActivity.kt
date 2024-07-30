@@ -34,9 +34,7 @@ import org.avmedia.gShockPhoneSync.databinding.ActivityMainBinding
 import org.avmedia.gShockPhoneSync.services.DeviceManager
 import org.avmedia.gShockPhoneSync.services.DnDModeReceiver
 import org.avmedia.gShockPhoneSync.services.InactivityWatcher
-import org.avmedia.gShockPhoneSync.services.KeepAliveManager
 import org.avmedia.gShockPhoneSync.services.NightWatcher
-import org.avmedia.gShockPhoneSync.ui.actions.ActionsModel
 import org.avmedia.gShockPhoneSync.ui.settings.AutoLightSetter
 import org.avmedia.gShockPhoneSync.ui.settings.DnDSetter
 import org.avmedia.gShockPhoneSync.ui.time.HomeTime
@@ -110,7 +108,6 @@ class MainActivity : AppCompatActivity() {
         createAppEventsSubscription()
 
         // KeepAliveManager.start(this)
-
         // ApiTest().run(this)
     }
 

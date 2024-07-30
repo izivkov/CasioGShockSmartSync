@@ -97,7 +97,8 @@ object ActionsModel {
     enum class RunEnvironment {
         NORMAL_CONNECTION,      // Connected by long-pressing the LOWER-LEFT button
         ACTION_BUTTON_PRESSED,  // Connected by short-pressing the LOWER-RIGHT button
-        AUTO_TIME_ADJUSTMENT    // Connected automatically during auto time update
+        AUTO_TIME_ADJUSTMENT,   // Connected automatically during auto time update
+        FIND_PHONE_PRESSED      // The user has activated the "Find Phone" function
     }
 
     abstract class Action(
@@ -110,6 +111,7 @@ object ActionsModel {
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
+                RunEnvironment.FIND_PHONE_PRESSED -> false
             }
         }
 
@@ -142,6 +144,7 @@ object ActionsModel {
                 RunEnvironment.NORMAL_CONNECTION -> enabled && WatchInfo.hasReminders
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && WatchInfo.hasReminders
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && WatchInfo.hasReminders
+                RunEnvironment.FIND_PHONE_PRESSED -> false
             }
         }
 
@@ -175,6 +178,15 @@ object ActionsModel {
     class FindPhoneAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
 
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            return when (runEnvironment) {
+                RunEnvironment.NORMAL_CONNECTION -> false
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && WatchInfo.findButtonUserDefined
+                RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
+                RunEnvironment.FIND_PHONE_PRESSED -> true
+            }
+        }
+
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             PhoneFinder.ring(context)
@@ -202,6 +214,7 @@ object ActionsModel {
                 RunEnvironment.NORMAL_CONNECTION -> WatchInfo.alwaysConnected
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> true
+                RunEnvironment.FIND_PHONE_PRESSED -> false
             }
         }
 
@@ -283,6 +296,7 @@ object ActionsModel {
                 RunEnvironment.NORMAL_CONNECTION -> enabled
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled
+                RunEnvironment.FIND_PHONE_PRESSED -> false
             }
         }
 
@@ -480,7 +494,9 @@ object ActionsModel {
     }
 
     fun runActionFindPhone(context: Context) {
-        runFilteredActions(context, listOf(FindPhoneAction("Find Phone", true)))
+        runFilteredActions(context, actions.filter {
+            it.shouldRun(RunEnvironment.FIND_PHONE_PRESSED)
+        })
     }
 
     private fun showTimeSyncNotification(context: Context) {

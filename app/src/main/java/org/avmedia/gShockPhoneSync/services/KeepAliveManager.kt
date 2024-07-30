@@ -1,9 +1,14 @@
 package org.avmedia.gShockPhoneSync.services
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
+import android.content.Intent
+import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
 import androidx.core.app.NotificationManagerCompat
@@ -11,55 +16,45 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import org.avmedia.gShockPhoneSync.MainActivity
 
-object KeepAliveManager {
-    fun start(context: Context) {
-        val immediateWorkRequest = OneTimeWorkRequestBuilder<LongRunningWorker>().build()
-        WorkManager.getInstance(context).enqueue(immediateWorkRequest)
+/*
+Note, this is WIP, does not work
+ */
+
+class KeepAliveManager : Service() {
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val notification = createNotification()
+        startForeground(1, notification)
+        // Your long-running task here
+        return START_STICKY
     }
 
-    fun stop(context: Context) {
-        WorkManager.getInstance(context).cancelUniqueWork("LongRunningWorker")
-
-        fun cancelAllNotifications(context: Context) {
-            val notificationManager = NotificationManagerCompat.from(context)
-            notificationManager.cancelAll()
-        }
-
-        cancelAllNotifications(context)
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
 
-    class LongRunningWorker(appContext: Context, workerParams: WorkerParameters) :
-        Worker(appContext, workerParams) {
+    private fun createNotification(): Notification {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
 
-        override fun doWork(): Result {
-            showNotification("G-Shock Smart Sync", "Running...")
-            return Result.success()
+        return NotificationCompat.Builder(this, "channel_id")
+            .setContentTitle("G-Shock Smart Sync Running...")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentIntent(pendingIntent)
+            .build()
+    }
+
+    companion object {
+        fun start(context: Context) {
+            val startIntent = Intent(context, KeepAliveManager::class.java)
+            context.startService(startIntent)
         }
 
-        @SuppressLint("MissingPermission")
-        private fun showNotification(title: String, message: String) {
-            val channelId = "gshock_smart_sync_keep_alive_channel"
-
-            val channel = NotificationChannel(
-                channelId,
-                "G-Shock Keep Alive Notification",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val notificationManager =
-                applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-
-            val notificationBuilder = NotificationCompat.Builder(applicationContext, channelId)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(PRIORITY_DEFAULT)
-                .setOngoing(true)
-
-            with(NotificationManagerCompat.from(applicationContext)) {
-                notify(System.currentTimeMillis().toInt(), notificationBuilder.build())
-            }
+        fun stop(context: Context) {
+            val stopIntent = Intent(context, KeepAliveManager::class.java)
+            context.stopService(stopIntent)
         }
     }
 }
