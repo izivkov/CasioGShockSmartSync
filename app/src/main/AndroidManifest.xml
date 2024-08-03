@@ -45,7 +45,7 @@
         tools:ignore="DataExtractionRules,GoogleAppIndexingWarning"
         tools:targetApi="s">
 
-        <service android:name="org.avmedia.gShockPhoneSync.services.KeepAliveManager" />
+<!--        <service android:name="org.avmedia.gShockPhoneSync.services.KeepAliveManager" />-->
 
         <activity
             android:name="org.avmedia.gShockPhoneSync.MainActivity"
