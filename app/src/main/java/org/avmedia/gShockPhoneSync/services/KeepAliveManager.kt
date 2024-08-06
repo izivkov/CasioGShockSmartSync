@@ -37,7 +37,7 @@ class KeepAliveManager : Service() {
 
     private fun createNotification(): Notification {
         val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_MUTABLE)
 
         return NotificationCompat.Builder(this, "channel_id")
             .setContentTitle("G-Shock Smart Sync Running...")
