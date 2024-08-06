@@ -176,6 +176,7 @@ object RRuleValues {
         return endDate
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun validateRule(rule: String): Boolean {
         // TODO: Add validation here.
         return true

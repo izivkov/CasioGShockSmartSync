@@ -22,7 +22,7 @@ class SettingsList @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    companion object  {
+    companion object {
         var adapter: SettingsAdapter? = null
     }
 

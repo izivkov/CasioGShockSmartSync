@@ -10,7 +10,6 @@ import androidx.work.workDataOf
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
-import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.LocalTime
 import java.time.ZonedDateTime
@@ -26,7 +25,8 @@ object NightWatcher {
     private var sunriseTime: LocalTime? = null
     private var sunsetTime: LocalTime? = null
 
-    class SunriseSunsetWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+    class SunriseSunsetWorker(context: Context, workerParams: WorkerParameters) :
+        Worker(context, workerParams) {
         override fun doWork(): Result {
             val isSunrise = inputData.getBoolean("isSunrise", true)
             if (isSunrise) {
@@ -47,9 +47,10 @@ object NightWatcher {
     }
 
     private fun scheduleSunriseSunsetTasks(context: Context, sunrise: String, sunset: String) {
-        val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        sunriseTime = LocalTime.parse(sunrise, DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
-        sunsetTime = LocalTime.parse(sunset, DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
+        sunriseTime =
+            LocalTime.parse(sunrise, DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
+        sunsetTime =
+            LocalTime.parse(sunset, DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
         val now = ZonedDateTime.now()
 
         val sunriseDelay = Duration.between(now.toLocalTime(), sunriseTime).toMillis()
@@ -75,7 +76,7 @@ object NightWatcher {
         val latitude = location?.latitude
         val longitude = location?.longitude
         if (latitude == null || longitude == null) {
-            Timber.i ("NightWatcher: cannot get location")
+            Timber.i("NightWatcher: cannot get location")
             return
         }
 

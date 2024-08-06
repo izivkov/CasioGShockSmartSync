@@ -8,10 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.ProgressEvents
 
 class DnDSelector @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
-) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs) {
-}
+) : com.google.android.material.switchmaterial.SwitchMaterial(context, attrs)

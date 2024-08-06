@@ -13,7 +13,6 @@ import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
 import org.avmedia.gShockPhoneSync.services.LocationProvider
-import org.avmedia.gShockPhoneSync.services.NightWatcher
 import org.avmedia.gShockPhoneSync.utils.Utils
 import org.avmedia.gshockapi.Alarm
 import java.time.Instant
@@ -43,7 +42,8 @@ object PrayerAlarms {
                 prayerAdjustments = PrayerAdjustments(fajr = 2)
             )
 
-        val prayerTimes = PrayerTimes(Coordinates(location.latitude, location.longitude), date, parameters)
+        val prayerTimes =
+            PrayerTimes(Coordinates(location.latitude, location.longitude), date, parameters)
 
         val alarms = ArrayList<Alarm>()
         alarms.add(prayerTimeToAlarm(prayerTimes.fajr))

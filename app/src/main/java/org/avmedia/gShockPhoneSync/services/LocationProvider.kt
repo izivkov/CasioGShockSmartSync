@@ -3,24 +3,6 @@ package org.avmedia.gShockPhoneSync.services
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.LocationManager
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.Worker
-import androidx.work.WorkerParameters
-import androidx.work.workDataOf
-import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator
-import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.time.Duration
-import java.time.LocalTime
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
-import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.TimeUnit
-import com.luckycatlabs.sunrisesunset.dto.Location as SunLocation
 
 object LocationProvider {
 
@@ -46,7 +28,8 @@ object LocationProvider {
         return if (lastLocationGPS != null) {
             Location(lastLocationGPS.latitude, lastLocationGPS.longitude)
         } else {
-            val lastLocationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            val lastLocationNetwork =
+                locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
             if (lastLocationNetwork != null) {
                 Location(lastLocationNetwork.latitude, lastLocationNetwork.longitude)
             } else {

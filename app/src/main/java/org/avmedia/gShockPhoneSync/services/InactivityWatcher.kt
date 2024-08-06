@@ -7,9 +7,14 @@
 package org.avmedia.gShockPhoneSync.services
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.utils.Utils.snackBar
-import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 object InactivityWatcher {
