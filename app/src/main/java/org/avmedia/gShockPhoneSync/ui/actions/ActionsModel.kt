@@ -247,7 +247,11 @@ object ActionsModel {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             try {
-                context.startActivity(Intent(Intent.ACTION_VOICE_COMMAND).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
+                    setPackage("com.google.android.googlequicksearchbox") // Set package for Google Assistant
+                        .setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                }
+                context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
                 Utils.snackBar(context, "Voice Assistant not available on this device!")
             }

@@ -2,9 +2,15 @@
 
 ## Announcements
 
-Added support for the Edifice **ECB-30** watch. [Here](https://github.com/izivkov/CasioGShockSmartSync/issues/84#issuecomment-2190312054) are more details on this watch.
+We have rewritten this project from the ground up to use [Jetpack Compose](https://developer.android.com/compose). The new version can be found [here](https://github.com/izivkov/GShockSmartSyncCompose).
 
-We have not tested the older **ECB-10** and **ECB-20** watches, but they will probably work as well. If you have these watches, please give feedback in [this](https://github.com/izivkov/CasioGShockSmartSync/issues/84) thread.
+The functionality is similar to this project, but the code in the new project is much cleaner and easier to maintain. In addition, it uses the latest Material 3 design system for a better user experience.
+
+Currently, the new project is in testing mode, but it will eventually be merged into this project. All new development work will be done in the new project.
+
+We need your help to test the new project and provide feedback, bug reports, and suggestions.
+
+Thank you!
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:

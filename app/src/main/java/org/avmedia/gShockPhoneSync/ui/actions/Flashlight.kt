@@ -13,7 +13,6 @@ import androidx.core.content.getSystemService
 import org.avmedia.gShockPhoneSync.utils.Utils
 import timber.log.Timber
 
-
 object Flashlight {
     private lateinit var cameraId: String
     private var currentState = false

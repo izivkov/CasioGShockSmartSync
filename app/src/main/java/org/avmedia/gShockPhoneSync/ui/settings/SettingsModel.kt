@@ -8,10 +8,17 @@
 
 package org.avmedia.gShockPhoneSync.ui.settings
 
+import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 import timber.log.Timber
+import kotlin.coroutines.CoroutineContext
 
 object SettingsModel {
     private val settings = ArrayList<Setting>()
