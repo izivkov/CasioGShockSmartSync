@@ -1,21 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!--
-  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
-  ~ Copyright (c) 2022 . All rights reserved.
-  ~ Last modified 2022-03-29, 11:40 a.m.
-  -->
-
 <resources>
     <color name="indigo_500">#3F51B5</color>
-    <color name="indigo_700">#303F9F</color>
-    <color name="pink_A200">#FF4081</color>
-    <color name="amber_50">#FFF8E1</color>
-
     <color name="grey_500">#9E9E9E</color>
-    <color name="grey_700">#616161</color>
+    <color name="pink_A200">#FF4081</color>
+    <color name="indigo_700">#303F9F</color>
 
-    <color name="black">#000000</color>
 
     <!-- Colors for the app -->
     <color name="colorPrimary">@color/indigo_500</color>

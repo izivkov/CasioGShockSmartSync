@@ -1,8 +1,18 @@
-/*
- * Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
- * Copyright (c) 2022 . All rights reserved.
- * Last modified 2022-03-29, 11:43 p.m.
- */
-
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
+}
+rootProject.name = "GShock Smart Sync Compose"
 include ':app'
-rootProject.name='Casio G-Shock Square Smart Sync'
+include ':api'

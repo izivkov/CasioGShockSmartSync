@@ -5,9 +5,14 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="s" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -20,9 +25,10 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -35,29 +41,24 @@
         android:required="false" />
 
     <application
-        android:allowBackup="false"
+        android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        tools:ignore="DataExtractionRules,GoogleAppIndexingWarning"
-        tools:targetApi="s">
-
-<!--        <service android:name="org.avmedia.gShockPhoneSync.services.KeepAliveManager" />-->
-
+        android:theme="@style/Theme.NavigationBarMedium"
+        tools:targetApi="31">
         <activity
-            android:name="org.avmedia.gShockPhoneSync.MainActivity"
+            android:name="org.avmedia.gShockSmartSyncCompose.MainActivity"
+            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
             android:exported="true"
-            android:screenOrientation="fullUser"
             android:rotationAnimation="seamless"
             android:resizeableActivity="true"
-            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
-            >
-
+            android:theme="@style/Theme.NavigationBarMedium">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
