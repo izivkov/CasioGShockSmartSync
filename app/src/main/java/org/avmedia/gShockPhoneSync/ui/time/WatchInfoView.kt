@@ -18,9 +18,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import org.avmedia.gShockSmartSync.R
 import org.avmedia.gShockPhoneSync.ui.common.AppCard
 import org.avmedia.gShockPhoneSync.ui.common.InfoButton
+import org.avmedia.gShockSmartSync.R
 import org.avmedia.gshockapi.WatchInfo
 
 @Composable

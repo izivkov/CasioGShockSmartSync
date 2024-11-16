@@ -14,9 +14,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import org.avmedia.gShockSmartSync.R
 import org.avmedia.gShockPhoneSync.theme.GShockSmartSyncTheme
 import org.avmedia.gShockPhoneSync.ui.common.ScreenTitle
+import org.avmedia.gShockSmartSync.R
 
 @Composable
 fun TimeScreen(navController: NavController) {

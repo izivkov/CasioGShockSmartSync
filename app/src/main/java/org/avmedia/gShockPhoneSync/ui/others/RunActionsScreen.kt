@@ -12,8 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import org.avmedia.gShockSmartSync.R
 import org.avmedia.gShockPhoneSync.ui.actions.ActionRunner
+import org.avmedia.gShockSmartSync.R
 
 @Composable
 fun RunActionsScreen() {

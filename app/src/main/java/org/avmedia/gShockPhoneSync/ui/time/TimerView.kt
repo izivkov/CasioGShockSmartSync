@@ -26,9 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.avmedia.gShockSmartSync.R
 import org.avmedia.gShockPhoneSync.ui.common.AppButton
 import org.avmedia.gShockPhoneSync.ui.common.AppCard
+import org.avmedia.gShockSmartSync.R
 
 @Composable
 fun TimerView(

@@ -19,9 +19,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import org.avmedia.gShockSmartSync.R
 import org.avmedia.gShockPhoneSync.ui.common.AppCard
 import org.avmedia.gShockPhoneSync.ui.common.AppSnackbar
+import org.avmedia.gShockSmartSync.R
 
 @Composable
 fun EventItem(

@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
-import org.avmedia.gShockSmartSync.R
 import org.avmedia.gShockPhoneSync.utils.LocalDataStorage
 import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gShockSmartSync.R
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.ble.Connection

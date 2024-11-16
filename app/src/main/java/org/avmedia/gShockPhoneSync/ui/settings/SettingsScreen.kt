@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.avmedia.gShockSmartSync.R
 import org.avmedia.gShockPhoneSync.theme.GShockSmartSyncTheme
 import org.avmedia.gShockPhoneSync.ui.common.ButtonData
 import org.avmedia.gShockPhoneSync.ui.common.ButtonsRow
 import org.avmedia.gShockPhoneSync.ui.common.InfoButton
 import org.avmedia.gShockPhoneSync.ui.common.ItemList
 import org.avmedia.gShockPhoneSync.ui.common.ScreenTitle
+import org.avmedia.gShockSmartSync.R
 import org.avmedia.gshockapi.WatchInfo
 
 @SuppressLint("MutableCollectionMutableState")
