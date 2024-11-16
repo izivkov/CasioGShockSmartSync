@@ -14,7 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.utils.Utils.snackBar
+import org.avmedia.gShockPhoneSync.ui.common.AppSnackbar
 import kotlin.coroutines.CoroutineContext
 
 object InactivityWatcher {
@@ -27,8 +27,8 @@ object InactivityWatcher {
 
         job = CoroutineScope(coroutineContext).launch {
             delay(TIMEOUT * 1000)
-            api().disconnect(context)
-            snackBar(context, "Disconnecting due to inactivity")
+            AppSnackbar("Disconnecting due to inactivity")
+            api().disconnect()
         }
     }
 
@@ -41,8 +41,8 @@ object InactivityWatcher {
 
         job = CoroutineScope(coroutineContext).launch {
             delay(TIMEOUT * 1000)
-            api().disconnect(context)
-            snackBar(context, "Disconnecting due to inactivity")
+            api().disconnect()
+            AppSnackbar("Disconnecting due to inactivity")
         }
     }
 }

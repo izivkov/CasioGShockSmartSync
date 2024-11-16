@@ -1,14 +1,29 @@
-/*
- * Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
- * Copyright (c) 2022 . All rights reserved.
- * Last modified 2022-03-28, 11:46 a.m.
- */
-
 package org.avmedia.gShockPhoneSync.ui.time
 
-import android.content.Context
-import android.util.AttributeSet
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.contentColorFor
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import org.avmedia.gShockPhoneSync.ui.common.AppCard
 
-class WatchInfoCard @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.card.MaterialCardView(context, attrs, defStyleAttr)
+@Composable
+fun WatchInfoCard(
+    modifier: Modifier = Modifier,
+    shape: Shape = MaterialTheme.shapes.medium,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = contentColorFor(backgroundColor),
+    elevation: Dp = 1.dp,
+    border: BorderStroke? = null,
+    content: @Composable () -> Unit
+) {
+    AppCard(
+        modifier = modifier,
+    ) {
+        content()
+    }
+}

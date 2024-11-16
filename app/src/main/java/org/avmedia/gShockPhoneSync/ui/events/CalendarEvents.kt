@@ -8,12 +8,14 @@ package org.avmedia.gShockPhoneSync.ui.events
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.Context
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.CalendarContract
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.ProgressEvents
@@ -32,15 +34,14 @@ object CalendarEvents {
         val cur: Cursor?
         val cr: ContentResolver = context.contentResolver
 
-        val mProjection = arrayOf(
-            "_id",
-            CalendarContract.Events.TITLE,
-            CalendarContract.Events.DTSTART,
-            CalendarContract.Events.DTEND,
-            CalendarContract.Events.HAS_ALARM,
-            CalendarContract.Events.RRULE,
-            CalendarContract.Events.ALL_DAY,
-            CalendarContract.Events._ID,
+        val projection = arrayOf(
+            CalendarContract.Instances.EVENT_ID,        // Event ID
+            CalendarContract.Instances.TITLE,           // Event title
+            CalendarContract.Instances.BEGIN,           // Event start time (next occurrence)
+            CalendarContract.Instances.END,             // Event end time
+            CalendarContract.Instances.ALL_DAY,         // Whether the event is an all-day event
+            CalendarContract.Instances.RRULE,           // Recurrence rule (if any)
+            CalendarContract.Instances.DTSTART,
         )
 
         val calendar: Calendar = Calendar.getInstance()
@@ -64,62 +65,118 @@ object CalendarEvents {
             CalendarContract.Calendars.CAL_ACCESS_OWNER.toString()
         )
 
-        val uri: Uri = CalendarContract.Events.CONTENT_URI
+        // Get the current time and define the end time (e.g., 1 year from now)
+        val startMillis = Calendar.getInstance().timeInMillis
+        val endMillis = Calendar.getInstance().apply {
+            add(Calendar.YEAR, 2)  // Query up to 2 years in the future
+        }.timeInMillis
+
+        // Build the URI for querying instances within the specified time range
+        val builder: Uri.Builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
+        ContentUris.appendId(builder, startMillis)
+        ContentUris.appendId(builder, endMillis)
+
+        val uri = builder.build()
+
+        // Sort by the BEGIN field (next occurrence)
+        val sortOrder = "${CalendarContract.Instances.BEGIN} ASC"
+
+        // Perform the query to get event instances within the specified time range
         cur = cr.query(
             uri,
-            mProjection,
+            projection,
             selection,
             selectionArgs,
-            CalendarContract.Events.DTSTART + " ASC" // could be null
+            sortOrder
         )
+
+        // check cusror columns:
+        if (cur != null) {
+            val columnNames = cur.columnNames
+            columnNames.forEach { columnName ->
+                println("Available column: $columnName")
+            }
+
+            while (cur.moveToNext()) {
+                // Safely get column indices
+                val titleColumnIndex = cur.getColumnIndexOrThrow(CalendarContract.Instances.TITLE)
+                val beginColumnIndex = cur.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN)
+
+                val eventTitle = cur.getString(titleColumnIndex)
+                val eventBegin = cur.getLong(beginColumnIndex)
+
+                println("Event: $eventTitle, Start: $eventBegin")
+            }
+            // cur.close()
+            cur.moveToFirst()
+        }
+        // end
+
 
         CalendarObserver.register(cr, uri)
 
+        val seenEventIds = mutableSetOf<Long>() // Set to track seen EVENT_IDs
+
         while (cur!!.moveToNext()) {
-            var title: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
-            title = if (title.isNullOrBlank()) "(No title)" else title
+            val eventId =
+                cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID))
 
-            val dateStart: String? =
-                cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
-            val rrule: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
-            val allDay: String? = cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
+            val eventStart =
+                cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN))
+            val currentTimeMillis = System.currentTimeMillis()
 
-            var zone = ZoneId.systemDefault()
-            if (allDay == "1") {
-                zone = ZoneId.of("UTC")
-            }
+            // If we haven't seen this EVENT_ID before, it's the first occurrence of the event
+            if (eventId !in seenEventIds && eventStart > currentTimeMillis) {
+                seenEventIds.add(eventId)
 
-            val startDate = EventsModel.createEventDate(dateStart!!.toLong(), zone)
-            var endDate = startDate
+                var title: String? =
+                    cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
+                title = if (title.isNullOrBlank()) "(No title)" else title
 
-            val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
-                RRuleValues.getValues(rrule, startDate, zone)
+                val dateStart: String? =
+                    cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
+                val rrule: String? =
+                    cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
+                val allDay: String? =
+                    cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
 
-            if (localEndDate != null) {
-                endDate = EventDate(
-                    localEndDate.year,
-                    localEndDate.month,
-                    localEndDate.dayOfMonth
+                var zone = ZoneId.systemDefault()
+                if (allDay == "1") {
+                    zone = ZoneId.of("UTC")
+                }
+
+                val startDate = EventsModel.createEventDate(dateStart!!.toLong(), zone)
+                var endDate = startDate
+
+                val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
+                    RRuleValues.getValues(rrule, startDate, zone)
+
+                if (localEndDate != null) {
+                    endDate = EventDate(
+                        localEndDate.year,
+                        localEndDate.month,
+                        localEndDate.dayOfMonth
+                    )
+                }
+
+                val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
+                if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) {
+                    continue // do not add expired events
+                }
+
+                val enabled = events.size < EventsModel.MAX_REMINDERS
+                events.add(
+                    Event(
+                        title,
+                        startDate,
+                        endDate,
+                        repeatPeriod,
+                        daysOfWeek,
+                        enabled,
+                        incompatible,
+                    )
                 )
             }
-
-            val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
-            if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) {
-                continue // do not add expired events
-            }
-
-            val enabled = events.size < EventsModel.MAX_REMINDERS
-            events.add(
-                Event(
-                    title,
-                    startDate,
-                    endDate,
-                    repeatPeriod,
-                    daysOfWeek,
-                    enabled,
-                    incompatible,
-                )
-            )
         }
         cur.close()
         return events
@@ -131,7 +188,7 @@ object CalendarEvents {
         @Suppress("DEPRECATION")
         private val calendarObserver = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {
-                ProgressEvents.onNext("CalendarUpdated")
+                ProgressEvents.onNext("CalendarUpdated", getEvents(applicationContext()))
             }
         }
 

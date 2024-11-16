@@ -1,43 +1,45 @@
-/*
- * Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
- * Copyright (c) 2022 . All rights reserved.
- * Last modified 2022-03-29, 6:24 p.m.
- */
-
 package org.avmedia.gShockPhoneSync.ui.time
 
-import android.app.Activity
-import android.content.Context
-import android.util.AttributeSet
+import AppText
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
+import kotlinx.coroutines.withContext
 import org.avmedia.gshockapi.WatchInfo
 
-open class HomeTime @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
+@Composable
+fun HomeTime(
+    modifier: Modifier = Modifier,
+    defaultText: String = "N/A",
+    timeModel: TimeViewModel = viewModel()
+) {
+    val homeTime by timeModel.homeTime.collectAsState()
+    var text by remember { mutableStateOf(defaultText) }
 
-    // Wait for layout be be loaded, otherwise the layout will overwrite the values when loaded.
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        if (api().isConnected() && api().isNormalButtonPressed()) {
-            getFragmentScope().launch(Dispatchers.IO) {
-                text = if (WatchInfo.worldCities) api().getHomeTime() else "N/A"
-            }
+    LaunchedEffect(homeTime) {
+        text = withContext(Dispatchers.IO) {
+            if (WatchInfo.worldCities)
+                homeTime
+            else defaultText
         }
     }
 
-    override fun setText(text: CharSequence?, type: BufferType?) {
-        (context as Activity).runOnUiThread {
-            super.setText(text, type)
-        }
-    }
+    AppText(
+        text = text,
+        modifier = modifier
+    )
+}
 
-    fun update() {
-        getFragmentScope().launch(Dispatchers.IO) {
-            text = api().getHomeTime()
-        }
-    }
+@Preview(showBackground = true)
+@Composable
+fun PreviewHomeTime() {
+    HomeTime(Modifier, "America/Toronto")
 }

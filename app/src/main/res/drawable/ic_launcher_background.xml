@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/cardview_light_background" /> <!-- Light yellow color -->
+    <corners android:radius="40dp" /> <!-- Rounded corners to match the icon style -->
+</shape>

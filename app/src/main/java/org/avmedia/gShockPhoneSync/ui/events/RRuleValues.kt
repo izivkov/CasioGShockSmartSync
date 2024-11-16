@@ -10,9 +10,9 @@ import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.Weekday
 import com.philjay.WeekdayNum
+import org.avmedia.gShockPhoneSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
-import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -61,7 +61,7 @@ object RRuleValues {
 
             if (!isCompatible(rruleObj)) {
                 rruleValues.incompatible = true
-                Timber.i("Event not compatible with Watch")
+                AppSnackbar("Event not compatible with Watch")
             }
 
             if (rrule.isNotEmpty()) {

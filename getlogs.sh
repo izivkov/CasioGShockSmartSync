@@ -1,1 +1,1 @@
-sudo ../Android/Sdk/platform-tools/adb bugreport anewbugreportfolder
+isudo ../Android/Sdk/platform-tools/adb bugreport anewbugreportfolder

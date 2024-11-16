@@ -58,7 +58,7 @@
     <string name="operational_sound">按键音</string>
     <string name="power_saving_mode">省电模式</string>
     <string name="select_language">选择语言</string>
-    <string name="auto_fill_help">"<![CDATA[自动填充值的产生方式：
+    <string name="auto_fill_help"><![CDATA[自动填充值的产生方式：
         <li>时间日期与语言设置均从手机设置中获取</li>
         <li>按键音仅在手机置于勿扰模式时关闭</li>
         <li>在手表电量降至15%时自动开启省电模式</li>
@@ -149,5 +149,11 @@
 
     <string name="auto_light_at_night_only">“仅在夜间自动亮灯”</string>
     <string name="keep_alive">“保持唤醒（耗电更多）”</string>
-
-</resources>
+    <string name="enter_timer_time">"输入时间 " </string>
+    <string name="max_reminders_reached">提醒数量已达上限，请先禁用一些再选择新的 " </string>
+    <string name="fine_time_adjustment">微调</string>
+    <string name="fine_adjustment_info"><![CDATA[
+    在设置时间时，某些手表型号可能会显示比实际时间快几秒。此设置允许您进行微调调整。值的单位是毫秒，并添加到应用程序发送给手表的时间中。您可以设置的范围在 -5000 到 5000 之间。例如，如果您的手表比实际时间快了 2.5 秒，请将该值设置为 -2500，以准确同步时间。
+    ]]></string>
+    <string name="_0000">0000</string>
+    </resources>

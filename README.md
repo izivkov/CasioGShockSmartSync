@@ -99,21 +99,36 @@ alt="Events Screen"
 width=200
 style="margin: 10px;" />
 
-> Make sure you have set your phone to auto-sync to your google account. Otherwise, adding events in your phone will not be reflected to the Google account, and you will not be able to see the events in the app.
+>Syncing Your Calendar
+Ensure that your phone is set to auto-sync with your Google Account. Without this setting, events added to your phone will not sync with your Google account and will not appear in the app.
 
-This screen displays `Events` from your `Google Calendar` and allows you to send these events to the watch's `reminders`.
-(*don't confuse these with `reminders` in the Google Calendar app. These reminders are special features and are not accessible programmatically*).
+# Syncing Your Calendar
 
-There are many ways to set calendar events in `Google Calendar`. Events could be `one time`, repeating `daily`, `weekly`, `monthly` 
-or `yearly`, or some complex period such as `every second Thursday of the month`. There are also events which occur number of 
-times only (count events), like `repeat this event 12 times every Monday`. Not all event types can be supported on the watch, but this app 
-attempts to adopt the calendar events to the watch as much as possible. The only **not** supported event types are `daily` and complex events, 
-such as `every second Thursday of the month`. Count events are simulated on the watch with a start and end date, 
-matching the event start time, count and frequency. In case the calendar event cannot be adopted to a watch reminder, 
-the app will display the event as `Incompatible`. Only future events and recurring events which have not expired are displayed.
+Ensure that your phone is set to **auto-sync with your Google Account**. Without this setting, events added to your phone will not sync with your Google account and will not appear in the app.
 
-The watch only supports `all-day reminders`. However, if the Google calendar event has a specific time,
-it will still be used as a day reminder on the watch.
+## About This Screen
+
+This screen displays events from your Google Calendar and allows you to send these events to your watch's reminders. *(Note: These are distinct from reminders in the Google Calendar app. The watch reminders are a unique feature and cannot be accessed programmatically.)*
+
+## Event Types and Compatibility
+
+Google Calendar supports various types of events:
+
+- **One-time events**: Single occurrences.
+- **Repeating events**: Daily, weekly, monthly, yearly, or complex patterns (e.g., "every second Thursday of the month").
+- **Count events**: Limited repetitions, such as "repeat 12 times every Monday."
+
+While the app does its best to adapt calendar events to the watch, some limitations exist:
+
+- **Not Supported**: Daily events and complex patterns (e.g., "every second Thursday of the month").
+- **Count Events**: Simulated on the watch using a start and end date, adjusted to match the event's start time, frequency, and count.
+
+Events that cannot be adapted will appear as **Incompatible**. Only future events and ongoing recurring events are displayed.
+
+## Watch-Specific Behavior
+
+The watch only supports **all-day reminders**. For Google Calendar events with a specific time, the app will convert them into all-day reminders on the watch while still retaining their date.
+
 
 ## Actions
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/ActionsScreen.png"

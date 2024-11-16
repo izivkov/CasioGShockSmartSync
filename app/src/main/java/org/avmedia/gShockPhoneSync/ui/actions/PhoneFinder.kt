@@ -9,7 +9,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
-import org.avmedia.gShockPhoneSync.utils.Utils
+import org.avmedia.gShockPhoneSync.ui.common.AppSnackbar
 import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -23,15 +23,13 @@ class PhoneFinder {
         var resetVolume: () -> Unit? = {}
 
         fun ring(context: Context) {
-            Utils.snackBar(context, "When found, lift phone to stop ringing")
-
             // get alarm uri
             var alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             if (alarmUri == null) {
                 alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
             }
             if (alarmUri == null) {
-                Timber.e("ringAlarm", "Unable to get default sound URI")
+                AppSnackbar("Unable to get default sound URI")
                 return
             }
 

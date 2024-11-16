@@ -1,63 +1,77 @@
-/*
- * Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
- * Copyright (c) 2022 . All rights reserved.
- * Last modified 2022-03-29, 6:12 p.m.
- */
-
-package org.avmedia.gShockPhoneSync.ui.time
-
-import android.annotation.SuppressLint
-import android.content.Context
 import android.icu.text.MeasureFormat
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
-import android.os.Build
 import android.telephony.TelephonyManager
-import android.util.AttributeSet
-import android.view.View
-import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
-import org.avmedia.gShockPhoneSync.ui.time.TimeFragment.Companion.getFragmentScope
-import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gShockPhoneSync.ui.time.TimeViewModel
 import java.util.Locale
 
-class WatchTemperature @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : com.google.android.material.textview.MaterialTextView(context, attrs, defStyleAttr) {
+@Composable
+fun WatchTemperature(
+    modifier: Modifier = Modifier,
+    hasTemperature: Boolean,
+    isConnected: Boolean,
+    isNormalButtonPressed: Boolean,
+    timeModel: TimeViewModel = viewModel()
+) {
+    var temperatureText by remember { mutableStateOf("N/A") }
+    val temperature by timeModel.temperature.collectAsState()
 
-    @RequiresApi(Build.VERSION_CODES.P)
-    @SuppressLint("SetTextI18n")
-    override fun onFinishInflate() {
-        super.onFinishInflate()
+    val context = LocalContext.current
 
-        visibility = View.VISIBLE
+    LaunchedEffect(temperature) {
+        if (hasTemperature && isConnected && isNormalButtonPressed) {
+            launch(Dispatchers.IO) {
 
-        if (!WatchInfo.hasTemperature) {
-            text = "N/A"
-            return
-        }
-
-        if (api().isConnected() && api().isNormalButtonPressed()) {
-            getFragmentScope().launch(Dispatchers.IO) {
-                val temperature = api().getWatchTemperature()
-
-                val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-                val countryCodeValue = tm.networkCountryIso
+                val tm = getSystemService(context, TelephonyManager::class.java)
+                val countryCodeValue = tm?.networkCountryIso ?: ""
                 val isUS = (countryCodeValue.isNotEmpty() && countryCodeValue.uppercase() == "US")
                 val fmt =
                     MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
-                val measure = if (isUS) Measure(
-                    ((temperature * 9 / 5) + 32),
-                    MeasureUnit.FAHRENHEIT
-                ) else Measure(temperature, MeasureUnit.CELSIUS)
+                val measure = if (isUS) {
+                    Measure(
+                        ((temperature * 9 / 5) + 32),
+                        MeasureUnit.FAHRENHEIT
+                    )
+                } else {
+                    Measure(temperature, MeasureUnit.CELSIUS)
+                }
 
-                getFragmentScope().launch(Dispatchers.Main) {
-                    text = fmt.format(measure)
+                launch(Dispatchers.Main) {
+                    temperatureText = fmt.format(measure)
                 }
             }
+        } else if (!hasTemperature) {
+            temperatureText = "N/A"
         }
     }
+
+    AppText(
+        text = temperatureText,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewWatchTemperature() {
+    // Provide the required parameters for preview
+    WatchTemperature(
+        hasTemperature = true,
+        isConnected = true,
+        isNormalButtonPressed = true,
+    )
 }
 

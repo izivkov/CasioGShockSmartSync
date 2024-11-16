@@ -1,29 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!--
-  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
-  ~ Copyright (c) 2022 . All rights reserved.
-  ~ Last modified 2022-03-29, 11:40 a.m.
-  -->
-
 <resources>
+    <!-- Existing Colors -->
     <color name="indigo_500">#3F51B5</color>
-    <color name="indigo_700">#303F9F</color>
-    <color name="pink_A200">#FF4081</color>
-    <color name="amber_50">#FFF8E1</color>
-
     <color name="grey_500">#9E9E9E</color>
-    <color name="grey_700">#616161</color>
+    <color name="pink_A200">#FF4081</color>
+    <color name="indigo_700">#303F9F</color>
 
-    <color name="black">#000000</color>
-
-    <!-- Colors for the app -->
+    <!-- App Colors -->
     <color name="colorPrimary">@color/indigo_500</color>
     <color name="colorPrimaryDark">@color/indigo_700</color>
     <color name="colorAccent">@color/pink_A200</color>
 
-    <!--Light Background Dark Text-->
+    <!-- Light Backgrounds (Material 3 Guidelines) -->
+    <color name="indigo_500_light_background">#E8EAF6</color> <!-- Lighter shade of Indigo 500 -->
+    <color name="grey_500_light_background">#F5F5F5</color> <!-- Lighter shade of Grey 500 -->
+    <color name="pink_A200_light_background">#FFEBEE</color> <!-- Lighter shade of Pink A200 -->
+    <color name="indigo_700_light_background">#C5CAE9</color> <!-- Lighter shade of Indigo 700 -->
 
-    <!--Dark Background Light Text-->
+    <!-- Dark Background with Light Text -->
     <color name="dark_bg_light_secondary_text">#B3FFFFFF</color>
 </resources>

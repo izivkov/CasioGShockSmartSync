@@ -1,9 +1,3 @@
-<!--
-  ~ Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
-  ~ Copyright (c) 2022 . All rights reserved.
-  ~ Last modified 2022-03-29, 11:51 p.m.
-  -->
-
 <resources>
     <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
     <string name="title_time">Time</string>
@@ -49,7 +43,7 @@
     <string name="signal_chime">Signal (chime)</string>
     <string name="google_calendar_events">Google Calendar Events</string>
     <string name="local_time">Local Time</string>
-    <string name="send_to_watch">Send to Watch</string>
+    <string name="send_to_watch">Send to\nWatch</string>
     <string name="_416_555_6789">416–555–6789</string>
     <string name="phonecall_item">PhoneCall Item</string>
     <string name="home_time">Home Time</string>
@@ -114,7 +108,7 @@
     <string name="no_watch">No Watch</string>
     <string name="set_time">Set Time</string>
     <string name="find_phone">Find Phone</string>
-    <string name="set_reminders">Set Reminders from Google Calendar</string>
+    <string name="set_reminders">Set Reminders from\nGoogle Calendar</string>
     <string name="take_photo">Take a photo</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>
     <string name="start_voice_assistant">Start Voice Assist</string>
@@ -158,5 +152,13 @@
     ]]></string>
     <string name="auto_light_at_night_only">Auto-light at night only</string>
     <string name="keep_alive">Keep Alive (uses more battery)</string>
+    <string name="enter_timer_time">Enter Timer Time</string>
+    <string name="max_reminders_reached">Maximum number of reminders reached, Please disable some before selecting new ones" </string>
+    <string name="fine_time_adjustment">Fine Adjustment</string>
+    <string name="_0000">0000</string>
+    <string name="fine_adjustment_info"><![CDATA[
+    When setting the time, some watch models may display a time that is slightly off by a few seconds. This setting allows you to fine-tune the time adjustment.
+    The value, in milliseconds, is added to the time sent from the app to the watch. You can set values between -5000 and 5000. For example,
+    if your watch is 2.5 seconds ahead of the actual time, set this value to -2500 to sync it accurately.
+    ]]></string>
 </resources>
-

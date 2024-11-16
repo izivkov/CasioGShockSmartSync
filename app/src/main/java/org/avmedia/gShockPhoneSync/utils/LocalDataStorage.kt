@@ -1,9 +1,3 @@
-/*
- * Created by Ivo Zivkov (izivkov@gmail.com) on 2022-03-30, 12:06 a.m.
- * Copyright (c) 2022 . All rights reserved.
- * Last modified 2022-03-14, 1:48 p.m.
- */
-
 package org.avmedia.gShockPhoneSync.utils
 
 import android.content.Context
@@ -13,113 +7,75 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.avmedia.gShockPhoneSync.MainActivity.Companion.applicationContext
 
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    init {
-        // load in memory, so can perform sync operation
-        scope.launch {
-            applicationContext().dataStore.data.first()
+    // Use a DataStore delegate in context
+    private val Context.dataStore by preferencesDataStore(
+        name = STORAGE_NAME,
+        produceMigrations = { context ->
+            listOf(SharedPreferencesMigration(context, STORAGE_NAME))
         }
-    }
+    )
 
-    private val Context.sharedPreferences
-        get() = getSharedPreferences(STORAGE_NAME, Context.MODE_PRIVATE)
-
-    fun put(key: String, value: String) {
+    fun put(context: Context, key: String, value: String) {
         scope.launch {
-            applicationContext().dataStore.edit { preferences ->
+            context.dataStore.edit { preferences ->
                 preferences[stringPreferencesKey(key)] = value
             }
         }
     }
 
-    fun get(key: String, defaultValue: String? = null): String? {
+    fun get(context: Context, key: String, defaultValue: String? = null): String? {
         var value: String?
         runBlocking {
-            val preferences = applicationContext().dataStore.data.first()
+            val preferences = context.dataStore.data.first()
             value = preferences[stringPreferencesKey(key)] ?: defaultValue
         }
         return value
     }
 
-    fun delete(key: String) {
+    fun delete(context: Context, key: String) {
         scope.launch {
-            deleteAsync(key)
+            deleteAsync(context, key)
         }
     }
 
-    suspend fun deleteAsync(key: String) {
-        applicationContext().dataStore.edit { preferences ->
+    suspend fun deleteAsync(context: Context, key: String) {
+        context.dataStore.edit { preferences ->
             preferences.remove(stringPreferencesKey(key))
         }
     }
 
-    private fun getBoolean(key: String): Boolean {
-        return get(key, "false")?.toBoolean() ?: false
+    private fun getBoolean(context: Context, key: String): Boolean {
+        return get(context, key, "false")?.toBoolean() ?: false
     }
 
-    private fun putBoolean(key: String, value: Boolean) {
+    private fun putBoolean(context: Context, key: String, value: Boolean) {
         scope.launch {
-            put(key, value.toString())
+            put(context, key, value.toString())
         }
     }
 
-    fun getTimeAdjustmentNotification(): Boolean {
-        return getBoolean("timeAdjustmentNotification")
+    fun getTimeAdjustmentNotification(context: Context): Boolean {
+        return getBoolean(context, "timeAdjustmentNotification")
     }
 
-    fun setTimeAdjustmentNotification(value: Boolean) {
-        putBoolean("timeAdjustmentNotification", value)
+    fun setTimeAdjustmentNotification(context: Context, value: Boolean) {
+        putBoolean(context, "timeAdjustmentNotification", value)
     }
 
-    fun getMirrorPhoneDnd(): Boolean {
-        return getBoolean("mirrorPhoneDnD")
+    fun getFineTimeAdjustment(context: Context): Int {
+        return get(context, "fineTimeAdjustment", "0")?.toInt() ?: 0
     }
 
-    fun setMirrorPhoneDnD(value: Boolean) {
-        putBoolean("mirrorPhoneDnD", value)
+    fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
+        return put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
-
-    fun getKeepAlive(): Boolean {
-        return getBoolean("keepAlive")
-    }
-
-    fun setKeepAlive(value: Boolean) {
-        putBoolean("keepAlive", value)
-    }
-
-    fun getAllData(): Flow<String> {
-        return applicationContext().dataStore.data.map { preferences ->
-            val allEntries = preferences.asMap()
-            val stringBuilder = StringBuilder()
-            allEntries.forEach { (key, value) ->
-                stringBuilder.append("$key: $value\n")
-            }
-            stringBuilder.toString()
-        }
-    }
-
-    fun getAutoLightNightOnly(): Boolean {
-        return getBoolean("autoLightNightOnly")
-    }
-
-    fun setAutoLightNightOnly(value: Boolean) {
-        putBoolean("autoLightNightOnly", value)
-    }
-
-    // Migration related
-    private val Context.dataStore by preferencesDataStore(name = STORAGE_NAME,
-        produceMigrations = { context ->
-            listOf(SharedPreferencesMigration(context, STORAGE_NAME))
-        })
 }
