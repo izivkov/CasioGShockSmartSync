@@ -50,7 +50,7 @@
         android:theme="@style/Theme.NavigationBarMedium"
         tools:targetApi="31">
         <activity
-            android:name="org.avmedia.gShockSmartSyncCompose.MainActivity"
+            android:name="org.avmedia.gShockPhoneSync.MainActivity"
             android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
             android:exported="true"
             android:rotationAnimation="seamless"

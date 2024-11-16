@@ -13,6 +13,6 @@ dependencyResolutionManagement {
         maven { url "https://jitpack.io" }
     }
 }
-rootProject.name = "GShock Smart Sync Compose"
+rootProject.name = "Casio GShock Smart Sync"
 include ':app'
 include ':api'

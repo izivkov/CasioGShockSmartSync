@@ -4,15 +4,15 @@
     <item>
         <shape android:shape="rectangle">
             <solid android:color="?attr/colorSurfaceVariant" />
-            <corners android:radius="40dp" /> <!-- Rounded corners -->
+            <corners android:radius="40dp" />
         </shape>
     </item>
 
     <!-- Thin border using Material 3 Primary Container color -->
     <item android:top="4dp" android:bottom="4dp" android:left="4dp" android:right="4dp">
         <shape android:shape="rectangle">
-            <solid android:color="?attr/colorPrimaryContainer" />
-            <corners android:radius="36dp" /> <!-- Smaller radius to show the background -->
+            <solid android:color="?attr/colorOnSecondary" />
+            <corners android:radius="36dp" />
         </shape>
     </item>
 

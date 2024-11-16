@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Casio G-Shock Smart Sync Compose</string>
+    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
     <string name="title_events">Events</string>

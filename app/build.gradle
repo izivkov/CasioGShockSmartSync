@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'org.avmedia.gShockSmartSyncCompose'
+    namespace 'org.avmedia.gShockSmartSync'
     compileSdk 35
 
     defaultConfig {
-        applicationId "org.avmedia.gShockSmartSyncCompose"
+        applicationId "org.avmedia.gshockGoogleSync"
         minSdk 26
         targetSdk 35
-        versionCode 1
-        versionName "1.1.9"
+        versionCode 20
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -62,7 +62,7 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
     debugImplementation "androidx.compose.ui:ui-test-manifest:1.7.5"
-    implementation "androidx.navigation:navigation-compose:2.8.3"
+    implementation "androidx.navigation:navigation-compose:2.8.4"
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0"
     implementation ("androidx.datastore:datastore-preferences:1.1.1")
 
