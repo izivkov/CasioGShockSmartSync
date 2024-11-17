@@ -8,6 +8,7 @@ package org.avmedia.gShockPhoneSync.ui.actions
 
 import android.content.ContentValues
 import android.content.Context
+import android.media.MediaActionSound
 import android.os.Build
 import android.provider.MediaStore
 import androidx.camera.core.CameraSelector
@@ -25,6 +26,9 @@ class CameraCaptureHelper(private val context: Context) {
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
+    private val mediaActionSound = MediaActionSound().apply {
+        load(MediaActionSound.SHUTTER_CLICK)
+    }
 
     fun initCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -65,8 +69,10 @@ class CameraCaptureHelper(private val context: Context) {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Images")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/Camera")
             }
+
+            mediaActionSound.play(MediaActionSound.SHUTTER_CLICK)
         }
 
         val outputOptions = ImageCapture.OutputFileOptions

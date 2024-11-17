@@ -491,6 +491,8 @@ However, this way gives us more control on how to start the actions.
     }
 
     fun runActionsForActionButton(context: Context) {
+        updateActionsAndMap(loadData(context))
+
         runFilteredActions(
             context,
             _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) })
@@ -542,7 +544,7 @@ However, this way gives us more control on how to start the actions.
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
                 if (it.runMode == RUN_MODE.ASYNC) {
-                    Timber.d("running ${it.javaClass.simpleName}")
+                    Timber.d("------------> running ${it.javaClass.simpleName}")
                     // actions are run on the main lifecycle scope, because the Actions Fragment never gets created.
                     mainScope.launch {
                         runIt(it, context)
@@ -553,7 +555,7 @@ However, this way gives us more control on how to start the actions.
             }
     }
 
-    fun loadData(context: Context): List<Action> {
+    private fun loadData(context: Context): List<Action> {
         _actions.value.forEach {
             it.load(context)
         }

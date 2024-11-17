@@ -1,0 +1,3 @@
+Rewrote using Jetpack Compose
+Use material 3 UI and dynamic colors
+
