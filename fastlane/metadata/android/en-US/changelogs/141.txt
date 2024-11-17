@@ -1,2 +1,0 @@
-Fix build issues for F-DROID.
-

@@ -1,0 +1,2 @@
+Fix closing camera after running "Take a Photo" action.
+
