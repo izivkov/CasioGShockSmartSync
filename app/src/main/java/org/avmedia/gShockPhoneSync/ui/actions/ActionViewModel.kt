@@ -499,12 +499,16 @@ However, this way gives us more control on how to start the actions.
     }
 
     fun runActionForConnection(context: Context) {
+        updateActionsAndMap(loadData(context))
+
         runFilteredActions(context, _actions.value.filter {
             it.shouldRun(RunEnvironment.NORMAL_CONNECTION)
         })
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
+        updateActionsAndMap(loadData(context))
+
         runFilteredActions(
             context,
             _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) })

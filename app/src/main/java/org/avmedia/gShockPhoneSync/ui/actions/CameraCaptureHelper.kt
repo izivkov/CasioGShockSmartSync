@@ -6,11 +6,13 @@
 
 package org.avmedia.gShockPhoneSync.ui.actions
 
+import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
 import android.media.MediaActionSound
 import android.os.Build
 import android.provider.MediaStore
+import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -26,6 +28,8 @@ class CameraCaptureHelper(private val context: Context) {
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
+    // private var currentContextView = (context as Activity).contentView
+    private var currentContextView = (context as Activity).findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
     private val mediaActionSound = MediaActionSound().apply {
         load(MediaActionSound.SHUTTER_CLICK)
     }
@@ -89,16 +93,30 @@ class CameraCaptureHelper(private val context: Context) {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exception: ImageCaptureException) {
                     onError(exception.message ?: "Unknown error")
+                    stopCamera()
                 }
 
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     onImageCaptured("Image saved at ${outputFileResults.savedUri}")
+                    stopCamera()
                 }
             }
         )
     }
 
-    fun shutdown() {
-        cameraExecutor.shutdown()
+    private fun stopCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
+            // Unbind all use cases to release the camera
+            cameraProvider.unbindAll()
+
+            // Shutdown the executor to release background threads
+            cameraExecutor.shutdown()
+
+            // Restore the previous content view
+            (context as Activity).setContentView(currentContextView)
+        }, ContextCompat.getMainExecutor(context))
     }
 }
