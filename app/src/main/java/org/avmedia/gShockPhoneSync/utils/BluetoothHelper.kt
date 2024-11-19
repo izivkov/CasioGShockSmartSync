@@ -1,15 +1,21 @@
-package org.avmedia.gShockPhoneSync.utils
-
 import android.Manifest
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.avmedia.gShockPhoneSync.ui.common.AppSnackbar
 
 class BluetoothHelper(
@@ -19,7 +25,11 @@ class BluetoothHelper(
     private val onBluetoothEnabled: () -> Unit,
     private val onBluetoothNotEnabled: () -> Unit
 ) {
-    fun turnOnBLE() {
+    private var onResultCallback: (() -> Unit)? = null
+
+    fun turnOnBLE(onResult: (() -> Unit)? = null) {
+        onResultCallback = onResult
+
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter = bluetoothManager?.adapter
         if (bluetoothAdapter == null) {
@@ -35,6 +45,8 @@ class BluetoothHelper(
                     context, Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
+                AppSnackbar("Permission required to turn on Bluetooth.")
+                onBluetoothNotEnabled()
                 return
             }
 
@@ -42,7 +54,22 @@ class BluetoothHelper(
                 requestBluetooth.launch(enableBtIntent)
             } catch (e: SecurityException) {
                 AppSnackbar("You have no permissions to turn on Bluetooth. Please turn it on manually.")
+                onBluetoothNotEnabled()
             }
+        } else {
+            onBluetoothEnabled()
+            onResult?.invoke()
+        }
+    }
+
+    fun handleBluetoothResult(resultCode: Int) {
+        if (resultCode == Activity.RESULT_OK) {
+            // Bluetooth successfully enabled
+            onBluetoothEnabled()
+            onResultCallback?.invoke()
+        } else {
+            // User did not enable Bluetooth
+            onBluetoothNotEnabled()
         }
     }
 }

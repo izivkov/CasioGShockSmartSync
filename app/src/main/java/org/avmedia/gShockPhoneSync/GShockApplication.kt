@@ -2,7 +2,6 @@ package org.avmedia.gShockPhoneSync
 
 import android.app.Application
 import android.bluetooth.BluetoothDevice
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +41,7 @@ class GShockApplication : Application() {
     fun init(context: MainActivity) {
         this.context = context
     }
+
     override fun onCreate() {
         super.onCreate()
 
@@ -172,7 +172,8 @@ class GShockApplication : Application() {
     private fun waitForConnection() {
         val reuseAddress = true
         val deviceAddress = if (reuseAddress) {
-            val savedDeviceAddress = LocalDataStorage.get(applicationContext, "LastDeviceAddress", "")
+            val savedDeviceAddress =
+                LocalDataStorage.get(applicationContext, "LastDeviceAddress", "")
             if (api.validateBluetoothAddress(savedDeviceAddress)) savedDeviceAddress else null
         } else null
 
