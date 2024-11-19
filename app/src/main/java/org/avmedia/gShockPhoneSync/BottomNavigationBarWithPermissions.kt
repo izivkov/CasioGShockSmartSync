@@ -16,12 +16,14 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,12 +31,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import org.avmedia.gShockPhoneSync.MainActivity.Companion.api
+import org.avmedia.gShockPhoneSync.services.InactivityHandler
 import org.avmedia.gShockPhoneSync.ui.actions.ActionsScreen
 import org.avmedia.gShockPhoneSync.ui.alarms.AlarmsScreen
 import org.avmedia.gShockPhoneSync.ui.common.AppSnackbar
 import org.avmedia.gShockPhoneSync.ui.events.EventsScreen
 import org.avmedia.gShockPhoneSync.ui.settings.SettingsScreen
 import org.avmedia.gShockPhoneSync.ui.time.TimeScreen
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun BottomNavigationBarWithPermissions() {
@@ -42,8 +47,34 @@ fun BottomNavigationBarWithPermissions() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    val inactivityHandler = remember {
+        InactivityHandler(timeout = (3*60).seconds) {
+            api().disconnect()
+            AppSnackbar("Disconnected due to inactivity.")
+        }
+    }
+
+    DisposableEffect(Unit) {
+        inactivityHandler.startMonitoring()
+        onDispose {
+            inactivityHandler.stopMonitoring()
+        }
+    }
+
+    fun Modifier.detectInactivity(handler: InactivityHandler): Modifier {
+        return this.pointerInput(Unit) {
+            while (true) {
+                awaitPointerEventScope {
+                    awaitPointerEvent()
+                    handler.registerInteraction()
+                }
+            }
+        }
+    }
+
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().
+        detectInactivity(inactivityHandler),
         bottomBar = {
             NavigationBar(
                 modifier = Modifier.padding(0.dp)

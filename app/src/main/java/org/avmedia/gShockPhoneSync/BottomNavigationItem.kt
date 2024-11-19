@@ -3,6 +3,7 @@ package org.avmedia.gShockPhoneSync
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import org.avmedia.gShockSmartSync.R
@@ -10,7 +11,7 @@ import org.avmedia.gShockSmartSync.R
 data class BottomNavigationItem(
     val label: String = "",
     val icon: ImageVector = Icons.Filled.Home,
-    val route: String = ""
+    val route: String = "",
 ) {
     @Composable
     fun bottomNavigationItems(): List<BottomNavigationItem> {
@@ -18,7 +19,7 @@ data class BottomNavigationItem(
             BottomNavigationItem(
                 label = "Time",
                 icon = ImageVector.vectorResource(id = R.drawable.time), // Local icon
-                route = Screens.Time.route
+                route = Screens.Time.route,
             ),
             BottomNavigationItem(
                 label = "Alarms",

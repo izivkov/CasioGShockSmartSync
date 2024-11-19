@@ -56,7 +56,8 @@ class MainActivity : ComponentActivity() {
             onBluetoothEnabled = { },
             onBluetoothNotEnabled = {
                 AppSnackbar("Bluetooth is not enabled.")
-                Executors.newSingleThreadScheduledExecutor().schedule({ finish() }, 3L, TimeUnit.SECONDS)
+                Executors.newSingleThreadScheduledExecutor()
+                    .schedule({ finish() }, 3L, TimeUnit.SECONDS)
             }
         )
 
@@ -72,7 +73,8 @@ class MainActivity : ComponentActivity() {
                                         SnackbarHost(hostState = nonNullHostState)
                                     }
                                 },
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
                             ) { padding ->
                                 Surface(
                                     modifier = Modifier.fillMaxSize(),
