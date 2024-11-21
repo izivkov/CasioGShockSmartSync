@@ -1,0 +1,2 @@
+Fixed issue with inactivity timer.
+

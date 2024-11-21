@@ -41,7 +41,7 @@
         android:required="false" />
 
     <application
-        android:name="org.avmedia.gShockPhoneSync.GShockApplication"
+        android:name=".GShockApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -51,7 +51,7 @@
         android:theme="@style/Theme.NavigationBarMedium"
         tools:targetApi="31">
         <activity
-            android:name="org.avmedia.gShockPhoneSync.MainActivity"
+            android:name=".MainActivity"
             android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
             android:exported="true"
             android:rotationAnimation="seamless"
@@ -59,7 +59,6 @@
             android:theme="@style/Theme.NavigationBarMedium">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
