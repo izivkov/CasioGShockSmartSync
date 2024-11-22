@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
@@ -27,7 +28,7 @@ import org.avmedia.gshockGoogleSync.R
 @Composable
 fun PhoneView(
     onUpdate: (ActionsViewModel.PhoneDialAction) -> Unit,
-    actionsViewModel: ActionsViewModel = viewModel(),
+    actionsViewModel: ActionsViewModel = hiltViewModel(),
 ) {
     val classType = ActionsViewModel.PhoneDialAction::class.java
     val actions by actionsViewModel.actions.collectAsState()

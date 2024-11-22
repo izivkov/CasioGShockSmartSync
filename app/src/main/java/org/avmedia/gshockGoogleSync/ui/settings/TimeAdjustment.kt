@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppTextField
@@ -34,7 +35,7 @@ import org.avmedia.gshockGoogleSync.R
 @Composable
 fun TimeAdjustment(
     onUpdate: (SettingsViewModel.TimeAdjustment) -> Unit,
-    settingsViewModel: SettingsViewModel = viewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val classType = SettingsViewModel.TimeAdjustment::class.java
     val settings by settingsViewModel.settings.collectAsState()

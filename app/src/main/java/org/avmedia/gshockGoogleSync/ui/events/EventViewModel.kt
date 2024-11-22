@@ -3,18 +3,23 @@ package org.avmedia.gshockGoogleSync.ui.events
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.api
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import javax.inject.Inject
 
-class EventViewModel : ViewModel() {
+@HiltViewModel
+class EventViewModel @Inject constructor(
+    private val repository: GShockRepository
+) : ViewModel() {
 
     init {
         listenForUpdateRequest()
@@ -59,7 +64,7 @@ class EventViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val events = _events.value
-                api().setEvents(ArrayList(_events.value))
+                repository.setEvents(ArrayList(_events.value))
                 AppSnackbar("Events Set")
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")

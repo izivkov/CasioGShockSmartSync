@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
@@ -27,9 +28,10 @@ import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.R
+import javax.inject.Singleton
 
 @Composable
-fun AlarmList(alarmViewModel: AlarmViewModel = viewModel()) {
+fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
     val alarms by alarmViewModel.alarms.collectAsState()
 
     LaunchedEffect(alarms) {
@@ -69,7 +71,7 @@ fun AlarmList(alarmViewModel: AlarmViewModel = viewModel()) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AlarmsScreen(
-    alarmViewModel: AlarmViewModel = viewModel()
+    alarmViewModel: AlarmViewModel = hiltViewModel()
 ) {
     GShockSmartSyncTheme {
         Surface(

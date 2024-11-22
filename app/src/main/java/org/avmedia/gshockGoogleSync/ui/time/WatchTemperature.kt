@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,7 +26,7 @@ fun WatchTemperature(
     hasTemperature: Boolean,
     isConnected: Boolean,
     isNormalButtonPressed: Boolean,
-    timeModel: TimeViewModel = viewModel()
+    timeModel: TimeViewModel = hiltViewModel()
 ) {
     var temperatureText by remember { mutableStateOf("N/A") }
     val temperature by timeModel.temperature.collectAsState()

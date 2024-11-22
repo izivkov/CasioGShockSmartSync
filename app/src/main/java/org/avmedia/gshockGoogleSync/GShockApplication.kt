@@ -9,12 +9,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.api
 import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.di.RepositoryEntryPoint
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -24,7 +26,6 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit
 @HiltAndroidApp
 class GShockApplication : Application() {
     lateinit var context: MainActivity
-    val api: GShockAPI by lazy { GShockAPI(this) }
+    private lateinit var repository: GShockRepository
 
     fun init(context: MainActivity) {
         this.context = context
@@ -41,7 +42,12 @@ class GShockApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        DeviceManager.initialize(api)
+        repository = EntryPointAccessors.fromApplication(
+            this,
+            RepositoryEntryPoint::class.java
+        ).getGShockRepository()
+
+        DeviceManager.initialize(repository)
         createAppEventsSubscription()
     }
 
@@ -57,8 +63,7 @@ class GShockApplication : Application() {
 
     private fun createAppEventsSubscription() {
         val eventActions = arrayOf(
-            EventAction("ConnectionSetupComplete") {
-            },
+            EventAction("ConnectionSetupComplete") {},
             EventAction("WatchInitializationCompleted") { handleWatchInitialization() },
             EventAction("ConnectionFailed") { handleConnectionFailure() },
             EventAction("ApiError") { handleApiError() },
@@ -73,10 +78,10 @@ class GShockApplication : Application() {
     private fun handleWatchInitialization() {
         context.setContent {
             StartScreen {
-                if (api.isActionButtonPressed() || api.isAutoTimeStarted() || api.isFindPhoneButtonPressed()) {
-                    RunActionsScreen()
+                if (repository.isActionButtonPressed() || repository.isAutoTimeStarted() || repository.isFindPhoneButtonPressed()) {
+                    RunActionsScreen(repository)
                 } else {
-                    BottomNavigationBarWithPermissions()
+                    BottomNavigationBarWithPermissions(repository)
                 }
             }
         }
@@ -109,7 +114,7 @@ class GShockApplication : Application() {
             ?: "ApiError! Ensure the official G-Shock app is not running."
 
         AppSnackbar(message)
-        api.disconnect()
+        repository.disconnect()
         context.setContent {
             StartScreen {
                 PreConnectionScreen()
@@ -120,7 +125,7 @@ class GShockApplication : Application() {
     private fun handleDisconnect() {
         val device = ProgressEvents.getPayload("Disconnect") as? BluetoothDevice
         if (device != null) {
-            api.teardownConnection(device)
+            repository.teardownConnection(device)
         }
 
         Executors.newSingleThreadScheduledExecutor().schedule({
@@ -152,12 +157,12 @@ class GShockApplication : Application() {
         if (reuseAddress) {
             val savedDeviceAddress =
                 LocalDataStorage.get(applicationContext(), "LastDeviceAddress", "")
-            if (api().validateBluetoothAddress(savedDeviceAddress)) {
+            if (repository.validateBluetoothAddress(savedDeviceAddress)) {
                 deviceAddress = savedDeviceAddress
             }
         }
 
         val deviceName = LocalDataStorage.get(applicationContext(), "LastDeviceName", "")
-        api().waitForConnection(deviceAddress, deviceName)
+        repository.waitForConnection(deviceAddress, deviceName)
     }
 }

@@ -9,13 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PhoneFinderView(
     onUpdate: (ActionsViewModel.FindPhoneAction) -> Unit,
-    actionsViewModel: ActionsViewModel = viewModel()
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val classType = ActionsViewModel.FindPhoneAction::class.java
     val actions by actionsViewModel.actions.collectAsState()

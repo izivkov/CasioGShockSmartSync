@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
@@ -79,7 +80,7 @@ fun SettingsScreen() {
 @Composable
 fun SettingsList() {
 
-    val settingsViewModel: SettingsViewModel = viewModel()
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     val settingsViews = arrayListOf(
         Locale(settingsViewModel::updateSetting),
@@ -100,7 +101,7 @@ fun SettingsList() {
 @Composable
 fun BottomRow(
     modifier: Modifier,
-    settingsViewModel: SettingsViewModel = viewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     Column(
         modifier = modifier,

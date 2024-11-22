@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -30,7 +31,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockapi.Event
 
 @Composable
-fun EventsScreen(viewModel: EventViewModel = viewModel()) {
+fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
 
     GShockSmartSyncTheme {
         Surface(
@@ -86,7 +87,7 @@ fun EventsScreen(viewModel: EventViewModel = viewModel()) {
 }
 
 @Composable
-fun EventList(eventViewModel: EventViewModel = viewModel()) {
+fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
 
     val events by eventViewModel.events.collectAsState()
 

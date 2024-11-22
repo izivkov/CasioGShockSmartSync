@@ -2,18 +2,16 @@ package org.avmedia.gshockGoogleSync.services
 
 import android.app.Application
 import android.bluetooth.BluetoothDevice
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.api
 import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ProgressEvents
-import java.lang.ref.WeakReference
 
 object DeviceManager {
 
-    private var apiReference: WeakReference<GShockAPI>? = null
+    private lateinit var repository: GShockRepository
 
     init {
         startListener()
@@ -23,8 +21,8 @@ object DeviceManager {
      * Initializes the DeviceManager with the given GShockAPI instance.
      * Uses WeakReference to prevent memory leaks.
      */
-    fun initialize(api: GShockAPI) {
-        apiReference = WeakReference(api)
+    fun initialize(repository: GShockRepository) {
+        this.repository = repository
     }
 
     private fun startListener() {
@@ -53,7 +51,7 @@ object DeviceManager {
                         applicationContext(),
                         "LastDeviceAddress",
                         ""
-                    ) != deviceAddress && api().validateBluetoothAddress(deviceAddress)
+                    ) != deviceAddress && repository.validateBluetoothAddress(deviceAddress)
                 ) {
                     LocalDataStorage.put(
                         applicationContext(),
@@ -70,10 +68,9 @@ object DeviceManager {
      * Disconnects the device and clears local data.
      */
     private fun disconnectAndNotify(application: Application) {
-        val api = apiReference?.get() ?: return // Exit if API reference is null
         val deviceName = ProgressEvents.getPayload("Disconnect") as BluetoothDevice
 
-        api.teardownConnection(deviceName)
+        repository.teardownConnection(deviceName)
 
         // Optionally, notify the user or update the UI
         // You can send a local broadcast or use an event bus to notify.

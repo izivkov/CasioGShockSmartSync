@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppTextField
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
@@ -28,7 +29,7 @@ import org.avmedia.gshockGoogleSync.R
 fun FineAdjustmentRow(
     modifier: Modifier = Modifier,
     onUpdate: (SettingsViewModel.TimeAdjustment) -> Unit,
-    settingsViewModel: SettingsViewModel = viewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val classType = SettingsViewModel.TimeAdjustment::class.java
     val settings by settingsViewModel.settings.collectAsState()

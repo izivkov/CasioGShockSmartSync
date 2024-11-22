@@ -14,13 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 
 @Composable
 fun WatchNameView(
     modifier: Modifier = Modifier,
-    timeModel: TimeViewModel = viewModel()
+    timeModel: TimeViewModel = hiltViewModel()
 ) {
     val watchName by timeModel.watchName.collectAsState()
 

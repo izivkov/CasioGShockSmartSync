@@ -33,13 +33,15 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockapi.WatchInfo
 
 @Composable
-fun Battery(timeModel: TimeViewModel = viewModel()) {
-
+fun Battery(
+    timeModel: TimeViewModel = hiltViewModel())
+{
     val batteryLevel by timeModel.batteryLevel.collectAsState()
     var result by remember { mutableIntStateOf(0) }
 

@@ -15,6 +15,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -24,11 +25,12 @@ import org.avmedia.gshockapi.GShockAPI
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val application: GShockApplication
         get() = applicationContext as GShockApplication
     private var deviceManager: DeviceManager
-    private val api = GShockAPI(this)
+//    private val api = GShockAPI(this)
     private lateinit var bluetoothHelper: BluetoothHelper
 
     init {
@@ -99,11 +101,6 @@ class MainActivity : ComponentActivity() {
         // Make context available from anywhere in the code (not yet used).
         fun applicationContext(): Context {
             return instance!!.applicationContext
-        }
-
-        // git fun api(): GShockAPIMock {
-        fun api(): GShockAPI {
-            return instance!!.api
         }
     }
 }

@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 
 @Composable
-fun RunActionsScreen() {
+fun RunActionsScreen(repository: GShockRepository) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -29,12 +29,6 @@ fun RunActionsScreen() {
             fontWeight = FontWeight.Bold // Adjust as needed
         )
 
-        ActionRunner(context = LocalContext.current)
+        ActionRunner(context = LocalContext.current, api = repository)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewRunActionsScreen() {
-    RunActionsScreen()
 }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,7 +20,7 @@ import org.avmedia.gshockapi.WatchInfo
 fun HomeTime(
     modifier: Modifier = Modifier,
     defaultText: String = "N/A",
-    timeModel: TimeViewModel = viewModel()
+    timeModel: TimeViewModel = hiltViewModel()
 ) {
     val homeTime by timeModel.homeTime.collectAsState()
     var text by remember { mutableStateOf(defaultText) }

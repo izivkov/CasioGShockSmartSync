@@ -6,14 +6,15 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.api
 import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
@@ -21,9 +22,13 @@ import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-class SettingsViewModel : ViewModel() {
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val repository: GShockRepository
+) : ViewModel() {
     abstract class Setting(open var title: String) {
         open fun save() {}
     }
@@ -127,7 +132,7 @@ class SettingsViewModel : ViewModel() {
 
         val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
         CoroutineScope(coroutineContext).launch {
-            val settingStr = Gson().toJson(api().getSettings())
+            val settingStr = Gson().toJson(repository.getSettings())
             updateSettingsAndMap(fromJson(settingStr))
         }
     }
@@ -314,7 +319,7 @@ class SettingsViewModel : ViewModel() {
         smartSettings.add(light)
 
         // Power Save Mode
-        val batteryLevel = api().getBatteryLevel()
+        val batteryLevel = repository.getBatteryLevel()
         val powerSavingMode = batteryLevel <= 15
         val powerSavings = PowerSavingMode(powerSavingMode)
         smartSettings.add(powerSavings)
@@ -371,7 +376,7 @@ class SettingsViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                api().setSettings(settings)
+                repository.setSettings(settings)
                 AppSnackbar("Settings Sent to Watch")
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")

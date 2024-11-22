@@ -6,19 +6,24 @@ import android.os.Looper
 import android.provider.AlarmClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.api
 import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class AlarmViewModel : ViewModel() {
+@HiltViewModel
+class AlarmViewModel @Inject constructor(
+    private val repository: GShockRepository
+) : ViewModel() {
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms
 
@@ -30,7 +35,7 @@ class AlarmViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 // Load the alarms initially
-                val loadedAlarms = api().getAlarms() // Call your suspend function here
+                val loadedAlarms = repository.getAlarms() // Call your suspend function here
                 _alarms.value = loadedAlarms
                 AlarmsModel.clear()
                 AlarmsModel.addAll(ArrayList(_alarms.value))
@@ -56,7 +61,7 @@ class AlarmViewModel : ViewModel() {
     fun sendAlarmsToWatch() {
         viewModelScope.launch {
             try {
-                api().setAlarms(alarms = ArrayList(alarms.value))
+                repository.setAlarms(alarms = ArrayList(alarms.value))
                 AppSnackbar("Alarms Set no Watch")
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
@@ -92,7 +97,7 @@ class AlarmViewModel : ViewModel() {
 
                 // Schedule the alarms with a one-second delay
                 executorService.schedule({
-                    api().preventReconnection()
+                    repository.preventReconnection()
 
                     // Use the handler to call startActivity on the main thread
                     handler.post {

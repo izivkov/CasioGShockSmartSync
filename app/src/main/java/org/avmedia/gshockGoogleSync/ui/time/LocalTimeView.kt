@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
@@ -35,7 +36,7 @@ import java.util.TimeZone
 @Composable
 fun LocalTimeView(
     modifier: Modifier,
-    timeModel: TimeViewModel = viewModel()
+    timeModel: TimeViewModel = hiltViewModel()
 ) {
     AppCard(
         modifier = modifier

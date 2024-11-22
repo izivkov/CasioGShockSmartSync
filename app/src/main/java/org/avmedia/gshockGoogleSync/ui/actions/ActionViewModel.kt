@@ -9,13 +9,13 @@ import android.net.Uri
 import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.api
 import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.CoroutineScopes.mainScope
@@ -28,8 +28,13 @@ import java.text.DateFormat
 import java.time.Clock
 import java.util.Date
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import javax.inject.Inject
 
-class ActionsViewModel : ViewModel() {
+@HiltViewModel
+class ActionsViewModel @Inject constructor(
+    val repository: GShockRepository
+) : ViewModel() {
     private val _actions = MutableStateFlow<ArrayList<Action>>(arrayListOf())
     val actions: StateFlow<List<Action>> = _actions
 
@@ -79,14 +84,14 @@ class ActionsViewModel : ViewModel() {
             NextTrack("Skip to next track", false),
 
             FindPhoneAction(applicationContext().getString(R.string.find_phone), true),
-            SetTimeAction(applicationContext().getString(R.string.set_time), true),
-            SetEventsAction(applicationContext().getString(R.string.set_reminders), false),
+            SetTimeAction(applicationContext().getString(R.string.set_time), true, repository),
+            SetEventsAction(applicationContext().getString(R.string.set_reminders), false, repository),
             PhotoAction(
                 applicationContext().getString(R.string.take_photo),
                 false,
                 CAMERA_ORIENTATION.BACK
             ),
-            PrayerAlarmsAction("Set Prayer Alarms", true),
+            PrayerAlarmsAction("Set Prayer Alarms", true, repository),
             Separator(applicationContext().getString(R.string.emergency_actions), false),
             PhoneDialAction(applicationContext().getString(R.string.make_phonecall), false, ""),
         )
@@ -135,7 +140,7 @@ class ActionsViewModel : ViewModel() {
     }
 
     data class SetEventsAction(
-        override var title: String, override var enabled: Boolean
+        override var title: String, override var enabled: Boolean, val repository: GShockRepository
     ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
 
@@ -151,7 +156,7 @@ class ActionsViewModel : ViewModel() {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(context)
-            api().setEvents(EventsModel.events)
+            repository.setEvents(EventsModel.events)
         }
 
         override fun load(context: Context) {
@@ -205,7 +210,7 @@ class ActionsViewModel : ViewModel() {
     }
 
     data class SetTimeAction(
-        override var title: String, override var enabled: Boolean
+        override var title: String, override var enabled: Boolean, val repository: GShockRepository
     ) :
         Action(
             title,
@@ -230,7 +235,7 @@ class ActionsViewModel : ViewModel() {
 
             // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
             mainScope.launch {
-                api().setTime(timeMs = timeMs)
+                repository.setTime(timeMs = timeMs)
             }
         }
 
@@ -303,7 +308,7 @@ class ActionsViewModel : ViewModel() {
     }
 
     data class PrayerAlarmsAction(
-        override var title: String, override var enabled: Boolean
+        override var title: String, override var enabled: Boolean, val repository: GShockRepository
     ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
 
@@ -325,8 +330,8 @@ class ActionsViewModel : ViewModel() {
             }
             mainScope.launch {
                 // getAlarms need to be run first, otherwise setAlarms() will not work
-                api().getAlarms()
-                api().setAlarms(alarms)
+                repository.getAlarms()
+                repository.setAlarms(alarms)
             }
         }
     }
