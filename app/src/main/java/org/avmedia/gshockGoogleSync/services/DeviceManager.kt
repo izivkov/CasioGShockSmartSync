@@ -12,7 +12,7 @@ import org.avmedia.gshockapi.ProgressEvents
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ViewScoped
+@Singleton
 class DeviceManager @Inject constructor(
     private val repository: GShockRepository,
     @ApplicationContext private val appContext: Context // Inject application context

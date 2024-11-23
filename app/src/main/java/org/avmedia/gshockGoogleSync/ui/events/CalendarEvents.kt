@@ -16,7 +16,6 @@ import android.net.Uri
 import android.os.Handler
 import android.provider.CalendarContract
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ViewModelScoped
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.ProgressEvents
@@ -98,94 +97,77 @@ class CalendarEvents @Inject constructor(
             sortOrder
         )
 
-        // check cursor columns:
-        if (cur != null) {
-            val columnNames = cur.columnNames
-            columnNames.forEach { columnName ->
-                println("Available column: $columnName")
-            }
-
-            while (cur.moveToNext()) {
-                // Safely get column indices
-                val titleColumnIndex = cur.getColumnIndexOrThrow(CalendarContract.Instances.TITLE)
-                val beginColumnIndex = cur.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN)
-
-                val eventTitle = cur.getString(titleColumnIndex)
-                val eventBegin = cur.getLong(beginColumnIndex)
-
-                println("Event: $eventTitle, Start: $eventBegin")
-            }
-            // cur.close()
-            cur.moveToFirst()
-        }
-        // end
-
         calendarObserver.register(cr, uri)
-
         val seenEventIds = mutableSetOf<Long>() // Set to track seen EVENT_IDs
 
-        while (cur!!.moveToNext()) {
-            val eventId =
-                cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID))
+        // cur?.moveToFirst()
+        cur?.moveToPosition(-1) // move before the first event, so moveToNext will start at the first event
 
-            val eventStart =
-                cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN))
-            val currentTimeMillis = System.currentTimeMillis()
+        if (cur != null) {
+            while (cur.moveToNext()) {
+                val eventId =
+                    cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID))
 
-            // If we haven't seen this EVENT_ID before, it's the first occurrence of the event
-            if (eventId !in seenEventIds && eventStart > currentTimeMillis) {
-                seenEventIds.add(eventId)
+                val eventStart =
+                    cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN))
+                val currentTimeMillis = System.currentTimeMillis()
 
-                var title: String? =
-                    cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
-                title = if (title.isNullOrBlank()) "(No title)" else title
+                // If we haven't seen this EVENT_ID before, it's the first occurrence of the event
+                if (eventId !in seenEventIds && eventStart > currentTimeMillis) {
+                    seenEventIds.add(eventId)
 
-                val dateStart: String? =
-                    cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
-                val rrule: String? =
-                    cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
-                val allDay: String? =
-                    cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
+                    var title: String? =
+                        cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
+                    title = if (title.isNullOrBlank()) "(No title)" else title
 
-                var zone = ZoneId.systemDefault()
-                if (allDay == "1") {
-                    zone = ZoneId.of("UTC")
-                }
+                    val dateStart: String? =
+                        cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
+                    val rrule: String? =
+                        cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
+                    val allDay: String? =
+                        cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
 
-                val startDate = EventsModel.createEventDate(dateStart!!.toLong(), zone)
-                var endDate = startDate
+                    var zone = ZoneId.systemDefault()
+                    if (allDay == "1") {
+                        zone = ZoneId.of("UTC")
+                    }
 
-                val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
-                    RRuleValues.getValues(rrule, startDate, zone)
+                    val startDate = EventsModel.createEventDate(dateStart!!.toLong(), zone)
+                    var endDate = startDate
 
-                if (localEndDate != null) {
-                    endDate = EventDate(
-                        localEndDate.year,
-                        localEndDate.month,
-                        localEndDate.dayOfMonth
+                    val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
+                        RRuleValues.getValues(rrule, startDate, zone)
+
+                    if (localEndDate != null) {
+                        endDate = EventDate(
+                            localEndDate.year,
+                            localEndDate.month,
+                            localEndDate.dayOfMonth
+                        )
+                    }
+
+                    val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
+                    if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) {
+                        continue // do not add expired events
+                    }
+
+                    val enabled = events.size < EventsModel.MAX_REMINDERS
+                    events.add(
+                        Event(
+                            title,
+                            startDate,
+                            endDate,
+                            repeatPeriod,
+                            daysOfWeek,
+                            enabled,
+                            incompatible,
+                        )
                     )
                 }
-
-                val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
-                if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) {
-                    continue // do not add expired events
-                }
-
-                val enabled = events.size < EventsModel.MAX_REMINDERS
-                events.add(
-                    Event(
-                        title,
-                        startDate,
-                        endDate,
-                        repeatPeriod,
-                        daysOfWeek,
-                        enabled,
-                        incompatible,
-                    )
-                )
             }
         }
-        cur.close()
+
+        cur?.close()
         return events
     }
 

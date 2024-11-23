@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.di.RepositoryEntryPoint
+import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
@@ -27,11 +28,15 @@ import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @HiltAndroidApp
 class GShockApplication : Application() {
     lateinit var context: MainActivity
     private lateinit var repository: GShockRepository
+
+    @Inject
+    lateinit var deviceManager: DeviceManager // Inject the DeviceManager
 
     fun init(context: MainActivity) {
         this.context = context
@@ -45,7 +50,7 @@ class GShockApplication : Application() {
             RepositoryEntryPoint::class.java
         ).getGShockRepository()
 
-        // DeviceManager.initialize(repository)
+        deviceManager
         createAppEventsSubscription()
     }
 
