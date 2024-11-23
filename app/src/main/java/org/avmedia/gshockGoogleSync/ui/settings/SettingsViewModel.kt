@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
@@ -28,8 +28,10 @@ import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    @Named("api") private val api: GShockRepository
+    @Named("api") private val api: GShockRepository,
+    @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
+
     abstract class Setting(open var title: String) {
         open fun save() {}
     }
@@ -99,19 +101,20 @@ class SettingsViewModel @Inject constructor(
         Setting("Power Saving Mode")
 
     data class TimeAdjustment(
+        val appContext: Context,
         var timeAdjustment: Boolean = true,
         var adjustmentTimeMinutes: Int = 0,
         var timeAdjustmentNotifications: Boolean =
-            LocalDataStorage.getTimeAdjustmentNotification(applicationContext()),
-        var fineAdjustment: Int = LocalDataStorage.getFineTimeAdjustment(applicationContext()),
+            LocalDataStorage.getTimeAdjustmentNotification(appContext),
+        var fineAdjustment: Int = LocalDataStorage.getFineTimeAdjustment(appContext),
     ) : Setting("Time Adjustment") {
         override fun save() {
             LocalDataStorage.setTimeAdjustmentNotification(
-                applicationContext(),
+                appContext,
                 timeAdjustmentNotifications
             )
             LocalDataStorage.setFineTimeAdjustment(
-                applicationContext(),
+                appContext,
                 fineAdjustment
             )
         }
@@ -127,7 +130,7 @@ class SettingsViewModel @Inject constructor(
             OperationSound(),
             Light(),
             PowerSavingMode(),
-            TimeAdjustment(),
+            TimeAdjustment(appContext),
         )
         updateSettingsAndMap(filter(newSettings))
 
@@ -268,8 +271,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     @SuppressLint("SimpleDateFormat")
-    private suspend fun getSmartDefaults(
-    ): ArrayList<Setting> {
+    private suspend fun getSmartDefaults(): ArrayList<Setting> {
         val smartSettings = arrayListOf<Setting>()
         val currentLocale = java.util.Locale.getDefault()
 
@@ -308,7 +310,7 @@ class SettingsViewModel @Inject constructor(
 
         // Button sounds
         val notificationManager =
-            applicationContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val buttonTone =
             notificationManager.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
         val operationSound = OperationSound(buttonTone)
@@ -326,7 +328,7 @@ class SettingsViewModel @Inject constructor(
         smartSettings.add(powerSavings)
 
         // Time adjustment
-        val timeAdjustment = TimeAdjustment(true, 30, false, 0)
+        val timeAdjustment = TimeAdjustment(appContext, true, 30, false, 0)
         smartSettings.add(timeAdjustment)
 
         return smartSettings
@@ -366,7 +368,7 @@ class SettingsViewModel @Inject constructor(
             settings.timeAdjustment = timeAdjustment.timeAdjustment
             settings.adjustmentTimeMinutes = timeAdjustment.adjustmentTimeMinutes
             LocalDataStorage.setTimeAdjustmentNotification(
-                applicationContext(),
+                appContext,
                 timeAdjustment.timeAdjustmentNotifications
             )
         }

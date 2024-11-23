@@ -19,7 +19,8 @@ import javax.inject.Named
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
-    @Named("api") private val api: GShockRepository
+    private val api: GShockRepository,
+    private val calendarEvents: CalendarEvents
 ) : ViewModel() {
 
     init {
@@ -32,9 +33,9 @@ class EventViewModel @Inject constructor(
     fun loadEvents(context: Context) {
         viewModelScope.launch {
             try {
-                val loadedEvents = CalendarEvents.getEventsFromCalendar(context)
+                val loadedEvents = calendarEvents.getEventsFromCalendar()
                 _events.value = loadedEvents
-                EventsModel.refresh(context)
+                EventsModel.refresh(loadedEvents)
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message)
             }

@@ -3,6 +3,7 @@ package org.avmedia.gshockGoogleSync.ui.alarms
 import AppSwitch
 import AppText
 import AppTextExtraLarge
+import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
@@ -25,15 +26,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppTimePicker
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import java.util.Date
 import java.util.Locale
 
@@ -51,6 +54,14 @@ fun AlarmItem(
     var selectedTime by remember { mutableStateOf<TimePickerState?>(null) }
     var alarmHours by remember { mutableIntStateOf(hours) }
     var alarmMinutes by remember { mutableIntStateOf(minutes) }
+
+    val localContext = LocalContext.current.applicationContext
+    val appContext = remember {
+        EntryPointAccessors.fromApplication(
+            localContext,
+            ApplicationContextEntryPoint::class.java
+        ).getApplicationContext()
+    }
 
     val handleConfirm: (TimePickerState) -> Unit = { timePickerState ->
         selectedTime = timePickerState
@@ -83,7 +94,7 @@ fun AlarmItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppTextExtraLarge(
-                    text = formatTime(alarmHours, alarmMinutes),
+                    text = formatTime(alarmHours, alarmMinutes, appContext),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
@@ -128,7 +139,7 @@ fun AlarmItem(
     }
 }
 
-fun formatTime(hours: Int, minutes: Int): String {
+fun formatTime(hours: Int, minutes: Int, appContext: Context): String {
 
     fun from0to12(formattedTime: String): String {
         return if (formattedTime.startsWith("0")) {
@@ -141,7 +152,7 @@ fun formatTime(hours: Int, minutes: Int): String {
     val sdf = SimpleDateFormat("H:mm", Locale.getDefault())
     val dateObj: Date = sdf.parse("${hours}:${minutes}")
 
-    val is24HourFormat = DateFormat.is24HourFormat(applicationContext())
+    val is24HourFormat = DateFormat.is24HourFormat(appContext)
     val timeFormat = if (is24HourFormat) {
         "H:mm"
     } else {

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockGoogleSync.R
@@ -20,7 +21,7 @@ import org.avmedia.gshockapi.ProgressEvents
 @Composable
 fun ForgetButton(
     modifier: Modifier,
-    ptrConnectionViewModel: PreConnectionViewModel = PreConnectionViewModel()
+    ptrConnectionViewModel: PreConnectionViewModel = hiltViewModel()
 ) {
     var isEnabled by remember { mutableStateOf(true) }
 

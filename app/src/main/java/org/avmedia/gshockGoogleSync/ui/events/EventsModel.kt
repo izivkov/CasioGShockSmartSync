@@ -19,9 +19,9 @@ object EventsModel {
 
     val events = ArrayList<Event>()
 
-    fun refresh(context: Context) {
+    fun refresh(newEvents: ArrayList<Event>) {
         events.clear()
-        events.addAll(CalendarEvents.getEventsFromCalendar(context))
+        events.addAll(newEvents)
     }
 
     fun getEnabledCount(): Int {

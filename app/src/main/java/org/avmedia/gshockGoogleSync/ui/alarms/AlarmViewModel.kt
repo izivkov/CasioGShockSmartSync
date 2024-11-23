@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.alarms
 
+import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -7,10 +8,10 @@ import android.provider.AlarmClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
@@ -23,7 +24,8 @@ import javax.inject.Named
 
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
-    @Named("api") private val api: GShockRepository
+    private val api: GShockRepository,
+    @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms
@@ -102,7 +104,7 @@ class AlarmViewModel @Inject constructor(
 
                     // Use the handler to call startActivity on the main thread
                     handler.post {
-                        applicationContext().startActivity(intent)
+                        appContext.startActivity(intent)
                     }
                 }, index.toLong(), TimeUnit.SECONDS)
             }

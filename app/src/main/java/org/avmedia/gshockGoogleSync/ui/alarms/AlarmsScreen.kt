@@ -28,7 +28,6 @@ import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.R
-import javax.inject.Singleton
 
 @Composable
 fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {

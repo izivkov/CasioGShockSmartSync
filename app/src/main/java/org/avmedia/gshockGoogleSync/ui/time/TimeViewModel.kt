@@ -1,11 +1,12 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
@@ -15,7 +16,8 @@ import javax.inject.Named
 
 @HiltViewModel
 class TimeViewModel @Inject constructor(
-    @Named("api") private val api: GShockRepository
+    @Named("api") private val api: GShockRepository,
+    @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
     private val _timer = MutableStateFlow(0)
     val timer = _timer
@@ -45,7 +47,7 @@ class TimeViewModel @Inject constructor(
     fun sendTimeToWatch() {
         viewModelScope.launch {
             try {
-                val timeOffset = LocalDataStorage.getFineTimeAdjustment(applicationContext())
+                val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                 val timeMs = System.currentTimeMillis() + timeOffset
                 AppSnackbar("Sending time to watch...")
                 api.setTime(timeMs = timeMs)

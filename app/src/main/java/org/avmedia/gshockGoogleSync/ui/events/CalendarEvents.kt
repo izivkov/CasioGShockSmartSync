@@ -15,17 +15,25 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.CalendarContract
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ViewModelScoped
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.ProgressEvents
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object CalendarEvents {
-    fun getEventsFromCalendar(context: Context): ArrayList<Event> {
-        return getEvents(context)
+@Singleton
+class CalendarEvents @Inject constructor(
+    @ApplicationContext private val appContext: Context // Inject application context
+) {
+    private val calendarObserver = CalendarObserver()
+
+    fun getEventsFromCalendar(): ArrayList<Event> {
+        return getEvents(appContext)
     }
 
     @SuppressLint("Range")
@@ -90,7 +98,7 @@ object CalendarEvents {
             sortOrder
         )
 
-        // check cusror columns:
+        // check cursor columns:
         if (cur != null) {
             val columnNames = cur.columnNames
             columnNames.forEach { columnName ->
@@ -112,8 +120,7 @@ object CalendarEvents {
         }
         // end
 
-
-        CalendarObserver.register(cr, uri)
+        calendarObserver.register(cr, uri)
 
         val seenEventIds = mutableSetOf<Long>() // Set to track seen EVENT_IDs
 
@@ -182,13 +189,13 @@ object CalendarEvents {
         return events
     }
 
-    private object CalendarObserver {
+    inner class CalendarObserver {
         private var registered = false
 
         @Suppress("DEPRECATION")
         private val calendarObserver = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {
-                ProgressEvents.onNext("CalendarUpdated", getEvents(applicationContext()))
+                ProgressEvents.onNext("CalendarUpdated", getEvents(appContext))
             }
         }
 

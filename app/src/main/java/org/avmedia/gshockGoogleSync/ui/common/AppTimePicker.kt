@@ -19,9 +19,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import dagger.hilt.android.EntryPointAccessors
+import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,10 +33,18 @@ fun AppTimePicker(
     initialHour: Int,
     initialMinute: Int,
 ) {
+    val localContext = LocalContext.current.applicationContext
+    val appContext = remember {
+        EntryPointAccessors.fromApplication(
+            localContext,
+            ApplicationContextEntryPoint::class.java
+        ).getApplicationContext()
+    }
+
     val timePickerState = rememberTimePickerState(
         initialHour,
         initialMinute,
-        is24Hour = DateFormat.is24HourFormat(applicationContext()),
+        is24Hour = DateFormat.is24HourFormat(appContext),
     )
 
     Column(

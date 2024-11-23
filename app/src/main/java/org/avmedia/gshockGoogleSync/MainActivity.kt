@@ -1,7 +1,6 @@
 package org.avmedia.gshockGoogleSync
 
 import BluetoothHelper
-import android.content.Context
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -21,7 +20,6 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
-import org.avmedia.gshockapi.GShockAPI
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -29,16 +27,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : ComponentActivity() {
     private val application: GShockApplication
         get() = applicationContext as GShockApplication
-    private var deviceManager: DeviceManager
-//    private val api = GShockAPI(this)
     private lateinit var bluetoothHelper: BluetoothHelper
-
-    init {
-        instance = this
-
-        // do not delete this. DeviceManager needs to be running to save the last device name to reuse on next start.
-        deviceManager = DeviceManager
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +66,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
-                            ) { padding ->
+                            ) { _ ->
                                 Surface(
                                     modifier = Modifier.fillMaxSize(),
                                     color = MaterialTheme.colorScheme.background
@@ -91,16 +80,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-
-    companion object {
-
-        private var instance: MainActivity? = null
-
-        // Make context available from anywhere in the code (not yet used).
-        fun applicationContext(): Context {
-            return instance!!.applicationContext
         }
     }
 }

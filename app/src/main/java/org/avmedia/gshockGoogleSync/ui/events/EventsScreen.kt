@@ -12,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,7 +22,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
+import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
@@ -28,6 +30,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockapi.Event
 
 @Composable
@@ -90,9 +93,17 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
 fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
 
     val events by eventViewModel.events.collectAsState()
+    val localContext = LocalContext.current.applicationContext
+
+    val appContext = remember(localContext) {
+        EntryPointAccessors.fromApplication(
+            localContext,
+            ApplicationContextEntryPoint::class.java
+        ).getApplicationContext()
+    }
 
     LaunchedEffect(Unit) {
-        eventViewModel.loadEvents(applicationContext())
+        eventViewModel.loadEvents(appContext)
     }
 
     @Composable

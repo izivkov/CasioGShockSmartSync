@@ -10,13 +10,13 @@ import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.MainActivity.Companion.applicationContext
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.CoroutineScopes.mainScope
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -29,15 +29,21 @@ import java.time.Clock
 import java.util.Date
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import javax.inject.Inject
 import javax.inject.Named
 
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
-    @Named("api") private val api: GShockRepository
+    private val api: GShockRepository,
+    @ApplicationContext private val appContext: Context, // Inject application context
+    private val calendarEvents: CalendarEvents
 ) : ViewModel() {
     private val _actions = MutableStateFlow<ArrayList<Action>>(arrayListOf())
     val actions: StateFlow<List<Action>> = _actions
+
+    @Inject
+    lateinit var notificationProvider: NotificationProvider
 
     private val actionMap = mutableMapOf<Class<out Action>, Action>()
 
@@ -62,7 +68,7 @@ class ActionsViewModel @Inject constructor(
         if (index != -1) {
             currentList[index] = updatedAction
             updateActionsAndMap(currentList)
-            updatedAction.save(applicationContext())
+            updatedAction.save(appContext)
         }
     }
 
@@ -74,7 +80,7 @@ class ActionsViewModel @Inject constructor(
 
     init {
         loadInitialActions()
-        updateActionsAndMap(loadData(applicationContext()))
+        updateActionsAndMap(loadData(appContext))
     }
 
     // Method to load the initial list of actions
@@ -84,17 +90,17 @@ class ActionsViewModel @Inject constructor(
             StartVoiceAssistAction("Start Voice Assistant", false),
             NextTrack("Skip to next track", false),
 
-            FindPhoneAction(applicationContext().getString(R.string.find_phone), true),
-            SetTimeAction(applicationContext().getString(R.string.set_time), true, api),
-            SetEventsAction(applicationContext().getString(R.string.set_reminders), false, api),
+            FindPhoneAction(appContext.getString(R.string.find_phone), true),
+            SetTimeAction(appContext.getString(R.string.set_time), true, api),
+            SetEventsAction(appContext.getString(R.string.set_reminders), false, api, calendarEvents),
             PhotoAction(
-                applicationContext().getString(R.string.take_photo),
+                appContext.getString(R.string.take_photo),
                 false,
                 CAMERA_ORIENTATION.BACK
             ),
             PrayerAlarmsAction("Set Prayer Alarms", true, api),
-            Separator(applicationContext().getString(R.string.emergency_actions), false),
-            PhoneDialAction(applicationContext().getString(R.string.make_phonecall), false, ""),
+            Separator(appContext.getString(R.string.emergency_actions), false),
+            PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""),
         )
 
         _actions.value = initialActions
@@ -141,7 +147,7 @@ class ActionsViewModel @Inject constructor(
     }
 
     data class SetEventsAction(
-        override var title: String, override var enabled: Boolean, val api: GShockRepository
+        override var title: String, override var enabled: Boolean, val api: GShockRepository, val calendarEvents: CalendarEvents
     ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
 
@@ -156,7 +162,7 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            EventsModel.refresh(context)
+            EventsModel.refresh(calendarEvents.getEventsFromCalendar())
             api.setEvents(EventsModel.events)
         }
 
@@ -541,8 +547,7 @@ However, this way gives us more control on how to start the actions.
         val watchName = WatchInfo.name
         msg += " for $watchName watch"
 
-        NotificationProvider.createNotification(
-            context,
+        notificationProvider.createNotification(
             "G-Shock Smart Sync",
             msg,
             NotificationManager.IMPORTANCE_DEFAULT
