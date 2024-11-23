@@ -23,11 +23,12 @@ import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val repository: GShockRepository
+    @Named("api") private val api: GShockRepository
 ) : ViewModel() {
     abstract class Setting(open var title: String) {
         open fun save() {}
@@ -132,7 +133,7 @@ class SettingsViewModel @Inject constructor(
 
         val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
         CoroutineScope(coroutineContext).launch {
-            val settingStr = Gson().toJson(repository.getSettings())
+            val settingStr = Gson().toJson(api.getSettings())
             updateSettingsAndMap(fromJson(settingStr))
         }
     }
@@ -319,7 +320,7 @@ class SettingsViewModel @Inject constructor(
         smartSettings.add(light)
 
         // Power Save Mode
-        val batteryLevel = repository.getBatteryLevel()
+        val batteryLevel = api.getBatteryLevel()
         val powerSavingMode = batteryLevel <= 15
         val powerSavings = PowerSavingMode(powerSavingMode)
         smartSettings.add(powerSavings)
@@ -376,7 +377,7 @@ class SettingsViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                repository.setSettings(settings)
+                api.setSettings(settings)
                 AppSnackbar("Settings Sent to Watch")
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")

@@ -30,10 +30,11 @@ import java.util.Date
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
-    val repository: GShockRepository
+    @Named("api") private val api: GShockRepository
 ) : ViewModel() {
     private val _actions = MutableStateFlow<ArrayList<Action>>(arrayListOf())
     val actions: StateFlow<List<Action>> = _actions
@@ -84,14 +85,14 @@ class ActionsViewModel @Inject constructor(
             NextTrack("Skip to next track", false),
 
             FindPhoneAction(applicationContext().getString(R.string.find_phone), true),
-            SetTimeAction(applicationContext().getString(R.string.set_time), true, repository),
-            SetEventsAction(applicationContext().getString(R.string.set_reminders), false, repository),
+            SetTimeAction(applicationContext().getString(R.string.set_time), true, api),
+            SetEventsAction(applicationContext().getString(R.string.set_reminders), false, api),
             PhotoAction(
                 applicationContext().getString(R.string.take_photo),
                 false,
                 CAMERA_ORIENTATION.BACK
             ),
-            PrayerAlarmsAction("Set Prayer Alarms", true, repository),
+            PrayerAlarmsAction("Set Prayer Alarms", true, api),
             Separator(applicationContext().getString(R.string.emergency_actions), false),
             PhoneDialAction(applicationContext().getString(R.string.make_phonecall), false, ""),
         )
@@ -140,7 +141,7 @@ class ActionsViewModel @Inject constructor(
     }
 
     data class SetEventsAction(
-        override var title: String, override var enabled: Boolean, val repository: GShockRepository
+        override var title: String, override var enabled: Boolean, val api: GShockRepository
     ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
 
@@ -156,7 +157,7 @@ class ActionsViewModel @Inject constructor(
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(context)
-            repository.setEvents(EventsModel.events)
+            api.setEvents(EventsModel.events)
         }
 
         override fun load(context: Context) {
@@ -210,7 +211,7 @@ class ActionsViewModel @Inject constructor(
     }
 
     data class SetTimeAction(
-        override var title: String, override var enabled: Boolean, val repository: GShockRepository
+        override var title: String, override var enabled: Boolean, val api: GShockRepository
     ) :
         Action(
             title,
@@ -235,7 +236,7 @@ class ActionsViewModel @Inject constructor(
 
             // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
             mainScope.launch {
-                repository.setTime(timeMs = timeMs)
+                api.setTime(timeMs = timeMs)
             }
         }
 
@@ -308,7 +309,7 @@ class ActionsViewModel @Inject constructor(
     }
 
     data class PrayerAlarmsAction(
-        override var title: String, override var enabled: Boolean, val repository: GShockRepository
+        override var title: String, override var enabled: Boolean, val api: GShockRepository
     ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
 
@@ -330,8 +331,8 @@ class ActionsViewModel @Inject constructor(
             }
             mainScope.launch {
                 // getAlarms need to be run first, otherwise setAlarms() will not work
-                repository.getAlarms()
-                repository.setAlarms(alarms)
+                api.getAlarms()
+                api.setAlarms(alarms)
             }
         }
     }

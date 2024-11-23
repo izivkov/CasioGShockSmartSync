@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockapi.GShockAPI
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -14,6 +15,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
+    @Named("api")
     fun provideGShockRepository(api: GShockAPI): GShockRepository {
         return GShockRepository(api)
     }

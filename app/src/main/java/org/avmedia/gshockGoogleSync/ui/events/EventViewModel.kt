@@ -15,10 +15,11 @@ import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
-    private val repository: GShockRepository
+    @Named("api") private val api: GShockRepository
 ) : ViewModel() {
 
     init {
@@ -64,7 +65,7 @@ class EventViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val events = _events.value
-                repository.setEvents(ArrayList(_events.value))
+                api.setEvents(ArrayList(_events.value))
                 AppSnackbar("Events Set")
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")

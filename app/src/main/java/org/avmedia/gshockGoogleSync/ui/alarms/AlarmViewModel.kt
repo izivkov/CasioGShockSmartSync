@@ -19,10 +19,11 @@ import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
-    private val repository: GShockRepository
+    @Named("api") private val api: GShockRepository
 ) : ViewModel() {
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms
@@ -35,7 +36,7 @@ class AlarmViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Load the alarms initially
-                val loadedAlarms = repository.getAlarms() // Call your suspend function here
+                val loadedAlarms = api.getAlarms() // Call your suspend function here
                 _alarms.value = loadedAlarms
                 AlarmsModel.clear()
                 AlarmsModel.addAll(ArrayList(_alarms.value))
@@ -61,7 +62,7 @@ class AlarmViewModel @Inject constructor(
     fun sendAlarmsToWatch() {
         viewModelScope.launch {
             try {
-                repository.setAlarms(alarms = ArrayList(alarms.value))
+                api.setAlarms(alarms = ArrayList(alarms.value))
                 AppSnackbar("Alarms Set no Watch")
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
@@ -97,7 +98,7 @@ class AlarmViewModel @Inject constructor(
 
                 // Schedule the alarms with a one-second delay
                 executorService.schedule({
-                    repository.preventReconnection()
+                    api.preventReconnection()
 
                     // Use the handler to call startActivity on the main thread
                     handler.post {
