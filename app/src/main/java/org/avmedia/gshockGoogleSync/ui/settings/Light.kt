@@ -55,30 +55,32 @@ fun Light(
                 .padding(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 4.dp)
         ) {
             // Auto Light Layout
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 0.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
+            if (WatchInfo.hasAutoLight) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 0.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    AppTextLarge(
-                        text = stringResource(id = R.string.auto_light),
-                        modifier = Modifier.padding(end = 6.dp)
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        AppTextLarge(
+                            text = stringResource(id = R.string.auto_light),
+                            modifier = Modifier.padding(end = 6.dp)
+                        )
+                    }
+                    AppSwitch(
+                        checked = autoLight,
+                        onCheckedChange = {
+                            autoLight = it
+                            lightSetting.autoLight = it
+                            onUpdate(lightSetting.copy(autoLight = it))
+                        }
                     )
                 }
-                AppSwitch(
-                    checked = autoLight,
-                    onCheckedChange = {
-                        autoLight = it
-                        lightSetting.autoLight = it
-                        onUpdate(lightSetting.copy(autoLight = it))
-                    }
-                )
             }
 
             // Illumination Period Layout
