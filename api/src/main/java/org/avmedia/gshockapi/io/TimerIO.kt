@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CompletableDeferred
@@ -17,8 +18,8 @@ object TimerIO {
     }
 
     suspend fun request(): Int {
-        val timerValue = CachedIO.request("18", TimerIO::getTimer)
-        return timerValue as Int
+        val timerValue = CachedIO.request("18") { key -> getTimer(key) }
+        return timerValue
     }
 
     private suspend fun getTimer(key: String): Int {
@@ -29,8 +30,10 @@ object TimerIO {
     }
 
     fun set(timerValue: Int) {
-        fun setFunc () {Connection.sendMessage("{action: \"SET_TIMER\", value: $timerValue}")}
-        CachedIO.set("18", ::setFunc)
+        fun setFunc() {
+            Connection.sendMessage("{action: \"SET_TIMER\", value: $timerValue}")
+        }
+        CachedIO.set("18") {setFunc()}
     }
 
     fun onReceived(data: String) {

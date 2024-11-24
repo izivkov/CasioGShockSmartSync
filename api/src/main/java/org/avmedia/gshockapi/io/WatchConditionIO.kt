@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.utils.Utils
@@ -15,7 +16,7 @@ object WatchConditionIO {
     class WatchConditionValue(val batteryLevel: Int, val temperature: Int)
 
     suspend fun request(): WatchConditionValue {
-        return CachedIO.request("28", ::getWatchCondition) as WatchConditionValue
+        return CachedIO.request("28") { key -> getWatchCondition(key) }
     }
 
     private suspend fun getWatchCondition(key: String): WatchConditionValue {

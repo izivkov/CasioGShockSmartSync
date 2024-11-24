@@ -1,83 +1,56 @@
-package org.avmedia.gshockapi.io
-
 import org.avmedia.gshockapi.utils.Utils
 import java.util.Locale
-import kotlin.reflect.KFunction0
-import kotlin.reflect.KSuspendFunction1
 
 object CachedIO {
 
     private var cacheOff = false
-    private val cache = Cache()
+    private val cache = mutableMapOf<String, Any?>()
 
-    class Cache {
-        private val map = mutableMapOf<String, Any>()
-
-        suspend fun getCached(key: String): Any? {
-            return get(key.uppercase())
-        }
-
-        fun put(key: String, value: Any) {
-            map[key.uppercase()] = value
-        }
-
-        fun get(key: String): Any? {
-            return map[key.uppercase()]
-        }
-
-        fun remove(key: String) {
-            map.remove(key.uppercase())
-        }
-
-        fun clear() {
-            map.clear()
-        }
-    }
-
-    fun init() {
-        cache.clear()
-    }
-
+    // Clear the entire cache
     fun clearCache() {
         cache.clear()
     }
 
-    suspend fun request(key: String, func: KSuspendFunction1<String, Any>): Any {
-        val value = if (cacheOff) null else cache.getCached(key)
-        if (value == null) {
-            val funcResult = func(key)
-            cache.put(key, funcResult)
-            return funcResult
-        }
-        return value
-    }
-
-    fun set(key: String, func: KFunction0<Unit>) {
-        func()
-        remove(key)
-    }
-
-    fun get(key: String): Any? {
-        return cache.get(key)
-    }
-
+    // Remove a specific key
     fun remove(key: String) {
-        cache.remove(key)
+        cache.remove(key.uppercase())
     }
 
-    fun put(key: String, value: Any): Any {
-        return cache.put(key, value)
-    }
-
-    fun createKey(data: String): String {
-
-        val shortStr = Utils.toCompactString(data)
-        var keyLength = 2
-        // get the first byte of the returned data, which indicates the data content.
-        val startOfData = shortStr.substring(0, 2).uppercase(Locale.getDefault())
-        if (startOfData in arrayOf("1D", "1E", "1F", "30", "31")) {
-            keyLength = 4
+    // Fetch from cache or compute if not present
+    suspend fun <T : Any> request(
+        key: String,
+        compute: suspend (String) -> T
+    ): T {
+        if (cacheOff) {
+            return compute(key).also { cache[key.uppercase()] = it }
         }
+
+        @Suppress("UNCHECKED_CAST")
+        return (cache[key.uppercase()] as? T) ?: compute(key).also {
+            cache[key.uppercase()] = it
+        }
+    }
+
+    fun set(key: String, func: () -> Unit) {
+        func() // Execute the lambda
+        remove(key) // Remove the cached value for the given key
+    }
+
+    fun put(key: String, value: Any) {
+        cache[key.uppercase()] = value
+    }
+
+    // Get a cached value without recomputing
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Any> get(key: String): T {
+        return cache[key.uppercase()] as T
+    }
+
+    // Generate a compact key
+    fun createKey(data: String): String {
+        val shortStr = Utils.toCompactString(data)
+        val startOfData = shortStr.substring(0, 2).uppercase(Locale.getDefault())
+        val keyLength = if (startOfData in arrayOf("1D", "1E", "1F", "30", "31")) 4 else 2
         return shortStr.substring(0, keyLength).uppercase(Locale.getDefault())
     }
 }

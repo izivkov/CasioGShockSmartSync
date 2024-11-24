@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CompletableDeferred
@@ -14,7 +15,7 @@ object DstForWorldCitiesIO {
     }
 
     suspend fun request(cityNumber: Int): String {
-        return CachedIO.request("1e0$cityNumber", ::getDSTForWorldCities) as String
+        return CachedIO.request("1e0$cityNumber") { key -> getDSTForWorldCities(key) }
     }
 
     private suspend fun getDSTForWorldCities(key: String): String {

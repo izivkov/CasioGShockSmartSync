@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.utils.Utils
 
@@ -10,7 +11,7 @@ object DstWatchStateIO {
     }
 
     suspend fun request(state: IO.DTS_STATE): String {
-        return CachedIO.request("1d0${state.state}", ::getDSTWatchState) as String
+        return CachedIO.request("1d0${state.state}") { key -> getDSTWatchState(key) }
     }
 
     private suspend fun getDSTWatchState(key: String): String {

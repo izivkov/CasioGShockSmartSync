@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.utils.Utils
 
@@ -10,7 +11,7 @@ object WorldCitiesIO {
     }
 
     suspend fun request(cityNumber: Int): String {
-        return CachedIO.request("1f0$cityNumber", ::getWorldCities) as String
+        return CachedIO.request("1f0$cityNumber") { key -> getWorldCities(key) }
     }
 
     private suspend fun getWorldCities(key: String): String {

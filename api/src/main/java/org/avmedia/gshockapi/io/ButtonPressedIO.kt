@@ -10,7 +10,9 @@ object ButtonPressedIO {
     }
 
     suspend fun request(): IO.WATCH_BUTTON {
-        return CachedIO.request("10", ::getPressedButton) as IO.WATCH_BUTTON
+        return CachedIO.request("10") { key->
+            getPressedButton (key)
+        }
     }
 
     private suspend fun getPressedButton(key: String): IO.WATCH_BUTTON {

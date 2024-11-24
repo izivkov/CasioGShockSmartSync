@@ -76,7 +76,6 @@ class GShockAPI(private val context: Context) : IGShockAPI {
 
     override suspend fun init(): Boolean {
         IO.init()
-        CachedIO.init()
         getPressedButton()
         ProgressEvents.onNext("ButtonPressedInfoReceived")
 

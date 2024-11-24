@@ -24,7 +24,7 @@ object TimeAdjustmentIO {
     }
 
     suspend fun request(): TimeAdjustmentInfo {
-        return CachedIO.request("GET_TIME_ADJUSTMENT", ::getTimeAdjustment) as TimeAdjustmentInfo
+        return CachedIO.request("GET_TIME_ADJUSTMENT") {key->getTimeAdjustment(key)}
     }
 
     private suspend fun getTimeAdjustment(key: String): TimeAdjustmentInfo {

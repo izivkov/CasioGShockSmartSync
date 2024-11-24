@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
@@ -27,7 +28,7 @@ object SettingsIO {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun request(): Settings {
-        return CachedIO.request("GET_SETTINGS", ::getBasicSettings) as Settings
+        return CachedIO.request("GET_SETTINGS") { key-> getBasicSettings(key) }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -40,8 +41,10 @@ object SettingsIO {
     @RequiresApi(Build.VERSION_CODES.O)
     fun set(settings: Settings) {
         val settingJson = Gson().toJson(settings)
-        fun setFunc () {Connection.sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")}
-        CachedIO.set("GET_SETTINGS", ::setFunc)
+        fun setFunc() {
+            Connection.sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
+        }
+        CachedIO.set("GET_SETTINGS") { setFunc() }
     }
 
     fun onReceived(data: String) {
@@ -201,7 +204,8 @@ pwr. saving off:00010000
         }
 
         private fun setDnDFlag(flag: Byte, value: Boolean): Byte {
-            return if (value) flag or DO_NOT_DISTURB_OFF.toByte() else flag and DO_NOT_DISTURB_OFF.toByte().inv()
+            return if (value) flag or DO_NOT_DISTURB_OFF.toByte() else flag and DO_NOT_DISTURB_OFF.toByte()
+                .inv()
         }
     }
 }

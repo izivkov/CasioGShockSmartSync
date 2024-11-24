@@ -1,12 +1,11 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.awaitAll
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GET_SET_MODE
@@ -55,8 +54,10 @@ object EventsIO {
         }
 
         suspend fun waitForEvent(eventNumber: Int) {
-            val titleVal = CachedIO.request("30$eventNumber", ::requestTitle) as JSONObject
-            val timeVal = CachedIO.request("31$eventNumber", ::requestTime) as JSONObject
+            val titleVal =
+                CachedIO.request("30$eventNumber") { key -> requestTitle(key) as JSONObject }
+            val timeVal =
+                CachedIO.request("31$eventNumber") { key -> requestTime(key) as JSONObject }
 
             val eventJson = combineJSONObjects(titleVal, timeVal)
             DeferredValueHolder.deferredResult.complete(Event(eventJson))
@@ -179,11 +180,12 @@ object EventsIO {
             fun setFuncTitle() {
                 processReminderTitle(index + 1, reminderJson)
             }
+
             fun setFuncTime() {
                 processReminderTime(index + 1, reminderJson)
             }
-            CachedIO.set("30${index + 1}", ::setFuncTitle)
-            CachedIO.set("31${index + 1}", ::setFuncTime)
+            CachedIO.set("30${index + 1}") { setFuncTitle() }
+            CachedIO.set("31${index + 1}") { setFuncTime() }
         }
 
         Timber.i("Got reminders $remindersJsonArr")

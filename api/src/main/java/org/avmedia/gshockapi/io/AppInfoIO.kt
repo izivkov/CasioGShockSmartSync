@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.io
 
+import CachedIO
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.ble.GET_SET_MODE
 import org.avmedia.gshockapi.utils.Utils
@@ -11,7 +12,7 @@ object AppInfoIO {
     }
 
     suspend fun request(): String {
-        return CachedIO.request("22", ::getAppInfo) as String
+        return CachedIO.request("22") { key -> getAppInfo(key) }
     }
 
     private suspend fun getAppInfo(key: String): String {
