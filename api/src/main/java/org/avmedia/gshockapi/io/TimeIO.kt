@@ -12,7 +12,6 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.time.*
 import java.util.*
-import kotlin.reflect.KSuspendFunction1
 
 /*
 When using the API, the app doesn't need to keep a list of world cities to set the time on the watch. It can simply provide the current timezone
@@ -93,7 +92,6 @@ object TimeIO {
 
     private suspend fun getDSTWatchStateWithTZ(state: IO.DTS_STATE): String {
         val origDTS = getDSTWatchState(state)
-        // CasioIO.removeFromCache(origDTS)
 
         val dstValue =
             (if (casioTimezone.isInDST()) DtsMask.ON.ordinal else DtsMask.OFF.ordinal) or (if (casioTimezone.hasRules()) DtsMask.AUTO.ordinal else 0)
@@ -131,7 +129,10 @@ object TimeIO {
         writeWorldCities()
     }
 
-    private suspend fun <T> readAndWrite(function: KSuspendFunction1<T, String>, param: T) {
+    private suspend fun <T> readAndWrite(
+        function: suspend (T) -> String,
+        param: T
+    ) {
         val ret: String = function(param)
         val shortStr = Utils.toCompactString(ret)
         IO.writeCmd(GET_SET_MODE.SET, shortStr)
@@ -139,14 +140,14 @@ object TimeIO {
 
     private suspend fun writeDST() {
         data class Dts(
-            val function: KSuspendFunction1<IO.DTS_STATE, String>,
-            val param: IO.DTS_STATE
+            val param: IO.DTS_STATE,
+            val function: suspend (IO.DTS_STATE) -> String, // Lambda type
         )
 
         val dtsStates = arrayOf(
-            Dts(::getDSTWatchStateWithTZ, IO.DTS_STATE.ZERO),
-            Dts(::getDSTWatchState, IO.DTS_STATE.TWO),
-            Dts(::getDSTWatchState, IO.DTS_STATE.FOUR)
+            Dts(IO.DTS_STATE.ZERO) { state -> getDSTWatchStateWithTZ(state) },
+            Dts(IO.DTS_STATE.TWO) { state -> getDSTWatchState(state) },
+            Dts(IO.DTS_STATE.FOUR) { state -> getDSTWatchState(state) }
         )
 
         for (i in 0 until WatchInfo.dstCount) {
@@ -156,20 +157,20 @@ object TimeIO {
 
     private suspend fun writeDSTForWorldCities() {
         data class DstForWorldCities(
-            val function: KSuspendFunction1<Int, String>,
-            val param: Int
+            val param: Int,
+            val function: suspend (Int) -> String, // Lambda type
         )
 
         val dstForWorldCities = arrayOf(
-            DstForWorldCities(::getDSTForWorldCitiesWithTZ, 0),
-            DstForWorldCities(::getDSTForWorldCities, 1),
-            DstForWorldCities(::getDSTForWorldCities, 2),
-            DstForWorldCities(::getDSTForWorldCities, 3),
-            DstForWorldCities(::getDSTForWorldCities, 4),
-            DstForWorldCities(::getDSTForWorldCities, 5),
+            DstForWorldCities(0) { cityNumber: Int -> getDSTForWorldCitiesWithTZ(cityNumber) },
+            DstForWorldCities(1) { cityNumber: Int -> getDSTForWorldCities(cityNumber) },
+            DstForWorldCities(2) { cityNumber: Int -> getDSTForWorldCities(cityNumber) },
+            DstForWorldCities(3) { cityNumber: Int -> getDSTForWorldCities(cityNumber) },
+            DstForWorldCities(4) { cityNumber: Int -> getDSTForWorldCities(cityNumber) },
+            DstForWorldCities(5) { cityNumber: Int -> getDSTForWorldCities(cityNumber) },
         )
 
-        for (i in 0 until WatchInfo.worldCitiesCount) {
+        for (i in dstForWorldCities.indices) {
             readAndWrite(dstForWorldCities[i].function, dstForWorldCities[i].param)
             Timber.i("writeDSTForWorldCities: $i")
         }
@@ -177,17 +178,17 @@ object TimeIO {
 
     private suspend fun writeWorldCities() {
         data class WorldCities(
-            val function: KSuspendFunction1<Int, String>,
-            val param: Int
+            val param: Int,
+            val function: suspend (Int) -> String, // Lambda type
         )
 
         val worldCities = arrayOf(
-            WorldCities(::getWorldCitiesWithTZ, 0),
-            WorldCities(::getWorldCities, 1),
-            WorldCities(::getWorldCities, 2),
-            WorldCities(::getWorldCities, 3),
-            WorldCities(::getWorldCities, 4),
-            WorldCities(::getWorldCities, 5),
+            WorldCities(0) { cityNumber: Int -> getWorldCitiesWithTZ(cityNumber) },
+            WorldCities(1) { cityNumber: Int -> getWorldCities(cityNumber) },
+            WorldCities(2) { cityNumber: Int -> getWorldCities(cityNumber) },
+            WorldCities(3) { cityNumber: Int -> getWorldCities(cityNumber) },
+            WorldCities(4) { cityNumber: Int -> getWorldCities(cityNumber) },
+            WorldCities(5) { cityNumber: Int -> getWorldCities(cityNumber) },
         )
 
         for (i in 0 until WatchInfo.worldCitiesCount) {
@@ -197,19 +198,22 @@ object TimeIO {
     }
 
     private suspend fun initializeForSettingTimeForB2100() {
-        suspend fun <T> readAndWrite(function: KSuspendFunction1<T, String>, param: T) {
+        suspend fun <T> readAndWrite(
+            function: suspend (T) -> String,
+            param: T
+        ) {
             val ret: String = function(param)
             val shortStr = Utils.toCompactString(ret)
             IO.writeCmd(GET_SET_MODE.SET, shortStr)
         }
 
-        readAndWrite(::getDSTWatchStateWithTZ, IO.DTS_STATE.ZERO)
+        readAndWrite({ getDSTWatchStateWithTZ(it) }, IO.DTS_STATE.ZERO)
 
-        readAndWrite(::getDSTForWorldCitiesWithTZ, 0)
-        readAndWrite(::getDSTForWorldCities, 1)
+        readAndWrite({ getDSTForWorldCitiesWithTZ(it) }, 0)
+        readAndWrite({ getDSTForWorldCities(it) }, 1)
 
-        readAndWrite(::getWorldCitiesWithTZ, 0)
-        readAndWrite(::getWorldCities, 1)
+        readAndWrite({ getWorldCitiesWithTZ(it) }, 0)
+        readAndWrite({ getWorldCities(it) }, 1)
     }
 
     fun sendToWatchSet(message: String) {

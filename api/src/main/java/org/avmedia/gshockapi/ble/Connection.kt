@@ -30,7 +30,7 @@ object Connection {
             Timber.i("onConnected() end")
         }
 
-        bleManager?.connect(device, ::onConnected)
+        bleManager?.connect(device) {name:String, address: String -> onConnected(name, address)}
     }
 
     fun disconnect() {
