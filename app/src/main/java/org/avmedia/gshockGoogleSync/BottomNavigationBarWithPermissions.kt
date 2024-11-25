@@ -154,7 +154,7 @@ fun NavigateWithPermissions(
     requiredPermissions: List<String>,
     navController: NavController,
     destinationScreen: @Composable () -> Unit,
-    errorMessage: String = ""
+    errorMessage: String = "Required permissions denied. Cannot access screen!"
 ) {
     var hasNavigated by remember { mutableStateOf(false) }
 
