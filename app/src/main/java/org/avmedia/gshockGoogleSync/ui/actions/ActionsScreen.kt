@@ -28,7 +28,7 @@ import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
-fun ActionsScreen(navController: NavController) {
+fun ActionsScreen() {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -96,6 +96,6 @@ fun ActionList() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewActionsScreen() {
-    ActionsScreen(NavController(LocalContext.current))
+    ActionsScreen()
 }
 

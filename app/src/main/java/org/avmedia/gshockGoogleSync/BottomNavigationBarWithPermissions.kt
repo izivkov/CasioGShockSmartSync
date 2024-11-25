@@ -138,7 +138,7 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
                 NavigateWithPermissions(
                     permissions,
                     navController,
-                    destinationScreen = { ActionsScreen(navController) },
+                    destinationScreen = { ActionsScreen() },
                     "\"Required permissions denied. Cannot access Actions."
                 )
             }
