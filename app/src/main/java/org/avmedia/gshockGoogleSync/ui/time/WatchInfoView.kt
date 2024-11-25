@@ -100,7 +100,6 @@ fun WatchInfoCard2(modifier: Modifier = Modifier) {
             }
 
             WatchTemperature(
-                modifier = Modifier.padding(bottom = 0.dp),  // WatchTemperature composable
                 hasTemperature = WatchInfo.hasTemperature,
                 isNormalButtonPressed = true,
                 isConnected = true,

@@ -161,4 +161,8 @@
     The value, in milliseconds, is added to the time sent from the app to the watch. You can set values between -5000 and 5000. For example,
     if your watch is 2.5 seconds ahead of the actual time, set this value to -2500 to sync it accurately.
     ]]></string>
+    <string name="required_permissions_denied_cannot_access_screen">Required permissions denied. Cannot access screen!</string>
+    <string name="required_permissions_denied_cannot_access_actions">Required permissions denied. Cannot access Actions.</string>
+    <string name="calendar_permission_denied_cannot_access_events">Calendar permission denied. Cannot access Events.</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">" Clear app storage from Android Setting and restart the app to add permissions."</string>
 </resources>

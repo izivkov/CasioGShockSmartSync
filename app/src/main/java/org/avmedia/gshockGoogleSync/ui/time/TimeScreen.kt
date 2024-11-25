@@ -19,7 +19,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
-fun TimeScreen(navController: NavController) {
+fun TimeScreen() {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -82,5 +82,5 @@ fun TimeScreen(navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewTimeScreen() {
-    TimeScreen(navController = rememberNavController())
+    TimeScreen()
 }

@@ -28,9 +28,7 @@ fun AppButton(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = LocalIndication.current // Default ripple indication
                 ) { onClick() }
-            )
-        // .border(1.dp, Color.Gray, shape = MaterialTheme.shapes.small)
-        ,
+            ),
         enabled = enabled
     ) {
         AppText(

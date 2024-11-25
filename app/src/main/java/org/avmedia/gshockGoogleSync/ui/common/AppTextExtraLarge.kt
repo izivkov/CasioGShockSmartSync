@@ -49,6 +49,6 @@ fun AppTextExtraLarge(
         maxLines = maxLines,
         minLines = minLines,
         onTextLayout = onTextLayout,
-        style = style.copy(color = color)
+        // style = style.copy(color = color)
     )
 }

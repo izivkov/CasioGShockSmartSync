@@ -12,7 +12,7 @@ fun AppSwitch(
     enabled: Boolean = true,
     colors: SwitchColors = SwitchDefaults.colors() // Default colors based on the current theme
 ) {
-    val switch = Switch(
+    Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,
         modifier = modifier,

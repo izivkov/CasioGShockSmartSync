@@ -91,7 +91,6 @@ fun getCurrentColorScheme(darkTheme: Boolean): ColorScheme {
 @Composable
 fun GShockSmartSyncTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = getCurrentColorScheme(darkTheme)

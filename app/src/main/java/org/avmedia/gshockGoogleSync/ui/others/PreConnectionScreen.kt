@@ -33,12 +33,12 @@ fun PreConnectionScreen(
 ) {
     val watchName by ptrConnectionViewModel.watchName.collectAsState()
 
-    val getImageId: (String) -> Int = { watchName ->
+    val getImageId: (String) -> Int = { name ->
         when {
-            "GA" in watchName || "GMA" in watchName -> R.drawable.ga_b2100
-            "GW" in watchName || "GMW" in watchName -> R.drawable.ic_gw_b5600
-            "DW" in watchName || "DMW" in watchName -> R.drawable.dw_b5600
-            "ECB" in watchName -> R.drawable.ecb_30d
+            "GA" in name || "GMA" in name -> R.drawable.ga_b2100
+            "GW" in name || "GMW" in name -> R.drawable.ic_gw_b5600
+            "DW" in name || "DMW" in name -> R.drawable.dw_b5600
+            "ECB" in name -> R.drawable.ecb_30d
             else -> R.drawable.ic_gw_b5600
         }
     }

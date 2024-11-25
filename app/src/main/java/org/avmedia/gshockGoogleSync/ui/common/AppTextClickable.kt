@@ -40,7 +40,6 @@ fun AppTextClickable(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = TextStyle.Default,
     color: Color = Color.Unspecified,
     onClick: () -> Unit
 ) {
@@ -48,11 +47,6 @@ fun AppTextClickable(
     val fixedFontSizeStyle = TextStyle(
         fontSize = (16.sp / currentFontScale)  // Fixed font size
     )
-
-    val additionalStyle = TextStyle(
-        color = color,
-    )
-    val combinedStyle = fixedFontSizeStyle.merge(additionalStyle)
 
     ElevatedCard(
         modifier = Modifier.padding(0.dp)

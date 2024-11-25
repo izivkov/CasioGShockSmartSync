@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -114,9 +115,7 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Time.route) {
-                TimeScreen(
-                    navController
-                )
+                TimeScreen()
             }
             composable(Screens.Alarms.route) {
                 AlarmsScreen()
@@ -126,7 +125,7 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
                     listOf(READ_CALENDAR),
                     navController,
                     destinationScreen = { EventsScreen() },
-                    "Calendar permission denied. Cannot access Events."
+                    stringResource(R.string.calendar_permission_denied_cannot_access_events)
                 )
             }
             composable(Screens.Actions.route) {
@@ -139,7 +138,7 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
                     permissions,
                     navController,
                     destinationScreen = { ActionsScreen() },
-                    "Required permissions denied. Cannot access Actions."
+                    stringResource(R.string.required_permissions_denied_cannot_access_actions)
                 )
             }
             composable(Screens.Settings.route) {
@@ -154,9 +153,10 @@ fun NavigateWithPermissions(
     requiredPermissions: List<String>,
     navController: NavController,
     destinationScreen: @Composable () -> Unit,
-    errorMessage: String = "Required permissions denied. Cannot access screen!"
+    errorMessage: String = stringResource(R.string.required_permissions_denied_cannot_access_screen)
 ) {
     var hasNavigated by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     PermissionRequiredScreen(
         requiredPermissions = requiredPermissions,
@@ -165,7 +165,9 @@ fun NavigateWithPermissions(
             if (!hasNavigated) {
                 hasNavigated = true
                 LaunchedEffect(Unit) { // make sure it is only called once
-                    AppSnackbar(errorMessage)
+                    val additionalInfo =
+                        context.getString(R.string.clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions)
+                    AppSnackbar(errorMessage + additionalInfo)
                 }
                 navController.navigate(Screens.Time.route) {
                     popUpTo(Screens.Time.route) {
@@ -183,7 +185,6 @@ fun PermissionRequiredScreen(
     onPermissionGranted: @Composable () -> Unit,
     onPermissionDenied: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
     var permissionGranted by remember { mutableStateOf(false) }
     var permissionChecked by remember { mutableStateOf(false) }
 

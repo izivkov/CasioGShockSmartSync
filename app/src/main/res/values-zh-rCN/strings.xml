@@ -156,4 +156,8 @@
     在设置时间时，某些手表型号可能会显示比实际时间快几秒。此设置允许您进行微调调整。值的单位是毫秒，并添加到应用程序发送给手表的时间中。您可以设置的范围在 -5000 到 5000 之间。例如，如果您的手表比实际时间快了 2.5 秒，请将该值设置为 -2500，以准确同步时间。
     ]]></string>
     <string name="_0000">0000</string>
-    </resources>
+    <string name="required_permissions_denied_cannot_access_screen">所需权限被拒绝，无法访问屏幕！</string>
+    <string name="required_permissions_denied_cannot_access_actions">所需权限被拒绝，无法访问操作。</string>
+    <string name="calendar_permission_denied_cannot_access_events">日历权限被拒绝，无法访问事件。</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">请从 Android 设置中清除应用存储并重新启动应用以添加权限。</string>
+</resources>

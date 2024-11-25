@@ -93,17 +93,9 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
 fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
 
     val events by eventViewModel.events.collectAsState()
-    val localContext = LocalContext.current.applicationContext
-
-    val appContext = remember(localContext) {
-        EntryPointAccessors.fromApplication(
-            localContext,
-            ApplicationContextEntryPoint::class.java
-        ).getApplicationContext()
-    }
 
     LaunchedEffect(Unit) {
-        eventViewModel.loadEvents(appContext)
+        eventViewModel.loadEvents()
     }
 
     @Composable

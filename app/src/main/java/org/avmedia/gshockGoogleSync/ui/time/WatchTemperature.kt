@@ -22,7 +22,6 @@ import java.util.Locale
 
 @Composable
 fun WatchTemperature(
-    modifier: Modifier = Modifier,
     hasTemperature: Boolean,
     isConnected: Boolean,
     isNormalButtonPressed: Boolean,

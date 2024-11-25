@@ -13,7 +13,7 @@ fun <T> ItemList(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        items.forEach { item ->
+        items.forEach { _ ->
             ItemView {}
         }
     }

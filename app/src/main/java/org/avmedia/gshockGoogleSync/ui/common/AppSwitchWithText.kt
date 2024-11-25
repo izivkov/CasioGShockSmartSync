@@ -29,7 +29,6 @@ fun AppSwitchWithText(
     ) {
         AppText(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
             fontSize = 22.sp,
             modifier = Modifier
                 .padding(end = 4.dp)

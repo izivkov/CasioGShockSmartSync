@@ -124,9 +124,9 @@ fun TimerView(
                     minutes = minutes,
                     seconds = seconds,
                     onDismiss = { handleDismiss() },
-                    onSubmit = { hours, minutes, seconds ->
+                    onSubmit = { hr, min, sec ->
                         // Handle the submitted time in the preview
-                        handleConfirm(hours, minutes, seconds)
+                        handleConfirm(hr, min, sec)
                     }
                 )
             }

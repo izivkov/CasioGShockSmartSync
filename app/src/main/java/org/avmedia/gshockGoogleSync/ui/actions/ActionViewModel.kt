@@ -529,7 +529,7 @@ However, this way gives us more control on how to start the actions.
         if (LocalDataStorage.getTimeAdjustmentNotification(context)
             && !WatchInfo.alwaysConnected
         ) { // only create notification for not-always connected watches.
-            showTimeSyncNotification(context)
+            showTimeSyncNotification()
         }
     }
 
@@ -539,7 +539,7 @@ However, this way gives us more control on how to start the actions.
         })
     }
 
-    private fun showTimeSyncNotification(context: Context) {
+    private fun showTimeSyncNotification() {
         val dateStr =
             DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
 

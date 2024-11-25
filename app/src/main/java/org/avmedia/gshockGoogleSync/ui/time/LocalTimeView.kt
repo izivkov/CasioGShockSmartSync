@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -96,7 +97,6 @@ fun LocalTimeView(
 @Composable
 fun TextClockComposable(
     modifier: Modifier = Modifier,
-    format: TimeFormat = TimeFormat.TwentyFourHour
 ) {
     RealTimeClock(modifier = modifier.padding(start = 6.dp))
 }
