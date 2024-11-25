@@ -139,7 +139,7 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
                     permissions,
                     navController,
                     destinationScreen = { ActionsScreen() },
-                    "\"Required permissions denied. Cannot access Actions."
+                    "Required permissions denied. Cannot access Actions."
                 )
             }
             composable(Screens.Settings.route) {
