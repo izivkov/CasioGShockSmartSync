@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -121,17 +122,11 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
                 AlarmsScreen()
             }
             composable(Screens.Events.route) {
-                PermissionRequiredScreen(
-                    requiredPermissions = listOf(READ_CALENDAR),
-                    onPermissionGranted = { EventsScreen() },
-                    onPermissionDenied = {
-                        LaunchedEffect(Unit) { // make sure it is only called once
-                            AppSnackbar(
-                                "Calendar permission denied.  Cannot access Events.",
-                            )
-                        }
-                        navController.navigate(Screens.Time.route)
-                    }
+                NavigateWithPermissions(
+                    listOf(READ_CALENDAR),
+                    navController,
+                    destinationScreen = { EventsScreen() },
+                    "Calendar permission denied. Cannot access Events."
                 )
             }
             composable(Screens.Actions.route) {
@@ -140,18 +135,11 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) it += WRITE_EXTERNAL_STORAGE
                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) it += ACCESS_FINE_LOCATION
                 }
-
-                PermissionRequiredScreen(
-                    requiredPermissions = permissions,
-                    onPermissionGranted = { ActionsScreen(navController) },
-                    onPermissionDenied = {
-                        LaunchedEffect(Unit) { // make sure it is only called once
-                            AppSnackbar(
-                                "Required permissions denied. Cannot access Actions.",
-                            )
-                        }
-                        navController.navigate(Screens.Time.route)
-                    }
+                NavigateWithPermissions(
+                    permissions,
+                    navController,
+                    destinationScreen = { ActionsScreen(navController) },
+                    "\"Required permissions denied. Cannot access Actions."
                 )
             }
             composable(Screens.Settings.route) {
@@ -159,6 +147,34 @@ fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
             }
         }
     }
+}
+
+@Composable
+fun NavigateWithPermissions(
+    requiredPermissions: List<String>,
+    navController: NavController,
+    destinationScreen: @Composable () -> Unit,
+    errorMessage: String = ""
+) {
+    var hasNavigated by remember { mutableStateOf(false) }
+
+    PermissionRequiredScreen(
+        requiredPermissions = requiredPermissions,
+        onPermissionGranted = { destinationScreen() },
+        onPermissionDenied = {
+            if (!hasNavigated) {
+                hasNavigated = true
+                LaunchedEffect(Unit) { // make sure it is only called once
+                    AppSnackbar(errorMessage)
+                }
+                navController.navigate(Screens.Time.route) {
+                    popUpTo(Screens.Time.route) {
+                        inclusive = true
+                    } // Avoid back stack issues
+                }
+            }
+        }
+    )
 }
 
 @Composable

@@ -1,4 +1,3 @@
 - Added Dependency Injection via Dagger/Hilt
 - Fixed issues with events (first event not showing)
-- Removed Auto-light setting nor non-supporting watches like the GA-B2100/
-
+- Removed Auto-light setting nor non-supporting watches like the GA-B2100.
