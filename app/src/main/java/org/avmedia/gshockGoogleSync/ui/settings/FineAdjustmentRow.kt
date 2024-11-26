@@ -1,11 +1,13 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
 import AppText
-import androidx.compose.foundation.layout.IntrinsicSize
+import AppTextLink
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,11 +22,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import org.avmedia.gshockGoogleSync.ui.common.AppTextField
-import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.ui.common.InfoButton
+import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun FineAdjustmentRow(
     modifier: Modifier = Modifier,
@@ -54,27 +56,36 @@ fun FineAdjustmentRow(
         AppText(
             text = stringResource(R.string.fine_time_adjustment),
             fontSize = 20.sp,
-            modifier = Modifier.padding(end = 6.dp)
+            modifier = Modifier.padding(end = 2.dp)
         )
         InfoButton(infoText = stringResource(R.string.fine_adjustment_info))
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val pattern = remember { Regex("^(0|(-?[1-9][0-9]{0,2}|-?1000|-?[1-4][0-9]{3}|-?5000))$") }
-        AppTextField(
+        var showDialog by remember { mutableStateOf(false) }
+        var selectedValue by remember { mutableIntStateOf(text.toInt()) }
+
+        AppTextLink(
+            text = selectedValue.toString(),
             modifier = Modifier
-                .width(IntrinsicSize.Min)
-                .padding(end = 12.dp, start = 12.dp, top = 0.dp, bottom = 0.dp)
-                .weight(2f),
-            value = text,
-            onValueChange = { newText: String ->
-                if (newText.isEmpty() || newText == "-" || newText.matches(pattern)) {
-                    text = newText
-                    onUpdate(timeAdjustmentSetting.copy(fineAdjustment = text.toIntOrNull() ?: 0))
-                }
-            },
-            placeholderText = "0000",
+                .clickable { showDialog = true }
+                .padding(2.dp),
         )
+        if (showDialog) {
+            ValueSelectionDialog(
+                initialValue = selectedValue,
+                range = -5000..5000,
+                step = 100,
+                title = "Fine Adjustment",
+                label = "ms between -5000 and 5000",
+                onDismiss = { showDialog = false },
+                onConfirm = { newValue ->
+                    selectedValue = newValue
+                    showDialog = false
+                    onUpdate(timeAdjustmentSetting.copy(fineAdjustment = newValue))
+                }
+            )
+        }
     }
 }
 

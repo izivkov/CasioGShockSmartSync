@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.avmedia.gshockapi.GShockAPI
+import org.avmedia.gshockapi.GShockAPIMock
 import org.avmedia.gshockapi.IGShockAPI
 import javax.inject.Singleton
 
@@ -16,7 +17,7 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideGShockAPI(@ApplicationContext context: Context): GShockAPI {
-        return GShockAPI(context)
+    fun provideGShockAPI(@ApplicationContext context: Context): GShockAPIMock {
+        return GShockAPIMock(context)
     }
 }

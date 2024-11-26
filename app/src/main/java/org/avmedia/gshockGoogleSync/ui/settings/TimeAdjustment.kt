@@ -3,6 +3,10 @@ package org.avmedia.gshockGoogleSync.ui.settings
 import AppSwitch
 import AppText
 import AppTextLarge
+import AppTextLink
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -31,7 +35,9 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppTextField
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun TimeAdjustment(
     onUpdate: (SettingsViewModel.TimeAdjustment) -> Unit,
@@ -104,25 +110,32 @@ fun TimeAdjustment(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                val pattern = Regex("^(0|[1-9]|[1-5][0-9])$")
-                AppTextField(
-                    value = adjustmentMinutes,
+                var showDialog by remember { mutableStateOf(false) }
+                var selectedValue by remember { mutableStateOf(adjustmentMinutes.toInt()) }
+
+                AppTextLink(text = selectedValue.toString(),
                     modifier = Modifier
-                        .width(IntrinsicSize.Min)
-                        .padding(end = 12.dp, start = 12.dp, top = 0.dp, bottom = 0.dp)
-                        .weight(2f),
-                    onValueChange = { newValue: String ->
-                        if (newValue.isEmpty() || newValue.matches(pattern)) {
-                            adjustmentMinutes = newValue
+                        .clickable { showDialog = true }
+                        .padding(6.dp),
+                )
+                if (showDialog) {
+                    ValueSelectionDialog(
+                        initialValue = selectedValue,
+                        range = 0..59,
+                        title = "When to run",
+                        label = "Minutes between 0 and 59",
+                        onDismiss = { showDialog = false },
+                        onConfirm = { newValue ->
+                            selectedValue = newValue
+                            showDialog = false
                             onUpdate(
                                 timeAdjustmentSetting.copy(
-                                    adjustmentTimeMinutes = adjustmentMinutes.toIntOrNull() ?: 0
+                                    adjustmentTimeMinutes = newValue
                                 )
                             )
                         }
-                    },
-                    placeholderText = "00",
-                )
+                    )
+                }
             }
 
             FineAdjustmentRow(
@@ -154,6 +167,7 @@ fun TimeAdjustment(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Preview(showBackground = true)
 @Composable
 fun PreviewTimeAdjustment() {

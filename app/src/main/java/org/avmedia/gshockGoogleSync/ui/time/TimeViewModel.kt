@@ -16,7 +16,7 @@ import javax.inject.Named
 
 @HiltViewModel
 class TimeViewModel @Inject constructor(
-    @Named("api") private val api: GShockRepository,
+    private val api: GShockRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
     private val _timer = MutableStateFlow(0)

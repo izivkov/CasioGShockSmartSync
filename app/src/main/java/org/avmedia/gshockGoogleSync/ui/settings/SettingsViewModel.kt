@@ -28,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    @Named("api") private val api: GShockRepository,
+    private val api: GShockRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
 
