@@ -32,7 +32,7 @@ fun AppTextLink(
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
     style: TextStyle = TextStyle.Default,
-    color: Color = Color.Unspecified
+    color: Color = Color.Unspecified,
 ) {
     val currentFontScale = LocalDensity.current.fontScale
     val fixedFontSizeStyle = TextStyle(

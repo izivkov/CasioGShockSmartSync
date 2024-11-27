@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -26,7 +27,8 @@ fun AppTextField(
     fontSize: TextUnit = 20.sp,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     textAlign: TextAlign = TextAlign.End,
-) {
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    ) {
     TextField(
         value = value,
         onValueChange = { newText ->
@@ -49,6 +51,7 @@ fun AppTextField(
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = textAlign
         ),
+        visualTransformation = visualTransformation,
         singleLine = true,
         placeholder = {
             AppText(
