@@ -42,7 +42,6 @@
     <string name="google_calendar_events">Google Calendar事件</string>
     <string name="local_time">本地时间</string>
     <string name="send_to_watch">发送到手表</string>
-    <string name="_416_555_6789">416–555–6789</string>
     <string name="phonecall_item">手机呼叫</string>
     <string name="home_time">家乡时间</string>
     <string name="running_actions">正在执行的动作</string>
@@ -160,4 +159,10 @@
     <string name="required_permissions_denied_cannot_access_actions">所需权限被拒绝，无法访问操作。</string>
     <string name="calendar_permission_denied_cannot_access_events">日历权限被拒绝，无法访问事件。</string>
     <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">请从 Android 设置中清除应用存储并重新启动应用以添加权限。</string>
+
+    <string name="phone_number">电话号码</string>
+    <string name="enter_phone_number">输入电话号码</string>
+    <string name="when_to_run">何时运行</string>
+    <string name="minutes_between_0_and_59">分钟（介于 0 到 59 之间）</string>
+
 </resources>

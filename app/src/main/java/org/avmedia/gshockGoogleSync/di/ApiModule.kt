@@ -17,7 +17,7 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideGShockAPI(@ApplicationContext context: Context): GShockAPIMock {
-        return GShockAPIMock(context)
+    fun provideGShockAPI(@ApplicationContext context: Context): GShockAPI {
+        return GShockAPI(context)
     }
 }

@@ -135,7 +135,7 @@ class GShockApplication : Application() {
             context.setContent {
                 Run()
             }
-        }, 3L, TimeUnit.SECONDS)
+        }, 0L, TimeUnit.SECONDS)
     }
 
     private fun waitForConnectionSuspended() {

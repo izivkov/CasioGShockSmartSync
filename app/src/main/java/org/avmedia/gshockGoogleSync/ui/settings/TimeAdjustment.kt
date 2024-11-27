@@ -122,8 +122,8 @@ fun TimeAdjustment(
                     ValueSelectionDialog(
                         initialValue = selectedValue,
                         range = 0..59,
-                        title = "When to run",
-                        label = "Minutes between 0 and 59",
+                        title = stringResource(R.string.when_to_run),
+                        label = stringResource(R.string.minutes_between_0_and_59),
                         onDismiss = { showDialog = false },
                         onConfirm = { newValue ->
                             selectedValue = newValue

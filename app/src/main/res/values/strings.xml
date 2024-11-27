@@ -44,7 +44,6 @@
     <string name="google_calendar_events">Google Calendar Events</string>
     <string name="local_time">Local Time</string>
     <string name="send_to_watch">Send to\nWatch</string>
-    <string name="_416_555_6789">416–555–6789</string>
     <string name="phonecall_item">PhoneCall Item</string>
     <string name="home_time">Home Time</string>
     <string name="running_actions">Running Actions</string>
@@ -165,4 +164,8 @@
     <string name="required_permissions_denied_cannot_access_actions">Required permissions denied. Cannot access Actions.</string>
     <string name="calendar_permission_denied_cannot_access_events">Calendar permission denied. Cannot access Events.</string>
     <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">" Clear app storage from Android Setting and restart the app to add permissions."</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="enter_phone_number">Enter Phone Number</string>
+    <string name="when_to_run">When to run</string>
+    <string name="minutes_between_0_and_59">Minutes between 0 and 59</string>
 </resources>

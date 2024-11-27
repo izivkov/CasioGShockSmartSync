@@ -9,7 +9,7 @@ import javax.inject.Singleton
 
 @Singleton
 class GShockRepository @Inject constructor(
-    api: GShockAPIMock
+    api: GShockAPI
 ) : IGShockAPI by api {
     // Additional repository-specific logic can be added here if needed
 }

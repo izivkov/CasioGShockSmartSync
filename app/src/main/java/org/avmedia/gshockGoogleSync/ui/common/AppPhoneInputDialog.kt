@@ -18,12 +18,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun AppPhoneInputDialog(
@@ -44,13 +46,13 @@ fun AppPhoneInputDialog(
     ) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Enter Phone Number") },
+            title = { Text(stringResource(R.string.enter_phone_number)) },
             text = {
                 Column {
                     OutlinedTextField(
                         value = inputValue.trim(),
                         onValueChange = { inputValue = it.trim() },
-                        label = { Text("Phone Number") },
+                        label = { Text(stringResource(R.string.phone_number)) },
                         isError = validationError,
                         modifier = Modifier.fillMaxWidth(),
                         // visualTransformation = PhoneNumberVisualTransformation(),
@@ -67,7 +69,7 @@ fun AppPhoneInputDialog(
                 }
             },
             confirmButton = {
-                AppButton(text = "OK",
+                AppButton(text = stringResource(R.string.ok),
                     onClick = {
                         if (validatePhoneNumber(inputValue)) {
                             onPhoneNumberValidated(inputValue)
@@ -77,7 +79,7 @@ fun AppPhoneInputDialog(
                     })
             },
             dismissButton = {
-                AppButton(onClick = onDismiss, text = "Cancel")
+                AppButton(onClick = onDismiss, text = stringResource(R.string.cancel))
             }
         )
     }
@@ -85,8 +87,9 @@ fun AppPhoneInputDialog(
 
 fun validatePhoneNumber(phoneNumber: String): Boolean {
     // val regex = Regex("^\\+?[0-9 ]{10,15}\$")
-    val regexInternational = Regex("^\\+?[1-9]\\d{1,14}(\\s*\\(\\d+\\)\\s*|\\s*[-.\\s]?\\d+)*\$")
-    return regexInternational.matches(phoneNumber.trim())
+    // val regexInternational = Regex("^\\+?(\\d{1,3})?[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,9})\$")
+    val notEmpty = Regex ("^.+$")
+    return notEmpty.matches(phoneNumber.trim())
 }
 
 class PhoneNumberVisualTransformation : VisualTransformation {

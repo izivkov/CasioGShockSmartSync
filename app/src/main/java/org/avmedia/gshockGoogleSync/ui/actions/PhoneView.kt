@@ -35,7 +35,7 @@ fun PhoneView(
         actionsViewModel.getAction(classType)
 
     var isEnabled by remember { mutableStateOf(phoneDialAction.enabled) }
-    val defaultPhone = "416-555-6789"
+    val defaultPhone = "000-000-0000"
     var phoneNumber by remember {
         mutableStateOf(phoneDialAction.phoneNumber.takeIf { it.isNotBlank() }?.trim() ?: defaultPhone)
     }
@@ -100,7 +100,6 @@ fun PhoneView(
                     phoneDialAction.enabled = newValue
                     onUpdate(phoneDialAction.copy(enabled = newValue))
                 },
-                modifier = Modifier.padding(end = 0.dp)
             )
         }
     }
