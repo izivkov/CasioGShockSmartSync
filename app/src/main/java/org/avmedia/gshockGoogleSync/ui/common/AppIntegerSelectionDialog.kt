@@ -117,8 +117,10 @@ fun NumberPickerView(
                         onValueChange(pickerValues[newValue])
                     }
 
-                    // Set text color using reflection
-                    textColor = contentColor.toArgb()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // Set text color using reflection
+                        textColor = contentColor.toArgb()
+                    }
                 }
             },
             update = { picker ->
