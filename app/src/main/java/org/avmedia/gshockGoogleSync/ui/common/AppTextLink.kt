@@ -31,7 +31,6 @@ fun AppTextLink(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = TextStyle.Default,
     color: Color = Color.Unspecified,
 ) {
     val currentFontScale = LocalDensity.current.fontScale

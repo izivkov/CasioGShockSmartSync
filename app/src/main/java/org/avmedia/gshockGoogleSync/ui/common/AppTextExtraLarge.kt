@@ -30,8 +30,6 @@ fun AppTextExtraLarge(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = TextStyle.Default,
-    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,
@@ -49,6 +47,5 @@ fun AppTextExtraLarge(
         maxLines = maxLines,
         minLines = minLines,
         onTextLayout = onTextLayout,
-        // style = style.copy(color = color)
     )
 }

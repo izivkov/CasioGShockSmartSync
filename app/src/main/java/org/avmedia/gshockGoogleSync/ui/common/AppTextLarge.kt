@@ -31,13 +31,7 @@ fun AppTextLarge(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    color: Color = Color.Unspecified
 ) {
-    val currentFontScale = LocalDensity.current.fontScale
-    val fixedFontSizeStyle = TextStyle(
-        fontSize = (16.sp / currentFontScale)  // Fixed font size
-    )
-
     Text(
         text = text,
         modifier = modifier,
@@ -54,7 +48,5 @@ fun AppTextLarge(
         maxLines = maxLines,
         minLines = minLines,
         onTextLayout = onTextLayout,
-        // style = fixedFontSizeStyle,
-        // color = color
     )
 }

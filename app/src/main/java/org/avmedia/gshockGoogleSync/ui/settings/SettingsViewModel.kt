@@ -53,6 +53,7 @@ class SettingsViewModel @Inject constructor(
 
     fun <T : Setting> getSetting(type: Class<T>): T {
         println("getSetting: $type, settingsMap size: ${settingsMap.size}")
+        @Suppress("UNCHECKED_CAST")
         return settingsMap[type] as T
     }
 

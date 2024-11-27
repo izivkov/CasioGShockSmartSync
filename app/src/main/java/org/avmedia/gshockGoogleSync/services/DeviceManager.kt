@@ -26,7 +26,7 @@ class DeviceManager @Inject constructor(
         val eventActions = arrayOf(
             EventAction("DeviceName") {
                 val deviceName = ProgressEvents.getPayload("DeviceName") as String
-                if ((deviceName as String) == "") {
+                if ((deviceName) == "") {
                     LocalDataStorage.delete(appContext, "LastDeviceName")
                 } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
                         appContext,

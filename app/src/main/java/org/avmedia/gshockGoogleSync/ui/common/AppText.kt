@@ -31,18 +31,11 @@ fun AppText(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    style: TextStyle = TextStyle.Default,
-    color: Color = Color.Unspecified
 ) {
     val currentFontScale = LocalDensity.current.fontScale
     val fixedFontSizeStyle = TextStyle(
         fontSize = (16.sp / currentFontScale)  // Fixed font size
     )
-
-    val additionalStyle = TextStyle(
-        color = color,
-    )
-    val combinedStyle = fixedFontSizeStyle.merge(additionalStyle)
 
     Text(
         text = text,

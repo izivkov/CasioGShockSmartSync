@@ -113,14 +113,14 @@ fun TimeAdjustment(
                 var showDialog by remember { mutableStateOf(false) }
                 var selectedValue by remember { mutableStateOf(adjustmentMinutes.toInt()) }
 
-                AppTextLink(text = selectedValue.toString(),
+                AppTextLink(text = adjustmentMinutes,
                     modifier = Modifier
                         .clickable { showDialog = true }
                         .padding(6.dp),
                 )
                 if (showDialog) {
                     ValueSelectionDialog(
-                        initialValue = selectedValue,
+                        initialValue = adjustmentMinutes.toInt(),
                         range = 0..59,
                         title = stringResource(R.string.when_to_run),
                         label = stringResource(R.string.minutes_between_0_and_59),

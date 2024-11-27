@@ -40,7 +40,6 @@ fun AppTextClickable(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
-    color: Color = Color.Unspecified,
     onClick: () -> Unit
 ) {
     val currentFontScale = LocalDensity.current.fontScale

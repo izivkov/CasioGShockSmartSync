@@ -165,7 +165,6 @@ class GShockApplication : Application() {
             }
         }
 
-        val deviceName = LocalDataStorage.get(this, "LastDeviceName", "")
-        repository.waitForConnection(deviceAddress, deviceName)
+        repository.waitForConnection(deviceAddress)
     }
 }

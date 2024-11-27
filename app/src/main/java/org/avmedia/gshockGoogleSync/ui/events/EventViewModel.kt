@@ -50,6 +50,7 @@ class EventViewModel @Inject constructor(
         val eventActions = arrayOf(
             EventAction("CalendarUpdated") {
                 Timber.d("CalendarUpdated, events: ${EventsModel.events.size}")
+                @Suppress("UNCHECKED_CAST")
                 _events.value = ProgressEvents.getPayload("CalendarUpdated") as List<Event>
             },
         )
@@ -63,7 +64,6 @@ class EventViewModel @Inject constructor(
     fun sendEventsToWatch() {
         viewModelScope.launch {
             try {
-                val events = _events.value
                 api.setEvents(ArrayList(_events.value))
                 AppSnackbar("Events Set")
             } catch (e: Exception) {

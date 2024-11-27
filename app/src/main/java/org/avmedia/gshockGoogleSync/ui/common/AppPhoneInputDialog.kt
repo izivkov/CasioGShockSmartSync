@@ -33,7 +33,6 @@ fun AppPhoneInputDialog(
     onDismiss: () -> Unit,
     onPhoneNumberValidated: (String) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
     var inputValue by remember { mutableStateOf(initialPhoneNumber.trim()) }
     var validationError by remember { mutableStateOf(false) }

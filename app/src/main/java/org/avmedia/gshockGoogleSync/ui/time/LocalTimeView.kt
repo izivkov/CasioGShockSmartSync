@@ -55,7 +55,6 @@ fun LocalTimeView(
                 AppTextLarge(
                     modifier = Modifier.padding(start = 6.dp),
                     text = stringResource(id = R.string.local_time),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 TextClockComposable(
@@ -81,9 +80,6 @@ fun LocalTimeView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 SendTimeButton(
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .background(MaterialTheme.colorScheme.primary),
                     text = stringResource(id = R.string.send_to_watch),
                     onClick = {
                         timeModel.sendTimeToWatch()
@@ -98,7 +94,7 @@ fun LocalTimeView(
 fun TextClockComposable(
     modifier: Modifier = Modifier,
 ) {
-    RealTimeClock(modifier = modifier.padding(start = 6.dp))
+    RealTimeClock(modifier = modifier.padding(start = 0.dp))
 }
 
 @Composable
@@ -126,7 +122,7 @@ fun TimeZoneTextView(modifier: Modifier = Modifier, textSize: TextUnit) {
 }
 
 @Composable
-fun SendTimeButton(modifier: Modifier = Modifier, text: String, onClick: () -> Unit) {
+fun SendTimeButton(text: String, onClick: () -> Unit) {
     AppButton(
         onClick = {
             onClick()

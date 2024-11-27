@@ -2,6 +2,7 @@ package org.avmedia.gshockGoogleSync.theme
 
 import android.app.Activity
 import android.os.Build
+import android.view.WindowInsetsController
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -106,6 +107,7 @@ fun GShockSmartSyncTheme(
                 // WindowCompat.setDecorFitsSystemWindows(window, false)
 
                 // Set the status bar color (still the recommended way as of Android 34+)
+                @Suppress("DEPRECATION")
                 window.statusBarColor = colorScheme.primary.toArgb()
 
                 // Configure light or dark appearance for the status bar icons

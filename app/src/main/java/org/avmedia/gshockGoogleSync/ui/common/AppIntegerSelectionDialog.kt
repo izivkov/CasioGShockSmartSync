@@ -77,8 +77,8 @@ fun NumberPickerView(
     pickerValues: List<Int>,
     selectedIndex: Int,
     onValueChange: (Int) -> Unit,
-    backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
 
     val safeStep = if (step > 0) step else 1

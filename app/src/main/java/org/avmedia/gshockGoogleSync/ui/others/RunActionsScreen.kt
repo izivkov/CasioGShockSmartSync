@@ -25,7 +25,6 @@ fun RunActionsScreen(repository: GShockRepository) {
     ) {
         AppTextExtraLarge(
             text = stringResource(id = R.string.running_actions),
-            color = (MaterialTheme.colorScheme.primary),
             fontWeight = FontWeight.Bold // Adjust as needed
         )
 

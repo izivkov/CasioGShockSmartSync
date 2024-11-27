@@ -106,7 +106,6 @@ fun AlarmItem(
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
                     text = stringResource(id = R.string.daily),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             AppSwitch(

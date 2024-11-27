@@ -56,11 +56,6 @@ fun AppTextField(
         placeholder = {
             AppText(
                 text = placeholderText,
-                style = TextStyle(
-                    fontSize = fontSize,
-                    lineHeight = fontSize,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
             )
         }
     )

@@ -1,2 +1,0 @@
-Changed app package. May have to uninstall current app before installing this version.
-
