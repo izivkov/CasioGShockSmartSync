@@ -1,6 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,6 +79,7 @@ fun SettingsScreen() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun SettingsList() {
 
@@ -88,7 +91,7 @@ fun SettingsList() {
         Light(settingsViewModel::updateSetting)
     ).apply {
         if (WatchInfo.hasPowerSavingMode) add(PowerSavings(settingsViewModel::updateSetting))
-        if (!WatchInfo.alwaysConnected) add(TimeAdjustment(settingsViewModel::updateSetting))
+        add (TimeAdjustment(settingsViewModel::updateSetting))
     }
 
     Column(

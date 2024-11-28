@@ -37,6 +37,7 @@ fun ValueSelectionDialog(
     onConfirm: (Int) -> Unit,
     title: String = "Select Value",
     label: String = "Choose a value:",
+    unit: String,
 ) {
     val values = range.step(step).toList()
     val initialIndex = values.indexOf(initialValue)
@@ -63,7 +64,8 @@ fun ValueSelectionDialog(
                     step = step,
                     pickerValues = values,
                     selectedIndex = selectedIndex,
-                    onValueChange = { selectedIndex = it }
+                    onValueChange = { selectedIndex = it },
+                    unit = unit
                 )
             }
         }
@@ -78,7 +80,8 @@ fun NumberPickerView(
     selectedIndex: Int,
     onValueChange: (Int) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    unit: String = ""
 ) {
 
     val safeStep = if (step > 0) step else 1
@@ -103,11 +106,10 @@ fun NumberPickerView(
         AndroidView(
             factory = { context ->
                 NumberPicker(context).apply {
-                    // Configure NumberPicker
                     minValue = adjustedMinValue
                     maxValue = adjustedMaxValue
                     value = safeSelectedIndex
-                    displayedValues = pickerValues.map { it.toString() }.toTypedArray()
+                    displayedValues = pickerValues.map { "$it $unit" }.toTypedArray()
                     descendantFocusability =
                         NumberPicker.FOCUS_BLOCK_DESCENDANTS // Disable keyboard input
                     wrapSelectorWheel = false
@@ -118,7 +120,6 @@ fun NumberPickerView(
                     }
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // Set text color using reflection
                         textColor = contentColor.toArgb()
                     }
                 }

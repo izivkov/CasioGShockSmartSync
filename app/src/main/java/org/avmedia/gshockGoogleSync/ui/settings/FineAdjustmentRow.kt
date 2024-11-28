@@ -66,7 +66,7 @@ fun FineAdjustmentRow(
         var selectedValue by remember { mutableIntStateOf(text.toInt()) }
 
         AppTextLink(
-            text = selectedValue.toString(),
+            text = "$selectedValue ms",
             modifier = Modifier
                 .clickable { showDialog = true }
                 .padding(2.dp),
@@ -83,7 +83,8 @@ fun FineAdjustmentRow(
                     selectedValue = newValue
                     showDialog = false
                     onUpdate(timeAdjustmentSetting.copy(fineAdjustment = newValue))
-                }
+                },
+                unit = "ms",
             )
         }
     }

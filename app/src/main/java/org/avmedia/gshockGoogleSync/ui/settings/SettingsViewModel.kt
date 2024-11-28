@@ -146,7 +146,6 @@ class SettingsViewModel @Inject constructor(
         return settings.filter { setting ->
             when (setting) {
                 is PowerSavingMode -> WatchInfo.hasPowerSavingMode
-                is TimeAdjustment -> !WatchInfo.alwaysConnected
                 else -> true
             }
         } as ArrayList<Setting>
@@ -181,12 +180,10 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 "timeAdjustment" -> {
-                    if (!WatchInfo.alwaysConnected) {
                         val setting: TimeAdjustment =
                             settingsMap[TimeAdjustment::class.java] as TimeAdjustment
                         setting.timeAdjustment = value == true
                         updatedObjects.add(setting)
-                    }
                 }
 
                 "adjustmentTimeMinutes" -> {
