@@ -3,7 +3,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -85,9 +84,9 @@ fun PhoneView(
                         initialPhoneNumber = phoneNumber,
                         onDismiss = { showDialog = false },
                         onPhoneNumberValidated = { newValue ->
-                            phoneNumber = newValue
+                            phoneNumber = newValue.ifEmpty { defaultPhone }
                             showDialog = false
-                            onUpdate(phoneDialAction.copy(phoneNumber = newValue))
+                            onUpdate(phoneDialAction.copy(phoneNumber = phoneNumber))
                         },
                     )
                 }

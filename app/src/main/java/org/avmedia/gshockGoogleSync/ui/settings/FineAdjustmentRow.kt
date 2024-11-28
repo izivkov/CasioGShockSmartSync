@@ -74,10 +74,10 @@ fun FineAdjustmentRow(
         if (showDialog) {
             ValueSelectionDialog(
                 initialValue = selectedValue,
-                range = -5000..5000,
+                range = -10000..10000,
                 step = 100,
-                title = "Fine Adjustment",
-                label = "ms between -5000 and 5000",
+                title = stringResource(R.string.fine_adjustment),
+                label = stringResource(R.string.ms_between_10000_and_10000),
                 onDismiss = { showDialog = false },
                 onConfirm = { newValue ->
                     selectedValue = newValue

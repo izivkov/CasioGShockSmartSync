@@ -164,5 +164,6 @@
     <string name="enter_phone_number">输入电话号码</string>
     <string name="when_to_run">何时运行</string>
     <string name="minutes_between_0_and_59">分钟（介于 0 到 59 之间）</string>
-
+    <string name="fine_adjustment">精细调整</string>
+    <string name="ms_between_10000_and_10000">毫秒介于 -10000 和 10000 之间</string>
 </resources>

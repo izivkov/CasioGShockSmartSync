@@ -1,6 +1,10 @@
 package org.avmedia.gshockGoogleSync.ui.common
 
+import android.content.Context
 import android.os.Build
+import android.text.InputType
+import android.util.AttributeSet
+import android.widget.EditText
 import android.widget.NumberPicker
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -110,8 +114,8 @@ fun NumberPickerView(
                     maxValue = adjustedMaxValue
                     value = safeSelectedIndex
                     displayedValues = pickerValues.map { "$it $unit" }.toTypedArray()
-                    descendantFocusability =
-                        NumberPicker.FOCUS_BLOCK_DESCENDANTS // Disable keyboard input
+                    descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // Disable keyboard input
+                    // descendantFocusability = NumberPicker.FOCUS_AFTER_DESCENDANTS // Allow keyboard input
                     wrapSelectorWheel = false
 
                     // Set listener for value change
@@ -122,6 +126,7 @@ fun NumberPickerView(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         textColor = contentColor.toArgb()
                     }
+
                 }
             },
             update = { picker ->

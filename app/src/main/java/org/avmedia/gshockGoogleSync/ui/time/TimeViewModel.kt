@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -51,9 +52,10 @@ class TimeViewModel @Inject constructor(
                 val timeMs = System.currentTimeMillis() + timeOffset
                 AppSnackbar("Sending time to watch...")
                 api.setTime(timeMs = timeMs)
-                api.setTime(timeMs = timeMs)
-
                 AppSnackbar("Time Set")
+
+                // wait to settle
+                delay(1000)
 
                 // Refresh the Home Time on the screen in case changed by setting time.
                 _homeTime.value = api.getHomeTime()

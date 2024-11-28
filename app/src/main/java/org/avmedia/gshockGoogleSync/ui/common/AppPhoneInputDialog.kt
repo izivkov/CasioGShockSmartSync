@@ -86,9 +86,9 @@ fun AppPhoneInputDialog(
 
 fun validatePhoneNumber(phoneNumber: String): Boolean {
     // val regex = Regex("^\\+?[0-9 ]{10,15}\$")
-    // val regexInternational = Regex("^\\+?(\\d{1,3})?[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,9})\$")
-    val notEmpty = Regex ("^.+$")
-    return notEmpty.matches(phoneNumber.trim())
+    // val regex = Regex("^\\+?(\\d{1,3})?[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,9})\$")
+    val regex = Regex ("^\\+?[0-9 ()/,*.;\\-N#]*\$|^\$")
+    return regex.matches(phoneNumber.trim())
 }
 
 class PhoneNumberVisualTransformation : VisualTransformation {

@@ -168,4 +168,6 @@
     <string name="enter_phone_number">Enter Phone Number</string>
     <string name="when_to_run">When to run</string>
     <string name="minutes_between_0_and_59">Minutes between 0 and 59</string>
+    <string name="fine_adjustment">Fine Adjustment</string>
+    <string name="ms_between_10000_and_10000">ms between -10000 and 10000</string>
 </resources>
