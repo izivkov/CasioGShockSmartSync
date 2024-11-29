@@ -2,7 +2,7 @@
 
 ## Announcements
 
-We have now completed the migration to Jetpack Compose nad Material 3 design.
+We have now completed the migration to [Jetpack Compose](https://developer.android.com/compose) and Material 3 design.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
