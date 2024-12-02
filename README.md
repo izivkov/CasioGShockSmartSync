@@ -2,6 +2,9 @@
 
 ## Announcements
 
+We have added Bulgarian, Arabic, Japanese, French, Spanish, German, Russian, Chinese (simplified) support. If you see mistakes or have suggestions 
+for the translations, please create an issue ant tell us about it.
+
 We have now completed the migration to [Jetpack Compose](https://developer.android.com/compose) and Material 3 design.
 
 ## What is it?
