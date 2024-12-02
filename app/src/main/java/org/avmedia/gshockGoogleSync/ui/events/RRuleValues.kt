@@ -6,10 +6,13 @@
 
 package org.avmedia.gshockGoogleSync.ui.events
 
+import android.content.Context
 import com.philjay.Frequency
 import com.philjay.RRule
 import com.philjay.Weekday
 import com.philjay.WeekdayNum
+import dagger.hilt.android.qualifiers.ApplicationContext
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
@@ -19,8 +22,13 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object RRuleValues {
+@Singleton
+class RRuleValues @Inject constructor(
+    @ApplicationContext private val appContext: Context
+) {
     data class Values(
         var localEndDate: LocalDate? = null,
         var incompatible: Boolean = false,
@@ -61,7 +69,7 @@ object RRuleValues {
 
             if (!isCompatible(rruleObj)) {
                 rruleValues.incompatible = true
-                AppSnackbar("Event not compatible with Watch")
+                AppSnackbar(appContext.getString(R.string.event_not_compatible_with_watch))
             }
 
             if (rrule.isNotEmpty()) {

@@ -9,6 +9,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import timber.log.Timber
 import java.util.concurrent.Executors
@@ -29,7 +30,7 @@ class PhoneFinder {
                 alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
             }
             if (alarmUri == null) {
-                AppSnackbar("Unable to get default sound URI")
+                AppSnackbar(context.getString(R.string.unable_to_get_default_sound_uri))
                 return
             }
 

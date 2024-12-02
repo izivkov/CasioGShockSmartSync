@@ -20,12 +20,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.avmedia.gshockGoogleSync.BuildConfig
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
-import org.avmedia.gshockGoogleSync.BuildConfig
-import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PreConnectionScreen(

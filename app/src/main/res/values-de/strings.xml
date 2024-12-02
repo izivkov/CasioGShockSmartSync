@@ -1,0 +1,196 @@
+<resources>
+    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
+    <string name="title_time">Zeit</string>
+    <string name="title_alarms">Wecker</string>
+    <string name="title_events">Ereignisse</string>
+    <string name="title_settings">Einstellungen</string>
+    <string name="events">Ereignisse</string>
+    <string name="alarms">Wecker</string>
+    <string name="time">Zeit</string>
+    <string name="send_alarms_to_watch">An die\nUhr senden</string>
+    <string name="enabled">Aktiviert</string>
+    <string name="disabled">Deaktiviert</string>
+    <string name="send_alarms_to_phone">An\nTelefon senden</string>
+    <string name="send_events_to_watch">An Uhr\nErinnerungen senden</string>
+    <string name="connection_screen_info"><![CDATA[Um zum nächsten Bildschirm zu gelangen, drücken und halten Sie die <b>UNTERE-LINKE</b>-Taste der Uhr für 3 Sekunden.
+    Nach dem zweiten Doppel-Piep zeigt die App den Zeit-Einstellungsbildschirm an.
+    <p><b>Stellen Sie sicher, dass die offizielle Casio-App nicht läuft, da sie diese App stören wird.</b></p>
+    <p>Um Aktionen auszuführen, die auf dem Bildschirm <b>Aktionen</b> definiert sind, drücken Sie kurz die <b>UNTERE-RECHTE</b>-Taste.
+    Mit diesen Aktionen fungiert die Uhr als Fernbedienung für Ihr Telefon.</p>]]>
+    </string>
+    <string name="alarms_screen_info"><![CDATA[Die Uhren <b>B5600/B5000/B2100</b> verfügen über 5 Wecker und ein "Signal" (stündliches Signal), die hier angezeigt werden.
+    Die Wecker können aktualisiert werden, indem Sie auf den Zeitwert eines jeden Weckers drücken. Es erscheint ein neues Dialogfenster, in dem Sie die Weckzeit einstellen können.
+    Sobald die Wecker eingestellt sind, können Sie diese an die Uhr senden oder an die Wecker-App auf dem Telefon senden.]]></string>
+    <string name="events_screen_info"><![CDATA[Dieser Bildschirm zeigt Ereignisse aus Ihrem <b>Google-Kalender</b> an und ermöglicht es Ihnen, sie an die <b>Erinnerungen</b> der Uhr zu senden.
+    \n\nWenn keine Ereignisse angezeigt werden, stellen Sie sicher, dass Sie zukünftige Ereignisse oder nicht abgelaufene wiederkehrende Ereignisse in Ihrem Google-Kalender haben.]]>
+    </string>
+    <string name="actions">Aktionen</string>
+    <string name="title_actions">Aktionen</string>
+    <string name="actions_screen_info"><![CDATA[Die ausgewählten Aktionen werden ausgeführt, wenn der Benutzer die <b>UNTERE-RECHTE</b>-Taste der Uhr im Startbildschirm <b>kurz drückt</b>. Mit diesen Aktionen fungiert die Uhr als Fernbedienung für Ihr Telefon.]]></string>
+    <string name="feb_22_mar_24">22. Feb - 24. Mär</string>
+    <string name="weekly">WÖCHENTLICH</string>
+    <string name="action_item">Aktionspunkt</string>
+    <string name="voice_assistant">Sprachassistent</string>
+    <string name="front_cam">Frontkamera</string>
+    <string name="back_cam">Rückkamera</string>
+    <string name="take_a_photo">Foto aufnehmen</string>
+    <string name="info">Info</string>
+    <string name="daily">Täglich</string>
+    <string name="_12_00">12:00</string>
+    <string name="email_item">E-Mail-Element</string>
+    <string name="email_example_com">ich@example.com</string>
+    <string name="watch_alarms">Uhr-Wecker</string>
+    <string name="signal_chime">Signal (Piepton)</string>
+    <string name="google_calendar_events">Google-Kalender-Ereignisse</string>
+    <string name="local_time">Lokale Zeit</string>
+    <string name="send_to_watch">An die\nUhr senden</string>
+    <string name="phonecall_item">Telefonanruf-Element</string>
+    <string name="home_time">Heimzeit</string>
+    <string name="running_actions">Laufende Aktionen</string>
+    <string name="title_placeholder">Titel-Platzhalter</string>
+    <string name="settings">Einstellungen</string>
+    <string name="send_to_watch_settings">An die\nUhr senden</string>
+    <string name="auto_configure_settings">Auto-\nAusfüllen</string>
+    <string name="time_format">Zeitformat</string>
+    <string name="_12h">12h</string>
+    <string name="_24h">24h</string>
+    <string name="date_format">Datumsformat</string>
+    <string name="language">Sprache</string>
+    <string name="operational_sound">Tastenton</string>
+    <string name="power_saving_mode">Energiesparmodus</string>
+    <string name="select_language">Sprache auswählen</string>
+    <string name="auto_fill_help"><![CDATA[Die Werte der automatischen Ausfüllfunktion werden wie folgt abgeleitet:
+        <li>Das Zeit-/Datumsformat und die Sprache werden aus den Einstellungen des Telefons übernommen.</li>
+        <li>Der Tastenton wird deaktiviert, wenn das Telefon im DnD-Modus ist, ansonsten aktiviert.</li>
+        <li>Der Energiesparmodus wird aktiviert, wenn der Akkustand 15 % oder weniger beträgt.</li>
+        Hinweis: <i>Die Werte ändern sich nicht, bis sie erneut gesendet werden, selbst wenn sich die Bedingungen ändern (z. B. DnD wird ein-/ausgeschaltet).</i>
+        ]]>
+    </string>
+    <string name="cancel">Abbrechen</string>
+    <string name="ok">OK</string>
+    <string name="timerDialogTitle">Timer</string>
+    <string name="info_home_time">
+    <![CDATA[<b>Heimzeit</b> zeigt die Zeitzone der Uhr an.
+    Wenn die App die Uhrzeit (manuell oder automatisch) einstellt, wird auch die <b>Heimzeit, Zeitverschiebung</b> und <b>Sommerzeit</b> (falls zutreffend) auf die aktuelle Zeitzone gesetzt. Daher ist es nicht notwendig, die <b>Weltzeit</b> und <b>Heimzeit</b> beim Reisen in eine andere Zeitzone zu tauschen.]]>
+</string>
+    <string name="time_adjustment_info">
+    <![CDATA[
+    <li><b>Zeiteinstellung</b> ermöglicht es der App, die Uhrzeit der Uhr 4-mal täglich automatisch zu aktualisieren.</li>
+    <li>Gleichzeitig wird die App die <b>Erinnerungen (Ereignisse)</b> von Ihrem <b>Google Kalender</b> auf die Uhr übertragen, wenn die Aktion <b>Erinnerungen aus Google Kalender festlegen</b> aktiviert ist.</li>
+    ]]>
+</string>
+    <string name="image_of_casio_watch">Casio Uhr</string>
+    <string name="connection_screen_device"> <![CDATA[
+    <li>Standardmäßig wird die App versuchen, sich mit einer zuvor verbundenen Uhr zu verbinden. Wenn Sie sich mit einer anderen Uhr verbinden möchten, drücken Sie den <b>VERGESSEN</b>-Button und verbinden Sie dann die neue Uhr wie gewohnt. Ab diesem Zeitpunkt wird die App versuchen, sich mit dieser neuen Uhr zu verbinden.</li>
+
+    <li>Die App erkennt automatisch das Modell der Uhr.</li>
+    ]]>
+</string>
+    <string name="forget">Vergessen</string>
+    <string name="hand_adjustment">Zeigeranpassung</string>
+    <string name="move_hand_to_the_left">Zeiger nach links bewegen</string>
+    <string name="reset_hand_at_12_position">Zeiger auf 12 Uhr zurücksetzen</string>
+    <string name="move_hand_to_the_right">Zeiger nach rechts bewegen</string>
+    <string name="auto_light">Automatische Beleuchtung</string>
+    <string name="off">Aus</string>
+    <string name="on">An</string>
+    <string name="illumination_period">Beleuchtungsdauer</string>
+    <string name="mm_dd">MM:TT</string>
+    <string name="dd_mm">TT:MM</string>
+    <string name="time_adjustment">Zeiteinstellung</string>
+    <string name="notify_me">Benachrichtige mich</string>
+    <string name="timer">Timer</string>
+    <string name="_00_00_00">00:00:00</string>
+    <string name="_00">00</string>
+    <string name="semi_column">:</string>
+    <string name="no_watch">Keine Uhr</string>
+    <string name="set_time">Zeit einstellen</string>
+    <string name="find_phone">Telefon suchen</string>
+    <string name="set_reminders">Erinnerungen aus\nGoogle Kalender festlegen</string>
+    <string name="take_photo">Foto machen</string>
+    <string name="toggle_flashlight">Taschenlampe</string>
+    <string name="start_voice_assistant">Sprachassistent starten</string>
+    <string name="next_track">Nächster Titel</string>
+    <string name="emergency_actions">Notfallaktionen:</string>
+    <string name="make_phonecall">Telefonanruf tätigen</string>
+    <string name="adjustment_time_info"><![CDATA[
+    <li>Die automatische Zeiteinstellung erfolgt 4-mal täglich, nach den Stunden 00:00 Uhr, 06:00 Uhr, 12:00 Uhr und 18:00 Uhr.</li>
+    <li>Diese Einstellung legt die Anzahl der Minuten nach der vollen Stunde fest, wann die Zeiteinstellung erfolgt. Wenn Sie diesen Wert auf 25 setzen, erfolgt die Zeiteinstellung um 00:25 Uhr, 06:25 Uhr, 12:25 Uhr und 18:25 Uhr.</li>
+    <li>Wenn Sie mehrere Uhren haben, können Sie individuell festlegen, wann deren Zeit eingestellt werden soll.</li>
+    ]]></string>
+    <string name="adjustment_time_minutes">Wann ausführen\n(Minuten nach Stunde)</string>
+    <string name="skip_to_next_track_info"><![CDATA[
+    Wenn Sie Musik oder ein Video in einem Media Player wie Spotify, YouTube oder YTMusic auf Ihrem Telefon abspielen, überspringt diese Aktion den aktuellen Titel und spielt den nächsten ab.
+    Sie funktioniert auch mit Android Auto.
+    ]]></string>
+    <string name="set_prayer_alarms">Gebetsalarme einstellen</string>
+    <string name="prayer_times_info"><![CDATA[
+    <li>Diese Aktion stellt die 5 Alarme auf der Uhr auf die islamischen Gebetszeiten <b>Fajr</b>, <b>Dhuhr</b>, <b>Asr</b>, <b>Maghrib</b> und <b>Isha</b> ein.</li>
+    <li>Die Zeiten variieren je nach Ihrem Standort und dem aktuellen Datum, daher wird empfohlen, diese Aktion täglich auszuführen.
+    Wenn diese Aktion aktiviert ist, werden die Alarme auch automatisch während der automatischen Zeiteinstellung 4-mal täglich aktualisiert.</li>
+    <li>Die folgenden Berechnungsmethoden werden je nach Ihrem Standort verwendet:
+        <b>NORDAMERIKA</b>,
+        <b>DİYANET</b>,
+        <b>EGYPTISCH</b>,
+        <b>DUBAI</b>,
+        <b>UMM AL QURA</b>,
+        <b>QATAR</b>,
+        <b>SINGAPUR</b>,
+        <b>KUWAIT</b> und
+        <b>ISLAMISCHE WELTVERBAND</b> überall anders.
+    </li>
+    <li>Für Vorschläge und Korrekturen kontaktieren Sie <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
+]]></string>
+    <string name="do_not_disturb_dnd">Nicht stören (DnD)</string>
+    <string name="mirror_phone_s_dnd">Spiegeln des DnD des Telefons</string>
+    <string name="DnD_info_message"><![CDATA[
+    Wenn ausgewählt, werden alle Alarme, Timer und Stundenschläge auf der Uhr stummgeschaltet.
+    <li>Bei manueller Aktivierung/Deaktivierung wird DnD wirksam, nachdem die <b>Send to Watch</b>-Taste gedrückt wurde.</li>
+    <li>Beim Spiegeln wird es sofort wirksam, wenn die DnD-Einstellung auf dem Telefon geändert wird, unabhängig davon, auf welchem Bildschirm Sie sich gerade befinden.</li>
+]]></string>
+    <string name="auto_light_at_night_only">Auto-Licht nur nachts</string>
+    <string name="keep_alive">Wartung aktiv (verbraucht mehr Batterie)</string>
+    <string name="enter_timer_time">Timerzeit eingeben</string>
+    <string name="max_reminders_reached">Maximale Anzahl an Erinnerungen erreicht, bitte deaktivieren Sie einige, bevor Sie neue auswählen</string>
+    <string name="fine_time_adjustment">Feinabstimmung</string>
+    <string name="_0000">0000</string>
+    <string name="fine_adjustment_info"><![CDATA[
+    Bei einigen Uhrenmodellen kann es bei der Zeiteinstellung zu einer leichten Abweichung von wenigen Sekunden kommen. Mit dieser Einstellung können Sie die Zeiteinstellung feinjustieren.
+    Der Wert, in Millisekunden, wird zur Zeit hinzugefügt, die von der App an die Uhr gesendet wird. Sie können Werte zwischen -5000 und 5000 einstellen. Wenn Ihre Uhr beispielsweise 2,5 Sekunden vor der tatsächlichen Zeit liegt, setzen Sie diesen Wert auf -2500, um sie genau abzugleichen.
+]]></string>
+    <string name="required_permissions_denied_cannot_access_screen">Erforderliche Berechtigungen abgelehnt. Kann auf den Bildschirm nicht zugreifen!</string>
+    <string name="required_permissions_denied_cannot_access_actions">Erforderliche Berechtigungen abgelehnt. Kann auf Aktionen nicht zugreifen.</string>
+    <string name="calendar_permission_denied_cannot_access_events">Kalenderberechtigung abgelehnt. Kann nicht auf Ereignisse zugreifen.</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">"Löschen Sie den App-Speicher in den Android-Einstellungen und starten Sie die App neu, um Berechtigungen hinzuzufügen."</string>
+    <string name="phone_number">Telefonnummer</string>
+    <string name="enter_phone_number">Telefonnummer eingeben</string>
+    <string name="when_to_run">Wann ausführen</string>
+    <string name="minutes_between_0_and_59">Minuten zwischen 0 und 59</string>
+    <string name="fine_adjustment">Feinabstimmung</string>
+    <string name="ms_between_10000_and_10000">ms zwischen -10000 und 10000</string>
+
+    <string name="sending_time_to_watch">Sende Zeit an die Uhr…</string>
+    <string name="time_set">Zeit eingestellt</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiFehler! Stellen Sie sicher, dass die offizielle G-Shock-App nicht läuft.</string>
+    <string name="bluetooth_is_not_enabled">Bluetooth ist nicht aktiviert.</string>
+    <string name="disconnected_due_to_inactivity">Getrennt aufgrund von Inaktivität.</string>
+    <string name="when_found_lift_phone_to_stop_ringing">Wenn gefunden, heben Sie das Telefon an, um das Klingeln zu stoppen</string>
+    <string name="voice_assistant_not_available_on_this_device">Sprachassistent auf diesem Gerät nicht verfügbar!</string>
+    <string name="cannot_go_to_next_track">Kann nicht zum nächsten Titel wechseln!</string>
+    <string name="image_captured">Bild aufgenommen: %1$s</string>
+    <string name="emaillocationaction_emailaddress">EmailLocationAction: emailAdresse: %1$s</string>
+    <string name="camera_capture_error">Kamera-Aufnahmefehler: %1$s</string>
+    <string name="flashlight_not_available">Taschenlampe nicht verfügbar</string>
+    <string name="unable_to_get_default_sound_uri">Kann die Standard-Sound-URI nicht abrufen</string>
+    <string name="alarms_set_no_watch">Alarme gesetzt, keine Uhr</string>
+    <string name="events_set">Ereignisse gesetzt</string>
+    <string name="event_not_compatible_with_watch">Ereignis nicht mit der Uhr kompatibel</string>
+    <string name="settings_sent_to_watch">Einstellungen an die Uhr gesendet</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">Entschuldigung, Ihr Gerät unterstützt Bluetooth nicht. Wird beendet…</string>
+    <string name="permission_required_to_turn_on_bluetooth">Berechtigung erforderlich, um Bluetooth zu aktivieren.</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">Sie haben keine Berechtigung, Bluetooth zu aktivieren. Bitte aktivieren Sie es manuell.</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Berechtigungen sind dauerhaft abgelehnt. Bitte aktivieren Sie sie in den App-Einstellungen.</string>
+    <string name="you_have_not_given_permission_to_to_run_action">Sie haben keine Berechtigung erteilt, die Aktion %1$s auszuführen.</string>
+    <string name="timer_set">Timer eingestellt</string>
+
+</resources>

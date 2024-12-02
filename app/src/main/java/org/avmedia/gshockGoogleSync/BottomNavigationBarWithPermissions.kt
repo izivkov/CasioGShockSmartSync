@@ -33,7 +33,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockGoogleSync.services.InactivityHandler
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
 import org.avmedia.gshockGoogleSync.ui.alarms.AlarmsScreen
@@ -44,15 +46,25 @@ import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun BottomNavigationBarWithPermissions(repository: GShockRepository) {
+fun BottomNavigationBarWithPermissions(
+    repository: GShockRepository,
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    val localContext = LocalContext.current.applicationContext
+    val appContext = remember {
+        EntryPointAccessors.fromApplication(
+            localContext,
+            ApplicationContextEntryPoint::class.java
+        ).getApplicationContext()
+    }
+
     val inactivityHandler = remember {
         InactivityHandler(timeout = (3 * 60).seconds) {
             repository.disconnect()
-            AppSnackbar("Disconnected due to inactivity.")
+            AppSnackbar(appContext.getString(R.string.disconnected_due_to_inactivity))
         }
     }
 

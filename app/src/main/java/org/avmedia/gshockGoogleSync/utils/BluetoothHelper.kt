@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 
 class BluetoothHelper(
@@ -25,7 +26,7 @@ class BluetoothHelper(
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter = bluetoothManager?.adapter
         if (bluetoothAdapter == null) {
-            AppSnackbar("Sorry, your device does not support Bluetooth. Exiting...")
+            AppSnackbar(context.getString(R.string.sorry_your_device_does_not_support_bluetooth_exiting))
             activity.finish()
             return
         }
@@ -37,7 +38,7 @@ class BluetoothHelper(
                     context, Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                AppSnackbar("Permission required to turn on Bluetooth.")
+                AppSnackbar(context.getString(R.string.permission_required_to_turn_on_bluetooth))
                 onBluetoothNotEnabled()
                 return
             }
@@ -45,7 +46,7 @@ class BluetoothHelper(
             try {
                 requestBluetooth.launch(enableBtIntent)
             } catch (e: SecurityException) {
-                AppSnackbar("You have no permissions to turn on Bluetooth. Please turn it on manually.")
+                AppSnackbar(context.getString(R.string.you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually))
                 onBluetoothNotEnabled()
             }
         } else {

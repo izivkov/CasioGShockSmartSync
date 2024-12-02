@@ -14,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
@@ -23,7 +24,6 @@ import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
@@ -180,10 +180,10 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 "timeAdjustment" -> {
-                        val setting: TimeAdjustment =
-                            settingsMap[TimeAdjustment::class.java] as TimeAdjustment
-                        setting.timeAdjustment = value == true
-                        updatedObjects.add(setting)
+                    val setting: TimeAdjustment =
+                        settingsMap[TimeAdjustment::class.java] as TimeAdjustment
+                    setting.timeAdjustment = value == true
+                    updatedObjects.add(setting)
                 }
 
                 "adjustmentTimeMinutes" -> {
@@ -378,7 +378,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setSettings(settings)
-                AppSnackbar("Settings Sent to Watch")
+                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

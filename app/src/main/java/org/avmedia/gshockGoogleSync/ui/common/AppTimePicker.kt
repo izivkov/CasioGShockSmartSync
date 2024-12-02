@@ -20,9 +20,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.EntryPointAccessors
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,13 +63,13 @@ fun AppTimePicker(
             AppButton(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
-                text = "Cancel"
+                text = stringResource(id = R.string.cancel)
             )
             Spacer(modifier = Modifier.width(8.dp)) // Space between buttons
             AppButton(
                 onClick = { onConfirm(timePickerState) },
                 modifier = Modifier.weight(1f), // Equal width buttons
-                text = "OK"
+                text = stringResource(id = R.string.ok)
             )
         }
     }

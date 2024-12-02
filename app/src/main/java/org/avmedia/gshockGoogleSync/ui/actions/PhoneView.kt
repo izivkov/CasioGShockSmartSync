@@ -36,7 +36,9 @@ fun PhoneView(
     var isEnabled by remember { mutableStateOf(phoneDialAction.enabled) }
     val defaultPhone = "000-000-0000"
     var phoneNumber by remember {
-        mutableStateOf(phoneDialAction.phoneNumber.takeIf { it.isNotBlank() }?.trim() ?: defaultPhone)
+        mutableStateOf(
+            phoneDialAction.phoneNumber.takeIf { it.isNotBlank() }?.trim() ?: defaultPhone
+        )
     }
 
     LaunchedEffect(actions, phoneDialAction) {

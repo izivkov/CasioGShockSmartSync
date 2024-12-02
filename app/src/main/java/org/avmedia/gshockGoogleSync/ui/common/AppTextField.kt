@@ -28,7 +28,7 @@ fun AppTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     textAlign: TextAlign = TextAlign.End,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    ) {
+) {
     TextField(
         value = value,
         onValueChange = { newText ->

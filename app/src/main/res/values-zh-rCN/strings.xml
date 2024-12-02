@@ -166,4 +166,29 @@
     <string name="minutes_between_0_and_59">分钟（介于 0 到 59 之间）</string>
     <string name="fine_adjustment">精细调整</string>
     <string name="ms_between_10000_and_10000">毫秒介于 -10000 和 10000 之间</string>
+
+    <string name="sending_time_to_watch">正在发送时间到手表…</string>
+    <string name="time_set">时间已设置</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError！请确保官方 G-Shock 应用未在运行。</string>
+    <string name="bluetooth_is_not_enabled">蓝牙未启用。</string>
+    <string name="disconnected_due_to_inactivity">因不活动已断开连接。</string>
+    <string name="when_found_lift_phone_to_stop_ringing">找到时，请抬起手机以停止铃声</string>
+    <string name="voice_assistant_not_available_on_this_device">此设备不支持语音助手！</string>
+    <string name="cannot_go_to_next_track">无法跳到下一首歌曲！</string>
+    <string name="image_captured">已拍摄图像：%1$s</string>
+    <string name="emaillocationaction_emailaddress">EmailLocationAction：电子邮件地址：%1$s</string>
+    <string name="camera_capture_error">拍照错误：%1$s</string>
+    <string name="flashlight_not_available">手电筒不可用</string>
+    <string name="unable_to_get_default_sound_uri">无法获取默认声音 URI</string>
+    <string name="alarms_set_no_watch">已设置闹钟，但没有手表</string>
+    <string name="events_set">已设置事件</string>
+    <string name="event_not_compatible_with_watch">事件与手表不兼容</string>
+    <string name="settings_sent_to_watch">设置已发送到手表</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">抱歉，您的设备不支持蓝牙。正在退出…</string>
+    <string name="permission_required_to_turn_on_bluetooth">需要权限才能开启蓝牙。</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">您没有权限开启蓝牙，请手动开启。</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">权限已被永久拒绝，请在应用设置中启用。</string>
+    <string name="you_have_not_given_permission_to_to_run_action">您未授权执行操作 %1$s。</string>
+    <string name="timer_set">定时器已设置</string>
+
 </resources>

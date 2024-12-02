@@ -1,0 +1,201 @@
+<resources>
+    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
+    <string name="title_time">Heure</string>
+    <string name="title_alarms">Alarmes</string>
+    <string name="title_events">Événements</string>
+    <string name="title_settings">Paramètres</string>
+    <string name="events">Événements</string>
+    <string name="alarms">Alarmes</string>
+    <string name="time">Heure</string>
+    <string name="send_alarms_to_watch">Envoyer à\nla montre</string>
+    <string name="enabled">Activé</string>
+    <string name="disabled">Désactivé</string>
+    <string name="send_alarms_to_phone">Envoyer au\nTéléphone</string>
+    <string name="send_events_to_watch">Envoyer à la montre\nRappels</string>
+
+    <string name="connection_screen_info"><![CDATA[Pour passer à l\'écran suivant, appuyez et maintenez le bouton <b>INFÉRIEUR-GAUCHE</b> de la montre pendant 3 secondes.
+Après le deuxième double-bip, l\'application affichera l\'écran de réglage de l\'heure.
+<p><b>Assurez-vous que l\'application officielle Casio n\'est pas en cours d\'exécution, car elle interférera avec cette application.</b></p>
+<p>Pour exécuter les Actions définies dans l\'écran <b>Actions</b>, appuyez brièvement sur le bouton <b>INFÉRIEUR-DROIT</b>. Les actions sont des applications sur votre téléphone, comme <b>Prendre une photo</b>.
+Grâce à ces actions, la montre agit comme une télécommande pour votre téléphone.</p>]]>
+</string>
+    <string name="alarms_screen_info"><![CDATA[Les montres <b>B5600/B5000/B2100</b> ont 5 alarmes et un réglage "signal" (carillon horaire) indiqués ici.
+Les alarmes peuvent être mises à jour en appuyant sur la valeur de l\'heure de chaque alarme. Une nouvelle boîte de dialogue apparaîtra, vous permettant de définir l\'heure de l\'alarme.
+Une fois les alarmes définies, vous pouvez les envoyer à la montre ou à l\'application Réveil sur le téléphone.]]></string>
+    <string name="events_screen_info"><![CDATA[Cet écran affiche les Événements de votre <b>Google Agenda</b> et vous permet de les envoyer aux <b>rappels</b> de la montre.\n\n
+Si aucun événement n\'apparaît, assurez-vous que vous avez des événements à venir ou des événements récurrents non expirés dans votre Google Agenda.]]>
+</string>
+    <string name="actions">Actions</string>
+    <string name="title_actions">Actions</string>
+    <string name="actions_screen_info"><![CDATA[Les actions sélectionnées sont exécutées lorsque l\'utilisateur <b>appuie brièvement</b> sur le bouton <b>INFÉRIEUR-DROIT</b> de la montre depuis l\'écran initial. Grâce à ces actions, la montre agit comme une télécommande pour votre téléphone.]]></string>
+    <string name="feb_22_mar_24">22 Fév. - 24 Mars</string>
+    <string name="weekly">HEBDOMADAIRE</string>
+    <string name="action_item">Élément d\'action</string>
+    <string name="voice_assistant">Assistant vocal</string>
+    <string name="front_cam">Caméra avant</string>
+    <string name="back_cam">Caméra arrière</string>
+    <string name="take_a_photo">Prendre une photo</string>
+    <string name="info">Info</string>
+    <string name="daily">Quotidien</string>
+    <string name="_12_00">12:00</string>
+    <string name="email_item">Élément Email</string>
+
+    <string name="email_example_com">moi@example.com</string>
+    <string name="watch_alarms">Alarmes de la montre</string>
+    <string name="signal_chime">Signal (carillon)</string>
+    <string name="google_calendar_events">Événements Google Agenda</string>
+    <string name="local_time">Heure locale</string>
+
+    <string name="send_to_watch">Envoyer à\nla montre</string>
+    <string name="phonecall_item">Élément Appel Téléphonique</string>
+    <string name="home_time">Heure à domicile</string>
+    <string name="running_actions">Exécution des Actions</string>
+    <string name="title_placeholder">Titre Placeholder</string>
+    <string name="settings">Paramètres</string>
+    <string name="send_to_watch_settings">Envoyer à\nla montre</string>
+    <string name="auto_configure_settings">Auto\nremplir</string>
+    <string name="time_format">Format de l\heure</string>
+
+
+    <string name="_12h">12h</string>
+    <string name="_24h">24h</string>
+    <string name="date_format">Format de la date</string>
+    <string name="language">Langue</string>
+    <string name="operational_sound">Ton des boutons</string>
+    <string name="power_saving_mode">Mode économie d\'énergie</string>
+    <string name="select_language">Sélectionner la langue</string>
+
+    <string name="auto_fill_help"><![CDATA[Les valeurs auto-remplies sont obtenues comme suit :
+<li>Le format de l\'heure/de la date et la langue sont obtenus depuis les paramètres du téléphone.</li>
+<li>Le ton des boutons est désactivé si le téléphone est en mode Ne Pas Déranger (DnD), activé sinon.</li>
+<li>Le mode économie d\'énergie est activé si le niveau de batterie est à 15 % ou moins.</li>
+Note : <i>Les valeurs ne changeront pas tant qu\'elles ne sont pas renvoyées, même si les conditions changent (par ex. le DnD est activé/désactivé)</i>
+]]>
+</string>
+    <string name="cancel">Annuler</string>
+    <string name="ok">OK</string>
+    <string name="timerDialogTitle">Minuteur</string>
+    <string name="info_home_time">
+<![CDATA[<b>Heure à domicile</b> indique le fuseau horaire de la montre.
+Lorsque l\'application définit l\'heure de la montre (manuellement ou automatiquement), elle définira également le <b>Temps à domicile,
+Décalage horaire</b> et <b>DST</b> (le cas échéant) au fuseau horaire actuel. Il n\'est donc pas nécessaire d\'échanger votre <b>Temps mondial</b> et votre <b>Temps à domicile</b>
+lorsque vous voyagez dans un autre fuseau horaire.]]>
+</string>
+    <string name="time_adjustment_info"><![CDATA[
+<li><b>Ajustement de l\'heure</b> permet à l\'application de mettre à jour automatiquement l\'heure de la montre 4 fois par jour.</li>
+<li>En même temps, l\'application mettra à jour les <b>Rappels (Événements)</b> de la montre depuis votre <b>Google Calendar</b> si l\'action <b>Définir les rappels depuis Google Calendar</b> est activée.</li>
+]]></string>
+    <string name="image_of_casio_watch">Montre Casio</string>
+    <string name="connection_screen_device"> <![CDATA[
+<li>Par défaut, l\'application tentera de se connecter à une montre précédemment connectée. Si vous souhaitez vous connecter à une autre montre, appuyez sur le bouton <b>OUBLIER</b>, puis connectez la nouvelle montre comme d\'habitude. Dès lors, l\'application tentera de se connecter à cette nouvelle montre.</li>
+<li>L\'application détectera automatiquement le modèle de la montre.</li>
+]]></string>
+
+    <string name="forget">Oublier</string>
+    <string name="hand_adjustment">Réglage des aiguilles</string>
+    <string name="move_hand_to_the_left">Déplacer l\'aiguille à gauche</string>
+    <string name="reset_hand_at_12_position">Réinitialiser l\'aiguille à la position 12</string>
+    <string name="move_hand_to_the_right">Déplacer l\'aiguille à droite</string>
+    <string name="auto_light">Éclairage automatique</string>
+    <string name="off">Éteint</string>
+    <string name="on">Allumé</string>
+    <string name="illumination_period">Période d\'illumination</string>
+    <string name="mm_dd">MM:JJ</string>
+    <string name="dd_mm">JJ:MM</string>
+    <string name="time_adjustment">Ajustement de l\'heure</string>
+    <string name="notify_me">M\'avertir</string>
+    <string name="timer">Minuteur</string>
+    <string name="_00_00_00">00:00:00</string>
+    <string name="_00">00</string>
+    <string name="semi_column">:</string>
+    <string name="no_watch">Pas de montre</string>
+    <string name="set_time">Réglage de l\'heure</string>
+    <string name="find_phone">Trouver le téléphone</string>
+    <string name="set_reminders">Définir des rappels depuis\nGoogle Calendar</string>
+
+    <string name="take_photo">Prendre une photo</string>
+    <string name="toggle_flashlight">Torche</string>
+    <string name="start_voice_assistant">Démarrer l\'assistant vocal</string>
+    <string name="next_track">Passer à la piste suivante</string>
+    <string name="emergency_actions">Actions d\'urgence :</string>
+    <string name="make_phonecall">Passer un appel</string>
+    <string name="adjustment_time_info"><![CDATA[
+<li>L\'ajustement automatique de l\'heure se produit 4 fois par jour, quelque temps après 00h00, 06h00, 12h00 et 18h00.</li>
+<li>Ce réglage définit le nombre de minutes après l\'heure où l\'ajustement de l\'heure se produit. Par exemple, si vous définissez cette valeur à 25, l\'ajustement de l\'heure aura lieu à 00h25, 06h25, 12h25 et 18h25.</li>
+<li>Si vous avez plusieurs montres, vous pouvez contrôler quand régler l\'heure de chacune d\'elles individuellement.</li>
+]]></string>
+    <string name="adjustment_time_minutes">Quand exécuter\n(minutes après l\'heure)</string>
+    <string name="skip_to_next_track_info"><![CDATA[
+Si vous écoutez de la musique ou regardez une vidéo sur une application de lecture multimédia comme Spotify, YouTube ou YTMusic sur votre téléphone, cette action passera à la chanson ou vidéo suivante.
+Cela fonctionne également avec Android Auto.
+]]></string>
+    <string name="set_prayer_alarms">Alarmes de prière</string>
+    <string name="prayer_times_info"><![CDATA[
+<li>Cette action définira les 5 alarmes de la montre pour les prières musulmanes <b>Fajr</b>, <b>Dhuhr</b>, <b>Asr</b>, <b>Maghrib</b> et <b>Isha</b>.</li>
+<li>Les horaires varient en fonction de votre emplacement et de la date actuelle, il est donc recommandé d\'exécuter cette action quotidiennement.
+Si cette action est activée, les alarmes seront également mises à jour automatiquement lors de l\'ajustement automatique de l\'heure, 4 fois par jour.</li>
+<li>Les méthodes de calcul suivantes sont utilisées en fonction de votre emplacement :
+<b>AMÉRIQUE DU NORD</b>,
+<b>DİYANET</b>,
+<b>ÉGYPTIENNE</b>,
+<b>DUBAÏ</b>,
+<b>UMM AL QURA</b>,
+<b>QATAR</b>,
+<b>SINGAPOUR</b>,
+<b>KOWEÏT</b> et
+<b>LIGUE MONDIALE MUSULMANE</b> partout ailleurs.
+</li>
+<li>Pour des suggestions ou corrections, contactez <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
+]]></string>
+    <string name="do_not_disturb_dnd">Ne pas déranger (DnD)</string>
+    <string name="mirror_phone_s_dnd">Miroir du DnD du téléphone</string>
+    <string name="DnD_info_message"><![CDATA[
+Lorsque sélectionné, toutes les alarmes, minuteries et sonneries horaires de la montre seront silencieuses.
+<li>Lorsqu\'il est activé manuellement, le DnD prendra effet après que le bouton <b>Envoyer à la montre</b> ait été pressé.</li>
+<li>Lors du miroir, il prendra effet immédiatement après avoir changé le réglage DnD sur le téléphone, quel que soit l\'écran actuellement affiché.</li>
+]]></string>
+    <string name="auto_light_at_night_only">Éclairage automatique uniquement la nuit</string>
+    <string name="keep_alive">Garder actif (consomme plus de batterie)</string>
+    <string name="enter_timer_time">Entrez l\'heure du minuteur</string>
+    <string name="max_reminders_reached">Nombre maximum de rappels atteint. Veuillez en désactiver certains avant de sélectionner de nouveaux.</string>
+    <string name="fine_time_adjustment">Ajustement fin</string>
+    <string name="_0000">0000</string>
+    <string name="fine_adjustment_info"><![CDATA[
+Lors du réglage de l\'heure, certains modèles de montre peuvent afficher une heure légèrement décalée de quelques secondes. Ce réglage vous permet de peaufiner l\'ajustement de l\'heure.
+La valeur, en millisecondes, est ajoutée à l\'heure envoyée depuis l\'application vers la montre. Vous pouvez définir des valeurs comprises entre -5000 et 5000. Par exemple,
+si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, définissez cette valeur à -2500 pour la synchroniser correctement.
+]]></string>
+    <string name="required_permissions_denied_cannot_access_screen">Permissions requises refusées. Impossible d\'accéder à l\'écran !</string>
+    <string name="required_permissions_denied_cannot_access_actions">Permissions requises refusées. Impossible d\'accéder aux actions.</string>
+    <string name="calendar_permission_denied_cannot_access_events">Permission du calendrier refusée. Impossible d\'accéder aux événements.</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">"Effacer le stockage de l\'application dans les paramètres Android et redémarrer l\'application pour ajouter les permissions."</string>
+    <string name="phone_number">Numéro de téléphone</string>
+    <string name="enter_phone_number">Entrez le numéro de téléphone</string>
+    <string name="when_to_run">Quand exécuter</string>
+    <string name="minutes_between_0_and_59">Minutes entre 0 et 59</string>
+    <string name="fine_adjustment">Ajustement fin</string>
+    <string name="ms_between_10000_and_10000">ms entre -10000 et 10000</string>
+    <string name="sending_time_to_watch">Envoi de l\'heure à la montre…</string>
+    <string name="time_set">Heure définie</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError ! Assurez-vous que l\'application officielle G-Shock n\'est pas en cours d\'exécution.</string>
+    <string name="bluetooth_is_not_enabled">Le Bluetooth n\'est pas activé.</string>
+    <string name="disconnected_due_to_inactivity">Déconnecté en raison de l\'inactivité.</string>
+    <string name="when_found_lift_phone_to_stop_ringing">Lorsque le téléphone est trouvé, soulevez-le pour arrêter de sonner.</string>
+    <string name="voice_assistant_not_available_on_this_device">L\'Assistant vocal n\'est pas disponible sur cet appareil !</string>
+    <string name="cannot_go_to_next_track">Impossible de passer à la chanson suivante !</string>
+    <string name="image_captured">Image capturée : %1$s</string>
+    <string name="emaillocationaction_emailaddress">EmailLocationAction : adresseEmail : %1$s</string>
+    <string name="camera_capture_error">Erreur de capture de l\'appareil photo : %1$s</string>
+    <string name="flashlight_not_available">Lampe de poche non disponible</string>
+    <string name="unable_to_get_default_sound_uri">Impossible d\'obtenir l\'URI du son par défaut</string>
+    <string name="alarms_set_no_watch">Alarmes définies sans montre</string>
+    <string name="events_set">Événements définis</string>
+    <string name="event_not_compatible_with_watch">Événement non compatible avec la montre</string>
+    <string name="settings_sent_to_watch">Paramètres envoyés à la montre</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">Désolé, votre appareil ne prend pas en charge le Bluetooth. Fermeture…</string>
+    <string name="permission_required_to_turn_on_bluetooth">Permission requise pour activer le Bluetooth.</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">Vous n\'avez pas de permission pour activer le Bluetooth. Veuillez l\'activer manuellement.</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Les permissions sont définitivement refusées. Veuillez les activer dans les paramètres de l\'application.</string>
+    <string name="you_have_not_given_permission_to_to_run_action">Vous n\'avez pas donné la permission d\'exécuter l\'action %1$s.</string>
+    <string name="timer_set">Minuteur réglé</string>
+</resources>

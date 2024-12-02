@@ -3,6 +3,7 @@ package org.avmedia.gshockGoogleSync.ui.actions
 import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraManager.TorchCallback
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 
 object FlashlightHelper {
@@ -22,7 +23,7 @@ object FlashlightHelper {
     private fun turnOnOff(context: Context, state: Boolean) {
         cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         if (cameraManager.cameraIdList.isEmpty()) {
-            AppSnackbar("Flashlight not available")
+            AppSnackbar(context.getString(R.string.flashlight_not_available))
             return
         }
 

@@ -24,14 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockapi.WatchInfo
 
 @SuppressLint("MutableCollectionMutableState")
@@ -91,7 +90,7 @@ fun SettingsList() {
         Light(settingsViewModel::updateSetting)
     ).apply {
         if (WatchInfo.hasPowerSavingMode) add(PowerSavings(settingsViewModel::updateSetting))
-        add (TimeAdjustment(settingsViewModel::updateSetting))
+        add(TimeAdjustment(settingsViewModel::updateSetting))
     }
 
     Column(
@@ -138,8 +137,7 @@ fun BottomRow(
 
             ButtonsRow(buttons = buttons, modifier = Modifier.weight(2.5f))
 
-            Spacer(modifier = Modifier.weight(1f))
-
+            Spacer(modifier = Modifier.weight(.5f))
         }
     }
 }

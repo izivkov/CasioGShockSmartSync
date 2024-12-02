@@ -1,11 +1,14 @@
 package org.avmedia.gshockGoogleSync.ui.events
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.Utils
@@ -18,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class EventViewModel @Inject constructor(
     private val api: GShockRepository,
-    private val calendarEvents: CalendarEvents
+    private val calendarEvents: CalendarEvents,
+    @ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     init {
@@ -28,7 +32,7 @@ class EventViewModel @Inject constructor(
     private val _events = MutableStateFlow<List<Event>>(emptyList())
     val events: StateFlow<List<Event>> = _events
 
-    fun loadEvents () {
+    fun loadEvents() {
         viewModelScope.launch {
             try {
                 val loadedEvents = calendarEvents.getEventsFromCalendar()
@@ -65,7 +69,7 @@ class EventViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setEvents(ArrayList(_events.value))
-                AppSnackbar("Events Set")
+                AppSnackbar(appContext.getString(R.string.events_set))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

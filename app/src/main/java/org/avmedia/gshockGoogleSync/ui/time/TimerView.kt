@@ -26,10 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun TimerView(
@@ -102,7 +101,7 @@ fun TimerView(
             ) {
                 SendTimerButton(
                     modifier = Modifier
-                        .padding(5.dp),
+                        .padding(0.dp),
                     onClick = {
                         timeModel.sendTimerToWatch(timer)
                     }

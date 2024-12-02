@@ -108,6 +108,7 @@
     <string name="set_time">Set Time</string>
     <string name="find_phone">Find Phone</string>
     <string name="set_reminders">Set Reminders from\nGoogle Calendar</string>
+
     <string name="take_photo">Take a photo</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>
     <string name="start_voice_assistant">Start Voice Assist</string>
@@ -170,4 +171,27 @@
     <string name="minutes_between_0_and_59">Minutes between 0 and 59</string>
     <string name="fine_adjustment">Fine Adjustment</string>
     <string name="ms_between_10000_and_10000">ms between -10000 and 10000</string>
+    <string name="sending_time_to_watch">Sending time to watch…</string>
+    <string name="time_set">Time Set</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Ensure the official G-Shock app is not running.</string>
+    <string name="bluetooth_is_not_enabled">Bluetooth is not enabled.</string>
+    <string name="disconnected_due_to_inactivity">Disconnected due to inactivity.</string>
+    <string name="when_found_lift_phone_to_stop_ringing">When found, lift phone to stop ringing</string>
+    <string name="voice_assistant_not_available_on_this_device">Voice Assistant not available on this device!</string>
+    <string name="cannot_go_to_next_track">Cannot go to Next Track!</string>
+    <string name="image_captured">Image captured: %1$s</string>
+    <string name="emaillocationaction_emailaddress">EmailLocationAction: emailAddress: %1$s</string>
+    <string name="camera_capture_error">Camera capture error: %1$s</string>
+    <string name="flashlight_not_available">Flashlight not available</string>
+    <string name="unable_to_get_default_sound_uri">Unable to get default sound URI</string>
+    <string name="alarms_set_no_watch">Alarms Set no Watch</string>
+    <string name="events_set">Events Set</string>
+    <string name="event_not_compatible_with_watch">Event not compatible with Watch</string>
+    <string name="settings_sent_to_watch">Settings Sent to Watch</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">Sorry, your device does not support Bluetooth. Exiting…</string>
+    <string name="permission_required_to_turn_on_bluetooth">Permission required to turn on Bluetooth.</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">You have no permissions to turn on Bluetooth. Please turn it on manually.</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Permissions are permanently denied. Please enable them in the app settings.</string>
+    <string name="you_have_not_given_permission_to_to_run_action">You have not given permission to run action %1$s.</string>
+    <string name="timer_set">Timer Set</string>
 </resources>

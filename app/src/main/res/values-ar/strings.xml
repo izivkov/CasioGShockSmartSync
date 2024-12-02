@@ -1,0 +1,186 @@
+<resources>
+    <string name="app_name" translatable="false">كاسيو جي-شوك سمارت سينك</string>
+    <string name="title_time">الوقت</string>
+    <string name="title_alarms">المنبهات</string>
+    <string name="title_events">الأحداث</string>
+    <string name="title_settings">الإعدادات</string>
+    <string name="events">الأحداث</string>
+    <string name="alarms">المنبهات</string>
+    <string name="time">الوقت</string>
+    <string name="send_alarms_to_watch">إرسال إلى\n الساعة</string>
+    <string name="enabled">مفعل</string>
+    <string name="disabled">معطل</string>
+    <string name="send_alarms_to_phone">إرسال إلى\nالهاتف</string>
+    <string name="send_events_to_watch">إرسال إلى الساعة\n التذكيرات</string>
+    <string name="connection_screen_info"><![CDATA[للمتابعة إلى الشاشة التالية، اضغط مع الاستمرار على زر <b>اليسار السفلي</b> في الساعة لمدة 3 ثوانٍ. بعد الصفارة المزدوجة الثانية، ستعرض التطبيق شاشة ضبط الوقت.
+    <p><b>تأكد من أن تطبيق كاسيو الرسمي غير قيد التشغيل، لأنه سيؤثر على هذا التطبيق.</b></p>
+    <p>لتنفيذ الإجراءات المحددة في شاشة <b>الإجراءات</b>، اضغط ضغطاً خفيفاً على زر <b>اليمين السفلي</b>. الإجراءات هي تطبيقات على هاتفك مثل <b>التقاط صورة</b>. باستخدام الإجراءات، تعمل الساعة كجهاز تحكم عن بعد لهاتفك.</p>]]>
+    </string>
+    <string name="alarms_screen_info"><![CDATA[تحتوي ساعات <b>B5600/B5000/B2100</b> على 5 منبهات وإعدادات "الإشارة" (جرس الساعة) الموضحة هنا. يمكن تحديث المنبهات بالضغط على قيمة وقت كل منبه. ستظهر نافذة جديدة تتيح لك ضبط وقت المنبه. بعد ضبط المنبهات، يمكنك إرسالها إلى الساعة أو إلى تطبيق المنبهات على الهاتف.]]></string>
+    <string name="events_screen_info"><![CDATA[تعرض هذه الشاشة الأحداث من <b>تقويم Google</b> وتتيح لك إرسالها إلى <b>التذكيرات</b> في الساعة.\n\nإذا لم تظهر أي أحداث، فتأكد من وجود أحداث مستقبلية أو أحداث مكررة غير منتهية في تقويم Google الخاص بك.]]>
+    </string>
+    <string name="actions">الإجراءات</string>
+    <string name="title_actions">الإجراءات</string>
+    <string name="actions_screen_info"><![CDATA[يتم تنفيذ الإجراءات المحددة عندما يقوم المستخدم <b>بالضغط القصير</b> على زر <b>اليمين السفلي</b> للساعة من الشاشة الرئيسية. باستخدام هذه الإجراءات، تعمل الساعة كجهاز تحكم عن بعد لهاتفك.]]></string>
+    <string name="feb_22_mar_24">22-فبراير - 24-مارس</string>
+    <string name="weekly">أسبوعياً</string>
+    <string name="action_item">عنصر الإجراء</string>
+    <string name="voice_assistant">المساعد الصوتي</string>
+    <string name="front_cam">الكاميرا الأمامية</string>
+    <string name="back_cam">الكاميرا الخلفية</string>
+    <string name="take_a_photo">التقاط صورة</string>
+    <string name="info">معلومات</string>
+    <string name="daily">يومياً</string>
+    <string name="_12_00">12:00</string>
+    <string name="email_item">عنصر البريد الإلكتروني</string>
+    <string name="email_example_com">me@example.com</string>
+    <string name="watch_alarms">منبهات الساعة</string>
+    <string name="signal_chime">الإشارة (جرس الساعة)</string>
+    <string name="google_calendar_events">أحداث تقويم Google</string>
+    <string name="local_time">الوقت المحلي</string>
+    <string name="send_to_watch">إرسال إلى\nالساعة</string>
+    <string name="phonecall_item">عنصر المكالمة الهاتفية</string>
+    <string name="home_time">وقت المنزل</string>
+    <string name="running_actions">تشغيل الإجراءات</string>
+    <string name="title_placeholder">عنصر نائب للعنوان</string>
+    <string name="settings">الإعدادات</string>
+    <string name="send_to_watch_settings">إرسال إلى\nالساعة</string>
+    <string name="auto_configure_settings">تعبئة القيم تلقائياً</string>
+    <string name="time_format">تنسيق الوقت</string>
+    <string name="_12h">12 ساعة</string>
+    <string name="_24h">24 ساعة</string>
+    <string name="date_format">تنسيق التاريخ</string>
+    <string name="language">اللغة</string>
+    <string name="operational_sound">صوت أزرار التشغيل</string>
+    <string name="power_saving_mode">وضع توفير الطاقة</string>
+    <string name="select_language">اختر اللغة</string>
+    <string name="auto_fill_help"><![CDATA[القيم التي يتم تعبئتها تلقائياً مستمدة كما يلي:
+        <li>تنسيق الوقت/التاريخ واللغة يتم الحصول عليها من إعدادات الهاتف.</li>
+        <li>يتم إيقاف نغمة الأزرار إذا كان الهاتف في وضع "عدم الإزعاج"، ويتم تشغيلها في حالات أخرى.</li>
+        <li>سيتم ضبط وضع توفير الطاقة إذا كانت نسبة البطارية 15٪ أو أقل.</li>
+        ملاحظة: <i>لن تتغير القيم إلا إذا تم إرسالها مرة أخرى، حتى إذا تغيرت الشروط (مثل تفعيل/تعطيل وضع عدم الإزعاج).</i>
+        ]]>
+    </string>
+    <string name="cancel">إلغاء</string>
+    <string name="ok">موافق</string>
+    <string name="timerDialogTitle">المؤقت</string>
+    <string name="info_home_time"><![CDATA[<b>وقت المنزل</b> يعرض المنطقة الزمنية للساعة. عندما يقوم التطبيق بضبط وقت الساعة (يدوياً أو تلقائياً)، فإنه سيضبط أيضًا <b>وقت المنزل، تعويض الوقت</b> و<b>التوقيت الصيفي</b> (إذا كان ذلك مناسباً) بناءً على المنطقة الزمنية الحالية. لذا لا حاجة لتبديل <b>وقت العالم</b> و<b>وقت المنزل</b> عند السفر إلى منطقة زمنية أخرى.]]>
+    </string>
+
+    <string name="time_adjustment_info"><![CDATA[
+    <li><b>إعداد ضبط الوقت</b> يتيح للتطبيق تحديث وقت الساعة تلقائيًا 4 مرات يوميًا.</li>
+    <li>في نفس الوقت، سيقوم التطبيق بتحديث <b>التذكيرات (الأحداث)</b> في الساعة من <b>تقويم Google</b> إذا كانت خاصية <b>تعيين التذكيرات من تقويم Google</b> مفعّلة.</li>
+]]></string>
+    <string name="image_of_casio_watch">ساعة كاسيو</string>
+    <string name="connection_screen_device"><![CDATA[
+    <li>افتراضيًا، سيحاول التطبيق الاتصال بالساعة التي تم الاتصال بها مسبقًا. إذا كنت ترغب في الاتصال بساعة مختلفة،
+    اضغط على زر <b>نسيان</b> ثم قم بتوصيل الساعة الجديدة كالمعتاد. بعد ذلك، سيحاول التطبيق الاتصال بالساعة الجديدة.</li>
+    <li>سيكتشف التطبيق تلقائيًا طراز الساعة.</li>
+]]></string>
+    <string name="forget">نسيان</string>
+    <string name="hand_adjustment">ضبط العقارب</string>
+    <string name="move_hand_to_the_left">تحريك العقرب إلى اليسار</string>
+    <string name="reset_hand_at_12_position">إعادة العقرب إلى موضع الساعة 12</string>
+    <string name="move_hand_to_the_right">تحريك العقرب إلى اليمين</string>
+    <string name="auto_light">الإضاءة التلقائية</string>
+    <string name="off">إيقاف</string>
+    <string name="on">تشغيل</string>
+    <string name="illumination_period">فترة الإضاءة</string>
+    <string name="mm_dd">الشهر:اليوم</string>
+    <string name="dd_mm">اليوم:الشهر</string>
+    <string name="time_adjustment">ضبط الوقت</string>
+    <string name="notify_me">أخبرني</string>
+    <string name="timer">المؤقت</string>
+    <string name="_00_00_00">00:00:00</string>
+    <string name="_00">00</string>
+    <string name="semi_column">:</string>
+    <string name="no_watch">لا توجد ساعة</string>
+    <string name="set_time">ضبط الوقت</string>
+    <string name="find_phone">ابحث عن الهاتف</string>
+    <string name="set_reminders">تعيين التذكيرات من\nتقويم Google</string>
+    <string name="take_photo">التقاط صورة</string>
+    <string name="toggle_flashlight">تشغيل/إيقاف المصباح</string>
+    <string name="start_voice_assistant">تشغيل مساعد الصوت</string>
+    <string name="next_track">تخطي إلى المسار التالي</string>
+    <string name="emergency_actions">الإجراءات الطارئة:</string>
+    <string name="make_phonecall">إجراء مكالمة هاتفية</string>
+    <string name="adjustment_time_info"><![CDATA[
+    <li>يتم ضبط الوقت تلقائيًا 4 مرات يوميًا، بعد ساعات 12:00 صباحًا، 6:00 صباحًا، 12:00 ظهرًا و6:00 مساءً.</li>
+    <li>هذا الإعداد يحدد عدد الدقائق بعد الساعة التي يتم فيها ضبط الوقت. إذا قمت بضبط هذه القيمة على 25، سيتم ضبط الوقت في الساعة 12:25 صباحًا، 6:25 صباحًا، 12:25 ظهرًا و6:25 مساءً.</li>
+    <li>إذا كان لديك ساعات متعددة، يمكنك التحكم في وقت ضبط كل ساعة بشكل فردي.</li>
+]]></string>
+    <string name="adjustment_time_minutes">متى يتم الضبط\n(الدقائق بعد الساعة)</string>
+    <string name="skip_to_next_track_info"><![CDATA[
+    إذا كنت تستمع إلى موسيقى أو تشاهد فيديو في مشغل وسائط مثل Spotify أو YouTube أو YTMusic على هاتفك، سيقوم هذا الإجراء بتخطي الأغنية أو الفيديو التالي.
+    يعمل أيضًا مع Android Auto.
+]]></string>
+    <string name="set_prayer_alarms">ضبط تنبيهات الصلاة</string>
+    <string name="prayer_times_info"><![CDATA[
+    <li>هذا الإجراء سيضبط التنبيهات الخمس في الساعة لأوقات الصلاة الإسلامية <b>الفجر</b>، <b>الظهر</b>، <b>العصر</b>، <b>المغرب</b> و<b>العشاء</b>.</li>
+    <li>تختلف الأوقات بناءً على موقعك والتاريخ الحالي، لذا لتحقيق أفضل دقة، قم بتشغيل هذا الإجراء يوميًا.
+    إذا كان هذا الإجراء مفعّلًا، فسيتم تحديث التنبيهات تلقائيًا أثناء ضبط الوقت التلقائي، 4 مرات يوميًا.</li>
+    <li>تُستخدم طرق الحساب التالية بناءً على موقعك:
+        <b>أمريكا الشمالية</b>,
+        <b>ديانات</b>,
+        <b>المصري</b>,
+        <b>دبي</b>,
+        <b>أم القرى</b>,
+        <b>قطر</b>,
+        <b>سنغافورة</b>,
+        <b>الكويت</b> و
+        <b>رابطة العالم الإسلامي</b> في كل مكان آخر.
+    </li>
+    <li>للاقتراحات والتصحيحات، يرجى التواصل عبر <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
+]]></string>
+    <string name="do_not_disturb_dnd">عدم الإزعاج (DnD)</string>
+    <string name="mirror_phone_s_dnd">نسخ وضع عدم الإزعاج للهاتف</string>
+    <string name="DnD_info_message"><![CDATA[
+    عند التحديد، سيتم كتم جميع التنبيهات، المؤقتات، والتنبيهات الساعية على الساعة.
+    <li>عند التشغيل/الإيقاف يدويًا، سيتم تفعيل عدم الإزعاج بعد الضغط على زر <b>الإرسال إلى الساعة</b>.<\li>
+    <li>عند النسخ، سيتم التفعيل فورًا عند تغيير إعداد عدم الإزعاج على الهاتف، بغض النظر عن الشاشة الحالية.<\li>
+]]></string>
+    <string name="auto_light_at_night_only">الإضاءة التلقائية ليلًا فقط</string>
+    <string name="keep_alive">ابقاء التطبيق نشطًا (يستهلك المزيد من البطارية)</string>
+    <string name="enter_timer_time">أدخل وقت المؤقت</string>
+    <string name="max_reminders_reached">تم الوصول إلى الحد الأقصى من التذكيرات. يرجى تعطيل بعضها قبل تحديد تذكيرات جديدة.</string>
+    <string name="fine_time_adjustment">الضبط الدقيق</string>
+    <string name="_0000">0000</string>
+    <string name="fine_adjustment_info"><![CDATA[
+    عند ضبط الوقت، قد تعرض بعض موديلات الساعات وقتًا غير دقيق بفارق بضع ثوانٍ. يتيح لك هذا الإعداد ضبط الوقت بدقة.
+    يتم إضافة القيمة، بالميلي ثانية، إلى الوقت المرسل من التطبيق إلى الساعة. يمكنك ضبط قيم بين -5000 و5000. على سبيل المثال،
+    إذا كانت ساعتك متقدمة بمقدار 2.5 ثانية عن الوقت الفعلي، قم بضبط هذه القيمة إلى -2500 لمزامنتها بدقة.
+]]></string>
+    <string name="required_permissions_denied_cannot_access_screen">تم رفض الأذونات المطلوبة. لا يمكن الوصول إلى الشاشة!</string>
+    <string name="required_permissions_denied_cannot_access_actions">تم رفض الأذونات المطلوبة. لا يمكن الوصول إلى الإجراءات.</string>
+    <string name="calendar_permission_denied_cannot_access_events">تم رفض إذن الوصول إلى التقويم. لا يمكن الوصول إلى الأحداث.</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">" قم بمسح تخزين التطبيق من إعدادات Android وأعد تشغيل التطبيق لإضافة الأذونات."</string>
+    <string name="phone_number">رقم الهاتف</string>
+    <string name="enter_phone_number">أدخل رقم الهاتف</string>
+    <string name="when_to_run">وقت التنفيذ</string>
+    <string name="minutes_between_0_and_59">الدقائق بين 0 و59</string>
+    <string name="fine_adjustment">التعديل الدقيق</string>
+    <string name="ms_between_10000_and_10000">ميلي ثانية بين -10000 و10000</string>
+    <string name="sending_time_to_watch">يتم إرسال الوقت إلى الساعة…</string>
+    <string name="time_set">تم ضبط الوقت</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">خطأ في API! تأكد من أن تطبيق G-Shock الرسمي غير قيد التشغيل.</string>
+    <string name="bluetooth_is_not_enabled">البلوتوث غير مفعل.</string>
+    <string name="disconnected_due_to_inactivity">تم قطع الاتصال بسبب عدم النشاط.</string>
+    <string name="when_found_lift_phone_to_stop_ringing">عند العثور عليه، ارفع الهاتف لإيقاف الرنين</string>
+    <string name="voice_assistant_not_available_on_this_device">المساعد الصوتي غير متوفر على هذا الجهاز!</string>
+    <string name="cannot_go_to_next_track">لا يمكن الانتقال إلى المسار التالي!</string>
+    <string name="image_captured">تم التقاط الصورة: %1$s</string>
+    <string name="emaillocationaction_emailaddress">إجراء تحديد الموقع عبر البريد الإلكتروني: عنوان البريد الإلكتروني: %1$s</string>
+    <string name="camera_capture_error">خطأ في التقاط الصورة: %1$s</string>
+    <string name="flashlight_not_available">المصباح غير متوفر</string>
+    <string name="unable_to_get_default_sound_uri">غير قادر على الحصول على رابط الصوت الافتراضي</string>
+    <string name="alarms_set_no_watch">تم ضبط المنبهات، لا توجد ساعة</string>
+    <string name="events_set">تم ضبط الأحداث</string>
+    <string name="event_not_compatible_with_watch">الحدث غير متوافق مع الساعة</string>
+    <string name="settings_sent_to_watch">تم إرسال الإعدادات إلى الساعة</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">عذراً، جهازك لا يدعم البلوتوث. يتم الإغلاق…</string>
+    <string name="permission_required_to_turn_on_bluetooth">يتطلب الإذن لتشغيل البلوتوث.</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">ليس لديك أذونات لتشغيل البلوتوث. يرجى تشغيله يدوياً.</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">تم رفض الأذونات بشكل دائم. يرجى تمكينها في إعدادات التطبيق.</string>
+    <string name="you_have_not_given_permission_to_to_run_action">لم تمنح الإذن لتشغيل الإجراء %1$s.</string>
+    <string name="timer_set">تم تعيين المؤقت</string>
+</resources>

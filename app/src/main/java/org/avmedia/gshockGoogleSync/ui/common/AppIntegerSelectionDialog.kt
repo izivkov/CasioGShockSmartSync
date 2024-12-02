@@ -1,10 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.common
 
-import android.content.Context
 import android.os.Build
-import android.text.InputType
-import android.util.AttributeSet
-import android.widget.EditText
 import android.widget.NumberPicker
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -28,8 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import org.avmedia.gshockGoogleSync.R
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -51,12 +49,12 @@ fun ValueSelectionDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onConfirm(values[selectedIndex]) }) {
-                Text("OK")
+                Text(stringResource(id = R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         },
         title = { Text(title) },
@@ -114,7 +112,8 @@ fun NumberPickerView(
                     maxValue = adjustedMaxValue
                     value = safeSelectedIndex
                     displayedValues = pickerValues.map { "$it $unit" }.toTypedArray()
-                    descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // Disable keyboard input
+                    descendantFocusability =
+                        NumberPicker.FOCUS_BLOCK_DESCENDANTS // Disable keyboard input
                     // descendantFocusability = NumberPicker.FOCUS_AFTER_DESCENDANTS // Allow keyboard input
                     wrapSelectorWheel = false
 

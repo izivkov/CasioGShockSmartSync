@@ -25,8 +25,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.ui.common.AppButton
 
 
 @Composable
@@ -155,12 +155,12 @@ fun TimerPicker(
         dismissButton = {
             AppButton(
                 onClick = onDismiss,
-                text = "Cancel"
+                text = stringResource(id = R.string.cancel)
             )
         },
         confirmButton = {
             AppButton(
-                text = "OK",
+                text = stringResource(id = R.string.ok),
                 onClick = {
                     val h = hourInput.text.toIntOrNull() ?: 0
                     val m = minuteInput.text.toIntOrNull() ?: 0

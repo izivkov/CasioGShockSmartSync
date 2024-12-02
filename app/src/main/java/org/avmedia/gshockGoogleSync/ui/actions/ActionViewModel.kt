@@ -17,9 +17,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.CoroutineScopes.mainScope
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
@@ -27,11 +30,7 @@ import timber.log.Timber
 import java.text.DateFormat
 import java.time.Clock
 import java.util.Date
-import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
@@ -92,7 +91,12 @@ class ActionsViewModel @Inject constructor(
 
             FindPhoneAction(appContext.getString(R.string.find_phone), true),
             SetTimeAction(appContext.getString(R.string.set_time), true, api),
-            SetEventsAction(appContext.getString(R.string.set_reminders), false, api, calendarEvents),
+            SetEventsAction(
+                appContext.getString(R.string.set_reminders),
+                false,
+                api,
+                calendarEvents
+            ),
             PhotoAction(
                 appContext.getString(R.string.take_photo),
                 false,
@@ -147,7 +151,10 @@ class ActionsViewModel @Inject constructor(
     }
 
     data class SetEventsAction(
-        override var title: String, override var enabled: Boolean, val api: GShockRepository, val calendarEvents: CalendarEvents
+        override var title: String,
+        override var enabled: Boolean,
+        val api: GShockRepository,
+        val calendarEvents: CalendarEvents
     ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
 
@@ -200,7 +207,7 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            AppSnackbar("When found, lift phone to stop ringing")
+            AppSnackbar(context.getString(R.string.when_found_lift_phone_to_stop_ringing))
             PhoneFinder.ring(context)
         }
 
@@ -277,7 +284,7 @@ class ActionsViewModel @Inject constructor(
                 }
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                AppSnackbar("Voice Assistant not available on this device!")
+                AppSnackbar(context.getString(R.string.voice_assistant_not_available_on_this_device))
             }
         }
     }
@@ -309,7 +316,7 @@ class ActionsViewModel @Inject constructor(
                 audioManager.dispatchMediaKeyEvent(upEvent)
 
             } catch (e: ActivityNotFoundException) {
-                AppSnackbar("Cannot go to Next Track!")
+                AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
             }
         }
     }
@@ -426,12 +433,12 @@ class ActionsViewModel @Inject constructor(
                 cameraHelper.takePicture(
                     onImageCaptured = { result ->
                         captureResult = result
-                        AppSnackbar("Image captured: $captureResult")
+                        AppSnackbar(context.getString(R.string.image_captured, captureResult))
                         // Handle result, maybe pass it to the UI or save it
                     },
                     onError = { error ->
                         captureResult = "Error: $error"
-                        AppSnackbar("Camera capture error: $captureResult")
+                        AppSnackbar(context.getString(R.string.camera_capture_error, captureResult))
                     }
                 )
             }
@@ -452,38 +459,6 @@ class ActionsViewModel @Inject constructor(
         }
     }
 
-    class EmailLocationAction(
-        override var title: String,
-        override var enabled: Boolean,
-        var emailAddress: String,
-        private var extraText: String
-    ) : Action(title, enabled) {
-
-        init {
-            AppSnackbar("EmailLocationAction: emailAddress: $emailAddress")
-            Timber.d("EmailLocationAction: extraText: $extraText")
-        }
-
-        override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
-        }
-
-        override fun save(context: Context) {
-            val key = this.javaClass.simpleName + ".emailAddress"
-            LocalDataStorage.put(context, key, emailAddress)
-            super.save(context)
-        }
-
-        override fun load(context: Context) {
-            super.load(context)
-
-            val key = this.javaClass.simpleName + ".emailAddress"
-            emailAddress = LocalDataStorage.get(context, key, "").toString()
-            extraText =
-                "Sent by G-shock App:\n https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"
-        }
-    }
-
     /*
 Note: Alternatively, actions can run autonomously, when certain conditions were met:
 1. User pressed Action button (lower-right) on the watch
@@ -496,7 +471,12 @@ However, this way gives us more control on how to start the actions.
         try {
             action.run(context)
         } catch (e: SecurityException) {
-            AppSnackbar("You have not given permission to to run action ${action.title}.")
+            AppSnackbar(
+                context.getString(
+                    R.string.you_have_not_given_permission_to_to_run_action,
+                    action.title
+                )
+            )
         } catch (e: Exception) {
             AppSnackbar("Could not run action ${action.title}. Reason: $e")
         }

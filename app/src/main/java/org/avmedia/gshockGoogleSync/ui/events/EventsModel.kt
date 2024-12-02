@@ -6,7 +6,6 @@
 
 package org.avmedia.gshockGoogleSync.ui.events
 
-import android.content.Context
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
 import java.time.Instant

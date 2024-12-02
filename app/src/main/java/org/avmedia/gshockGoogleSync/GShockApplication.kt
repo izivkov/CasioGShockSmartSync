@@ -114,7 +114,7 @@ class GShockApplication : Application() {
 
     private fun handleApiError() {
         val message = ProgressEvents.getPayload("ApiError") as String?
-            ?: "ApiError! Ensure the official G-Shock app is not running."
+            ?: getString(R.string.apierror_ensure_the_official_g_shock_app_is_not_running)
 
         AppSnackbar(message)
         repository.disconnect()

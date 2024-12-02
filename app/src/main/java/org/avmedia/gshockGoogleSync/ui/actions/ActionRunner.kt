@@ -13,8 +13,8 @@ import javax.inject.Named
 fun ActionRunner(
     context: Context,
     actionsViewModel: ActionsViewModel = hiltViewModel(),
-    @Named("api") api: GShockRepository)
-{
+    @Named("api") api: GShockRepository
+) {
     val eventActions = arrayOf(
         EventAction("RunActions") {
             actionsViewModel.runActionsForActionButton(context)

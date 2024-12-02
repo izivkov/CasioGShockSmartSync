@@ -27,6 +27,7 @@ import javax.inject.Singleton
 
 @Singleton
 class CalendarEvents @Inject constructor(
+    private val rRuleValues: RRuleValues,
     @ApplicationContext private val appContext: Context // Inject application context
 ) {
     private val calendarObserver = CalendarObserver()
@@ -136,7 +137,7 @@ class CalendarEvents @Inject constructor(
                     var endDate = startDate
 
                     val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
-                        RRuleValues.getValues(rrule, startDate, zone)
+                        rRuleValues.getValues(rrule, startDate, zone)
 
                     if (localEndDate != null) {
                         endDate = EventDate(

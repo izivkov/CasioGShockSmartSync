@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
             requestBluetooth = requestBluetoothLauncher,
             onBluetoothEnabled = { },
             onBluetoothNotEnabled = {
-                AppSnackbar("Bluetooth is not enabled.")
+                AppSnackbar(getString(R.string.bluetooth_is_not_enabled))
                 Executors.newSingleThreadScheduledExecutor()
                     .schedule({ finish() }, 3L, TimeUnit.SECONDS)
             }
@@ -68,7 +68,9 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxSize()
                             ) { contentPadding ->
                                 Surface(
-                                    modifier = Modifier.fillMaxSize().padding(contentPadding),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(contentPadding),
                                     color = MaterialTheme.colorScheme.background
                                 ) {
                                     setContent {

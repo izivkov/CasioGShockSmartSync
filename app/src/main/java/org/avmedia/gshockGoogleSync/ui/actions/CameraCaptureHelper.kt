@@ -28,8 +28,10 @@ class CameraCaptureHelper(private val context: Context) {
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
+
     // private var currentContextView = (context as Activity).contentView
-    private var currentContextView = (context as Activity).findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+    private var currentContextView =
+        (context as Activity).findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
     private val mediaActionSound = MediaActionSound().apply {
         load(MediaActionSound.SHUTTER_CLICK)
     }
