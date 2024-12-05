@@ -194,4 +194,5 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Permissions are permanently denied. Please enable them in the app settings.</string>
     <string name="you_have_not_given_permission_to_to_run_action">You have not given permission to run action %1$s.</string>
     <string name="timer_set">Timer Set</string>
+    <string name="invalid_phone_number">Invalid phone number</string>
 </resources>

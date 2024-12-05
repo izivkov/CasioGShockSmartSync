@@ -85,7 +85,6 @@ fun NumberPickerView(
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     unit: String = ""
 ) {
-
     val safeStep = if (step > 0) step else 1
 
     // Ensure pickerValues are valid
