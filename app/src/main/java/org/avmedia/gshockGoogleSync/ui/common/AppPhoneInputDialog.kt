@@ -60,7 +60,7 @@ fun AppPhoneInputDialog(
 
                     if (validationError) {
                         Text(
-                            text = stringResource(R.string.invalid_phone_number),
+                            text = "Invalid phone number",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                         )
