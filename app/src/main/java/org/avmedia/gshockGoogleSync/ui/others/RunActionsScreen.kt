@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun RunActionsScreen(repository: GShockRepository) {
@@ -24,7 +25,7 @@ fun RunActionsScreen(repository: GShockRepository) {
         contentAlignment = Alignment.Center
     ) {
         AppTextExtraLarge(
-            text = stringResource(id = R.string.running_actions),
+            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.running_actions),
             fontWeight = FontWeight.Bold // Adjust as needed
         )
 

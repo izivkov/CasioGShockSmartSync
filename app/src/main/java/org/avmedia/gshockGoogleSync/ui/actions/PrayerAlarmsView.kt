@@ -7,10 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun PrayerAlarmsView(
@@ -30,7 +32,7 @@ fun PrayerAlarmsView(
     }
 
     ActionItem(
-        title = stringResource(id = R.string.set_prayer_alarms),
+        title = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.set_prayer_alarms),
         resourceId = R.drawable.prayer_times,
         isEnabled = isEnabled,
         onEnabledChange = { newValue ->
@@ -38,7 +40,7 @@ fun PrayerAlarmsView(
             prayerAlarmsAction.enabled = newValue
             onUpdate(prayerAlarmsAction.copy(enabled = isEnabled))
         },
-        infoText = stringResource(id = R.string.prayer_times_info)
+        infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.prayer_times_info)
     )
 }
 

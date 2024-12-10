@@ -17,6 +17,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.translateapi.DynamicResourceApi
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -65,7 +66,7 @@ class AlarmViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setAlarms(alarms = ArrayList(alarms.value))
-                AppSnackbar(appContext.getString(R.string.alarms_set_no_watch))
+                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.alarms_set_no_watch))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

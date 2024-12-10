@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +27,7 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun PreConnectionScreen(
@@ -64,7 +66,7 @@ fun PreConnectionScreen(
                         // WatchImageView equivalent
                         Image(
                             painter = painterResource(id = getImageId(watchName)),
-                            contentDescription = stringResource(id = R.string.image_of_casio_watch),
+                            contentDescription = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.image_of_casio_watch),
                             modifier = Modifier
                                 .constrainAs(watchImageView) {
                                     top.linkTo(parent.top)
@@ -90,7 +92,7 @@ fun PreConnectionScreen(
                                 top.linkTo(parent.top)
                                 end.linkTo(parent.end)
                             }) {
-                            InfoButton(infoText = stringResource(id = R.string.connection_screen_info) + "v" + BuildConfig.VERSION_NAME)
+                            InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.connection_screen_info) + "v" + BuildConfig.VERSION_NAME)
                         }
                     }
                 }
@@ -141,7 +143,7 @@ fun PreConnectionScreen(
                                     bottom.linkTo(parent.bottom)
                                 }) {
                                 InfoButton(
-                                    infoText = stringResource(id = R.string.connection_screen_device)
+                                    infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.connection_screen_device)
                                 )
                             }
                         }

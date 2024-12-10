@@ -13,6 +13,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.translateapi.DynamicResourceApi
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,7 +42,7 @@ class TimeViewModel @Inject constructor(
     fun sendTimerToWatch(timeMs: Int) {
         viewModelScope.launch {
             api.setTimer(timeMs)
-            AppSnackbar(appContext.getString(R.string.timer_set))
+            AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.timer_set))
         }
     }
 
@@ -50,9 +51,9 @@ class TimeViewModel @Inject constructor(
             try {
                 val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                 val timeMs = System.currentTimeMillis() + timeOffset
-                AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
+                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.sending_time_to_watch))
                 api.setTime(timeMs = timeMs)
-                AppSnackbar(appContext.getString(R.string.time_set))
+                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.time_set))
 
                 // wait to settle
                 delay(1000)

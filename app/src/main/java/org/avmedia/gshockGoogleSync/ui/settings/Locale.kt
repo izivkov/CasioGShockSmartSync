@@ -26,12 +26,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.translateapi.DynamicResourceApi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +70,7 @@ fun Locale(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 AppTextLarge(
-                    text = stringResource(id = R.string.time_format),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.time_format),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 12.dp)
@@ -87,7 +89,7 @@ fun Locale(
                             )
                         }
                     )
-                    AppTextLarge(text = stringResource(id = R.string._12h))
+                    AppTextLarge(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string._12h))
                     Spacer(modifier = Modifier.width(10.dp))
                     RadioButton(
                         selected = timeFormat == SettingsViewModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS,
@@ -97,7 +99,7 @@ fun Locale(
                             onUpdate(localeSetting.copy(timeFormat = timeFormat))
                         }
                     )
-                    AppTextLarge(text = stringResource(id = R.string._24h))
+                    AppTextLarge(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string._24h))
                 }
             }
 
@@ -106,7 +108,7 @@ fun Locale(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(id = R.string.date_format),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.date_format),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 6.dp)
@@ -123,7 +125,7 @@ fun Locale(
                             onUpdate(localeSetting.copy(dateFormat = dateFormat))
                         }
                     )
-                    AppText(text = stringResource(id = R.string.mm_dd))
+                    AppText(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.mm_dd))
 
                     Spacer(modifier = Modifier.width(10.dp))
 
@@ -135,7 +137,7 @@ fun Locale(
                             onUpdate(localeSetting.copy(dateFormat = dateFormat))
                         }
                     )
-                    AppText(text = stringResource(id = R.string.dd_mm))
+                    AppText(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.dd_mm))
                 }
             }
 
@@ -146,7 +148,7 @@ fun Locale(
                     .wrapContentHeight()
             ) {
                 AppText(
-                    text = stringResource(id = R.string.language),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.language),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 0.dp)

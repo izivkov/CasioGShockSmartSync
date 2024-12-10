@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun SeparatorView() {
@@ -23,7 +25,7 @@ fun SeparatorView() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AppTextLarge(
-            text = stringResource(id = R.string.emergency_actions),
+            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.emergency_actions),
         )
     }
 }

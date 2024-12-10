@@ -7,10 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun OperationalTone(
@@ -28,7 +30,7 @@ fun OperationalTone(
         sound = operationToneSetting.sound
     }
 
-    val title = stringResource(id = R.string.operational_sound)
+    val title = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.operational_sound)
     BasicSettings(
         title = title,
         isSwitchOn = sound,

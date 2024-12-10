@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun Light(
@@ -67,7 +69,7 @@ fun Light(
                         verticalArrangement = Arrangement.Center
                     ) {
                         AppTextLarge(
-                            text = stringResource(id = R.string.auto_light),
+                            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.auto_light),
                             modifier = Modifier.padding(end = 6.dp)
                         )
                     }
@@ -90,7 +92,7 @@ fun Light(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 AppTextLarge(
-                    text = stringResource(id = R.string.illumination_period),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.illumination_period),
                 )
 
                 Row(

@@ -43,6 +43,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
+import org.avmedia.translateapi.DynamicResourceApi
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -64,7 +65,7 @@ fun BottomNavigationBarWithPermissions(
     val inactivityHandler = remember {
         InactivityHandler(timeout = (3 * 60).seconds) {
             repository.disconnect()
-            AppSnackbar(appContext.getString(R.string.disconnected_due_to_inactivity))
+            AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.disconnected_due_to_inactivity))
         }
     }
 
@@ -137,7 +138,7 @@ fun BottomNavigationBarWithPermissions(
                     listOf(READ_CALENDAR),
                     navController,
                     destinationScreen = { EventsScreen() },
-                    stringResource(R.string.calendar_permission_denied_cannot_access_events)
+                    DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.calendar_permission_denied_cannot_access_events)
                 )
             }
             composable(Screens.Actions.route) {
@@ -150,7 +151,7 @@ fun BottomNavigationBarWithPermissions(
                     permissions,
                     navController,
                     destinationScreen = { ActionsScreen() },
-                    stringResource(R.string.required_permissions_denied_cannot_access_actions)
+                    DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.required_permissions_denied_cannot_access_actions)
                 )
             }
             composable(Screens.Settings.route) {
@@ -165,7 +166,7 @@ fun NavigateWithPermissions(
     requiredPermissions: List<String>,
     navController: NavController,
     destinationScreen: @Composable () -> Unit,
-    errorMessage: String = stringResource(R.string.required_permissions_denied_cannot_access_screen)
+    errorMessage: String = DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.required_permissions_denied_cannot_access_screen)
 ) {
     var hasNavigated by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -178,7 +179,7 @@ fun NavigateWithPermissions(
                 hasNavigated = true
                 LaunchedEffect(Unit) { // make sure it is only called once
                     val additionalInfo =
-                        context.getString(R.string.clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions)
+                        DynamicResourceApi.getApi().getString(context, R.string.clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions)
                     AppSnackbar(errorMessage + additionalInfo)
                 }
                 navController.navigate(Screens.Time.route) {

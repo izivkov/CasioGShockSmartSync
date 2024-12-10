@@ -37,6 +37,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppTimePicker
+import org.avmedia.translateapi.DynamicResourceApi
 import java.util.Date
 import java.util.Locale
 
@@ -105,7 +106,7 @@ fun AlarmItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
-                    text = stringResource(id = R.string.daily),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.daily),
                 )
             }
             AppSwitch(

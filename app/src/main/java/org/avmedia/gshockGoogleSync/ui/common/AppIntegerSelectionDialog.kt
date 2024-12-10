@@ -24,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.translateapi.DynamicResourceApi
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -49,12 +51,12 @@ fun ValueSelectionDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onConfirm(values[selectedIndex]) }) {
-                Text(stringResource(id = R.string.ok))
+                Text(DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(id = R.string.cancel))
+                Text(DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.cancel))
             }
         },
         title = { Text(title) },

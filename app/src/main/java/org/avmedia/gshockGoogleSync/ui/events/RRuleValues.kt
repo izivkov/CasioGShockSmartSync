@@ -16,6 +16,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
+import org.avmedia.translateapi.DynamicResourceApi
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -69,7 +70,7 @@ class RRuleValues @Inject constructor(
 
             if (!isCompatible(rruleObj)) {
                 rruleValues.incompatible = true
-                AppSnackbar(appContext.getString(R.string.event_not_compatible_with_watch))
+                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.event_not_compatible_with_watch))
             }
 
             if (rrule.isNotEmpty()) {

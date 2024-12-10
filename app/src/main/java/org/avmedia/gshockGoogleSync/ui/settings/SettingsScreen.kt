@@ -18,6 +18,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,7 @@ import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.DynamicResourceApi
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -46,7 +48,8 @@ fun SettingsScreen() {
             ) {
                 val (title, settingsLayout, buttonsRow) = createRefs()
 
-                ScreenTitle(stringResource(id = R.string.settings), Modifier
+                ScreenTitle(
+                    DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.settings), Modifier
                     .constrainAs(title) {
                         top.linkTo(parent.top)  // Link top of content to parent top
                         bottom.linkTo(settingsLayout.top)  // Link bottom of content to top of buttonsRow
@@ -122,16 +125,16 @@ fun BottomRow(
                     .padding(end = 0.dp),
                 contentAlignment = Alignment.CenterEnd  // Aligns content to the right
             ) {
-                InfoButton(infoText = stringResource(id = R.string.auto_fill_help))
+                InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.auto_fill_help))
             }
 
             val buttons = arrayListOf(
                 ButtonData(
-                    text = stringResource(id = R.string.auto_configure_settings),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.auto_configure_settings),
                     onClick = { settingsViewModel.setSmartDefaults() }),
 
                 ButtonData(
-                    text = stringResource(id = R.string.send_to_watch),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_to_watch),
                     onClick = { settingsViewModel.sendToWatch() })
             )
 

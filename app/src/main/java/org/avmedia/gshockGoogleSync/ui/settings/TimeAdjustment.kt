@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.DynamicResourceApi
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -82,10 +84,10 @@ fun TimeAdjustment(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppTextLarge(
-                        text = stringResource(id = R.string.time_adjustment),
+                        text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.time_adjustment),
                         modifier = Modifier.padding(end = 6.dp)
                     )
-                    InfoButton(infoText = stringResource(id = R.string.time_adjustment_info))
+                    InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.time_adjustment_info))
                     Spacer(modifier = Modifier.weight(1f))
                     AppSwitch(
                         checked = timeAdjustment,
@@ -107,11 +109,11 @@ fun TimeAdjustment(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
-                        text = stringResource(id = R.string.adjustment_time_minutes),
+                        text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.adjustment_time_minutes),
                         fontSize = 20.sp,
                         modifier = Modifier.padding(end = 6.dp)
                     )
-                    InfoButton(infoText = stringResource(id = R.string.adjustment_time_info))
+                    InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.adjustment_time_info))
 
                     Spacer(modifier = Modifier.weight(1f))
 
@@ -138,8 +140,8 @@ fun TimeAdjustment(
                                     )
                                 )
                             },
-                            title = stringResource(R.string.when_to_run),
-                            label = stringResource(R.string.minutes_between_0_and_59),
+                            title = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.when_to_run),
+                            label = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.minutes_between_0_and_59),
                             unit = "m"
                         )
                     }
@@ -158,7 +160,7 @@ fun TimeAdjustment(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppText(
-                        text = stringResource(id = R.string.notify_me),
+                        text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.notify_me),
                         modifier = Modifier.wrapContentWidth(),
                     )
                     Checkbox(

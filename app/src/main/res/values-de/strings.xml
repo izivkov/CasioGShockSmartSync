@@ -62,7 +62,7 @@
     <string name="auto_fill_help"><![CDATA[Die Werte der automatischen Ausfüllfunktion werden wie folgt abgeleitet:
         <li>Das Zeit-/Datumsformat und die Sprache werden aus den Einstellungen des Telefons übernommen.</li>
         <li>Der Tastenton wird deaktiviert, wenn das Telefon im DnD-Modus ist, ansonsten aktiviert.</li>
-        <li>Der Energiesparmodus wird aktiviert, wenn der Akkustand 15 % oder weniger beträgt.</li>
+        <li>Der Energiesparmodus wird aktiviert, wenn der Akkustand 15 %% oder weniger beträgt.</li>
         Hinweis: <i>Die Werte ändern sich nicht, bis sie erneut gesendet werden, selbst wenn sich die Bedingungen ändern (z. B. DnD wird ein-/ausgeschaltet).</i>
         ]]>
     </string>

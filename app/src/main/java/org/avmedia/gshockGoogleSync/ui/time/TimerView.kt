@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun TimerView(
@@ -79,7 +81,7 @@ fun TimerView(
                 verticalArrangement = Arrangement.Center
             ) {
                 AppTextLarge(
-                    text = stringResource(R.string.timer),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.timer),
                 )
                 TimerTimeView(
                     modifier = Modifier
@@ -144,7 +146,7 @@ fun TimerTimeView(modifier: Modifier = Modifier, timeText: String) {
 @Composable
 fun SendTimerButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     AppButton(
-        text = stringResource(R.string.send_to_watch),
+        text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.send_to_watch),
         onClick = onClick,
         modifier = modifier,
     )

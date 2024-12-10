@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
+import org.avmedia.translateapi.DynamicResourceApi
 
 
 @Composable
@@ -62,7 +64,7 @@ fun TimerPicker(
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
-        title = { AppText(text = stringResource(R.string.enter_timer_time)) },
+        title = { AppText(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.enter_timer_time)) },
         text = {
             Column {
                 Row(
@@ -155,12 +157,12 @@ fun TimerPicker(
         dismissButton = {
             AppButton(
                 onClick = onDismiss,
-                text = stringResource(id = R.string.cancel)
+                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.cancel)
             )
         },
         confirmButton = {
             AppButton(
-                text = stringResource(id = R.string.ok),
+                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.ok),
                 onClick = {
                     val h = hourInput.text.toIntOrNull() ?: 0
                     val m = minuteInput.text.toIntOrNull() ?: 0

@@ -5,6 +5,7 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraManager.TorchCallback
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.translateapi.DynamicResourceApi
 
 object FlashlightHelper {
     private lateinit var cameraId: String
@@ -23,7 +24,7 @@ object FlashlightHelper {
     private fun turnOnOff(context: Context, state: Boolean) {
         cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         if (cameraManager.cameraIdList.isEmpty()) {
-            AppSnackbar(context.getString(R.string.flashlight_not_available))
+            AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.flashlight_not_available))
             return
         }
 

@@ -63,7 +63,7 @@
     <string name="auto_fill_help"><![CDATA[Los valores de autocompletar se derivan de la siguiente manera:
         <li>El formato de Hora/Fecha y el idioma se obtienen de la configuración del teléfono.</li>
         <li>El tono de botón se apaga si el teléfono está en modo No molestar (DnD), y se enciende en caso contrario.</li>
-        <li>El ahorro de energía se activará si el nivel de batería es del 15% o menos.</li>
+        <li>El ahorro de energía se activará si el nivel de batería es del 15%% o menos.</li>
         Nota: <i>Los valores no cambiarán hasta que se envíen nuevamente, incluso si las condiciones cambian (es decir, si se activa o desactiva el DnD).</i>
         ]]>
     </string>

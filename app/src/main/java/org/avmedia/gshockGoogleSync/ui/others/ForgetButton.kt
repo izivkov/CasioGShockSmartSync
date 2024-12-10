@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -17,6 +18,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun ForgetButton(
@@ -54,7 +56,7 @@ fun ForgetButton(
             isEnabled = false
             ptrConnectionViewModel.forget()
         },
-        text = stringResource(id = R.string.forget),
+        text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.forget),
         modifier = modifier
     )
 }

@@ -21,6 +21,7 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.DynamicResourceApi
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import javax.inject.Inject
@@ -378,7 +379,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setSettings(settings)
-                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
+                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.settings_sent_to_watch))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

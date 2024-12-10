@@ -4,15 +4,17 @@ import AppTextLarge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun WatchName(
     modifier: Modifier,
-    watchName: String = stringResource(id = R.string.no_watch),
+    watchName: String = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.no_watch),
 ) {
     AppTextLarge(text = watchName.removePrefix("CASIO").trim(), modifier = modifier)
 }

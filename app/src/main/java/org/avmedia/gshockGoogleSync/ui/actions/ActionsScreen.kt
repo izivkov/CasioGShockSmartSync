@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun ActionsScreen() {
@@ -36,7 +38,8 @@ fun ActionsScreen() {
             ) {
                 val (title, actions) = createRefs()
 
-                ScreenTitle(stringResource(id = R.string.actions), Modifier
+                ScreenTitle(
+                    DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.actions), Modifier
                     .constrainAs(title) {
                         top.linkTo(parent.top)  // Link top of content to parent top
                         bottom.linkTo(actions.top)  // Link bottom of content to top of buttonsRow

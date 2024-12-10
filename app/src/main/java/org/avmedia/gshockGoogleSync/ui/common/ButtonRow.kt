@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.translateapi.DynamicResourceApi
 
 data class ButtonData(val text: String, val onClick: () -> Unit)
 
@@ -42,10 +44,10 @@ fun ButtonsRow(
 fun PreviewButtonRow() {
     val buttons = listOf(
         ButtonData(
-            text = stringResource(id = R.string.send_alarms_to_phone),
+            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_alarms_to_phone),
             onClick = { /* handle click */ }),
         ButtonData(
-            text = stringResource(id = R.string.send_alarms_to_watch),
+            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_alarms_to_watch),
             onClick = { /* handle click */ })
     )
 

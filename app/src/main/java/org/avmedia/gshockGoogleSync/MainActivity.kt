@@ -21,14 +21,28 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
+import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+
+import org.avmedia.translateapi.DynamicResourceApi
+import org.avmedia.translateapi.ResourceLocaleKey
+import org.avmedia.translateapi.engine.BushTranslationEngine
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val application: GShockApplication
         get() = applicationContext as GShockApplication
     private lateinit var bluetoothHelper: BluetoothHelper
+
+    private val api = DynamicResourceApi
+        .init(
+            engine = BushTranslationEngine(),
+            language = Locale.getDefault(),
+            overWrites = arrayOf(
+            )
+        )
+        .getApi()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +62,7 @@ class MainActivity : ComponentActivity() {
             requestBluetooth = requestBluetoothLauncher,
             onBluetoothEnabled = { },
             onBluetoothNotEnabled = {
-                AppSnackbar(getString(R.string.bluetooth_is_not_enabled))
+                AppSnackbar(DynamicResourceApi.getApi().getString(this, R.string.bluetooth_is_not_enabled))
                 Executors.newSingleThreadScheduledExecutor()
                     .schedule({ finish() }, 3L, TimeUnit.SECONDS)
             }

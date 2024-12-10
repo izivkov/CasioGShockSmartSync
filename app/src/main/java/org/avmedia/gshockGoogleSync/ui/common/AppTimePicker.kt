@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
+import org.avmedia.translateapi.DynamicResourceApi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,13 +64,13 @@ fun AppTimePicker(
             AppButton(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
-                text = stringResource(id = R.string.cancel)
+                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.cancel)
             )
             Spacer(modifier = Modifier.width(8.dp)) // Space between buttons
             AppButton(
                 onClick = { onConfirm(timePickerState) },
                 modifier = Modifier.weight(1f), // Equal width buttons
-                text = stringResource(id = R.string.ok)
+                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.ok)
             )
         }
     }

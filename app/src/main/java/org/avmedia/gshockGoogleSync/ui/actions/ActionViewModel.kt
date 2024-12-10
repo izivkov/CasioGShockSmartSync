@@ -26,6 +26,7 @@ import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.DynamicResourceApi
 import timber.log.Timber
 import java.text.DateFormat
 import java.time.Clock
@@ -89,22 +90,22 @@ class ActionsViewModel @Inject constructor(
             StartVoiceAssistAction("Start Voice Assistant", false),
             NextTrack("Skip to next track", false),
 
-            FindPhoneAction(appContext.getString(R.string.find_phone), true),
-            SetTimeAction(appContext.getString(R.string.set_time), true, api),
+            FindPhoneAction(DynamicResourceApi.getApi().getString(appContext, R.string.find_phone), true),
+            SetTimeAction(DynamicResourceApi.getApi().getString(appContext, R.string.set_time), true, api),
             SetEventsAction(
-                appContext.getString(R.string.set_reminders),
+                DynamicResourceApi.getApi().getString(appContext, R.string.set_reminders),
                 false,
                 api,
                 calendarEvents
             ),
             PhotoAction(
-                appContext.getString(R.string.take_photo),
+                DynamicResourceApi.getApi().getString(appContext, R.string.take_photo),
                 false,
                 CAMERA_ORIENTATION.BACK
             ),
             PrayerAlarmsAction("Set Prayer Alarms", true, api),
-            Separator(appContext.getString(R.string.emergency_actions), false),
-            PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""),
+            Separator(DynamicResourceApi.getApi().getString(appContext, R.string.emergency_actions), false),
+            PhoneDialAction(DynamicResourceApi.getApi().getString(appContext, R.string.make_phonecall), false, ""),
         )
 
         _actions.value = initialActions
@@ -207,7 +208,7 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            AppSnackbar(context.getString(R.string.when_found_lift_phone_to_stop_ringing))
+            AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.when_found_lift_phone_to_stop_ringing))
             PhoneFinder.ring(context)
         }
 
@@ -284,7 +285,7 @@ class ActionsViewModel @Inject constructor(
                 }
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                AppSnackbar(context.getString(R.string.voice_assistant_not_available_on_this_device))
+                AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.voice_assistant_not_available_on_this_device))
             }
         }
     }
@@ -316,7 +317,7 @@ class ActionsViewModel @Inject constructor(
                 audioManager.dispatchMediaKeyEvent(upEvent)
 
             } catch (e: ActivityNotFoundException) {
-                AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
+                AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.cannot_go_to_next_track))
             }
         }
     }
@@ -433,12 +434,12 @@ class ActionsViewModel @Inject constructor(
                 cameraHelper.takePicture(
                     onImageCaptured = { result ->
                         captureResult = result
-                        AppSnackbar(context.getString(R.string.image_captured, captureResult))
+                        AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.image_captured, captureResult!!))
                         // Handle result, maybe pass it to the UI or save it
                     },
                     onError = { error ->
                         captureResult = "Error: $error"
-                        AppSnackbar(context.getString(R.string.camera_capture_error, captureResult))
+                        AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.camera_capture_error, captureResult!!))
                     }
                 )
             }
@@ -472,7 +473,7 @@ However, this way gives us more control on how to start the actions.
             action.run(context)
         } catch (e: SecurityException) {
             AppSnackbar(
-                context.getString(
+                DynamicResourceApi.getApi().getString(context,
                     R.string.you_have_not_given_permission_to_to_run_action,
                     action.title
                 )

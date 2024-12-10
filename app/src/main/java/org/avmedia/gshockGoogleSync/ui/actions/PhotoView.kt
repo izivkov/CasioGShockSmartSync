@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun PhotoView(
@@ -66,7 +68,7 @@ fun PhotoView(
             ) {
                 // Title TextView equivalent
                 AppTextLarge(
-                    text = stringResource(id = R.string.take_photo),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.take_photo),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                 )
@@ -90,7 +92,7 @@ fun PhotoView(
                             },
                             modifier = Modifier
                         )
-                        Text(text = stringResource(id = R.string.front_cam))
+                        Text(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.front_cam))
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -105,7 +107,7 @@ fun PhotoView(
                             },
                             modifier = Modifier
                         )
-                        Text(text = stringResource(id = R.string.back_cam))
+                        Text(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.back_cam))
                     }
                 }
             }

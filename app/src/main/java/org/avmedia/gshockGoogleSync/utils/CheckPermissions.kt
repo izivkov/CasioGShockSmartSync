@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.translateapi.DynamicResourceApi
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -98,7 +99,7 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
     }
 
     if (permanentlyDenied) {
-        AppSnackbar(stringResource(R.string.permissions_are_permanently_denied_please_enable_them_in_the_app_settings))
+        AppSnackbar(DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.permissions_are_permanently_denied_please_enable_them_in_the_app_settings))
         Timer("SettingUp", false).schedule(6000) { activity.finish() }
     }
 }

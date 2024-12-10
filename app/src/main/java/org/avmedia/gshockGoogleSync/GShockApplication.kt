@@ -26,6 +26,7 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.translateapi.DynamicResourceApi
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -114,7 +115,7 @@ class GShockApplication : Application() {
 
     private fun handleApiError() {
         val message = ProgressEvents.getPayload("ApiError") as String?
-            ?: getString(R.string.apierror_ensure_the_official_g_shock_app_is_not_running)
+            ?: DynamicResourceApi.getApi().getString(context, R.string.apierror_ensure_the_official_g_shock_app_is_not_running)
 
         AppSnackbar(message)
         repository.disconnect()

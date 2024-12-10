@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
 import org.avmedia.gshockGoogleSync.ui.common.AppPhoneInputDialog
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun PhoneView(
@@ -69,7 +71,7 @@ fun PhoneView(
                     .padding(6.dp)
             ) {
                 AppTextLarge(
-                    text = stringResource(id = R.string.make_phonecall),
+                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.make_phonecall),
                 )
                 var showDialog by remember { mutableStateOf(false) }
 

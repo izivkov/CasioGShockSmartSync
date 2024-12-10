@@ -15,6 +15,7 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.translateapi.DynamicResourceApi
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -69,7 +70,7 @@ class EventViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setEvents(ArrayList(_events.value))
-                AppSnackbar(appContext.getString(R.string.events_set))
+                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.events_set))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

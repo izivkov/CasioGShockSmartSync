@@ -68,7 +68,7 @@ Si aucun événement n\'apparaît, assurez-vous que vous avez des événements �
     <string name="auto_fill_help"><![CDATA[Les valeurs auto-remplies sont obtenues comme suit :
 <li>Le format de l\'heure/de la date et la langue sont obtenus depuis les paramètres du téléphone.</li>
 <li>Le ton des boutons est désactivé si le téléphone est en mode Ne Pas Déranger (DnD), activé sinon.</li>
-<li>Le mode économie d\'énergie est activé si le niveau de batterie est à 15 % ou moins.</li>
+<li>Le mode économie d\'énergie est activé si le niveau de batterie est à 15%% ou moins.</li>
 Note : <i>Les valeurs ne changeront pas tant qu\'elles ne sont pas renvoyées, même si les conditions changent (par ex. le DnD est activé/désactivé)</i>
 ]]>
 </string>

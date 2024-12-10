@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
@@ -81,7 +83,8 @@ fun AlarmsScreen(
             ) {
                 val (title, alarms, buttonsRow) = createRefs()
 
-                ScreenTitle(stringResource(id = R.string.watch_alarms), Modifier
+                ScreenTitle(
+                    DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.watch_alarms), Modifier
                     .constrainAs(title) {
                         top.linkTo(parent.top)  // Link top of content to parent top
                         bottom.linkTo(alarms.top)  // Link bottom of content to top of buttonsRow
@@ -122,10 +125,10 @@ fun AlarmsScreen(
                 ) {
                     val buttons = arrayListOf(
                         ButtonData(
-                            text = stringResource(id = R.string.send_alarms_to_phone),
+                            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_alarms_to_phone),
                             onClick = { alarmViewModel.sendAlarmsToPhone() }),
                         ButtonData(
-                            text = stringResource(id = R.string.send_alarms_to_watch),
+                            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_alarms_to_watch),
                             onClick = {
                                 alarmViewModel.sendAlarmsToWatch()
                             })
