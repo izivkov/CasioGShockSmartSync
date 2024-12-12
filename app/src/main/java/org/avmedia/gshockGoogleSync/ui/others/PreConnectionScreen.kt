@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ fun PreConnectionScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .systemBarsPadding()
             ) {
                 AppCard(
                     modifier = Modifier
@@ -66,7 +68,10 @@ fun PreConnectionScreen(
                         // WatchImageView equivalent
                         Image(
                             painter = painterResource(id = getImageId(watchName)),
-                            contentDescription = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.image_of_casio_watch),
+                            contentDescription = DynamicResourceApi.getApi().stringResource(
+                                context = LocalContext.current,
+                                id = R.string.image_of_casio_watch
+                            ),
                             modifier = Modifier
                                 .constrainAs(watchImageView) {
                                     top.linkTo(parent.top)
@@ -87,12 +92,17 @@ fun PreConnectionScreen(
                         )
 
                         Box(modifier = Modifier
-                            .padding(top = 45.dp, end = 30.dp)
+                            .padding(top = 30.dp, end = 30.dp)
                             .constrainAs(infoButton) {
                                 top.linkTo(parent.top)
                                 end.linkTo(parent.end)
                             }) {
-                            InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.connection_screen_info) + "v" + BuildConfig.VERSION_NAME)
+                            InfoButton(
+                                infoText = DynamicResourceApi.getApi().stringResource(
+                                    context = LocalContext.current,
+                                    id = R.string.connection_screen_info
+                                ) + "v" + BuildConfig.VERSION_NAME
+                            )
                         }
                     }
                 }
@@ -143,7 +153,10 @@ fun PreConnectionScreen(
                                     bottom.linkTo(parent.bottom)
                                 }) {
                                 InfoButton(
-                                    infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.connection_screen_device)
+                                    infoText = DynamicResourceApi.getApi().stringResource(
+                                        context = LocalContext.current,
+                                        id = R.string.connection_screen_device
+                                    )
                                 )
                             }
                         }

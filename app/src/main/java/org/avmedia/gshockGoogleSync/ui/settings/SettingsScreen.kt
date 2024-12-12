@@ -32,6 +32,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.translateapi.DynamicResourceApi
 
@@ -130,7 +131,9 @@ fun BottomRow(
 
             val buttons = arrayListOf(
                 ButtonData(
-                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.auto_configure_settings),
+                    text = Utils.shortenString(
+                        DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.auto_configure_settings),
+                        15, "AUTO"),
                     onClick = { settingsViewModel.setSmartDefaults() }),
 
                 ButtonData(

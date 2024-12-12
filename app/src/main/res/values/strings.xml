@@ -125,7 +125,7 @@
         If you are playing music or a video in a media player such as Spotify, YouTube, or YTMusic on your phone, this action will skip to the next song or video.
         It also works with Android Auto
         ]]></string>
-    <string name="set_prayer_alarms">Set Prayer Alarms</string>
+    <string name="set_prayer_alarms">Prayer Alarms</string>
     <string name="prayer_times_info"><![CDATA[
         <li>This action will set the 5 alarms on the watch to the Muslim prayers <b>Fajr</b>, <b>Dhuhr</b>, <b>Asr</b>, <b>Maghrib</b>, and <b>Isha</b> times.</li>
         <li>The times vary based on your location and current date, so for best accuracy, run this action daily.

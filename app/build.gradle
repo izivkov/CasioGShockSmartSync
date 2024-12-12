@@ -50,8 +50,8 @@ dependencies {
     implementation 'com.github.izivkov:GShockAPI:1.4.35'
     // implementation project(':api')
 
-    // implementation 'com.github.izivkov:DynamicResourceTranslator:v1.0.6'
-    implementation(project(":translateApi"))
+    implementation 'com.github.izivkov:DynamicResourceTranslator:v1.0.0'
+    // implementation(project(":translateApi"))
 
     implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
