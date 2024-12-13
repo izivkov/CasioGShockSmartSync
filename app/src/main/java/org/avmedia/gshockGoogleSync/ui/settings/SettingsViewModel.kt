@@ -41,7 +41,6 @@ class SettingsViewModel @Inject constructor(
 
     private val _settings = MutableStateFlow<ArrayList<Setting>>(arrayListOf())
     val settings: StateFlow<ArrayList<Setting>> = _settings
-
     private val settingsMap = ConcurrentHashMap<Class<out Setting>, Setting>()
 
     private fun updateSettingsAndMap(newSettings: ArrayList<Setting>) {
@@ -55,8 +54,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun <T : Setting> getSetting(type: Class<T>): T {
-        @Suppress("UNCHECKED_CAST")
-        return settingsMap[type] as T
+        synchronized(settingsMap) {
+            @Suppress("UNCHECKED_CAST")
+            return settingsMap[type] as T
+        }
     }
 
     fun <T : Setting> updateSetting(updatedSetting: T) {
