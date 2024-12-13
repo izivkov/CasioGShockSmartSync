@@ -24,6 +24,7 @@ import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.util.Collections
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -40,8 +41,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _settings = MutableStateFlow<ArrayList<Setting>>(arrayListOf())
     val settings: StateFlow<ArrayList<Setting>> = _settings
+
     private val settingsMap: MutableMap<Class<out Setting>, Setting> =
-        _settings.value.associateBy { it::class.java }.toMutableMap()
+        Collections.synchronizedMap(mutableMapOf())
 
     private fun updateSettingsAndMap(newSettings: ArrayList<Setting>) {
         settingsMap.clear()
