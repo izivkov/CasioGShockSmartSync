@@ -3,6 +3,7 @@
 ## Announcements
 
 We now support most languages through automatic translation, powered by the [DynamicResourceTranslator](https://github.com/izivkov/DynamicResourceTranslator) library. 
+
 We highly value your feedback to improve translations for specific languages, allowing us to fine-tune the translated text. 
 If you notice a translation that needs improvement, please create an Issue [here](https://github.com/izivkov/CasioGShockSmartSync/issues) and include the language, the string to be corrected, and your suggested translation.
 
