@@ -2,10 +2,9 @@
 
 ## Announcements
 
-We have added Arabic, Japanese, French, Spanish, German, Bulgarian, Russian, Chinese (simplified) support. If you see mistakes or have suggestions 
-for the translations, please create an issue and tell us about it.
-
-We have now completed the migration to [Jetpack Compose](https://developer.android.com/compose) and Material 3 design.
+We now support all languages through automatic translation, powered by the [DynamicResourceTranslator](https://github.com/izivkov/DynamicResourceTranslator) library. 
+We highly value your feedback to improve translations for specific languages, allowing us to fine-tune the translated text. 
+If you notice a translation that needs improvement, please create an Issue [here](https://github.com/izivkov/CasioGShockSmartSync/issues) and include the language, the string to be corrected, and your suggested translation.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
@@ -20,7 +19,7 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 
 # Supported Watches
 
-The app will try to connect and addopt to any Casio watch that wants to connect to it (not just G-Shock). Surprisingly, many models will work "right off the bat". Here are some watches which are reported to work with the app:
+The app will try to connect and adopt to any Casio watch that wants to connect to it (not just G-Shock). Surprisingly, many models will work "right off the bat". Here are some watches which are reported to work with the app:
 
 G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100, G-B001, GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, GG-B100, Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
 
