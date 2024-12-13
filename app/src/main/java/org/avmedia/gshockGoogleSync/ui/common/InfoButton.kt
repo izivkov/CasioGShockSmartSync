@@ -17,11 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.translateapi.DynamicResourceApi
+import org.avmedia.gshockGoogleSync.di.TranslateEntryPoint
 
 @Composable
 fun InfoButton(
@@ -33,6 +33,11 @@ fun InfoButton(
         onClick = { showDialog = !showDialog },
         Modifier.size(32.dp),
     ) {
+        val translateApi = EntryPointAccessors.fromApplication(
+            LocalContext.current,
+            TranslateEntryPoint::class.java
+        ).getTranslateRepository()
+
         Icon(
             imageVector = Icons.Outlined.Info,
             contentDescription = "Info Icon",
@@ -47,13 +52,23 @@ fun InfoButton(
                 onDismissRequest = { showDialog = false },
                 confirmButton = {
                     Text(
-                        text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.ok),
+                        text = translateApi.stringResource(
+                            context = LocalContext.current,
+                            id = R.string.ok
+                        ),
                         modifier = Modifier.clickable {
                             showDialog = false
                         }
                     )
                 },
-                title = { Text(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.info)) },
+                title = {
+                    Text(
+                        text = translateApi.stringResource(
+                            context = LocalContext.current,
+                            id = R.string.info
+                        )
+                    )
+                },
                 text = {
                     Text(text = Html.fromHtml(infoText, Html.FROM_HTML_MODE_LEGACY).toString())
                 }

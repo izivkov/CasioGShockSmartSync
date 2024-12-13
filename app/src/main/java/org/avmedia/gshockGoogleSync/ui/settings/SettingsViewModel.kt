@@ -16,12 +16,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.translateapi.DynamicResourceApi
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import javax.inject.Inject
@@ -30,6 +30,7 @@ import kotlin.coroutines.CoroutineContext
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val api: GShockRepository,
+    val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
 
@@ -379,7 +380,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setSettings(settings)
-                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.settings_sent_to_watch))
+                AppSnackbar(translateApi.getString(appContext, R.string.settings_sent_to_watch))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

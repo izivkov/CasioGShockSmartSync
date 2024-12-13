@@ -10,18 +10,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.translateapi.DynamicResourceApi
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
     private val api: GShockRepository,
+    val translateApi: TranslateRepository,
     private val calendarEvents: CalendarEvents,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
@@ -70,7 +71,7 @@ class EventViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setEvents(ArrayList(_events.value))
-                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.events_set))
+                AppSnackbar(translateApi.getString(appContext, R.string.events_set))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

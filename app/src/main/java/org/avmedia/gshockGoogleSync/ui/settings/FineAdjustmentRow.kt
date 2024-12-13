@@ -19,14 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
-import org.avmedia.translateapi.DynamicResourceApi
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -56,11 +54,19 @@ fun FineAdjustmentRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AppText(
-            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.fine_time_adjustment),
+            text = settingsViewModel.translateApi.stringResource(
+                context = LocalContext.current,
+                R.string.fine_time_adjustment
+            ),
             fontSize = 20.sp,
             modifier = Modifier.padding(end = 2.dp)
         )
-        InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.fine_adjustment_info))
+        InfoButton(
+            infoText = settingsViewModel.translateApi.stringResource(
+                context = LocalContext.current,
+                R.string.fine_adjustment_info
+            )
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -78,8 +84,14 @@ fun FineAdjustmentRow(
                 initialValue = selectedValue,
                 range = -10000..10000,
                 step = 100,
-                title = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.fine_adjustment),
-                label = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.ms_between_10000_and_10000),
+                title = settingsViewModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    R.string.fine_adjustment
+                ),
+                label = settingsViewModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    R.string.ms_between_10000_and_10000
+                ),
                 onDismiss = { showDialog = false },
                 onConfirm = { newValue ->
                     selectedValue = newValue

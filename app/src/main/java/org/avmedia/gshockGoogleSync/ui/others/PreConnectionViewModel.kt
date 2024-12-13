@@ -10,21 +10,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.ble.Connection
-import org.avmedia.translateapi.DynamicResourceApi
 import javax.inject.Inject
 
 @HiltViewModel
 class PreConnectionViewModel @Inject constructor(
     private val api: GShockRepository,
+    val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
 
-    private val noWatchString = DynamicResourceApi.getApi().getString(appContext, R.string.no_watch)
+    private val noWatchString = translateApi.getString(appContext, R.string.no_watch)
     private val initialValue =
         LocalDataStorage.get(appContext, "LastDeviceName", noWatchString) as String
 

@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -28,7 +27,6 @@ import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.Event
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
@@ -44,11 +42,14 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                 val (title, events, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.events), Modifier
-                    .constrainAs(title) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(events.top)
-                    })
+                    viewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.events
+                    ), Modifier
+                        .constrainAs(title) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(events.top)
+                        })
 
                 Column(
                     modifier = Modifier
@@ -76,7 +77,10 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                 ) {
                     val buttons = arrayListOf(
                         ButtonData(
-                            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_events_to_watch),
+                            text = viewModel.translateApi.stringResource(
+                                context = LocalContext.current,
+                                id = R.string.send_events_to_watch
+                            ),
                             onClick = { viewModel.sendEventsToWatch() }
                         )
                     )

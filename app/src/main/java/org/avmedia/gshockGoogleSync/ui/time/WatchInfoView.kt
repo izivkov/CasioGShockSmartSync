@@ -14,16 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun WatchInfoView(modifier: Modifier) {
@@ -53,7 +52,10 @@ fun WatchInfoView(modifier: Modifier) {
 }
 
 @Composable
-fun WatchInfoCard1(modifier: Modifier = Modifier) {
+fun WatchInfoCard1(
+    modifier: Modifier = Modifier,
+    timeModel: TimeViewModel = hiltViewModel()
+) {
     AppCard(
         modifier = modifier
     ) {
@@ -70,9 +72,19 @@ fun WatchInfoCard1(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AppText(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.home_time))  // Home Time Text
+                AppText(
+                    text = timeModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.home_time
+                    )
+                )  // Home Time Text
                 Spacer(modifier = Modifier.width(10.dp))
-                InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.info_home_time))  // Info Button
+                InfoButton(
+                    infoText = timeModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.info_home_time
+                    )
+                )  // Info Button
             }
 
             HomeTime(

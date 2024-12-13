@@ -25,11 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.translateapi.DynamicResourceApi
+import org.avmedia.gshockGoogleSync.ui.alarms.AlarmViewModel
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -42,6 +42,7 @@ fun ValueSelectionDialog(
     title: String = "Select Value",
     label: String = "Choose a value:",
     unit: String,
+    alarmsViewModel: AlarmViewModel = hiltViewModel(),
 ) {
     val values = range.step(step).toList()
     val initialIndex = values.indexOf(initialValue)
@@ -51,12 +52,22 @@ fun ValueSelectionDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onConfirm(values[selectedIndex]) }) {
-                Text(DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.ok))
+                Text(
+                    alarmsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.ok
+                    )
+                )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.cancel))
+                Text(
+                    alarmsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.cancel
+                    )
+                )
             }
         },
         title = { Text(title) },

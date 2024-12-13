@@ -15,12 +15,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.di.TranslateEntryPoint
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.translateapi.DynamicResourceApi
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -99,7 +99,18 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
     }
 
     if (permanentlyDenied) {
-        AppSnackbar(DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.permissions_are_permanently_denied_please_enable_them_in_the_app_settings))
+
+        val translateApi = EntryPointAccessors.fromApplication(
+            LocalContext.current,
+            TranslateEntryPoint::class.java
+        ).getTranslateRepository()
+
+        AppSnackbar(
+            translateApi.stringResource(
+                LocalContext.current,
+                R.string.permissions_are_permanently_denied_please_enable_them_in_the_app_settings
+            )
+        )
         Timer("SettingUp", false).schedule(6000) { activity.finish() }
     }
 }

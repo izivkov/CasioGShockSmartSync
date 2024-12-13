@@ -21,7 +21,7 @@ class Utils {
             }
         }
 
-        fun shortenString (
+        fun shortenString(
             input: String,
             maxLength: Int,
             defaultString: String? = null

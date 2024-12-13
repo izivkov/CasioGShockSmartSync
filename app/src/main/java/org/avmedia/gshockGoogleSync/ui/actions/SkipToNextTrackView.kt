@@ -8,11 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun SkipToNextTrackView(
@@ -32,9 +30,15 @@ fun SkipToNextTrackView(
     }
 
     ActionItem(
-        title = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.next_track),
+        title = actionsViewModel.translateApi.stringResource(
+            context = LocalContext.current,
+            id = R.string.next_track
+        ),
         resourceId = R.drawable.skip_next,
-        infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.skip_to_next_track_info),
+        infoText = actionsViewModel.translateApi.stringResource(
+            context = LocalContext.current,
+            id = R.string.skip_to_next_track_info
+        ),
         isEnabled = isEnabled,
         onEnabledChange = { newValue ->
             isEnabled = newValue // Update the state when the switch is toggled

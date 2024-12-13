@@ -9,15 +9,17 @@ import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.translateapi.DynamicResourceApi
+import javax.inject.Inject
 
-class BluetoothHelper(
+class BluetoothHelper @Inject constructor(
     private val context: Context,
     private val activity: Activity,
     private val requestBluetooth: ActivityResultLauncher<Intent>,
     private val onBluetoothEnabled: () -> Unit,
-    private val onBluetoothNotEnabled: () -> Unit
+    private val onBluetoothNotEnabled: () -> Unit,
+    private val translateApi: TranslateRepository,
 ) {
     private var onResultCallback: (() -> Unit)? = null
 
@@ -27,7 +29,12 @@ class BluetoothHelper(
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter = bluetoothManager?.adapter
         if (bluetoothAdapter == null) {
-            AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.sorry_your_device_does_not_support_bluetooth_exiting))
+            AppSnackbar(
+                translateApi.getString(
+                    context,
+                    R.string.sorry_your_device_does_not_support_bluetooth_exiting
+                )
+            )
             activity.finish()
             return
         }
@@ -39,7 +46,12 @@ class BluetoothHelper(
                     context, Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.permission_required_to_turn_on_bluetooth))
+                AppSnackbar(
+                    translateApi.getString(
+                        context,
+                        R.string.permission_required_to_turn_on_bluetooth
+                    )
+                )
                 onBluetoothNotEnabled()
                 return
             }
@@ -47,7 +59,12 @@ class BluetoothHelper(
             try {
                 requestBluetooth.launch(enableBtIntent)
             } catch (e: SecurityException) {
-                AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually))
+                AppSnackbar(
+                    translateApi.getString(
+                        context,
+                        R.string.you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually
+                    )
+                )
                 onBluetoothNotEnabled()
             }
         } else {

@@ -14,10 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.translateapi.DynamicResourceApi
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -26,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
+    val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
@@ -66,7 +67,7 @@ class AlarmViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.setAlarms(alarms = ArrayList(alarms.value))
-                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.alarms_set_no_watch))
+                AppSnackbar(translateApi.getString(appContext, R.string.alarms_set_no_watch))
             } catch (e: Exception) {
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

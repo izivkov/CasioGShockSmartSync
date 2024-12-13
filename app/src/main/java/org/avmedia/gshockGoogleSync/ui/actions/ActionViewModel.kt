@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.CoroutineScopes.mainScope
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -26,7 +27,6 @@ import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.translateapi.DynamicResourceApi
 import timber.log.Timber
 import java.text.DateFormat
 import java.time.Clock
@@ -36,6 +36,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
     private val api: GShockRepository,
+    val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context, // Inject application context
     private val calendarEvents: CalendarEvents
 ) : ViewModel() {
@@ -87,25 +88,31 @@ class ActionsViewModel @Inject constructor(
     private fun loadInitialActions() {
         val initialActions = arrayListOf(
             ToggleFlashlightAction("Toggle Flashlight", false),
-            StartVoiceAssistAction("Start Voice Assistant", false),
-            NextTrack("Skip to next track", false),
+            StartVoiceAssistAction("Start Voice Assistant", false, translateApi),
+            NextTrack("Skip to next track", false, translateApi),
 
-            FindPhoneAction(DynamicResourceApi.getApi().getString(appContext, R.string.find_phone), true),
-            SetTimeAction(DynamicResourceApi.getApi().getString(appContext, R.string.set_time), true, api),
+            FindPhoneAction(
+                translateApi.getString(appContext, R.string.find_phone),
+                translateApi,
+                true
+            ),
+            SetTimeAction(translateApi.getString(appContext, R.string.set_time), true, api),
             SetEventsAction(
-                DynamicResourceApi.getApi().getString(appContext, R.string.set_reminders),
+                translateApi.getString(appContext, R.string.set_reminders),
                 false,
                 api,
+                translateApi,
                 calendarEvents
             ),
             PhotoAction(
-                DynamicResourceApi.getApi().getString(appContext, R.string.take_photo),
+                translateApi.getString(appContext, R.string.take_photo),
                 false,
-                CAMERA_ORIENTATION.BACK
+                CAMERA_ORIENTATION.BACK,
+                translateApi
             ),
             PrayerAlarmsAction("Set Prayer Alarms", true, api),
-            Separator(DynamicResourceApi.getApi().getString(appContext, R.string.emergency_actions), false),
-            PhoneDialAction(DynamicResourceApi.getApi().getString(appContext, R.string.make_phonecall), false, ""),
+            Separator(translateApi.getString(appContext, R.string.emergency_actions), false),
+            PhoneDialAction(translateApi.getString(appContext, R.string.make_phonecall), false, ""),
         )
 
         _actions.value = initialActions
@@ -155,6 +162,7 @@ class ActionsViewModel @Inject constructor(
         override var title: String,
         override var enabled: Boolean,
         val api: GShockRepository,
+        val translateApi: TranslateRepository,
         val calendarEvents: CalendarEvents
     ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
@@ -194,7 +202,11 @@ class ActionsViewModel @Inject constructor(
         }
     }
 
-    data class FindPhoneAction(override var title: String, override var enabled: Boolean) :
+    data class FindPhoneAction(
+        override var title: String,
+        val translateApi: TranslateRepository,
+        override var enabled: Boolean
+    ) :
         Action(title, enabled) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
@@ -208,7 +220,12 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.when_found_lift_phone_to_stop_ringing))
+            AppSnackbar(
+                translateApi.getString(
+                    context,
+                    R.string.when_found_lift_phone_to_stop_ringing
+                )
+            )
             PhoneFinder.ring(context)
         }
 
@@ -273,7 +290,11 @@ class ActionsViewModel @Inject constructor(
         }
     }
 
-    data class StartVoiceAssistAction(override var title: String, override var enabled: Boolean) :
+    data class StartVoiceAssistAction(
+        override var title: String,
+        override var enabled: Boolean,
+        val translateApi: TranslateRepository,
+    ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -285,12 +306,21 @@ class ActionsViewModel @Inject constructor(
                 }
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.voice_assistant_not_available_on_this_device))
+                AppSnackbar(
+                    translateApi.getString(
+                        context,
+                        R.string.voice_assistant_not_available_on_this_device
+                    )
+                )
             }
         }
     }
 
-    data class NextTrack(override var title: String, override var enabled: Boolean) :
+    data class NextTrack(
+        override var title: String,
+        override var enabled: Boolean,
+        val translateApi: TranslateRepository,
+    ) :
         Action(title, enabled, RUN_MODE.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -317,7 +347,7 @@ class ActionsViewModel @Inject constructor(
                 audioManager.dispatchMediaKeyEvent(upEvent)
 
             } catch (e: ActivityNotFoundException) {
-                AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.cannot_go_to_next_track))
+                AppSnackbar(translateApi.getString(context, R.string.cannot_go_to_next_track))
             }
         }
     }
@@ -414,7 +444,8 @@ class ActionsViewModel @Inject constructor(
     data class PhotoAction(
         override var title: String,
         override var enabled: Boolean,
-        var cameraOrientation: CAMERA_ORIENTATION
+        var cameraOrientation: CAMERA_ORIENTATION,
+        val translateApi: TranslateRepository,
     ) : Action(title, enabled, RUN_MODE.ASYNC) {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
@@ -434,12 +465,24 @@ class ActionsViewModel @Inject constructor(
                 cameraHelper.takePicture(
                     onImageCaptured = { result ->
                         captureResult = result
-                        AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.image_captured, captureResult!!))
+                        AppSnackbar(
+                            translateApi.getString(
+                                context,
+                                R.string.image_captured,
+                                captureResult!!
+                            )
+                        )
                         // Handle result, maybe pass it to the UI or save it
                     },
                     onError = { error ->
                         captureResult = "Error: $error"
-                        AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.camera_capture_error, captureResult!!))
+                        AppSnackbar(
+                            translateApi.getString(
+                                context,
+                                R.string.camera_capture_error,
+                                captureResult!!
+                            )
+                        )
                     }
                 )
             }
@@ -473,7 +516,7 @@ However, this way gives us more control on how to start the actions.
             action.run(context)
         } catch (e: SecurityException) {
             AppSnackbar(
-                DynamicResourceApi.getApi().getString(context,
+                context.getString(
                     R.string.you_have_not_given_permission_to_to_run_action,
                     action.title
                 )

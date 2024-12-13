@@ -20,13 +20,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
-import org.avmedia.translateapi.DynamicResourceApi
+import org.avmedia.gshockGoogleSync.ui.alarms.AlarmViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +35,7 @@ fun AppTimePicker(
     onDismiss: () -> Unit,
     initialHour: Int,
     initialMinute: Int,
+    alarmsViewModel: AlarmViewModel = hiltViewModel(),
 ) {
     val localContext = LocalContext.current.applicationContext
     val appContext = remember {
@@ -64,13 +65,19 @@ fun AppTimePicker(
             AppButton(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
-                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.cancel)
+                text = alarmsViewModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    id = R.string.cancel
+                )
             )
             Spacer(modifier = Modifier.width(8.dp)) // Space between buttons
             AppButton(
                 onClick = { onConfirm(timePickerState) },
                 modifier = Modifier.weight(1f), // Equal width buttons
-                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.ok)
+                text = alarmsViewModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    id = R.string.ok
+                )
             )
         }
     }

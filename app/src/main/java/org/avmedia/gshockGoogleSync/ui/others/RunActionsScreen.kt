@@ -9,15 +9,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
-fun RunActionsScreen(repository: GShockRepository) {
+fun RunActionsScreen(
+    repository: GShockRepository,
+    translateApi: TranslateRepository
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -25,7 +27,10 @@ fun RunActionsScreen(repository: GShockRepository) {
         contentAlignment = Alignment.Center
     ) {
         AppTextExtraLarge(
-            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.running_actions),
+            text = translateApi.stringResource(
+                context = LocalContext.current,
+                id = R.string.running_actions
+            ),
             fontWeight = FontWeight.Bold // Adjust as needed
         )
 

@@ -13,10 +13,10 @@ import com.philjay.Weekday
 import com.philjay.WeekdayNum
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
-import org.avmedia.translateapi.DynamicResourceApi
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,7 +28,8 @@ import javax.inject.Singleton
 
 @Singleton
 class RRuleValues @Inject constructor(
-    @ApplicationContext private val appContext: Context
+    @ApplicationContext private val appContext: Context,
+    private val translateApi: TranslateRepository,
 ) {
     data class Values(
         var localEndDate: LocalDate? = null,
@@ -70,7 +71,12 @@ class RRuleValues @Inject constructor(
 
             if (!isCompatible(rruleObj)) {
                 rruleValues.incompatible = true
-                AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.event_not_compatible_with_watch))
+                AppSnackbar(
+                    translateApi.getString(
+                        appContext,
+                        R.string.event_not_compatible_with_watch
+                    )
+                )
             }
 
             if (rrule.isNotEmpty()) {

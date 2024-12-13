@@ -8,18 +8,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
-fun TimeScreen() {
+fun TimeScreen(
+    timeModel: TimeViewModel = hiltViewModel()
+) {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -30,12 +31,15 @@ fun TimeScreen() {
                 val (title, localTime, timer, watchName, watchInfo) = createRefs()
 
                 ScreenTitle(
-                    DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.time), Modifier
-                    .constrainAs(title) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    })
+                    timeModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.time
+                    ), Modifier
+                        .constrainAs(title) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        })
 
                 LocalTimeView(
                     Modifier

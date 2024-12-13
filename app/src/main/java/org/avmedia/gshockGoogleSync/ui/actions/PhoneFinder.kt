@@ -9,9 +9,10 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.di.TranslateEntryPoint
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.translateapi.DynamicResourceApi
 import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -25,13 +26,23 @@ class PhoneFinder {
         var resetVolume: () -> Unit? = {}
 
         fun ring(context: Context) {
+            val translateApi = EntryPointAccessors.fromApplication(
+                context,
+                TranslateEntryPoint::class.java
+            ).getTranslateRepository()
+
             // get alarm uri
             var alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             if (alarmUri == null) {
                 alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
             }
             if (alarmUri == null) {
-                AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.unable_to_get_default_sound_uri))
+                AppSnackbar(
+                    translateApi.getString(
+                        context,
+                        R.string.unable_to_get_default_sound_uri
+                    )
+                )
                 return
             }
 

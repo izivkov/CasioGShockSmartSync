@@ -35,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockGoogleSync.services.InactivityHandler
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
@@ -43,12 +44,12 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
-import org.avmedia.translateapi.DynamicResourceApi
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
+    translateApi: TranslateRepository,
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -65,7 +66,7 @@ fun BottomNavigationBarWithPermissions(
     val inactivityHandler = remember {
         InactivityHandler(timeout = (3 * 60).seconds) {
             repository.disconnect()
-            AppSnackbar(DynamicResourceApi.getApi().getString(appContext, R.string.disconnected_due_to_inactivity))
+            AppSnackbar(translateApi.getString(appContext, R.string.disconnected_due_to_inactivity))
         }
     }
 
@@ -95,30 +96,31 @@ fun BottomNavigationBarWithPermissions(
             NavigationBar(
                 modifier = Modifier.padding(0.dp)
             ) {
-                BottomNavigationItem().bottomNavigationItems().forEachIndexed { _, navigationItem ->
-                    NavigationBarItem(
-                        selected = navigationItem.route == currentDestination?.route,
-                        label = {
-                            Text(navigationItem.label)
-                        },
-                        icon = {
-                            Icon(
-                                navigationItem.icon,
-                                contentDescription = navigationItem.label
-                            )
-                        },
-                        onClick = {
-                            navController.navigate(navigationItem.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                BottomNavigationItem(translateApi = translateApi).bottomNavigationItems()
+                    .forEachIndexed { _, navigationItem ->
+                        NavigationBarItem(
+                            selected = navigationItem.route == currentDestination?.route,
+                            label = {
+                                Text(navigationItem.label)
+                            },
+                            icon = {
+                                Icon(
+                                    navigationItem.icon,
+                                    contentDescription = navigationItem.label
+                                )
+                            },
+                            onClick = {
+                                navController.navigate(navigationItem.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        alwaysShowLabel = false,
-                    )
-                }
+                            },
+                            alwaysShowLabel = false,
+                        )
+                    }
             }
         }
     ) { paddingValues ->
@@ -138,7 +140,11 @@ fun BottomNavigationBarWithPermissions(
                     listOf(READ_CALENDAR),
                     navController,
                     destinationScreen = { EventsScreen() },
-                    DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.calendar_permission_denied_cannot_access_events)
+                    translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.calendar_permission_denied_cannot_access_events
+                    ),
+                    translateApi
                 )
             }
             composable(Screens.Actions.route) {
@@ -151,7 +157,11 @@ fun BottomNavigationBarWithPermissions(
                     permissions,
                     navController,
                     destinationScreen = { ActionsScreen() },
-                    DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.required_permissions_denied_cannot_access_actions)
+                    translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.required_permissions_denied_cannot_access_actions
+                    ),
+                    translateApi
                 )
             }
             composable(Screens.Settings.route) {
@@ -166,7 +176,8 @@ fun NavigateWithPermissions(
     requiredPermissions: List<String>,
     navController: NavController,
     destinationScreen: @Composable () -> Unit,
-    errorMessage: String = DynamicResourceApi.getApi().stringResource(LocalContext.current, R.string.required_permissions_denied_cannot_access_screen)
+    errorMessage: String = stringResource(R.string.required_permissions_denied_cannot_access_screen),
+    translateApi: TranslateRepository,
 ) {
     var hasNavigated by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -179,7 +190,10 @@ fun NavigateWithPermissions(
                 hasNavigated = true
                 LaunchedEffect(Unit) { // make sure it is only called once
                     val additionalInfo =
-                        DynamicResourceApi.getApi().getString(context, R.string.clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions)
+                        translateApi.getString(
+                            context,
+                            R.string.clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions
+                        )
                     AppSnackbar(errorMessage + additionalInfo)
                 }
                 navController.navigate(Screens.Time.route) {

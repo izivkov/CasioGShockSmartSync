@@ -19,16 +19,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
-import org.avmedia.translateapi.DynamicResourceApi
 
 
 @Composable
@@ -37,7 +36,8 @@ fun TimerPicker(
     minutes: Int,
     seconds: Int,
     onDismiss: () -> Unit,
-    onSubmit: (Int, Int, Int) -> Unit
+    onSubmit: (Int, Int, Int) -> Unit,
+    timeModel: TimeViewModel = hiltViewModel(),
 ) {
     var hourInput by remember {
         mutableStateOf(
@@ -64,7 +64,14 @@ fun TimerPicker(
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
-        title = { AppText(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.enter_timer_time)) },
+        title = {
+            AppText(
+                text = timeModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    R.string.enter_timer_time
+                )
+            )
+        },
         text = {
             Column {
                 Row(
@@ -157,12 +164,18 @@ fun TimerPicker(
         dismissButton = {
             AppButton(
                 onClick = onDismiss,
-                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.cancel)
+                text = timeModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    id = R.string.cancel
+                )
             )
         },
         confirmButton = {
             AppButton(
-                text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.ok),
+                text = timeModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    id = R.string.ok
+                ),
                 onClick = {
                     val h = hourInput.text.toIntOrNull() ?: 0
                     val m = minuteInput.text.toIntOrNull() ?: 0

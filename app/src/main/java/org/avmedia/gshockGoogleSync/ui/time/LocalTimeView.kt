@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -28,7 +27,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.translateapi.DynamicResourceApi
 import java.util.TimeZone
 
 @Composable
@@ -51,7 +49,10 @@ fun LocalTimeView(
             ) {
                 AppTextLarge(
                     modifier = Modifier.padding(start = 6.dp),
-                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.local_time),
+                    text = timeModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.local_time
+                    ),
                 )
 
                 TextClockComposable(
@@ -77,7 +78,10 @@ fun LocalTimeView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 SendTimeButton(
-                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_to_watch),
+                    text = timeModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.send_to_watch
+                    ),
                     onClick = {
                         timeModel.sendTimeToWatch()
                     }

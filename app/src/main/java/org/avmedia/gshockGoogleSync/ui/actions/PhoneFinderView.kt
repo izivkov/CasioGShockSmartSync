@@ -8,11 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun PhoneFinderView(
@@ -31,7 +29,10 @@ fun PhoneFinderView(
     }
 
     ActionItem(
-        title = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.find_phone),
+        title = actionsViewModel.translateApi.stringResource(
+            context = LocalContext.current,
+            id = R.string.find_phone
+        ),
         resourceId = R.drawable.find_phone,
         isEnabled = isEnabled,
         onEnabledChange = { newValue ->

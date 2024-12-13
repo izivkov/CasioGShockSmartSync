@@ -11,17 +11,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSwitchWithText
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun AlarmChimeSwitch(
     modifier: Modifier,
+    alarmsViewModel: AlarmViewModel = hiltViewModel(),
 ) {
     // State to manage whether the switch is checked or not
     val isChecked =
@@ -58,7 +58,10 @@ fun AlarmChimeSwitch(
                 }
             },
             modifier = modifier,
-            text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.signal_chime)
+            text = alarmsViewModel.translateApi.stringResource(
+                context = LocalContext.current,
+                id = R.string.signal_chime
+            )
         )
     }
 }

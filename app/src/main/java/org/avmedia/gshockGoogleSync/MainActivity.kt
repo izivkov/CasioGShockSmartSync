@@ -9,7 +9,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -18,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
@@ -25,10 +25,7 @@ import org.avmedia.gshockGoogleSync.utils.CheckPermissions
 import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-
-import org.avmedia.translateapi.DynamicResourceApi
-import org.avmedia.translateapi.ResourceLocaleKey
-import org.avmedia.translateapi.engine.BushTranslationEngine
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -36,15 +33,17 @@ class MainActivity : ComponentActivity() {
         get() = applicationContext as GShockApplication
     private lateinit var bluetoothHelper: BluetoothHelper
 
-    private val api = DynamicResourceApi
-        .init()
-        .getApi()
+    @Inject
+    lateinit var translateApi: TranslateRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         application.init(this)
+
+        translateApi.setLanguage(Locale.getDefault()).setOverwrites(arrayOf())
+
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val requestBluetoothLauncher =
@@ -58,10 +57,11 @@ class MainActivity : ComponentActivity() {
             requestBluetooth = requestBluetoothLauncher,
             onBluetoothEnabled = { },
             onBluetoothNotEnabled = {
-                AppSnackbar(DynamicResourceApi.getApi().getString(this, R.string.bluetooth_is_not_enabled))
+                AppSnackbar(translateApi.getString(this, R.string.bluetooth_is_not_enabled))
                 Executors.newSingleThreadScheduledExecutor()
                     .schedule({ finish() }, 3L, TimeUnit.SECONDS)
-            }
+            },
+            translateApi = translateApi
         )
 
         setContent {

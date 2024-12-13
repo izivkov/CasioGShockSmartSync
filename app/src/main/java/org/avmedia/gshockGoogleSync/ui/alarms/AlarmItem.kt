@@ -27,17 +27,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppTimePicker
-import org.avmedia.translateapi.DynamicResourceApi
 import java.util.Date
 import java.util.Locale
 
@@ -48,7 +47,8 @@ fun AlarmItem(
     minutes: Int = 0,
     isAlarmEnabled: Boolean = true,
     onToggleAlarm: (Boolean) -> Unit,
-    onTimeChanged: (Int, Int) -> Unit
+    onTimeChanged: (Int, Int) -> Unit,
+    alarmsViewModel: AlarmViewModel = hiltViewModel()
 ) {
     var isEnabled by remember { mutableStateOf(isAlarmEnabled) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
@@ -106,7 +106,10 @@ fun AlarmItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
-                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.daily),
+                    text = alarmsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.daily
+                    ),
                 )
             }
             AppSwitch(

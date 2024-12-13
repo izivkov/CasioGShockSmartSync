@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.di.RepositoryEntryPoint
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -26,7 +27,6 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.translateapi.DynamicResourceApi
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -37,7 +37,10 @@ class GShockApplication : Application() {
     private lateinit var repository: GShockRepository
 
     @Inject
-    lateinit var deviceManager: DeviceManager // Inject the DeviceManager
+    lateinit var deviceManager: DeviceManager
+
+    @Inject
+    lateinit var translateApi: TranslateRepository
 
     fun init(context: MainActivity) {
         this.context = context
@@ -52,6 +55,7 @@ class GShockApplication : Application() {
         ).getGShockRepository()
 
         deviceManager
+        translateApi
         createAppEventsSubscription()
     }
 
@@ -83,9 +87,12 @@ class GShockApplication : Application() {
         context.setContent {
             StartScreen {
                 if (repository.isActionButtonPressed() || repository.isAutoTimeStarted() || repository.isFindPhoneButtonPressed()) {
-                    RunActionsScreen(repository)
+                    RunActionsScreen(repository, translateApi)
                 } else {
-                    BottomNavigationBarWithPermissions(repository)
+                    BottomNavigationBarWithPermissions(
+                        repository = repository,
+                        translateApi = translateApi
+                    )
                 }
             }
         }
@@ -115,7 +122,10 @@ class GShockApplication : Application() {
 
     private fun handleApiError() {
         val message = ProgressEvents.getPayload("ApiError") as String?
-            ?: DynamicResourceApi.getApi().getString(context, R.string.apierror_ensure_the_official_g_shock_app_is_not_running)
+            ?: translateApi.getString(
+                context,
+                R.string.apierror_ensure_the_official_g_shock_app_is_not_running
+            )
 
         AppSnackbar(message)
         repository.disconnect()

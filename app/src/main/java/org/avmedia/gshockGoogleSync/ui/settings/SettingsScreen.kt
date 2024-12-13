@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -34,11 +33,13 @@ import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.translateapi.DynamicResourceApi
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+) {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -50,11 +51,14 @@ fun SettingsScreen() {
                 val (title, settingsLayout, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.settings), Modifier
-                    .constrainAs(title) {
-                        top.linkTo(parent.top)  // Link top of content to parent top
-                        bottom.linkTo(settingsLayout.top)  // Link bottom of content to top of buttonsRow
-                    })
+                    settingsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.settings
+                    ), Modifier
+                        .constrainAs(title) {
+                            top.linkTo(parent.top)  // Link top of content to parent top
+                            bottom.linkTo(settingsLayout.top)  // Link bottom of content to top of buttonsRow
+                        })
 
                 Column(
                     modifier = Modifier
@@ -126,18 +130,30 @@ fun BottomRow(
                     .padding(end = 0.dp),
                 contentAlignment = Alignment.CenterEnd  // Aligns content to the right
             ) {
-                InfoButton(infoText = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.auto_fill_help))
+                InfoButton(
+                    infoText = settingsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.auto_fill_help
+                    )
+                )
             }
 
             val buttons = arrayListOf(
                 ButtonData(
                     text = Utils.shortenString(
-                        DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.auto_configure_settings),
-                        15, "AUTO"),
+                        settingsViewModel.translateApi.stringResource(
+                            context = LocalContext.current,
+                            id = R.string.auto_configure_settings
+                        ),
+                        15, "AUTO"
+                    ),
                     onClick = { settingsViewModel.setSmartDefaults() }),
 
                 ButtonData(
-                    text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.send_to_watch),
+                    text = settingsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        id = R.string.send_to_watch
+                    ),
                     onClick = { settingsViewModel.sendToWatch() })
             )
 
@@ -148,6 +164,7 @@ fun BottomRow(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Preview(showBackground = true)
 @Composable
 fun PreviewSettingsScreen() {

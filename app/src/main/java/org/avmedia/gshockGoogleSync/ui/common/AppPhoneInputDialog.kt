@@ -19,15 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.translateapi.DynamicResourceApi
+import org.avmedia.gshockGoogleSync.ui.alarms.AlarmViewModel
 
 @Composable
 fun AppPhoneInputDialog(
@@ -35,6 +35,7 @@ fun AppPhoneInputDialog(
     onDismiss: () -> Unit,
     onPhoneNumberValidated: (String) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    alarmsViewModel: AlarmViewModel = hiltViewModel(),
 ) {
     var inputValue by remember { mutableStateOf(initialPhoneNumber.trim()) }
     var validationError by remember { mutableStateOf(false) }
@@ -47,13 +48,27 @@ fun AppPhoneInputDialog(
     ) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text(DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.enter_phone_number)) },
+            title = {
+                Text(
+                    alarmsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        R.string.enter_phone_number
+                    )
+                )
+            },
             text = {
                 Column {
                     OutlinedTextField(
                         value = inputValue.trim(),
                         onValueChange = { inputValue = it.trim() },
-                        label = { Text(DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.phone_number)) },
+                        label = {
+                            Text(
+                                alarmsViewModel.translateApi.stringResource(
+                                    context = LocalContext.current,
+                                    R.string.phone_number
+                                )
+                            )
+                        },
                         isError = validationError,
                         modifier = Modifier.fillMaxWidth(),
                         // visualTransformation = PhoneNumberVisualTransformation(),
@@ -70,7 +85,10 @@ fun AppPhoneInputDialog(
                 }
             },
             confirmButton = {
-                AppButton(text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.ok),
+                AppButton(text = alarmsViewModel.translateApi.stringResource(
+                    context = LocalContext.current,
+                    R.string.ok
+                ),
                     onClick = {
                         if (validatePhoneNumber(inputValue)) {
                             onPhoneNumberValidated(inputValue)
@@ -80,7 +98,13 @@ fun AppPhoneInputDialog(
                     })
             },
             dismissButton = {
-                AppButton(onClick = onDismiss, text = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, R.string.cancel))
+                AppButton(
+                    onClick = onDismiss,
+                    text = alarmsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        R.string.cancel
+                    )
+                )
             }
         )
     }

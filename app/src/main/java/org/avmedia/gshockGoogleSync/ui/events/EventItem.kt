@@ -15,15 +15,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.translateapi.DynamicResourceApi
 
 @Composable
 fun EventItem(
@@ -33,11 +32,15 @@ fun EventItem(
     enabled: Boolean,
     onEnabledChange: (Boolean) -> Unit,
     enabledCount: Int, // Pass in the count of currently enabled events
-    maxEnabled: Int = 5 // Set the maximum number of enabled events (default is 5)
+    maxEnabled: Int = 5, // Set the maximum number of enabled events (default is 5)
+    eventViewModel: EventViewModel = hiltViewModel()
 ) {
     var isEnabled by remember { mutableStateOf(enabled) }
 
-    val maxReminderMessage = DynamicResourceApi.getApi().stringResource(context = LocalContext.current, id = R.string.max_reminders_reached)
+    val maxReminderMessage = eventViewModel.translateApi.stringResource(
+        context = LocalContext.current,
+        id = R.string.max_reminders_reached
+    )
 
     LaunchedEffect(enabled) {
         isEnabled = enabled

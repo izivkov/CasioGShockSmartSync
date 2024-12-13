@@ -4,13 +4,14 @@ import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraManager.TorchCallback
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.translateapi.DynamicResourceApi
 
 object FlashlightHelper {
     private lateinit var cameraId: String
     private var currentState = false
     private lateinit var cameraManager: CameraManager
+    private lateinit var translateApi: TranslateRepository
 
     private val torchCallback = object : TorchCallback() {
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
@@ -24,7 +25,7 @@ object FlashlightHelper {
     private fun turnOnOff(context: Context, state: Boolean) {
         cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         if (cameraManager.cameraIdList.isEmpty()) {
-            AppSnackbar(DynamicResourceApi.getApi().getString(context, R.string.flashlight_not_available))
+            AppSnackbar(translateApi.getString(context, R.string.flashlight_not_available))
             return
         }
 
