@@ -55,10 +55,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun <T : Setting> getSetting(type: Class<T>): T {
-        synchronized(settingsMap) {
-            @Suppress("UNCHECKED_CAST")
-            return settingsMap[type] as T
-        }
+        @Suppress("UNCHECKED_CAST")
+        return settingsMap[type] as T
     }
 
     fun <T : Setting> updateSetting(updatedSetting: T) {
