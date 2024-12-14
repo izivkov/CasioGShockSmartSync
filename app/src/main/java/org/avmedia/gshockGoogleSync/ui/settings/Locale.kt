@@ -184,7 +184,7 @@ fun Locale(
 
                 LanguageDropdownMenu(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1.5f)
                         .padding(bottom = 2.dp),
                     onUpdate = onUpdate,
                     localeSetting = localeSetting,
@@ -222,7 +222,10 @@ fun LanguageDropdownMenu(
             value = selectedLanguage.value,
             onValueChange = {},
             readOnly = true,  // To prevent user from typing in the field
-            label = { AppText(text = stringResource(R.string.select_language)) },
+            label = { AppText(text = settingsViewModel.translateApi.stringResource(
+                LocalContext.current,
+                R.string.select_language)) },
+
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(
