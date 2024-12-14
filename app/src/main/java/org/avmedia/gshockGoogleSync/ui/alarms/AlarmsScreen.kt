@@ -27,10 +27,21 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.translateapi.ResourceLocaleKey
+import java.util.Locale
 
 @Composable
 fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
     val alarms by alarmViewModel.alarms.collectAsState()
+
+    alarmViewModel.translateApi.addOverwrites(
+        arrayOf(
+            ResourceLocaleKey(R.string.daily, Locale("ca")) to "Diària",
+            ResourceLocaleKey(R.string.signal_chime, Locale("ca")) to "Senyal horaria",
+            ResourceLocaleKey(R.string.send_alarms_to_phone, Locale("ca")) to "Envia al\ntelèfon",
+            ResourceLocaleKey(R.string.send_alarms_to_watch, Locale("ca")) to "Envia al\nrellotge",
+        )
+    )
 
     LaunchedEffect(alarms) {
     }

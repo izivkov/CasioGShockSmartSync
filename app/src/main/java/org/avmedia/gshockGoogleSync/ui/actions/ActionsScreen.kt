@@ -23,9 +23,20 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.ResourceLocaleKey
+import java.util.Locale
 
 @Composable
 fun ActionsScreen(actionModel: ActionsViewModel = hiltViewModel()) {
+
+    actionModel.translateApi.addOverwrites(
+        arrayOf(
+            ResourceLocaleKey(R.string.voice_assistant, Locale("ca")) to "Assistent de veu",
+            ResourceLocaleKey(R.string.next_track, Locale("ca")) to "Salta a la següent",
+            ResourceLocaleKey(R.string.make_phonecall, Locale("ca")) to "Fes una trucada",
+        )
+    )
+
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

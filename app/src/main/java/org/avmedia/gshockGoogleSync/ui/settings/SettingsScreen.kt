@@ -33,6 +33,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.ResourceLocaleKey
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @SuppressLint("MutableCollectionMutableState")
@@ -40,6 +41,14 @@ import org.avmedia.gshockapi.WatchInfo
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
+    settingsViewModel.translateApi.addOverwrites(
+        arrayOf(
+            ResourceLocaleKey(R.string.language, java.util.Locale("ca")) to "Idioma",
+            ResourceLocaleKey(R.string.select_language, java.util.Locale("ca")) to "Selecciona un idioma",
+            ResourceLocaleKey(R.string.send_to_watch_settings, java.util.Locale("ca")) to "Envia al\nrellotge",
+        )
+    )
+
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

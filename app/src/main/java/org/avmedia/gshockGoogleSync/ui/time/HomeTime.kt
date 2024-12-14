@@ -13,7 +13,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.translateapi.ResourceLocaleKey
 
 @Composable
 fun HomeTime(

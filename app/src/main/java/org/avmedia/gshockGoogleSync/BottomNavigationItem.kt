@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
+import org.avmedia.translateapi.ResourceLocaleKey
 
 data class BottomNavigationItem(
     val label: String = "",
@@ -16,6 +17,14 @@ data class BottomNavigationItem(
 ) {
     @Composable
     fun bottomNavigationItems(): List<BottomNavigationItem> {
+
+        translateApi.addOverwrites(
+            arrayOf(
+                ResourceLocaleKey(R.string.settings, java.util.Locale("ca")) to "Config.",
+                ResourceLocaleKey(R.string.time, java.util.Locale("ca")) to "Hora",
+            )
+        )
+
         return listOf(
             BottomNavigationItem(
                 label = translateApi.stringResource(LocalContext.current, R.string.time),

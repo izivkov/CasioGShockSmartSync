@@ -16,11 +16,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.translateapi.ResourceLocaleKey
+import java.util.Locale
 
 @Composable
 fun TimeScreen(
     timeModel: TimeViewModel = hiltViewModel()
 ) {
+    timeModel.translateApi.addOverwrites(
+        arrayOf(
+            ResourceLocaleKey(R.string.home_time, Locale("ca")) to "Hora Local",
+            ResourceLocaleKey(R.string.select_language, Locale("ca")) to "Selecciona un idioma",
+            ResourceLocaleKey(R.string.send_to_watch, Locale("ca")) to "Envia al rellotge",
+        )
+    )
+
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

@@ -10,13 +10,13 @@
     <string name="send_alarms_to_watch">Enviar a\n Reloj</string>
     <string name="enabled">Habilitado</string>
     <string name="disabled">Deshabilitado</string>
-    <string name="send_alarms_to_phone">Enviar a\nTeléfono</string>
-    <string name="send_events_to_watch">Enviar a Reloj\n Recordatorios</string>
+    <string name="send_alarms_to_phone">Enviar al\nTeléfono</string>
+    <string name="send_events_to_watch">Enviar Recordatorios \nal Reloj</string>
     <string name="connection_screen_info"><![CDATA[Para proceder a la siguiente pantalla, mantén presionado el botón <b>ABAJO-IZQUIERDO</b> en el reloj durante 3 segundos.
     Después del segundo pitido doble, la aplicación mostrará la pantalla de configuración de hora.
     <p><b>Asegúrate de que la aplicación oficial de Casio no esté en ejecución, ya que interferirá con esta aplicación.</b></p>
-    <p>Para ejecutar las acciones definidas en la pantalla de <b>Acciones</b>, presiona brevemente el botón <b>ABAJO-DERECHO</b>. Las acciones son aplicaciones en tu teléfono, como <b>Tomar una foto</b>.
-    Usando acciones, el reloj actúa como un control remoto para tu teléfono.</p>]]>
+    <p>Para ejecutar las acciones definidas en la pantalla de <b>Acciones</b>, presiona brevemente el botón <b>ABAJO-DERECHO</b>. Las acciones son aplicaciones en tu teléfono, como <b>tomar una foto</b>.
+    Usando las acciones, el reloj actúa como un control remoto para tu teléfono.</p>]]>
     </string>
     <string name="alarms_screen_info"><![CDATA[Los relojes <b>B5600/B5000/B2100</b> tienen 5 alarmas y configuraciones de "señal" (campanada horaria) mostradas aquí.
     Las alarmas se pueden actualizar presionando el valor de la hora de cada alarma. Aparecerá un nuevo cuadro de diálogo que te permitirá configurar la hora de la alarma.
@@ -35,21 +35,21 @@
     <string name="back_cam">Cámara trasera</string>
     <string name="take_a_photo">Tomar una foto</string>
     <string name="info">Información</string>
-    <string name="daily">Diario</string>
+    <string name="daily">Diaria</string>
     <string name="_12_00">12:00</string>
     <string name="email_item">Elemento de correo electrónico</string>
     <string name="email_example_com">me@ejemplo.com</string>
     <string name="watch_alarms">Alarmas del reloj</string>
-    <string name="signal_chime">Señal (campanada)</string>
+    <string name="signal_chime">Señal horaria</string>
     <string name="google_calendar_events">Eventos del Google Calendar</string>
     <string name="local_time">Hora local</string>
-    <string name="send_to_watch">Enviar a\nReloj</string>
+    <string name="send_to_watch">Enviar al\nReloj</string>
     <string name="phonecall_item">Elemento de llamada telefónica</string>
     <string name="home_time">Hora local</string>
     <string name="running_actions">Acciones en ejecución</string>
     <string name="title_placeholder">Marcador de título</string>
     <string name="settings">Configuraciones</string>
-    <string name="send_to_watch_settings">Enviar a\nReloj</string>
+    <string name="send_to_watch_settings">Enviar al\nReloj</string>
 <!--    <string name="auto_configure_settings">Rellenar automáticamente\nValores</string>-->
     <string name="auto_configure_settings">Auto\nrrellenar</string>
     <string name="time_format">Formato de hora</string>
@@ -118,7 +118,7 @@
     <string name="make_phonecall">Hacer una llamada telefónica</string>
     <string name="adjustment_time_info"><![CDATA[
         <li>El ajuste automático de la hora ocurre 4 veces al día, en algún momento después de las 12:00 AM, 6:00 AM, 12:00 PM y 6:00 PM.</li>
-        <li>Esta configuración establece el número de minutos después de la hora en que ocurre el ajuste de la hora. Entonces, si configuras este valor en 25, el ajuste de la hora ocurrirá a las 12:25 AM, 6:25 AM, 12:25 PM y 6:25 PM.</li>
+        <li>Esta configuración establece el número de minutos después de la hora en que ocurre el ajuste de la hora. Por ejemplo, si configuras este valor en 25, el ajuste de la hora ocurrirá a las 12:25 AM, 6:25 AM, 12:25 PM y 6:25 PM.</li>
         <li>Si tienes varios relojes, puedes controlar cuándo establecer la hora individualmente.</li>
     ]]></string>
     <string name="adjustment_time_minutes">Cuándo ejecutar\n(minutos después de la hora)</string>
@@ -158,7 +158,7 @@
     <string name="fine_time_adjustment">Ajuste fino</string>
     <string name="_0000">0000</string>
     <string name="fine_adjustment_info"><![CDATA[
-        Al configurar la hora, algunos modelos de reloj pueden mostrar una hora que está ligeramente desfasada por algunos segundos. Esta configuración te permite ajustar finamente el ajuste de la hora.
+        Al configurar la hora, algunos modelos de reloj pueden mostrar una hora que está ligeramente desfasada algunos segundos. Esta configuración te permite ajustar finamente el ajuste de la hora.
         El valor, en milisegundos, se agrega a la hora enviada desde la app al reloj. Puedes configurar valores entre -5000 y 5000. Por ejemplo,
         si tu reloj está 2.5 segundos adelantado respecto a la hora real, configura este valor en -2500 para sincronizarlo con precisión.
     ]]></string>
