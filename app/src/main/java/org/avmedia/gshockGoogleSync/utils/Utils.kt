@@ -21,22 +21,29 @@ class Utils {
             }
         }
 
-        fun shortenString(
+        fun shortenStringNewLine(
             input: String,
-            maxLength: Int,
+            wordMaxLength: Int,
             defaultString: String? = null
         ): String {
             // Split the input string into words
             val words = input.split(" ").filter { it.isNotBlank() }
 
             // Check if any word exceeds the max length
-            if (words.any { it.length > maxLength }) {
+            if (words.any { it.length > wordMaxLength }) {
                 // If defaultString is provided, return it
                 defaultString?.let { return it }
             }
 
             // Otherwise, join words with a newline separator
             return words.joinToString("\n")
+        }
+
+        fun shortenString(input: String, maxLength: Int, ellipsis: Char = '…'): String {
+            if (maxLength < 1) throw IllegalArgumentException("maxLength must be at least 1")
+            if (input.length <= maxLength) return input
+            val shortenedLength = maxLength - 1 // Reserve space for the ellipsis
+            return input.take(shortenedLength) + ellipsis
         }
     }
 }

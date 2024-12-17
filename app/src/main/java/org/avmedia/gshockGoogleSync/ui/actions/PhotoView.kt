@@ -23,6 +23,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
+import org.avmedia.gshockGoogleSync.utils.Utils
 
 @Composable
 fun PhotoView(
@@ -66,9 +67,11 @@ fun PhotoView(
             ) {
                 // Title TextView equivalent
                 AppTextLarge(
-                    text = actionsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
-                        id = R.string.take_photo
+                    text = Utils.shortenString(
+                        actionsViewModel.translateApi.stringResource(
+                            context = LocalContext.current,
+                            id = R.string.take_photo
+                        ), 15
                     ),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)

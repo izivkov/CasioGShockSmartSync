@@ -32,8 +32,8 @@ Si aucun événement n\'apparaît, assurez-vous que vous avez des événements �
     <string name="weekly">HEBDOMADAIRE</string>
     <string name="action_item">Élément d\'action</string>
     <string name="voice_assistant">Assistant vocal</string>
-    <string name="front_cam">Caméra avant</string>
-    <string name="back_cam">Caméra arrière</string>
+    <string name="front_cam">Avant</string>
+    <string name="back_cam">Arrière</string>
     <string name="take_a_photo">Prendre une photo</string>
     <string name="info">Info</string>
     <string name="daily">Quotidien</string>
@@ -57,8 +57,8 @@ Si aucun événement n\'apparaît, assurez-vous que vous avez des événements �
     <string name="time_format">Format de l\heure</string>
 
 
-    <string name="_12h">12h</string>
-    <string name="_24h">24h</string>
+    <string name="_12h" >12h</string>
+    <string name="_24h" >24h</string>
     <string name="date_format">Format de la date</string>
     <string name="language">Langue</string>
     <string name="operational_sound">Ton des boutons</string>

@@ -27,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -222,9 +221,14 @@ fun LanguageDropdownMenu(
             value = selectedLanguage.value,
             onValueChange = {},
             readOnly = true,  // To prevent user from typing in the field
-            label = { AppText(text = settingsViewModel.translateApi.stringResource(
-                LocalContext.current,
-                R.string.select_language)) },
+            label = {
+                AppText(
+                    text = settingsViewModel.translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.select_language
+                    )
+                )
+            },
 
             modifier = Modifier
                 .fillMaxWidth()

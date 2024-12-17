@@ -22,7 +22,6 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
-import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -41,8 +40,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         application.init(this)
-
-        translateApi.setLanguage(Locale.getDefault()).setOverwrites(arrayOf())
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 

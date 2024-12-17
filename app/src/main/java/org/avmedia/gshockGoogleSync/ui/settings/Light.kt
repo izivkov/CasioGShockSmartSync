@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
 
 @Composable
@@ -93,9 +94,11 @@ fun Light(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 AppTextLarge(
-                    text = settingsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
-                        id = R.string.illumination_period
+                    text = Utils.shortenString(
+                        settingsViewModel.translateApi.stringResource(
+                            context = LocalContext.current,
+                            id = R.string.illumination_period
+                        ), 20
                     ),
                 )
 

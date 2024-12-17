@@ -50,7 +50,7 @@ dependencies {
     implementation libs.gshockapi
     // implementation project(':api')
 
-    implementation libs.dynamicresourcetranslator
+    implementation libs.izivkov.dynamicresourcetranslator
     // implementation(project(":translateApi"))
 
     implementation libs.androidx.core.ktx.v1150
@@ -71,7 +71,7 @@ dependencies {
     debugImplementation libs.ui.test.manifest
     implementation libs.androidx.navigation.compose
     implementation libs.androidx.constraintlayout.compose
-    implementation (libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences)
 
     implementation libs.androidx.camera.core
     implementation libs.androidx.camera.lifecycle
