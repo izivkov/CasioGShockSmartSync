@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
+import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.translateapi.ResourceLocaleKey
 
 data class BottomNavigationItem(
@@ -20,38 +21,37 @@ data class BottomNavigationItem(
 
         translateApi.addOverwrites(
             arrayOf(
-                ResourceLocaleKey(R.string.settings, java.util.Locale("ca")) to "Config.",
                 ResourceLocaleKey(R.string.time, java.util.Locale("ca")) to "Hora",
             )
         )
 
         return listOf(
             BottomNavigationItem(
-                label = translateApi.stringResource(LocalContext.current, R.string.time),
+                label = Utils.shortenString(translateApi.stringResource(LocalContext.current, R.string.time), 7),
                 icon = ImageVector.vectorResource(id = R.drawable.time), // Local icon
                 route = Screens.Time.route,
                 translateApi
             ),
             BottomNavigationItem(
-                label = translateApi.stringResource(LocalContext.current, R.string.alarms),
+                label = Utils.shortenString(translateApi.stringResource(LocalContext.current, R.string.alarms), 7),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_alarm_black_24dp), // Local icon
                 route = Screens.Alarms.route,
                 translateApi
             ),
             BottomNavigationItem(
-                label = translateApi.stringResource(LocalContext.current, R.string.events),
+                label = Utils.shortenString(translateApi.stringResource(LocalContext.current, R.string.events), 7),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_event_black_24dp), // Local icon
                 route = Screens.Events.route,
                 translateApi
             ),
             BottomNavigationItem(
-                label = translateApi.stringResource(LocalContext.current, R.string.actions),
+                label = Utils.shortenString(translateApi.stringResource(LocalContext.current, R.string.actions), 7),
                 icon = ImageVector.vectorResource(id = R.drawable.generic_action_item), // Local icon
                 route = Screens.Actions.route,
                 translateApi
             ),
             BottomNavigationItem(
-                label = translateApi.stringResource(LocalContext.current, R.string.settings),
+                label = Utils.shortenString(translateApi.stringResource(LocalContext.current, R.string.settings), 7),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_settings), // Local icon
                 route = Screens.Settings.route,
                 translateApi

@@ -218,7 +218,7 @@ fun LanguageDropdownMenu(
         onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
-            value = selectedLanguage.value,
+            value = selectedLanguage.nativeName,
             onValueChange = {},
             readOnly = true,  // To prevent user from typing in the field
             label = {
@@ -246,7 +246,7 @@ fun LanguageDropdownMenu(
         ) {
             languages.forEach { language ->
                 DropdownMenuItem(
-                    text = { AppText(language.value) },
+                    text = { AppText(language.nativeName) },
                     onClick = {
                         selectedLanguage = language
                         expanded = false

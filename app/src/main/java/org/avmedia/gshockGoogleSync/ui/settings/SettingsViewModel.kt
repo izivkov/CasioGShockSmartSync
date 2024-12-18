@@ -83,10 +83,19 @@ class SettingsViewModel @Inject constructor(
             MONTH_DAY("MM:DD"), DAY_MONTH("DD:MM"),
         }
 
-        enum class DAY_OF_WEEK_LANGUAGE(var value: String) {
-            ENGLISH("English"), SPANISH("Spanish"), FRENCH("French"), GERMAN("German"), ITALIAN("Italian"), RUSSIAN(
-                "Russian"
-            )
+//        enum class DAY_OF_WEEK_LANGUAGE(var value: String) {
+//            ENGLISH("English"), SPANISH("Spanish"), FRENCH("French"), GERMAN("German"), ITALIAN("Italian"), RUSSIAN(
+//                "Russian"
+//            )
+//        }
+
+        enum class DAY_OF_WEEK_LANGUAGE(val nativeName: String, val englishName: String) {
+            ENGLISH("English", "English"),
+            SPANISH("Español", "Spanish"),
+            FRENCH("Français", "French"),
+            GERMAN("Deutsch", "German"),
+            ITALIAN("Italiano", "Italian"),
+            RUSSIAN("Русский", "Russian");
         }
     }
 
@@ -242,24 +251,28 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 "language" -> {
+                    fun toEnglish(inString: String): String {
+                        return inString
+                    }
+
                     val setting: Locale = settingsMap[Locale::class.java] as Locale
                     when (value) {
-                        Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH.value -> setting.dayOfWeekLanguage =
+                        Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH.englishName -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.ENGLISH
 
-                        Locale.DAY_OF_WEEK_LANGUAGE.SPANISH.value -> setting.dayOfWeekLanguage =
+                        Locale.DAY_OF_WEEK_LANGUAGE.SPANISH.englishName -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.SPANISH
 
-                        Locale.DAY_OF_WEEK_LANGUAGE.FRENCH.value -> setting.dayOfWeekLanguage =
+                        Locale.DAY_OF_WEEK_LANGUAGE.FRENCH.englishName -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.FRENCH
 
-                        Locale.DAY_OF_WEEK_LANGUAGE.GERMAN.value -> setting.dayOfWeekLanguage =
+                        Locale.DAY_OF_WEEK_LANGUAGE.GERMAN.englishName -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.GERMAN
 
-                        Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN.value -> setting.dayOfWeekLanguage =
+                        Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN.englishName -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.ITALIAN
 
-                        Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN.value -> setting.dayOfWeekLanguage =
+                        Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN.englishName -> setting.dayOfWeekLanguage =
                             Locale.DAY_OF_WEEK_LANGUAGE.RUSSIAN
                     }
                     updatedObjects.add(setting)
@@ -323,13 +336,20 @@ class SettingsViewModel @Inject constructor(
         smartSettings.add(light)
 
         // Power Save Mode
-        val batteryLevel = api.getBatteryLevel()
-        val powerSavingMode = batteryLevel <= 15
-        val powerSavings = PowerSavingMode(powerSavingMode)
-        smartSettings.add(powerSavings)
+        if (WatchInfo.hasPowerSavingMode) {
+            val batteryLevel = api.getBatteryLevel()
+            val currentPowerSavingMode: PowerSavingMode =
+                settingsMap[PowerSavingMode::class.java] as PowerSavingMode
+
+            val enablePowerSetting =
+                if (batteryLevel <= 15) true else currentPowerSavingMode.powerSavingMode
+            val powerSavings = PowerSavingMode(enablePowerSetting)
+            smartSettings.add(powerSavings)
+        }
 
         // Time adjustment
-        val timeAdjustment = TimeAdjustment(appContext, true, 30, false, 0)
+        val notifyMe = LocalDataStorage.getTimeAdjustmentNotification(appContext)
+        val timeAdjustment = TimeAdjustment(appContext, true, 30, notifyMe, 0)
         smartSettings.add(timeAdjustment)
 
         return smartSettings
@@ -349,7 +369,7 @@ class SettingsViewModel @Inject constructor(
         val settings = Settings()
 
         val localeSetting: Locale = settingsMap[Locale::class.java] as Locale
-        settings.language = localeSetting.dayOfWeekLanguage.value
+        settings.language = localeSetting.dayOfWeekLanguage.englishName
         settings.timeFormat = localeSetting.timeFormat.value
         settings.dateFormat = localeSetting.dateFormat.value
 
