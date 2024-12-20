@@ -130,6 +130,8 @@ class ActionsViewModel @Inject constructor(
         open var enabled: Boolean,
         var runMode: RunMode = RunMode.SYNC,
     ) {
+        val ENABLED: String = ".enabled"
+
         open fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
@@ -142,13 +144,13 @@ class ActionsViewModel @Inject constructor(
         abstract fun run(context: Context)
 
         open fun save(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.simpleName + ENABLED
             val value = enabled
             LocalDataStorage.put(context, key, value.toString())
         }
 
         open fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.simpleName + ENABLED
             enabled = LocalDataStorage.get(context, key, "false").toBoolean()
             Timber.d("Load value: $key, $enabled")
         }
@@ -183,7 +185,7 @@ class ActionsViewModel @Inject constructor(
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.simpleName + ENABLED
             enabled = LocalDataStorage.get(context, key, "false").toBoolean()
         }
     }
@@ -197,7 +199,7 @@ class ActionsViewModel @Inject constructor(
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.simpleName + ENABLED
             enabled = LocalDataStorage.get(context, key, "false").toBoolean()
         }
     }
@@ -230,7 +232,7 @@ class ActionsViewModel @Inject constructor(
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.simpleName + ENABLED
             enabled =
                 LocalDataStorage.get(
                     context,
@@ -272,7 +274,7 @@ class ActionsViewModel @Inject constructor(
         }
 
         override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ".enabled"
+            val key = this.javaClass.simpleName + ENABLED
             enabled =
                 LocalDataStorage.get(
                     context,
@@ -300,7 +302,6 @@ class ActionsViewModel @Inject constructor(
             Timber.d("running ${this.javaClass.simpleName}")
             try {
                 val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
-                    // setPackage("com.google.android.googlequicksearchbox") // Set package for Google Assistant
                     flags =
                         Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 }
