@@ -40,7 +40,8 @@ class Utils {
         }
 
         fun shortenString(input: String, maxLength: Int, ellipsis: Char = '…'): String {
-            if (maxLength < 1) throw IllegalArgumentException("maxLength must be at least 1")
+            require(maxLength >= 1) { "maxLength must be at least 1" }
+
             if (input.length <= maxLength) return input
             val shortenedLength = maxLength - 1 // Reserve space for the ellipsis
             return input.take(shortenedLength) + ellipsis

@@ -2,7 +2,6 @@ package org.avmedia.gshockGoogleSync.ui.common
 
 import android.os.Build
 import android.widget.NumberPicker
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.alarms.AlarmViewModel
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun ValueSelectionDialog(
     initialValue: Int,
@@ -87,7 +85,6 @@ fun ValueSelectionDialog(
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun NumberPickerView(
     step: Int,
@@ -101,9 +98,8 @@ fun NumberPickerView(
     val safeStep = if (step > 0) step else 1
 
     // Ensure pickerValues are valid
-    if (pickerValues.isEmpty() || pickerValues.size < 2) {
-        throw IllegalArgumentException("pickerValues must have at least 2 elements.")
-    }
+    require(!(pickerValues.isEmpty() || pickerValues.size < 2)) { "pickerValues must have at least 2 elements." }
+
 
     // Calculate adjusted boundaries
     val adjustedMinValue = 0

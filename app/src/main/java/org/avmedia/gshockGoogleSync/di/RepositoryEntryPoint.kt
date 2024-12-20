@@ -7,6 +7,6 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
-interface RepositoryEntryPoint {
+fun interface RepositoryEntryPoint {
     fun getGShockRepository(): GShockRepository
 }

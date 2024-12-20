@@ -1,8 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +33,6 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.translateapi.ResourceLocaleKey
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SettingsScreen(
@@ -101,7 +98,6 @@ fun SettingsScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun SettingsList() {
 
@@ -179,7 +175,6 @@ fun BottomRow(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Preview(showBackground = true)
 @Composable
 fun PreviewSettingsScreen() {

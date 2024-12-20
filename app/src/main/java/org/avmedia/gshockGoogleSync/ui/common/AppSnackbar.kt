@@ -3,6 +3,7 @@ package org.avmedia.gshockGoogleSync.ui.common
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -49,8 +50,10 @@ fun PopupMessageReceiver(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter // Align the popup at the bottom
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        contentAlignment = Alignment.BottomCenter, // Align the popup at the bottom
     ) {
         SnackbarHost(
             hostState = SnackbarController.snackbarHostState!!,

@@ -193,7 +193,7 @@ class RRuleValues @Inject constructor(
 
     @Suppress("UNUSED_PARAMETER")
     private fun validateRule(rule: String): Boolean {
-        // TODO: Add validation here.
+        // Add possible validation here.
         return true
     }
 

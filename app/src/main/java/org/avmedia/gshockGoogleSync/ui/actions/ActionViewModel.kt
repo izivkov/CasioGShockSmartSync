@@ -48,7 +48,7 @@ class ActionsViewModel @Inject constructor(
 
     private val actionMap = mutableMapOf<Class<out Action>, Action>()
 
-    enum class RUN_MODE {
+    enum class RunMode {
         SYNC, ASYNC,
     }
 
@@ -107,7 +107,7 @@ class ActionsViewModel @Inject constructor(
             PhotoAction(
                 translateApi.getString(appContext, R.string.take_photo),
                 false,
-                CAMERA_ORIENTATION.BACK,
+                CameraOrientation.BACK,
                 translateApi
             ),
             PrayerAlarmsAction("Set Prayer Alarms", true, api),
@@ -128,7 +128,7 @@ class ActionsViewModel @Inject constructor(
     abstract class Action(
         open var title: String,
         open var enabled: Boolean,
-        var runMode: RUN_MODE = RUN_MODE.SYNC,
+        var runMode: RunMode = RunMode.SYNC,
     ) {
         open fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
@@ -165,7 +165,7 @@ class ActionsViewModel @Inject constructor(
         val translateApi: TranslateRepository,
         val calendarEvents: CalendarEvents
     ) :
-        Action(title, enabled, RUN_MODE.ASYNC) {
+        Action(title, enabled, RunMode.ASYNC) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
@@ -247,7 +247,7 @@ class ActionsViewModel @Inject constructor(
         Action(
             title,
             enabled,
-            RUN_MODE.ASYNC,
+            RunMode.ASYNC,
         ) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
@@ -295,7 +295,7 @@ class ActionsViewModel @Inject constructor(
         override var enabled: Boolean,
         val translateApi: TranslateRepository,
     ) :
-        Action(title, enabled, RUN_MODE.ASYNC) {
+        Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             try {
@@ -321,7 +321,7 @@ class ActionsViewModel @Inject constructor(
         override var enabled: Boolean,
         val translateApi: TranslateRepository,
     ) :
-        Action(title, enabled, RUN_MODE.ASYNC) {
+        Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             try {
@@ -355,7 +355,7 @@ class ActionsViewModel @Inject constructor(
     data class PrayerAlarmsAction(
         override var title: String, override var enabled: Boolean, val api: GShockRepository
     ) :
-        Action(title, enabled, RUN_MODE.ASYNC) {
+        Action(title, enabled, RunMode.ASYNC) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
@@ -437,16 +437,16 @@ class ActionsViewModel @Inject constructor(
         }
     }
 
-    enum class CAMERA_ORIENTATION {
+    enum class CameraOrientation {
         FRONT, BACK;
     }
 
     data class PhotoAction(
         override var title: String,
         override var enabled: Boolean,
-        var cameraOrientation: CAMERA_ORIENTATION,
+        var cameraOrientation: CameraOrientation,
         val translateApi: TranslateRepository,
-    ) : Action(title, enabled, RUN_MODE.ASYNC) {
+    ) : Action(title, enabled, RunMode.ASYNC) {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
         }
@@ -499,7 +499,7 @@ class ActionsViewModel @Inject constructor(
             val key = this.javaClass.simpleName + ".cameraOrientation"
             cameraOrientation = if (LocalDataStorage.get(context, key, "BACK")
                     .toString() == "BACK"
-            ) CAMERA_ORIENTATION.BACK else CAMERA_ORIENTATION.FRONT
+            ) CameraOrientation.BACK else CameraOrientation.FRONT
         }
     }
 
@@ -582,7 +582,7 @@ However, this way gives us more control on how to start the actions.
 
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
             .forEach {
-                if (it.runMode == RUN_MODE.ASYNC) {
+                if (it.runMode == RunMode.ASYNC) {
                     Timber.d("------------> running ${it.javaClass.simpleName}")
                     // actions are run on the main lifecycle scope, because the Actions Fragment never gets created.
                     mainScope.launch {

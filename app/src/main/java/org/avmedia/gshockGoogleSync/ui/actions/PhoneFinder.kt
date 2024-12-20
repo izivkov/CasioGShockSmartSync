@@ -94,6 +94,7 @@ class PhoneFinder {
             class PhoneLiftEventListener : SensorEventListener {
 
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                    // NO-OP
                 }
 
                 override fun onSensorChanged(event: SensorEvent?) {

@@ -81,9 +81,9 @@ fun Locale(
                     verticalAlignment = Alignment.CenterVertically // Aligns children vertically in the center
                 ) {
                     RadioButton(
-                        selected = timeFormat == SettingsViewModel.Locale.TIME_FORMAT.TWELVE_HOURS,
+                        selected = timeFormat == SettingsViewModel.Locale.TimeFormat.TWELVE_HOURS,
                         onClick = {
-                            timeFormat = SettingsViewModel.Locale.TIME_FORMAT.TWELVE_HOURS
+                            timeFormat = SettingsViewModel.Locale.TimeFormat.TWELVE_HOURS
                             localeSetting.timeFormat = timeFormat
                             onUpdate(
                                 localeSetting.copy(timeFormat = timeFormat)
@@ -98,9 +98,9 @@ fun Locale(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     RadioButton(
-                        selected = timeFormat == SettingsViewModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS,
+                        selected = timeFormat == SettingsViewModel.Locale.TimeFormat.TWENTY_FOUR_HOURS,
                         onClick = {
-                            timeFormat = SettingsViewModel.Locale.TIME_FORMAT.TWENTY_FOUR_HOURS
+                            timeFormat = SettingsViewModel.Locale.TimeFormat.TWENTY_FOUR_HOURS
                             localeSetting.timeFormat = timeFormat
                             onUpdate(localeSetting.copy(timeFormat = timeFormat))
                         }
@@ -132,9 +132,9 @@ fun Locale(
                     verticalAlignment = Alignment.CenterVertically // Aligns children vertically in the center
                 ) {
                     RadioButton(
-                        selected = dateFormat == SettingsViewModel.Locale.DATE_FORMAT.MONTH_DAY,
+                        selected = dateFormat == SettingsViewModel.Locale.DateFormat.MONTH_DAY,
                         onClick = {
-                            dateFormat = SettingsViewModel.Locale.DATE_FORMAT.MONTH_DAY
+                            dateFormat = SettingsViewModel.Locale.DateFormat.MONTH_DAY
                             localeSetting.dateFormat = dateFormat
                             onUpdate(localeSetting.copy(dateFormat = dateFormat))
                         }
@@ -149,9 +149,9 @@ fun Locale(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     RadioButton(
-                        selected = dateFormat == SettingsViewModel.Locale.DATE_FORMAT.DAY_MONTH,
+                        selected = dateFormat == SettingsViewModel.Locale.DateFormat.DAY_MONTH,
                         onClick = {
-                            dateFormat = SettingsViewModel.Locale.DATE_FORMAT.DAY_MONTH
+                            dateFormat = SettingsViewModel.Locale.DateFormat.DAY_MONTH
                             localeSetting.dateFormat = dateFormat
                             onUpdate(localeSetting.copy(dateFormat = dateFormat))
                         }
@@ -203,7 +203,7 @@ fun LanguageDropdownMenu(
 ) {
     val settings by settingsViewModel.settings.collectAsState()
 
-    val languages = SettingsViewModel.Locale.DAY_OF_WEEK_LANGUAGE.entries.map { it }
+    val languages = SettingsViewModel.Locale.DayOfWeekLanguage.entries.map { it }
     var selectedLanguage by remember { mutableStateOf(localeSetting.dayOfWeekLanguage) }
     var expanded by remember { mutableStateOf(false) }  // State to control menu visibility
 

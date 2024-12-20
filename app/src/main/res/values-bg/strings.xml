@@ -49,7 +49,6 @@
     <string name="title_placeholder">Заглавие Място</string>
     <string name="settings">Настройки</string>
     <string name="send_to_watch_settings">Изпрати на\nЧасовник</string>
-<!--    <string name="auto_configure_settings">Автоматично попълване\nСтойности</string>-->
     <string name="auto_configure_settings">Авто</string>
     <string name="time_format">Часов формат</string>
     <string name="_12h">12ч</string>

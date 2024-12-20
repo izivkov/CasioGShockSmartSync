@@ -7,6 +7,6 @@ import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
-interface TranslateEntryPoint {
+fun interface TranslateEntryPoint {
     fun getTranslateRepository(): TranslateRepository
 }

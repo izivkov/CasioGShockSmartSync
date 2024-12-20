@@ -39,137 +39,128 @@ class CalendarEvents @Inject constructor(
     @SuppressLint("Range")
     private fun getEvents(context: Context): ArrayList<Event> {
         val events: ArrayList<Event> = ArrayList()
-        val cur: Cursor?
         val cr: ContentResolver = context.contentResolver
 
-        val projection = arrayOf(
-            CalendarContract.Instances.EVENT_ID,        // Event ID
-            CalendarContract.Instances.TITLE,           // Event title
-            CalendarContract.Instances.BEGIN,           // Event start time (next occurrence)
-            CalendarContract.Instances.END,             // Event end time
-            CalendarContract.Instances.ALL_DAY,         // Whether the event is an all-day event
-            CalendarContract.Instances.RRULE,           // Recurrence rule (if any)
-            CalendarContract.Instances.DTSTART,
+        val uri = buildCalendarUri()
+        val selectionArgs = arrayOf(CalendarContract.Calendars.CAL_ACCESS_OWNER.toString())
+        val cursor = cr.query(
+            uri,
+            getProjection(),
+            buildSelection(),
+            selectionArgs,
+            "${CalendarContract.Instances.BEGIN} ASC"
         )
 
-        val calendar: Calendar = Calendar.getInstance()
-        calendar.set(Calendar.MILLISECOND, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.HOUR, 0)
+        calendarObserver.register(cr, uri)
+        cursor?.let {
+            processCursor(it, events)
+        }
+        cursor?.close()
 
-        val selection =
-            """
-            (${CalendarContract.Events.DTEND} >= ${calendar.timeInMillis}
-            or ${CalendarContract.Events.RRULE} IS NOT NULL)
-            and (${CalendarContract.Events.CALENDAR_ACCESS_LEVEL} = ?
-            or ${CalendarContract.Events.HAS_ALARM} = "1")
-            """.trimIndent()
+        return events
+    }
 
-        // Use this for non-google calendar
-        // or ${CalendarContract.Events.TITLE} = "LOCAL"
-
-        val selectionArgs = arrayOf(
-            CalendarContract.Calendars.CAL_ACCESS_OWNER.toString()
-        )
-
-        // Get the current time and define the end time (e.g., 1 year from now)
+    private fun buildCalendarUri(): Uri {
         val startMillis = Calendar.getInstance().timeInMillis
-        val endMillis = Calendar.getInstance().apply {
-            add(Calendar.YEAR, 2)  // Query up to 2 years in the future
-        }.timeInMillis
+        val endMillis = Calendar.getInstance().apply { add(Calendar.YEAR, 2) }.timeInMillis // limit to 2 years in the future.
 
-        // Build the URI for querying instances within the specified time range
         val builder: Uri.Builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
         ContentUris.appendId(builder, startMillis)
         ContentUris.appendId(builder, endMillis)
 
-        val uri = builder.build()
+        return builder.build()
+    }
 
-        // Sort by the BEGIN field (next occurrence)
-        val sortOrder = "${CalendarContract.Instances.BEGIN} ASC"
-
-        // Perform the query to get event instances within the specified time range
-        cur = cr.query(
-            uri,
-            projection,
-            selection,
-            selectionArgs,
-            sortOrder
+    private fun getProjection(): Array<String> {
+        return arrayOf(
+            CalendarContract.Instances.EVENT_ID,
+            CalendarContract.Instances.TITLE,
+            CalendarContract.Instances.BEGIN,
+            CalendarContract.Instances.END,
+            CalendarContract.Instances.ALL_DAY,
+            CalendarContract.Instances.RRULE,
+            CalendarContract.Instances.DTSTART
         )
+    }
 
-        calendarObserver.register(cr, uri)
-        val seenEventIds = mutableSetOf<Long>() // Set to track seen EVENT_IDs
-
-        // cur?.moveToFirst()
-        cur?.moveToPosition(-1) // move before the first event, so moveToNext will start at the first event
-
-        if (cur != null) {
-            while (cur.moveToNext()) {
-                val eventId =
-                    cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID))
-
-                val eventStart =
-                    cur.getLong(cur.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN))
-                val currentTimeMillis = System.currentTimeMillis()
-
-                // If we haven't seen this EVENT_ID before, it's the first occurrence of the event
-                if (eventId !in seenEventIds && eventStart > currentTimeMillis) {
-                    seenEventIds.add(eventId)
-
-                    var title: String? =
-                        cur.getString(cur.getColumnIndex(CalendarContract.Events.TITLE))
-                    title = if (title.isNullOrBlank()) "(No title)" else title
-
-                    val dateStart: String? =
-                        cur.getString(cur.getColumnIndex(CalendarContract.Events.DTSTART))
-                    val rrule: String? =
-                        cur.getString(cur.getColumnIndex(CalendarContract.Events.RRULE))
-                    val allDay: String? =
-                        cur.getString(cur.getColumnIndex(CalendarContract.Events.ALL_DAY))
-
-                    var zone = ZoneId.systemDefault()
-                    if (allDay == "1") {
-                        zone = ZoneId.of("UTC")
-                    }
-
-                    val startDate = EventsModel.createEventDate(dateStart!!.toLong(), zone)
-                    var endDate = startDate
-
-                    val (localEndDate, incompatible, daysOfWeek, repeatPeriod) =
-                        rRuleValues.getValues(rrule, startDate, zone)
-
-                    if (localEndDate != null) {
-                        endDate = EventDate(
-                            localEndDate.year,
-                            localEndDate.month,
-                            localEndDate.dayOfMonth
-                        )
-                    }
-
-                    val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
-                    if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) {
-                        continue // do not add expired events
-                    }
-
-                    val enabled = events.size < EventsModel.MAX_REMINDERS
-                    events.add(
-                        Event(
-                            title,
-                            startDate,
-                            endDate,
-                            repeatPeriod,
-                            daysOfWeek,
-                            enabled,
-                            incompatible,
-                        )
-                    )
-                }
-            }
+    private fun buildSelection(): String {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.MILLISECOND, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.HOUR, 0)
         }
 
-        cur?.close()
-        return events
+        return """
+            (${CalendarContract.Events.DTEND} >= ${calendar.timeInMillis}
+            or ${CalendarContract.Events.RRULE} IS NOT NULL)
+            and (${CalendarContract.Events.CALENDAR_ACCESS_LEVEL} = ?
+            or ${CalendarContract.Events.HAS_ALARM} = "1")
+        """.trimIndent()
+    }
+
+    private fun processCursor(cursor: Cursor, events: ArrayList<Event>) {
+        val seenEventIds = mutableSetOf<Long>()
+        cursor.moveToPosition(-1) // move before the first event
+
+        while (cursor.moveToNext()) {
+            val eventId =
+                cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID))
+            val eventStart =
+                cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN))
+
+            if (eventId !in seenEventIds && eventStart > System.currentTimeMillis()) {
+                seenEventIds.add(eventId)
+                processEvent(cursor, events)
+            }
+        }
+    }
+
+    // @SuppressLint("Range")
+    private fun processEvent(cursor: Cursor, events: ArrayList<Event>) {
+
+        val titleIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.TITLE)
+        val title: String? = if (titleIndex >= 0) cursor.getString(titleIndex) else "(No title)"
+
+        val dateStartIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.DTSTART)
+        val dateStart: String? = if (dateStartIndex >= 0) cursor.getString(dateStartIndex) else null
+
+        val rruleIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.RRULE)
+        val rrule: String? = if (rruleIndex >= 0) cursor.getString(rruleIndex) else null
+
+        val allDayIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.ALL_DAY)
+        val allDay: String? = if (allDayIndex >= 0) cursor.getString(allDayIndex) else null
+
+        val zone = if (allDay == "1") ZoneId.of("UTC") else ZoneId.systemDefault()
+
+        val startDate = EventsModel.createEventDate(dateStart!!.toLong(), zone)
+        var endDate = startDate
+
+        val (localEndDate, incompatible, daysOfWeek, repeatPeriod) = rRuleValues.getValues(
+            rrule,
+            startDate,
+            zone
+        )
+
+        localEndDate?.let {
+            endDate = EventDate(it.year, it.month, it.dayOfMonth)
+        }
+
+        val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
+        if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) return // skip expired events
+
+        val enabled = events.size < EventsModel.MAX_REMINDERS
+        events.add(
+            Event(
+                title as String,
+                startDate,
+                endDate,
+                repeatPeriod,
+                daysOfWeek,
+                enabled,
+                incompatible
+            )
+        )
     }
 
     inner class CalendarObserver {

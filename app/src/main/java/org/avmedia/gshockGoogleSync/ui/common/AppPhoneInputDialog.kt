@@ -111,8 +111,6 @@ fun AppPhoneInputDialog(
 }
 
 fun validatePhoneNumber(phoneNumber: String): Boolean {
-    // val regex = Regex("^\\+?[0-9 ]{10,15}\$")
-    // val regex = Regex("^\\+?(\\d{1,3})?[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,4})[-.\\s]?(\\d{1,9})\$")
     val regex = Regex("^\\+?[0-9 ()/,*.;\\-N#]*\$|^\$")
     return regex.matches(phoneNumber.trim())
 }
@@ -122,21 +120,34 @@ class PhoneNumberVisualTransformation : VisualTransformation {
         val originalText = text.text
 
         // Format the text into groups of 3-3-4
-        val formattedText = buildString {
-            var count = 0
-            for (char in originalText) {
-                if (char.isDigit()) {
-                    append(char)
-                    count++
-                    if (count == 3 || count == 6) {
-                        append(' ')
-                    }
+        val formattedText = formatText(originalText)
+
+        // Create the offset mapping
+        val offsetMapping = createOffsetMapping(originalText, formattedText)
+
+        return TransformedText(
+            text = AnnotatedString(formattedText),
+            offsetMapping = offsetMapping
+        )
+    }
+
+    private fun formatText(input: String): String {
+        val result = StringBuilder()
+        var count = 0
+        for (char in input) {
+            if (char.isDigit()) {
+                result.append(char)
+                count++
+                if (count == 3 || count == 6) {
+                    result.append(' ')
                 }
             }
-        }.trimEnd()
+        }
+        return result.trimEnd().toString()
+    }
 
-        // Offset mapping to account for added spaces
-        val offsetMapping = object : OffsetMapping {
+    private fun createOffsetMapping(originalText: String, formattedText: String): OffsetMapping {
+        return object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
                 var transformedOffset = offset
                 if (offset > 3) transformedOffset++
@@ -151,10 +162,5 @@ class PhoneNumberVisualTransformation : VisualTransformation {
                 return originalOffset.coerceIn(0, originalText.length)
             }
         }
-
-        return TransformedText(
-            text = AnnotatedString(formattedText),
-            offsetMapping = offsetMapping
-        )
     }
 }

@@ -2,8 +2,6 @@ package org.avmedia.gshockGoogleSync.ui.settings
 
 import AppText
 import AppTextLink
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,7 +24,6 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun FineAdjustmentRow(
     modifier: Modifier = Modifier,

@@ -4,7 +4,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.avmedia.gshockGoogleSync.utils.UppercaseTranslationEngine
 import org.avmedia.translateapi.DynamicTranslator
 import javax.inject.Singleton
 

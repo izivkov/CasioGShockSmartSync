@@ -8,7 +8,7 @@ import dagger.hilt.components.SingletonComponent
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
-interface ApplicationContextEntryPoint {
+fun interface ApplicationContextEntryPoint {
     @ApplicationContext
     fun getApplicationContext(): Context
 }

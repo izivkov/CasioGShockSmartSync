@@ -87,11 +87,11 @@ fun PhotoView(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = cameraOrientation == ActionsViewModel.CAMERA_ORIENTATION.FRONT,
+                            selected = cameraOrientation == ActionsViewModel.CameraOrientation.FRONT,
                             onClick = {
                                 photoAction.cameraOrientation =
-                                    ActionsViewModel.CAMERA_ORIENTATION.FRONT
-                                cameraOrientation = ActionsViewModel.CAMERA_ORIENTATION.FRONT
+                                    ActionsViewModel.CameraOrientation.FRONT
+                                cameraOrientation = ActionsViewModel.CameraOrientation.FRONT
                                 onUpdate(photoAction.copy(cameraOrientation = cameraOrientation))
                             },
                             modifier = Modifier
@@ -107,11 +107,11 @@ fun PhotoView(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = cameraOrientation == ActionsViewModel.CAMERA_ORIENTATION.BACK,
+                            selected = cameraOrientation == ActionsViewModel.CameraOrientation.BACK,
                             onClick = {
                                 photoAction.cameraOrientation =
-                                    ActionsViewModel.CAMERA_ORIENTATION.BACK
-                                cameraOrientation = ActionsViewModel.CAMERA_ORIENTATION.BACK
+                                    ActionsViewModel.CameraOrientation.BACK
+                                cameraOrientation = ActionsViewModel.CameraOrientation.BACK
                                 onUpdate(photoAction.copy(cameraOrientation = cameraOrientation))
                             },
                             modifier = Modifier

@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.services
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -56,14 +55,6 @@ class DeviceManager @Inject constructor(
         )
 
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
-    }
-
-    /**
-     * Disconnects the device and clears local data.
-     */
-    private fun disconnectAndNotify() {
-        val deviceName = ProgressEvents.getPayload("Disconnect") as BluetoothDevice
-        repository.teardownConnection(deviceName)
     }
 
     /**

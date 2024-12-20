@@ -107,11 +107,11 @@ fun Light(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(
-                        selected = lightDuration == SettingsViewModel.Light.LIGHT_DURATION.TWO_SECONDS,
+                        selected = lightDuration == SettingsViewModel.Light.LightDuration.TWO_SECONDS,
                         onClick = {
-                            lightDuration = SettingsViewModel.Light.LIGHT_DURATION.TWO_SECONDS
+                            lightDuration = SettingsViewModel.Light.LightDuration.TWO_SECONDS
                             lightSetting.duration =
-                                SettingsViewModel.Light.LIGHT_DURATION.TWO_SECONDS
+                                SettingsViewModel.Light.LightDuration.TWO_SECONDS
                             onUpdate(lightSetting.copy(duration = lightDuration))
                         },
                         modifier = Modifier.padding(end = 0.dp)
@@ -119,11 +119,11 @@ fun Light(
                     AppText(text = WatchInfo.shortLightDuration)
 
                     RadioButton(
-                        selected = lightDuration == SettingsViewModel.Light.LIGHT_DURATION.FOUR_SECONDS,
+                        selected = lightDuration == SettingsViewModel.Light.LightDuration.FOUR_SECONDS,
                         onClick = {
-                            lightDuration = SettingsViewModel.Light.LIGHT_DURATION.FOUR_SECONDS
+                            lightDuration = SettingsViewModel.Light.LightDuration.FOUR_SECONDS
                             lightSetting.duration =
-                                SettingsViewModel.Light.LIGHT_DURATION.FOUR_SECONDS
+                                SettingsViewModel.Light.LightDuration.FOUR_SECONDS
                             onUpdate(lightSetting.copy(duration = lightDuration))
                         },
                         modifier = Modifier.padding(end = 0.dp)

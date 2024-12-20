@@ -2,12 +2,5 @@
 <resources>
     <!-- res/values/themes.xml -->
     <style name="Theme.NavigationBarMedium" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Customize your theme here -->
-<!--        <item name="colorPrimary">@color/primaryColor</item>-->
-<!--        <item name="colorPrimaryVariant">@color/primaryDarkColor</item>-->
-<!--        <item name="colorOnPrimary">@color/white</item>-->
-<!--        <item name="colorSecondary">@color/secondaryColor</item>-->
-<!--        <item name="colorOnSecondary">@color/white</item>-->
-        <!-- Other theme customizations -->
     </style>
 </resources>

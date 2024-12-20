@@ -50,7 +50,6 @@
     <string name="title_placeholder">Marcador de título</string>
     <string name="settings">Configuraciones</string>
     <string name="send_to_watch_settings">Enviar al\nReloj</string>
-<!--    <string name="auto_configure_settings">Rellenar automáticamente\nValores</string>-->
     <string name="auto_configure_settings">Auto\nrrellenar</string>
     <string name="time_format">Formato de hora</string>
     <string name="_12h">12h</string>
@@ -99,7 +98,6 @@
     <string name="illumination_period">Periodo de iluminación</string>
     <string name="mm_dd">MM:DD</string>
     <string name="dd_mm">DD:MM</string>
-<!--    <string name="time_adjustment">Ajuste de hora</string>-->
     <string name="time_adjustment">Time Adjustment</string>
     <string name="notify_me">Notificarme</string>
     <string name="timer">Temporizador</string>
