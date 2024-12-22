@@ -170,6 +170,17 @@
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
           <option name="api" value="33" />
+          <option name="brand" value="google" />
+          <option name="codename" value="felix_camera" />
+          <option name="id" value="felix_camera" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel Fold (Camera-enabled)" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="2208" />
+          <option name="screenY" value="1840" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
           <option name="brand" value="samsung" />
           <option name="codename" value="gts8uwifi" />
           <option name="id" value="gts8uwifi" />

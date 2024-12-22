@@ -6,7 +6,7 @@ cameraCore = "1.4.1"
 constraintlayoutCompose = "1.1.0"
 coreKtxVersion = "1.15.0"
 datastorePreferences = "1.1.1"
-dynamicresourcetranslator = "v1.4.1"
+dynamicresourcetranslator = "v1.4.3"
 gshockapi = "1.4.37"
 gson = "2.10.1"
 hiltAndroid = "2.51.1"
@@ -48,7 +48,7 @@ androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-fr
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
-dynamicresourcetranslator = { module = "com.github.izivkov:DynamicResourceTranslator", version.ref = "dynamicresourcetranslator" }
+# dynamicresourcetranslator = { module = "com.github.izivkov:DynamicResourceTranslator", version.ref = "dynamicresourcetranslator" }
 gshockapi = { module = "com.github.izivkov:GShockAPI", version.ref = "gshockapi" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
