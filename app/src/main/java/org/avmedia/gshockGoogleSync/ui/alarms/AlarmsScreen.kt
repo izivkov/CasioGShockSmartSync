@@ -36,10 +36,10 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 
     alarmViewModel.translateApi.addOverwrites(
         arrayOf(
-            ResourceLocaleKey(R.string.daily, Locale("ca")) to "Diària",
-            ResourceLocaleKey(R.string.signal_chime, Locale("ca")) to "Senyal horaria",
-            ResourceLocaleKey(R.string.send_alarms_to_phone, Locale("ca")) to "Envia al\ntelèfon",
-            ResourceLocaleKey(R.string.send_alarms_to_watch, Locale("ca")) to "Envia al\nrellotge",
+            ResourceLocaleKey(R.string.daily, Locale("ca")) to { "Diària" },
+            ResourceLocaleKey(R.string.signal_chime, Locale("ca")) to { "Senyal horaria" },
+            ResourceLocaleKey(R.string.send_alarms_to_phone, Locale("ca")) to { "Envia al\ntelèfon" },
+            ResourceLocaleKey(R.string.send_alarms_to_watch, Locale("ca")) to { "Envia al\nrellotge" },
         )
     )
 
