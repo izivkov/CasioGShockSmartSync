@@ -1,0 +1,55 @@
+name: Build APK for Tag on Master
+
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - master
+
+jobs:
+  build:
+    if: github.ref_name == 'master' || github.ref_name == 'main' # Ensure only tags on master branch trigger the workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17' # Use the version your project requires
+
+      - name: Decode and save keystore
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Build APK
+        run: ./gradlew assembleRelease
+
+      - name: Sign APK
+        run: |
+          jarsigner -verbose \
+            -keystore release.keystore \
+            -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
+            -keypass ${{ secrets.KEY_PASSWORD }} \
+            app/build/outputs/apk/release/app-release-unsigned.apk \
+            ${{ secrets.KEY_ALIAS }}
+
+      - name: Verify APK
+        run: |
+          zipalign -v -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-signed.apk
+          apksigner verify app/build/outputs/apk/release/app-release-signed.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release-signed.apk
+          path: app/build/outputs/apk/release/app-release-signed.apk
