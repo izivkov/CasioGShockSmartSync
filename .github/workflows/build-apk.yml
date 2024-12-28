@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    if: github.ref_name == 'master' || github.ref_name == 'main' # Ensure only tags on master branch trigger the workflow
+    if: github.ref_name == 'apktest' # Ensure only tags on master branch trigger the workflow
     runs-on: ubuntu-latest
 
     steps:
