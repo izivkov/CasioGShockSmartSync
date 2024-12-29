@@ -1,0 +1,2 @@
+Added SafeMode to automatic translation to reduce slow response.
+
