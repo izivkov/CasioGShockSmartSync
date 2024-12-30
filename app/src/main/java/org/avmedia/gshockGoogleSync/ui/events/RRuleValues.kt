@@ -71,12 +71,6 @@ class RRuleValues @Inject constructor(
 
             if (!isCompatible(rruleObj)) {
                 rruleValues.incompatible = true
-                AppSnackbar(
-                    translateApi.getString(
-                        appContext,
-                        R.string.event_not_compatible_with_watch
-                    )
-                )
             }
 
             if (rrule.isNotEmpty()) {
