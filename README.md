@@ -2,12 +2,11 @@
 
 ## Announcements
 
-***Note:*** *Starting from version v21.4, we have temporarily disabled automatic translation because it is causing instability for some users who are unable to access Google Services. We will reintroduce it once we are able to resolve the issue.*
+1. You might have noticed the app icon has changed along with some other minor visual changes. Google Play Store has issued a policy violation against the app for **Impersonation"", most likely brought by Casio.
+I will not comment on the merits, but to fully comply, I would have to remove all references to G-Shock. Obviously, I cannot do that, and I have appealed. However, there is a good chance the app will be removed from the Play Store.
+It will still be available on F-DROID, and I will build APKs for download here on GitHub.
 
-We now support most languages through automatic translation, powered by the [DynamicResourceTranslator](https://github.com/izivkov/DynamicResourceTranslator) library. 
-
-We highly value your feedback to improve translations for specific languages, allowing us to fine-tune the translated text. 
-If you notice a translation that needs improvement, please create an Issue [here](https://github.com/izivkov/CasioGShockSmartSync/issues) and include the language, the string to be corrected, and your suggested translation.
+2. ***Note:*** *Starting from version v21.4, we have temporarily disabled automatic translation because it is causing instability for some users who are unable to access Google Services. We will reintroduce it once we are able to resolve the issue.*
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
