@@ -50,8 +50,8 @@ dependencies {
     implementation libs.gshockapi
     // implementation project(':api')
 
-    implementation libs.izivkov.dynamicresourcetranslator
-    // implementation(project(":translateApi"))
+    // implementation libs.izivkov.dynamicresourcetranslator
+    implementation(project(":translateApi"))
 
     implementation libs.androidx.core.ktx.v1150
     implementation libs.androidx.lifecycle.runtime.ktx
