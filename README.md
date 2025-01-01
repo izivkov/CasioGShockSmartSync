@@ -2,8 +2,7 @@
 
 ## Announcements
 
-***Note:*** *Starting from version v21.4, we have temporarily disabled automatic translation because it is causing instability for some users who are unable to access Google Services.*  
-*We will reintroduce it once we are able to resolve the issue.*
+***Note:*** *Starting from version v21.4, we have temporarily disabled automatic translation because it is causing instability for some users who are unable to access Google Services. We will reintroduce it once we are able to resolve the issue.*
 
 We now support most languages through automatic translation, powered by the [DynamicResourceTranslator](https://github.com/izivkov/DynamicResourceTranslator) library. 
 
