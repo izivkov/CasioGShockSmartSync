@@ -139,26 +139,23 @@ class DynamicTranslator : IDynamicTranslator {
         var currentText = inText
 
         translatorEngines.forEach { engine ->
-            try {
-                val result = runBlocking {
-                    withTimeout(2000) { // 2-second timeout
+            runCatching {
+                runBlocking {
+                    withTimeout(2000) {
                         engine.translate(currentText, locale) // Perform the translation
                     }
                 }
-                println("Translated $inText -> $result")
+            }.onSuccess { result ->
                 if (result.isNotBlank()) {
                     currentText = result
+                    println("Translated $inText -> $result")
                 }
-
-            // If we get some kind of exception, stop using the auto-translator.
-            } catch (e: TimeoutCancellationException) {
-                println("Translation timed out for engine: $engine")
-                safeMode = true
-            } catch (e: TranslationException) {
-                println("Translation Exception in engine: $engine")
-                safeMode = true
-            } catch (e: Exception) {
-                println("Error during translation with engine $engine: ${e.message}")
+            }.onFailure { e ->
+                when (e) {
+                    is TranslationException -> println ("Translation Exception in engine: $engine")
+                    is TimeoutCancellationException -> println("Translation timed out for engine: $engine")
+                    else -> println("Error during translation with engine $engine: ${e.message}")
+                }
                 safeMode = true
             }
         }
