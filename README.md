@@ -2,7 +2,7 @@
 
 ## Announcements
 
-1. You might have noticed the app icon has changed along with some other minor visual changes. Google Play Store has issued a policy violation against the app for **Impersonation"", most likely brought by Casio.
+1. You might have noticed the app icon has changed along with some other minor visual changes. Google Play Store has issued a policy violation against the app for **Impersonation**, most likely brought by Casio.
 I will not comment on the merits, but to fully comply, I would have to remove all references to G-Shock. Obviously, I cannot do that, and I have appealed. However, there is a good chance the app will be removed from the Play Store.
 It will still be available on F-DROID, and I will build APKs for download here on GitHub.
 
