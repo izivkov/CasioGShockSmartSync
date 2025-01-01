@@ -149,6 +149,8 @@ class DynamicTranslator : IDynamicTranslator {
                 if (result.isNotBlank()) {
                     currentText = result
                 }
+
+            // If we get some kind of exception, stop using the auto-translator.
             } catch (e: TimeoutCancellationException) {
                 println("Translation timed out for engine: $engine")
                 safeMode = true
