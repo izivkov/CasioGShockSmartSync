@@ -15,4 +15,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Casio GShock Smart Sync"
 include ':app'
-include ':translateApi'

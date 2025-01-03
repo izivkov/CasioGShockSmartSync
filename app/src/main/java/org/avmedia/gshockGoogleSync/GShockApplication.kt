@@ -55,7 +55,7 @@ class GShockApplication : Application() {
         ).getGShockRepository()
 
         deviceManager
-        translateApi.setSafeMode(false)
+        translateApi.setSafeMode(true)
         createAppEventsSubscription()
     }
 

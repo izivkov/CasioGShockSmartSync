@@ -14,8 +14,8 @@ android {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdk 26
         targetSdk 35
-        versionCode 214
-        versionName "21.4"
+        versionCode 215
+        versionName "21.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,8 +50,8 @@ dependencies {
     implementation libs.gshockapi
     // implementation project(':api')
 
-    // implementation libs.izivkov.dynamicresourcetranslator
-    implementation(project(":translateApi"))
+    implementation libs.izivkov.dynamicresourcetranslator
+    // implementation(project(":translateApi"))
 
     implementation libs.androidx.core.ktx.v1150
     implementation libs.androidx.lifecycle.runtime.ktx

@@ -1,1 +1,0 @@
-Added Arabic, Japanese, French, Spanish, German, Bulgarian, Russian, Chinese (simplified) support.

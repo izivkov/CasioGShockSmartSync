@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">G-Shock Smart Sync</string>
+    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
     <string name="title_time">Hora</string>
     <string name="title_alarms">Alarmas</string>
     <string name="title_events">Eventos</string>
