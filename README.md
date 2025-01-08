@@ -31,9 +31,6 @@ G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100, G-
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/org.avmedia.gshockGoogleSync/)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync)
 
 _**Note**: I am trying to get more people to find out about this app. I have tried to get it reviewed by some of the YouTube channels specializing in G-Shocks with limited success. 
 If you like this app, please ask reviewers to give it a try. Thank you._
@@ -160,15 +157,6 @@ For those who want to build their own Android app for interfacing with the G-Sho
 If you rather not use a mobile app, but still like to set the time on your G-Shock to the correct time,
 here is a [Python program](https://github.com/izivkov/GShockTimeServer) which can run as a server on a regular PC or Raspberry PI with Bluetooth interface.
 The project is still WIP, but you can give it a try.
-
-## A Message to Casio
-I believe there is room for an open-source alternative to Casio's app, and I hope Casio views this project positively. We continuously receive feedback from users,
-and this app incorporates many of their suggestions. It caters to users who prefer not to share personal information, while also enhancing Casio watch sales by
-offering features like calendar integration and prayer alarms.
-
-I also hope some of the ideas from this project will be adopted in the official app. I would be happy to collaborate with
-Casio to add support on some of the no-longer supported watches, such as the GB-5600 series. If interested, reach out to me at izivkov@gmail.com
-
 
 
 
