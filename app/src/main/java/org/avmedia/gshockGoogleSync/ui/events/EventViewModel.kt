@@ -36,15 +36,16 @@ class EventViewModel @Inject constructor(
 
     fun loadEvents() {
         viewModelScope.launch {
-            try {
+            runCatching {
                 val loadedEvents = calendarEvents.getEventsFromCalendar()
                 _events.value = loadedEvents
                 EventsModel.refresh(loadedEvents)
-            } catch (e: Exception) {
-                ProgressEvents.onNext("ApiError", e.message)
+            }.onFailure {
+                ProgressEvents.onNext("ApiError", it.message)
             }
         }
     }
+
 
     fun toggleEvents(index: Int, isEnabled: Boolean) {
         _events.value = _events.value.toMutableList().apply {
@@ -69,10 +70,12 @@ class EventViewModel @Inject constructor(
 
     fun sendEventsToWatch() {
         viewModelScope.launch {
-            try {
+            val result = runCatching {
                 api.setEvents(ArrayList(_events.value))
                 AppSnackbar(translateApi.getString(appContext, R.string.events_set))
-            } catch (e: Exception) {
+            }
+
+            result.onFailure { e ->
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }
         }

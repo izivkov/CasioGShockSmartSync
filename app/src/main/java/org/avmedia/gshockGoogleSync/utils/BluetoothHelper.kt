@@ -56,16 +56,18 @@ class BluetoothHelper @Inject constructor(
                 return
             }
 
-            try {
+            runCatching {
                 requestBluetooth.launch(enableBtIntent)
-            } catch (e: SecurityException) {
-                AppSnackbar(
-                    translateApi.getString(
-                        context,
-                        R.string.you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually
+            }.onFailure { e ->
+                if (e is SecurityException) {
+                    AppSnackbar(
+                        translateApi.getString(
+                            context,
+                            R.string.you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually
+                        )
                     )
-                )
-                onBluetoothNotEnabled()
+                    onBluetoothNotEnabled()
+                }
             }
         } else {
             onBluetoothEnabled()

@@ -21,7 +21,7 @@ data class BottomNavigationItem(
 
         translateApi.addOverwrites(
             arrayOf(
-                ResourceLocaleKey(R.string.time, java.util.Locale("ca")) to {"Hora"},
+                ResourceLocaleKey(R.string.time, java.util.Locale("ca")) to { "Hora" },
             )
         )
 

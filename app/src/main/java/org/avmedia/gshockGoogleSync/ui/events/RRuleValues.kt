@@ -12,9 +12,7 @@ import com.philjay.RRule
 import com.philjay.Weekday
 import com.philjay.WeekdayNum
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
 import java.time.DayOfWeek
@@ -22,7 +20,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -224,12 +221,14 @@ class RRuleValues @Inject constructor(
         if (index == -1) return rrule
 
         val untilValue = components[index + 1]
-        return try {
+        return runCatching {
             DateTimeFormatter.ofPattern("yyyyMMdd").parse(untilValue)
             val newUntilValue = untilValue + "T000000Z"
             rrule.replace(untilValue, newUntilValue)
-        } catch (_: DateTimeParseException) {
+        }.getOrElse {
+            // Handle the failure case (exception)
             rrule
         }
+
     }
 }

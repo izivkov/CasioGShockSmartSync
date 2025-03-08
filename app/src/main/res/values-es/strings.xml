@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
     <string name="title_time">Hora</string>
     <string name="title_alarms">Alarmas</string>
     <string name="title_events">Eventos</string>
@@ -184,7 +183,7 @@
     <string name="camera_capture_error">Error al capturar imagen: %1$s</string>
     <string name="flashlight_not_available">Linterna no disponible</string>
     <string name="unable_to_get_default_sound_uri">No se puede obtener el URI de sonido predeterminado</string>
-    <string name="alarms_set_no_watch">Alarmas configuradas sin reloj</string>
+    <string name="alarms_set_to_watch">Alarmas configuradas en el reloj</string>
     <string name="events_set">Eventos configurados</string>
     <string name="event_not_compatible_with_watch">El evento no es compatible con el reloj</string>
     <string name="settings_sent_to_watch">Configuraciones enviadas al reloj</string>

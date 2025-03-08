@@ -335,9 +335,9 @@ class SettingsViewModel @Inject constructor(
 
     fun setSmartDefaults() {
         viewModelScope.launch {
-            try {
+            runCatching {
                 updateSettingsAndMap(getSmartDefaults())
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }
         }
@@ -377,12 +377,13 @@ class SettingsViewModel @Inject constructor(
         settings.buttonTone = buttonTone.sound
 
         viewModelScope.launch {
-            try {
+            runCatching {
                 api.setSettings(settings)
                 AppSnackbar(translateApi.getString(appContext, R.string.settings_sent_to_watch))
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }
+
         }
     }
 }

@@ -49,7 +49,7 @@ class TimeViewModel @Inject constructor(
 
     fun sendTimeToWatch() {
         viewModelScope.launch {
-            try {
+            runCatching {
                 val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                 val timeMs = System.currentTimeMillis() + timeOffset
                 AppSnackbar(translateApi.getString(appContext, R.string.sending_time_to_watch))
@@ -61,24 +61,25 @@ class TimeViewModel @Inject constructor(
 
                 // Refresh the Home Time on the screen in case changed by setting time.
                 _homeTime.value = api.getHomeTime()
-
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }
+
         }
     }
 
     init {
         viewModelScope.launch {
-            try {
+            runCatching {
                 _timer.value = api.getTimer()
                 _homeTime.value = api.getHomeTime()
                 _batteryLevel.value = api.getBatteryLevel()
                 _temperature.value = api.getWatchTemperature()
                 _watchName.value = api.getWatchName()
-            } catch (e: Exception) {
+            }.onFailure {
                 ProgressEvents.onNext("ApiError")
             }
+
         }
     }
 }

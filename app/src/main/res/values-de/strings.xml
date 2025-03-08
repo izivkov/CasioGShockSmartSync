@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
     <string name="title_time">Zeit</string>
     <string name="title_alarms">Wecker</string>
     <string name="title_events">Ereignisse</string>
@@ -182,7 +181,7 @@
     <string name="camera_capture_error">Kamera-Aufnahmefehler: %1$s</string>
     <string name="flashlight_not_available">Taschenlampe nicht verfügbar</string>
     <string name="unable_to_get_default_sound_uri">Kann die Standard-Sound-URI nicht abrufen</string>
-    <string name="alarms_set_no_watch">Alarme gesetzt, keine Uhr</string>
+    <string name="alarms_set_to_watch">Wecker auf die Uhr gestellt</string>
     <string name="events_set">Ereignisse gesetzt</string>
     <string name="event_not_compatible_with_watch">Ereignis nicht mit der Uhr kompatibel</string>
     <string name="settings_sent_to_watch">Einstellungen an die Uhr gesendet</string>

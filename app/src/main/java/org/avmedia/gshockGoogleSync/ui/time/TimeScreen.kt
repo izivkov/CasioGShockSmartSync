@@ -25,9 +25,9 @@ fun TimeScreen(
 ) {
     timeModel.translateApi.addOverwrites(
         arrayOf(
-            ResourceLocaleKey(R.string.home_time, Locale("ca")) to {"Hora Local"},
-            ResourceLocaleKey(R.string.select_language, Locale("ca")) to {"Selecciona un idioma"},
-            ResourceLocaleKey(R.string.send_to_watch, Locale("ca")) to {"Envia al rellotge"},
+            ResourceLocaleKey(R.string.home_time, Locale("ca")) to { "Hora Local" },
+            ResourceLocaleKey(R.string.select_language, Locale("ca")) to { "Selecciona un idioma" },
+            ResourceLocaleKey(R.string.send_to_watch, Locale("ca")) to { "Envia al rellotge" },
         )
     )
 

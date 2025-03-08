@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
+    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
     <string name="title_events">Events</string>
@@ -184,7 +184,7 @@
     <string name="camera_capture_error">Camera capture error: %1$s</string>
     <string name="flashlight_not_available">Flashlight not available</string>
     <string name="unable_to_get_default_sound_uri">Unable to get default sound URI</string>
-    <string name="alarms_set_no_watch">Alarms Set no Watch</string>
+    <string name="alarms_set_to_watch">Alarms Set to Watch</string>
     <string name="events_set">Events Set</string>
     <string name="event_not_compatible_with_watch">Event not compatible with Watch</string>
     <string name="settings_sent_to_watch">Settings Sent to Watch</string>
