@@ -190,5 +190,6 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">权限已被永久拒绝，请在应用设置中启用。</string>
     <string name="you_have_not_given_permission_to_to_run_action">您未授权执行操作 %1$s。</string>
     <string name="timer_set">定时器已设置</string>
-
+    <string name="press_and_hold_for_3_seconds">长按\n3秒</string>
+    <string name="short_press_to_run_actions">短按\n执行</string>
 </resources>

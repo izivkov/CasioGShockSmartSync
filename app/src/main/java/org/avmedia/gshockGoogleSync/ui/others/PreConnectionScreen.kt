@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -37,10 +35,20 @@ fun PreConnectionScreen(
     val getImageId: (String) -> Int = { name ->
         when {
             "GA" in name || "GMA" in name -> R.drawable.ga_b2100
-            "GW" in name || "GMW" in name -> R.drawable.ic_gw_b5600
+            "GW" in name || "GMW" in name -> R.drawable.gw_b5600
             "DW" in name || "DMW" in name -> R.drawable.dw_b5600
             "ECB" in name -> R.drawable.ecb_30d
-            else -> R.drawable.ic_gw_b5600
+            else -> R.drawable.gw_b5600
+        }
+    }
+
+    val getArrowsVerticalPosition: (String) -> Float = { name ->
+        when {
+            "GA" in name || "GMA" in name -> 0.55f
+            "GW" in name || "GMW" in name -> 0.55f
+            "DW" in name || "DMW" in name -> 0.55f
+            "ECB" in name -> 0.55f
+            else -> 0.55f
         }
     }
 
@@ -61,23 +69,11 @@ fun PreConnectionScreen(
                     ConstraintLayout(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        val (watchImageView, connectionSpinner, infoButton) = createRefs()
+                        val (connectionSpinner, infoButton) = createRefs()
 
-                        // WatchImageView equivalent
-                        Image(
-                            painter = painterResource(id = getImageId(watchName)),
-                            contentDescription = ptrConnectionViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
-                                id = R.string.image_of_casio_watch
-                            ),
-                            modifier = Modifier
-                                .constrainAs(watchImageView) {
-                                    top.linkTo(parent.top)
-                                    bottom.linkTo(parent.bottom)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                }
-                                .fillMaxSize()
+                        WatchScreen(
+                            imageResId = getImageId(watchName),
+                            arrowsVerticalPosition = getArrowsVerticalPosition(watchName)
                         )
 
                         AppConnectionSpinner(modifier = Modifier
@@ -163,6 +159,19 @@ fun PreConnectionScreen(
             }
         }
     }
+}
+
+@Composable
+fun WatchScreen(
+    modifier: Modifier = Modifier,
+    imageResId: Int = R.drawable.gw_b5600,
+    arrowsVerticalPosition: Float = 0.55f
+) {
+    WatchImageWithOverlay(
+        modifier,
+        imageResId,
+        arrowsVerticalPosition,
+    )
 }
 
 @Preview(showBackground = true)

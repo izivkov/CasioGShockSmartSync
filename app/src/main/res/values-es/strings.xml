@@ -193,5 +193,6 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Los permisos están permanentemente denegados. Habilítelos en la configuración de la aplicación.</string>
     <string name="you_have_not_given_permission_to_to_run_action">No ha otorgado permiso para ejecutar la acción %1$s.</string>
     <string name="timer_set">Temporizador configurado</string>
-
+    <string name="press_and_hold_for_3_seconds">Mantén\n3 seg</string>
+    <string name="short_press_to_run_actions">Pulsar para\nacciones</string>
 </resources>

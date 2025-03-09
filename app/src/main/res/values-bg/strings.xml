@@ -192,5 +192,7 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Разрешенията са постоянно отказани. Моля, активирайте ги в настройките на приложението.</string>
     <string name="you_have_not_given_permission_to_to_run_action">Не сте дали разрешение да се изпълни действието %1$s.</string>
     <string name="timer_set">Таймерът е настроен</string>
+    <string name="press_and_hold_for_3_seconds">Задръж\n3 сек</string>
+    <string name="short_press_to_run_actions">Натисни за\nдействия</string>
 
 </resources>

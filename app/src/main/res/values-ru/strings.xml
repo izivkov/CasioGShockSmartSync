@@ -192,5 +192,6 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Разрешения навсегда отклонены. Пожалуйста, включите их в настройках приложения.</string>
     <string name="you_have_not_given_permission_to_to_run_action">Вы не дали разрешение на выполнение действия %1$s.</string>
     <string name="timer_set">Таймер установлен</string>
-
+    <string name="press_and_hold_for_3_seconds">Удерживать\n3 сек</string>
+    <string name="short_press_to_run_actions">Нажать для\nдействий</string>
 </resources>

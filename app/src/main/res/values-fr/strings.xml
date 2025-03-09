@@ -197,4 +197,6 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Les permissions sont définitivement refusées. Veuillez les activer dans les paramètres de l\'application.</string>
     <string name="you_have_not_given_permission_to_to_run_action">Vous n\'avez pas donné la permission d\'exécuter l\'action %1$s.</string>
     <string name="timer_set">Minuteur réglé</string>
+    <string name="press_and_hold_for_3_seconds">Maintenir\n3 sec</string>
+    <string name="short_press_to_run_actions">Appuyer pour\nactions</string>
 </resources>

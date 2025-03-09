@@ -182,4 +182,6 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">تم رفض الأذونات بشكل دائم. يرجى تمكينها في إعدادات التطبيق.</string>
     <string name="you_have_not_given_permission_to_to_run_action">لم تمنح الإذن لتشغيل الإجراء %1$s.</string>
     <string name="timer_set">تم تعيين المؤقت</string>
+    <string name="press_and_hold_for_3_seconds">اضغط\n٣ ثواني</string>
+    <string name="short_press_to_run_actions">اضغط\nللإجراءات</string>
 </resources>
