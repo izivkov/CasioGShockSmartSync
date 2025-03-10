@@ -56,9 +56,6 @@ class TimeViewModel @Inject constructor(
                 api.setTime(timeMs = timeMs)
                 AppSnackbar(translateApi.getString(appContext, R.string.time_set))
 
-                // wait to settle
-                delay(1000)
-
                 // Refresh the Home Time on the screen in case changed by setting time.
                 _homeTime.value = api.getHomeTime()
             }.onFailure { e ->
