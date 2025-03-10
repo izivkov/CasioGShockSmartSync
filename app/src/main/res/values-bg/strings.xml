@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
     <string name="title_time">Време</string>
     <string name="title_alarms">Аларми</string>
     <string name="title_events">Събития</string>
@@ -183,7 +182,7 @@
     <string name="camera_capture_error">Грешка при заснемане на изображението: %1$s</string>
     <string name="flashlight_not_available">Тези лампа не е налична</string>
     <string name="unable_to_get_default_sound_uri">Не може да се получи стандартен URI за звук</string>
-    <string name="alarms_set_no_watch">Настроени аларми, без часовник</string>
+    <string name="alarms_set_to_watch">Алармите са настроени на часовника</string>
     <string name="events_set">Настроени събития</string>
     <string name="event_not_compatible_with_watch">Събитието не е съвместимо с часовника</string>
     <string name="settings_sent_to_watch">Настройки изпратени към часовника</string>
@@ -193,5 +192,7 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Разрешенията са постоянно отказани. Моля, активирайте ги в настройките на приложението.</string>
     <string name="you_have_not_given_permission_to_to_run_action">Не сте дали разрешение да се изпълни действието %1$s.</string>
     <string name="timer_set">Таймерът е настроен</string>
+    <string name="press_and_hold_for_3_seconds">Задръж\n3 сек</string>
+    <string name="short_press_to_run_actions">Натисни за\nдействия</string>
 
 </resources>

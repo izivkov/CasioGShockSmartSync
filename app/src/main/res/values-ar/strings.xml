@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
     <string name="title_time">الوقت</string>
     <string name="title_alarms">المنبهات</string>
     <string name="title_events">الأحداث</string>
@@ -173,7 +172,7 @@
     <string name="camera_capture_error">خطأ في التقاط الصورة: %1$s</string>
     <string name="flashlight_not_available">المصباح غير متوفر</string>
     <string name="unable_to_get_default_sound_uri">غير قادر على الحصول على رابط الصوت الافتراضي</string>
-    <string name="alarms_set_no_watch">تم ضبط المنبهات، لا توجد ساعة</string>
+    <string name="alarms_set_to_watch">تم ضبط المنبهات على الساعة</string>
     <string name="events_set">تم ضبط الأحداث</string>
     <string name="event_not_compatible_with_watch">الحدث غير متوافق مع الساعة</string>
     <string name="settings_sent_to_watch">تم إرسال الإعدادات إلى الساعة</string>
@@ -183,4 +182,6 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">تم رفض الأذونات بشكل دائم. يرجى تمكينها في إعدادات التطبيق.</string>
     <string name="you_have_not_given_permission_to_to_run_action">لم تمنح الإذن لتشغيل الإجراء %1$s.</string>
     <string name="timer_set">تم تعيين المؤقت</string>
+    <string name="press_and_hold_for_3_seconds">اضغط\n٣ ثواني</string>
+    <string name="short_press_to_run_actions">اضغط\nللإجراءات</string>
 </resources>

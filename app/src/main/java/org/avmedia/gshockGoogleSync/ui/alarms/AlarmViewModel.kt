@@ -38,13 +38,13 @@ class AlarmViewModel @Inject constructor(
 
     private fun loadAlarms() {
         viewModelScope.launch {
-            try {
+            runCatching {
                 // Load the alarms initially
                 val loadedAlarms = api.getAlarms() // Call your suspend function here
                 _alarms.value = loadedAlarms
                 AlarmsModel.clear()
                 AlarmsModel.addAll(ArrayList(_alarms.value))
-            } catch (e: Exception) {
+            }.onFailure {
                 ProgressEvents.onNext("ApiError")
             }
         }
@@ -65,11 +65,11 @@ class AlarmViewModel @Inject constructor(
 
     fun sendAlarmsToWatch() {
         viewModelScope.launch {
-            try {
+            runCatching {
                 api.setAlarms(alarms = ArrayList(alarms.value))
-                AppSnackbar(translateApi.getString(appContext, R.string.alarms_set_no_watch))
-            } catch (e: Exception) {
-                ProgressEvents.onNext("ApiError", e.message ?: "")
+                AppSnackbar(translateApi.getString(appContext, R.string.alarms_set_to_watch))
+            }.onFailure {
+                ProgressEvents.onNext("ApiError", it.message ?: "")
             }
         }
     }

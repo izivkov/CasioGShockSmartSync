@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
     <string name="title_time">時間</string>
     <string name="title_alarms">アラーム</string>
     <string name="title_events">イベント</string>
@@ -193,7 +192,7 @@
     <string name="camera_capture_error">カメラキャプチャエラー: %1$s</string>
     <string name="flashlight_not_available">懐中電灯が利用できません</string>
     <string name="unable_to_get_default_sound_uri">デフォルトのサウンドURIを取得できません</string>
-    <string name="alarms_set_no_watch">アラームが設定されましたが、時計がありません</string>
+    <string name="alarms_set_to_watch">アラームが時計に設定されました</string>
     <string name="events_set">イベントが設定されました</string>
     <string name="event_not_compatible_with_watch">イベントが時計と互換性がありません</string>
     <string name="settings_sent_to_watch">設定が時計に送信されました</string>
@@ -203,4 +202,6 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">権限が永続的に拒否されました。アプリ設定で有効にしてください。</string>
     <string name="you_have_not_given_permission_to_to_run_action">アクション%1$sを実行する権限がありません。</string>
     <string name="timer_set">タイマー設定済み</string>
+    <string name="press_and_hold_for_3_seconds">3秒間\n長押し</string>
+    <string name="short_press_to_run_actions">押して\n実行</string>
 </resources>

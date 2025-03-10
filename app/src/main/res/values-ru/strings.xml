@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">FOSS G-Shock Smart Sync</string>
     <string name="title_time">Время</string>
     <string name="title_alarms">Будильники</string>
     <string name="title_events">События</string>
@@ -183,7 +182,7 @@
     <string name="camera_capture_error">Ошибка съемки камеры: %1$s</string>
     <string name="flashlight_not_available">Фонарик недоступен</string>
     <string name="unable_to_get_default_sound_uri">Не удалось получить URI звука по умолчанию</string>
-    <string name="alarms_set_no_watch">Будильники установлены, но нет часов</string>
+    <string name="alarms_set_to_watch">Будильники настроены на часы</string>
     <string name="events_set">События установлены</string>
     <string name="event_not_compatible_with_watch">Событие несовместимо с часами</string>
     <string name="settings_sent_to_watch">Настройки отправлены на часы</string>
@@ -193,5 +192,6 @@
     <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Разрешения навсегда отклонены. Пожалуйста, включите их в настройках приложения.</string>
     <string name="you_have_not_given_permission_to_to_run_action">Вы не дали разрешение на выполнение действия %1$s.</string>
     <string name="timer_set">Таймер установлен</string>
-
+    <string name="press_and_hold_for_3_seconds">Удерживать\n3 сек</string>
+    <string name="short_press_to_run_actions">Нажать для\nдействий</string>
 </resources>

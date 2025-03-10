@@ -13,10 +13,10 @@ class Utils {
 
         fun <T> runApi(apiCall: suspend (Array<out T>) -> Unit, vararg args: T) {
             CoroutineScope(Dispatchers.IO).launch {
-                try {
+                runCatching {
                     apiCall(args)  // Pass the arguments as an array
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                }.onFailure {
+                    it.printStackTrace()
                 }
             }
         }

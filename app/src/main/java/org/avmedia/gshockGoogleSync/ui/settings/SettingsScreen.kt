@@ -41,8 +41,14 @@ fun SettingsScreen(
     settingsViewModel.translateApi.addOverwrites(
         arrayOf(
             ResourceLocaleKey(R.string.language, java.util.Locale("ca")) to { "Idioma" },
-            ResourceLocaleKey(R.string.select_language, java.util.Locale("ca")) to { "Selecciona un idioma" },
-            ResourceLocaleKey(R.string.send_to_watch_settings, java.util.Locale("ca")) to { "Envia al\nrellotge" },
+            ResourceLocaleKey(
+                R.string.select_language,
+                java.util.Locale("ca")
+            ) to { "Selecciona un idioma" },
+            ResourceLocaleKey(
+                R.string.send_to_watch_settings,
+                java.util.Locale("ca")
+            ) to { "Envia al\nrellotge" },
         )
     )
 

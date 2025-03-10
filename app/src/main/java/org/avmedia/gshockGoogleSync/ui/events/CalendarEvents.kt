@@ -62,7 +62,8 @@ class CalendarEvents @Inject constructor(
 
     private fun buildCalendarUri(): Uri {
         val startMillis = Calendar.getInstance().timeInMillis
-        val endMillis = Calendar.getInstance().apply { add(Calendar.YEAR, 2) }.timeInMillis // limit to 2 years in the future.
+        val endMillis = Calendar.getInstance()
+            .apply { add(Calendar.YEAR, 2) }.timeInMillis // limit to 2 years in the future.
 
         val builder: Uri.Builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
         ContentUris.appendId(builder, startMillis)

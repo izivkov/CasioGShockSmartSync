@@ -26,6 +26,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.text.DateFormat
@@ -263,7 +264,6 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-
             val timeOffset = LocalDataStorage.getFineTimeAdjustment(context)
             val timeMs = System.currentTimeMillis() + timeOffset
 
@@ -300,19 +300,21 @@ class ActionsViewModel @Inject constructor(
         Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            try {
+            runCatching {
                 val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
                     flags =
                         Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 }
                 context.startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
-                AppSnackbar(
-                    translateApi.getString(
-                        context,
-                        R.string.voice_assistant_not_available_on_this_device
+            }.onFailure {
+                if (it is ActivityNotFoundException) {
+                    AppSnackbar(
+                        translateApi.getString(
+                            context,
+                            R.string.voice_assistant_not_available_on_this_device
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -324,8 +326,8 @@ class ActionsViewModel @Inject constructor(
     ) :
         Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
-            try {
+            Timber.d("running \${this.javaClass.simpleName}")
+            runCatching {
                 val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                 val eventTime = SystemClock.uptimeMillis()
 
@@ -346,9 +348,10 @@ class ActionsViewModel @Inject constructor(
                     0
                 )
                 audioManager.dispatchMediaKeyEvent(upEvent)
-
-            } catch (e: ActivityNotFoundException) {
-                AppSnackbar(translateApi.getString(context, R.string.cannot_go_to_next_track))
+            }.onFailure {
+                if (it is ActivityNotFoundException) {
+                    AppSnackbar(translateApi.getString(context, R.string.cannot_go_to_next_track))
+                }
             }
         }
     }
@@ -454,7 +457,6 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-
             var captureResult: String?
             val cameraHelper = CameraCaptureHelper(context)
 
@@ -513,26 +515,34 @@ Note: Alternatively, actions can run autonomously, when certain conditions were 
 However, this way gives us more control on how to start the actions.
  */
     private fun runIt(action: Action, context: Context) {
-        try {
+        runCatching {
             action.run(context)
-        } catch (e: SecurityException) {
-            AppSnackbar(
-                context.getString(
-                    R.string.you_have_not_given_permission_to_to_run_action,
-                    action.title
+        }.onFailure {
+            when (it) {
+                is SecurityException -> AppSnackbar(
+                    context.getString(
+                        R.string.you_have_not_given_permission_to_to_run_action,
+                        action.title
+                    )
                 )
-            )
-        } catch (e: Exception) {
-            AppSnackbar("Could not run action ${action.title}. Reason: $e")
+
+                else -> AppSnackbar("Could not run action \${action.title}. Reason: \$it")
+            }
         }
     }
+
 
     fun runActionsForActionButton(context: Context) {
         updateActionsAndMap(loadData(context))
 
+        val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
+
+        ProgressEvents.onNext("ActionNames", actions.map{it.title})
+
         runFilteredActions(
             context,
-            _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) })
+            actions
+            )
     }
 
     fun runActionForConnection(context: Context) {

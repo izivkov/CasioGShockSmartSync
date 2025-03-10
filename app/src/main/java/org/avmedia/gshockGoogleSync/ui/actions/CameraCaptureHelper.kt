@@ -46,7 +46,7 @@ class CameraCaptureHelper(private val context: Context) {
                 .setFlashMode(ImageCapture.FLASH_MODE_AUTO)
                 .build()
 
-            try {
+            runCatching {
                 cameraProvider.unbindAll()
 
                 // Bind the image capture use case without any preview
@@ -55,10 +55,9 @@ class CameraCaptureHelper(private val context: Context) {
                     cameraSelector,
                     imageCapture
                 )
-            } catch (exc: Exception) {
-                Timber.e("Use case binding failed", exc)
+            }.onFailure {
+                Timber.e("Use case binding failed", it)
             }
-
         }, ContextCompat.getMainExecutor(context))
 
         cameraExecutor = Executors.newSingleThreadExecutor()
