@@ -1,0 +1,3 @@
+- Enhanced "Running Actions" screen with more info.
+- Added support for ABL-100 watch
+- Localized initial screen
