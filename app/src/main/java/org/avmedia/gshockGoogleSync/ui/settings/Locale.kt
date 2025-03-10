@@ -118,7 +118,7 @@ fun Locale(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
+                AppTextLarge(
                     text = settingsViewModel.translateApi.stringResource(
                         context = LocalContext.current,
                         id = R.string.date_format
@@ -139,7 +139,7 @@ fun Locale(
                             onUpdate(localeSetting.copy(dateFormat = dateFormat))
                         }
                     )
-                    AppText(
+                    AppTextLarge(
                         text = settingsViewModel.translateApi.stringResource(
                             context = LocalContext.current,
                             id = R.string.mm_dd
@@ -156,7 +156,7 @@ fun Locale(
                             onUpdate(localeSetting.copy(dateFormat = dateFormat))
                         }
                     )
-                    AppText(
+                    AppTextLarge(
                         text = settingsViewModel.translateApi.stringResource(
                             context = LocalContext.current,
                             id = R.string.dd_mm
@@ -171,7 +171,7 @@ fun Locale(
                     .fillMaxWidth()
                     .wrapContentHeight()
             ) {
-                AppText(
+                AppTextLarge(
                     text = settingsViewModel.translateApi.stringResource(
                         context = LocalContext.current,
                         id = R.string.language

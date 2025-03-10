@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,12 +38,15 @@ import kotlin.math.cos
 import kotlin.math.sin
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 
 @Composable
 fun WatchImageWithOverlay(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
-    arrowsVerticalPosition: Float = 0.55f
+    arrowsVerticalPosition: Float = 0.55f,
+    ptrConnectionViewModel: PreConnectionViewModel = viewModel()
 ) {
     var isAnimating by remember { mutableStateOf(true) }
 
@@ -77,14 +81,21 @@ fun WatchImageWithOverlay(
         )
 
         OverlayText(
-            text = stringResource(R.string.press_and_hold_for_3_seconds),
+            text = ptrConnectionViewModel.translateApi.stringResource(
+                LocalContext.current,
+                R.string.press_and_hold_for_3_seconds
+            ),
+
             alignment = Alignment.BottomStart,
             verticalOffset = textOffsetDp,
             horizontalPadding = horizontalPadding
         )
 
         OverlayText(
-            text = stringResource(R.string.short_press_to_run_actions),
+            text = ptrConnectionViewModel.translateApi.stringResource(
+                LocalContext.current,
+                R.string.short_press_to_run_actions
+            ),
             alignment = Alignment.BottomEnd,
             verticalOffset = textOffsetDp,
             horizontalPadding = horizontalPadding

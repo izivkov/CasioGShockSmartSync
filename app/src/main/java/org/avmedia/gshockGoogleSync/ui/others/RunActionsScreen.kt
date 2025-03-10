@@ -36,22 +36,19 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 
-object ActionHandler {
-    private var isInitialized = false
+object ActionNameHandler {
     private val actionNames = mutableStateListOf<String>()
     var actionNamesText = mutableStateOf("")
 
-    fun initialize() {
-        if (isInitialized) return
-
-        val clean: (String) -> String = { input ->
-            input.replace(Regex("[^\\x20-\\x7E]"), " ").replace("\\s+".toRegex(), " ").trim()
+    init {
+        val format: (String) -> String = { input ->
+            input.replace("\\s+".toRegex(), " ").trim()
         }
 
         val eventActions = arrayOf(
             EventAction("ActionNames") {
                 val actionNamesResult = ProgressEvents.getPayload("ActionNames") as ArrayList<*>
-                val cleanedNames = actionNamesResult.map { "\u2192 " + clean(it as String) }
+                val cleanedNames = actionNamesResult.map { "\u2192 " + format(it as String) }
                 actionNames.clear()
                 actionNames.addAll(cleanedNames)
                 actionNamesText.value = actionNames.joinToString(separator = "\n")
@@ -59,7 +56,6 @@ object ActionHandler {
         )
 
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
-        isInitialized = true
     }
 }
 
@@ -71,12 +67,8 @@ fun RunActionsScreen(
     val scrollState = rememberScrollState()
     var actionNamesText by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        ActionHandler.initialize()
-    }
-
     val derivedActionNamesText by remember {
-        derivedStateOf { ActionHandler.actionNamesText.value }
+        derivedStateOf { ActionNameHandler.actionNamesText.value }
     }
 
     LaunchedEffect(derivedActionNamesText) {

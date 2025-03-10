@@ -165,12 +165,12 @@ fun PreConnectionScreen(
 fun WatchScreen(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
-    arrowsVerticalPosition: Float = 0.55f
+    arrowsVerticalPosition: Float = 0.55f,
 ) {
     WatchImageWithOverlay(
         modifier,
         imageResId,
-        arrowsVerticalPosition,
+        arrowsVerticalPosition
     )
 }
 
