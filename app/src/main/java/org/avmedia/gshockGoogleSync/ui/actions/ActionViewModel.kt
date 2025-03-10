@@ -26,6 +26,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import java.text.DateFormat
@@ -263,7 +264,6 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-
             val timeOffset = LocalDataStorage.getFineTimeAdjustment(context)
             val timeMs = System.currentTimeMillis() + timeOffset
 
@@ -457,7 +457,6 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-
             var captureResult: String?
             val cameraHelper = CameraCaptureHelper(context)
 
@@ -536,9 +535,14 @@ However, this way gives us more control on how to start the actions.
     fun runActionsForActionButton(context: Context) {
         updateActionsAndMap(loadData(context))
 
+        val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
+
+        ProgressEvents.onNext("ActionNames", actions.map{it.title})
+
         runFilteredActions(
             context,
-            _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) })
+            actions
+            )
     }
 
     fun runActionForConnection(context: Context) {

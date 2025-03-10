@@ -2,37 +2,123 @@ package org.avmedia.gshockGoogleSync.ui.others
 
 import AppTextExtraLarge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
+import org.avmedia.gshockGoogleSync.utils.Utils
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
+
+object ActionHandler {
+    private var isInitialized = false
+    private val actionNames = mutableStateListOf<String>()
+    var actionNamesText = mutableStateOf("")
+
+    fun initialize() {
+        if (isInitialized) return
+
+        val clean: (String) -> String = { input ->
+            input.replace(Regex("[^\\x20-\\x7E]"), " ").replace("\\s+".toRegex(), " ").trim()
+        }
+
+        val eventActions = arrayOf(
+            EventAction("ActionNames") {
+                val actionNamesResult = ProgressEvents.getPayload("ActionNames") as ArrayList<*>
+                val cleanedNames = actionNamesResult.map { "\u2192 " + clean(it as String) }
+                actionNames.clear()
+                actionNames.addAll(cleanedNames)
+                actionNamesText.value = actionNames.joinToString(separator = "\n")
+            }
+        )
+
+        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+        isInitialized = true
+    }
+}
 
 @Composable
 fun RunActionsScreen(
     repository: GShockRepository,
     translateApi: TranslateRepository
 ) {
+    val scrollState = rememberScrollState()
+    var actionNamesText by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        ActionHandler.initialize()
+    }
+
+    val derivedActionNamesText by remember {
+        derivedStateOf { ActionHandler.actionNamesText.value }
+    }
+
+    LaunchedEffect(derivedActionNamesText) {
+        actionNamesText = derivedActionNamesText
+        scrollState.animateScrollTo(scrollState.maxValue)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        AppTextExtraLarge(
-            text = translateApi.stringResource(
-                context = LocalContext.current,
-                id = R.string.running_actions
-            ),
-            fontWeight = FontWeight.Bold // Adjust as needed
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AppTextExtraLarge(
+                text = translateApi.stringResource(
+                    context = LocalContext.current,
+                    id = R.string.running_actions
+                ),
+                fontWeight = FontWeight.Bold
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = actionNamesText,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
 
         ActionRunner(context = LocalContext.current, api = repository)
     }
