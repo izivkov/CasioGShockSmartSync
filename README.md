@@ -1,13 +1,5 @@
 # Casio G-Shock Smart Sync
 
-## Announcements
-
-1. You might have noticed the app icon has changed along with some other minor visual changes. Google Play Store has issued a policy violation against the app for **Impersonation**, most likely brought by Casio.
-I will not comment on the merits, but to fully comply, I would have to remove all references to G-Shock. Obviously, I cannot do that, and I have appealed. However, there is a good chance the app will be removed from the Play Store.
-It will still be available on F-DROID, and I will build APKs for download here on GitHub.
-
-2. ***Note:*** *Starting from version v21.4, we have temporarily disabled automatic translation because it is causing instability for some users who are unable to access Google Services. We will reintroduce it once we are able to resolve the issue.*
-
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
 
@@ -23,7 +15,7 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 
 The app will try to connect and adopt to any Casio watch that wants to connect to it (not just G-Shock). Surprisingly, many models will work "right off the bat". Here are some watches which are reported to work with the app:
 
-G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100, G-B001, GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, GG-B100, Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
+G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100, G-B001, GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, GG-B100, ABL-100WE, Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
 
 [Let us know](mailto:izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
 

@@ -1,76 +1,90 @@
-Note: We now support the B2100 series of G-Shock watches!
+Casio G-Shock Smart Sync
 
-I think we can do better than the official G-Shock Connected App! This app provides the following extra features:
+What is it?
+-----------
+I think we can do better than the Official Casio G-Shock App!
+This app provides the following extra features:
 
 - Sets watch's reminders from Google Calendar
-- Automatically sets correct timezone when travelling. No need to switch between Word Time and Home time
-- Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
-- Auto-configure most watch settings from phone's configuration.
-- Phone's alarms can be synced with watch's alarms.
-- Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
+- Automatically sets correct timezone when travelling
+- Use your watch to trigger actions on your phone remotely
+- Allows you to set when auto-time adjustment will run
+- Auto-configure most watch settings from phone's configuration
+- Phone's alarms can be synced with watch's alarms
+- Super fast connection time: 3.5 seconds vs 12 seconds for the official app
 
 Supported Watches
-=================
-G(M)W-5600, G(M)W-5000, GA-B2100, GST-B500, MSG-B100, G-B001, GBD-800 (Partial support), MRG-B5000, GCW-B5000
+-----------------
+The app will try to connect and adapt to any Casio watch that wants to connect to it (not just G-Shock). Here are some watches which are reported to work with the app:
+
+- G(M)W-5600
+- G(M)W-5000
+- GA-B2100
+- GA-B001-1AER
+- GST-B500
+- GST-B200
+- MSG-B100
+- G-B001
+- GBD-H1000 (Partial support)
+- MRG-B5000
+- GCW-B5000
+- GG-B100
+- Edifice ECB-30
+- ECB-10
+- ECB-20
+- Most Edifice watches
+- Most Protrek models
+- ABL-100WE
+
+General
+-------
+The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone but is read from the watch each time a connection is established. Any changes on the app are sent back to the watch only when the Send to Watch button is pressed.
 
 Setting Time
-============
-The local time can be set from the main screen by pressing the Send to Watch 
-button next to the current time display. The app uses your current location to 
-get the local lime. You can then set the watch time accordingly, without having 
-to change your World Time selection on the watch.
-
-This screen also shows your Home Time location and battery level.
+------------
+The local time can be set from the main screen by pressing the Send to Watch button next to the current time display. The app uses your current location to get the local time. You can then set the watch time accordingly, without having to change your World Time selection on the watch. This screen also shows your Home Time location and battery level.
 
 Alarms
-======
-The B5600/B5000/B2100 watches have 5 alarms and a Signal or chime setting. They are first read
-from the watch, and displayed in the app. The alarms can be updated by pressing 
-on the time display of each alarm. A dialog will appear which allows you to 
-select the time.
-
-Once the alarms have been set, you can send them to the watch, or send them to 
-the Alarm Clock app on the phone. Unfortunately, there is currently no way to 
-read the alarms from the AlarmClock app programmatically, so we cannot set the 
-watch alarms from this app. However, we can set the Alarm Clock app with the 
-watch's alarms.
+------
+The B5600/B5000 watches have 5 alarms and a Signal or chime setting. They are first read from the watch and displayed in the app. The alarms can be updated by pressing on the time display of each alarm. A dialog will appear which allows you to select the time. Once the alarms have been set, you can send them to the watch or send them to the Alarm Clock app on the phone.
 
 Events
-======
-This screen displays Events from your Google Calendar and allows you to send 
-these events to the watch's reminders.
+------
+This screen displays events from your Google Calendar and allows you to send these events to your watch's reminders. Ensure that your phone is set to auto-sync with your Google Account. Without this setting, events added to your phone will not sync with your Google account and will not appear in the app.
 
-Events could be one time, repeating daily, weekly, monthly or yearly, or some complex period
-such as every second Thursday of the month. Not all event types can be supported on the watch, but this app
-attempts to adopt the calendar events to the watch as much as possible. The 
-only not supported event types are daily and complex events, such as every
-second Thursday of the month. Events occurring number of times are simulated on the watch with
-a start and end date, matching the event start time, count and frequency.
-In case the calendar event cannot be adopted to a watch reminder, the app
-will display the event as Incompatible. Only future events and recurring
-events which have not expired are displayed.
+Event Types and Compatibility
+-----------------------------
+Google Calendar supports various types of events:
+- One-time events: Single occurrences.
+- Repeating events: Daily, weekly, monthly, yearly, or complex patterns (e.g., "every second Thursday of the month").
+- Count events: Limited repetitions, such as "repeat 12 times every Monday."
 
-The watch only supports all-day reminders. However, if the Google calendar 
-event has a specific time, it will still be used as a day reminder on the watch.
+While the app does its best to adapt calendar events to the watch, some limitations exist:
+- Not Supported: Daily events and complex patterns (e.g., "every second Thursday of the month").
+- Count Events: Simulated on the watch using a start and end date, adjusted to match the event's start time, frequency, and count.
+
+Events that cannot be adapted will appear as Incompatible. Only future events and ongoing recurring events are displayed.
+
+Watch-Specific Behavior
+----------l-------------
+The watch only supports all-day reminders. For Google Calendar events with a specific time, the app will convert them into all-day reminders on the watch while still retaining their date.
 
 Actions
-=======
-The selected actions are run when the user short-presses the lower-right watch 
-button from disconnected mode (initial screen).
+-------
+The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.
 
-Using these actions, the watch acts like a remote control for your phone.
+Settings
+--------
+This screen allows you to set up the watch's settings. You can auto prefill the values using information from your phone.
 
 Where are my World Cities?
-==========================
-Using an app to manually swap between Home Time and World Time is a bit silly.
-Your phone already knows where you are. When setting time, this app will also
-set the Home Time, Timezone and DST state to your current location.
-So when travelling to another timezone, just set time and you are good to go.
+--------------------------
+Using an app to manually swap between Home Time and World Time is a bit silly. Your phone already knows where you are. When setting time, this app will also set the Home Time, Timezone, and DST state to your current location. So when travelling to another timezone, just set time and you are good to go.
 
 Build Your Own App
-==================
-For those who want to build their own Android app for interfacing with the G-Shock 5000/5600/B2100 watches,
-I have also created an API (library) project here: https://github.com/izivkov/GShockAPI.
+------------------
+For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches, I have also created an API (library) project here: https://github.com/izivkov/GShockAPI.
 
-
-
+Similar Project
+---------------
+If you rather not use a mobile app, but still like to set the time on your G-Shock to the correct time, here is a Python program which can run as a server on a regular PC or Raspberry PI with Bluetooth interface. The project is still WIP, but you can give it a try.
