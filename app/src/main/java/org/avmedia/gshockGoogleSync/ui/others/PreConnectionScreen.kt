@@ -24,6 +24,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 
 @Composable
@@ -95,7 +96,9 @@ fun PreConnectionScreen(
                                 infoText = ptrConnectionViewModel.translateApi.stringResource(
                                     context = LocalContext.current,
                                     id = R.string.connection_screen_info
-                                ) + "v" + BuildConfig.VERSION_NAME
+                                ) { translatedString ->
+                                    // infoText = translatedString
+                                } + "v" + BuildConfig.VERSION_NAME
                             )
                         }
                     }

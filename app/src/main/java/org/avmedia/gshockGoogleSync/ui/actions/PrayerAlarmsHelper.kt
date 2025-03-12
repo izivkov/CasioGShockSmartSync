@@ -61,7 +61,7 @@ object PrayerAlarmsHelper {
         return when (Locale.getDefault().country.uppercase(Locale.US)) {
             "US", "CA" -> CalculationMethod.NORTH_AMERICA
             "EG" -> CalculationMethod.EGYPTIAN
-            "PK" -> CalculationMethod.KARACHI
+            "PK", "IN", "BD" -> CalculationMethod.KARACHI
             "SA" -> CalculationMethod.UMM_AL_QURA
             "AE" -> CalculationMethod.DUBAI
             "QA" -> CalculationMethod.QATAR

@@ -142,7 +142,7 @@ fun BottomNavigationBarWithPermissions(
                     destinationScreen = { EventsScreen() },
                     translateApi.stringResource(
                         LocalContext.current,
-                        R.string.calendar_permission_denied_cannot_access_events
+                        R.string.calendar_permission_denied_cannot_access_events,
                     ),
                     translateApi
                 )
