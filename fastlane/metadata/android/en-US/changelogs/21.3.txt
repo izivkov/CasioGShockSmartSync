@@ -1,3 +1,0 @@
-Fix for Indonesian auto-translation.
-UI improvements.
-

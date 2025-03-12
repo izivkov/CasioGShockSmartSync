@@ -1,1 +1,0 @@
-Changed the name to "FOSS G-Shock Smart Sync" to distinguish it from the official app.
