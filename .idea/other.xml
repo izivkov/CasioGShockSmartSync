@@ -292,6 +292,17 @@
         <PersistentDeviceSelectionData>
           <option name="api" value="34" />
           <option name="brand" value="samsung" />
+          <option name="codename" value="gta9pwifi" />
+          <option name="id" value="gta9pwifi" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-X210" />
+          <option name="screenDensity" value="240" />
+          <option name="screenX" value="1200" />
+          <option name="screenY" value="1920" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
           <option name="codename" value="gts7xllite" />
           <option name="id" value="gts7xllite" />
           <option name="manufacturer" value="Samsung" />

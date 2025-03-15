@@ -25,7 +25,7 @@ Do you have an old or new G-Shock watch that isn’t yet supported by GshockSmar
 
 If you’re willing to donate a watch (new or used), it would greatly assist in expanding compatibility and adding support for more models. Every donation helps bring the app to a wider range of users.
 
-Please reach out to us at [your contact email] if you're interested in contributing. Your support is truly appreciated!
+Please reach out to us at izivkov@gmail.com if you're interested in contributing. Your support is truly appreciated!
 
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
