@@ -19,13 +19,18 @@ G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100, G-
 
 [Let us know](mailto:izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
 
+### 📢 Help Expand GShock Smart Sync!
+
+Do you have an old or new G-Shock watch that isn’t yet supported by GshockSmartSync? Your contribution can help improve the project!
+
+If you’re willing to donate a watch (new or used), it would greatly assist in expanding compatibility and adding support for more models. Every donation helps bring the app to a wider range of users.
+
+Please reach out to us at [your contact email] if you're interested in contributing. Your support is truly appreciated!
+
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/org.avmedia.gshockGoogleSync/)
-
-_**Note**: I am trying to get more people to find out about this app. I have tried to get it reviewed by some of the YouTube channels specializing in G-Shocks with limited success. 
-If you like this app, please ask reviewers to give it a try. Thank you._
 
 ## General
 
