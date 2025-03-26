@@ -198,4 +198,5 @@
     <string name="timer_set">Timer Set</string>
     <string name="press_and_hold_for_3_seconds">Press and\nhold for 3\nseconds</string>
     <string name="short_press_to_run_actions">Short-press\nto run\nActions</string>
+    <string name="run_in_the_background">Run in the Background</string>
 </resources>

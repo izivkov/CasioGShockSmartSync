@@ -9,6 +9,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.os.PowerManager
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.TranslateEntryPoint
@@ -24,6 +25,7 @@ class PhoneFinder {
 
         private var mp: MediaPlayer? = null
         var resetVolume: () -> Unit? = {}
+        private var wakeLock: PowerManager.WakeLock? = null
 
         fun ring(context: Context) {
             val translateApi = EntryPointAccessors.fromApplication(
@@ -72,6 +74,11 @@ class PhoneFinder {
             mp!!.start()
             mp!!.isLooping = true
 
+            // acquire wake lock
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PhoneFinder::WakeLock")
+            wakeLock?.acquire(10 * 60 * 1000L /*10 minutes*/)
+
             detectPhoneLifting(context)
         }
 
@@ -83,6 +90,7 @@ class PhoneFinder {
                 mp = null
             }
             resetVolume()
+            wakeLock?.release()
         }
 
         private fun detectPhoneLifting(context: Context) {

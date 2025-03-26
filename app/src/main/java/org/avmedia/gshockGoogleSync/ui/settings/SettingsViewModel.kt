@@ -3,6 +3,7 @@ package org.avmedia.gshockGoogleSync.ui.settings
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
+import androidx.compose.animation.fadeIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -34,6 +35,11 @@ class SettingsViewModel @Inject constructor(
     val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
+
+    class AppSettings (appContext: Context) {
+        var runInBackground = LocalDataStorage.getRunInBackground(appContext)
+    }
+    val appSettings = AppSettings(appContext)
 
     abstract class Setting(open var title: String) {
         open fun save() {
@@ -69,6 +75,34 @@ class SettingsViewModel @Inject constructor(
             currentList[index] = updatedSetting
             updateSettingsAndMap(currentList)
             updatedSetting.save()
+        }
+    }
+
+    init {
+        val newSettings = arrayListOf(
+            Locale(),
+            OperationSound(),
+            Light(),
+            PowerSavingMode(),
+            TimeAdjustment(appContext),
+            RunInBackground(appContext),
+        )
+        updateSettingsAndMap(filter(newSettings))
+
+        val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
+        CoroutineScope(coroutineContext).launch {
+            val settingsJson = Gson().toJsonTree(api.getSettings()).asJsonObject
+            val appSettingsJson = Gson().toJsonTree(appSettings).asJsonObject
+
+            // Merge appSettingsJson into settingsJson
+            for (entry in appSettingsJson.entrySet()) {
+                settingsJson.add(entry.key, entry.value)
+            }
+
+            // Serialize the merged JsonObject
+            val settingStr = Gson().toJson(settingsJson)
+
+            updateSettingsAndMap(fromJson(settingStr))
         }
     }
 
@@ -109,6 +143,18 @@ class SettingsViewModel @Inject constructor(
     data class PowerSavingMode(var powerSavingMode: Boolean = false) :
         Setting("Power Saving Mode")
 
+    data class RunInBackground(val appContext: Context,
+                               var runInBackground: Boolean = LocalDataStorage.getRunInBackground(appContext)) :
+        Setting("Run in Background") {
+
+        override fun save() {
+            LocalDataStorage.setRunInBackground(
+                appContext,
+                runInBackground
+            )
+        }
+    }
+
     data class TimeAdjustment(
         val appContext: Context,
         var timeAdjustment: Boolean = true,
@@ -132,23 +178,6 @@ class SettingsViewModel @Inject constructor(
     data class DnD(
         var dnd: Boolean = true,
     ) : Setting("DnD")
-
-    init {
-        val newSettings = arrayListOf(
-            Locale(),
-            OperationSound(),
-            Light(),
-            PowerSavingMode(),
-            TimeAdjustment(appContext),
-        )
-        updateSettingsAndMap(filter(newSettings))
-
-        val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
-        CoroutineScope(coroutineContext).launch {
-            val settingStr = Gson().toJson(api.getSettings())
-            updateSettingsAndMap(fromJson(settingStr))
-        }
-    }
 
     private fun filter(settings: ArrayList<Setting>): ArrayList<Setting> {
         return settings.filter { setting ->
@@ -179,10 +208,17 @@ class SettingsViewModel @Inject constructor(
                 "timeFormat" -> handleTimeFormat(value, updatedObjects)
                 "dateFormat" -> handleDateFormat(value, updatedObjects)
                 "language" -> handleLanguage(value, updatedObjects)
+                "runInBackground" -> handleRunInBackground(value, updatedObjects)
             }
         }
 
         return ArrayList(updatedObjects)
+    }
+
+    private fun handleRunInBackground(value: Any, updatedObjects: MutableSet<Setting>) {
+        val setting = settingsMap[RunInBackground::class.java] as RunInBackground
+        setting.runInBackground = value == true
+        updatedObjects.add(setting)
     }
 
     private fun handlePowerSavingMode(value: Any, updatedObjects: MutableSet<Setting>) {
@@ -329,6 +365,11 @@ class SettingsViewModel @Inject constructor(
         val notifyMe = LocalDataStorage.getTimeAdjustmentNotification(appContext)
         val timeAdjustment = TimeAdjustment(appContext, true, 30, notifyMe, 0)
         smartSettings.add(timeAdjustment)
+
+        // Run in background
+        val runInBackgroundValue = LocalDataStorage.getRunInBackground (appContext)
+        val runInBackground = RunInBackground(appContext, runInBackgroundValue)
+        smartSettings.add(runInBackground)
 
         return smartSettings
     }

@@ -23,6 +23,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
+import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
@@ -85,8 +86,10 @@ class GShockApplication : Application() {
     private fun handleWatchInitialization() {
         context.setContent {
             StartScreen {
-                if (repository.isActionButtonPressed() || repository.isAutoTimeStarted() || repository.isFindPhoneButtonPressed()) {
+                if (repository.isActionButtonPressed() || repository.isAutoTimeStarted()) {
                     RunActionsScreen(repository, translateApi)
+                } else if (repository.isFindPhoneButtonPressed()) {
+                    RunFindPhoneScreen(repository, translateApi)
                 } else {
                     BottomNavigationBarWithPermissions(
                         repository = repository,

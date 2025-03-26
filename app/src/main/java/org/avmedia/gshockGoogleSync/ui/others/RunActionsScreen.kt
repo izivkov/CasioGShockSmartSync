@@ -115,3 +115,26 @@ fun RunActionsScreen(
         ActionRunner(context = LocalContext.current, api = repository)
     }
 }
+
+@Composable
+fun RunFindPhoneScreen(
+    repository: GShockRepository,
+    translateApi: TranslateRepository
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        AppTextExtraLarge(
+            text = translateApi.stringResource(
+                context = LocalContext.current,
+                id = R.string.find_phone
+            ),
+            fontWeight = FontWeight.Bold // Adjust as needed
+        )
+
+        ActionRunner(context = LocalContext.current, api = repository)
+    }
+}

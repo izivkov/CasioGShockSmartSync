@@ -78,4 +78,12 @@ object LocalDataStorage {
     fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
         return put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
+
+    fun setRunInBackground(context: Context, value: Boolean) {
+        putBoolean(context, "runInBackground", value)
+    }
+
+    fun getRunInBackground(context: Context): Boolean {
+        return getBoolean(context, "runInBackground")
+    }
 }
