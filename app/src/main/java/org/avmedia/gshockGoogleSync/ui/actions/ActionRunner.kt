@@ -16,9 +16,6 @@ fun ActionRunner(
     @Named("api") api: GShockRepository
 ) {
     val eventActions = arrayOf(
-        EventAction("RunActions") {
-            actionsViewModel.runActionsForActionButton(context)
-        },
         EventAction("ButtonPressedInfoReceived") {
             when {
                 api.isActionButtonPressed() -> {

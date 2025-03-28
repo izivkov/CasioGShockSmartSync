@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
@@ -198,4 +198,6 @@
     <string name="timer_set">Timer Set</string>
     <string name="press_and_hold_for_3_seconds">Press and\nhold for 3\nseconds</string>
     <string name="short_press_to_run_actions">Short-press\nto run\nActions</string>
+    <string name="g_shock_smart_sync_is_running" tools:ignore="MissingTranslation">G-Shock Smart Sync is Running</string>
+    <string name="preventing_the_app_from_closing" tools:ignore="MissingTranslation">Preventing the app from closing</string>
 </resources>

@@ -30,6 +30,7 @@ material = "1.12.0"
 translatorVersion = "1.1.1"
 uiTestManifest = "1.7.8"
 workRuntimeKtx = "2.10.0"
+lifecycleService = "2.8.7"
 
 [libraries]
 adhan2 = { module = "com.batoulapps.adhan:adhan2", version.ref = "adhan2" }
@@ -75,6 +76,7 @@ sunrisesunsetcalculator = { module = "com.luckycatlabs:SunriseSunsetCalculator",
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 translator = { module = "com.github.therealbush:translator", version.ref = "translatorVersion" }
 ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
+androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

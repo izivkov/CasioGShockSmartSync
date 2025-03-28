@@ -223,12 +223,6 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            AppSnackbar(
-                translateApi.getString(
-                    context,
-                    R.string.when_found_lift_phone_to_stop_ringing
-                )
-            )
             PhoneFinder.ring(context)
         }
 
@@ -569,9 +563,10 @@ However, this way gives us more control on how to start the actions.
     }
 
     fun runActionFindPhone(context: Context) {
-        runFilteredActions(context, _actions.value.filter {
+        val actionsToRun = _actions.value.filter {
             it.shouldRun(RunEnvironment.FIND_PHONE_PRESSED)
-        })
+        }
+        runFilteredActions(context, actionsToRun)
     }
 
     private fun showTimeSyncNotification() {
@@ -597,9 +592,11 @@ However, this way gives us more control on how to start the actions.
                     Timber.d("------------> running ${it.javaClass.simpleName}")
                     // actions are run on the main lifecycle scope, because the Actions Fragment never gets created.
                     mainScope.launch {
+                        print("Running action ASYNC: ${it.title}")
                         runIt(it, context)
                     }
                 } else {
+                    print("Running action SYNC: ${it.title}")
                     runIt(it, context)
                 }
             }

@@ -57,7 +57,6 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
         val alarmItems = mutableListOf<Any>()
 
         alarms.forEachIndexed { index, alarm ->
-            println("Alarm ${index}: ${alarm.enabled}")
             ItemView {
                 AlarmItem(
                     hours = alarm.hour,

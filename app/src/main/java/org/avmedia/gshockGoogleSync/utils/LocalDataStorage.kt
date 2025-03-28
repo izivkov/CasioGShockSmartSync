@@ -78,4 +78,12 @@ object LocalDataStorage {
     fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
         return put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
+
+    fun setKeepAlive(context: Context, value: Boolean) {
+        putBoolean(context, "keepAlive", value)
+    }
+
+    fun getKeepAlive(context: Context): Boolean {
+        return getBoolean(context, "keepAlive")
+    }
 }

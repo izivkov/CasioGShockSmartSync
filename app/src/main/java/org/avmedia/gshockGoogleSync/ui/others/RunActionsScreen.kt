@@ -17,16 +17,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -113,5 +114,39 @@ fun RunActionsScreen(
         }
 
         ActionRunner(context = LocalContext.current, api = repository)
+    }
+}
+
+@Composable
+fun RunFindPhoneScreen(
+    repository: GShockRepository,
+    translateApi: TranslateRepository
+) {
+    val context = LocalContext.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        val text = remember(context) {
+            buildString {
+                append(translateApi.stringResource(context, R.string.find_phone))
+                append("\n\n\n")
+                append(translateApi.stringResource(context, R.string.when_found_lift_phone_to_stop_ringing))
+            }
+        }
+
+        AppTextExtraLarge(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            textAlign = TextAlign.Center
+        )
+
+        ActionRunner(context = context, api = repository)
     }
 }

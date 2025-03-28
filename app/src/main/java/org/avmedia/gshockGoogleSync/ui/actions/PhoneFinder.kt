@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.actions
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -19,11 +20,11 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class PhoneFinder {
+class PhoneFinder(context: Context) {
     companion object {
-
         private var mp: MediaPlayer? = null
         var resetVolume: () -> Unit? = {}
+        private var phoneFinder: PhoneFinder? = null
 
         fun ring(context: Context) {
             val translateApi = EntryPointAccessors.fromApplication(
@@ -43,7 +44,6 @@ class PhoneFinder {
                         R.string.unable_to_get_default_sound_uri
                     )
                 )
-                return
             }
 
             // set volume to maximum
@@ -53,13 +53,13 @@ class PhoneFinder {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_ALARM,
                     previousVolume,
-                    AudioManager.FLAG_SHOW_UI
+                    AudioManager.FLAG_PLAY_SOUND
                 )
             }
             audioManager.setStreamVolume(
                 AudioManager.STREAM_ALARM,
                 audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
-                AudioManager.FLAG_SHOW_UI
+                AudioManager.FLAG_PLAY_SOUND
             )
 
             // init media player
@@ -69,10 +69,21 @@ class PhoneFinder {
             )
             mp!!.setDataSource(context, alarmUri)
             mp!!.prepare()
-            mp!!.start()
             mp!!.isLooping = true
+            mp!!.start()
 
             detectPhoneLifting(context)
+        }
+
+        private fun detectPhoneLifting(context: Context) {
+            phoneFinder = PhoneFinder(context)
+            phoneFinder?.startListening(context)
+
+            // Stop ring after 30 seconds if phone not found
+            RingCanceler.callFunctionAfterDelay(30000) {
+                phoneFinder?.stopListening()
+                stopRing()
+            }
         }
 
         private fun stopRing() {
@@ -83,48 +94,6 @@ class PhoneFinder {
                 mp = null
             }
             resetVolume()
-        }
-
-        private fun detectPhoneLifting(context: Context) {
-            // use accelerometer sensor values to detect phone lifting
-            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val accelerometerSensor =
-                sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-
-            class PhoneLiftEventListener : SensorEventListener {
-
-                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                    // NO-OP
-                }
-
-                override fun onSensorChanged(event: SensorEvent?) {
-                    val x = event!!.values[0]
-                    val y = event.values[1]
-                    val z = event.values[2]
-
-                    if (abs(x) > 1 || abs(y) > 1 || abs(z) > 1) {
-                        sensorManager.unregisterListener(this)
-                        RingCanceler.cancelAction()
-                        stopRing()
-                    }
-                }
-            }
-
-            val phoneLiftListener = PhoneLiftEventListener()
-
-            fun cancelRing() {
-                sensorManager.unregisterListener(phoneLiftListener)
-                stopRing()
-            }
-
-            // Stop ring after 30 seconds if phone not found.
-            RingCanceler.callFunctionAfterDelay(30000, ::cancelRing)
-
-            sensorManager.registerListener(
-                phoneLiftListener,
-                accelerometerSensor,
-                SensorManager.SENSOR_DELAY_NORMAL
-            )
         }
 
         object RingCanceler {
@@ -142,5 +111,82 @@ class PhoneFinder {
                 executor?.shutdownNow()
             }
         }
+    }
+
+    private inner class SensorHandler(context: Context) : SensorEventListener {
+        private val sensorManager =
+            context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        private val accelerometer = getBestAvailableSensor(sensorManager)
+        private val proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+
+        private var lastZ: Float = 0f
+        private val motionThreshold = 2.5f
+
+        fun startListening(context: Context) {
+            val sensorDelay =
+                if (context.checkSelfPermission(android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS)
+                    == PackageManager.PERMISSION_GRANTED
+                ) {
+                    SensorManager.SENSOR_DELAY_FASTEST
+                } else {
+                    SensorManager.SENSOR_DELAY_GAME
+                }
+
+            sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_UI)
+            sensorManager.registerListener(this, accelerometer, sensorDelay)
+        }
+
+        fun stopListening() {
+            sensorManager.unregisterListener(this)
+        }
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            event?.let {
+                if (it.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                    handleAccelerometerEvent(it.values)
+                }
+            }
+        }
+
+        private fun handleAccelerometerEvent(values: FloatArray) {
+            if (values.size < 3) {
+                Timber.d("Unexpected sensor data size: ${values.size}, values: ${values.contentToString()}")
+                return
+            }
+
+            val x = values[0]
+            val y = values[1]
+            val z = values[2]
+
+            // Check for significant motion in any axis
+            if (abs(x) > 11 || abs(y) > 11 || abs(z) > 11) {
+                Timber.d("Phone lifted: x=$x, y=$y, z=$z")
+                stopListening()
+                RingCanceler.cancelAction()
+                stopRing()
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+        private fun getBestAvailableSensor(sensorManager: SensorManager): Sensor? {
+            return sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+                ?: sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+                ?: sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
+        }
+    }
+
+    private var sensorHandler: SensorHandler? = null
+
+    init {
+        sensorHandler = SensorHandler(context)
+    }
+
+    fun startListening(context: Context) {
+        sensorHandler?.startListening(context)
+    }
+
+    fun stopListening() {
+        sensorHandler?.stopListening()
     }
 }

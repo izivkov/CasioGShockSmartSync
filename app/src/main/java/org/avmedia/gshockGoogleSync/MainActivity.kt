@@ -18,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
+import org.avmedia.gshockGoogleSync.services.KeepAliveManager
+import org.avmedia.gshockGoogleSync.services.KeepAliveService
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.SnackbarController

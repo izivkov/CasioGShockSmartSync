@@ -18,11 +18,13 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.di.RepositoryEntryPoint
 import org.avmedia.gshockGoogleSync.services.DeviceManager
+import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
+import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
@@ -44,6 +46,10 @@ class GShockApplication : Application() {
 
     fun init(context: MainActivity) {
         this.context = context
+
+        if (LocalDataStorage.getKeepAlive(context)) {
+            KeepAliveManager.getInstance(context).enable()
+        }
     }
 
     override fun onCreate() {
@@ -85,8 +91,10 @@ class GShockApplication : Application() {
     private fun handleWatchInitialization() {
         context.setContent {
             StartScreen {
-                if (repository.isActionButtonPressed() || repository.isAutoTimeStarted() || repository.isFindPhoneButtonPressed()) {
+                if (repository.isActionButtonPressed() || repository.isAutoTimeStarted()) {
                     RunActionsScreen(repository, translateApi)
+                } else if (repository.isFindPhoneButtonPressed()) {
+                    RunFindPhoneScreen(repository, translateApi)
                 } else {
                     BottomNavigationBarWithPermissions(
                         repository = repository,
@@ -167,14 +175,23 @@ class GShockApplication : Application() {
         val reuseAddress = true
         var deviceAddress: String? = null
 
-        if (reuseAddress) {
-            val savedDeviceAddress =
-                LocalDataStorage.get(this, "LastDeviceAddress", "")
-            if (repository.validateBluetoothAddress(savedDeviceAddress)) {
-                deviceAddress = savedDeviceAddress
+//        if (reuseAddress) {
+//            val savedDeviceAddress =
+//                LocalDataStorage.get(this, "LastDeviceAddress", "")
+//            if (repository.validateBluetoothAddress(savedDeviceAddress)) {
+//                deviceAddress = savedDeviceAddress
+//            }
+//        }
+
+        if (reuseAddress){
+            val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+            if (bluetoothAdapter?.isEnabled == true) {
+                val savedDeviceAddress = LocalDataStorage.get(this, "LastDeviceAddress", "")
+                if (repository.validateBluetoothAddress(savedDeviceAddress)) {
+                    deviceAddress = savedDeviceAddress
+                }
             }
         }
-
         repository.waitForConnection(deviceAddress)
     }
 }
