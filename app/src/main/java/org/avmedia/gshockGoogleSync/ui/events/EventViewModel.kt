@@ -17,6 +17,8 @@ import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import java.text.Normalizer
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 @HiltViewModel
@@ -69,9 +71,37 @@ class EventViewModel @Inject constructor(
     }
 
     fun sendEventsToWatch() {
+
+        fun String.filterAllowedCharacters(): String {
+            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}~。「」、・。"
+            val regex = "[A-Za-z0-9${Regex.escape(allowedSymbols)}]+".toRegex()
+            return regex.findAll(this).joinToString("") { it.value }
+        }
+
+        fun String.removeEmojis(): String {
+            return this.replace(Regex("[\\p{So}\\p{Cn}]"), "")
+        }
+
+        fun String.removeAccents(): String {
+            val normalized = Normalizer.normalize(this, Normalizer.Form.NFD)
+            return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("")
+        }
+
+        fun String?.orElse() = if (this.isNullOrEmpty()) "???" else this
+
+        val res = "".orElse()
+        println("--->>> Empty String: $res")
+
         viewModelScope.launch {
             val result = runCatching {
-                api.setEvents(ArrayList(_events.value))
+                // Create a new list with emoji-free titles
+                val sanitizedEvents = _events.value.map { event ->
+                    event.copy(title = event.title.removeEmojis().removeAccents().filterAllowedCharacters().trim().orElse())
+                }
+
+                sanitizedEvents.forEach { println(it.title) }
+
+                api.setEvents(ArrayList(sanitizedEvents))
                 AppSnackbar(translateApi.getString(appContext, R.string.events_set))
             }
 
