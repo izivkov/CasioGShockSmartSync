@@ -89,9 +89,6 @@ class EventViewModel @Inject constructor(
 
         fun String?.orElse() = if (this.isNullOrEmpty()) "???" else this
 
-        val res = "".orElse()
-        println("--->>> Empty String: $res")
-
         viewModelScope.launch {
             val result = runCatching {
                 // Create a new list with emoji-free titles
