@@ -70,8 +70,7 @@ class EventViewModel @Inject constructor(
         )
     }
 
-    fun sendEventsToWatch() {
-
+    private fun String.sanitizeEventTitle():String {
         fun String.filterAllowedCharacters(): String {
             val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}~。「」、・。"
             val regex = "[A-Za-z0-9${Regex.escape(allowedSymbols)}]+".toRegex()
@@ -89,11 +88,16 @@ class EventViewModel @Inject constructor(
 
         fun String?.orElse() = if (this.isNullOrEmpty()) "???" else this
 
+        return this.removeEmojis().removeAccents().filterAllowedCharacters().trim().orElse()
+    }
+
+    fun sendEventsToWatch() {
+
         viewModelScope.launch {
             val result = runCatching {
                 // Create a new list with emoji-free titles
                 val sanitizedEvents = _events.value.map { event ->
-                    event.copy(title = event.title.removeEmojis().removeAccents().filterAllowedCharacters().trim().orElse())
+                    event.copy(title = event.title.sanitizeEventTitle())
                 }
 
                 sanitizedEvents.forEach { println(it.title) }
