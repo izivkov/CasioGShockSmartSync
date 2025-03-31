@@ -72,7 +72,7 @@ class EventViewModel @Inject constructor(
 
     private fun String.sanitizeEventTitle():String {
         fun String.filterAllowedCharacters(): String {
-            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}~。「」、・。¥±♪⟪⟫♦"
+            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}" // Not supported on the watch: "~。「」、・。¥±♪⟪⟫♦▶◀""
             val regex = "[^A-Za-z0-9${Regex.escape(allowedSymbols)}]".toRegex()
             return this.replace(regex, "*")
         }
