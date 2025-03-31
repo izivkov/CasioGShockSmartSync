@@ -72,9 +72,9 @@ class EventViewModel @Inject constructor(
 
     private fun String.sanitizeEventTitle():String {
         fun String.filterAllowedCharacters(): String {
-            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}~。「」、・。"
-            val regex = "[A-Za-z0-9${Regex.escape(allowedSymbols)}]+".toRegex()
-            return regex.findAll(this).joinToString("") { it.value }
+            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}~。「」、・。¥±♪⟪⟫♦"
+            val regex = "[^A-Za-z0-9${Regex.escape(allowedSymbols)}]".toRegex()
+            return this.replace(regex, "*")
         }
 
         fun String.removeEmojis(): String {
@@ -86,9 +86,7 @@ class EventViewModel @Inject constructor(
             return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("")
         }
 
-        fun String?.orElse() = if (this.isNullOrEmpty()) "???" else this
-
-        return this.removeEmojis().removeAccents().filterAllowedCharacters().trim().orElse()
+        return this.removeEmojis().removeAccents().filterAllowedCharacters().trim()
     }
 
     fun sendEventsToWatch() {
