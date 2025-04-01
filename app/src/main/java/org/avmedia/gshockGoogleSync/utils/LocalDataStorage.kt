@@ -65,9 +65,7 @@ object LocalDataStorage {
 
     fun putBoolean(context: Context, key: String, value: Boolean) {
         scope.launch {
-            mutex.withLock {
-                put(context, key, value.toString())
-            }
+            put(context, key, value.toString())
         }
     }
 
