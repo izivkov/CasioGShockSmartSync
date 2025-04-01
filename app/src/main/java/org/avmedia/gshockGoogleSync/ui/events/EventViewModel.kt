@@ -72,7 +72,7 @@ class EventViewModel @Inject constructor(
 
     private fun String.sanitizeEventTitle():String {
         fun String.filterAllowedCharacters(): String {
-            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}" // Not supported on the watch: "~。「」、・。¥±♪⟪⟫♦▶◀""
+            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}" // Not supported on the watch: "~。「」、・。¥±♪⟪⟫♦▶◀"
             val regex = "[^A-Za-z0-9${Regex.escape(allowedSymbols)}]".toRegex()
             return this.replace(regex, "*")
         }
@@ -97,8 +97,6 @@ class EventViewModel @Inject constructor(
                 val sanitizedEvents = _events.value.map { event ->
                     event.copy(title = event.title.sanitizeEventTitle())
                 }
-
-                sanitizedEvents.forEach { println(it.title) }
 
                 api.setEvents(ArrayList(sanitizedEvents))
                 AppSnackbar(translateApi.getString(appContext, R.string.events_set))

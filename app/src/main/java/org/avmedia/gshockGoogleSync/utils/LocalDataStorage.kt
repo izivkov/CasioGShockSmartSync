@@ -5,16 +5,16 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
     private val scope = CoroutineScope(Dispatchers.IO)
+    private val mutex = Mutex()
 
     // Use a DataStore delegate in context
     private val Context.dataStore by preferencesDataStore(
@@ -26,8 +26,10 @@ object LocalDataStorage {
 
     fun put(context: Context, key: String, value: String) {
         scope.launch {
-            context.dataStore.edit { preferences ->
-                preferences[stringPreferencesKey(key)] = value
+            mutex.withLock {
+                context.dataStore.edit { preferences ->
+                    preferences[stringPreferencesKey(key)] = value
+                }
             }
         }
     }
@@ -35,15 +37,19 @@ object LocalDataStorage {
     fun get(context: Context, key: String, defaultValue: String? = null): String? {
         var value: String?
         runBlocking {
-            val preferences = context.dataStore.data.first()
-            value = preferences[stringPreferencesKey(key)] ?: defaultValue
+            mutex.withLock {
+                val preferences = context.dataStore.data.first()
+                value = preferences[stringPreferencesKey(key)] ?: defaultValue
+            }
         }
         return value
     }
 
     fun delete(context: Context, key: String) {
         scope.launch {
-            deleteAsync(context, key)
+            mutex.withLock {
+                deleteAsync(context, key)
+            }
         }
     }
 
@@ -53,13 +59,15 @@ object LocalDataStorage {
         }
     }
 
-    private fun getBoolean(context: Context, key: String): Boolean {
+    fun getBoolean(context: Context, key: String): Boolean {
         return get(context, key, "false")?.toBoolean() ?: false
     }
 
-    private fun putBoolean(context: Context, key: String, value: Boolean) {
+    fun putBoolean(context: Context, key: String, value: Boolean) {
         scope.launch {
-            put(context, key, value.toString())
+            mutex.withLock {
+                put(context, key, value.toString())
+            }
         }
     }
 
@@ -76,7 +84,7 @@ object LocalDataStorage {
     }
 
     fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
-        return put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
+        put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
 
     fun setKeepAlive(context: Context, value: Boolean) {
