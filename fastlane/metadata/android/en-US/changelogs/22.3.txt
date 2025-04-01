@@ -1,0 +1,1 @@
+Fixed possible ConcurrentModificationException when accessing the LocalDataStorage class.
