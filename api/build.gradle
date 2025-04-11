@@ -32,19 +32,17 @@ android {
 }
 
 dependencies {
-    def nordic_version = "1.3.0"
-
     implementation libs.androidx.core.ktx
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    implementation(libs.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Nordicsemi ble
-    implementation "libs.scanner:1.3.0"
-    implementation 'libs.client:1.3.0'
-    implementation 'libs.ble:1.3.0'
+    implementation(libs.scanner)
+    implementation(libs.client)
+    implementation(libs.ble)
 
     implementation(libs.timber)
     implementation(libs.gson)

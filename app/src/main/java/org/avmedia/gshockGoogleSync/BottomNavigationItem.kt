@@ -63,6 +63,18 @@ data class BottomNavigationItem(
                 label = Utils.shortenString(
                     translateApi.stringResource(
                         LocalContext.current,
+                        R.string.health
+                    ), 7
+                ),
+                icon = ImageVector.vectorResource(id = R.drawable.health), // Local icon
+                route = Screens.Health.route,
+                translateApi
+            ),
+
+            BottomNavigationItem(
+                label = Utils.shortenString(
+                    translateApi.stringResource(
+                        LocalContext.current,
                         R.string.actions
                     ), 7
                 ),

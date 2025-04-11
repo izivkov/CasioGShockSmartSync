@@ -47,8 +47,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.gshockapi)
-    // implementation project(':api')
+    // implementation(libs.gshockapi)
+    implementation project(':api')
 
     implementation(libs.izivkov.dynamicresourcetranslator)
     // implementation(project(":translateApi"))
@@ -91,6 +91,13 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
+
+    // health connect
+    implementation(libs.androidx.health.connect)
+    implementation(libs.guava) // needed for health connect
+
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
 }
 
 // Allow references to generated code
