@@ -48,6 +48,11 @@
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
 
+
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+
     <application
         android:name=".GShockApplication"
         android:allowBackup="true"
@@ -98,24 +103,6 @@
             </intent-filter>
         </activity>
 
-        <!-- For versions starting Android 14, create an activity alias to show the rationale
-             of Health Connect permissions once users click the privacy policy link. -->
-        <activity-alias
-            android:name="ViewPermissionUsageActivity"
-            android:exported="true"
-            android:targetActivity=".PermissionsRationaleActivity"
-            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
-                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
-            </intent-filter>
-        </activity-alias>
-
     </application>
-    <!-- Check if Health Connect is installed -->
-
-    <queries>
-        <package android:name="com.google.android.apps.healthdata" />
-    </queries>
 
 </manifest>
