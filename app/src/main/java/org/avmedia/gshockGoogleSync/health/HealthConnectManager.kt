@@ -12,8 +12,12 @@ import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.flow.Flow
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
+
+import androidx.health.connect.client.records.metadata.Metadata
+import androidx.health.connect.client.records.metadata.DataOrigin
 
 class HealthConnectManager(private val context: Context) : IHealthConnectManager {
     private val client by lazy { HealthConnectClient.getOrCreate(context) }
@@ -89,13 +93,75 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
         return try {
             val response = client.readRecords(request)
             response.records.fold(0L) { acc, record ->
-                acc + java.time.Duration.between(record.startTime, record.endTime).toMinutes()
+                acc + Duration.between(record.startTime, record.endTime).toMinutes()
             }
         } catch (e: Exception) {
             0L
         }
     }
 
+    /////////// Write
+    suspend fun writeStepsRecord(
+        startTime: Instant,
+        endTime: Instant,
+        steps: Long
+    ): Boolean {
+        val record = StepsRecord(
+            count = steps,
+            startTime = startTime,
+            endTime = endTime,
+            startZoneOffset = null,
+            endZoneOffset = null,
+            metadata = RecordMetadata(
+                id = "gshock_sync_${System.currentTimeMillis()}",
+                lastModifiedTime = Instant.now(),
+                clientRecordId = null,
+                dataOrigin = DataOrigin("GShock Sync")
+            ))
+
+        return try {
+            client.insertRecords(listOf(record))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun writeHeartRateRecord(
+        startTime: Instant,
+        samples: List<HeartRateRecord.Sample>
+    ): Boolean {
+        val record = HeartRateRecord(
+            startTime = startTime,
+            endTime = startTime.plusSeconds(samples.size.toLong()),
+            samples = samples,
+            startZoneOffset = null,
+            endZoneOffset = null,
+            metadata = HeartRateRecord.Metadata(
+                deviceType = null,
+                )
+        )
+
+        return try {
+            client.insertRecords(listOf(record))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // Helper function to create heart rate samples
+    fun createHeartRateSample(
+        time: Instant,
+        beatsPerMinute: Long
+    ): HeartRateRecord.Sample {
+        return HeartRateRecord.Sample(
+            time = time,
+            beatsPerMinute = beatsPerMinute
+        )
+    }
+
+    //
     override fun getSteps(start: Instant, end: Instant): Flow<Long> {
         TODO("Not yet implemented")
     }
