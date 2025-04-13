@@ -8,6 +8,8 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.metadata.Device
+import androidx.health.connect.client.records.metadata.Metadata.Companion.autoRecordedWithId
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
@@ -16,8 +18,6 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 
-import androidx.health.connect.client.records.metadata.Metadata
-import androidx.health.connect.client.records.metadata.DataOrigin
 
 class HealthConnectManager(private val context: Context) : IHealthConnectManager {
     private val client by lazy { HealthConnectClient.getOrCreate(context) }
@@ -101,6 +101,16 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
     }
 
     /////////// Write
+    private val device = Device(
+        manufacturer = "Casio",
+        model = "DW-H5600",
+        type = Device.TYPE_WATCH,
+    )
+    private val metadata = autoRecordedWithId(
+        id = "G-Shock Smart Sync",
+        device
+    )
+
     suspend fun writeStepsRecord(
         startTime: Instant,
         endTime: Instant,
@@ -112,12 +122,8 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
             endTime = endTime,
             startZoneOffset = null,
             endZoneOffset = null,
-            metadata = RecordMetadata(
-                id = "gshock_sync_${System.currentTimeMillis()}",
-                lastModifiedTime = Instant.now(),
-                clientRecordId = null,
-                dataOrigin = DataOrigin("GShock Sync")
-            ))
+            metadata = metadata
+        )
 
         return try {
             client.insertRecords(listOf(record))
@@ -137,9 +143,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
             samples = samples,
             startZoneOffset = null,
             endZoneOffset = null,
-            metadata = HeartRateRecord.Metadata(
-                deviceType = null,
-                )
+            metadata = metadata
         )
 
         return try {
