@@ -69,7 +69,7 @@
     <string name="timerDialogTitle">Időzítő</string>
     <string name="info_home_time">
         <![CDATA[Az <b>Otthoni idő</b> az óra saját időzónája.
-        Az app ezt az időt módosítja amikor időt állít be. Az időzóna és a táli/nyári időszámítás az Android rendszer helymeghatározási szolgáltatásával kerül beállításra. Tehát nem kell a helyi időt és a világidőt külön-külön beállítani, ha a telefon időzónát vált, akkor az az órán is látszani fog.]]>
+        Az app ezt az időt módosítja amikor időt állít be. Az időzóna és a táli/nyári időszámítás az Android rendszer helymeghatározási szolgáltatásával kerül beállításra. Tehát nem kell a helyi időt és a világidőt külön-külön beállítani, ha a telefon időzónát vált, akkor az órán is látszani fog.]]>
     </string>
     <string name="time_adjustment_info" ><![CDATA[
     <li>Az <b>Automatikus Időbeállítás</b> naponta négyszer szinkronizálja az órát az Android rendszerrel.</li>
@@ -111,7 +111,7 @@
     <string name="make_phonecall">Telefonhívás</string>
     <string name="adjustment_time_info"><![CDATA[
         <li>Az automtatikus időbeállítás naponta négyszer történik: 00:00, 06:00, 12:00 és 18:00-kor.</li>
-        <li>A perceket itt külön lehet beállítani. Ha itt például '25' perc van, megadva, akkor az időbeállítás rendre 00:25, 06:25, 12:25 és 18:25-kor for megtörténni.</li>
+        <li>A perceket itt külön lehet beállítani. Ha itt például \'25\' perc van, megadva, akkor az időbeállítás rendre 00:25, 06:25, 12:25 és 18:25-kor for megtörténni.</li>
         <li>Így meg lehet akadályozni, hogy többra egyszerre akarjon a telefonnal időt beállítani.</li>
         ]]></string>
     <string name="adjustment_time_minutes">Időbeállítás késleltetése\n(perc)</string>
@@ -155,10 +155,10 @@
     <string name="phone_number">Telefonszám</string>
     <string name="enter_phone_number">Telefonszám:</string>
     <string name="when_to_run">Mikor fusson</string>
-    <string name="minutes_between_0_and_59">Perc (0... 59)</string>
+    <string name="minutes_between_0_and_59">Perc (0…59)</string>
     <string name="fine_adjustment">Finombeállítás</string>
-    <string name="ms_between_10000_and_10000">-10000...10000 ms</string>
-    <string name="sending_time_to_watch">Időbeállítás átküldése...</string>
+    <string name="ms_between_10000_and_10000">-10000…10000 ms</string>
+    <string name="sending_time_to_watch">Időbeállítás átküldése…</string>
     <string name="time_set">Időbeállítás</string>
     <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Valószínüleg a gyári CASIO G-SHOCK alkalmazás fut..</string>
     <string name="bluetooth_is_not_enabled">Bluetooth ki van kapcsolva.</string>
@@ -184,5 +184,5 @@
     <string name="press_and_hold_for_3_seconds">Tartsa nyomva\n 3 másodpercig</string>
     <string name="short_press_to_run_actions">Ezzel a gombbal lehet\nfeladatot futtatni</string>
     <string name="g_shock_smart_sync_is_running" tools:ignore="MissingTranslation">G-Shock Smart Sync fut.</string>
-    <string name="preventing_the_app_from_closing" tools:ignore="MissingTranslation">...akadályozza az alkalmazás bezárását.</string>
+    <string name="preventing_the_app_from_closing" tools:ignore="MissingTranslation">…akadályozza az alkalmazás bezárását.</string>
 </resources>
