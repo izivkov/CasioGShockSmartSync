@@ -25,6 +25,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.ui.settings.BottomRow
 import androidx.health.connect.client.PermissionController
+import kotlinx.coroutines.launch
 
 @Composable
 fun HealthScreen(
@@ -34,15 +35,16 @@ fun HealthScreen(
     val healthConnectManager = remember { HealthConnectManager(context) }
     var showPermissionsCard by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = healthConnectManager.requestPermissionsActivityContract(),
-        onResult = { granted ->
-            if (granted.containsAll(healthConnectManager.permissions)) {
-                showPermissionsCard = false
-                viewModel.startDataCollection(healthConnectManager)
-            }
-            else {
-                showPermissionsCard = true
+        contract = PermissionController.createRequestPermissionResultContract(),
+        onResult = { _ ->
+            scope.launch {
+                val hasAllPermissions = healthConnectManager.hasPermissions()
+                showPermissionsCard = !hasAllPermissions
+                if (hasAllPermissions) {
+                    viewModel.startDataCollection(healthConnectManager)
+                }
             }
         }
     )
