@@ -1,0 +1,188 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
+    <string name="title_time">Idő</string>
+    <string name="title_alarms">Ébresztő</string>
+    <string name="title_events">Események</string>
+    <string name="title_settings">Beállítások</string>
+    <string name="events">Események</string>
+    <string name="alarms">Ébresztő</string>
+    <string name="time">Idő</string>
+    <string name="send_alarms_to_watch">Átküldés az\n órára</string>
+    <string name="enabled">Be</string>
+    <string name="disabled">Ki</string>
+    <string name="send_alarms_to_phone">Átküldés a\ntelefonra</string>
+    <string name="send_events_to_watch">Átküldés az\n órára</string>
+    <string name="connection_screen_info"><![CDATA[Tartsa nyomva a <b>BAL ALSÓ</b> gombot 3 márodpercig. Az óra kétszer fog duplán csipogni. A második dupla csipogás után az alklamazás kapcsolódni fog az órához, és a gombot el lehet engedni.
+    <p><b>Ez az alkalmazás összeakad a gyári CASIO alkalmazással, a kettő ne fusson egyszerre!</b></p>
+    <p>Az óra <b>JOBB ALSÓ</b> gombjának megnyomásával lehet indítani a beállított feladatokat. Ezeket a  <b>Feladatok</b> képernyőn lehet módosítani. Ilyen feladat lehet például egy <b>Fénykép készítése</b>.
+    Gyakorlatilag az órát egy egyszerű távvezérlőként lehet használni a telefon valamely funckiójának eléréséhez..</p>
+    <p>Ez az alkalmazás az F-DROID-on érhető el: https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync</p>
+    ]]>
+    </string>
+    <string name="alarms_screen_info"><![CDATA[A <b>B5600/B5000/B2100</b> úrákon 5 külön ébresztési időpontot lehet beállítani, és itt lehet az óránkénti csipogást ("SIG") is be/kikapcsolni. Az ébresztési időpontokat külön lehet bállítani. Ha ez megvolt, akkor az "Átküldés az órára" gombbal lehet az új beállításokat érvénybe helyezni. Ezen kívül, az itt beállított ébresztési időpontokat az Android rendszer órájára is át lehet küldeni az "Átküldés a telefonra" gombbal. Így az óra és a telefon egyszerre tud ébreszteni.]]></string>
+    <string name="events_screen_info"><![CDATA[Itt a <b>Google Naptár</b> eseményei láthatóak, és itt van lehetőség az óra emlékeztető funkciókát ("REM") a naptárbeli eseményekkel összerendelni.]]>
+</string>
+    <string name="actions">Feladatok</string>
+    <string name="title_actions">Feladatoks</string>
+    <string name="actions_screen_info"><![CDATA[A beállított feladatot az óra <b>JOBB-ALSÓ</b> gombjának megnyomásával lehet indítani.]]></string>
+    <string name="feb_22_mar_24">Feb-22 - Már-24</string>
+    <string name="weekly">HETI</string>
+    <string name="action_item">Feladat</string>
+    <string name="voice_assistant">Hangasszisztens</string>
+    <string name="front_cam">Szelfikamera</string>
+    <string name="back_cam">Főkamera</string>
+    <string name="take_a_photo">Fotó készítése</string>
+    <string name="info">Infó</string>
+    <string name="daily">Napi</string>
+    <string name="_12_00">12:00</string>
+    <string name="email_item">Email küldése</string>
+    <string name="email_example_com">uristen@menny.hu</string>
+    <string name="watch_alarms">Ébresztők</string>
+    <string name="signal_chime">Óránkénti csipogás (SIG)</string>
+    <string name="google_calendar_events">Google Naptár Események</string>
+    <string name="local_time">Helyi idő</string>
+    <string name="send_to_watch">Átküldés az\nórára</string>
+    <string name="phonecall_item">Telefonhívás</string>
+    <string name="home_time">Otthoni idő</string>
+    <string name="running_actions">Futó feladatok</string>
+    <string name="title_placeholder">Címke</string>
+    <string name="settings">Beállítások</string>
+    <string name="send_to_watch_settings">Átküldés az\nórára</string>
+    <string name="auto_configure_settings">Értékek automatikus\nkitöltése</string>
+    <string name="time_format">Időformátum</string>
+    <string name="_12h">12h</string>
+    <string name="_24h">24h</string>
+    <string name="date_format">Dátum formátum</string>
+    <string name="language">NYelv</string>
+    <string name="operational_sound">Gombnyomási csipogás</string>
+    <string name="power_saving_mode">Elemkímélő mód</string>
+    <string name="select_language">Nyelv kiválasztása</string>
+    <string name="auto_fill_help"><![CDATA[Az alábbi étékek kerültek automatikus kitöltésre:
+        <li>A Dátum- és időformátum, és a nyelvi beállítások a telefon beállításait követik.</li>
+        <li>A gombcsipogás ki van kapcsolva, ha a telefon "Ne zavarjanak" módban van.</li>
+        <li>Az elemkímélő mód be lesz kapcsolva, ha ez elem 15% töltöttség alá merül.</li>
+        Fontos: <i>Ezek a beállítások csak az "Átküldés az órára" gomb megnyomása után lesznek érvényben.</i>
+        ]]>
+    </string>
+    <string name="cancel">Mégsem</string>
+    <string name="ok">OK</string>
+    <string name="timerDialogTitle">Időzítő</string>
+    <string name="info_home_time">
+        <![CDATA[Az <b>Otthoni idő</b> az óra saját időzónája.
+        Az app ezt az időt módosítja amikor időt állít be. Az időzóna és a táli/nyári időszámítás az Android rendszer helymeghatározási szolgáltatásával kerül beállításra. Tehát nem kell a helyi időt és a világidőt külön-külön beállítani, ha a telefon időzónát vált, akkor az az órán is látszani fog.]]>
+    </string>
+    <string name="time_adjustment_info" ><![CDATA[
+    <li>Az <b>Automatikus Időbeállítás</b> naponta négyszer szinkronizálja az órát az Android rendszerrel.</li>
+    <li>ezen kívül a beállított naptári események emlékeztetőid is szinkronizálni tudja.</li>
+    ]]></string>
+    <string name="image_of_casio_watch">Casio Watch</string>
+    <string name="connection_screen_device"> <![CDATA[
+        <li>Az alkamazás a legutóbb használt órához próbál kapcsolódni. Ha több óra van használatbnak, akkor a "Óra elfelejtése" gombot kell megnyomni, és utána a másik órával kell kapcsolódni.</li>
+
+        <li>Az alkalmazás automatikusan lecseréli a képet az éppen használt órára.</li>
+        ]]></string>
+    <string name="forget">Óra elfelejtése</string>
+    <string name="hand_adjustment">Mutatók beállítása</string>
+    <string name="move_hand_to_the_left">Mutatót vissza</string>
+    <string name="reset_hand_at_12_position">Mutatót 12 órára</string>
+    <string name="move_hand_to_the_right">Mutatót előre</string>
+    <string name="auto_light">Automatikus világítás</string>
+    <string name="off">Ki</string>
+    <string name="on">Be</string>
+    <string name="illumination_period">Világítási idő</string>
+    <string name="mm_dd">HH:NN</string>
+    <string name="dd_mm">NN:HH</string>
+    <string name="time_adjustment">Automatikus időbeállítás</string>
+    <string name="notify_me">Jelezzen a telefonon</string>
+    <string name="timer">Időzítő</string>
+    <string name="_00_00_00">00:00:00</string>
+    <string name="_00">00</string>
+    <string name="semi_column">:</string>
+    <string name="no_watch">Nincs óra?</string>
+    <string name="set_time">Idő beállítása</string>
+    <string name="find_phone">Telefonkereső</string>
+    <string name="set_reminders">Google Naptár\nEmlékeztetők</string>
+
+    <string name="take_photo">Fotó készítése</string>
+    <string name="toggle_flashlight">Zseblámpa bekapcsolása</string>
+    <string name="start_voice_assistant">Hangasszisztens indítása</string>
+    <string name="next_track">Kövezkező zeneszám</string>
+    <string name="emergency_actions">Vészhelyzeti feladat:</string>
+    <string name="make_phonecall">Telefonhívás</string>
+    <string name="adjustment_time_info"><![CDATA[
+        <li>Az automtatikus időbeállítás naponta négyszer történik: 00:00, 06:00, 12:00 és 18:00-kor.</li>
+        <li>A perceket itt külön lehet beállítani. Ha itt például '25' perc van, megadva, akkor az időbeállítás rendre 00:25, 06:25, 12:25 és 18:25-kor for megtörténni.</li>
+        <li>Így meg lehet akadályozni, hogy többra egyszerre akarjon a telefonnal időt beállítani.</li>
+        ]]></string>
+    <string name="adjustment_time_minutes">Időbeállítás késleltetése\n(perc)</string>
+    <string name="skip_to_next_track_info"><![CDATA[
+        Ha a telefonon támogatott zenelejátszó alkalmazás fut (pl. Spotify, Youtube, YouTube Music), akkor az óra jobb alsó gombjának megnyomásával a következő zeneszámra lehet léptetni. Ez a funkció Android Auto-val is működik.]]></string>
+    <string name="set_prayer_alarms">Imaidők</string>
+    <string name="prayer_times_info"><![CDATA[
+        <li>Az Iszlám vallásban a napi imák <b>Fadzsr</b>, <b>Dhúr</b>, <b>Ászr</b>, <b>Magrib</b>, és <b>Isa</b> ideje napi szinten változik.</li>
+        <li>Az imaidők a telefon helymeghatározási szoltáltatása alapján kerülnek kiszámításra. Ezt a feladatot célszerű naponta futtatni, hogy az imaidőt pontosan jelezze. Ha ez be van kpacsolva, akkor az öt ébresztési időpont automatikusan a napi/helyi imaidőkre lesz állítva.</li>
+        <li>Az alábbi helyekre külön számítási algoritmus van az alkalmazásban:
+            <b>Észak-Amerika</b>,
+            <b>Diyanet</b>,
+            <b>Egyiptom</b>,
+            <b>Dubaj</b>,
+            <b>Umm Al Kura</b>,
+            <b>Katar</b>,
+            <b>Szingapúr</b>,
+            <b>Kuvait</b> és
+            <b>Muszlim világliga</b> a világ bármely más részén.
+        </li>
+        <li>Ha bármi kérés van ezzel kapcsolatban, akkor ide lehet írni: <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
+    ]]></string>
+    <string name="do_not_disturb_dnd">Ne zavarjanak mód</string>
+    <string name="mirror_phone_s_dnd">A telefon "ne zavarjanak" beállítását használja</string>
+    <string name="DnD_info_message"><![CDATA[
+    Ha ez be van kapcsolva, akkor az óra nem fog csipogni.
+    <li>Ez a beállítás csak az <b>Átküldés az órára</b> gomb megnyomása után kerül érvénybe.<\li>
+    <li>Ha a "Ne zavarjanak mód" a telefon beállítását követi, akkor az alkamazás automatikusan némítja az órát is, amikor a telefon "Ne zavarjanak" módba kerül.<\li>]]></string>
+    <string name="auto_light_at_night_only">Csak éjszaka legyen automatikus világítás</string>
+    <string name="keep_alive">Maradjon kapcsolódva az óra (több energiát használ)</string>
+    <string name="enter_timer_time">Időtartam:</string>
+    <string name="max_reminders_reached">Ennél több emlékezetőt nem lehet beállítani." </string>
+    <string name="fine_time_adjustment">Finombeállítás</string>
+    <string name="_0000">0000</string>
+    <string name="fine_adjustment_info"><![CDATA[
+    Néha az időbeállítás nem sikerül túl pontosan, és pár másodpercnyi különbség előfordulhat. Ilyenkor a kézi finombeállítás segíthet a helyzeten. +/- 10000 milliszekundum tartományban műkdöik.]]></string>
+    <string name="required_permissions_denied_cannot_access_screen">Ez a funckió nem elérhető, mert egy szükséges engedély meg lett tagadva.</string>
+    <string name="required_permissions_denied_cannot_access_actions">Ez a funckió nem elérhető, mert egy szükséges engedély meg lett tagadva.</string>
+    <string name="calendar_permission_denied_cannot_access_events">Ez a funckió nem elérhető, mert a Google Naptár hozzáférés nincs engedélyezve.</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">"Az engedélyek újbóli kéréséhez ki kell törölni az alkalmazás teljes tárhelyét."</string>
+    <string name="phone_number">Telefonszám</string>
+    <string name="enter_phone_number">Telefonszám:</string>
+    <string name="when_to_run">Mikor fusson</string>
+    <string name="minutes_between_0_and_59">Perc (0... 59)</string>
+    <string name="fine_adjustment">Finombeállítás</string>
+    <string name="ms_between_10000_and_10000">-10000...10000 ms</string>
+    <string name="sending_time_to_watch">Időbeállítás átküldése...</string>
+    <string name="time_set">Időbeállítás</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Valószínüleg a gyári CASIO G-SHOCK alkalmazás fut..</string>
+    <string name="bluetooth_is_not_enabled">Bluetooth ki van kapcsolva.</string>
+    <string name="disconnected_due_to_inactivity">Időtúllépés, szétkapcsolva.</string>
+    <string name="when_found_lift_phone_to_stop_ringing">Ha meglett a telefon, felemeléskor csendesendjen el</string>
+    <string name="voice_assistant_not_available_on_this_device">Ezen az eszközön nem elérhető a hangasszisztens!</string>
+    <string name="cannot_go_to_next_track">Nem sikerült zeneszámot léptetni!!</string>
+    <string name="image_captured">Fotó: %1$s</string>
+    <string name="emaillocationaction_emailaddress">EmailLocationAction: emailAddress: %1$s</string>
+    <string name="camera_capture_error">Fotó készítése sikertelen: %1$s</string>
+    <string name="flashlight_not_available">A zseblámpa hibár jelzett.</string>
+    <string name="unable_to_get_default_sound_uri">Unable to get default sound URI</string>
+    <string name="alarms_set_to_watch">Az ébresztési időpontok sikeresen át lettek küldve az órára.</string>
+    <string name="events_set">Események beállítva</string>
+    <string name="event_not_compatible_with_watch">Ez az esemény nem kompatibilis az órával</string>
+    <string name="settings_sent_to_watch">Beállítások átküldve az órára.</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">Ezen az eszközön nincs Bluetooth. Az alkalmazás nem használható.</string>
+    <string name="permission_required_to_turn_on_bluetooth">Bluetooth-használati engedély szükséges.</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">Bluetooth-használati engedély megtagadva. A Bluetooth-t kézzel kell bekapcsolni.</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Az engedélyek nincsenek megadva. Az alkamazás beállításainál lehet az engedélyeket megadni.</string>
+    <string name="you_have_not_given_permission_to_to_run_action">%1$s: Sajnos ehhez a feladathoz nincs engedély megadva.</string>
+    <string name="timer_set">Időzítő beállítva.</string>
+    <string name="press_and_hold_for_3_seconds">Tartsa nyomva\n 3 másodpercig</string>
+    <string name="short_press_to_run_actions">Ezzel a gombbal lehet\nfeladatot futtatni</string>
+    <string name="g_shock_smart_sync_is_running" tools:ignore="MissingTranslation">G-Shock Smart Sync fut.</string>
+    <string name="preventing_the_app_from_closing" tools:ignore="MissingTranslation">...akadályozza az alkalmazás bezárását.</string>
+</resources>
