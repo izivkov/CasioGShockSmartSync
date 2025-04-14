@@ -15,9 +15,12 @@ import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.flow.Flow
 import java.time.Duration
-import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import java.time.Instant
+import java.time.ZoneOffset
 
 class HealthConnectManager(private val context: Context) : IHealthConnectManager {
     private val client by lazy { HealthConnectClient.getOrCreate(context) }
@@ -112,16 +115,16 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
     )
 
     suspend fun writeStepsRecord(
-        startTime: Instant,
-        endTime: Instant,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
         steps: Long
     ): Boolean {
         val record = StepsRecord(
             count = steps,
-            startTime = startTime,
-            endTime = endTime,
-            startZoneOffset = null,
-            endZoneOffset = null,
+            startTime = startTime.atZone(ZoneId.systemDefault()).toInstant(),
+            endTime = endTime.atZone(ZoneId.systemDefault()).toInstant(),
+            startZoneOffset = ZoneId.systemDefault().rules.getOffset(startTime),
+            endZoneOffset = ZoneId.systemDefault().rules.getOffset(endTime),
             metadata = metadata
         )
 
@@ -134,15 +137,16 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
     }
 
     suspend fun writeHeartRateRecord(
-        startTime: Instant,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
         samples: List<HeartRateRecord.Sample>
     ): Boolean {
         val record = HeartRateRecord(
-            startTime = startTime,
-            endTime = startTime.plusSeconds(samples.size.toLong()),
+            startTime = startTime.atZone(ZoneId.systemDefault()).toInstant(),
+            endTime = endTime.atZone(ZoneId.systemDefault()).toInstant(),
+            startZoneOffset = ZoneId.systemDefault().rules.getOffset(startTime),
+            endZoneOffset = ZoneId.systemDefault().rules.getOffset(endTime),
             samples = samples,
-            startZoneOffset = null,
-            endZoneOffset = null,
             metadata = metadata
         )
 
@@ -156,13 +160,110 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
 
     // Helper function to create heart rate samples
     fun createHeartRateSample(
-        time: Instant,
+        time: LocalDateTime,
         beatsPerMinute: Long
     ): HeartRateRecord.Sample {
         return HeartRateRecord.Sample(
-            time = time,
+            time = time.atZone(ZoneId.systemDefault()).toInstant(),
             beatsPerMinute = beatsPerMinute
         )
+    }
+
+    suspend fun writeExerciseSession(
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        title: String,
+        notes: String
+    ): Boolean {
+        // Add missing imports
+        val exerciseRecord = ExerciseSessionRecord(
+            startTime = startTime.atZone(ZoneId.systemDefault()).toInstant(),
+            endTime = endTime.atZone(ZoneId.systemDefault()).toInstant(),
+            startZoneOffset = ZoneId.systemDefault().rules.getOffset(startTime),
+            endZoneOffset = ZoneId.systemDefault().rules.getOffset(endTime),
+            exerciseType = ExerciseSessionRecord.EXERCISE_TYPE_RUNNING,
+            title = title,
+            notes = notes,
+            metadata = metadata     // Added missing metadata
+        )
+
+        return try {
+            client.insertRecords(listOf(exerciseRecord))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun writeSleepSession(
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        notes: String = ""
+    ): Boolean {
+        val sleepRecord = SleepSessionRecord(
+            startTime = startTime.atZone(ZoneId.systemDefault()).toInstant(),
+            endTime = endTime.atZone(ZoneId.systemDefault()).toInstant(),
+            startZoneOffset = ZoneId.systemDefault().rules.getOffset(startTime),
+            endZoneOffset = ZoneId.systemDefault().rules.getOffset(endTime),
+            stages = emptyList(),
+            notes = notes,
+            title = "Sleep",
+            metadata = metadata
+        )
+
+        return try {
+            client.insertRecords(listOf(sleepRecord))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // Sllep Stage
+    suspend fun writeSleepSessionWithStages(
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        stages: List<SleepStage>,
+        notes: String = ""
+    ): Boolean {
+        val sleepStages = stages.map { stage ->
+            SleepSessionRecord.Stage(
+                stage = stage.type,
+                startTime = stage.startTime.atZone(ZoneId.systemDefault()).toInstant(),
+                endTime = stage.endTime.atZone(ZoneId.systemDefault()).toInstant(),
+            )
+        }
+
+        val sleepRecord = SleepSessionRecord(
+            startTime = startTime.atZone(ZoneId.systemDefault()).toInstant(),
+            endTime = endTime.atZone(ZoneId.systemDefault()).toInstant(),
+            startZoneOffset = ZoneId.systemDefault().rules.getOffset(startTime),
+            endZoneOffset = ZoneId.systemDefault().rules.getOffset(endTime),
+            stages = sleepStages,
+            notes = notes,
+            title = "Sleep",
+            metadata = metadata
+        )
+
+        return try {
+            client.insertRecords(listOf(sleepRecord))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+    data class SleepStage(
+        val type: Int,
+        val startTime: LocalDateTime,
+        val endTime: LocalDateTime
+    ) {
+        companion object {
+            val STAGE_TYPE_AWAKE = SleepSessionRecord.STAGE_TYPE_AWAKE
+            val STAGE_TYPE_DEEP = SleepSessionRecord.STAGE_TYPE_DEEP
+            val STAGE_TYPE_LIGHT = SleepSessionRecord.STAGE_TYPE_LIGHT
+            val STAGE_TYPE_REM = SleepSessionRecord.STAGE_TYPE_REM
+            val STAGE_TYPE_UNKNOWN = SleepSessionRecord.STAGE_TYPE_UNKNOWN
+        }
     }
 
     //
