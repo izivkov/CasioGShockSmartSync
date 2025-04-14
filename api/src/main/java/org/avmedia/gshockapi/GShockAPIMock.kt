@@ -301,4 +301,39 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     override fun preventReconnection(): Boolean {
         return true
     }
+
+    // Health
+    override suspend fun readSteps(): Int {
+        // delay(3000)
+        return return (300..1000).random()
+    }
+
+    override suspend fun readHeartRateSamples(): List<Int> {
+        return listOf(
+            (50..60).random(),
+            (60..70).random(),
+            (70..80).random(),
+            (80..90).random()
+        )
+    }
+
+    override suspend fun readSleepSessions(): Long {
+        return (200L..500L).random()
+    }
+
+    override suspend fun readMinHeartRate(): Int {
+        return (20..30).random()
+    }
+
+    override suspend fun readMaxHeartRate(): Int {
+        return (90..120).random()
+    }
+
+    override suspend fun readAvgHeartRate(): Int {
+        return (70..80).random()
+    }
+
+    override suspend fun readSleepDuration(): Int { 
+        return (250..350).random()
+    }
 }

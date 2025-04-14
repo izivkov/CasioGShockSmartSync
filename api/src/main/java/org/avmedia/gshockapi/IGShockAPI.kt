@@ -50,4 +50,13 @@ interface IGShockAPI {
     fun resetHand()
     fun validateBluetoothAddress(deviceAddress: String?): Boolean
     fun preventReconnection(): Boolean
+
+    // health
+    suspend fun readSteps(): Int
+    suspend fun readHeartRateSamples(): List<Int>
+    suspend fun readSleepSessions(): Long
+    suspend fun readSleepDuration(): Int
+    suspend fun readMinHeartRate(): Int
+    suspend fun readMaxHeartRate(): Int
+    suspend fun readAvgHeartRate(): Int
 }

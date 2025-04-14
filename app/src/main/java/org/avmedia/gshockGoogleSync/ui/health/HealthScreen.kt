@@ -29,9 +29,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HealthScreen(
-    viewModel: HealthViewModel = hiltViewModel()
+    healthViewModel: HealthViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+
+    val steps by healthViewModel.steps.collectAsState()
+    val minHeartRate by healthViewModel.minHeartRate.collectAsState()
+    val maxHeartRate by healthViewModel.maxHeartRate.collectAsState()
+    val avgHeartRate by healthViewModel.avgHeartRate.collectAsState()
+    val sleepDuration by healthViewModel.sleepDuration.collectAsState()
+
     val healthConnectManager = remember { HealthConnectManager(context) }
     var showPermissionsCard by remember { mutableStateOf(false) }
 
@@ -43,7 +50,7 @@ fun HealthScreen(
                 val hasAllPermissions = healthConnectManager.hasPermissions()
                 showPermissionsCard = !hasAllPermissions
                 if (hasAllPermissions) {
-                    viewModel.startDataCollection(healthConnectManager)
+                    healthViewModel.startDataCollection(healthConnectManager)
                 }
             }
         }
@@ -53,7 +60,7 @@ fun HealthScreen(
         val hasPermissions = healthConnectManager.hasPermissions()
         showPermissionsCard = !hasPermissions
         if (hasPermissions) {
-            viewModel.startDataCollection(healthConnectManager)
+            healthViewModel.startDataCollection(healthConnectManager)
         }
     }
 
@@ -66,7 +73,7 @@ fun HealthScreen(
                 val (title, healthLayout, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    viewModel.translateApi.stringResource(context, R.string.health),
+                    healthViewModel.translateApi.stringResource(context, R.string.health),
                     Modifier.constrainAs(title) {
                         top.linkTo(parent.top)
                         bottom.linkTo(healthLayout.top)
@@ -90,13 +97,13 @@ fun HealthScreen(
                         }
                     } else {
                         // Your health cards
-                        ExerciseCard(viewModel.steps)
+                        ExerciseCard(steps)
                         HeartRateCard(
-                            minRate = viewModel.minHeartRate,
-                            avgRate = viewModel.avgHeartRate,
-                            maxRate = viewModel.maxHeartRate
+                            minRate = minHeartRate,
+                            avgRate = avgHeartRate,
+                            maxRate = maxHeartRate
                         )
-                        SleepCard(viewModel.sleepDuration)
+                        SleepCard(sleepDuration)
                     }
                 }
 
@@ -166,7 +173,7 @@ private fun HeartRateCard(minRate: Int, avgRate: Int, maxRate: Int) {
 }
 
 @Composable
-private fun SleepCard(duration: String) {
+private fun SleepCard(duration: Int) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -190,7 +197,7 @@ private fun SleepCard(duration: String) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             AppText(
-                text = duration,
+                text = String.format("$duration")
             )
         }
     }

@@ -47,6 +47,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
         }
     }
 
+    // Read
     suspend fun readDailySteps(): Long? {
         val today = LocalDateTime.now()
         val startTime = today.withHour(0).withMinute(0)
@@ -103,7 +104,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
         }
     }
 
-    /////////// Write
+    // Write
     private val device = Device(
         manufacturer = "Casio",
         model = "DW-H5600",
@@ -219,7 +220,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
         }
     }
 
-    // Sllep Stage
+    // Sleep Stage
     suspend fun writeSleepSessionWithStages(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
