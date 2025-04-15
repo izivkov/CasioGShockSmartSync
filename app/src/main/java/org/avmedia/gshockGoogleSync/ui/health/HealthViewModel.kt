@@ -81,6 +81,10 @@ class HealthViewModel @Inject constructor(
         }
     }
 
+    fun sendToHealthApp () {
+        // TODO
+    }
+
     private fun formatSleepDuration(durationInMinutes: Long): String {
         val hours = durationInMinutes / 60
         val minutes = durationInMinutes % 60

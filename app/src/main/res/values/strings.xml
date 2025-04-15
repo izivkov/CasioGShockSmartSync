@@ -207,7 +207,6 @@
     <string name="health_connect_permissions_required">Health Connect permissions required</string>
     <string name="health_connect_not_available">Healt Connect not available</string>
 
-
     <string-array name="sleep_notes_array">
         <item>I slept great!</item>
         <item>I got woken up</item>

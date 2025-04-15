@@ -149,7 +149,14 @@ fun BottomNavigationBarWithPermissions(
                 )
             }
             composable(Screens.Health.route) {
-                HealthScreen()
+                HealthScreen(onDenyPermissionsOrNotInstalled = {
+                    navController.navigate(Screens.Time.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                    }
+                })
             }
             composable(Screens.Actions.route) {
 
