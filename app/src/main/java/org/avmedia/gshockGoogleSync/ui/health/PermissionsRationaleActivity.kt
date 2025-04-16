@@ -1,5 +1,6 @@
-package org.avmedia.gshockGoogleSync
+package org.avmedia.gshockGoogleSync.ui.health
 
+import AppTextLarge
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,11 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.avmedia.gshockGoogleSync.R
 
 class PermissionsRationaleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,14 +38,12 @@ private fun PermissionsRationaleContent() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
+        AppTextLarge(
             text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
+        AppTextLarge(
             text = stringResource(R.string.health_connect_permissions_required),
-            style = MaterialTheme.typography.bodyLarge
         )
     }
 }

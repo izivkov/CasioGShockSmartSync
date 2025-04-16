@@ -4,7 +4,6 @@ import AppText
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,11 +22,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Nightlight
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,9 +39,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.health.HealthConnectManager
@@ -55,8 +54,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import timber.log.Timber
-import androidx.core.net.toUri
+import kotlin.coroutines.coroutineContext
 
 @Composable
 fun HealthScreen(
@@ -99,8 +97,10 @@ fun HealthScreen(
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             // If Play Store is not available, fallback to browser
-            val browserIntent = Intent(Intent.ACTION_VIEW,
-                "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata".toUri())
+            val browserIntent = Intent(
+                Intent.ACTION_VIEW,
+                "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata".toUri()
+            )
             browserIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(browserIntent)
         }
@@ -199,7 +199,11 @@ fun BottomRow(
                         context = LocalContext.current,
                         id = R.string.send_to_health_app
                     ),
-                    onClick = { healthViewModel.sendToHealthApp() })
+                    onClick = {
+                        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
+                            healthViewModel.sendToHealthApp()
+                        }
+                    })
             )
 
             ButtonsRow(buttons = buttons)

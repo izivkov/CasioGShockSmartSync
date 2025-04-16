@@ -49,10 +49,10 @@
     <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
     <uses-permission android:name="android.permission.health.READ_SLEEP" />
     <uses-permission android:name="android.permission.health.WRITE_SLEEP" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+    <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
 
-    <!--    <uses-permission android:name="android.permission.health.READ_EXERCISE"/>-->
-<!--    <uses-permission android:name="android.permission.health.WRITE_EXERCISE"/>-->
-<!--    <uses-permission android:name="android.permission.health.READ_SPEED"/>-->
+    <!--    <uses-permission android:name="android.permission.health.READ_SPEED"/>-->
 <!--    <uses-permission android:name="android.permission.health.WRITE_SPEED"/>-->
 <!--    <uses-permission android:name="android.permission.health.READ_DISTANCE"/>-->
 <!--    <uses-permission android:name="android.permission.health.WRITE_DISTANCE"/>-->
@@ -129,7 +129,7 @@
         <!-- For supported versions through Android 13, create an activity to show the rationale
       of Health Connect permissions once users click the privacy policy link. -->
         <activity
-            android:name=".PermissionsRationaleActivity"
+            android:name=".ui.health.PermissionsRationaleActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />

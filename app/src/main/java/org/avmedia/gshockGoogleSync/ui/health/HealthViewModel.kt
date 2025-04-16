@@ -1,5 +1,10 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.metadata.DataOrigin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +16,9 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.health.HealthConnectManager
 import org.avmedia.gshockapi.ProgressEvents
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,8 +70,8 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    fun sendToHealthApp () {
-        // TODO
+    suspend fun sendToHealthApp() {
+        healthConnectManager?.simulateAndInsertWatchData()
     }
 
     private fun formatSleepDuration(durationInMinutes: Long): String {
