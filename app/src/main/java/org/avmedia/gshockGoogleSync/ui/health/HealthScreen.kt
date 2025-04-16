@@ -37,16 +37,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.health.HealthConnectManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import timber.log.Timber
 
 @Composable
 fun HealthScreen(
@@ -66,7 +70,7 @@ fun HealthScreen(
 
     val scope = rememberCoroutineScope()
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = PermissionController.createRequestPermissionResultContract(),
+        contract = healthConnectManager.requestPermissionsActivityContract(), // PermissionController.createRequestPermissionResultContract(),
         onResult = { _ ->
             scope.launch {
                 val hasAllPermissions = healthConnectManager.hasPermissions()
@@ -78,7 +82,24 @@ fun HealthScreen(
         }
     )
 
+    fun checkSdkStatus () {
+        val status = HealthConnectClient.getSdkStatus(context)
+        when (status) {
+            HealthConnectClient.SDK_AVAILABLE -> {
+                // SDK is available, do nothing
+                Timber.d("Health Connect SDK is available")
+            }
+            HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED -> {
+                AppSnackbar("Health Connect update required")
+            }
+            else -> {
+                AppSnackbar("Health Connect not available")
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
+        checkSdkStatus()
         val hasPermissions = healthConnectManager.hasPermissions()
         showPermissionsCard = !hasPermissions
         if (hasPermissions) {
@@ -293,17 +314,15 @@ private fun PermissionsCard(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                TextButton(
-                    onClick = onDenyPermissions
-                ) {
-                    AppText("Deny")
-                }
+                AppButton(
+                    onClick = onDenyPermissions,
+                    text = "Deny",
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = onGrantClick
-                ) {
-                    AppText("Allow")
-                }
+                AppButton(
+                    onClick = onGrantClick,
+                    text = "Allow",
+                )
             }
         }
     }

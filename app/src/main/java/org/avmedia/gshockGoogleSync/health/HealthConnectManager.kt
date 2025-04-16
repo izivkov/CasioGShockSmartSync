@@ -19,8 +19,8 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import timber.log.Timber
 import java.time.Instant
-import java.time.ZoneOffset
 
 class HealthConnectManager(private val context: Context) : IHealthConnectManager {
     private val client by lazy { HealthConnectClient.getOrCreate(context) }
@@ -32,7 +32,6 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
         HealthPermission.getReadPermission(HeartRateRecord::class),
         HealthPermission.getWritePermission(HeartRateRecord::class),
     )
-
     val permissions: Set<String> get() = _permissions
 
     fun requestPermissionsActivityContract(): ActivityResultContract<Set<String>, Set<String>> {
@@ -42,6 +41,14 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
     suspend fun hasPermissions(): Boolean {
         return try {
             client.permissionController.getGrantedPermissions().containsAll(_permissions)
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun isHealthConnectAvailable(): Boolean {
+        return try {
+            HealthConnectClient.getSdkStatus(context) != HealthConnectClient.SDK_UNAVAILABLE
         } catch (e: Exception) {
             false
         }
