@@ -28,9 +28,10 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
     private val _permissions = setOf(
         HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getWritePermission(StepsRecord::class),
-
         HealthPermission.getReadPermission(HeartRateRecord::class),
         HealthPermission.getWritePermission(HeartRateRecord::class),
+        HealthPermission.getReadPermission( SleepSessionRecord::class),
+        HealthPermission.getWritePermission(SleepSessionRecord::class),
     )
     val permissions: Set<String> get() = _permissions
 
@@ -48,7 +49,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
 
     fun isHealthConnectAvailable(): Boolean {
         return try {
-            HealthConnectClient.getSdkStatus(context) != HealthConnectClient.SDK_UNAVAILABLE
+            HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
         } catch (e: Exception) {
             false
         }

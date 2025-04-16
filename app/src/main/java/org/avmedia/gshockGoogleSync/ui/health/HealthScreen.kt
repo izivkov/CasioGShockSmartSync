@@ -1,8 +1,13 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
 import AppText
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,6 +56,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import timber.log.Timber
+import androidx.core.net.toUri
 
 @Composable
 fun HealthScreen(
@@ -82,24 +88,32 @@ fun HealthScreen(
         }
     )
 
-    fun checkSdkStatus () {
-        val status = HealthConnectClient.getSdkStatus(context)
-        when (status) {
-            HealthConnectClient.SDK_AVAILABLE -> {
-                // SDK is available, do nothing
-                Timber.d("Health Connect SDK is available")
-            }
-            HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED -> {
-                AppSnackbar("Health Connect update required")
-            }
-            else -> {
-                AppSnackbar("Health Connect not available")
-            }
+    fun launchHealthConnectInstall(context: Context) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data =
+                "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata".toUri()
+            setPackage("com.android.vending")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        try {
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            // If Play Store is not available, fallback to browser
+            val browserIntent = Intent(Intent.ACTION_VIEW,
+                "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata".toUri())
+            browserIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(browserIntent)
         }
     }
 
     LaunchedEffect(Unit) {
-        checkSdkStatus()
+        if (!healthConnectManager.isHealthConnectAvailable()) {
+            AppSnackbar("Health Connect not available. Please install it.")
+            onDenyPermissionsOrNotInstalled()
+            launchHealthConnectInstall(context)
+            return@LaunchedEffect
+        }
+
         val hasPermissions = healthConnectManager.hasPermissions()
         showPermissionsCard = !hasPermissions
         if (hasPermissions) {
@@ -281,48 +295,52 @@ private fun PermissionsCard(
     onGrantClick: () -> Unit,
     onDenyPermissions: () -> Unit,
 ) {
-    AppCard(
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            horizontalAlignment = Alignment.Start
+        AppCard(
+            modifier = Modifier
+                .fillMaxWidth(0.9f) // Takes 90% of screen width
         ) {
-            AppText(
-                text = "Permission request",
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            AppText(
-                text = "To track your health data, G-Shock Smart Sync needs access to:",
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-
-            // Permissions list
-            Column(modifier = Modifier.padding(start = 8.dp, bottom = 16.dp)) {
-                AppText("• Steps data")
-                AppText("• Heart rate data")
-                AppText("• Sleep data")
-            }
-
-            // Buttons row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.End
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.Start
             ) {
-                AppButton(
-                    onClick = onDenyPermissions,
-                    text = "Deny",
+                AppText(
+                    text = "Permission request",
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                AppButton(
-                    onClick = onGrantClick,
-                    text = "Allow",
+
+                AppText(
+                    text = "To track your health data, G-Shock Smart Sync needs access to:",
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
+
+                Column(modifier = Modifier.padding(start = 8.dp, bottom = 16.dp)) {
+                    AppText("• Steps data")
+                    AppText("• Heart rate data")
+                    AppText("• Sleep data")
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    AppButton(
+                        onClick = onDenyPermissions,
+                        text = "Deny",
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    AppButton(
+                        onClick = onGrantClick,
+                        text = "Allow",
+                    )
+                }
             }
         }
     }
