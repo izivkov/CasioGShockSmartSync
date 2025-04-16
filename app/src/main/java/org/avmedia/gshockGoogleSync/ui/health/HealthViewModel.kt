@@ -62,25 +62,6 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun readHealthData() {
-        healthConnectManager?.let { manager ->
-            // Read steps
-            _steps.value = (manager.readDailySteps() ?: 0).toInt()
-
-            // Read heart rate
-            val heartRates = manager.readHeartRateSamples()
-            if (heartRates.isNotEmpty()) {
-                _minHeartRate.value = heartRates.minOf { it.toInt() }
-                _maxHeartRate.value = heartRates.maxOf { it.toInt() }
-                _avgHeartRate.value = heartRates.average().toInt()
-            }
-
-            // Read sleep
-            val sleep = manager.readSleepSessions().toInt()
-            _sleepDuration.value = sleep
-        }
-    }
-
     fun sendToHealthApp () {
         // TODO
     }
