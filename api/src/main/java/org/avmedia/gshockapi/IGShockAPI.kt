@@ -59,4 +59,5 @@ interface IGShockAPI {
     suspend fun readMinHeartRate(): Int
     suspend fun readMaxHeartRate(): Int
     suspend fun readAvgHeartRate(): Int
+    suspend fun readExerciseSession(): Any
 }

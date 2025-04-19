@@ -507,4 +507,9 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         // TODO
         return 0
     }
+
+    override suspend fun readExerciseSession(): Any {
+        // TODO
+        return Any()
+    }
 }

@@ -333,7 +333,10 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
         return (70..80).random()
     }
 
-    override suspend fun readSleepDuration(): Int { 
+    override suspend fun readSleepDuration(): Int {
         return (250..350).random()
+    }
+    override suspend fun readExerciseSession(): Any {
+        return Any()
     }
 }

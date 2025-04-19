@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Nightlight
@@ -54,7 +55,6 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import kotlin.coroutines.coroutineContext
 
 @Composable
 fun HealthScreen(
@@ -155,7 +155,8 @@ fun HealthScreen(
                         )
                     } else {
                         // Your health cards
-                        ExerciseCard(steps)
+                        ExerciseSessionCard("Morning Run, Evening Walk")
+                        StepsCard(steps)
                         HeartRateCard(
                             minRate = minHeartRate,
                             avgRate = avgHeartRate,
@@ -264,6 +265,37 @@ private fun HeartRateCard(minRate: Int, avgRate: Int, maxRate: Int) {
 }
 
 @Composable
+private fun ExerciseSessionCard(exerciseTitle: String) {
+    AppCard(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.DirectionsRun,
+                    contentDescription = "Exercise",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                AppText(
+                    text = "Exercise Sessions"
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            AppText(
+                text = exerciseTitle.ifEmpty { "No exercise sessions today" }
+            )
+        }
+    }
+}
+
+@Composable
 private fun SleepCard(duration: Int) {
     AppCard(
         modifier = Modifier
@@ -351,7 +383,7 @@ private fun PermissionsCard(
 }
 
 @Composable
-private fun ExerciseCard(steps: Int) {
+private fun StepsCard(steps: Int) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
