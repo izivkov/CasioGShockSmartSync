@@ -14,11 +14,9 @@ import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata.Companion.autoRecordedWithId
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
-import kotlinx.coroutines.flow.map
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
+import kotlin.math.abs
 
 class HealthConnectManager(private val context: Context) : IHealthConnectManager {
     private val healthConnectClient by lazy { HealthConnectClient.getOrCreate(context) }
@@ -253,49 +251,44 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
         val timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
 
         return runCatching {
+            // Steps: Merge overlapping intervals and sum
             val totalSteps = runCatching {
                 val stepsRequest = ReadRecordsRequest(
                     recordType = StepsRecord::class,
                     timeRangeFilter = timeRangeFilter
                 )
-                val stepsResponse = healthConnectClient.readRecords(stepsRequest)
-                stepsResponse.records.sumOf { it.count.toInt() }
+                val stepsRecords = healthConnectClient.readRecords(stepsRequest).records
+                mergeOverlappingSteps(stepsRecords)
             }.getOrDefault(0)
 
+            // Heart Rate: Handle overlapping samples by taking closest values
             val (minHeartRate, maxHeartRate, avgHeartRate) = runCatching {
                 val heartRateRequest = ReadRecordsRequest(
                     recordType = HeartRateRecord::class,
                     timeRangeFilter = timeRangeFilter
                 )
-                val heartRateResponse = healthConnectClient.readRecords(heartRateRequest)
-                val heartRates = heartRateResponse.records.flatMap { it.samples }.map { it.beatsPerMinute }
-                Triple(
-                    heartRates.minOrNull()?.toInt() ?: 0,
-                    heartRates.maxOrNull()?.toInt() ?: 0,
-                    if (heartRates.isNotEmpty()) heartRates.average().toInt() else 0
-                )
+                val heartRateRecords = healthConnectClient.readRecords(heartRateRequest).records
+                processHeartRateRecords(heartRateRecords)
             }.getOrDefault(Triple(0, 0, 0))
 
+            // Sleep: Merge overlapping sleep sessions
             val totalSleepMinutes = runCatching {
                 val sleepRequest = ReadRecordsRequest(
                     recordType = SleepSessionRecord::class,
                     timeRangeFilter = timeRangeFilter
                 )
-                val sleepResponse = healthConnectClient.readRecords(sleepRequest)
-                sleepResponse.records.sumOf { record ->
-                    java.time.Duration.between(record.startTime, record.endTime).toMinutes().toInt()
-                }
+                val sleepRecords = healthConnectClient.readRecords(sleepRequest).records
+                calculateTotalSleepTime(sleepRecords)
             }.getOrDefault(0)
 
+            // Exercise: Remove duplicates within small time windows
             val exerciseTitles = runCatching {
                 val exerciseRequest = ReadRecordsRequest(
                     recordType = ExerciseSessionRecord::class,
                     timeRangeFilter = timeRangeFilter
                 )
-                val exerciseResponse = healthConnectClient.readRecords(exerciseRequest)
-                exerciseResponse.records
-                    .mapNotNull { it.title }
-                    .filterNotNull()
+                val exerciseRecords = healthConnectClient.readRecords(exerciseRequest).records
+                deduplicateExerciseSessions(exerciseRecords)
             }.getOrDefault(emptyList())
 
             AggregatedHealthData(
@@ -308,5 +301,96 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
             )
         }.onFailure { it.printStackTrace() }
             .getOrDefault(AggregatedHealthData())
+    }
+
+    private fun mergeOverlappingSteps(records: List<StepsRecord>): Int {
+        if (records.isEmpty()) return 0
+
+        // Sort by start time
+        val sortedRecords = records.sortedBy { it.startTime }
+        var totalSteps = 0
+        var lastEndTime = sortedRecords[0].startTime
+
+        for (record in sortedRecords) {
+            if (record.startTime > lastEndTime) {
+                // No overlap
+                totalSteps += record.count.toInt()
+            } else {
+                // Handle overlap by calculating the non-overlapping portion
+                val overlapRatio = 1 - (java.time.Duration.between(lastEndTime, record.endTime)
+                    .toMillis().toDouble() /
+                        java.time.Duration.between(record.startTime, record.endTime).toMillis())
+                totalSteps += (record.count.toInt() * (1 - overlapRatio)).toInt()
+            }
+            lastEndTime = maxOf(lastEndTime, record.endTime)
+        }
+        return totalSteps
+    }
+
+    private fun processHeartRateRecords(records: List<HeartRateRecord>): Triple<Int, Int, Int> {
+        val samples = mutableMapOf<Instant, Int>()
+
+        // Keep only the latest sample for each timestamp
+        records.forEach { record ->
+            record.samples.forEach { sample ->
+                samples[sample.time] = sample.beatsPerMinute.toInt()
+            }
+        }
+
+        val heartRates = samples.values
+        return if (heartRates.isNotEmpty()) {
+            Triple(
+                heartRates.minOrNull()!!,
+                heartRates.maxOrNull()!!,
+                heartRates.average().toInt()
+            )
+        } else {
+            Triple(0, 0, 0)
+        }
+    }
+
+    private fun calculateTotalSleepTime(records: List<SleepSessionRecord>): Int {
+        if (records.isEmpty()) return 0
+
+        // Sort by start time
+        val sortedRecords = records.sortedBy { it.startTime }
+        var totalMinutes = 0
+        var lastEndTime = sortedRecords[0].startTime
+
+        for (record in sortedRecords) {
+            if (record.startTime > lastEndTime) {
+                // No overlap
+                totalMinutes += java.time.Duration.between(record.startTime, record.endTime)
+                    .toMinutes().toInt()
+            } else {
+                // Handle overlap by taking the union of intervals
+                totalMinutes += java.time.Duration.between(lastEndTime, record.endTime)
+                    .toMinutes().toInt()
+            }
+            lastEndTime = maxOf(lastEndTime, record.endTime)
+        }
+        return totalMinutes
+    }
+
+    private fun deduplicateExerciseSessions(records: List<ExerciseSessionRecord>): List<String> {
+        // Group sessions by title and keep only the latest one within a 5-minute window
+        return records
+            .groupBy { it.title }
+            .mapNotNull { (title, sessions) ->
+                title?.takeIf {
+                    sessions.none { session1 ->
+                        sessions.any { session2 ->
+                            session1 != session2 &&
+                                    abs(
+                                        java.time.Duration.between(
+                                            session1.startTime,
+                                            session2.startTime
+                                        )
+                                            .toMinutes()
+                                    ) < 5
+                        }
+                    }
+                }
+            }
     }
 }

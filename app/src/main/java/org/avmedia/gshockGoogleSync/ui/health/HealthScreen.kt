@@ -203,6 +203,7 @@ fun BottomRow(
                     onClick = {
                         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
                             healthViewModel.sendToHealthApp()
+                            healthViewModel.readHealthData()
                         }
                     })
             )
@@ -296,7 +297,16 @@ private fun ExerciseSessionCard(exerciseTitle: String) {
 }
 
 @Composable
-private fun SleepCard(duration: Int) {
+private fun SleepCard(durationMinutes: Int) {
+    val hours = durationMinutes / 60
+    val minutes = durationMinutes % 60
+    val sleepText = when {
+        durationMinutes == 0 -> "No sleep data"
+        hours == 0 -> "$minutes min"
+        minutes == 0 -> "$hours h"
+        else -> "$hours h $minutes min"
+    }
+
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -320,7 +330,7 @@ private fun SleepCard(duration: Int) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             AppText(
-                text = String.format("$duration")
+                text = sleepText
             )
         }
     }

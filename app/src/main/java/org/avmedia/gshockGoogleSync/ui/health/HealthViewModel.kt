@@ -54,7 +54,7 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun readHealthData() {
+    suspend fun readHealthData() {
         val endTime = Clock.System.now().toJavaInstant()
         val startTime = endTime.minus(24, ChronoUnit.HOURS)
 
