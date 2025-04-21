@@ -12,13 +12,17 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata.Companion.autoRecordedWithId
-import kotlinx.coroutines.flow.Flow
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
+import kotlinx.coroutines.flow.map
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 
 class HealthConnectManager(private val context: Context) : IHealthConnectManager {
     private val healthConnectClient by lazy { HealthConnectClient.getOrCreate(context) }
-    private val healthRecordsContainer by lazy {HealthRecordsContainer()}
+    private val healthRecordsContainer by lazy { HealthRecordsContainer() }
 
     private val _permissions = setOf(
         HealthPermission.getReadPermission(StepsRecord::class),
@@ -115,6 +119,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
                     metadata = metadata
                 )
             }
+
             RecordClass.STEPS -> {
                 requireNotNull(steps) { "Steps count is required" }
                 require(steps > 0) { "Steps count must be greater than 0" }
@@ -128,6 +133,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
                     metadata = metadata
                 )
             }
+
             RecordClass.EXERCISE_SESSION -> {
                 requireNotNull(type) { "Exercise type is required" }
                 ExerciseSessionRecord(
@@ -145,7 +151,7 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
     }
 
     // 5. Insert all records
-    suspend fun insertToHealthConnect(healthConnectClient: HealthConnectClient) {
+    private suspend fun insertToHealthConnect(healthConnectClient: HealthConnectClient) {
         healthConnectClient.insertRecords(
             healthRecordsContainer.getAllRecords()
         )
@@ -228,5 +234,79 @@ class HealthConnectManager(private val context: Context) : IHealthConnectManager
 
         // Insert all records to Health Connect
         insertToHealthConnect(healthConnectClient)
+    }
+
+    // Data Aggregation
+    data class AggregatedHealthData(
+        val steps: Int = 0,
+        val minHeartRate: Int = 0,
+        val maxHeartRate: Int = 0,
+        val avgHeartRate: Int = 0,
+        val sleepDurationMinutes: Int = 0,
+        val exerciseSessions: List<String> = emptyList()
+    )
+
+    suspend fun getAggregatedHealthData(
+        startTime: Instant,
+        endTime: Instant
+    ): AggregatedHealthData {
+        val timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+
+        return runCatching {
+            val totalSteps = runCatching {
+                val stepsRequest = ReadRecordsRequest(
+                    recordType = StepsRecord::class,
+                    timeRangeFilter = timeRangeFilter
+                )
+                val stepsResponse = healthConnectClient.readRecords(stepsRequest)
+                stepsResponse.records.sumOf { it.count.toInt() }
+            }.getOrDefault(0)
+
+            val (minHeartRate, maxHeartRate, avgHeartRate) = runCatching {
+                val heartRateRequest = ReadRecordsRequest(
+                    recordType = HeartRateRecord::class,
+                    timeRangeFilter = timeRangeFilter
+                )
+                val heartRateResponse = healthConnectClient.readRecords(heartRateRequest)
+                val heartRates = heartRateResponse.records.flatMap { it.samples }.map { it.beatsPerMinute }
+                Triple(
+                    heartRates.minOrNull()?.toInt() ?: 0,
+                    heartRates.maxOrNull()?.toInt() ?: 0,
+                    if (heartRates.isNotEmpty()) heartRates.average().toInt() else 0
+                )
+            }.getOrDefault(Triple(0, 0, 0))
+
+            val totalSleepMinutes = runCatching {
+                val sleepRequest = ReadRecordsRequest(
+                    recordType = SleepSessionRecord::class,
+                    timeRangeFilter = timeRangeFilter
+                )
+                val sleepResponse = healthConnectClient.readRecords(sleepRequest)
+                sleepResponse.records.sumOf { record ->
+                    java.time.Duration.between(record.startTime, record.endTime).toMinutes().toInt()
+                }
+            }.getOrDefault(0)
+
+            val exerciseTitles = runCatching {
+                val exerciseRequest = ReadRecordsRequest(
+                    recordType = ExerciseSessionRecord::class,
+                    timeRangeFilter = timeRangeFilter
+                )
+                val exerciseResponse = healthConnectClient.readRecords(exerciseRequest)
+                exerciseResponse.records
+                    .mapNotNull { it.title }
+                    .filterNotNull()
+            }.getOrDefault(emptyList())
+
+            AggregatedHealthData(
+                steps = totalSteps,
+                minHeartRate = minHeartRate,
+                maxHeartRate = maxHeartRate,
+                avgHeartRate = avgHeartRate,
+                sleepDurationMinutes = totalSleepMinutes,
+                exerciseSessions = exerciseTitles
+            )
+        }.onFailure { it.printStackTrace() }
+            .getOrDefault(AggregatedHealthData())
     }
 }

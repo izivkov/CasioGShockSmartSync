@@ -1,10 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.records.ExerciseSessionRecord
-import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.metadata.DataOrigin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,18 +7,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.minus
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.health.HealthConnectManager
 import org.avmedia.gshockapi.ProgressEvents
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import java.time.temporal.ChronoUnit
+import kotlinx.datetime.toJavaInstant
 
 @HiltViewModel
 class HealthViewModel @Inject constructor(
-    private val api: GShockRepository,
     val translateApi: TranslateRepository
 ) : ViewModel() {
 
@@ -47,26 +43,31 @@ class HealthViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            readDataFromWatch()
+            readHealthData()
         }
     }
 
     fun startDataCollection(manager: HealthConnectManager) {
         healthConnectManager = manager
         scope.launch {
-            readDataFromWatch()
+            readHealthData()
         }
     }
 
-    private suspend fun readDataFromWatch() {
+    private suspend fun readHealthData() {
+        val endTime = Clock.System.now().toJavaInstant()
+        val startTime = endTime.minus(24, ChronoUnit.HOURS)
+
         runCatching {
-            _steps.value = api.readSteps()
-            _minHeartRate.value = api.readMinHeartRate()
-            _maxHeartRate.value = api.readMaxHeartRate()
-            _avgHeartRate.value = api.readAvgHeartRate()
-            _sleepDuration.value = api.readSleepDuration()
+            healthConnectManager?.getAggregatedHealthData(startTime, endTime)?.let { data ->
+                _steps.value = data.steps
+                _minHeartRate.value = data.minHeartRate
+                _maxHeartRate.value = data.maxHeartRate
+                _avgHeartRate.value = data.avgHeartRate
+                _sleepDuration.value = data.sleepDurationMinutes
+            }
         }.onFailure {
-            ProgressEvents.onNext("ApiError")
+            ProgressEvents.onNext("HealthConnectError")
         }
     }
 
