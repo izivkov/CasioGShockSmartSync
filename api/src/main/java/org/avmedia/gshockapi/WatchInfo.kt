@@ -6,7 +6,7 @@ package org.avmedia.gshockapi
  */
 object WatchInfo {
     enum class WatchModel {
-        GA, GW, DW, GMW, GPR, GST, MSG, GB001, GBD, MRG_B5000, GCW_B5000, EQB, ECB, ABL_100, UNKNOWN,
+        GA, GW, DW, GMW, GPR, GST, MSG, GB001, GBD, MRG_B5000, GCW_B5000, EQB, ECB, ABL_100, DW_H5600, UNKNOWN,
     }
 
     var name: String = ""
@@ -17,7 +17,7 @@ object WatchInfo {
 
     var worldCitiesCount = 2
     var dstCount = 3
-    private var alarmCount = 5
+    var alarmCount = 5
     var hasAutoLight = false
     var hasReminders = false
     var shortLightDuration = "2s"
@@ -42,7 +42,7 @@ object WatchInfo {
         var model: WatchModel,
         var worldCitiesCount: Int,
         var dstCount: Int,
-        var alarmCount: Int,
+        var alarmCount: Int = 5,
         var hasAutoLight: Boolean,
         var hasReminders: Boolean,
         var shortLightDuration: String,
@@ -70,6 +70,7 @@ object WatchInfo {
         ModelInfo(WatchModel.GB001, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s"),
         ModelInfo(WatchModel.MSG, 2, 1, 5, hasAutoLight = false, hasReminders = true, shortLightDuration = "1.5s", longLightDuration = "3s"),
         ModelInfo(WatchModel.GPR, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", weekLanguageSupported = false),
+        ModelInfo(WatchModel.DW_H5600, 2, 1, 4, hasAutoLight = true, hasReminders = false, shortLightDuration = "1s", longLightDuration = "5s", hasBatteryLevel = false, alwaysConnected = true),
         ModelInfo(WatchModel.DW, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s"),
         ModelInfo(WatchModel.GBD, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = false, hasTemperature = false),
         ModelInfo(WatchModel.EQB, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = false, hasTemperature = false),
@@ -111,6 +112,7 @@ object WatchInfo {
             shortName.startsWith("GA") -> WatchModel.GA
             shortName.startsWith("GB") -> WatchModel.GA
             shortName.startsWith("GW") -> WatchModel.GW
+            shortName.startsWith("DW-H5600") -> WatchModel.DW_H5600
             shortName.startsWith("DW") -> WatchModel.DW
             else -> WatchModel.UNKNOWN
         }

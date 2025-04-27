@@ -45,6 +45,8 @@ import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
 import org.avmedia.gshockGoogleSync.ui.health.HealthScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
+import org.avmedia.gshockGoogleSync.ui.time.WatchName
+import org.avmedia.gshockapi.WatchInfo
 import kotlin.time.Duration.Companion.seconds
 
 @Composable

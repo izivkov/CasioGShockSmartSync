@@ -34,6 +34,7 @@ object AppInfoIO {
             val appInfoCompactStr = Utils.toCompactString(data)
             if (appInfoCompactStr == "22FFFFFFFFFFFFFFFFFFFF00") {
                 IO.writeCmd(GetSetMode.SET, "223488F4E5D5AFC829E06D02")
+               // For the DW-H5600 we get:       "22b1faea51bd2f085f461502"
             }
         }
 

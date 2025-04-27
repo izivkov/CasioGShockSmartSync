@@ -18,6 +18,7 @@ import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -39,9 +40,8 @@ class AlarmViewModel @Inject constructor(
     private fun loadAlarms() {
         viewModelScope.launch {
             runCatching {
-                // Load the alarms initially
-                val loadedAlarms = api.getAlarms() // Call your suspend function here
-                _alarms.value = loadedAlarms
+                val loadedAlarms = api.getAlarms()
+                _alarms.value = loadedAlarms.take(WatchInfo.alarmCount)
                 AlarmsModel.clear()
                 AlarmsModel.addAll(ArrayList(_alarms.value))
             }.onFailure {

@@ -29,7 +29,7 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override suspend fun waitForConnection(deviceId: String?) {
-        ProgressEvents.onNext("DeviceName", "CASIO GW-B5600")
+        ProgressEvents.onNext("DeviceName", "CASIO DW-H5600")
 
         ProgressEvents.onNext("ConnectionStarted")
 
@@ -75,7 +75,7 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override suspend fun getWatchName(): String {
-        return "CASIO GW-B5600"
+        return "CASIO DW-H5600"
         // return "CASIO ECB-30"
     }
 
