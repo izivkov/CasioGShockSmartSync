@@ -34,6 +34,8 @@ object WatchInfo {
     var alwaysConnected = false
     var findButtonUserDefined = false
     var hasPowerSavingMode = true
+    var chimeInSettings: Boolean = false
+    var vibrate: Boolean = false
 
     /**
      * Info about the model.
@@ -56,6 +58,8 @@ object WatchInfo {
         val alwaysConnected: Boolean = false,
         val findButtonUserDefined: Boolean = false,
         val hasPowerSavingMode: Boolean = true,
+        val chimeInSettings: Boolean = false,
+        val vibrate: Boolean = false,
     )
 
     // @formatter:off
@@ -70,7 +74,7 @@ object WatchInfo {
         ModelInfo(WatchModel.GB001, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s"),
         ModelInfo(WatchModel.MSG, 2, 1, 5, hasAutoLight = false, hasReminders = true, shortLightDuration = "1.5s", longLightDuration = "3s"),
         ModelInfo(WatchModel.GPR, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", weekLanguageSupported = false),
-        ModelInfo(WatchModel.DW_H5600, 2, 1, 4, hasAutoLight = true, hasReminders = false, shortLightDuration = "1s", longLightDuration = "5s", hasBatteryLevel = false, alwaysConnected = true),
+        ModelInfo(WatchModel.DW_H5600, 2, 1, 4, vibrate = true, chimeInSettings=true, hasAutoLight = true, findButtonUserDefined=true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "5s", hasBatteryLevel = false, alwaysConnected = true),
         ModelInfo(WatchModel.DW, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s"),
         ModelInfo(WatchModel.GBD, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = false, hasTemperature = false),
         ModelInfo(WatchModel.EQB, 2, 1, 5, hasAutoLight = true, hasReminders = false, shortLightDuration = "1.5s", longLightDuration = "3s", worldCities = false, hasTemperature = false),
@@ -133,6 +137,8 @@ object WatchInfo {
         this.findButtonUserDefined = modelMap[model]!!.findButtonUserDefined
         this.hasPowerSavingMode = modelMap[model]!!.hasPowerSavingMode
         this.hasBatteryLevel = modelMap[model]!!.hasBatteryLevel
+        this.chimeInSettings = modelMap[model]!!.chimeInSettings
+        this.vibrate = modelMap[model]!!.vibrate
 
         ProgressEvents.onNext("DeviceName", this.name)
     }

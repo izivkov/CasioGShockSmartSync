@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Alarm
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.Alarms
@@ -22,7 +23,6 @@ object AlarmsIO {
         lateinit var deferredResult: CompletableDeferred<ArrayList<Alarm>>
     }
 
-    @Suppress("UNCHECKED_CAST")
     suspend fun request(): ArrayList<Alarm> {
         return CachedIO.request("GET_ALARMS") { key ->
             getAlarms(key)

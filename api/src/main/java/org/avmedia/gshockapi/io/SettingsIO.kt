@@ -16,11 +16,19 @@ import kotlin.experimental.inv
 import kotlin.experimental.or
 
 object SettingsIO {
-    val MASK_24_HOURS = 0b00000001
-    val MASK_BUTTON_TONE_OFF = 0b00000010
-    val MASK_AUTO_LIGHT_OFF = 0b00000100
-    val POWER_SAVING_MODE = 0b00010000
-    val DO_NOT_DISTURB_OFF = 0b01000000
+    private const val MASK_24_HOURS = 0b00000001
+    private const val MASK_BUTTON_TONE_OFF = 0b00000010
+    private const val MASK_AUTO_LIGHT_OFF = 0b00000100
+    private const val POWER_SAVING_MODE = 0b00010000
+    private const val DO_NOT_DISTURB_OFF = 0b01000000
+
+    // Button tone and vibration settings (DW-H5600 specific)
+    private const val SOUND_AND_VIBRATION = 0b1100  // Both sound and vibration (0x0C)
+    private const val VIBRATION_ONLY = 0b1000       // Vibration only (0x08)
+    private const val SOUND_ONLY = 0b0100           // Sound only (0x04)
+    private const val SILENT = 0b0000               // silent (0x00)
+
+    private const val CHIME = 0b00100000
 
     private object DeferredValueHolder {
         lateinit var deferredResult: CompletableDeferred<Settings>
@@ -74,6 +82,11 @@ Button Tone:
 on:     13 04 00 00 00 00 00 00 00 00 00 00
 off:    13 06 00 00 00 00 00 00 00 00 00 00
 
+For DW-H5600
+        13 04 00 00 00 00 00 00 00 00 00 00 0c 00 00 06 2d  // sound and vibration
+        13 04 00 00 00 00 00 00 00 00 00 00 04 00 00 06 2d  // vibration only
+        13 04 00 00 00 00 00 00 00 00 00 00 00 00 00 06 2d  // silent
+
 Auto Light: ?????
 on:     13 00 00 00 00 00 00 00 00 00 00 00
 off:    13 04 00 00 00 00 00 00 00 00 00 00
@@ -118,6 +131,16 @@ pwr. saving off:00010000
         settings.autoLight = settingArray[1] and MASK_AUTO_LIGHT_OFF == 0
         settings.powerSavingMode = settingArray[1] and POWER_SAVING_MODE == 0
         settings.DnD = settingArray[1] and DO_NOT_DISTURB_OFF == 0
+
+        // Check for key vibration and sound if array is long enough (DW-H5600 specific)
+        if (settingArray.size >= 13) {
+            val soundAndVibrationByte = settingArray[12]
+            settings.keyVibration = soundAndVibrationByte and VIBRATION_ONLY != 0  // Check vibration bit
+            settings.buttonTone = soundAndVibrationByte and SOUND_ONLY != 0    // Check sound bit
+
+            // 13 04 00 00 00 00 00 00 00 00 00 00 -> 20 <- 00 00 06 2d
+            settings.hourlyChime = soundAndVibrationByte and CHIME != 0
+        }
 
         if (settingArray[4] == 1) {
             settings.dateFormat = "DD:MM"
@@ -167,8 +190,11 @@ pwr. saving off:00010000
 
     object SettingsEncoder {
         fun encode(settings: JSONObject): ByteArray {
-            val arr = ByteArray(12)
+            // Create 17-byte array for DW-H5600 extended settings
+            val arr = ByteArray(17)
             arr[0] = CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte()
+
+            // Basic settings in byte 1
             if (settings.get("timeFormat") == "24h") {
                 arr[1] = (arr[1] or MASK_24_HOURS.toByte())
             }
@@ -181,24 +207,42 @@ pwr. saving off:00010000
             if (settings.get("powerSavingMode") == false) {
                 arr[1] = (arr[1] or POWER_SAVING_MODE.toByte())
             }
-
             if (settings.get("DnD") == false) {
                 arr[1] = (arr[1] or DO_NOT_DISTURB_OFF.toByte())
             }
 
-            if (settings.get("lightDuration") == "4s") {
-                arr[2] = 1
-            }
-            if (settings.get("dateFormat") == "DD:MM") arr[4] = 1
+            // Light duration and date format
+            arr[2] = if (settings.get("lightDuration") == "4s") 1 else 0
+            arr[4] = if (settings.get("dateFormat") == "DD:MM") 1 else 0
 
-            when (settings.get("language")) {
-                "English" -> arr[5] = 0
-                "Spanish" -> arr[5] = 1
-                "French" -> arr[5] = 2
-                "German" -> arr[5] = 3
-                "Italian" -> arr[5] = 4
-                "Russian" -> arr[5] = 5
+            // Language settings
+            arr[5] = when (settings.get("language")) {
+                "Spanish" -> 1
+                "French" -> 2
+                "German" -> 3
+                "Italian" -> 4
+                "Russian" -> 5
+                else -> 0 // English
             }
+
+            // Key vibration setting in byte 12
+            arr[12] = when {
+                settings.get("keyVibration") == true && settings.get("buttonTone") == true ->
+                    SOUND_AND_VIBRATION.toByte()
+                settings.get("keyVibration") == true ->
+                    VIBRATION_ONLY.toByte()
+                settings.get("buttonTone") == true ->
+                    SOUND_ONLY.toByte()
+                else ->
+                    SILENT.toByte()
+            }
+            if (settings.get("hourlyChime") == true) {
+                arr[12] = arr[12] or CHIME.toByte()
+            }
+
+            // Fixed values for last bytes (based on observed patterns)
+            arr[15] = 0x06
+            arr[16] = 0x2D
 
             return arr
         }

@@ -1,6 +1,10 @@
 package org.avmedia.gshockapi
 
 class Settings {
+    var hourlyChime: Boolean = false
+
+    var keyVibration: Boolean = false
+
     /**
      * "12h" or "24h"
      */
