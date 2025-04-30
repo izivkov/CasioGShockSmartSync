@@ -19,7 +19,7 @@ object IO {
     private lateinit var writer: (BluetoothDevice, BluetoothGattCharacteristic, ByteArray) -> Unit
 
     enum class WatchButton {
-        UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, NO_BUTTON, FIND_PHONE, INVALID
+        UPPER_LEFT, LOWER_LEFT, UPPER_RIGHT, LOWER_RIGHT, NO_BUTTON, FIND_PHONE, ALLAYS_CONNECTED_CONNECTION, INVALID
     }
 
     enum class DstState(val state: Int) { ZERO(0), TWO(2), FOUR(4) }

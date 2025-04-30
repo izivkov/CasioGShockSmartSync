@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.io.ButtonPressedIO
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.TimeAdjustmentInfo
 import java.time.DayOfWeek
@@ -71,6 +72,10 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override fun isFindPhoneButtonPressed(): Boolean {
+        return false
+    }
+
+    override fun isAlwaysConnectedConnectionPressed(): Boolean {
         return false
     }
 

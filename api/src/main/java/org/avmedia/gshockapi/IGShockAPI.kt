@@ -15,6 +15,7 @@ interface IGShockAPI {
     fun teardownConnection(device: BluetoothDevice)
     suspend fun getPressedButton(): IO.WatchButton
     fun isActionButtonPressed(): Boolean
+    fun isAlwaysConnectedConnectionPressed(): Boolean
     fun isNormalButtonPressed(): Boolean
     fun isAutoTimeStarted(): Boolean
     fun isFindPhoneButtonPressed(): Boolean

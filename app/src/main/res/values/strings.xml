@@ -203,4 +203,5 @@
     <string name="health_connect_permissions_required">Health Connect permissions required to send data to Health App.</string>
     <string name="health">Health</string>
     <string name="send_to_health_app">Send to Health App</string>
+    <string name="slide_to_unlock">Slide to Unlock</string>
 </resources>

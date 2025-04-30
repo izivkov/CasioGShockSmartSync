@@ -22,6 +22,7 @@ import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
+import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
@@ -88,19 +89,52 @@ class GShockApplication : Application() {
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
+    @Composable
+    private fun ContentSelector(
+        repository: GShockRepository,
+        translateApi: TranslateRepository,
+        onUnlocked: () -> Unit
+    ) {
+        when {
+            repository.isAlwaysConnectedConnectionPressed() -> {
+                CoverScreen(
+                    repository = repository,
+                    translateApi = translateApi,
+                    onUnlocked = onUnlocked
+                )
+            }
+            repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
+                RunActionsScreen(repository, translateApi)
+            }
+            repository.isFindPhoneButtonPressed() -> {
+                RunFindPhoneScreen(repository, translateApi)
+            }
+            else -> {
+                BottomNavigationBarWithPermissions(
+                    repository = repository,
+                    translateApi = translateApi
+                )
+            }
+        }
+    }
+
     private fun handleWatchInitialization() {
         context.setContent {
             StartScreen {
-                if (repository.isActionButtonPressed() || repository.isAutoTimeStarted()) {
-                    RunActionsScreen(repository, translateApi)
-                } else if (repository.isFindPhoneButtonPressed()) {
-                    RunFindPhoneScreen(repository, translateApi)
-                } else {
-                    BottomNavigationBarWithPermissions(
-                        repository = repository,
-                        translateApi = translateApi
-                    )
-                }
+                ContentSelector(
+                    repository = repository,
+                    translateApi = translateApi,
+                    onUnlocked = {
+                        context.setContent {
+                            StartScreen {
+                                BottomNavigationBarWithPermissions(
+                                    repository = repository,
+                                    translateApi = translateApi
+                                )
+                            }
+                        }
+                    }
+                )
             }
         }
     }
@@ -174,14 +208,6 @@ class GShockApplication : Application() {
         // Leave it to true.
         val reuseAddress = true
         var deviceAddress: String? = null
-
-//        if (reuseAddress) {
-//            val savedDeviceAddress =
-//                LocalDataStorage.get(this, "LastDeviceAddress", "")
-//            if (repository.validateBluetoothAddress(savedDeviceAddress)) {
-//                deviceAddress = savedDeviceAddress
-//            }
-//        }
 
         if (reuseAddress){
             val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()

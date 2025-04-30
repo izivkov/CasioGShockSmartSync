@@ -153,6 +153,11 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         return button == IO.WatchButton.LOWER_RIGHT
     }
 
+    override fun isAlwaysConnectedConnectionPressed(): Boolean {
+        val button = ButtonPressedIO.get()
+        return button == IO.WatchButton.ALLAYS_CONNECTED_CONNECTION
+    }
+
     /**
      * This function tells us if the connection was initiated by long-pressing the lower-left
      * button on the watch
