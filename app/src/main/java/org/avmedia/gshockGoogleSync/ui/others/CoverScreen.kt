@@ -43,7 +43,7 @@ fun CoverScreen(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                var isComplete by remember { mutableStateOf(false) }
+                var isPressed by remember { mutableStateOf(false) }
 
                 AppCard {
                     Box(
@@ -52,7 +52,9 @@ fun CoverScreen(
                                 awaitPointerEventScope {
                                     while (true) {
                                         val down = awaitFirstDown()
+                                        isPressed = true
                                         val longPress = awaitLongPressOrCancellation(down.id)
+                                        isPressed = false
                                         if (longPress != null) {
                                             onUnlock()
                                         }
@@ -62,7 +64,11 @@ fun CoverScreen(
                             .padding(horizontal = 32.dp, vertical = 16.dp)
                     ) {
                         AppTextVeryLarge(
-                            text = "Hold to unlock"
+                            text = "Hold to unlock",
+                            color = if (isPressed)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                            else
+                                MaterialTheme.colorScheme.primary
                         )
                     }
                 }

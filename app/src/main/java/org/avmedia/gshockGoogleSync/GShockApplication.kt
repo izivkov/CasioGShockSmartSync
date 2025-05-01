@@ -108,16 +108,7 @@ class GShockApplication : Application() {
                 ContentSelector(
                     repository = repository,
                     translateApi = translateApi,
-                    onUnlocked = {
-                        context.setContent {
-                            StartScreen {
-                                BottomNavigationBarWithPermissions(
-                                    repository = repository,
-                                    translateApi = translateApi
-                                )
-                            }
-                        }
-                    }
+                    onUnlocked = { goToNavigationScreen () }
                 )
             }
         }
@@ -137,18 +128,20 @@ class GShockApplication : Application() {
                     ContentSelector(
                         repository = repository,
                         translateApi = translateApi,
-                        onUnlocked = {
-                            context.setContent {
-                                StartScreen {
-                                    BottomNavigationBarWithPermissions(
-                                        repository = repository,
-                                        translateApi = translateApi
-                                    )
-                                }
-                            }
-                        }
+                        onUnlocked = { goToNavigationScreen () }
                     )
                 }
+            }
+        }
+    }
+
+    private fun goToNavigationScreen() {
+        context.setContent {
+            StartScreen {
+                BottomNavigationBarWithPermissions(
+                    repository = repository,
+                    translateApi = translateApi
+                )
             }
         }
     }
