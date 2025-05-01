@@ -13,6 +13,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
@@ -30,14 +31,15 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
 class GShockApplication : Application() {
-    lateinit var context: MainActivity
-    private lateinit var repository: GShockRepository
+    private var _context: MainActivity? = null
+    private val context get() = _context ?: throw IllegalStateException("MainActivity not initialized")
 
     @Inject
     lateinit var deviceManager: DeviceManager
@@ -45,37 +47,43 @@ class GShockApplication : Application() {
     @Inject
     lateinit var translateApi: TranslateRepository
 
-    fun init(context: MainActivity) {
-        this.context = context
+    @Inject
+    lateinit var repository: GShockRepository
 
+    override fun onCreate() {
+        super.onCreate()
+        setupEventSubscription()
+    }
+
+    fun init(context: MainActivity) {
+        _context = context
         if (LocalDataStorage.getKeepAlive(context)) {
             KeepAliveManager.getInstance(context).enable()
         }
     }
 
-    override fun onCreate() {
-        super.onCreate()
-
-        repository = EntryPointAccessors.fromApplication(
-            this,
-            RepositoryEntryPoint::class.java
-        ).getGShockRepository()
-
-        deviceManager
-        createAppEventsSubscription()
-    }
-
     @Composable
     fun Run() {
         StartScreen { PreConnectionScreen() }
-
-        // Ensure a new LaunchedEffect is triggered each time Run() is called by using a unique key
         LaunchedEffect(key1 = System.currentTimeMillis()) {
             waitForConnection()
         }
     }
 
-    private fun createAppEventsSubscription() {
+    @Composable
+    fun StartScreen(content: @Composable () -> Unit) {
+        GShockSmartSyncTheme {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                content()
+                PopupMessageReceiver()
+            }
+        }
+    }
+
+    private fun setupEventSubscription() {
         val eventActions = arrayOf(
             EventAction("ConnectionSetupComplete") {},
             EventAction("WatchInitializationCompleted") { handleWatchInitialization() },
@@ -83,39 +91,15 @@ class GShockApplication : Application() {
             EventAction("ApiError") { handleApiError() },
             EventAction("WaitForConnection") { waitForConnectionSuspended() },
             EventAction("Disconnect") { handleDisconnect() },
-            EventAction("HomeTimeUpdated") {}
+            EventAction("HomeTimeUpdated") {},
+            EventAction("RunActions") { handleRunAction() }
         )
 
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
-    @Composable
-    private fun ContentSelector(
-        repository: GShockRepository,
-        translateApi: TranslateRepository,
-        onUnlocked: () -> Unit
-    ) {
-        when {
-            repository.isAlwaysConnectedConnectionPressed() -> {
-                CoverScreen(
-                    repository = repository,
-                    translateApi = translateApi,
-                    onUnlocked = onUnlocked
-                )
-            }
-            repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
-                RunActionsScreen(repository, translateApi)
-            }
-            repository.isFindPhoneButtonPressed() -> {
-                RunFindPhoneScreen(repository, translateApi)
-            }
-            else -> {
-                BottomNavigationBarWithPermissions(
-                    repository = repository,
-                    translateApi = translateApi
-                )
-            }
-        }
+    private fun handleConnectionFailure() {
+        Timber.e("Failed to connect to the watch")
     }
 
     private fun handleWatchInitialization() {
@@ -139,24 +123,32 @@ class GShockApplication : Application() {
         }
     }
 
-    @Composable
-    fun StartScreen(content: @Composable () -> Unit) {
-        GShockSmartSyncTheme {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                content()
-                PopupMessageReceiver()
-            }
-        }
-    }
-
-    private fun handleConnectionFailure() {
+    private fun handleRunAction() {
         context.setContent {
             StartScreen {
-                PreConnectionScreen()
+                RunActionsScreen(repository, translateApi)
+            }
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(3000)
+            context.setContent {
+                StartScreen {
+                    ContentSelector(
+                        repository = repository,
+                        translateApi = translateApi,
+                        onUnlocked = {
+                            context.setContent {
+                                StartScreen {
+                                    BottomNavigationBarWithPermissions(
+                                        repository = repository,
+                                        translateApi = translateApi
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
             }
         }
     }
@@ -178,15 +170,12 @@ class GShockApplication : Application() {
     }
 
     private fun handleDisconnect() {
-        val device = ProgressEvents.getPayload("Disconnect") as? BluetoothDevice
-        if (device != null) {
-            repository.teardownConnection(device)
+        ProgressEvents.getPayload("Disconnect")?.let { device ->
+            repository.teardownConnection(device as BluetoothDevice)
         }
 
         Executors.newSingleThreadScheduledExecutor().schedule({
-            context.setContent {
-                Run()
-            }
+            context.setContent { Run() }
         }, 0L, TimeUnit.SECONDS)
     }
 
@@ -209,7 +198,7 @@ class GShockApplication : Application() {
         val reuseAddress = true
         var deviceAddress: String? = null
 
-        if (reuseAddress){
+        if (reuseAddress) {
             val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
             if (bluetoothAdapter?.isEnabled == true) {
                 val savedDeviceAddress = LocalDataStorage.get(this, "LastDeviceAddress", "")
@@ -220,4 +209,39 @@ class GShockApplication : Application() {
         }
         repository.waitForConnection(deviceAddress)
     }
+
+    @Composable
+    private fun ContentSelector(
+        repository: GShockRepository,
+        translateApi: TranslateRepository,
+        onUnlocked: () -> Unit
+    ) {
+        when {
+            repository.isAlwaysConnectedConnectionPressed() -> {
+                CoverScreen(
+                    translateApi = translateApi,
+                    onUnlock = onUnlocked,
+                    isConnected = repository.isConnected()
+                )
+            }
+            repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
+                RunActionsScreen(repository, translateApi)
+            }
+            repository.isFindPhoneButtonPressed() -> {
+                RunFindPhoneScreen(repository, translateApi)
+            }
+            else -> {
+                BottomNavigationBarWithPermissions(
+                    repository = repository,
+                    translateApi = translateApi
+                )
+            }
+        }
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        _context = null
+    }
 }
+

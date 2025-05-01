@@ -27,6 +27,7 @@ import org.avmedia.gshockapi.io.WorldCitiesIO
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 import timber.log.Timber
+import kotlin.collections.ArrayList
 
 object MessageDispatcher {
 
@@ -75,10 +76,25 @@ object MessageDispatcher {
     @RequiresApi(Build.VERSION_CODES.O)
     fun onReceived(data: String) {
         val intArray = Utils.toIntArray(data)
+
+        printArrayData(intArray)
+
         val key = intArray[0]
         if (dataReceivedMessages[key] == null) {
             Timber.e("GShockAPI", "Unknown key: $key")
         }
         dataReceivedMessages[key]?.invoke(data)
+    }
+
+    private fun printArrayData(intArray: ArrayList<Int>) {
+        val hexString = intArray.joinToString(" ") { "%02X".format(it) }
+        val ascii = intArray.map { it.toChar() }
+            .filter { it.isLetterOrDigit() || it.isWhitespace() }
+            .joinToString("")
+
+        println("HEX: $hexString")
+        if (ascii.isNotEmpty()) {
+            println("ASCII: $ascii")
+        }
     }
 }

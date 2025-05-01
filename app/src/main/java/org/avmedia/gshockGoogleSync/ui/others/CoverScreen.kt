@@ -1,108 +1,85 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import AppText
+import AppTextVeryLarge
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
-import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
-import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.ui.common.AppCard
 
 @Composable
 fun CoverScreen(
-    repository: GShockRepository,
     translateApi: TranslateRepository,
-    onUnlocked: () -> Unit
+    onUnlock: () -> Unit,
+    isConnected: Boolean = true
 ) {
-    var offsetX by remember { mutableStateOf(0f) }
-    var isUnlocked by remember { mutableStateOf(false) }
-    var isConnected by remember { mutableStateOf(false) }
-    val maxOffset = 200f
-
-    val alpha by animateFloatAsState(if (isUnlocked) 0f else 1f)
-
-    // Check connection status
-    LaunchedEffect(Unit) {
-        while (true) {
-            isConnected = repository.isConnected()
-            delay(1000)
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        // Connection status pill
-        AnimatedVisibility(
-            visible = isConnected,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 32.dp)
-        ) {
-            Surface(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = "Connected",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-        }
-
-        // Sliding content
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(alpha)
-                .padding(bottom = 80.dp),
-            contentAlignment = Alignment.Center
+                .systemBarsPadding()
         ) {
-            Text(
-                text = translateApi.stringResource(LocalContext.current, R.string.slide_to_unlock),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                var isComplete by remember { mutableStateOf(false) }
 
-            // Slider
-            Box(
-                modifier = Modifier
-                    .offset(x = offsetX.dp, y = 0.dp)
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(30.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures { _, dragAmount ->
-                            offsetX = (offsetX + dragAmount).coerceIn(0f, maxOffset)
-                            if (offsetX >= maxOffset) {
-                                isUnlocked = true
-                                onUnlocked()
+                AppCard {
+                    Box(
+                        modifier = Modifier
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val down = awaitFirstDown()
+                                        val longPress = awaitLongPressOrCancellation(down.id)
+                                        if (longPress != null) {
+                                            onUnlock()
+                                        }
+                                    }
+                                }
                             }
-                        }
+                            .padding(horizontal = 32.dp, vertical = 16.dp)
+                    ) {
+                        AppTextVeryLarge(
+                            text = "Hold to unlock"
+                        )
                     }
-            )
+                }
+            }
+
+            if (isConnected) {
+                AppCard(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 16.dp, bottom = 48.dp)
+                ) {
+                    AppText(
+                        text = "Connected",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
         }
     }
 }

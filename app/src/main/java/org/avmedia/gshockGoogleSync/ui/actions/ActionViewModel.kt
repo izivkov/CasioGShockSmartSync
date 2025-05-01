@@ -530,13 +530,8 @@ However, this way gives us more control on how to start the actions.
         updateActionsAndMap(loadData(context))
 
         val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
-
         ProgressEvents.onNext("ActionNames", actions.map{it.title})
-
-        runFilteredActions(
-            context,
-            actions
-            )
+        runFilteredActions(context, actions)
     }
 
     fun runActionForConnection(context: Context) {

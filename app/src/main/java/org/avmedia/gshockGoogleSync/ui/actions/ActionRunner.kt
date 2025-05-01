@@ -36,6 +36,14 @@ fun ActionRunner(
             }
         },
     )
-
     ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+
+    // Other actions that are triggered by sending messages, like "FindPhone" for always connected devices
+    val otherActions = arrayOf(
+        EventAction("RunActions") {
+            actionsViewModel.runActionsForActionButton(context)
+        },
+    )
+
+    ProgressEvents.runEventActions(Utils.AppHashCode()+"otherActions", otherActions)
 }
