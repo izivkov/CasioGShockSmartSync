@@ -192,4 +192,10 @@
     <string name="timer_set">定时器已设置</string>
     <string name="press_and_hold_for_3_seconds">长按\n3秒</string>
     <string name="short_press_to_run_actions">短按\n执行</string>
+    <string name="g_shock_smart_sync_is_running">G-Shock 智能同步正在运行</string>
+    <string name="preventing_the_app_from_closing">正在防止应用关闭</string>
+    <string name="health_connect_permissions_required">需要 Health Connect 权限才能将数据发送到健康应用。</string>
+    <string name="health">健康</string>
+    <string name="send_to_health_app">发送到健康应用</string>
+
 </resources>

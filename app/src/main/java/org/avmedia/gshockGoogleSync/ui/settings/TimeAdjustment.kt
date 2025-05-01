@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -129,7 +130,7 @@ fun TimeAdjustment(
                     Spacer(modifier = Modifier.weight(1f))
 
                     var showDialog by remember { mutableStateOf(false) }
-                    var selectedValue by remember { mutableStateOf(adjustmentMinutes.toInt()) }
+                    var selectedValue by remember { mutableIntStateOf(adjustmentMinutes.toInt()) }
 
                     AppTextLink(
                         text = "$adjustmentMinutes m",

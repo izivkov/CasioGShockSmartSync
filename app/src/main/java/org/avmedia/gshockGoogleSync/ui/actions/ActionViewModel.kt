@@ -8,6 +8,7 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.SystemClock
 import android.view.KeyEvent
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -409,7 +410,7 @@ class ActionsViewModel @Inject constructor(
 
             val dialIntent =
                 Intent(Intent.ACTION_CALL).setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            dialIntent.data = Uri.parse("tel:$phoneNumber")
+            dialIntent.data = "tel:$phoneNumber".toUri()
             context.startActivity(dialIntent)
         }
 
@@ -525,12 +526,11 @@ However, this way gives us more control on how to start the actions.
         }
     }
 
-
     fun runActionsForActionButton(context: Context) {
         updateActionsAndMap(loadData(context))
 
         val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
-        ProgressEvents.onNext("ActionNames", actions.map{it.title})
+        ProgressEvents.onNext("ActionNames", actions.map { it.title })
         runFilteredActions(context, actions)
     }
 

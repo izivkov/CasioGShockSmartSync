@@ -59,11 +59,11 @@ object LocalDataStorage {
         }
     }
 
-    fun getBoolean(context: Context, key: String): Boolean {
+    private fun getBoolean(context: Context, key: String): Boolean {
         return get(context, key, "false")?.toBoolean() ?: false
     }
 
-    fun putBoolean(context: Context, key: String, value: Boolean) {
+    private fun putBoolean(context: Context, key: String, value: Boolean) {
         scope.launch {
             put(context, key, value.toString())
         }
@@ -90,6 +90,7 @@ object LocalDataStorage {
     }
 
     fun getKeepAlive(context: Context): Boolean {
-        return getBoolean(context, "keepAlive")
+        // We want to set to "true" by default, that is why we don't use the getBoolean function.
+        return get(context, "keepAlive", "true")?.toBoolean() ?: true
     }
 }

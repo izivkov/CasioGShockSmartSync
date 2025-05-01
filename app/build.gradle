@@ -44,6 +44,13 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    lint {
+        disable += "IconLocation"
+    }
+
+    lintOptions {
+        disable 'TypographyFractions','TypographyQuotes'
+    }
 }
 
 dependencies {

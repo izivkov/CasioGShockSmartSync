@@ -56,11 +56,7 @@ data class BottomNavigationItem(
                     translateApi
                 )
             )
-        }
-
-        // Add remaining items
-        baseItems.addAll(
-            listOf(
+            if (WatchInfo.hasHealthFunctions) {
                 BottomNavigationItem(
                     label = Utils.shortenString(
                         translateApi.stringResource(LocalContext.current, R.string.health), 7
@@ -68,7 +64,13 @@ data class BottomNavigationItem(
                     icon = ImageVector.vectorResource(id = R.drawable.health),
                     route = Screens.Health.route,
                     translateApi
-                ),
+                )
+            }
+        }
+
+        // Add remaining items
+        baseItems.addAll(
+            listOf(
                 BottomNavigationItem(
                     label = Utils.shortenString(
                         translateApi.stringResource(LocalContext.current, R.string.actions), 7

@@ -204,4 +204,10 @@
     <string name="timer_set">タイマー設定済み</string>
     <string name="press_and_hold_for_3_seconds">3秒間\n長押し</string>
     <string name="short_press_to_run_actions">押して\n実行</string>
+
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync が実行中です</string>
+    <string name="preventing_the_app_from_closing">アプリが終了しないようにしています</string>
+    <string name="health_connect_permissions_required">ヘルスアプリにデータを送信するには、Health Connect の許可が必要です。</string>
+    <string name="health">健康</string>
+    <string name="send_to_health_app">ヘルスアプリに送信</string>
 </resources>

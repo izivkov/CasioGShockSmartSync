@@ -198,10 +198,9 @@
     <string name="timer_set">Timer Set</string>
     <string name="press_and_hold_for_3_seconds">Press and\nhold for 3\nseconds</string>
     <string name="short_press_to_run_actions">Short-press\nto run\nActions</string>
-    <string name="g_shock_smart_sync_is_running" tools:ignore="MissingTranslation">G-Shock Smart Sync is Running</string>
-    <string name="preventing_the_app_from_closing" tools:ignore="MissingTranslation">Preventing the app from closing</string>
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync is Running</string>
+    <string name="preventing_the_app_from_closing">Preventing the app from closing</string>
     <string name="health_connect_permissions_required">Health Connect permissions required to send data to Health App.</string>
     <string name="health">Health</string>
     <string name="send_to_health_app">Send to Health App</string>
-    <string name="slide_to_unlock">Slide to Unlock</string>
 </resources>
