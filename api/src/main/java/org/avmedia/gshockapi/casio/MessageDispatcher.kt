@@ -76,9 +76,7 @@ object MessageDispatcher {
     @RequiresApi(Build.VERSION_CODES.O)
     fun onReceived(data: String) {
         val intArray = Utils.toIntArray(data)
-
-        printArrayData(intArray)
-
+        // printArrayData(intArray)
         val key = intArray[0]
         if (dataReceivedMessages[key] == null) {
             Timber.e("GShockAPI", "Unknown key: $key")

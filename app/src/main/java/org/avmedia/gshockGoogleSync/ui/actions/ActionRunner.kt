@@ -45,5 +45,5 @@ fun ActionRunner(
         },
     )
 
-    ProgressEvents.runEventActions(Utils.AppHashCode()+"otherActions", otherActions)
+    ProgressEvents.runEventActions(Utils.AppHashCode() + "otherActions", otherActions)
 }
