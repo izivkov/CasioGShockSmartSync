@@ -196,9 +196,12 @@
     <string name="short_press_to_run_actions">Натисни за\nдействия</string>
 
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync работи</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync не работи.</string>
     <string name="preventing_the_app_from_closing">Предотвратява се затварянето на приложението</string>
     <string name="health_connect_permissions_required">Необходими са разрешения за Health Connect, за да се изпращат данни към приложението за здраве.</string>
     <string name="health">Здраве</string>
     <string name="send_to_health_app">Изпрати към приложението за здраве</string>
-
+    <string name="health_connect_not_available">"Health Connect" не е наличен. Моля, инсталирайте го.</string>
+    <string name="cover_hold_to_unlock">Задръжте, за да отключите</string>
+    <string name="cover_connected">Свързан</string>
 </resources>

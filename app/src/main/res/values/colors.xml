@@ -2,7 +2,6 @@
     <!-- Existing Colors -->
     <color name="indigo_500">#3F51B5</color>
     <color name="grey_500">#9E9E9E</color>
-    <color name="pink_A200">#FF4081</color>
 
     <!-- App Colors -->
     <color name="colorPrimary">@color/indigo_500</color>

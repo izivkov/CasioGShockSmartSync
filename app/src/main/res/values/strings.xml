@@ -200,7 +200,14 @@
     <string name="short_press_to_run_actions">Short-press\nto run\nActions</string>
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync is Running</string>
     <string name="preventing_the_app_from_closing">Preventing the app from closing</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync is not running.</string>
     <string name="health_connect_permissions_required">Health Connect permissions required to send data to Health App.</string>
     <string name="health">Health</string>
     <string name="send_to_health_app">Send to Health App</string>
+    <string name="health_connect_not_available">\"Health Connect\" not available. Please install it.</string>
+
+    <string name="cover_hold_to_unlock">Hold to unlock</string>
+    <string name="cover_connected">Connected</string>
+
+
 </resources>

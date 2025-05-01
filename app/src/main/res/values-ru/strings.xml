@@ -195,8 +195,12 @@
     <string name="press_and_hold_for_3_seconds">Удерживать\n3 сек</string>
     <string name="short_press_to_run_actions">Нажать для\nдействий</string>
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync запущен</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync не запущен</string>
     <string name="preventing_the_app_from_closing">Предотвращение закрытия приложения</string>
     <string name="health_connect_permissions_required">Для отправки данных в приложение Здоровье требуются разрешения Health Connect.</string>
     <string name="health">Здоровье</string>
     <string name="send_to_health_app">Отправить в приложение Здоровье</string>
+    <string name="health_connect_not_available">«Health Connect» недоступен. Пожалуйста, установите его.</string>
+    <string name="cover_hold_to_unlock">Удерживайте для разблокировки</string>
+    <string name="cover_connected">Подключено</string>
 </resources>

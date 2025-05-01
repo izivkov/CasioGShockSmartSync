@@ -20,7 +20,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 
@@ -64,7 +66,7 @@ fun CoverScreen(
                             .padding(horizontal = 32.dp, vertical = 16.dp)
                     ) {
                         AppTextVeryLarge(
-                            text = "Hold to unlock",
+                            text = translateApi.stringResource(LocalContext.current, R.string.cover_hold_to_unlock),
                             color = if (isPressed)
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                             else
@@ -78,10 +80,10 @@ fun CoverScreen(
                 AppCard(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(end = 16.dp, bottom = 48.dp)
+                        .padding(end = 16.dp, bottom = 12.dp)
                 ) {
                     AppText(
-                        text = "Connected",
+                        text = translateApi.stringResource(LocalContext.current, R.string.cover_connected),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }

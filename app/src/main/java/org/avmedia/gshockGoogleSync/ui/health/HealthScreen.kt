@@ -108,7 +108,7 @@ fun HealthScreen(
 
     LaunchedEffect(Unit) {
         if (!healthConnectManager.isHealthConnectAvailable()) {
-            AppSnackbar("Health Connect not available. Please install it.")
+            AppSnackbar(healthViewModel.translateApi.getString(context, R.string.health_connect_not_available))
             onDenyPermissionsOrNotInstalled()
             launchHealthConnectInstall(context)
             return@LaunchedEffect

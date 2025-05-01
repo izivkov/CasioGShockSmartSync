@@ -201,9 +201,12 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="short_press_to_run_actions">Appuyer pour\nactions</string>
 
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync est en cours d’exécution</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync n’est pas en cours d’exécution</string>
     <string name="preventing_the_app_from_closing">Empêche la fermeture de l’application</string>
     <string name="health_connect_permissions_required">Les autorisations Health Connect sont requises pour envoyer des données à l’application Santé.</string>
     <string name="health">Santé</string>
     <string name="send_to_health_app">Envoyer à l’application Santé</string>
-
+    <string name="health_connect_not_available">"Health Connect" n\'est pas disponible. Veuillez l\'installer.</string>
+    <string name="cover_hold_to_unlock">Maintenir pour déverrouiller</string>
+    <string name="cover_connected">Connecté</string>
 </resources>

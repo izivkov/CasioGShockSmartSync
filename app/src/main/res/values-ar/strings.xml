@@ -186,9 +186,13 @@
     <string name="short_press_to_run_actions">اضغط\nللإجراءات</string>
 
     <string name="g_shock_smart_sync_is_running">تزامن G-Shock Smart قيد التشغيل</string>
+    <string name="g_shock_smart_sync_is_not_running">تزامن G-Shock الذكي غير مفعل.</string>
     <string name="preventing_the_app_from_closing">يتم منع التطبيق من الإغلاق</string>
     <string name="health_connect_permissions_required">مطلوب أذونات Health Connect لإرسال البيانات إلى تطبيق الصحة.</string>
     <string name="health">الصحة</string>
     <string name="send_to_health_app">إرسال إلى تطبيق الصحة</string>
+    <string name="health_connect_not_available">"Health Connect" غير متوفر. يرجى تثبيته.</string>
+    <string name="cover_hold_to_unlock">اضغط مع الاستمرار لإلغاء القفل</string>
+    <string name="cover_connected">متصل</string>
 
 </resources>

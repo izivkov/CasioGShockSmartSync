@@ -195,9 +195,12 @@
     <string name="short_press_to_run_actions">Drücken für\nAktionen</string>
 
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync wird ausgeführt</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync läuft nicht.</string>
     <string name="preventing_the_app_from_closing">Verhindert das Schließen der App</string>
     <string name="health_connect_permissions_required">Health Connect-Berechtigungen sind erforderlich, um Daten an die Gesundheits-App zu senden.</string>
     <string name="health">Gesundheit</string>
     <string name="send_to_health_app">An Gesundheits-App senden</string>
-
+    <string name="health_connect_not_available">"Health Connect" ist nicht verfügbar. Bitte installieren Sie es.</string>
+    <string name="cover_hold_to_unlock">Zum Entsperren halten</string>
+    <string name="cover_connected">Verbunden</string>
 </resources>

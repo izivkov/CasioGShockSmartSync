@@ -1,194 +1,189 @@
-<resources>
-    <string name="title_time">الوقت</string>
-    <string name="title_alarms">المنبهات</string>
-    <string name="title_events">الأحداث</string>
-    <string name="title_settings">الإعدادات</string>
-    <string name="events">الأحداث</string>
-    <string name="alarms">المنبهات</string>
-    <string name="time">الوقت</string>
-    <string name="send_alarms_to_watch">إرسال إلى\n الساعة</string>
-    <string name="enabled">مفعل</string>
-    <string name="disabled">معطل</string>
-    <string name="send_alarms_to_phone">إرسال إلى\nالهاتف</string>
-    <string name="send_events_to_watch">إرسال إلى الساعة\n التذكيرات</string>
-    <string name="connection_screen_info"><![CDATA[للمتابعة إلى الشاشة التالية، اضغط مع الاستمرار على زر <b>اليسار السفلي</b> في الساعة لمدة 3 ثوانٍ. بعد الصفارة المزدوجة الثانية، ستعرض التطبيق شاشة ضبط الوقت.
-    <p><b>تأكد من أن تطبيق كاسيو الرسمي غير قيد التشغيل، لأنه سيؤثر على هذا التطبيق.</b></p>
-    <p>لتنفيذ الإجراءات المحددة في شاشة <b>الإجراءات</b>، اضغط ضغطاً خفيفاً على زر <b>اليمين السفلي</b>. الإجراءات هي تطبيقات على هاتفك مثل <b>التقاط صورة</b>. باستخدام الإجراءات، تعمل الساعة كجهاز تحكم عن بعد لهاتفك.</p>]]>
-    </string>
-    <string name="alarms_screen_info"><![CDATA[تحتوي ساعات <b>B5600/B5000/B2100</b> على 5 منبهات وإعدادات "الإشارة" (جرس الساعة) الموضحة هنا. يمكن تحديث المنبهات بالضغط على قيمة وقت كل منبه. ستظهر نافذة جديدة تتيح لك ضبط وقت المنبه. بعد ضبط المنبهات، يمكنك إرسالها إلى الساعة أو إلى تطبيق المنبهات على الهاتف.]]></string>
-    <string name="events_screen_info"><![CDATA[تعرض هذه الشاشة الأحداث من <b>تقويم Google</b> وتتيح لك إرسالها إلى <b>التذكيرات</b> في الساعة.\n\nإذا لم تظهر أي أحداث، فتأكد من وجود أحداث مستقبلية أو أحداث مكررة غير منتهية في تقويم Google الخاص بك.]]>
-    </string>
-    <string name="actions">الإجراءات</string>
-    <string name="title_actions">الإجراءات</string>
-    <string name="actions_screen_info"><![CDATA[يتم تنفيذ الإجراءات المحددة عندما يقوم المستخدم <b>بالضغط القصير</b> على زر <b>اليمين السفلي</b> للساعة من الشاشة الرئيسية. باستخدام هذه الإجراءات، تعمل الساعة كجهاز تحكم عن بعد لهاتفك.]]></string>
-    <string name="feb_22_mar_24">22-فبراير - 24-مارس</string>
-    <string name="weekly">أسبوعياً</string>
-    <string name="action_item">عنصر الإجراء</string>
-    <string name="voice_assistant">المساعد الصوتي</string>
-    <string name="front_cam">الكاميرا الأمامية</string>
-    <string name="back_cam">الكاميرا الخلفية</string>
-    <string name="take_a_photo">التقاط صورة</string>
-    <string name="info">معلومات</string>
-    <string name="daily">يومياً</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="title_time">Idő</string>
+    <string name="title_alarms">Ébresztő</string>
+    <string name="title_events">Események</string>
+    <string name="title_settings">Beállítások</string>
+    <string name="events">Események</string>
+    <string name="alarms">Ébresztő</string>
+    <string name="time">Idő</string>
+    <string name="send_alarms_to_watch">Átküldés az órára</string>
+    <string name="enabled">Be</string>
+    <string name="disabled">Ki</string>
+    <string name="send_alarms_to_phone">Átküldés a\ntelefonra</string>
+    <string name="send_events_to_watch">Átküldés az órára</string>
+    <string name="connection_screen_info">"<![CDATA[Tartsa nyomva a <b>BAL ALSÓ</b> gombot 3 márodpercig. Az óra kétszer fog duplán csipogni. A második dupla csipogás után az alkamazás kapcsolódni fog az órához, és a gombot el lehet engedni.     <p><b>Ez az alkalmazás összeakad a gyári CASIO alkalmazással, a kettő ne fusson egyszerre!</b></p>     <p>Az óra <b>JOBB ALSÓ</b> gombjának megnyomásával lehet indítani különböző beállított feladatokat. Ezeket a  <b>Feladatok</b> képernyőn lehet módosítani. Ilyen feladat lehet például egy <b>fénykép készítése</b>.     Gyakorlatilag az órát egy egyszerű távvezérlőként lehet használni a telefon valamely funckiójának eléréséhez.</p>     <p>Ez az alkalmazás az F-DROID-on érhető el: https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync</p>     ]]>     "</string>
+    <string name="alarms_screen_info"><![CDATA[A <b>B5600/B5000/B2100</b> órákon 5 külön ébresztési időpontot lehet beállítani, és itt lehet az óránkénti csipogást ("SIG") is be/kikapcsolni. Az ébresztési időpontokat külön lehet bállítani. Ha ez megvolt, akkor az "Átküldés az órára" gombbal lehet az új beállításokat érvénybe helyezni. Ezen kívül, az itt beállított ébresztési időpontokat az Android rendszer órájára is át lehet küldeni az "Átküldés a telefonra" gombbal. Így az óra és a telefon egyszerre tud ébreszteni.]]></string>
+    <string name="events_screen_info"><![CDATA[Itt a <b>Google Naptár</b> eseményei láthatóak, és itt van lehetőség az óra emlékeztető funkciókát ("REM") a naptárbeli eseményekkel összerendelni.]]>
+</string>
+    <string name="actions">Feladatok</string>
+    <string name="title_actions">Feladatok</string>
+    <string name="actions_screen_info"><![CDATA[A beállított feladatot az óra <b>JOBB-ALSÓ</b> gombjának megnyomásával lehet indítani.]]></string>
+    <string name="feb_22_mar_24">Feb-22 - Már-24</string>
+    <string name="weekly">HETI</string>
+    <string name="action_item">Feladat</string>
+    <string name="voice_assistant">Hangasszisztens</string>
+    <string name="front_cam">Szelfi-\nkamera</string>
+    <string name="back_cam">Fő-\nkamera</string>
+    <string name="take_a_photo">Fényképezés</string>
+    <string name="info">Infó</string>
+    <string name="daily">Napi</string>
     <string name="_12_00">12:00</string>
-    <string name="email_item">عنصر البريد الإلكتروني</string>
-    <string name="email_example_com">me@example.com</string>
-    <string name="watch_alarms">منبهات الساعة</string>
-    <string name="signal_chime">الإشارة (جرس الساعة)</string>
-    <string name="google_calendar_events">أحداث تقويم Google</string>
-    <string name="local_time">الوقت المحلي</string>
-    <string name="send_to_watch">إرسال إلى\nالساعة</string>
-    <string name="phonecall_item">عنصر المكالمة الهاتفية</string>
-    <string name="home_time">وقت المنزل</string>
-    <string name="running_actions">تشغيل الإجراءات</string>
-    <string name="title_placeholder">عنصر نائب للعنوان</string>
-    <string name="settings">الإعدادات</string>
-    <string name="send_to_watch_settings">إرسال إلى\nالساعة</string>
-    <string name="auto_configure_settings">تعبئة القيم تلقائياً</string>
-    <string name="time_format">تنسيق الوقت</string>
-    <string name="_12h">12 ساعة</string>
-    <string name="_24h">24 ساعة</string>
-    <string name="date_format">تنسيق التاريخ</string>
-    <string name="language">اللغة</string>
-    <string name="operational_sound">صوت أزرار التشغيل</string>
-    <string name="power_saving_mode">وضع توفير الطاقة</string>
-    <string name="select_language">اختر اللغة</string>
-    <string name="auto_fill_help"><![CDATA[القيم التي يتم تعبئتها تلقائياً مستمدة كما يلي:
-        <li>تنسيق الوقت/التاريخ واللغة يتم الحصول عليها من إعدادات الهاتف.</li>
-        <li>يتم إيقاف نغمة الأزرار إذا كان الهاتف في وضع "عدم الإزعاج"، ويتم تشغيلها في حالات أخرى.</li>
-        <li>سيتم ضبط وضع توفير الطاقة إذا كانت نسبة البطارية 15٪ أو أقل.</li>
-        ملاحظة: <i>لن تتغير القيم إلا إذا تم إرسالها مرة أخرى، حتى إذا تغيرت الشروط (مثل تفعيل/تعطيل وضع عدم الإزعاج).</i>
+    <string name="email_item">Email küldése</string>
+    <string name="email_example_com">uristen@menny.hu</string>
+    <string name="watch_alarms">Ébresztők</string>
+    <string name="signal_chime">Óránkénti csipogás (SIG)</string>
+    <string name="google_calendar_events">Google Naptár Események</string>
+    <string name="local_time">Helyi idő</string>
+    <string name="send_to_watch">Átküldés az\nórára</string>
+    <string name="phonecall_item">Telefonhívás</string>
+    <string name="home_time">Helyi idő</string>
+    <string name="running_actions">Futó feladatok</string>
+    <string name="title_placeholder">Címke</string>
+    <string name="settings">Beállítások</string>
+    <string name="send_to_watch_settings">Órára\nküldés</string>
+    <string name="auto_configure_settings">Formátum másolása telefonról</string>
+    <string name="time_format">Formátum</string>
+    <string name="_12h">12 órás</string>
+    <string name="_24h">24 órás</string>
+    <string name="date_format">Nap-hónap</string>
+    <string name="language">Óra nyelve</string>
+    <string name="operational_sound">Gombnyomáskor csipogjon</string>
+    <string name="power_saving_mode">Elemkímélő mód</string>
+    <string name="select_language">Napok-hónapok nyelve:</string>
+    <string name="auto_fill_help"><![CDATA[Az alábbi étékek kerülnek automatikus kitöltésre:
+        <li>A Dátum- és időformátum, és a nyelvi beállítások a telefon beállításait követik.</li>
+        <li>A gombcsipogás ki lesz kapcsolva, ha a telefon "Ne zavarjanak" módban van.</li>
+        <li>Az elemkímélő mód be lesz kapcsolva, ha ez elem 15%% töltöttség alá merül.</li>
+        Fontos: <i>Ezek a beállítások csak az "Átküldés az órára" gomb megnyomása után lesznek érvényben.</i>
         ]]>
     </string>
-    <string name="cancel">إلغاء</string>
-    <string name="ok">موافق</string>
-    <string name="timerDialogTitle">المؤقت</string>
-    <string name="info_home_time"><![CDATA[<b>وقت المنزل</b> يعرض المنطقة الزمنية للساعة. عندما يقوم التطبيق بضبط وقت الساعة (يدوياً أو تلقائياً)، فإنه سيضبط أيضًا <b>وقت المنزل، تعويض الوقت</b> و<b>التوقيت الصيفي</b> (إذا كان ذلك مناسباً) بناءً على المنطقة الزمنية الحالية. لذا لا حاجة لتبديل <b>وقت العالم</b> و<b>وقت المنزل</b> عند السفر إلى منطقة زمنية أخرى.]]>
+    <string name="cancel">Mégsem</string>
+    <string name="ok">OK</string>
+    <string name="timerDialogTitle">Időzítő</string>
+    <string name="info_home_time">
+        <![CDATA[A <b>Helyi idő</b> az óra aktuális időzónája.
+        Az alkalmazás ezt automatikusan módosítja amikor időt állít be. Az időzóna és a téli/nyári időszámítás az Android rendszer helymeghatározási szolgáltatásával kerül beállításra. Tehát nem kell a helyi időt és a világidőt külön-külön beállítani, ha a telefon időzónát vált, akkor az órán is látszani fog.]]>
     </string>
+    <string name="time_adjustment_info" ><![CDATA[
+    <li>Az <b>Automatikus Időbeállítás</b> naponta négyszer szinkronizálja az órát az Android rendszerrel.</li>
+    <li>Ezen kívül a beállított naptári események emlékeztetőit is szinkronizálni tudja.</li>
+    ]]></string>
+    <string name="image_of_casio_watch">Casio Watch</string>
+    <string name="connection_screen_device"> <![CDATA[
+        <li>Az alkamazás a legutóbb használt órához próbál kapcsolódni. Ha több óra van használatban, akkor a "Óra elfelejtése" gombot kell megnyomni, és utána a másik órával is lehet kapcsolódni.</li>
 
-    <string name="time_adjustment_info"><![CDATA[
-    <li><b>إعداد ضبط الوقت</b> يتيح للتطبيق تحديث وقت الساعة تلقائيًا 4 مرات يوميًا.</li>
-    <li>في نفس الوقت، سيقوم التطبيق بتحديث <b>التذكيرات (الأحداث)</b> في الساعة من <b>تقويم Google</b> إذا كانت خاصية <b>تعيين التذكيرات من تقويم Google</b> مفعّلة.</li>
-]]></string>
-    <string name="image_of_casio_watch">ساعة كاسيو</string>
-    <string name="connection_screen_device"><![CDATA[
-    <li>افتراضيًا، سيحاول التطبيق الاتصال بالساعة التي تم الاتصال بها مسبقًا. إذا كنت ترغب في الاتصال بساعة مختلفة،
-    اضغط على زر <b>نسيان</b> ثم قم بتوصيل الساعة الجديدة كالمعتاد. بعد ذلك، سيحاول التطبيق الاتصال بالساعة الجديدة.</li>
-    <li>سيكتشف التطبيق تلقائيًا طراز الساعة.</li>
-]]></string>
-    <string name="forget">نسيان</string>
-    <string name="hand_adjustment">ضبط العقارب</string>
-    <string name="move_hand_to_the_left">تحريك العقرب إلى اليسار</string>
-    <string name="reset_hand_at_12_position">إعادة العقرب إلى موضع الساعة 12</string>
-    <string name="move_hand_to_the_right">تحريك العقرب إلى اليمين</string>
-    <string name="auto_light">الإضاءة التلقائية</string>
-    <string name="off">إيقاف</string>
-    <string name="on">تشغيل</string>
-    <string name="illumination_period">فترة الإضاءة</string>
-    <string name="mm_dd">الشهر:اليوم</string>
-    <string name="dd_mm">اليوم:الشهر</string>
-    <string name="time_adjustment">ضبط الوقت</string>
-    <string name="notify_me">أخبرني</string>
-    <string name="timer">المؤقت</string>
+        <li>Az alkalmazás automatikusan lecseréli a képet az éppen használt órára.</li>
+        ]]></string>
+    <string name="forget">Óra elfelejtése</string>
+    <string name="hand_adjustment">Mutatók beállítása</string>
+    <string name="move_hand_to_the_left">Mutatót vissza</string>
+    <string name="reset_hand_at_12_position">Mutatót 12 órára</string>
+    <string name="move_hand_to_the_right">Mutatót előre</string>
+    <string name="auto_light">Automatikus világítás</string>
+    <string name="off">Ki</string>
+    <string name="on">Be</string>
+    <string name="illumination_period">Világítási idő</string>
+    <string name="mm_dd">HH:NN</string>
+    <string name="dd_mm">NN:HH</string>
+    <string name="time_adjustment">Automatikus időbeállítás</string>
+    <string name="notify_me">Időbeállítás visszajelzése a telefonon</string>
+    <string name="timer">Időzítő</string>
     <string name="_00_00_00">00:00:00</string>
     <string name="_00">00</string>
     <string name="semi_column">:</string>
-    <string name="no_watch">لا توجد ساعة</string>
-    <string name="set_time">ضبط الوقت</string>
-    <string name="find_phone">ابحث عن الهاتف</string>
-    <string name="set_reminders">تعيين التذكيرات من\nتقويم Google</string>
-    <string name="take_photo">التقاط صورة</string>
-    <string name="toggle_flashlight">تشغيل/إيقاف المصباح</string>
-    <string name="start_voice_assistant">تشغيل مساعد الصوت</string>
-    <string name="next_track">تخطي إلى المسار التالي</string>
-    <string name="emergency_actions">الإجراءات الطارئة:</string>
-    <string name="make_phonecall">إجراء مكالمة هاتفية</string>
+    <string name="no_watch">Nincs utoljára\nhasznált óra</string>
+    <string name="set_time">Idő beállítása</string>
+    <string name="find_phone">Telefonkereső</string>
+    <string name="set_reminders">Google Naptár\nEmlékeztetők</string>
+
+    <string name="take_photo">Fényképezés</string>
+    <string name="toggle_flashlight">Zseblámpa bekapcsolása</string>
+    <string name="start_voice_assistant">Hangasszisztens indítása</string>
+    <string name="next_track">Következő zeneszám</string>
+    <string name="emergency_actions">Vészhelyzeti feladat:</string>
+    <string name="make_phonecall">Telefonhívás</string>
     <string name="adjustment_time_info"><![CDATA[
-    <li>يتم ضبط الوقت تلقائيًا 4 مرات يوميًا، بعد ساعات 12:00 صباحًا، 6:00 صباحًا، 12:00 ظهرًا و6:00 مساءً.</li>
-    <li>هذا الإعداد يحدد عدد الدقائق بعد الساعة التي يتم فيها ضبط الوقت. إذا قمت بضبط هذه القيمة على 25، سيتم ضبط الوقت في الساعة 12:25 صباحًا، 6:25 صباحًا، 12:25 ظهرًا و6:25 مساءً.</li>
-    <li>إذا كان لديك ساعات متعددة، يمكنك التحكم في وقت ضبط كل ساعة بشكل فردي.</li>
-]]></string>
-    <string name="adjustment_time_minutes">متى يتم الضبط\n(الدقائق بعد الساعة)</string>
+        <li>Az automatikus időbeállítás naponta négyszer történik: 00:00, 06:00, 12:00 és 18:00-kor.</li>
+        <li>A funckió percre pontos időpontját itt külön lehet beállítani. Ha itt például \'25\' perc van megadva, akkor az időbeállítás rendre 00:25, 06:25, 12:25 és 18:25-kor for megtörténni.</li>
+        <li>Így meg lehet akadályozni, hogy több óra egyszerre akarjon a telefonnal időt beállítani.</li>
+        ]]></string>
+    <string name="adjustment_time_minutes">Időbeállítás késleltetése\n(perc)</string>
     <string name="skip_to_next_track_info"><![CDATA[
-    إذا كنت تستمع إلى موسيقى أو تشاهد فيديو في مشغل وسائط مثل Spotify أو YouTube أو YTMusic على هاتفك، سيقوم هذا الإجراء بتخطي الأغنية أو الفيديو التالي.
-    يعمل أيضًا مع Android Auto.
-]]></string>
-    <string name="set_prayer_alarms">ضبط تنبيهات الصلاة</string>
+        Ha a telefonon támogatott zenelejátszó alkalmazás fut (pl. Spotify, Youtube, YouTube Music), akkor az óra jobb alsó gombjának megnyomásával a következő zeneszámra lehet léptetni. Ez a funkció Android Auto-val is működik.]]></string>
+    <string name="set_prayer_alarms">Imaidők</string>
     <string name="prayer_times_info"><![CDATA[
-    <li>هذا الإجراء سيضبط التنبيهات الخمس في الساعة لأوقات الصلاة الإسلامية <b>الفجر</b>، <b>الظهر</b>، <b>العصر</b>، <b>المغرب</b> و<b>العشاء</b>.</li>
-    <li>تختلف الأوقات بناءً على موقعك والتاريخ الحالي، لذا لتحقيق أفضل دقة، قم بتشغيل هذا الإجراء يوميًا.
-    إذا كان هذا الإجراء مفعّلًا، فسيتم تحديث التنبيهات تلقائيًا أثناء ضبط الوقت التلقائي، 4 مرات يوميًا.</li>
-    <li>تُستخدم طرق الحساب التالية بناءً على موقعك:
-        <b>أمريكا الشمالية</b>,
-        <b>ديانات</b>,
-        <b>المصري</b>,
-        <b>دبي</b>,
-        <b>أم القرى</b>,
-        <b>قطر</b>,
-        <b>سنغافورة</b>,
-        <b>الكويت</b> و
-        <b>رابطة العالم الإسلامي</b> في كل مكان آخر.
-    </li>
-    <li>للاقتراحات والتصحيحات، يرجى التواصل عبر <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
-]]></string>
-    <string name="do_not_disturb_dnd">عدم الإزعاج (DnD)</string>
-    <string name="mirror_phone_s_dnd">نسخ وضع عدم الإزعاج للهاتف</string>
+        <li>Az Iszlám vallásban a napi imák ideje (<b>Fadzsr</b>, <b>Dhúr</b>, <b>Ászr</b>, <b>Magrib</b>, és <b>Isa</b>) napi szinten változik.</li>
+        <li>Az imaidők a telefon helymeghatározási szoltáltatása alapján kerülnek kiszámításra. Ezt a feladatot célszerű naponta futtatni, hogy az imaidőt pontosan jelezze. Ha ez be van kapcsolva, akkor az öt ébresztési időpont automatikusan a napi/helyi imaidőkre lesz állítva.</li>
+        <li>Az alábbi helyekre külön számítási algoritmus van az alkalmazásban:
+            <b>Észak-Amerika</b>,
+            <b>Diyanet</b>,
+            <b>Egyiptom</b>,
+            <b>Dubaj</b>,
+            <b>Umm Al Kura</b>,
+            <b>Katar</b>,
+            <b>Szingapúr</b>,
+            <b>Kuvait</b> és
+            <b>Muszlim világliga</b> a világ bármely más részén.
+        </li>
+        <li>Ha bármi kérés van ezzel kapcsolatban, akkor (angolul) ide lehet írni: <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
+    ]]></string>
+    <string name="do_not_disturb_dnd">Ne zavarjanak mód</string>
+    <string name="mirror_phone_s_dnd">A telefon "ne zavarjanak" beállítását használja</string>
     <string name="DnD_info_message"><![CDATA[
-    عند التحديد، سيتم كتم جميع التنبيهات، المؤقتات، والتنبيهات الساعية على الساعة.
-    <li>عند التشغيل/الإيقاف يدويًا، سيتم تفعيل عدم الإزعاج بعد الضغط على زر <b>الإرسال إلى الساعة</b>.<\li>
-    <li>عند النسخ، سيتم التفعيل فورًا عند تغيير إعداد عدم الإزعاج على الهاتف، بغض النظر عن الشاشة الحالية.<\li>
-]]></string>
-    <string name="auto_light_at_night_only">الإضاءة التلقائية ليلًا فقط</string>
-    <string name="keep_alive">ابقاء التطبيق نشطًا (يستهلك المزيد من البطارية)</string>
-    <string name="enter_timer_time">أدخل وقت المؤقت</string>
-    <string name="max_reminders_reached">تم الوصول إلى الحد الأقصى من التذكيرات. يرجى تعطيل بعضها قبل تحديد تذكيرات جديدة.</string>
-    <string name="fine_time_adjustment">الضبط الدقيق</string>
+    Ha ez be van kapcsolva, akkor az óra nem fog csipogni.
+    <li>Ez a beállítás csak az <b>Átküldés az órára</b> gomb megnyomása után kerül érvénybe.<\li>
+    <li>Ha a "Ne zavarjanak mód" a telefon beállítását követi, akkor az alkamazás automatikusan némítja az órát is, amikor a telefon "Ne zavarjanak" módba kerül.<\li>]]></string>
+    <string name="auto_light_at_night_only">Csak éjszaka legyen automatikus világítás</string>
+    <string name="keep_alive">Bluetooth kapcsolat fenntartása.\nEz sok energiát használ.</string>
+    <string name="enter_timer_time">Időtartam:</string>
+    <string name="max_reminders_reached">Ennél több emlékezetőt nem lehet beállítani." </string>
+    <string name="fine_time_adjustment">Finombeállítás</string>
     <string name="_0000">0000</string>
     <string name="fine_adjustment_info"><![CDATA[
-    عند ضبط الوقت، قد تعرض بعض موديلات الساعات وقتًا غير دقيق بفارق بضع ثوانٍ. يتيح لك هذا الإعداد ضبط الوقت بدقة.
-    يتم إضافة القيمة، بالميلي ثانية، إلى الوقت المرسل من التطبيق إلى الساعة. يمكنك ضبط قيم بين -5000 و5000. على سبيل المثال،
-    إذا كانت ساعتك متقدمة بمقدار 2.5 ثانية عن الوقت الفعلي، قم بضبط هذه القيمة إلى -2500 لمزامنتها بدقة.
-]]></string>
-    <string name="required_permissions_denied_cannot_access_screen">تم رفض الأذونات المطلوبة. لا يمكن الوصول إلى الشاشة!</string>
-    <string name="required_permissions_denied_cannot_access_actions">تم رفض الأذونات المطلوبة. لا يمكن الوصول إلى الإجراءات.</string>
-    <string name="calendar_permission_denied_cannot_access_events">تم رفض إذن الوصول إلى التقويم. لا يمكن الوصول إلى الأحداث.</string>
-    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">" قم بمسح تخزين التطبيق من إعدادات Android وأعد تشغيل التطبيق لإضافة الأذونات."</string>
-    <string name="phone_number">رقم الهاتف</string>
-    <string name="enter_phone_number">أدخل رقم الهاتف</string>
-    <string name="when_to_run">وقت التنفيذ</string>
-    <string name="minutes_between_0_and_59">الدقائق بين 0 و59</string>
-    <string name="fine_adjustment">التعديل الدقيق</string>
-    <string name="ms_between_10000_and_10000">ميلي ثانية بين -10000 و10000</string>
-    <string name="sending_time_to_watch">يتم إرسال الوقت إلى الساعة…</string>
-    <string name="time_set">تم ضبط الوقت</string>
-    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">خطأ في API! تأكد من أن تطبيق G-Shock الرسمي غير قيد التشغيل.</string>
-    <string name="bluetooth_is_not_enabled">البلوتوث غير مفعل.</string>
-    <string name="disconnected_due_to_inactivity">تم قطع الاتصال بسبب عدم النشاط.</string>
-    <string name="when_found_lift_phone_to_stop_ringing">عند العثور عليه، ارفع الهاتف لإيقاف الرنين</string>
-    <string name="voice_assistant_not_available_on_this_device">المساعد الصوتي غير متوفر على هذا الجهاز!</string>
-    <string name="cannot_go_to_next_track">لا يمكن الانتقال إلى المسار التالي!</string>
-    <string name="image_captured">تم التقاط الصورة: %1$s</string>
-    <string name="emaillocationaction_emailaddress">إجراء تحديد الموقع عبر البريد الإلكتروني: عنوان البريد الإلكتروني: %1$s</string>
-    <string name="camera_capture_error">خطأ في التقاط الصورة: %1$s</string>
-    <string name="flashlight_not_available">المصباح غير متوفر</string>
-    <string name="unable_to_get_default_sound_uri">غير قادر على الحصول على رابط الصوت الافتراضي</string>
-    <string name="alarms_set_to_watch">تم ضبط المنبهات على الساعة</string>
-    <string name="events_set">تم ضبط الأحداث</string>
-    <string name="event_not_compatible_with_watch">الحدث غير متوافق مع الساعة</string>
-    <string name="settings_sent_to_watch">تم إرسال الإعدادات إلى الساعة</string>
-    <string name="sorry_your_device_does_not_support_bluetooth_exiting">عذراً، جهازك لا يدعم البلوتوث. يتم الإغلاق…</string>
-    <string name="permission_required_to_turn_on_bluetooth">يتطلب الإذن لتشغيل البلوتوث.</string>
-    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">ليس لديك أذونات لتشغيل البلوتوث. يرجى تشغيله يدوياً.</string>
-    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">تم رفض الأذونات بشكل دائم. يرجى تمكينها في إعدادات التطبيق.</string>
-    <string name="you_have_not_given_permission_to_to_run_action">لم تمنح الإذن لتشغيل الإجراء %1$s.</string>
-    <string name="timer_set">تم تعيين المؤقت</string>
-    <string name="press_and_hold_for_3_seconds">اضغط\n٣ ثواني</string>
-    <string name="short_press_to_run_actions">اضغط\nللإجراءات</string>
+    Néha az időbeállítás nem sikerül túl pontosan, pár másodpercnyi különbség előfordulhat. Ilyenkor a kézi finombeállítás segíthet a helyzeten. +/- 10000 milliszekundum tartományban működik.]]></string>
+    <string name="required_permissions_denied_cannot_access_screen">Ez a funckió nem elérhető, mert egy szükséges engedély meg lett tagadva.</string>
+    <string name="required_permissions_denied_cannot_access_actions">Ez a funckió nem elérhető, mert egy szükséges engedély meg lett tagadva.</string>
+    <string name="calendar_permission_denied_cannot_access_events">Ez a funckió nem elérhető, mert a Google Naptár hozzáférés nincs engedélyezve.</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">"Az engedélyek újbóli kéréséhez ki kell törölni az alkalmazás teljes tárhelyét."</string>
+    <string name="phone_number">Telefonszám</string>
+    <string name="enter_phone_number">Telefonszám:</string>
+    <string name="when_to_run">Mikor fusson</string>
+    <string name="minutes_between_0_and_59">Perc (0…59)</string>
+    <string name="fine_adjustment">Finombeállítás</string>
+    <string name="ms_between_10000_and_10000">-10000…10000 ms</string>
+    <string name="sending_time_to_watch">Időbeállítás átküldése…</string>
+    <string name="time_set">Időbeállítás</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Valószínüleg a gyári CASIO G-SHOCK alkalmazás fut..</string>
+    <string name="bluetooth_is_not_enabled">Bluetooth ki van kapcsolva.</string>
+    <string name="disconnected_due_to_inactivity">Időtúllépés, szétkapcsolva.</string>
+    <string name="when_found_lift_phone_to_stop_ringing">Ha meglett a telefon, felemeléskor csendesendjen el</string>
+    <string name="voice_assistant_not_available_on_this_device">Ezen az eszközön nem elérhető a hangasszisztens!</string>
+    <string name="cannot_go_to_next_track">Nem sikerült zeneszámot léptetni!!</string>
+    <string name="image_captured">Fotó: %1$s</string>
+    <string name="emaillocationaction_emailaddress">EmailLocationAction: emailAddress: %1$s</string>
+    <string name="camera_capture_error">Fotó készítése sikertelen: %1$s</string>
+    <string name="flashlight_not_available">A zseblámpa hibát jelzett.</string>
+    <string name="unable_to_get_default_sound_uri">Unable to get default sound URI</string>
+    <string name="alarms_set_to_watch">Az ébresztési időpontok sikeresen át lettek küldve az órára.</string>
+    <string name="events_set">Események beállítva</string>
+    <string name="event_not_compatible_with_watch">Ez az esemény nem kompatibilis az órával</string>
+    <string name="settings_sent_to_watch">Beállítások átküldve az órára.</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">Ezen az eszközön nincs Bluetooth. Az alkalmazás nem használható.</string>
+    <string name="permission_required_to_turn_on_bluetooth">Bluetooth-használati engedély szükséges.</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">Bluetooth-használati engedély megtagadva. A Bluetooth-t kézzel kell bekapcsolni.</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Az engedélyek nincsenek megadva. Az alkamazás beállításainál lehet az engedélyeket megadni.</string>
+    <string name="you_have_not_given_permission_to_to_run_action">%1$s: Sajnos ehhez a feladathoz nincs engedély megadva.</string>
+    <string name="timer_set">Időzítő beállítva.</string>
+    <string name="press_and_hold_for_3_seconds">Kapcsolódás:\nTartsa nyomva\n3 másodpercig</string>
+    <string name="short_press_to_run_actions">Ezzel a\ngombbal lehet\nfeladatot futtatni</string>
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync fut.</string>
+    <string name="preventing_the_app_from_closing">…akadályozza az alkalmazás bezárását.</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync nem fut.</string>
 
-    <string name="g_shock_smart_sync_is_running">تزامن G-Shock Smart قيد التشغيل</string>
-    <string name="preventing_the_app_from_closing">يتم منع التطبيق من الإغلاق</string>
-    <string name="health_connect_permissions_required">مطلوب أذونات Health Connect لإرسال البيانات إلى تطبيق الصحة.</string>
-    <string name="health">الصحة</string>
-    <string name="send_to_health_app">إرسال إلى تطبيق الصحة</string>
-
+    <string name="health_connect_permissions_required">A Health Connect engedélyei szükségesek az adatok Egészség alkalmazásba küldéséhez.</string>
+    <string name="health">Egészség</string>
+    <string name="send_to_health_app">Küldés az Egészség alkalmazásba</string>
+    <string name="health_connect_not_available">"Health Connect" nem elérhető. Kérem, telepítse.</string>
+    <string name="cover_hold_to_unlock">Feloldáshoz tartsa lenyomva</string>
+    <string name="cover_connected">Csatlakoztatva</string>
 </resources>
