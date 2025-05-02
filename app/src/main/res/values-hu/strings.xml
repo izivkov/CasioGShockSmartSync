@@ -186,4 +186,22 @@
     <string name="health_connect_not_available">"Health Connect" nem elérhető. Kérem, telepítse.</string>
     <string name="cover_hold_to_unlock">Feloldáshoz tartsa lenyomva</string>
     <string name="cover_connected">Csatlakoztatva</string>
+    <string name="no_sleep_data">Nincs alvásadat</string>
+    <string name="sleep">Alvás</string>
+    <string name="min">min</string>
+    <string name="max">max</string>
+    <string name="h">ó</string> <!-- "ó" is short for "óra" (hour) -->
+    <string name="permission_request">Engedélykérés</string>
+    <string name="need_health_data">Az egészségügyi adatok követéséhez a G-Shock Smart Sync hozzáférést igényel a következőkhöz:</string>
+    <string name="steps_data">Lépésadatok</string>
+    <string name="heart_rate_data">Pulzusadatok</string>
+    <string name="sleep_data">Alvásadatok</string>
+    <string name="deny">Elutasítás</string>
+    <string name="allow">Engedélyezés</string>
+    <string name="steps">Lépések</string>
+    <string name="daily_steps">Napi lépések</string>
+    <string name="heart_rate">Pulzus</string>
+    <string name="exercise">Gyakorlat</string>
+    <string name="exercise_session">Edzésszakaszok</string>
+    <string name="no_exercise_today">Ma nincs edzés</string>
 </resources>

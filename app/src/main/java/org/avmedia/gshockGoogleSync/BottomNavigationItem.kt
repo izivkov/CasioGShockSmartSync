@@ -41,10 +41,22 @@ data class BottomNavigationItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_alarm_black_24dp),
                 route = Screens.Alarms.route,
                 translateApi
-            )
+            ),
         )
 
-        // Add Events screen only if watch supports reminders
+        if (WatchInfo.hasHealthFunctions) {
+            baseItems.add(
+                BottomNavigationItem(
+                    label = Utils.shortenString(
+                        translateApi.stringResource(LocalContext.current, R.string.health), 7
+                    ),
+                    icon = ImageVector.vectorResource(id = R.drawable.health),
+                    route = Screens.Health.route,
+                    translateApi
+                )
+            )
+        }
+
         if (WatchInfo.hasReminders) {
             baseItems.add(
                 BottomNavigationItem(
@@ -56,16 +68,6 @@ data class BottomNavigationItem(
                     translateApi
                 )
             )
-            if (WatchInfo.hasHealthFunctions) {
-                BottomNavigationItem(
-                    label = Utils.shortenString(
-                        translateApi.stringResource(LocalContext.current, R.string.health), 7
-                    ),
-                    icon = ImageVector.vectorResource(id = R.drawable.health),
-                    route = Screens.Health.route,
-                    translateApi
-                )
-            }
         }
 
         // Add remaining items

@@ -47,6 +47,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.health.HealthConnectManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
@@ -108,7 +109,12 @@ fun HealthScreen(
 
     LaunchedEffect(Unit) {
         if (!healthConnectManager.isHealthConnectAvailable()) {
-            AppSnackbar(healthViewModel.translateApi.getString(context, R.string.health_connect_not_available))
+            AppSnackbar(
+                healthViewModel.translateApi.getString(
+                    context,
+                    R.string.health_connect_not_available
+                )
+            )
             onDenyPermissionsOrNotInstalled()
             launchHealthConnectInstall(context)
             return@LaunchedEffect
@@ -151,18 +157,24 @@ fun HealthScreen(
                     if (showPermissionsCard) {
                         PermissionsCard(
                             onGrantClick = { permissionLauncher.launch(healthConnectManager.permissions) },
-                            onDenyPermissions = onDenyPermissionsOrNotInstalled
+                            onDenyPermissions = onDenyPermissionsOrNotInstalled,
+                            translateApi = healthViewModel.translateApi,
                         )
                     } else {
                         // Your health cards
-                        ExerciseSessionCard("Morning Run, Evening Walk")
-                        StepsCard(steps)
+                        ExerciseSessionCard("Morning Run, Evening Walk",
+                            translateApi = healthViewModel.translateApi)
+                        StepsCard(steps, healthViewModel.translateApi)
                         HeartRateCard(
                             minRate = minHeartRate,
                             avgRate = avgHeartRate,
-                            maxRate = maxHeartRate
+                            maxRate = maxHeartRate,
+                            translateApi = healthViewModel.translateApi
                         )
-                        SleepCard(sleepDuration)
+                        SleepCard(
+                            durationMinutes = sleepDuration,
+                            translateApi = healthViewModel.translateApi
+                        )
                     }
                 }
 
@@ -230,7 +242,10 @@ private fun HeartRateMetric(label: String, value: String) {
 }
 
 @Composable
-private fun HeartRateCard(minRate: Int, avgRate: Int, maxRate: Int) {
+private fun HeartRateCard(
+    minRate: Int, avgRate: Int, maxRate: Int,
+    translateApi: TranslateRepository
+) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -244,12 +259,12 @@ private fun HeartRateCard(minRate: Int, avgRate: Int, maxRate: Int) {
             ) {
                 Icon(
                     imageVector = Icons.Filled.MonitorHeart,
-                    contentDescription = "Heart Rate",
+                    contentDescription = translateApi.stringResource(LocalContext.current, R.string.heart_rate),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
-                    text = "Heart Rate",
+                    text = translateApi.stringResource(LocalContext.current, R.string.heart_rate)
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -266,7 +281,8 @@ private fun HeartRateCard(minRate: Int, avgRate: Int, maxRate: Int) {
 }
 
 @Composable
-private fun ExerciseSessionCard(exerciseTitle: String) {
+private fun ExerciseSessionCard(exerciseTitle: String,
+                                translateApi: TranslateRepository) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -280,31 +296,45 @@ private fun ExerciseSessionCard(exerciseTitle: String) {
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.DirectionsRun,
-                    contentDescription = "Exercise",
+                    contentDescription = translateApi.stringResource(LocalContext.current, R.string.exercise),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
-                    text = "Exercise Sessions"
+                    text = translateApi.stringResource(LocalContext.current, R.string.exercise_session), // "Exercise Sessions"
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
             AppText(
-                text = exerciseTitle.ifEmpty { "No exercise sessions today" }
+                text = exerciseTitle.ifEmpty {
+                    translateApi.stringResource(LocalContext.current, R.string.no_exercise_today)
+                }
             )
         }
     }
 }
 
 @Composable
-private fun SleepCard(durationMinutes: Int) {
+private fun SleepCard(
+    durationMinutes: Int,
+    translateApi: TranslateRepository
+) {
     val hours = durationMinutes / 60
     val minutes = durationMinutes % 60
     val sleepText = when {
-        durationMinutes == 0 -> "No sleep data"
-        hours == 0 -> "$minutes min"
-        minutes == 0 -> "$hours h"
-        else -> "$hours h $minutes min"
+        durationMinutes == 0 -> translateApi.stringResource(
+            LocalContext.current,
+            R.string.no_sleep_data
+        )
+
+        hours == 0 -> "$minutes ${translateApi.stringResource(LocalContext.current, R.string.min)}"
+        minutes == 0 -> "$hours ${translateApi.stringResource(LocalContext.current, R.string.h)}"
+        else -> "$hours ${
+            translateApi.stringResource(
+                LocalContext.current,
+                R.string.h
+            )
+        } $minutes ${translateApi.stringResource(LocalContext.current, R.string.min)}"
     }
 
     AppCard(
@@ -320,12 +350,15 @@ private fun SleepCard(durationMinutes: Int) {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Nightlight,
-                    contentDescription = "Sleep",
+                    contentDescription = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.sleep
+                    ),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
-                    text = "Sleep Duration",
+                    text = translateApi.stringResource(LocalContext.current, R.string.sleep_data)
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -340,6 +373,7 @@ private fun SleepCard(durationMinutes: Int) {
 private fun PermissionsCard(
     onGrantClick: () -> Unit,
     onDenyPermissions: () -> Unit,
+    translateApi: TranslateRepository,
 ) {
     Box(
         modifier = Modifier
@@ -356,19 +390,40 @@ private fun PermissionsCard(
                 horizontalAlignment = Alignment.Start
             ) {
                 AppText(
-                    text = "Permission request",
+                    text = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.permission_request
+                    ),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
                 AppText(
-                    text = "To track your health data, G-Shock Smart Sync needs access to:",
+                    text = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.need_health_data
+                    ),
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
 
                 Column(modifier = Modifier.padding(start = 8.dp, bottom = 16.dp)) {
-                    AppText("• Steps data")
-                    AppText("• Heart rate data")
-                    AppText("• Sleep data")
+                    AppText(
+                        "• " + translateApi.stringResource(
+                            LocalContext.current,
+                            R.string.steps_data
+                        )
+                    )
+                    AppText(
+                        "• " + translateApi.stringResource(
+                            LocalContext.current,
+                            R.string.heart_rate_data
+                        )
+                    )
+                    AppText(
+                        "• " + translateApi.stringResource(
+                            LocalContext.current,
+                            R.string.sleep_data
+                        )
+                    )
                 }
 
                 Row(
@@ -379,12 +434,12 @@ private fun PermissionsCard(
                 ) {
                     AppButton(
                         onClick = onDenyPermissions,
-                        text = "Deny",
+                        text = translateApi.stringResource(LocalContext.current, R.string.deny)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     AppButton(
                         onClick = onGrantClick,
-                        text = "Allow",
+                        text = translateApi.stringResource(LocalContext.current, R.string.allow)
                     )
                 }
             }
@@ -393,7 +448,10 @@ private fun PermissionsCard(
 }
 
 @Composable
-private fun StepsCard(steps: Int) {
+private fun StepsCard(
+    steps: Int,
+    translateApi: TranslateRepository,
+) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -407,17 +465,25 @@ private fun StepsCard(steps: Int) {
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.DirectionsWalk,
-                    contentDescription = "Steps",
+                    contentDescription = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.steps
+                    ),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
-                    text = "Daily Steps",
+                    text = translateApi.stringResource(LocalContext.current, R.string.daily_steps)
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
             AppText(
-                text = "$steps steps",
+                text = "$steps ${
+                    translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.steps
+                    )
+                }",
             )
         }
     }

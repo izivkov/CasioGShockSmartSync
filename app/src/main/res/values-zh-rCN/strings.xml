@@ -201,4 +201,22 @@
     <string name="health_connect_not_available">“Health Connect”不可用。请安装它。</string>
     <string name="cover_hold_to_unlock">按住以解锁</string>
     <string name="cover_connected">已连接</string>
+    <string name="no_sleep_data">无睡眠数据</string>
+    <string name="sleep">睡眠</string>
+    <string name="min">最小</string>
+    <string name="max">最大</string>
+    <string name="h">小时</string>
+    <string name="permission_request">权限请求</string>
+    <string name="need_health_data">为了跟踪您的健康数据，G-Shock Smart Sync 需要访问以下内容：</string>
+    <string name="steps_data">步数数据</string>
+    <string name="heart_rate_data">心率数据</string>
+    <string name="sleep_data">睡眠数据</string>
+    <string name="deny">拒绝</string>
+    <string name="allow">允许</string>
+    <string name="steps">步数</string>
+    <string name="daily_steps">每日步数</string>
+    <string name="heart_rate">心率</string>
+    <string name="exercise">锻炼</string>
+    <string name="exercise_session">锻炼记录</string>
+    <string name="no_exercise_today">今天没有锻炼记录</string>
 </resources>

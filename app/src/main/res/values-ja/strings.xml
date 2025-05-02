@@ -214,4 +214,22 @@
     <string name="health_connect_not_available">「Health Connect」は利用できません。インストールしてください。</string>
     <string name="cover_hold_to_unlock">長押ししてロック解除</string>
     <string name="cover_connected">接続済み</string>
+    <string name="no_sleep_data">睡眠データがありません</string>
+    <string name="sleep">睡眠</string>
+    <string name="min">最小</string>
+    <string name="max">最大</string>
+    <string name="h">時間</string> <!-- "時間" means "hours"; can be abbreviated as "h" if preferred -->
+    <string name="permission_request">権限のリクエスト</string>
+    <string name="need_health_data">健康データを追跡するには、G-Shock Smart Sync に次のアクセス許可が必要です：</string>
+    <string name="steps_data">歩数データ</string>
+    <string name="heart_rate_data">心拍数データ</string>
+    <string name="sleep_data">睡眠データ</string>
+    <string name="deny">拒否</string>
+    <string name="allow">許可</string>
+    <string name="steps">歩数</string>
+    <string name="daily_steps">本日の歩数</string>
+    <string name="heart_rate">心拍数</string>
+    <string name="exercise">運動</string>
+    <string name="exercise_session">運動セッション</string>
+    <string name="no_exercise_today">今日は運動セッションがありません</string>
 </resources>

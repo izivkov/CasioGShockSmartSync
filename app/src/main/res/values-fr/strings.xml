@@ -209,4 +209,24 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="health_connect_not_available">"Health Connect" n\'est pas disponible. Veuillez l\'installer.</string>
     <string name="cover_hold_to_unlock">Maintenir pour déverrouiller</string>
     <string name="cover_connected">Connecté</string>
+
+    <string name="no_sleep_data">Aucune donnée de sommeil</string>
+    <string name="sleep">Sommeil</string>
+    <string name="min">min</string>
+    <string name="max">max</string>
+    <string name="h">h</string> <!-- "h" is standard for "heure" -->
+    <string name="permission_request">Demande d\'autorisation</string>
+    <string name="need_health_data">Pour suivre vos données de santé, G-Shock Smart Sync a besoin d\'accéder à :</string>
+    <string name="steps_data">Données de pas</string>
+    <string name="heart_rate_data">Données de fréquence cardiaque</string>
+    <string name="sleep_data">Données de sommeil</string>
+    <string name="deny">Refuser</string>
+    <string name="allow">Autoriser</string>
+    <string name="steps">Pas</string>
+    <string name="daily_steps">Pas quotidiens</string>
+    <string name="heart_rate">Fréquence cardiaque</string>
+    <string name="exercise">Exercice</string>
+    <string name="exercise_session">Séances d\'exercice</string>
+    <string name="no_exercise_today">Aucune séance d\'exercice aujourd\'hui</string>
+
 </resources>
