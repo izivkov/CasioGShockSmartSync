@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
-import android.net.Uri
 import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.core.net.toUri
@@ -124,7 +123,8 @@ class ActionsViewModel @Inject constructor(
         NORMAL_CONNECTION,      // Connected by long-pressing the LOWER-LEFT button
         ACTION_BUTTON_PRESSED,  // Connected by short-pressing the LOWER-RIGHT button
         AUTO_TIME_ADJUSTMENT,   // Connected automatically during auto time update
-        FIND_PHONE_PRESSED      // The user has activated the "Find Phone" function
+        FIND_PHONE_PRESSED,     // The user has activated the "Find Phone" function
+        ALWAYS_CONNECTED,       // Some watches are always connected, but the watch keeps connecting and disconnecting periodically.
     }
 
     abstract class Action(
@@ -140,6 +140,7 @@ class ActionsViewModel @Inject constructor(
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
                 RunEnvironment.FIND_PHONE_PRESSED -> false
+                RunEnvironment.ALWAYS_CONNECTED -> false
             }
         }
 
@@ -177,6 +178,7 @@ class ActionsViewModel @Inject constructor(
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && WatchInfo.hasReminders
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && WatchInfo.hasReminders
                 RunEnvironment.FIND_PHONE_PRESSED -> false
+                RunEnvironment.ALWAYS_CONNECTED -> false
             }
         }
 
@@ -219,6 +221,7 @@ class ActionsViewModel @Inject constructor(
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && WatchInfo.findButtonUserDefined
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
                 RunEnvironment.FIND_PHONE_PRESSED -> true
+                RunEnvironment.ALWAYS_CONNECTED -> false
             }
         }
 
@@ -248,12 +251,18 @@ class ActionsViewModel @Inject constructor(
             RunMode.ASYNC,
         ) {
 
+        private var lastSet: Long? = null
+
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            // update every hour
+            val setTimeConditionAlwaysConnected = (WatchInfo.alwaysConnected && (lastSet == null || System.currentTimeMillis() - lastSet!! > 1000 * 60 * 60))
+
             return when (runEnvironment) {
-                RunEnvironment.NORMAL_CONNECTION -> WatchInfo.alwaysConnected
+                RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> true
                 RunEnvironment.FIND_PHONE_PRESSED -> false
+                RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
             }
         }
 
@@ -265,6 +274,7 @@ class ActionsViewModel @Inject constructor(
             // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
             mainScope.launch {
                 api.setTime(timeMs = timeMs)
+                lastSet = timeMs
             }
         }
 
@@ -356,12 +366,17 @@ class ActionsViewModel @Inject constructor(
     ) :
         Action(title, enabled, RunMode.ASYNC) {
 
+        private var lastSet: Long? = null
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            // update every 6 hours
+            val setTimeConditionAlwaysConnected = (WatchInfo.alwaysConnected && (lastSet == null || System.currentTimeMillis() - lastSet!! > 6000 * 60 * 60))
+
             return when (runEnvironment) {
                 RunEnvironment.NORMAL_CONNECTION -> enabled
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
+                RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
             }
         }
 
@@ -376,6 +391,7 @@ class ActionsViewModel @Inject constructor(
                 // getAlarms need to be run first, otherwise setAlarms() will not work
                 api.getAlarms()
                 api.setAlarms(alarms)
+                lastSet = System.currentTimeMillis()
             }
         }
     }
@@ -539,6 +555,14 @@ However, this way gives us more control on how to start the actions.
 
         runFilteredActions(context, _actions.value.filter {
             it.shouldRun(RunEnvironment.NORMAL_CONNECTION)
+        })
+    }
+
+    fun runActionForAlwaysConnected(context: Context) {
+        updateActionsAndMap(loadData(context))
+
+        runFilteredActions(context, _actions.value.filter {
+            it.shouldRun(RunEnvironment.ALWAYS_CONNECTED)
         })
     }
 

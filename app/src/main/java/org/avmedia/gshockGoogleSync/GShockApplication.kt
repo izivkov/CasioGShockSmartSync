@@ -21,6 +21,7 @@ import org.avmedia.gshockGoogleSync.di.RepositoryEntryPoint
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
 import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
@@ -64,6 +65,9 @@ class GShockApplication : Application() {
 
     @Composable
     fun Run() {
+        // Start ActionRunner here so we can run actions on connection
+        ActionRunner(context = this, api = repository)
+
         StartScreen { PreConnectionScreen() }
         LaunchedEffect(key1 = System.currentTimeMillis()) {
             waitForConnection()

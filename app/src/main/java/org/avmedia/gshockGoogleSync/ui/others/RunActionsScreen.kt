@@ -112,8 +112,6 @@ fun RunActionsScreen(
                 )
             }
         }
-
-        ActionRunner(context = LocalContext.current, api = repository)
     }
 }
 
@@ -146,7 +144,5 @@ fun RunFindPhoneScreen(
                 .padding(horizontal = 16.dp),
             textAlign = TextAlign.Center
         )
-
-        ActionRunner(context = context, api = repository)
     }
 }

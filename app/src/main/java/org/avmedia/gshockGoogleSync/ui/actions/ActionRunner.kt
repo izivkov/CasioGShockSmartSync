@@ -33,6 +33,10 @@ fun ActionRunner(
                 api.isNormalButtonPressed() -> {
                     actionsViewModel.runActionForConnection(context)
                 }
+
+                api.isAlwaysConnectedConnectionPressed() -> {
+                    actionsViewModel.runActionForAlwaysConnected(context)
+                }
             }
         },
     )
