@@ -1,8 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-<<<<<<< HEAD
     <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
-=======
->>>>>>> health
     <string name="title_time">Idő</string>
     <string name="title_alarms">Ébresztő</string>
     <string name="title_events">Események</string>
