@@ -1,9 +1,10 @@
 package org.avmedia.gshockGoogleSync
 
 sealed class Screens(val route: String) {
-    object Time : Screens("Time")
-    object Alarms : Screens("Alarms")
-    object Events : Screens("Events")
-    object Actions : Screens("Actions")
-    object Settings : Screens("Settings")
+    data object Time : Screens("Time")
+    data object Alarms : Screens("Alarms")
+    data object Events : Screens("Events")
+    data object Health : Screens("Health")
+    data object Actions : Screens("Actions")
+    data object Settings : Screens("Settings")
 }

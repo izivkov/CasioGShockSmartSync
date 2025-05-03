@@ -1,5 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+<<<<<<< HEAD
     <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
+=======
+>>>>>>> health
     <string name="title_time">Idő</string>
     <string name="title_alarms">Ébresztő</string>
     <string name="title_events">Események</string>
@@ -177,6 +180,34 @@
     <string name="timer_set">Időzítő beállítva.</string>
     <string name="press_and_hold_for_3_seconds">Kapcsolódás:\nTartsa nyomva\n3 másodpercig</string>
     <string name="short_press_to_run_actions">Ezzel a\ngombbal lehet\nfeladatot futtatni</string>
-    <string name="g_shock_smart_sync_is_running" tools:ignore="MissingTranslation">G-Shock Smart Sync fut.</string>
-    <string name="preventing_the_app_from_closing" tools:ignore="MissingTranslation">…akadályozza az alkalmazás bezárását.</string>
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync fut.</string>
+    <string name="preventing_the_app_from_closing">…akadályozza az alkalmazás bezárását.</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync nem fut.</string>
+
+    <string name="health_connect_permissions_required">A Health Connect engedélyei szükségesek az adatok Egészség alkalmazásba küldéséhez.</string>
+    <string name="health">Egészség</string>
+    <string name="send_to_health_app">Küldés az Egészség alkalmazásba</string>
+    <string name="health_connect_not_available">"Health Connect" nem elérhető. Kérem, telepítse.</string>
+    <string name="cover_hold_to_unlock">Feloldáshoz tartsa lenyomva</string>
+    <string name="cover_connected">Csatlakoztatva</string>
+    <string name="no_sleep_data">Nincs alvásadat</string>
+    <string name="sleep">Alvás</string>
+    <string name="min">min</string>
+    <string name="max">max</string>
+    <string name="h">ó</string> <!-- "ó" is short for "óra" (hour) -->
+    <string name="permission_request">Engedélykérés</string>
+    <string name="need_health_data">Az egészségügyi adatok követéséhez a G-Shock Smart Sync hozzáférést igényel a következőkhöz:</string>
+    <string name="steps_data">Lépésadatok</string>
+    <string name="heart_rate_data">Pulzusadatok</string>
+    <string name="sleep_data">Alvásadatok</string>
+    <string name="deny">Elutasítás</string>
+    <string name="allow">Engedélyezés</string>
+    <string name="steps">Lépések</string>
+    <string name="daily_steps">Napi lépések</string>
+    <string name="heart_rate">Pulzus</string>
+    <string name="exercise">Gyakorlat</string>
+    <string name="exercise_session">Edzésszakaszok</string>
+    <string name="no_exercise_today">Ma nincs edzés</string>
+    <string name="find_phone_instruction">A műveletek végrehajtásához indítsa el az „Telefon keresése” funkciót az órán</string>
+>>>>>>> health
 </resources>

@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockapi.WatchInfo
+import androidx.core.graphics.createBitmap
 
 @Composable
 fun Battery(
@@ -167,10 +168,9 @@ class BatteryView @JvmOverloads constructor(
         desireHeight: Int? = null
     ): Bitmap? {
         val drawable = AppCompatResources.getDrawable(context, drawableId) ?: return null
-        val bitmap = Bitmap.createBitmap(
+        val bitmap = createBitmap(
             desireWidth ?: drawable.intrinsicWidth,
-            desireHeight ?: drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
+            desireHeight ?: drawable.intrinsicHeight
         )
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)

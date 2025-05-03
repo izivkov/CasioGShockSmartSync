@@ -42,8 +42,11 @@ import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
 import org.avmedia.gshockGoogleSync.ui.alarms.AlarmsScreen
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
+import org.avmedia.gshockGoogleSync.ui.health.HealthScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
+import org.avmedia.gshockGoogleSync.ui.time.WatchName
+import org.avmedia.gshockapi.WatchInfo
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -147,6 +150,16 @@ fun BottomNavigationBarWithPermissions(
                     translateApi
                 )
             }
+            composable(Screens.Health.route) {
+                HealthScreen(onDenyPermissionsOrNotInstalled = {
+                    navController.navigate(Screens.Time.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                    }
+                })
+            }
             composable(Screens.Actions.route) {
 
                 val permissions = mutableListOf(CAMERA, CALL_PHONE).also {
@@ -181,6 +194,10 @@ fun NavigateWithPermissions(
 ) {
     var hasNavigated by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    if (requiredPermissions.isEmpty()) {
+        return
+    }
 
     PermissionRequiredScreen(
         requiredPermissions = requiredPermissions,

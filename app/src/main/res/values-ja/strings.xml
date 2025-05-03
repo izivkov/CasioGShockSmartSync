@@ -204,4 +204,33 @@
     <string name="timer_set">タイマー設定済み</string>
     <string name="press_and_hold_for_3_seconds">3秒間\n長押し</string>
     <string name="short_press_to_run_actions">押して\n実行</string>
+
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync が実行中です</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync は実行されていません</string>
+    <string name="preventing_the_app_from_closing">アプリが終了しないようにしています</string>
+    <string name="health_connect_permissions_required">ヘルスアプリにデータを送信するには、Health Connect の許可が必要です。</string>
+    <string name="health">健康</string>
+    <string name="send_to_health_app">ヘルスアプリに送信</string>
+    <string name="health_connect_not_available">「Health Connect」は利用できません。インストールしてください。</string>
+    <string name="cover_hold_to_unlock">長押ししてロック解除</string>
+    <string name="cover_connected">接続済み</string>
+    <string name="no_sleep_data">睡眠データがありません</string>
+    <string name="sleep">睡眠</string>
+    <string name="min">最小</string>
+    <string name="max">最大</string>
+    <string name="h">時間</string> <!-- "時間" means "hours"; can be abbreviated as "h" if preferred -->
+    <string name="permission_request">権限のリクエスト</string>
+    <string name="need_health_data">健康データを追跡するには、G-Shock Smart Sync に次のアクセス許可が必要です：</string>
+    <string name="steps_data">歩数データ</string>
+    <string name="heart_rate_data">心拍数データ</string>
+    <string name="sleep_data">睡眠データ</string>
+    <string name="deny">拒否</string>
+    <string name="allow">許可</string>
+    <string name="steps">歩数</string>
+    <string name="daily_steps">本日の歩数</string>
+    <string name="heart_rate">心拍数</string>
+    <string name="exercise">運動</string>
+    <string name="exercise_session">運動セッション</string>
+    <string name="no_exercise_today">今日は運動セッションがありません</string>
+    <string name="find_phone_instruction">アクションを実行するには、時計で「携帯電話を探す」機能を開始してください</string>
 </resources>

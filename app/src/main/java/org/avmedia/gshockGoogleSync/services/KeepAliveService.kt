@@ -8,8 +8,6 @@ import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import javax.inject.Inject
@@ -19,7 +17,7 @@ const val NOTIFICATION_ID = 1
 
 // Foreground Service
 @AndroidEntryPoint
-class KeepAliveService  : LifecycleService() {
+class KeepAliveService : LifecycleService() {
 
     @Inject
     lateinit var translateApi: TranslateRepository
@@ -58,13 +56,31 @@ class KeepAliveService  : LifecycleService() {
 
     private fun acquireWakeLock() {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "KeepAlive::WakeLock")
-        wakeLock?.acquire()
+        wakeLock =
+            powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "KeepAlive::WakeLock").apply {
+                // Set a very long timeout (12 hours) as a safety net
+                acquire(7 * 24 * 60 * 60 * 1000L) // keep awake for a week
+            }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        wakeLock?.release()
+        wakeLock?.let {
+            if (it.isHeld) {
+                it.release()
+            }
+        }
+        wakeLock = null
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        wakeLock?.let {
+            if (it.isHeld) {
+                it.release()
+            }
+        }
+        wakeLock = null
     }
 
     companion object {

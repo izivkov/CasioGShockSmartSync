@@ -32,12 +32,11 @@ fun AlarmChimeSwitch(
         isChecked.value = AlarmsModel.getAlarms().getOrNull(0)?.hasHourlyChime ?: false
     }
 
-    // Simulating the `ProgressEvents.runEventActions` to trigger `onAlarmsLoaded`
     val alarmsLoadedEvent: String = "Alarms Loaded"
 
     LaunchedEffect(alarmsLoadedEvent) {
         ProgressEvents.runEventActions(
-            name = "Alarms Loaded",
+            name = alarmsLoadedEvent,
             eventActions = listOf(EventAction(alarmsLoadedEvent, onAlarmsLoaded)).toTypedArray()
         )
     }

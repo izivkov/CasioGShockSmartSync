@@ -44,6 +44,13 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    lint {
+        disable += "IconLocation"
+    }
+
+    lintOptions {
+        disable 'TypographyFractions','TypographyQuotes'
+    }
 }
 
 dependencies {
@@ -91,6 +98,13 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
+
+    // health connect
+    implementation(libs.androidx.health.connect)
+    implementation(libs.guava) // needed for health connect
+
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
 }
 
 // Allow references to generated code

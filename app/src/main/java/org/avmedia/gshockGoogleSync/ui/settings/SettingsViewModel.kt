@@ -128,7 +128,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    data class OperationSound(var sound: Boolean = true) : Setting("Button Sound")
+    data class OperationSound(var sound: Boolean = true, var vibrate: Boolean = false) : Setting("Button Sound")
 
     data class Light(
         var autoLight: Boolean = false,
@@ -202,6 +202,7 @@ class SettingsViewModel @Inject constructor(
                 "timeAdjustment" -> handleTimeAdjustment(value, updatedObjects)
                 "adjustmentTimeMinutes" -> handleAdjustmentTimeMinutes(value, updatedObjects)
                 "buttonTone" -> handleButtonTone(value, updatedObjects)
+                "keyVibration" -> handleButtonVibration(value, updatedObjects)
                 "autoLight" -> handleAutoLight(value, updatedObjects)
                 "lightDuration" -> handleLightDuration(value, updatedObjects)
                 "timeFormat" -> handleTimeFormat(value, updatedObjects)
@@ -245,6 +246,12 @@ class SettingsViewModel @Inject constructor(
     private fun handleButtonTone(value: Any, updatedObjects: MutableSet<Setting>) {
         val setting = settingsMap[OperationSound::class.java] as OperationSound
         setting.sound = value == true
+        updatedObjects.add(setting)
+    }
+
+    private fun handleButtonVibration(value: Any, updatedObjects: MutableSet<Setting>) {
+        val setting = settingsMap[OperationSound::class.java] as OperationSound
+        setting.vibrate = value == true
         updatedObjects.add(setting)
     }
 
@@ -415,6 +422,7 @@ class SettingsViewModel @Inject constructor(
         val buttonTone: OperationSound =
             settingsMap[OperationSound::class.java] as OperationSound
         settings.buttonTone = buttonTone.sound
+        settings.keyVibration = buttonTone.vibrate
 
         viewModelScope.launch {
             runCatching {

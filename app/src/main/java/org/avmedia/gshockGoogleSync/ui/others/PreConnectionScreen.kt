@@ -21,11 +21,13 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
+import org.avmedia.gshockapi.WatchInfo
 
 @Composable
 fun PreConnectionScreen(
@@ -37,9 +39,17 @@ fun PreConnectionScreen(
         when {
             "GA" in name || "GMA" in name -> R.drawable.ga_b2100
             "GW" in name || "GMW" in name -> R.drawable.gw_b5600
+            "DW-H5600" in name -> R.drawable.dw_h5600
             "DW" in name || "DMW" in name -> R.drawable.dw_b5600
             "ECB" in name -> R.drawable.ecb_30d
             else -> R.drawable.gw_b5600
+        }
+    }
+
+    val isAlwaysConnected: (String) -> Boolean = { name ->
+        when {
+            "DW-H5600" in name || "ECB" in name -> true
+            else -> false
         }
     }
 
@@ -74,7 +84,9 @@ fun PreConnectionScreen(
 
                         WatchScreen(
                             imageResId = getImageId(watchName),
-                            arrowsVerticalPosition = getArrowsVerticalPosition(watchName)
+                            isAlwaysConnected = isAlwaysConnected(watchName),
+                            arrowsVerticalPosition = getArrowsVerticalPosition(watchName),
+                            translateRepository = ptrConnectionViewModel.translateApi,
                         )
 
                         AppConnectionSpinner(modifier = Modifier
@@ -96,7 +108,7 @@ fun PreConnectionScreen(
                                 infoText = ptrConnectionViewModel.translateApi.stringResource(
                                     context = LocalContext.current,
                                     id = R.string.connection_screen_info
-                                ) { translatedString ->
+                                ) {
                                     // infoText = translatedString
                                 } + "v" + BuildConfig.VERSION_NAME
                             )
@@ -169,12 +181,24 @@ fun WatchScreen(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
     arrowsVerticalPosition: Float = 0.55f,
+    isAlwaysConnected: Boolean = false,
+    translateRepository: TranslateRepository
 ) {
-    WatchImageWithOverlay(
-        modifier,
-        imageResId,
-        arrowsVerticalPosition
-    )
+    Box(modifier = modifier) {
+        if (isAlwaysConnected) {
+            WatchImageWithOverlayAlwaysConnected(
+                modifier,
+                imageResId,
+                translateApi = translateRepository,
+            )
+        } else {
+            WatchImageWithOverlay(
+                modifier,
+                imageResId,
+                arrowsVerticalPosition
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)

@@ -2,16 +2,11 @@
     <!-- Existing Colors -->
     <color name="indigo_500">#3F51B5</color>
     <color name="grey_500">#9E9E9E</color>
-    <color name="pink_A200">#FF4081</color>
-    <color name="indigo_700">#303F9F</color>
 
     <!-- App Colors -->
     <color name="colorPrimary">@color/indigo_500</color>
-    <color name="colorPrimaryDark">@color/indigo_700</color>
-    <color name="colorAccent">@color/pink_A200</color>
 
     <!-- Light Backgrounds (Material 3 Guidelines) -->
-    <color name="indigo_500_light_background">#E8EAF6</color> <!-- Lighter shade of Indigo 500 -->
     <color name="grey_500_light_background">#F5F5F5</color> <!-- Lighter shade of Grey 500 -->
     <color name="pink_A200_light_background">#FFEBEE</color> <!-- Lighter shade of Pink A200 -->
     <color name="indigo_700_light_background">#C5CAE9</color> <!-- Lighter shade of Indigo 700 -->

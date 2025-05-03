@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        application.init(this)
+        // application.init(this)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -66,6 +66,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             CheckPermissions {
                 bluetoothHelper.turnOnBLE {
+
+                    // initialize the app after all permissions are granted.
+                    application.init(this)
+
                     setContent {
                         GShockSmartSyncTheme {
                             SnackbarController.snackbarHostState = remember { SnackbarHostState() }

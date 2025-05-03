@@ -37,6 +37,7 @@ import org.avmedia.gshockGoogleSync.R
 import kotlin.math.cos
 import kotlin.math.sin
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
@@ -105,6 +106,48 @@ fun WatchImageWithOverlay(
             arrowAlpha = arrowAlpha,
             arrowsVerticalPosition = arrowsVerticalPosition
         )
+    }
+}
+
+@Composable
+fun WatchImageWithOverlayAlwaysConnected (
+    modifier: Modifier = Modifier,
+    imageResId: Int = R.drawable.gw_b5600,
+    translateApi: TranslateRepository,
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val screenHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
+        val textOffsetPx = screenHeightPx * 0.75f // Position text 3/4 down the screen
+        val horizontalPadding = 16.dp
+
+        // Background watch image
+        Image(
+            painter = painterResource(id = imageResId),
+            contentDescription = "Watch Image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+
+        // Centered text overlay
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .padding(top = with(LocalDensity.current) { textOffsetPx.toDp() }),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Text(
+                text = translateApi.stringResource(
+                    LocalContext.current,
+                    R.string.find_phone_instruction
+                ),
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                lineHeight = 24.sp,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

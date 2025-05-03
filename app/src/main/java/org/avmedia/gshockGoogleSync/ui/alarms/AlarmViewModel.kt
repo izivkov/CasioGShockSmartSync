@@ -18,6 +18,7 @@ import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import java.util.Calendar
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -39,11 +40,18 @@ class AlarmViewModel @Inject constructor(
     private fun loadAlarms() {
         viewModelScope.launch {
             runCatching {
-                // Load the alarms initially
-                val loadedAlarms = api.getAlarms() // Call your suspend function here
-                _alarms.value = loadedAlarms
+                val loadedAlarms = api.getAlarms()
+                _alarms.value = loadedAlarms.take(WatchInfo.alarmCount)
                 AlarmsModel.clear()
                 AlarmsModel.addAll(ArrayList(_alarms.value))
+
+                if (WatchInfo.chimeInSettings) {
+                    val settings = api.getSettings()
+                    val hasHourlyChime = settings.hourlyChime
+                    _alarms.value[0].hasHourlyChime = hasHourlyChime
+                }
+
+                ProgressEvents.onNext("Alarms Loaded")
             }.onFailure {
                 ProgressEvents.onNext("ApiError")
             }
@@ -67,6 +75,11 @@ class AlarmViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 api.setAlarms(alarms = ArrayList(alarms.value))
+                if (WatchInfo.chimeInSettings) {
+                    val settings = api.getSettings()
+                    settings.hourlyChime = alarms.value[0].hasHourlyChime
+                    api.setSettings(settings)
+                }
                 AppSnackbar(translateApi.getString(appContext, R.string.alarms_set_to_watch))
             }.onFailure {
                 ProgressEvents.onNext("ApiError", it.message ?: "")

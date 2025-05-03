@@ -18,7 +18,6 @@
 
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="com.android.alarm.permission.DISMISS_ALARM" />
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <!-- General Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -41,6 +40,39 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
     <uses-feature android:name="android.hardware.sensor.proximity" android:required="true" />
+
+    <!-- Health Connect -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission android:name="android.permission.health.WRITE_SLEEP" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+    <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
+    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.WRITE_TOTAL_CALORIES_BURNED" />
+
+    <!--    <uses-permission android:name="android.permission.health.READ_SPEED"/>-->
+<!--    <uses-permission android:name="android.permission.health.WRITE_SPEED"/>-->
+<!--    <uses-permission android:name="android.permission.health.READ_DISTANCE"/>-->
+<!--    <uses-permission android:name="android.permission.health.WRITE_DISTANCE"/>-->
+<!--    <uses-permission android:name="android.permission.health.READ_WEIGHT"/>-->
+<!--    <uses-permission android:name="android.permission.health.WRITE_WEIGHT"/>-->
+<!--    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />-->
+
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+
+        <!--
+             This is required such that the app can query and resolve packages that have written
+             Health Connect data, and obtain their friendly App Name and Icon to show for data
+             attribution in the app
+        -->
+        <intent>
+            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent>
+    </queries>
 
     <application
         android:name=".GShockApplication"
@@ -79,6 +111,34 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+
+            <!-- Permission handling for Android 14 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
+            </intent-filter>
+
         </activity>
+
+        <!-- Health Connect -->
+        <!-- For supported versions through Android 13, create an activity to show the rationale
+      of Health Connect permissions once users click the privacy policy link. -->
+        <activity
+            android:name=".ui.health.PermissionsRationaleActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+        </activity>
+        
+        <meta-data
+            android:name="android.healthConnect.APP_TYPE"
+            android:value="healthConnect" />
+
     </application>
+
 </manifest>

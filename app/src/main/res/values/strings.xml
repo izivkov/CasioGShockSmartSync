@@ -198,6 +198,33 @@
     <string name="timer_set">Timer Set</string>
     <string name="press_and_hold_for_3_seconds">Press and\nhold for 3\nseconds</string>
     <string name="short_press_to_run_actions">Short-press\nto run\nActions</string>
-    <string name="g_shock_smart_sync_is_running" tools:ignore="MissingTranslation">G-Shock Smart Sync is Running</string>
-    <string name="preventing_the_app_from_closing" tools:ignore="MissingTranslation">Preventing the app from closing</string>
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync is Running</string>
+    <string name="preventing_the_app_from_closing">Preventing the app from closing</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync is not running.</string>
+    <string name="health_connect_permissions_required">Health Connect permissions required to send data to Health App.</string>
+    <string name="health">Health</string>
+    <string name="send_to_health_app">Send to Health App</string>
+    <string name="health_connect_not_available">\"Health Connect\" not available. Please install it.</string>
+    <string name="cover_hold_to_unlock">Hold to unlock</string>
+    <string name="cover_connected">Connected</string>
+
+    <string name="no_sleep_data">No sleep data</string>
+    <string name="sleep">Sleep</string>
+    <string name="min">min</string>
+    <string name="max">max</string>
+    <string name="h">h</string>
+    <string name="permission_request">Permission request</string>
+    <string name="need_health_data">To track your health data, G-Shock Smart Sync needs access to:</string>
+    <string name="steps_data">Steps data</string>
+    <string name="heart_rate_data">Heart rate data</string>
+    <string name="sleep_data">Sleep data</string>
+    <string name="deny">Deny</string>
+    <string name="allow">Allow</string>
+    <string name="steps">Steps</string>
+    <string name="daily_steps">Daily Steps</string>
+    <string name="heart_rate">Heart Rate</string>
+    <string name="exercise">Exercise</string>
+    <string name="exercise_session">Exercise Sessions</string>
+    <string name="no_exercise_today">No exercise sessions today</string>
+    <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
 </resources>

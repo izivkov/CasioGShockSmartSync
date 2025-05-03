@@ -193,4 +193,33 @@
     <string name="timer_set">Timer eingestellt</string>
     <string name="press_and_hold_for_3_seconds">Halte\n3 Sek</string>
     <string name="short_press_to_run_actions">Drücken für\nAktionen</string>
+
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync wird ausgeführt</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync läuft nicht.</string>
+    <string name="preventing_the_app_from_closing">Verhindert das Schließen der App</string>
+    <string name="health_connect_permissions_required">Health Connect-Berechtigungen sind erforderlich, um Daten an die Gesundheits-App zu senden.</string>
+    <string name="health">Gesundheit</string>
+    <string name="send_to_health_app">An Gesundheits-App senden</string>
+    <string name="health_connect_not_available">"Health Connect" ist nicht verfügbar. Bitte installieren Sie es.</string>
+    <string name="cover_hold_to_unlock">Zum Entsperren halten</string>
+    <string name="cover_connected">Verbunden</string>
+    <string name="no_sleep_data">Keine Schlafdaten</string>
+    <string name="sleep">Schlaf</string>
+    <string name="min">Min</string>
+    <string name="max">Max</string>
+    <string name="h">Std</string> <!-- "h" as in hours = "Stunden", abbreviated as "Std" -->
+    <string name="permission_request">Berechtigungsanfrage</string>
+    <string name="need_health_data">Um deine Gesundheitsdaten zu verfolgen, benötigt G-Shock Smart Sync Zugriff auf:</string>
+    <string name="steps_data">Schrittdaten</string>
+    <string name="heart_rate_data">Herzfrequenzdaten</string>
+    <string name="sleep_data">Schlafdaten</string>
+    <string name="deny">Ablehnen</string>
+    <string name="allow">Zulassen</string>
+    <string name="steps">Schritte</string>
+    <string name="daily_steps">Tägliche Schritte</string>
+    <string name="heart_rate">Herzfrequenz</string>
+    <string name="exercise">Training</string>
+    <string name="exercise_session">Trainingseinheiten</string>
+    <string name="no_exercise_today">Heute keine Trainingseinheiten</string>
+    <string name="find_phone_instruction">Um Aktionen auszuführen, starten Sie die Funktion „Telefon finden“ auf der Uhr</string>
 </resources>
