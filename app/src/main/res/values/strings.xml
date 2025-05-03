@@ -226,4 +226,5 @@
     <string name="exercise">Exercise</string>
     <string name="exercise_session">Exercise Sessions</string>
     <string name="no_exercise_today">No exercise sessions today</string>
+    <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
 </resources>

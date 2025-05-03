@@ -2,17 +2,18 @@ package org.avmedia.gshockGoogleSync.ui.others
 
 import AppText
 import AppTextVeryLarge
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,48 +33,50 @@ fun CoverScreen(
     onUnlock: () -> Unit,
     isConnected: Boolean = true
 ) {
+    val toneGen = remember { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100) }
+    var isPressed by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            toneGen.release()
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .systemBarsPadding()
+            modifier = Modifier.fillMaxSize().systemBarsPadding(),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                var isPressed by remember { mutableStateOf(false) }
-
-                AppCard {
-                    Box(
-                        modifier = Modifier
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val down = awaitFirstDown()
-                                        isPressed = true
-                                        val longPress = awaitLongPressOrCancellation(down.id)
-                                        isPressed = false
-                                        if (longPress != null) {
-                                            onUnlock()
-                                        }
-                                    }
+            Box(
+                modifier = Modifier
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val down = awaitFirstDown()
+                                isPressed = true
+                                val longPress = awaitLongPressOrCancellation(down.id)
+                                isPressed = false
+                                if (longPress != null) {
+                                    toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 100)
+                                    onUnlock()
                                 }
                             }
-                            .padding(horizontal = 32.dp, vertical = 16.dp)
-                    ) {
-                        AppTextVeryLarge(
-                            text = translateApi.stringResource(LocalContext.current, R.string.cover_hold_to_unlock),
-                            color = if (isPressed)
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                            else
-                                MaterialTheme.colorScheme.primary
-                        )
+                        }
                     }
-                }
+            ) {
+                AppTextVeryLarge(
+                    text = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.cover_hold_to_unlock
+                    ),
+                    color = if (isPressed)
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                    else
+                        MaterialTheme.colorScheme.primary
+                )
             }
 
             if (isConnected) {
@@ -83,7 +86,10 @@ fun CoverScreen(
                         .padding(end = 16.dp, bottom = 12.dp)
                 ) {
                     AppText(
-                        text = translateApi.stringResource(LocalContext.current, R.string.cover_connected),
+                        text = translateApi.stringResource(
+                            LocalContext.current,
+                            R.string.cover_connected
+                        ),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }

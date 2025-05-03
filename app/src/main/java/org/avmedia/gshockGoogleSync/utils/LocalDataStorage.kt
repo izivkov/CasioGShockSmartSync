@@ -92,5 +92,6 @@ object LocalDataStorage {
     fun getKeepAlive(context: Context): Boolean {
         // We want to set to "true" by default, that is why we don't use the getBoolean function.
         return get(context, "keepAlive", "true")?.toBoolean() ?: true
+        // return getBoolean(context, "keepAlive")
     }
 }
