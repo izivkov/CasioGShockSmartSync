@@ -85,10 +85,11 @@ fun AppPhoneInputDialog(
                 }
             },
             confirmButton = {
-                AppButton(text = alarmsViewModel.translateApi.stringResource(
-                    context = LocalContext.current,
-                    R.string.ok
-                ),
+                AppButton(
+                    text = alarmsViewModel.translateApi.stringResource(
+                        context = LocalContext.current,
+                        R.string.ok
+                    ),
                     onClick = {
                         if (validatePhoneNumber(inputValue)) {
                             onPhoneNumberValidated(inputValue)

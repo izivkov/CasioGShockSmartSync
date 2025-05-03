@@ -9,7 +9,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
-import org.avmedia.gshockGoogleSync.di.RepositoryEntryPoint
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -40,7 +38,8 @@ import javax.inject.Inject
 @HiltAndroidApp
 class GShockApplication : Application() {
     private var _context: MainActivity? = null
-    private val context get() = _context ?: throw IllegalStateException("MainActivity not initialized")
+    private val context
+        get() = _context ?: throw IllegalStateException("MainActivity not initialized")
 
     @Inject
     lateinit var deviceManager: DeviceManager
@@ -112,7 +111,7 @@ class GShockApplication : Application() {
                 ContentSelector(
                     repository = repository,
                     translateApi = translateApi,
-                    onUnlocked = { goToNavigationScreen () }
+                    onUnlocked = { goToNavigationScreen() }
                 )
             }
         }
@@ -132,7 +131,7 @@ class GShockApplication : Application() {
                     ContentSelector(
                         repository = repository,
                         translateApi = translateApi,
-                        onUnlocked = { goToNavigationScreen () }
+                        onUnlocked = { goToNavigationScreen() }
                     )
                 }
             }
@@ -221,12 +220,15 @@ class GShockApplication : Application() {
                     isConnected = repository.isConnected()
                 )
             }
+
             repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
                 RunActionsScreen(repository, translateApi)
             }
+
             repository.isFindPhoneButtonPressed() -> {
                 RunFindPhoneScreen(repository, translateApi)
             }
+
             else -> {
                 BottomNavigationBarWithPermissions(
                     repository = repository,

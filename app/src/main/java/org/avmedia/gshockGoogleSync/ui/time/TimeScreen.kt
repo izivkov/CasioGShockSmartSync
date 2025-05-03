@@ -61,13 +61,14 @@ fun TimeScreen(
                             end.linkTo(parent.end)
                         })
 
-                TimerView(modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(timer) {
-                        top.linkTo(localTime.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    })
+                TimerView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .constrainAs(timer) {
+                            top.linkTo(localTime.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        })
 
                 WatchNameView(
                     modifier = Modifier
@@ -81,14 +82,15 @@ fun TimeScreen(
                         }
                 )
 
-                WatchInfoView(modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(watchInfo) {
-                        top.linkTo(watchName.bottom)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    })
+                WatchInfoView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .constrainAs(watchInfo) {
+                            top.linkTo(watchName.bottom)
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        })
             }
         }
     }

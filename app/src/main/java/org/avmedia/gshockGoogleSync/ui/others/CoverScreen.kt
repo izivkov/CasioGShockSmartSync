@@ -47,7 +47,9 @@ fun CoverScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         Box(
-            modifier = Modifier.fillMaxSize().systemBarsPadding(),
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
             contentAlignment = Alignment.Center
         ) {
             Box(

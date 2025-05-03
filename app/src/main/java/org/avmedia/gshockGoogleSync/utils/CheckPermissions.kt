@@ -89,7 +89,8 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
             title = { Text(text = "Permissions Required") },
             text = { Text("This app needs location and Bluetooth permissions to function properly.") },
             confirmButton = {
-                AppButton("Retry",
+                AppButton(
+                    "Retry",
                     onClick = {
                         launcher.launch(initialPermissions)
                     })

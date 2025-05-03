@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.data.repository
 
-import org.avmedia.gshockGoogleSync.health.HealthConnectManager
 import org.avmedia.gshockGoogleSync.health.IHealthConnectManager
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -72,7 +72,8 @@ object PrayerAlarmsHelper {
         val currentTime = LocalDateTime.now()
 
         while (alarms.size < n) {
-            val date = DateComponents(currentDate.year, currentDate.monthValue, currentDate.dayOfMonth)
+            val date =
+                DateComponents(currentDate.year, currentDate.monthValue, currentDate.dayOfMonth)
             val prayerTimes = PrayerTimes(coordinates, date, parameters)
 
             val todaysPrayers = listOf(

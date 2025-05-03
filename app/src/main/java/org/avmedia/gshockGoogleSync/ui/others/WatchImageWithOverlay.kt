@@ -27,20 +27,19 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import org.avmedia.gshockGoogleSync.R
-import kotlin.math.cos
-import kotlin.math.sin
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun WatchImageWithOverlay(
@@ -110,7 +109,7 @@ fun WatchImageWithOverlay(
 }
 
 @Composable
-fun WatchImageWithOverlayAlwaysConnected (
+fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
     translateApi: TranslateRepository,

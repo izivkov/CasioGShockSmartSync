@@ -162,8 +162,10 @@ fun HealthScreen(
                         )
                     } else {
                         // Your health cards
-                        ExerciseSessionCard("Morning Run, Evening Walk",
-                            translateApi = healthViewModel.translateApi)
+                        ExerciseSessionCard(
+                            "Morning Run, Evening Walk",
+                            translateApi = healthViewModel.translateApi
+                        )
                         StepsCard(steps, healthViewModel.translateApi)
                         HeartRateCard(
                             minRate = minHeartRate,
@@ -259,7 +261,10 @@ private fun HeartRateCard(
             ) {
                 Icon(
                     imageVector = Icons.Filled.MonitorHeart,
-                    contentDescription = translateApi.stringResource(LocalContext.current, R.string.heart_rate),
+                    contentDescription = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.heart_rate
+                    ),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -281,8 +286,10 @@ private fun HeartRateCard(
 }
 
 @Composable
-private fun ExerciseSessionCard(exerciseTitle: String,
-                                translateApi: TranslateRepository) {
+private fun ExerciseSessionCard(
+    exerciseTitle: String,
+    translateApi: TranslateRepository
+) {
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -296,12 +303,18 @@ private fun ExerciseSessionCard(exerciseTitle: String,
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.DirectionsRun,
-                    contentDescription = translateApi.stringResource(LocalContext.current, R.string.exercise),
+                    contentDescription = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.exercise
+                    ),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 AppText(
-                    text = translateApi.stringResource(LocalContext.current, R.string.exercise_session), // "Exercise Sessions"
+                    text = translateApi.stringResource(
+                        LocalContext.current,
+                        R.string.exercise_session
+                    ), // "Exercise Sessions"
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))

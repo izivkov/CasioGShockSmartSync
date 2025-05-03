@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 

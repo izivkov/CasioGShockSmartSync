@@ -25,9 +25,7 @@ import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
-import org.avmedia.gshockapi.WatchInfo
 
 @Composable
 fun PreConnectionScreen(
@@ -53,15 +51,7 @@ fun PreConnectionScreen(
         }
     }
 
-    val getArrowsVerticalPosition: (String) -> Float = { name ->
-        when {
-            "GA" in name || "GMA" in name -> 0.55f
-            "GW" in name || "GMW" in name -> 0.55f
-            "DW" in name || "DMW" in name -> 0.55f
-            "ECB" in name -> 0.55f
-            else -> 0.55f
-        }
-    }
+    val getArrowsVerticalPosition: (String) -> Float = { _ -> 0.55f }
 
     GShockSmartSyncTheme {
         Surface(
@@ -89,21 +79,23 @@ fun PreConnectionScreen(
                             translateRepository = ptrConnectionViewModel.translateApi,
                         )
 
-                        AppConnectionSpinner(modifier = Modifier
-                            .constrainAs(connectionSpinner) {
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }
+                        AppConnectionSpinner(
+                            modifier = Modifier
+                                .constrainAs(connectionSpinner) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                }
                         )
 
-                        Box(modifier = Modifier
-                            .padding(top = 30.dp, end = 30.dp)
-                            .constrainAs(infoButton) {
-                                top.linkTo(parent.top)
-                                end.linkTo(parent.end)
-                            }) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 30.dp, end = 30.dp)
+                                .constrainAs(infoButton) {
+                                    top.linkTo(parent.top)
+                                    end.linkTo(parent.end)
+                                }) {
                             InfoButton(
                                 infoText = ptrConnectionViewModel.translateApi.stringResource(
                                     context = LocalContext.current,
@@ -154,13 +146,14 @@ fun PreConnectionScreen(
                                     }
                             )
 
-                            Box(modifier = Modifier
-                                .padding(end = 4.dp, start = 0.dp)
-                                .constrainAs(infoDeviceButton) {
-                                    end.linkTo(parent.end)
-                                    top.linkTo(parent.top)
-                                    bottom.linkTo(parent.bottom)
-                                }) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(end = 4.dp, start = 0.dp)
+                                    .constrainAs(infoDeviceButton) {
+                                        end.linkTo(parent.end)
+                                        top.linkTo(parent.top)
+                                        bottom.linkTo(parent.bottom)
+                                    }) {
                                 InfoButton(
                                     infoText = ptrConnectionViewModel.translateApi.stringResource(
                                         context = LocalContext.current,

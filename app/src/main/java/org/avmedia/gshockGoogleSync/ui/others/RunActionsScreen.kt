@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
-import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -132,7 +131,12 @@ fun RunFindPhoneScreen(
             buildString {
                 append(translateApi.stringResource(context, R.string.find_phone))
                 append("\n\n\n")
-                append(translateApi.stringResource(context, R.string.when_found_lift_phone_to_stop_ringing))
+                append(
+                    translateApi.stringResource(
+                        context,
+                        R.string.when_found_lift_phone_to_stop_ringing
+                    )
+                )
             }
         }
 

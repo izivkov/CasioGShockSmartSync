@@ -31,16 +31,17 @@ fun WatchInfoView(modifier: Modifier) {
     ) {
         val (watchInfo1, watchInfo2) = createRefs()
 
-        WatchInfoCard1(modifier = Modifier
-            .fillMaxWidth()
-            .constrainAs(watchInfo1) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(watchInfo2.start)
-                width = Dimension.percent(0.5f)
-                height = Dimension.fillToConstraints
-            })
+        WatchInfoCard1(
+            modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(watchInfo1) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(watchInfo2.start)
+                    width = Dimension.percent(0.5f)
+                    height = Dimension.fillToConstraints
+                })
         WatchInfoCard2(modifier = Modifier.constrainAs(watchInfo2) {
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)

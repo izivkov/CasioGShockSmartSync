@@ -8,15 +8,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
-import kotlinx.datetime.minus
+import kotlinx.datetime.toJavaInstant
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.health.HealthConnectManager
 import org.avmedia.gshockapi.ProgressEvents
-import javax.inject.Inject
 import java.time.temporal.ChronoUnit
-import kotlinx.datetime.toJavaInstant
+import javax.inject.Inject
 
 @HiltViewModel
 class HealthViewModel @Inject constructor(

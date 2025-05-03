@@ -9,5 +9,5 @@ class KeepAlivePreferences(private val context: Context) {
 
     var isEnabled: Boolean
         get() = preferences.getBoolean("is_enabled", false)
-        set(value) = preferences.edit() { putBoolean("is_enabled", value) }
+        set(value) = preferences.edit { putBoolean("is_enabled", value) }
 }

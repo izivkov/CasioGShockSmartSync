@@ -70,9 +70,10 @@ class EventViewModel @Inject constructor(
         )
     }
 
-    private fun String.sanitizeEventTitle():String {
+    private fun String.sanitizeEventTitle(): String {
         fun String.filterAllowedCharacters(): String {
-            val allowedSymbols = " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}" // Not supported on the watch: "~。「」、・。¥±♪⟪⟫♦▶◀"
+            val allowedSymbols =
+                " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}" // Not supported on the watch: "~。「」、・。¥±♪⟪⟫♦▶◀"
             val regex = "[^A-Za-z0-9${Regex.escape(allowedSymbols)}]".toRegex()
             return this.replace(regex, "*")
         }
@@ -83,7 +84,8 @@ class EventViewModel @Inject constructor(
 
         fun String.removeAccents(): String {
             val normalized = Normalizer.normalize(this, Normalizer.Form.NFD)
-            return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("")
+            return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized)
+                .replaceAll("")
         }
 
         return this.removeEmojis().removeAccents().filterAllowedCharacters().trim()

@@ -66,14 +66,15 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                     EventList()
                 }
 
-                Column(modifier = Modifier
-                    .constrainAs(buttonsRow) {
-                        top.linkTo(events.bottom)  // Link top of buttonsRow to bottom of content
-                        bottom.linkTo(parent.bottom)  // Keep buttons at the bottom
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                    .fillMaxWidth()
+                Column(
+                    modifier = Modifier
+                        .constrainAs(buttonsRow) {
+                            top.linkTo(events.bottom)  // Link top of buttonsRow to bottom of content
+                            bottom.linkTo(parent.bottom)  // Keep buttons at the bottom
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }
+                        .fillMaxWidth()
                 ) {
                     val buttons = arrayListOf(
                         ButtonData(

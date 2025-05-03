@@ -35,9 +35,10 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext val appContext: Context // Inject application context
 ) : ViewModel() {
 
-    class AppSettings (appContext: Context) {
+    class AppSettings(appContext: Context) {
         var keepAlive = LocalDataStorage.getKeepAlive(appContext)
     }
+
     val appSettings = AppSettings(appContext)
 
     abstract class Setting(open var title: String) {
@@ -128,7 +129,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    data class OperationSound(var sound: Boolean = true, var vibrate: Boolean = false) : Setting("Button Sound")
+    data class OperationSound(var sound: Boolean = true, var vibrate: Boolean = false) :
+        Setting("Button Sound")
 
     data class Light(
         var autoLight: Boolean = false,
@@ -142,8 +144,10 @@ class SettingsViewModel @Inject constructor(
     data class PowerSavingMode(var powerSavingMode: Boolean = false) :
         Setting("Power Saving Mode")
 
-    data class KeepAlive(val appContext: Context,
-                               var keepAlive: Boolean = LocalDataStorage.getKeepAlive(appContext)) :
+    data class KeepAlive(
+        val appContext: Context,
+        var keepAlive: Boolean = LocalDataStorage.getKeepAlive(appContext)
+    ) :
         Setting("Run in Background") {
 
         override fun save() {
@@ -373,7 +377,7 @@ class SettingsViewModel @Inject constructor(
         smartSettings.add(timeAdjustment)
 
         // Run in background
-        val keepAliveValue = LocalDataStorage.getKeepAlive (appContext)
+        val keepAliveValue = LocalDataStorage.getKeepAlive(appContext)
         val keepAlive = KeepAlive(appContext, keepAliveValue)
         smartSettings.add(keepAlive)
 

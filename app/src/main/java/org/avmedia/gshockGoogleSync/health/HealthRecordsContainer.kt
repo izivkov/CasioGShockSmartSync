@@ -3,9 +3,9 @@ package org.avmedia.gshockGoogleSync.health
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.Record
 
 class HealthRecordsContainer {
     private val sleepRecords = mutableListOf<SleepSessionRecord>()
@@ -27,7 +27,8 @@ class HealthRecordsContainer {
         }
     }
 
-    fun getAllRecords(): List<Record> = sleepRecords + exerciseRecords + stepsRecords + heartRateRecords
+    fun getAllRecords(): List<Record> =
+        sleepRecords + exerciseRecords + stepsRecords + heartRateRecords
 
     suspend fun insertToHealthConnect(healthConnectClient: HealthConnectClient) {
         val records = getAllRecords()

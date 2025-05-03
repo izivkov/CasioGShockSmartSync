@@ -32,7 +32,8 @@ fun PowerSavings(
         context = LocalContext.current,
         id = R.string.power_saving_mode
     )
-    BasicSettings(title = title, isSwitchOn = powerSavingMode,
+    BasicSettings(
+        title = title, isSwitchOn = powerSavingMode,
         onSwitchToggle = { newValue ->
             powerSavingMode = newValue // Update the state when the switch is toggled
             powerSavingModeSetting.powerSavingMode = newValue
