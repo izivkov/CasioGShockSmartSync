@@ -54,6 +54,52 @@ object PrayerAlarmsHelper {
         return alarms
     }
 
+    // Create the next n prayer alarms, where n is the number of alarms on the watch.
+    fun createNextPrayerAlarms(context: Context, n: Int): ArrayList<Alarm>? {
+        require(n in 1..5) { "Number of alarms must be between 1 and 5" }
+
+        val location = LocationProvider.getLocation(context) ?: run {
+            AppSnackbar("Could not obtain your location. Make sure FINE_LOCATION permission is granted.")
+            return null
+        }
+
+        val coordinates = Coordinates(location.latitude, location.longitude)
+        val parameters = getCalculationMethodForLocation().parameters
+            .copy(prayerAdjustments = PrayerAdjustments(fajr = 2))
+
+        val alarms = ArrayList<Alarm>()
+        var currentDate = LocalDate.now()
+        val currentTime = LocalDateTime.now()
+
+        while (alarms.size < n) {
+            val date = DateComponents(currentDate.year, currentDate.monthValue, currentDate.dayOfMonth)
+            val prayerTimes = PrayerTimes(coordinates, date, parameters)
+
+            val todaysPrayers = listOf(
+                prayerTimes.fajr to "fajr",
+                prayerTimes.dhuhr to "dhuhr",
+                prayerTimes.asr to "asr",
+                prayerTimes.maghrib to "maghrib",
+                prayerTimes.isha to "isha"
+            )
+
+            for ((prayerTime, _) in todaysPrayers) {
+                val prayerDateTime = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(prayerTime.toEpochMilliseconds()),
+                    ZoneId.systemDefault()
+                )
+
+                if (prayerDateTime > currentTime && alarms.size < n) {
+                    alarms.add(prayerTimeToAlarm(prayerTime))
+                }
+            }
+
+            currentDate = currentDate.plusDays(1)
+        }
+
+        return alarms
+    }
+
     private fun getCalculationMethodForLocation(): CalculationMethod {
         if (isInTurkeyOrEurope())
             return CalculationMethod.TURKEY

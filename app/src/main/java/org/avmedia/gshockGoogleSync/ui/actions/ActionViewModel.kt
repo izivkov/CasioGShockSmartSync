@@ -382,7 +382,7 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            val alarms = PrayerAlarmsHelper.createPrayerAlarms(context)
+            val alarms = PrayerAlarmsHelper.createNextPrayerAlarms(context, WatchInfo.alarmCount)
             if (alarms == null) {
                 Timber.e("Could not set prayer alarms")
                 return
