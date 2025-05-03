@@ -222,4 +222,5 @@
     <string name="exercise">Ejercicio</string>
     <string name="exercise_session">Sesiones de ejercicio</string>
     <string name="no_exercise_today">No hay sesiones de ejercicio hoy</string>
+    <string name="find_phone_instruction">Para ejecutar acciones, inicia la función "Buscar teléfono" en el reloj</string>
 </resources>

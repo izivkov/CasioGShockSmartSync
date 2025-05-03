@@ -221,4 +221,5 @@
     <string name="exercise">Training</string>
     <string name="exercise_session">Trainingseinheiten</string>
     <string name="no_exercise_today">Heute keine Trainingseinheiten</string>
+    <string name="find_phone_instruction">Um Aktionen auszuführen, starten Sie die Funktion „Telefon finden“ auf der Uhr</string>
 </resources>

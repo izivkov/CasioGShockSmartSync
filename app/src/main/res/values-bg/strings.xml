@@ -222,5 +222,5 @@
     <string name="exercise">Упражнение</string>
     <string name="exercise_session">Сесии с упражнения</string>
     <string name="no_exercise_today">Няма сесии с упражнения днес</string>
-
+    <string name="find_phone_instruction">За да изпълните действията, стартирайте функцията „Намиране телефон“ на часовника</string>
 </resources>

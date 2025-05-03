@@ -228,5 +228,5 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="exercise">Exercice</string>
     <string name="exercise_session">Séances d\'exercice</string>
     <string name="no_exercise_today">Aucune séance d\'exercice aujourd\'hui</string>
-
+    <string name="find_phone_instruction">Pour exécuter des actions, lancez la fonction «Rechercher le téléphone» sur la montre</string>
 </resources>

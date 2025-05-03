@@ -221,4 +221,5 @@
     <string name="exercise">Упражнение</string>
     <string name="exercise_session">Сеансы упражнений</string>
     <string name="no_exercise_today">Сегодня сеансов упражнений не было</string>
+    <string name="find_phone_instruction">Чтобы выполнить действия, запустите функцию «Найти телефон» на часах</string>
 </resources>

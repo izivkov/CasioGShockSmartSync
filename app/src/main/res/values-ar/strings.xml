@@ -212,4 +212,5 @@
     <string name="exercise">التمرين</string>
     <string name="exercise_session">جلسات التمرين</string>
     <string name="no_exercise_today">لا توجد جلسات تمرين اليوم</string>
+    <string name="find_phone_instruction">لتنفيذ الإجراءات، ابدأ وظيفة "البحث عن الهاتف" في الساعة</string>
 </resources>

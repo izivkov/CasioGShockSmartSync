@@ -2,9 +2,14 @@ package org.avmedia.gshockapi.io
 
 import CachedIO
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.avmedia.gshockapi.utils.Utils
 
 object ButtonPressedIO {
+
+    @Volatile
+    private var lastKnownButton: IO.WatchButton = IO.WatchButton.INVALID
 
     private object DeferredValueHolder {
         lateinit var deferredResult: CompletableDeferred<IO.WatchButton>
@@ -13,18 +18,19 @@ object ButtonPressedIO {
     suspend fun request(): IO.WatchButton {
         return CachedIO.request("10") { key ->
             getPressedButton(key)
+        }.also {
+            lastKnownButton = it
         }
     }
 
     private suspend fun getPressedButton(key: String): IO.WatchButton {
         DeferredValueHolder.deferredResult = CompletableDeferred()
         IO.request(key)
-        return DeferredValueHolder.deferredResult.await()
+        val ret = DeferredValueHolder.deferredResult.await()
+        return ret
     }
 
-    fun get(): IO.WatchButton {
-        return CachedIO.get("10") as IO.WatchButton
-    }
+    fun get(): IO.WatchButton = lastKnownButton
 
     fun put(value: Any) {
         CachedIO.put("10", value)
@@ -49,8 +55,6 @@ FIND PHONE:   0x10 07 7A 29 33 A1 C6 7F ->02<- 03 0F FF FF FF FF 24 00 00 00 // 
         if (data != "" && Utils.toIntArray(data).size >= 19) {
             val bleIntArr = Utils.toIntArray(data)
             val buttonValue = bleIntArr[8]
-
-            println("=============>>> Button pressed: dec=$buttonValue, hex=0x${buttonValue.toString(16)}, bin=${buttonValue.toString(2).padStart(8, '0')}")
 
             ret = when {
                 (buttonValue and AUTO_CONNECT_MASK) == AUTO_CONNECT_MASK -> IO.WatchButton.ALLAYS_CONNECTED_CONNECTION

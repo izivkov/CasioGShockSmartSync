@@ -204,4 +204,5 @@
     <string name="exercise">Gyakorlat</string>
     <string name="exercise_session">Edzésszakaszok</string>
     <string name="no_exercise_today">Ma nincs edzés</string>
+    <string name="find_phone_instruction">A műveletek végrehajtásához indítsa el az „Telefon keresése” funkciót az órán</string>
 </resources>

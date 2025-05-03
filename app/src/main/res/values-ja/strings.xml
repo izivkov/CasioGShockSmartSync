@@ -232,4 +232,5 @@
     <string name="exercise">運動</string>
     <string name="exercise_session">運動セッション</string>
     <string name="no_exercise_today">今日は運動セッションがありません</string>
+    <string name="find_phone_instruction">アクションを実行するには、時計で「携帯電話を探す」機能を開始してください</string>
 </resources>
