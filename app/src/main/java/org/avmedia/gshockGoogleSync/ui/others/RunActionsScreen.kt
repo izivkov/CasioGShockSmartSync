@@ -61,7 +61,6 @@ object ActionNameHandler {
 
 @Composable
 fun RunActionsScreen(
-    repository: GShockRepository,
     translateApi: TranslateRepository
 ) {
     val scrollState = rememberScrollState()

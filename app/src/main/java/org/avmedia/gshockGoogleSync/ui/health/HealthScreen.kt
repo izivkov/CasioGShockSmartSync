@@ -277,10 +277,10 @@ private fun HeartRateCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                val NO_DATA_BPM = "-- bpm"
-                HeartRateMetric("Min", if (minRate > 0) "$minRate bpm" else NO_DATA_BPM)
-                HeartRateMetric("Avg", if (avgRate > 0) "$avgRate bpm" else NO_DATA_BPM)
-                HeartRateMetric("Max", if (maxRate > 0) "$maxRate bpm" else NO_DATA_BPM)
+                val noDataBPM = "-- bpm"
+                HeartRateMetric("Min", if (minRate > 0) "$minRate bpm" else noDataBPM)
+                HeartRateMetric("Avg", if (avgRate > 0) "$avgRate bpm" else noDataBPM)
+                HeartRateMetric("Max", if (maxRate > 0) "$maxRate bpm" else noDataBPM)
             }
         }
     }

@@ -120,7 +120,7 @@ class GShockApplication : Application() {
     private fun handleRunAction() {
         context.setContent {
             StartScreen {
-                RunActionsScreen(repository, translateApi)
+                RunActionsScreen(translateApi)
             }
         }
 
@@ -222,7 +222,7 @@ class GShockApplication : Application() {
             }
 
             repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
-                RunActionsScreen(repository, translateApi)
+                RunActionsScreen(translateApi)
             }
 
             repository.isFindPhoneButtonPressed() -> {
