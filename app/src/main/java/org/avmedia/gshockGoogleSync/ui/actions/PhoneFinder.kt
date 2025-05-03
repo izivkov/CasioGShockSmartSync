@@ -167,7 +167,9 @@ class PhoneFinder(context: Context) {
             }
         }
 
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+            // Not used
+        }
 
         private fun getBestAvailableSensor(sensorManager: SensorManager): Sensor? {
             return sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)

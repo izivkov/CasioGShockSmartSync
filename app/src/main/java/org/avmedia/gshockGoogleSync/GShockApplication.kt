@@ -226,7 +226,7 @@ class GShockApplication : Application() {
             }
 
             repository.isFindPhoneButtonPressed() -> {
-                RunFindPhoneScreen(repository, translateApi)
+                RunFindPhoneScreen(translateApi)
             }
 
             else -> {

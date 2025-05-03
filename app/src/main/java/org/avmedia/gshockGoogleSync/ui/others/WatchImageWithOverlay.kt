@@ -117,7 +117,6 @@ fun WatchImageWithOverlayAlwaysConnected(
     BoxWithConstraints(modifier = modifier) {
         val screenHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
         val textOffsetPx = screenHeightPx * 0.75f // Position text 3/4 down the screen
-        val horizontalPadding = 16.dp
 
         // Background watch image
         Image(

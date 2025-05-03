@@ -82,20 +82,3 @@ fun AppTimePicker(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun PreviewInputExample() {
-    var selectedTime: TimePickerState? by remember { mutableStateOf(null) }
-
-    AppTimePicker(
-        onDismiss = {
-        },
-        onConfirm = { time ->
-            selectedTime = time
-        },
-        initialHour = 15,
-        initialMinute = 23
-    )
-}

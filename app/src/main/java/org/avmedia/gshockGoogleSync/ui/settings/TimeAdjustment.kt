@@ -47,13 +47,11 @@ fun TimeAdjustment(
 
     var notifyMe by remember { mutableStateOf(timeAdjustmentSetting.timeAdjustmentNotifications) }
     var adjustmentMinutes by remember { mutableStateOf(timeAdjustmentSetting.adjustmentTimeMinutes.toString()) }
-    var fineAdjustment by remember { mutableStateOf(timeAdjustmentSetting.fineAdjustment.toString()) }
 
     LaunchedEffect(settings, timeAdjustment, notifyMe) {
         timeAdjustment = timeAdjustmentSetting.timeAdjustment
         notifyMe = timeAdjustmentSetting.timeAdjustmentNotifications
         adjustmentMinutes = timeAdjustmentSetting.adjustmentTimeMinutes.toString()
-        fineAdjustment = timeAdjustmentSetting.fineAdjustment.toString()
     }
     AppCard(
         modifier = Modifier
@@ -130,7 +128,6 @@ fun TimeAdjustment(
                     Spacer(modifier = Modifier.weight(1f))
 
                     var showDialog by remember { mutableStateOf(false) }
-                    var selectedValue by remember { mutableIntStateOf(adjustmentMinutes.toInt()) }
 
                     AppTextLink(
                         text = "$adjustmentMinutes m",
@@ -144,7 +141,6 @@ fun TimeAdjustment(
                             range = 0..59,
                             onDismiss = { showDialog = false },
                             onConfirm = { newValue ->
-                                selectedValue = newValue
                                 showDialog = false
                                 onUpdate(
                                     timeAdjustmentSetting.copy(

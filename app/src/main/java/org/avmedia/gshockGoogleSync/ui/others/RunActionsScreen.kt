@@ -116,7 +116,6 @@ fun RunActionsScreen(
 
 @Composable
 fun RunFindPhoneScreen(
-    repository: GShockRepository,
     translateApi: TranslateRepository
 ) {
     val context = LocalContext.current

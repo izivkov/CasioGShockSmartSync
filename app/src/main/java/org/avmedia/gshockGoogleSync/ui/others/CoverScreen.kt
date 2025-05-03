@@ -28,6 +28,48 @@ import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 
 @Composable
+private fun LongPressHandler(
+    onPressed: (Boolean) -> Unit,
+    onLongPress: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier.pointerInput(Unit) {
+            awaitPointerEventScope {
+                while (true) {
+                    val down = awaitFirstDown()
+                    onPressed(true)
+                    val longPress = awaitLongPressOrCancellation(down.id)
+                    onPressed(false)
+                    if (longPress != null) {
+                        onLongPress()
+                    }
+                }
+            }
+        }
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun UnlockText(
+    translateApi: TranslateRepository,
+    isPressed: Boolean
+) {
+    AppTextVeryLarge(
+        text = translateApi.stringResource(
+            LocalContext.current,
+            R.string.cover_hold_to_unlock
+        ),
+        color = if (isPressed)
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+        else
+            MaterialTheme.colorScheme.primary
+    )
+}
+
+@Composable
 fun CoverScreen(
     translateApi: TranslateRepository,
     onUnlock: () -> Unit,
@@ -52,33 +94,14 @@ fun CoverScreen(
                 .systemBarsPadding(),
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .pointerInput(Unit) {
-                        awaitPointerEventScope {
-                            while (true) {
-                                val down = awaitFirstDown()
-                                isPressed = true
-                                val longPress = awaitLongPressOrCancellation(down.id)
-                                isPressed = false
-                                if (longPress != null) {
-                                    toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 100)
-                                    onUnlock()
-                                }
-                            }
-                        }
-                    }
+            LongPressHandler(
+                onPressed = { isPressed = it },
+                onLongPress = {
+                    toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 100)
+                    onUnlock()
+                }
             ) {
-                AppTextVeryLarge(
-                    text = translateApi.stringResource(
-                        LocalContext.current,
-                        R.string.cover_hold_to_unlock
-                    ),
-                    color = if (isPressed)
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                    else
-                        MaterialTheme.colorScheme.primary
-                )
+                UnlockText(translateApi, isPressed)
             }
 
             if (isConnected) {

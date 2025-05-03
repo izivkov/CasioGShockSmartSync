@@ -71,10 +71,4 @@ class HealthViewModel @Inject constructor(
     suspend fun sendToHealthApp() {
         healthConnectManager?.simulateAndInsertWatchData()
     }
-
-    private fun formatSleepDuration(durationInMinutes: Long): String {
-        val hours = durationInMinutes / 60
-        val minutes = durationInMinutes % 60
-        return "$hours h $minutes min"
-    }
 }
