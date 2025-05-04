@@ -1,0 +1,1 @@
+Added partial support for the DW-H5600 watch and other always-connected watches.
