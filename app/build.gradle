@@ -54,8 +54,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.gshockapi)
-    // implementation project(':api')
+    // implementation(libs.gshockapi)
+    implementation project(':api')
 
     implementation(libs.izivkov.dynamicresourcetranslator)
     // implementation(project(":translateApi"))

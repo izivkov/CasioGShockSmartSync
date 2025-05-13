@@ -3,6 +3,8 @@ package org.avmedia.gshockGoogleSync.ui.settings
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
+import androidx.compose.runtime.Recomposer
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -39,7 +41,7 @@ class SettingsViewModel @Inject constructor(
         var keepAlive = LocalDataStorage.getKeepAlive(appContext)
     }
 
-    val appSettings = AppSettings(appContext)
+    private val appSettings = AppSettings(appContext)
 
     abstract class Setting(open var title: String) {
         open fun save() {
@@ -47,18 +49,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private val _settings = MutableStateFlow<ArrayList<Setting>>(arrayListOf())
-    val settings: StateFlow<ArrayList<Setting>> = _settings
+    private val _settingsFlow = MutableStateFlow<List<Setting>>(emptyList())
+    val settings: StateFlow<List<Setting>> = _settingsFlow
     private val settingsMap = ConcurrentHashMap<Class<out Setting>, Setting>()
 
     private fun updateSettingsAndMap(newSettings: ArrayList<Setting>) {
         settingsMap.clear()
-        _settings.value = arrayListOf()
-
         newSettings.forEach { setting ->
-            _settings.value.add(setting)
             settingsMap[setting::class.java] = setting
         }
+        _settingsFlow.value = newSettings
     }
 
     fun <T : Setting> getSetting(type: Class<T>): T {
@@ -69,11 +69,12 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun <T : Setting> updateSetting(updatedSetting: T) {
-        val currentList = _settings.value
+        val currentList = _settingsFlow.value.toMutableList()
         val index = currentList.indexOfFirst { it::class == updatedSetting::class }
         if (index != -1) {
             currentList[index] = updatedSetting
-            updateSettingsAndMap(currentList)
+            _settingsFlow.value = currentList
+            settingsMap[updatedSetting::class.java] = updatedSetting
             updatedSetting.save()
         }
     }
