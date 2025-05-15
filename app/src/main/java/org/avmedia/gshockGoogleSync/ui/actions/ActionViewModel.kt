@@ -571,6 +571,9 @@ However, this way gives us more control on how to start the actions.
     fun runActionsForAutoTimeSetting(context: Context) {
         updateActionsAndMap(loadData(context))
 
+        val actions = _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
+        ProgressEvents.onNext("ActionNames", actions.map { it.title })
+
         runFilteredActions(
             context,
             _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) })
