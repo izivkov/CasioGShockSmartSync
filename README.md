@@ -3,7 +3,7 @@
 ## Announcement
 There is a critical bug in version **v22.5** where the **"Find Phone"** action is triggered incorrectly during automatic time updates. As a result, you may hear a loud beep when the time is updated, which happens **four times per day**.
 
-I have fixed this issue in **v22.6**, and it has been released to **F-Droid**. However, it typically takes about a week for F-Droid to publish the new version. In the meantime, you can use one of the following three workarounds:
+I have fixed this issue in **v22.7**, and it has been released to **F-Droid**. However, it typically takes about a week for F-Droid to publish the new version. In the meantime, you can use one of the following three workarounds:
 
 1. Disable **Auto Time Update** in the app settings.
 2. Downgrade to **v22.4** from F-Droid.
