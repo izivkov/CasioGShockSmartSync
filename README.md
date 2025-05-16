@@ -1,5 +1,15 @@
 # Casio G-Shock Smart Sync
 
+## Announcement
+There is a critical bug in version v22.5 where the "Find Phone" action was called incorrectly during auto time update. You may hear
+a loud beep when the time is being updated 4 times per day. I have fixed this 
+in v22.6 and released to F-Droid. However, it takes about a week for F-Froid to publish the new version. You can get a workaround in one of the 
+following 3 ways:
+
+1. Disable the Auto time update in the app settings.
+2. Downgrade to v22.4 from F-Droid.
+3. Upload a new APK v22.7
+
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
 
