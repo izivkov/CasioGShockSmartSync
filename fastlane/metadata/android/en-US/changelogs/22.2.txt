@@ -1,1 +1,0 @@
-Sanitize string sent to watch as reminders, i.e remove accents and filter characters which cannot be displayed on the watch.

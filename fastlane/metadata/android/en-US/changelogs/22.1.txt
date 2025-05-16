@@ -1,6 +1,0 @@
-
-- Added "Keep Alive" feature to keep the app running in the background. This will allow the app to handle functions like "Find Phone"
-for a longer period of time. This feature can be set from the "Settings" screen.
-
-- Improved detection to lifting phone to stop ringing when "Find Phone" is run and the phone is located.
-
