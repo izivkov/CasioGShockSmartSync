@@ -18,6 +18,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
+import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -28,6 +29,7 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
+import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
@@ -60,6 +62,7 @@ class GShockApplication : Application() {
         if (LocalDataStorage.getKeepAlive(context)) {
             KeepAliveManager.getInstance(context).enable()
         }
+        NotificationMonitorService.startService(context)
     }
 
     @Composable
@@ -95,10 +98,18 @@ class GShockApplication : Application() {
             EventAction("WaitForConnection") { waitForConnectionSuspended() },
             EventAction("Disconnect") { handleDisconnect() },
             EventAction("HomeTimeUpdated") {},
-            EventAction("RunActions") { handleRunAction() }
+            EventAction("RunActions") { handleRunAction() },
+            EventAction("AppNotification") { handleAppNotification() }
         )
 
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+    }
+
+    private fun handleAppNotification() {
+        if (repository.supportsAppNotifications()) {
+            val appNotification = ProgressEvents.getPayload("AppNotification") as AppNotification
+            repository.sendAppNotification(appNotification)
+        }
     }
 
     private fun handleConnectionFailure() {

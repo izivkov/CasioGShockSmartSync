@@ -616,11 +616,11 @@ However, this way gives us more control on how to start the actions.
                     Timber.d("------------> running ${it.javaClass.simpleName}")
                     // actions are run on the main lifecycle scope, because the Actions Fragment never gets created.
                     mainScope.launch {
-                        print("Running action ASYNC: ${it.title}")
+                        println("Running action ASYNC: ${it.title}")
                         runIt(it, context)
                     }
                 } else {
-                    print("Running action SYNC: ${it.title}")
+                    println("Running action SYNC: ${it.title}")
                     runIt(it, context)
                 }
             }
