@@ -109,7 +109,7 @@ private class GShockManagerImpl(
 
         connect(device)
             .retry(3, 100)
-            .useAutoConnect(true)
+            .useAutoConnect(false)
             .done {
                 requestMtu(256).enqueue()
                 Timber.d("BLE", "Connected with autoConnect!")
@@ -125,16 +125,19 @@ private class GShockManagerImpl(
     override fun release() {
         connectionState = ConnectionState.DISCONNECTING
 
-        // Cancel all coroutines.
         scope.cancel()
-
-        val wasConnected = isReady
-        // If the device wasn't connected, it means that ConnectRequest was still pending.
-        // Cancelling queue will initiate disconnecting automatically.
         cancelQueue()
 
-        // If the device was connected, we have to disconnect manually.
-        if (wasConnected) {
+        // Close GATT resources
+        close()
+
+        // Clear all characteristics
+        readCharacteristicHolder = null
+        writeCharacteristicHolder = null
+        writeCharacteristicHolderNotifications = null
+        characteristicUUIDs.clear()
+
+        if (isReady) {
             disconnect().enqueue()
         }
     }
@@ -206,7 +209,25 @@ private class GShockManagerImpl(
 
         override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
             ProgressEvents.onNext("Disconnect", device)
+
+            Timber.d("Device disconnected with reason: $reason")
+            when (reason) {
+                ConnectionObserver.REASON_NOT_SUPPORTED -> Timber.e("Device not supported")
+                ConnectionObserver.REASON_TERMINATE_LOCAL_HOST -> Timber.d("Terminated by local host")
+                ConnectionObserver.REASON_TERMINATE_PEER_USER -> Timber.d("Terminated by peer device")
+                ConnectionObserver.REASON_LINK_LOSS -> Timber.w("Connection lost")
+            }
+
             connectionState = ConnectionState.DISCONNECTED
+
+            // Add cleanup
+            readCharacteristicHolder = null
+            writeCharacteristicHolder = null
+            writeCharacteristicHolderNotifications = null
+            characteristicUUIDs.clear()
+
+            // Force garbage collection of BLE resources
+            System.gc()
         }
     }
 

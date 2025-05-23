@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockapi.WatchInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,54 +114,56 @@ fun Locale(
                 }
             }
 
-            Row(
+            if (WatchInfo.hasDateFormat) {
+                Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                AppTextLarge(
-                    text = settingsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
-                        id = R.string.date_format
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 6.dp)
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically // Aligns children vertically in the center
-                ) {
-                    RadioButton(
-                        selected = dateFormat == SettingsViewModel.Locale.DateFormat.MONTH_DAY,
-                        onClick = {
-                            dateFormat = SettingsViewModel.Locale.DateFormat.MONTH_DAY
-                            localeSetting.dateFormat = dateFormat
-                            onUpdate(localeSetting.copy(dateFormat = dateFormat))
-                        }
-                    )
                     AppTextLarge(
                         text = settingsViewModel.translateApi.stringResource(
                             context = LocalContext.current,
-                            id = R.string.mm_dd
-                        )
+                            id = R.string.date_format
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 6.dp)
                     )
 
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    RadioButton(
-                        selected = dateFormat == SettingsViewModel.Locale.DateFormat.DAY_MONTH,
-                        onClick = {
-                            dateFormat = SettingsViewModel.Locale.DateFormat.DAY_MONTH
-                            localeSetting.dateFormat = dateFormat
-                            onUpdate(localeSetting.copy(dateFormat = dateFormat))
-                        }
-                    )
-                    AppTextLarge(
-                        text = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
-                            id = R.string.dd_mm
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically // Aligns children vertically in the center
+                    ) {
+                        RadioButton(
+                            selected = dateFormat == SettingsViewModel.Locale.DateFormat.MONTH_DAY,
+                            onClick = {
+                                dateFormat = SettingsViewModel.Locale.DateFormat.MONTH_DAY
+                                localeSetting.dateFormat = dateFormat
+                                onUpdate(localeSetting.copy(dateFormat = dateFormat))
+                            }
                         )
-                    )
+                        AppTextLarge(
+                            text = settingsViewModel.translateApi.stringResource(
+                                context = LocalContext.current,
+                                id = R.string.mm_dd
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        RadioButton(
+                            selected = dateFormat == SettingsViewModel.Locale.DateFormat.DAY_MONTH,
+                            onClick = {
+                                dateFormat = SettingsViewModel.Locale.DateFormat.DAY_MONTH
+                                localeSetting.dateFormat = dateFormat
+                                onUpdate(localeSetting.copy(dateFormat = dateFormat))
+                            }
+                        )
+                        AppTextLarge(
+                            text = settingsViewModel.translateApi.stringResource(
+                                context = LocalContext.current,
+                                id = R.string.dd_mm
+                            )
+                        )
+                    }
                 }
             }
 

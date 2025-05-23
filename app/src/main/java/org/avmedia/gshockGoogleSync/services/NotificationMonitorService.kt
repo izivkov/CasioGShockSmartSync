@@ -20,6 +20,7 @@ data class NotificationInfo(
     val appName: String,
     val title: String,
     val text: String,
+    val shortText: String,
     val type: NotificationType,
     val timestamp: Long
 )
@@ -28,22 +29,6 @@ class NotificationMonitorService : NotificationListenerService() {
 
     init {
         notificationsSetupEventSubscription()
-    }
-
-    private val knownAppCategories = mapOf(
-        "com.google.android.calendar" to NotificationType.CALENDAR,
-        "com.google.android.gm" to NotificationType.EMAIL,
-        "com.whatsapp" to NotificationType.MESSAGE,
-        "com.google.android.apps.messaging" to NotificationType.MESSAGE,
-        "com.facebook.messenger" to NotificationType.MESSAGE,
-        "com.facebook.katana" to NotificationType.GENERIC,      // Social
-        "com.twitter.android" to NotificationType.GENERIC,      // Social
-        "com.instagram.android" to NotificationType.GENERIC,    // Social
-        "com.linkedin.android" to NotificationType.GENERIC      // Social
-    )
-
-    override fun onCreate() {
-        super.onCreate()
     }
 
     private fun notificationsSetupEventSubscription() {
@@ -58,6 +43,7 @@ class NotificationMonitorService : NotificationListenerService() {
     private fun handleWatchInitialization() {
         isRunning = true
     }
+
     private fun handleDisconnect() {
         isRunning = false
     }
@@ -74,13 +60,15 @@ class NotificationMonitorService : NotificationListenerService() {
             val notification = sbn.notification
             val extras = notification.extras
 
-            val title = extras.get(Notification.EXTRA_TITLE)?.toString() ?: ""
-            val text = extras.get(Notification.EXTRA_TEXT)?.toString() ?: ""
+            val title = extras.getString(Notification.EXTRA_TITLE) ?: ""
+            val text = extras.getString(Notification.EXTRA_TEXT) ?: ""
+            val shortText = extras.getString(Notification.EXTRA_SUB_TEXT) ?: ""
 
             val notificationInfo = NotificationInfo(
                 packageName = sbn.packageName,
                 appName = getAppName(sbn.packageName),
                 title = title,
+                shortText = shortText,
                 text = text,
                 type = classifyNotificationType(sbn.packageName, notification),
                 timestamp = sbn.postTime
@@ -104,6 +92,18 @@ class NotificationMonitorService : NotificationListenerService() {
         }
     }
 
+    private val knownAppCategories = mapOf(
+        "com.google.android.calendar" to NotificationType.CALENDAR,
+        "com.google.android.gm" to NotificationType.EMAIL,
+        "com.whatsapp" to NotificationType.MESSAGE,
+        "com.google.android.apps.messaging" to NotificationType.MESSAGE,
+        "com.facebook.messenger" to NotificationType.MESSAGE,
+        "com.facebook.katana" to NotificationType.GENERIC,      // Social
+        "com.twitter.android" to NotificationType.GENERIC,      // Social
+        "com.instagram.android" to NotificationType.GENERIC,    // Social
+        "com.linkedin.android" to NotificationType.GENERIC      // Social
+    )
+
     private fun classifyNotificationType(
         packageName: String,
         notification: Notification
@@ -124,17 +124,15 @@ class NotificationMonitorService : NotificationListenerService() {
 
     private fun handleNotification(info: NotificationInfo) {
         val appNotification = createAppNotification(info)
-        println("Notification received: $appNotification")
 
         // send the notification to be processed elsewhere
-         ProgressEvents.onNext("AppNotification", appNotification)
+        ProgressEvents.onNext("AppNotification", appNotification)
     }
 
-    // Add these methods to NotificationMonitorService
     companion object {
         private var isRunning = false
 
-        fun isEnabled(context: Context): Boolean {
+        private fun isNotificationGranted(context: Context): Boolean {
             val packageName = context.packageName
             val flat = Settings.Secure.getString(
                 context.contentResolver,
@@ -146,19 +144,23 @@ class NotificationMonitorService : NotificationListenerService() {
         private fun toggleNotificationListenerService(context: Context) {
             val pm = context.packageManager
             val componentName = ComponentName(context, NotificationMonitorService::class.java)
-            pm.setComponentEnabledSetting(componentName,
+            pm.setComponentEnabledSetting(
+                componentName,
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP)
-            pm.setComponentEnabledSetting(componentName,
+                PackageManager.DONT_KILL_APP
+            )
+            pm.setComponentEnabledSetting(
+                componentName,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP)
+                PackageManager.DONT_KILL_APP
+            )
         }
 
         fun startService(context: Context) {
-            if (!isEnabled(context)) {
+            if (!isNotificationGranted(context)) {
                 openNotificationListenerSettings(context)
             } else {
-                // Force reconnect the service
+                // Force reconnect the service...
                 // val toggleIntent = Intent(context, NotificationMonitorService::class.java)
                 // context.startService(toggleIntent)
 
@@ -194,6 +196,7 @@ class NotificationMonitorService : NotificationListenerService() {
             return AppNotification(
                 title = info.title,
                 text = info.text,
+                shortText = info.shortText,
                 app = info.appName,
                 type = info.type,
                 timestamp = info.timestamp.toFormattedDateTime()

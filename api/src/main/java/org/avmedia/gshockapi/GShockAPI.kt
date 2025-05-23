@@ -69,8 +69,13 @@ class GShockAPI(private val context: Context) : IGShockAPI {
 
         Connection.stopBleScan()
 
+        println("****************** Before After waitForConnection")
+
         val connectedStatus =
             WaitForConnectionIO.request(context, deviceId)
+
+        println("**************** After waitForConnection, status = $connectedStatus")
+
         if (connectedStatus == "OK") {
             init()
         }

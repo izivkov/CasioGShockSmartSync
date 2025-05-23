@@ -371,7 +371,7 @@ class ActionsViewModel @Inject constructor(
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             // update every 6 hours
             val setTimeConditionAlwaysConnected =
-                (WatchInfo.alwaysConnected && (lastSet == null || System.currentTimeMillis() - lastSet!! > 6000 * 60 * 60))
+                (enabled && WatchInfo.alwaysConnected && (lastSet == null || System.currentTimeMillis() - lastSet!! > 6000 * 60 * 60))
 
             return when (runEnvironment) {
                 RunEnvironment.NORMAL_CONNECTION -> enabled

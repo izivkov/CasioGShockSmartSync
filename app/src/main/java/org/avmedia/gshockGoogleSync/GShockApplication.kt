@@ -62,7 +62,7 @@ class GShockApplication : Application() {
         if (LocalDataStorage.getKeepAlive(context)) {
             KeepAliveManager.getInstance(context).enable()
         }
-        NotificationMonitorService.startService(context)
+        // NotificationMonitorService.startService(context)
     }
 
     @Composable
@@ -117,6 +117,11 @@ class GShockApplication : Application() {
     }
 
     private fun handleWatchInitialization() {
+
+        if (repository.supportsAppNotifications()) {
+            NotificationMonitorService.startService(this)
+        }
+
         context.setContent {
             StartScreen {
                 ContentSelector(
