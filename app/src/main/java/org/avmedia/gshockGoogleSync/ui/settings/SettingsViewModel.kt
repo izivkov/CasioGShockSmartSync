@@ -3,8 +3,6 @@ package org.avmedia.gshockGoogleSync.ui.settings
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
-import androidx.compose.runtime.Recomposer
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson

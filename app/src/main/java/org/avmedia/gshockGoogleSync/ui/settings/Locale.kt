@@ -116,9 +116,9 @@ fun Locale(
 
             if (WatchInfo.hasDateFormat) {
                 Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     AppTextLarge(
                         text = settingsViewModel.translateApi.stringResource(
                             context = LocalContext.current,
