@@ -43,7 +43,7 @@ class EventViewModel @Inject constructor(
                 _events.value = loadedEvents
                 EventsModel.refresh(loadedEvents)
             }.onFailure {
-                ProgressEvents.onNext("ApiError", it.message)
+                ProgressEvents.onNext("Arror", it.message)
             }
         }
     }
@@ -105,7 +105,7 @@ class EventViewModel @Inject constructor(
             }
 
             result.onFailure { e ->
-                ProgressEvents.onNext("ApiError", e.message ?: "")
+                ProgressEvents.onNext("Arror", e.message ?: "")
             }
         }
     }

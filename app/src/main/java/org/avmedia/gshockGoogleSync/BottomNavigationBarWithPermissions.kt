@@ -161,9 +161,14 @@ fun BottomNavigationBarWithPermissions(
             composable(Screens.Actions.route) {
 
                 val permissions = mutableListOf(CAMERA, CALL_PHONE).also {
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) it += WRITE_EXTERNAL_STORAGE
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) it += ACCESS_FINE_LOCATION
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                        it += WRITE_EXTERNAL_STORAGE
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        it += ACCESS_FINE_LOCATION
+                    }
                 }
+
                 NavigateWithPermissions(
                     permissions,
                     navController,

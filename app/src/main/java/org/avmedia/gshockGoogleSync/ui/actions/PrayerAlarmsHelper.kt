@@ -28,7 +28,7 @@ object PrayerAlarmsHelper {
         val location = LocationProvider.getLocation(context)
         if (location == null) {
             AppSnackbar(
-                "Could not obtain your location. Make sure FINE_LOCATION permission os granted."
+                "Could not obtain your location. Make sure FINE_LOCATION permission is granted."
             )
             return null
         }

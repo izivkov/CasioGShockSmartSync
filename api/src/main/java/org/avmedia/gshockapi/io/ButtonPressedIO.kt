@@ -56,7 +56,6 @@ FIND PHONE:   0x10 07 7A 29 33 A1 C6 7F ->02<- 03 0F FF FF FF FF 24 00 00 00 // 
         if (data != "" && Utils.toIntArray(data).size >= 19) {
             val bleIntArr = Utils.toIntArray(data)
             val pressedButton = bleIntArr[8]
-            println("******************** Button pressed: $pressedButton")
             ret = when (pressedButton) {
                 in 0..1 -> IO.WatchButton.LOWER_LEFT
                 2 -> IO.WatchButton.FIND_PHONE

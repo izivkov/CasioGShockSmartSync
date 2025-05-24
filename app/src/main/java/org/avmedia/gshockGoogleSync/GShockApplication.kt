@@ -94,7 +94,7 @@ class GShockApplication : Application() {
             EventAction("ConnectionSetupComplete") {},
             EventAction("WatchInitializationCompleted") { handleWatchInitialization() },
             EventAction("ConnectionFailed") { handleConnectionFailure() },
-            EventAction("ApiError") { handleApiError() },
+            EventAction("Arror") { handleError() },
             EventAction("WaitForConnection") { waitForConnectionSuspended() },
             EventAction("Disconnect") { handleDisconnect() },
             EventAction("HomeTimeUpdated") {},
@@ -165,8 +165,8 @@ class GShockApplication : Application() {
         }
     }
 
-    private fun handleApiError() {
-        val message = ProgressEvents.getPayload("ApiError") as String?
+    private fun handleError() {
+        val message = ProgressEvents.getPayload("Arror") as String?
             ?: translateApi.getString(
                 context,
                 R.string.apierror_ensure_the_official_g_shock_app_is_not_running

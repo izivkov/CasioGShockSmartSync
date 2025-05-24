@@ -12,6 +12,7 @@ import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.TimeAdjustmentInfo
+import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.Month
 
@@ -139,7 +140,6 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override fun setTimer(timerValue: Int) {
-        println("Timer set to $timerValue")
     }
 
     override suspend fun getAppInfo(): String {
@@ -147,7 +147,7 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override suspend fun setTime(timeZone: String, timeMs: Long?) {
-        println("Time set to $timeZone")
+        Timber.i("Time set to $timeZone")
     }
 
     override suspend fun getAlarms(): ArrayList<Alarm> {
@@ -164,7 +164,7 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override fun setAlarms(alarms: ArrayList<Alarm>) {
-        println("Alarms set: $alarms")
+        Timber.i("Alarms set: $alarms")
     }
 
     override suspend fun getEventsFromWatch(): ArrayList<Event> {
@@ -241,11 +241,11 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override fun setEvents(events: ArrayList<Event>) {
-        println("Events set: $events")
+        Timber.i("Events set: $events")
     }
 
     override fun clearEvents() {
-        println("Events cleared")
+        Timber.i("Events cleared")
     }
 
     override suspend fun getSettings(): Settings {
@@ -276,15 +276,15 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override fun setSettings(settings: Settings) {
-        println("Settings set: $settings")
+        Timber.i("Settings set: $settings")
     }
 
     override fun disconnect() {
-        println("Disconnected")
+        Timber.i("Disconnected")
     }
 
     override fun stopScan() {
-        println("Scan stopped")
+        Timber.i("Scan stopped")
     }
 
     override fun isBluetoothEnabled(context: Context): Boolean {
@@ -293,11 +293,11 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun sendMessage(message: String) {
-        println("Message sent: $message")
+        Timber.i("Message sent: $message")
     }
 
     override fun sendAppNotification(notification: AppNotification) {
-        println("sendAppNotification: Message sent: $notification")
+        Timber.i("sendAppNotification: Message sent: $notification")
     }
 
     override fun supportsAppNotifications ():Boolean {
@@ -305,7 +305,7 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override fun resetHand() {
-        println("Hand reset")
+        Timber.i("Hand reset")
     }
 
     override fun validateBluetoothAddress(deviceAddress: String?): Boolean {

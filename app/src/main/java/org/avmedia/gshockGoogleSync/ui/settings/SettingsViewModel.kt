@@ -390,7 +390,7 @@ class SettingsViewModel @Inject constructor(
             runCatching {
                 updateSettingsAndMap(getSmartDefaults())
             }.onFailure { e ->
-                ProgressEvents.onNext("ApiError", e.message ?: "")
+                ProgressEvents.onNext("Arror", e.message ?: "")
             }
         }
     }
