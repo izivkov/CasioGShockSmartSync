@@ -18,27 +18,13 @@ fun ActionRunner(
     val eventActions = arrayOf(
         EventAction("ButtonPressedInfoReceived") {
             when {
-                api.isActionButtonPressed() -> {
-                    actionsViewModel.runActionsForActionButton(context)
-                }
-
-                api.isAutoTimeStarted() -> {
-                    actionsViewModel.runActionsForAutoTimeSetting(context)
-                }
-
-                api.isFindPhoneButtonPressed() -> {
-                    actionsViewModel.runActionFindPhone(context)
-                }
-
-                api.isNormalButtonPressed() -> {
-                    actionsViewModel.runActionForConnection(context)
-                }
-
-                api.isAlwaysConnectedConnectionPressed() -> {
-                    actionsViewModel.runActionForAlwaysConnected(context)
-                }
+                api.isActionButtonPressed() -> actionsViewModel.runActionsForActionButton(context)
+                api.isAutoTimeStarted() -> actionsViewModel.runActionsForAutoTimeSetting(context)
+                api.isFindPhoneButtonPressed() -> actionsViewModel.runActionFindPhone(context)
+                api.isNormalButtonPressed() -> actionsViewModel.runActionForConnection(context)
+                api.isAlwaysConnectedConnectionPressed() -> actionsViewModel.runActionForAlwaysConnected(context)
             }
-        },
+        }
     )
     ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
 

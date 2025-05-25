@@ -1,7 +1,6 @@
 package org.avmedia.gshockGoogleSync
 
 import android.app.Application
-import android.bluetooth.BluetoothDevice
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -10,15 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
-import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -28,20 +22,14 @@ import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.Utils
-import org.avmedia.gshockapi.AppNotification
-import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.ProgressEvents
-import timber.log.Timber
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class GShockApplication : Application() {
+class GShockApplication : Application(), IScreenManager {
     private var _context: MainActivity? = null
     private val context
-        get() = _context ?: throw IllegalStateException("MainActivity not initialized")
+    get() = _context ?: throw IllegalStateException("MainActivity not initialized")
+    private lateinit var eventHandler: MainEventHandler
 
     @Inject
     lateinit var deviceManager: DeviceManager
@@ -52,17 +40,72 @@ class GShockApplication : Application() {
     @Inject
     lateinit var repository: GShockRepository
 
-    override fun onCreate() {
-        super.onCreate()
-        setupEventSubscription()
-    }
-
     fun init(context: MainActivity) {
         _context = context
         if (LocalDataStorage.getKeepAlive(context)) {
             KeepAliveManager.getInstance(context).enable()
         }
-        // NotificationMonitorService.startService(context)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        eventHandler = MainEventHandler(
+            context = this,
+            repository = repository,
+            translateApi = translateApi,
+            screenManager = this
+        )
+        eventHandler.setupEventSubscription()
+    }
+
+    // ScreenManager implementation
+    override fun showContentSelector(repository: GShockRepository, translateApi: TranslateRepository) {
+        context.setContent {
+            StartScreen {
+                ContentSelector(
+                    repository = repository,
+                    translateApi = translateApi,
+                    onUnlocked = { goToNavigationScreen() }
+                )
+            }
+        }
+    }
+
+    override fun showRunActionsScreen(translateApi: TranslateRepository) {
+        context.setContent {
+            StartScreen {
+                RunActionsScreen(translateApi)
+            }
+        }
+    }
+
+    private fun goToNavigationScreen() {
+        context.setContent {
+            StartScreen {
+                BottomNavigationBarWithPermissions(
+                    repository = repository,
+                    translateApi = translateApi
+                )
+            }
+        }
+    }
+
+    override fun showPreConnectionScreen() {
+        context.setContent {
+            StartScreen {
+                PreConnectionScreen()
+            }
+        }
+    }
+
+    override fun showInitialScreen() {
+        context.setContent {
+            Run()
+        }
+    }
+
+    override fun showError(message: String) {
+        AppSnackbar(message)
     }
 
     @Composable
@@ -86,114 +129,6 @@ class GShockApplication : Application() {
                 content()
                 PopupMessageReceiver()
             }
-        }
-    }
-
-    private fun setupEventSubscription() {
-        val eventActions = arrayOf(
-            EventAction("ConnectionSetupComplete") {},
-            EventAction("WatchInitializationCompleted") { handleWatchInitialization() },
-            EventAction("ConnectionFailed") { handleConnectionFailure() },
-            EventAction("Arror") { handleError() },
-            EventAction("WaitForConnection") { waitForConnectionSuspended() },
-            EventAction("Disconnect") { handleDisconnect() },
-            EventAction("HomeTimeUpdated") {},
-            EventAction("RunActions") { handleRunAction() },
-            EventAction("AppNotification") { handleAppNotification() }
-        )
-
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
-    }
-
-    private fun handleAppNotification() {
-        if (repository.supportsAppNotifications()) {
-            val appNotification = ProgressEvents.getPayload("AppNotification") as AppNotification
-            repository.sendAppNotification(appNotification)
-        }
-    }
-
-    private fun handleConnectionFailure() {
-        Timber.e("Failed to connect to the watch")
-    }
-
-    private fun handleWatchInitialization() {
-
-        if (repository.supportsAppNotifications()) {
-            NotificationMonitorService.startService(this)
-        }
-
-        context.setContent {
-            StartScreen {
-                ContentSelector(
-                    repository = repository,
-                    translateApi = translateApi,
-                    onUnlocked = { goToNavigationScreen() }
-                )
-            }
-        }
-    }
-
-    private fun handleRunAction() {
-        context.setContent {
-            StartScreen {
-                RunActionsScreen(translateApi)
-            }
-        }
-
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(3000)
-            context.setContent {
-                StartScreen {
-                    ContentSelector(
-                        repository = repository,
-                        translateApi = translateApi,
-                        onUnlocked = { goToNavigationScreen() }
-                    )
-                }
-            }
-        }
-    }
-
-    private fun goToNavigationScreen() {
-        context.setContent {
-            StartScreen {
-                BottomNavigationBarWithPermissions(
-                    repository = repository,
-                    translateApi = translateApi
-                )
-            }
-        }
-    }
-
-    private fun handleError() {
-        val message = ProgressEvents.getPayload("Arror") as String?
-            ?: translateApi.getString(
-                context,
-                R.string.apierror_ensure_the_official_g_shock_app_is_not_running
-            )
-
-        AppSnackbar(message)
-        repository.disconnect()
-        context.setContent {
-            StartScreen {
-                PreConnectionScreen()
-            }
-        }
-    }
-
-    private fun handleDisconnect() {
-        ProgressEvents.getPayload("Disconnect")?.let { device ->
-            repository.teardownConnection(device as BluetoothDevice)
-        }
-
-        Executors.newSingleThreadScheduledExecutor().schedule({
-            context.setContent { Run() }
-        }, 0L, TimeUnit.SECONDS)
-    }
-
-    private fun waitForConnectionSuspended() {
-        CoroutineScope(Dispatchers.Default).launch {
-            waitForConnection()
         }
     }
 

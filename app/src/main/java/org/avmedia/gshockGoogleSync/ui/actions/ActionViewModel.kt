@@ -518,15 +518,7 @@ class ActionsViewModel @Inject constructor(
             ) CameraOrientation.BACK else CameraOrientation.FRONT
         }
     }
-
-    /*
-Note: Alternatively, actions can run autonomously, when certain conditions were met:
-1. User pressed Action button (lower-right) on the watch
-2. The action is enabled
-3. Certain progress event received.
-
-However, this way gives us more control on how to start the actions.
- */
+    
     private fun runIt(action: Action, context: Context) {
         runCatching {
             action.run(context)

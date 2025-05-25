@@ -43,7 +43,7 @@ class EventViewModel @Inject constructor(
                 _events.value = loadedEvents
                 EventsModel.refresh(loadedEvents)
             }.onFailure {
-                ProgressEvents.onNext("Arror", it.message)
+                ProgressEvents.onNext("Error", it.message)
             }
         }
     }
@@ -105,7 +105,7 @@ class EventViewModel @Inject constructor(
             }
 
             result.onFailure { e ->
-                ProgressEvents.onNext("Arror", e.message ?: "")
+                ProgressEvents.onNext("Error", e.message ?: "")
             }
         }
     }

@@ -53,7 +53,7 @@ class AlarmViewModel @Inject constructor(
 
                 ProgressEvents.onNext("Alarms Loaded")
             }.onFailure {
-                ProgressEvents.onNext("Arror")
+                ProgressEvents.onNext("Error")
             }
         }
     }
@@ -82,7 +82,7 @@ class AlarmViewModel @Inject constructor(
                 }
                 AppSnackbar(translateApi.getString(appContext, R.string.alarms_set_to_watch))
             }.onFailure {
-                ProgressEvents.onNext("Arror", it.message ?: "")
+                ProgressEvents.onNext("Error", it.message ?: "")
             }
         }
     }

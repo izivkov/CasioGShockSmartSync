@@ -388,7 +388,7 @@ class SettingsViewModel @Inject constructor(
             runCatching {
                 updateSettingsAndMap(getSmartDefaults())
             }.onFailure { e ->
-                ProgressEvents.onNext("Arror", e.message ?: "")
+                ProgressEvents.onNext("Error", e.message ?: "")
             }
         }
     }
