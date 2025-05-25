@@ -1,3 +1,0 @@
-package org.avmedia.gshockGoogleSync.health
-
-interface IHealthConnectManager
