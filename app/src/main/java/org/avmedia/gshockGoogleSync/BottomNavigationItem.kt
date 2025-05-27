@@ -44,19 +44,6 @@ data class BottomNavigationItem(
             ),
         )
 
-        if (WatchInfo.hasHealthFunctions) {
-            baseItems.add(
-                BottomNavigationItem(
-                    label = Utils.shortenString(
-                        translateApi.stringResource(LocalContext.current, R.string.health), 7
-                    ),
-                    icon = ImageVector.vectorResource(id = R.drawable.health),
-                    route = Screens.Health.route,
-                    translateApi
-                )
-            )
-        }
-
         if (WatchInfo.hasReminders) {
             baseItems.add(
                 BottomNavigationItem(

@@ -1,13 +1,9 @@
 # Casio G-Shock Smart Sync
 
 ## Announcement
-There is a critical bug in version **v22.5** where the **"Find Phone"** action is triggered incorrectly during automatic time updates. As a result, you may hear a loud beep when the time is updated, which happens **four times per day**.
-
-I have fixed this issue in **v22.9**, and it has been released to **F-Droid**. However, it typically takes about a week for F-Droid to publish the new version. In the meantime, you can use one of the following three workarounds:
-
-1. Disable **Auto Time Update** in the app settings.
-2. Downgrade to **v22.4** from F-Droid.
-3. Download and install the **v22.9 APK** from [here](https://drive.google.com/file/d/1POoh5o2EjLG2NG0LIQrAofTP6JKBjuK_/view?usp=sharing).
+We now support sending notifications to watches that support this feature. It has been tested with 
+the DW-H5600 only. If you have a watch that supports notifications, such as the GBA or GBD series, 
+please let us know if it works for you.
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App! This app provides the following extra features:

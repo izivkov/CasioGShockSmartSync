@@ -219,5 +219,5 @@
     <string name="exercise">锻炼</string>
     <string name="exercise_session">锻炼记录</string>
     <string name="no_exercise_today">今天没有锻炼记录</string>
-    <string name="find_phone_instruction">Чтобы выполнить действия, запустите функцию «Найти телефон» на часах</string>
+    <string name="find_phone_instruction">要运行操作，请在手表上启动“查找手机”功能。</string>
 </resources>
