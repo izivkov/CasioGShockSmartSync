@@ -12,11 +12,10 @@
     <string name="disabled">关闭</string>
     <string name="send_alarms_to_phone">发送到手机</string>
     <string name="send_events_to_watch">发送到手表待办项</string>
-    <string name="connection_screen_info"><![CDATA[要进入下一步, 按住 手表<b>左下</b> 按钮3秒
-    在两声“哔”响后, App会进入时间设置页
-    <p><b>确保卡西欧官方应用未在运行, 否则会导致功能冲突.</b></p>
-    <p>要执行由 <b>Actions</b> 页定义的功能, 短按手表 <b>右下</b> 按钮. Actions 可以指定为你的手机上的一个功能或者软件, 比如说 <b>照个相</b>.
-    使用Actions功能时, 这块手表就如同手机的远程控制器一样</p>]]></string>
+    <string name="connection_screen_info"><![CDATA[要进入下一屏，请按住手表上的<b>左下</b>按钮 3 秒钟。
+在第二次双响蜂鸣后，应用将显示设置时间的界面。
+
+<p><b>请确保官方 Casio 应用未运行，否则会干扰此应用的操作。</b></p> <p>某些手表（例如 DW-H5600）在首次连接前需要配对。 在这种情况下，请将手表切换到配对模式。手机上会弹出窗口提示与手表配对。</p> <p>要执行<b>操作</b>界面中定义的操作，请短按<b>右下</b>按钮。 操作是手机上的应用，例如<b>拍照</b>。 通过操作，手表可以作为手机的遥控器使用。</p> <p>你可以从 <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a> 下载此应用。</p>]]></string>
     <string name="alarms_screen_info"><![CDATA[The <b>B5600/B5000/B2100</b> 手表有5组闹钟设定并且在此处可以调整“整点提醒”设置
     闹钟设定可以通过点按闹钟页面的时间值调整. 此时会弹出窗口要求设置脑中的时间
     当闹钟设置好后, 你可以把闹钟设置应用到手表或者这个手机的闹钟应用.]]></string>

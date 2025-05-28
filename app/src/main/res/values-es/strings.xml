@@ -11,11 +11,10 @@
     <string name="disabled">Deshabilitado</string>
     <string name="send_alarms_to_phone">Enviar al\nTeléfono</string>
     <string name="send_events_to_watch">Enviar Recordatorios \nal Reloj</string>
-    <string name="connection_screen_info"><![CDATA[Para proceder a la siguiente pantalla, mantén presionado el botón <b>ABAJO-IZQUIERDO</b> en el reloj durante 3 segundos.
-    Después del segundo pitido doble, la aplicación mostrará la pantalla de configuración de hora.
-    <p><b>Asegúrate de que la aplicación oficial de Casio no esté en ejecución, ya que interferirá con esta aplicación.</b></p>
-    <p>Para ejecutar las acciones definidas en la pantalla de <b>Acciones</b>, presiona brevemente el botón <b>ABAJO-DERECHO</b>. Las acciones son aplicaciones en tu teléfono, como <b>tomar una foto</b>.
-    Usando las acciones, el reloj actúa como un control remoto para tu teléfono.</p>]]>
+    <string name="connection_screen_info"><![CDATA[Para continuar a la siguiente pantalla, mantén presionado el botón <b>INFERIOR IZQUIERDO</b> del reloj durante 3 segundos.
+Después del segundo pitido doble, la app mostrará la pantalla de ajuste de hora.
+
+<p><b>Asegúrate de que la aplicación oficial de Casio no esté en ejecución, ya que interferirá con esta aplicación.</b></p> <p>Algunos relojes, como el DW-H5600, requieren emparejamiento antes de poder conectarse por primera vez. En esos casos, pon tu reloj en modo de emparejamiento. Aparecerá una ventana emergente en tu teléfono para emparejarlo con el reloj.</p> <p>Para ejecutar las Acciones definidas en la pantalla de <b>Acciones</b>, pulsa brevemente el botón <b>INFERIOR DERECHO</b>. Las acciones son aplicaciones en tu teléfono, como <b>Tomar una foto</b>. Mediante estas acciones, el reloj actúa como un control remoto para tu teléfono.</p> <p>Puedes descargar esta aplicación desde <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a></p>]]>
     </string>
     <string name="alarms_screen_info"><![CDATA[Los relojes <b>B5600/B5000/B2100</b> tienen 5 alarmas y configuraciones de "señal" (campanada horaria) mostradas aquí.
     Las alarmas se pueden actualizar presionando el valor de la hora de cada alarma. Aparecerá un nuevo cuadro de diálogo que te permitirá configurar la hora de la alarma.

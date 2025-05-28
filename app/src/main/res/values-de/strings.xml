@@ -11,17 +11,10 @@
     <string name="disabled">Deaktiviert</string>
     <string name="send_alarms_to_phone">An\nTelefon senden</string>
     <string name="send_events_to_watch">An Uhr\nErinnerungen senden</string>
-    <string name="connection_screen_info"><![CDATA[Um zum nächsten Bildschirm zu gelangen, drücken und halten Sie die <b>UNTERE-LINKE</b>-Taste der Uhr für 3 Sekunden.
-    Nach dem zweiten Doppel-Piep zeigt die App den Zeit-Einstellungsbildschirm an.
-    <p><b>Stellen Sie sicher, dass die offizielle Casio-App nicht läuft, da sie diese App stören wird.</b></p>
-    <p>Um Aktionen auszuführen, die auf dem Bildschirm <b>Aktionen</b> definiert sind, drücken Sie kurz die <b>UNTERE-RECHTE</b>-Taste.
-    Mit diesen Aktionen fungiert die Uhr als Fernbedienung für Ihr Telefon.</p>]]>
-    </string>
-    <string name="alarms_screen_info"><![CDATA[Die Uhren <b>B5600/B5000/B2100</b> verfügen über 5 Wecker und ein "Signal" (stündliches Signal), die hier angezeigt werden.
-    Die Wecker können aktualisiert werden, indem Sie auf den Zeitwert eines jeden Weckers drücken. Es erscheint ein neues Dialogfenster, in dem Sie die Weckzeit einstellen können.
-    Sobald die Wecker eingestellt sind, können Sie diese an die Uhr senden oder an die Wecker-App auf dem Telefon senden.]]></string>
-    <string name="events_screen_info"><![CDATA[Dieser Bildschirm zeigt Ereignisse aus Ihrem <b>Google-Kalender</b> an und ermöglicht es Ihnen, sie an die <b>Erinnerungen</b> der Uhr zu senden.
-    \n\nWenn keine Ereignisse angezeigt werden, stellen Sie sicher, dass Sie zukünftige Ereignisse oder nicht abgelaufene wiederkehrende Ereignisse in Ihrem Google-Kalender haben.]]>
+    <string name="connection_screen_info"><![CDATA[Um zum nächsten Bildschirm zu gelangen, halten Sie die <b>UNTERE-LINKE</b> Taste an der Uhr 3 Sekunden lang gedrückt.
+Nach dem zweiten Doppelton zeigt die App den Bildschirm zur Zeiteinstellung an.
+
+<p><b>Stellen Sie sicher, dass die offizielle Casio-App nicht ausgeführt wird, da sie die Funktion dieser App stören kann.</b></p> <p>Einige Uhren, wie die DW-H5600, müssen vor der ersten Verbindung gekoppelt werden. In solchen Fällen versetzen Sie Ihre Uhr in den Kopplungsmodus. Auf Ihrem Telefon erscheint ein Popup-Fenster, das Sie zur Kopplung mit der Uhr auffordert.</p> <p>Um Aktionen auszuführen, die im <b>Aktionen</b>-Bildschirm definiert sind, drücken Sie kurz die <b>UNTERE-RECHTE</b> Taste. Aktionen sind Apps auf Ihrem Telefon, wie z. B. <b>Foto aufnehmen</b>. Mit diesen Aktionen fungiert die Uhr als Fernbedienung für Ihr Telefon.</p> <p>Sie können diese App von <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a> herunterladen.</p>]]>
     </string>
     <string name="actions">Aktionen</string>
     <string name="title_actions">Aktionen</string>

@@ -12,11 +12,15 @@
     <string name="send_alarms_to_phone">Envoyer au\nTéléphone</string>
     <string name="send_events_to_watch">Envoyer à la montre\nRappels</string>
 
-    <string name="connection_screen_info"><![CDATA[Pour passer à l\'écran suivant, appuyez et maintenez le bouton <b>INFÉRIEUR-GAUCHE</b> de la montre pendant 3 secondes.
-Après le deuxième double-bip, l\'application affichera l\'écran de réglage de l\'heure.
-<p><b>Assurez-vous que l\'application officielle Casio n\'est pas en cours d\'exécution, car elle interférera avec cette application.</b></p>
-<p>Pour exécuter les Actions définies dans l\'écran <b>Actions</b>, appuyez brièvement sur le bouton <b>INFÉRIEUR-DROIT</b>. Les actions sont des applications sur votre téléphone, comme <b>Prendre une photo</b>.
-Grâce à ces actions, la montre agit comme une télécommande pour votre téléphone.</p>]]>
+    <string name="connection_screen_info"><![CDATA[Pour passer à l’écran suivant, maintenez le bouton <b>INFÉRIEUR GAUCHE</b> de la montre enfoncé pendant 3 secondes.
+Après le deuxième double bip, l’application affichera l’écran de réglage de l’heure.
+
+<p><b>Assurez-vous que l\’application officielle de Casio n\’est pas en cours d\’exécution, car elle pourrait interférer avec cette application.</b></p>
+<p>Certaines montres, comme la DW-H5600, nécessitent un appairage avant de pouvoir se connecter pour la première fois. Dans ce cas, mettez votre montre en
+mode d\’appairage. Une fenêtre contextuelle apparaîtra sur votre téléphone pour vous inviter à l\’appairer avec la montre.</p> <p>Pour exécuter les Actions
+définies dans l\’écran <b>Actions</b>, appuyez brièvement sur le bouton <b>INFÉRIEUR DROIT</b>. Les actions sont des applications sur votre téléphone, comme
+<b>Prendre une photo</b>. Avec les actions, la montre agit comme une télécommande pour votre téléphone.</p> <p>Vous pouvez télécharger cette application depuis
+<a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a></p>]]>
 </string>
     <string name="alarms_screen_info"><![CDATA[Les montres <b>B5600/B5000/B2100</b> ont 5 alarmes et un réglage "signal" (carillon horaire) indiqués ici.
 Les alarmes peuvent être mises à jour en appuyant sur la valeur de l\'heure de chaque alarme. Une nouvelle boîte de dialogue apparaîtra, vous permettant de définir l\'heure de l\'alarme.
