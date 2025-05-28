@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
@@ -57,8 +58,7 @@ fun AlarmChimeSwitch(
                 }
             },
             modifier = modifier,
-            text = alarmsViewModel.translateApi.stringResource(
-                context = LocalContext.current,
+            text = stringResource(
                 id = R.string.signal_chime
             )
         )

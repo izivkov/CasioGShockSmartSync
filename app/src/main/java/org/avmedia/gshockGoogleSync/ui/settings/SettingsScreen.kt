@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -31,27 +32,12 @@ import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.translateapi.ResourceLocaleKey
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    settingsViewModel.translateApi.addOverwrites(
-        arrayOf(
-            ResourceLocaleKey(R.string.language, java.util.Locale("ca")) to { "Idioma" },
-            ResourceLocaleKey(
-                R.string.select_language,
-                java.util.Locale("ca")
-            ) to { "Selecciona un idioma" },
-            ResourceLocaleKey(
-                R.string.send_to_watch_settings,
-                java.util.Locale("ca")
-            ) to { "Envia al\nrellotge" },
-        )
-    )
-
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -63,8 +49,7 @@ fun SettingsScreen(
                 val (title, settingsLayout, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    settingsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    stringResource(
                         id = R.string.settings
                     ), Modifier
                         .constrainAs(title) {
@@ -143,8 +128,7 @@ fun BottomRow(
                 contentAlignment = Alignment.CenterEnd  // Aligns content to the right
             ) {
                 InfoButton(
-                    infoText = settingsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    infoText = stringResource(
                         id = R.string.auto_fill_help
                     )
                 )
@@ -153,8 +137,7 @@ fun BottomRow(
             val buttons = arrayListOf(
                 ButtonData(
                     text = Utils.shortenStringNewLine(
-                        settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        stringResource(
                             id = R.string.auto_configure_settings
                         ),
                         15, "AUTO"
@@ -162,8 +145,7 @@ fun BottomRow(
                     onClick = { settingsViewModel.setSmartDefaults() }),
 
                 ButtonData(
-                    text = settingsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    text = stringResource(
                         id = R.string.send_to_watch
                     ),
                     onClick = { settingsViewModel.sendToWatch() })

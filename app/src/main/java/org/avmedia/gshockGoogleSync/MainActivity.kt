@@ -17,7 +17,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
@@ -31,9 +30,6 @@ class MainActivity : ComponentActivity() {
     private val application: GShockApplication
         get() = applicationContext as GShockApplication
     private lateinit var bluetoothHelper: BluetoothHelper
-
-    @Inject
-    lateinit var translateApi: TranslateRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,11 +48,10 @@ class MainActivity : ComponentActivity() {
             requestBluetooth = requestBluetoothLauncher,
             onBluetoothEnabled = { },
             onBluetoothNotEnabled = {
-                AppSnackbar(translateApi.getString(this, R.string.bluetooth_is_not_enabled))
+                AppSnackbar(this.getString(R.string.bluetooth_is_not_enabled))
                 Executors.newSingleThreadScheduledExecutor()
                     .schedule({ finish() }, 3L, TimeUnit.SECONDS)
-            },
-            translateApi = translateApi
+            }
         )
 
         setContent {

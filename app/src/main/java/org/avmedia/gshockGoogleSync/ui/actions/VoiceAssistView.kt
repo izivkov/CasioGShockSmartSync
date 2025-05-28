@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
@@ -30,8 +30,7 @@ fun VoiceAssistView(
     }
 
     ActionItem(
-        title = actionsViewModel.translateApi.stringResource(
-            context = LocalContext.current,
+        title = stringResource(
             id = R.string.start_voice_assistant
         ),
         resourceId = R.drawable.voice_assist,

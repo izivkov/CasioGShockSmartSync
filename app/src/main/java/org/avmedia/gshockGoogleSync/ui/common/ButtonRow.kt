@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.di.TranslateEntryPoint
+import androidx.compose.ui.res.stringResource
 
 data class ButtonData(val text: String, val onClick: () -> Unit)
 
@@ -42,22 +42,14 @@ fun ButtonsRow(
 @Preview(showBackground = true)
 @Composable
 fun PreviewButtonRow() {
-
-    val translateApi = EntryPointAccessors.fromApplication(
-        LocalContext.current,
-        TranslateEntryPoint::class.java
-    ).getTranslateRepository()
-
     val buttons = listOf(
         ButtonData(
-            text = translateApi.stringResource(
-                context = LocalContext.current,
+            text = stringResource(
                 id = R.string.send_alarms_to_phone
             ),
             onClick = { /* handle click */ }),
         ButtonData(
-            text = translateApi.stringResource(
-                context = LocalContext.current,
+            text = stringResource(
                 id = R.string.send_alarms_to_watch
             ),
             onClick = { /* handle click */ })

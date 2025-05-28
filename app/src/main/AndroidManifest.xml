@@ -50,13 +50,14 @@
     <uses-feature android:name="android.hardware.sensor.proximity" android:required="true" />
 
     <application
+        android:supportsRtl="true"
+        android:configChanges="locale|layoutDirection"
         android:name=".GShockApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
         android:theme="@style/Theme.NavigationBarMedium"
         tools:targetApi="31">
 

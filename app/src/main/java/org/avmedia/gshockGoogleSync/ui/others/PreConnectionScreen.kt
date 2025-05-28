@@ -15,13 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
@@ -76,7 +76,6 @@ fun PreConnectionScreen(
                             imageResId = getImageId(watchName),
                             isAlwaysConnected = isAlwaysConnected(watchName),
                             arrowsVerticalPosition = getArrowsVerticalPosition(watchName),
-                            translateRepository = ptrConnectionViewModel.translateApi,
                         )
 
                         AppConnectionSpinner(
@@ -97,12 +96,9 @@ fun PreConnectionScreen(
                                     end.linkTo(parent.end)
                                 }) {
                             InfoButton(
-                                infoText = ptrConnectionViewModel.translateApi.stringResource(
-                                    context = LocalContext.current,
+                                infoText = stringResource(
                                     id = R.string.connection_screen_info
-                                ) {
-                                    // infoText = translatedString
-                                } + "v" + BuildConfig.VERSION_NAME
+                                ) + "v" + BuildConfig.VERSION_NAME
                             )
                         }
                     }
@@ -155,8 +151,7 @@ fun PreConnectionScreen(
                                         bottom.linkTo(parent.bottom)
                                     }) {
                                 InfoButton(
-                                    infoText = ptrConnectionViewModel.translateApi.stringResource(
-                                        context = LocalContext.current,
+                                    infoText = stringResource(
                                         id = R.string.connection_screen_device
                                     )
                                 )
@@ -174,15 +169,13 @@ fun WatchScreen(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
     arrowsVerticalPosition: Float = 0.55f,
-    isAlwaysConnected: Boolean = false,
-    translateRepository: TranslateRepository
+    isAlwaysConnected: Boolean = false
 ) {
     Box(modifier = modifier) {
         if (isAlwaysConnected) {
             WatchImageWithOverlayAlwaysConnected(
                 modifier,
-                imageResId,
-                translateApi = translateRepository,
+                imageResId
             )
         } else {
             WatchImageWithOverlay(

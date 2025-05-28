@@ -8,7 +8,6 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockGoogleSync.utils.Utils
@@ -19,7 +18,6 @@ import java.util.concurrent.TimeUnit
 class MainEventHandler(
     private val context: GShockApplication,
     private val repository: GShockRepository,
-    private val translateApi: TranslateRepository,
     private val screenManager: IScreenManager
 ) {
     fun setupEventSubscription() {
@@ -42,7 +40,7 @@ class MainEventHandler(
         if (repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
         }
-        screenManager.showContentSelector(repository, translateApi)
+        screenManager.showContentSelector(repository)
     }
 
     private fun handleAppNotification() {
@@ -59,18 +57,17 @@ class MainEventHandler(
     }
 
     private fun handleRunAction() {
-        screenManager.showRunActionsScreen(translateApi)
+        screenManager.showRunActionsScreen()
 
         CoroutineScope(Dispatchers.Main).launch {
             delay(3000)
-            screenManager.showContentSelector(repository, translateApi)
+            screenManager.showContentSelector(repository)
         }
     }
 
     private fun handleError() {
         val message = ProgressEvents.getPayload("Error") as String?
-            ?: translateApi.getString(
-                context,
+            ?: context.getString(
                 R.string.apierror_ensure_the_official_g_shock_app_is_not_running
             )
 

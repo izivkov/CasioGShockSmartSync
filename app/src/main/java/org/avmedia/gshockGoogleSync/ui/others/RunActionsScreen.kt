@@ -26,12 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -60,9 +60,7 @@ object ActionNameHandler {
 }
 
 @Composable
-fun RunActionsScreen(
-    translateApi: TranslateRepository
-) {
+fun RunActionsScreen() {
     val scrollState = rememberScrollState()
     var actionNamesText by remember { mutableStateOf("") }
 
@@ -87,8 +85,7 @@ fun RunActionsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AppTextExtraLarge(
-                text = translateApi.stringResource(
-                    context = LocalContext.current,
+                text = stringResource(
                     id = R.string.running_actions
                 ),
                 fontWeight = FontWeight.Bold
@@ -115,7 +112,6 @@ fun RunActionsScreen(
 
 @Composable
 fun RunFindPhoneScreen(
-    translateApi: TranslateRepository
 ) {
     val context = LocalContext.current
 
@@ -127,11 +123,10 @@ fun RunFindPhoneScreen(
     ) {
         val text = remember(context) {
             buildString {
-                append(translateApi.stringResource(context, R.string.find_phone))
+                append(context.getString(R.string.find_phone))
                 append("\n\n\n")
                 append(
-                    translateApi.stringResource(
-                        context,
+                    context.getString(
                         R.string.when_found_lift_phone_to_stop_ringing
                     )
                 )

@@ -12,7 +12,6 @@ import com.philjay.RRule
 import com.philjay.Weekday
 import com.philjay.WeekdayNum
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.RepeatPeriod
 import java.time.DayOfWeek
@@ -26,7 +25,6 @@ import javax.inject.Singleton
 @Singleton
 class RRuleValues @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val translateApi: TranslateRepository,
 ) {
     data class Values(
         var localEndDate: LocalDate? = null,

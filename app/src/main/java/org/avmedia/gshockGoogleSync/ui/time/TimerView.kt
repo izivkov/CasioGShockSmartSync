@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -79,8 +80,7 @@ fun TimerView(
                 verticalArrangement = Arrangement.Center
             ) {
                 AppTextLarge(
-                    text = timeModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    text = stringResource(
                         R.string.timer
                     ),
                 )
@@ -150,8 +150,7 @@ fun SendTimerButton(
     timeModel: TimeViewModel = hiltViewModel()
 ) {
     AppButton(
-        text = timeModel.translateApi.stringResource(
-            context = LocalContext.current,
+        text = stringResource(
             R.string.send_to_watch
         ),
         onClick = onClick,

@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,8 +69,7 @@ fun Light(
                         verticalArrangement = Arrangement.Center
                     ) {
                         AppTextLarge(
-                            text = settingsViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            text = stringResource(
                                 id = R.string.auto_light
                             ),
                             modifier = Modifier.padding(end = 6.dp)
@@ -95,8 +95,7 @@ fun Light(
             ) {
                 AppTextLarge(
                     text = Utils.shortenString(
-                        settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        stringResource(
                             id = R.string.illumination_period
                         ), 20
                     ),

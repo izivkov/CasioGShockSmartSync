@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.Event
@@ -24,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class EventViewModel @Inject constructor(
     private val api: GShockRepository,
-    val translateApi: TranslateRepository,
     private val calendarEvents: CalendarEvents,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
@@ -101,7 +99,7 @@ class EventViewModel @Inject constructor(
                 }
 
                 api.setEvents(ArrayList(sanitizedEvents))
-                AppSnackbar(translateApi.getString(appContext, R.string.events_set))
+                AppSnackbar(appContext.getString(R.string.events_set))
             }
 
             result.onFailure { e ->

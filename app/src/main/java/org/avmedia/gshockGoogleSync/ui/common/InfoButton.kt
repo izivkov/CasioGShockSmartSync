@@ -17,11 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.di.TranslateEntryPoint
 
 @Composable
 fun InfoButton(
@@ -33,11 +33,6 @@ fun InfoButton(
         onClick = { showDialog = !showDialog },
         Modifier.size(32.dp),
     ) {
-        val translateApi = EntryPointAccessors.fromApplication(
-            LocalContext.current,
-            TranslateEntryPoint::class.java
-        ).getTranslateRepository()
-
         Icon(
             imageVector = Icons.Outlined.Info,
             contentDescription = "Info Icon",
@@ -52,8 +47,7 @@ fun InfoButton(
                 onDismissRequest = { showDialog = false },
                 confirmButton = {
                     Text(
-                        text = translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string.ok
                         ),
                         modifier = Modifier.clickable {
@@ -63,8 +57,7 @@ fun InfoButton(
                 },
                 title = {
                     Text(
-                        text = translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string.info
                         )
                     )

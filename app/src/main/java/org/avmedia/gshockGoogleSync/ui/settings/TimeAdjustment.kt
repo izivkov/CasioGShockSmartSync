@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,15 +78,13 @@ fun TimeAdjustment(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppTextLarge(
-                        text = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string.time_adjustment
                         ),
                         modifier = Modifier.padding(end = 6.dp)
                     )
                     InfoButton(
-                        infoText = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        infoText = stringResource(
                             id = R.string.time_adjustment_info
                         )
                     )
@@ -110,16 +109,14 @@ fun TimeAdjustment(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
-                        text = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string.adjustment_time_minutes
                         ),
                         fontSize = 20.sp,
                         modifier = Modifier.padding(end = 6.dp)
                     )
                     InfoButton(
-                        infoText = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        infoText = stringResource(
                             id = R.string.adjustment_time_info
                         )
                     )
@@ -147,12 +144,10 @@ fun TimeAdjustment(
                                     )
                                 )
                             },
-                            title = settingsViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            title = stringResource(
                                 R.string.when_to_run
                             ),
-                            label = settingsViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            label = stringResource(
                                 R.string.minutes_between_0_and_59
                             ),
                             unit = "m"
@@ -173,8 +168,7 @@ fun TimeAdjustment(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppText(
-                        text = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string.notify_me
                         ),
                         modifier = Modifier.wrapContentWidth(),

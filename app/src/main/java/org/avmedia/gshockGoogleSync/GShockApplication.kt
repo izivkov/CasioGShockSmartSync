@@ -10,7 +10,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.HiltAndroidApp
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -35,9 +34,6 @@ class GShockApplication : Application(), IScreenManager {
     lateinit var deviceManager: DeviceManager
 
     @Inject
-    lateinit var translateApi: TranslateRepository
-
-    @Inject
     lateinit var repository: GShockRepository
 
     fun init(context: MainActivity) {
@@ -52,29 +48,27 @@ class GShockApplication : Application(), IScreenManager {
         eventHandler = MainEventHandler(
             context = this,
             repository = repository,
-            translateApi = translateApi,
             screenManager = this
         )
         eventHandler.setupEventSubscription()
     }
 
     // ScreenManager implementation
-    override fun showContentSelector(repository: GShockRepository, translateApi: TranslateRepository) {
+    override fun showContentSelector(repository: GShockRepository) {
         context.setContent {
             StartScreen {
                 ContentSelector(
                     repository = repository,
-                    translateApi = translateApi,
                     onUnlocked = { goToNavigationScreen() }
                 )
             }
         }
     }
 
-    override fun showRunActionsScreen(translateApi: TranslateRepository) {
+    override fun showRunActionsScreen() {
         context.setContent {
             StartScreen {
-                RunActionsScreen(translateApi)
+                RunActionsScreen()
             }
         }
     }
@@ -83,8 +77,7 @@ class GShockApplication : Application(), IScreenManager {
         context.setContent {
             StartScreen {
                 BottomNavigationBarWithPermissions(
-                    repository = repository,
-                    translateApi = translateApi
+                    repository = repository
                 )
             }
         }
@@ -160,30 +153,27 @@ class GShockApplication : Application(), IScreenManager {
     @Composable
     private fun ContentSelector(
         repository: GShockRepository,
-        translateApi: TranslateRepository,
         onUnlocked: () -> Unit
     ) {
         when {
             repository.isAlwaysConnectedConnectionPressed() -> {
                 CoverScreen(
-                    translateApi = translateApi,
                     onUnlock = onUnlocked,
                     isConnected = repository.isConnected()
                 )
             }
 
             repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
-                RunActionsScreen(translateApi)
+                RunActionsScreen()
             }
 
             repository.isFindPhoneButtonPressed() -> {
-                RunFindPhoneScreen(translateApi)
+                RunFindPhoneScreen()
             }
 
             else -> {
                 BottomNavigationBarWithPermissions(
                     repository = repository,
-                    translateApi = translateApi
                 )
             }
         }

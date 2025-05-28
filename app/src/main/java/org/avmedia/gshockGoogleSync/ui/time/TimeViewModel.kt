@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
@@ -18,7 +17,6 @@ import javax.inject.Inject
 @HiltViewModel
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
-    val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
     private val _timer = MutableStateFlow(0)
@@ -42,7 +40,7 @@ class TimeViewModel @Inject constructor(
     fun sendTimerToWatch(timeMs: Int) {
         viewModelScope.launch {
             api.setTimer(timeMs)
-            AppSnackbar(translateApi.getString(appContext, R.string.timer_set))
+            AppSnackbar(appContext.getString(R.string.timer_set))
         }
     }
 
@@ -51,9 +49,9 @@ class TimeViewModel @Inject constructor(
             runCatching {
                 val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                 val timeMs = System.currentTimeMillis() + timeOffset
-                AppSnackbar(translateApi.getString(appContext, R.string.sending_time_to_watch))
+                AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
                 api.setTime(timeMs = timeMs)
-                AppSnackbar(translateApi.getString(appContext, R.string.time_set))
+                AppSnackbar(appContext.getString(R.string.time_set))
 
                 // Refresh the Home Time on the screen in case changed by setting time.
                 _homeTime.value = api.getHomeTime()

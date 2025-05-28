@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.CoroutineScopes.mainScope
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -37,7 +36,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
     private val api: GShockRepository,
-    val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context, // Inject application context
     private val calendarEvents: CalendarEvents
 ) : ViewModel() {
@@ -89,31 +87,28 @@ class ActionsViewModel @Inject constructor(
     private fun loadInitialActions() {
         val initialActions = arrayListOf(
             ToggleFlashlightAction("Toggle Flashlight", false),
-            StartVoiceAssistAction("Start Voice Assistant", false, translateApi),
-            NextTrack("Skip to next track", false, translateApi),
+            StartVoiceAssistAction("Start Voice Assistant", false),
+            NextTrack("Skip to next track", false),
 
             FindPhoneAction(
-                translateApi.getString(appContext, R.string.find_phone),
-                translateApi,
+                appContext.getString(R.string.find_phone),
                 true
             ),
-            SetTimeAction(translateApi.getString(appContext, R.string.set_time), true, api),
+            SetTimeAction(appContext.getString(R.string.set_time), true, api),
             SetEventsAction(
-                translateApi.getString(appContext, R.string.set_reminders),
+                appContext.getString(R.string.set_reminders),
                 false,
                 api,
-                translateApi,
                 calendarEvents
             ),
             PhotoAction(
-                translateApi.getString(appContext, R.string.take_photo),
+                appContext.getString(R.string.take_photo),
                 false,
                 CameraOrientation.BACK,
-                translateApi
             ),
             PrayerAlarmsAction("Set Prayer Alarms", true, api),
-            Separator(translateApi.getString(appContext, R.string.emergency_actions), false),
-            PhoneDialAction(translateApi.getString(appContext, R.string.make_phonecall), false, ""),
+            Separator(appContext.getString(R.string.emergency_actions), false),
+            PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""),
         )
 
         _actions.value = initialActions
@@ -167,7 +162,6 @@ class ActionsViewModel @Inject constructor(
         override var title: String,
         override var enabled: Boolean,
         val api: GShockRepository,
-        val translateApi: TranslateRepository,
         val calendarEvents: CalendarEvents
     ) :
         Action(title, enabled, RunMode.ASYNC) {
@@ -210,7 +204,6 @@ class ActionsViewModel @Inject constructor(
 
     data class FindPhoneAction(
         override var title: String,
-        val translateApi: TranslateRepository,
         override var enabled: Boolean
     ) :
         Action(title, enabled) {
@@ -301,7 +294,6 @@ class ActionsViewModel @Inject constructor(
     data class StartVoiceAssistAction(
         override var title: String,
         override var enabled: Boolean,
-        val translateApi: TranslateRepository,
     ) :
         Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
@@ -315,8 +307,7 @@ class ActionsViewModel @Inject constructor(
             }.onFailure {
                 if (it is ActivityNotFoundException) {
                     AppSnackbar(
-                        translateApi.getString(
-                            context,
+                        context.getString(
                             R.string.voice_assistant_not_available_on_this_device
                         )
                     )
@@ -328,7 +319,6 @@ class ActionsViewModel @Inject constructor(
     data class NextTrack(
         override var title: String,
         override var enabled: Boolean,
-        val translateApi: TranslateRepository,
     ) :
         Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
@@ -356,7 +346,7 @@ class ActionsViewModel @Inject constructor(
                 audioManager.dispatchMediaKeyEvent(upEvent)
             }.onFailure {
                 if (it is ActivityNotFoundException) {
-                    AppSnackbar(translateApi.getString(context, R.string.cannot_go_to_next_track))
+                    AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
                 }
             }
         }
@@ -462,7 +452,6 @@ class ActionsViewModel @Inject constructor(
         override var title: String,
         override var enabled: Boolean,
         var cameraOrientation: CameraOrientation,
-        val translateApi: TranslateRepository,
     ) : Action(title, enabled, RunMode.ASYNC) {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
@@ -482,8 +471,7 @@ class ActionsViewModel @Inject constructor(
                     onImageCaptured = { result ->
                         captureResult = result
                         AppSnackbar(
-                            translateApi.getString(
-                                context,
+                            context.getString(
                                 R.string.image_captured,
                                 captureResult!!
                             )
@@ -493,8 +481,7 @@ class ActionsViewModel @Inject constructor(
                     onError = { error ->
                         captureResult = "Error: $error"
                         AppSnackbar(
-                            translateApi.getString(
-                                context,
+                            context.getString(
                                 R.string.camera_capture_error,
                                 captureResult!!
                             )

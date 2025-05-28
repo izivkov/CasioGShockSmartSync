@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
@@ -31,7 +30,6 @@ import kotlin.coroutines.CoroutineContext
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val api: GShockRepository,
-    val translateApi: TranslateRepository,
     @ApplicationContext val appContext: Context // Inject application context
 ) : ViewModel() {
 
@@ -430,7 +428,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 api.setSettings(settings)
-                AppSnackbar(translateApi.getString(appContext, R.string.settings_sent_to_watch))
+                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
             }.onFailure { e ->
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }

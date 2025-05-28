@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
@@ -30,13 +31,11 @@ fun SkipToNextTrackView(
     }
 
     ActionItem(
-        title = actionsViewModel.translateApi.stringResource(
-            context = LocalContext.current,
+        title = stringResource(
             id = R.string.next_track
         ),
         resourceId = R.drawable.skip_next,
-        infoText = actionsViewModel.translateApi.stringResource(
-            context = LocalContext.current,
+        infoText = stringResource(
             id = R.string.skip_to_next_track_info
         ),
         isEnabled = isEnabled,

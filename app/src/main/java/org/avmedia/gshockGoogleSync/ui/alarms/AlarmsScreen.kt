@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -27,27 +28,11 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import org.avmedia.translateapi.ResourceLocaleKey
 import java.util.Locale
 
 @Composable
 fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
     val alarms by alarmViewModel.alarms.collectAsState()
-
-    alarmViewModel.translateApi.addOverwrites(
-        arrayOf(
-            ResourceLocaleKey(R.string.daily, Locale("ca")) to { "Diària" },
-            ResourceLocaleKey(R.string.signal_chime, Locale("ca")) to { "Senyal horaria" },
-            ResourceLocaleKey(
-                R.string.send_alarms_to_phone,
-                Locale("ca")
-            ) to { "Envia al\ntelèfon" },
-            ResourceLocaleKey(
-                R.string.send_alarms_to_watch,
-                Locale("ca")
-            ) to { "Envia al\nrellotge" },
-        )
-    )
 
     LaunchedEffect(alarms) {
     }
@@ -98,8 +83,7 @@ fun AlarmsScreen(
                 val (title, alarms, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    alarmViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    stringResource(
                         id = R.string.watch_alarms
                     ), Modifier
                         .constrainAs(title) {
@@ -142,14 +126,12 @@ fun AlarmsScreen(
                 ) {
                     val buttons = arrayListOf(
                         ButtonData(
-                            text = alarmViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            text = stringResource(
                                 id = R.string.send_alarms_to_phone
                             ),
                             onClick = { alarmViewModel.sendAlarmsToPhone() }),
                         ButtonData(
-                            text = alarmViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            text = stringResource(
                                 id = R.string.send_alarms_to_watch
                             ),
                             onClick = {

@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -23,19 +24,10 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.translateapi.ResourceLocaleKey
 import java.util.Locale
 
 @Composable
 fun ActionsScreen(actionModel: ActionsViewModel = hiltViewModel()) {
-
-    actionModel.translateApi.addOverwrites(
-        arrayOf(
-            ResourceLocaleKey(R.string.voice_assistant, Locale("ca")) to { "Assistent de veu" },
-            ResourceLocaleKey(R.string.next_track, Locale("ca")) to { "Salta a la següent" },
-            ResourceLocaleKey(R.string.make_phonecall, Locale("ca")) to { "Fes una trucada" },
-        )
-    )
 
     GShockSmartSyncTheme {
         Surface(
@@ -48,8 +40,7 @@ fun ActionsScreen(actionModel: ActionsViewModel = hiltViewModel()) {
                 val (title, actions) = createRefs()
 
                 ScreenTitle(
-                    actionModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    stringResource(
                         id = R.string.actions
                     ), Modifier
                         .constrainAs(title) {

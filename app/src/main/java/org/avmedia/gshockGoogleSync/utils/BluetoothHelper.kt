@@ -9,7 +9,6 @@ import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import javax.inject.Inject
 
@@ -18,8 +17,7 @@ class BluetoothHelper @Inject constructor(
     private val activity: Activity,
     private val requestBluetooth: ActivityResultLauncher<Intent>,
     private val onBluetoothEnabled: () -> Unit,
-    private val onBluetoothNotEnabled: () -> Unit,
-    private val translateApi: TranslateRepository,
+    private val onBluetoothNotEnabled: () -> Unit
 ) {
     private var onResultCallback: (() -> Unit)? = null
 
@@ -30,8 +28,7 @@ class BluetoothHelper @Inject constructor(
         val bluetoothAdapter = bluetoothManager?.adapter
         if (bluetoothAdapter == null) {
             AppSnackbar(
-                translateApi.getString(
-                    context,
+                context.getString(
                     R.string.sorry_your_device_does_not_support_bluetooth_exiting
                 )
             )
@@ -47,8 +44,7 @@ class BluetoothHelper @Inject constructor(
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 AppSnackbar(
-                    translateApi.getString(
-                        context,
+                    context.getString(
                         R.string.permission_required_to_turn_on_bluetooth
                     )
                 )
@@ -61,8 +57,7 @@ class BluetoothHelper @Inject constructor(
             }.onFailure { e ->
                 if (e is SecurityException) {
                     AppSnackbar(
-                        translateApi.getString(
-                            context,
+                        context.getString(
                             R.string.you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually
                         )
                     )

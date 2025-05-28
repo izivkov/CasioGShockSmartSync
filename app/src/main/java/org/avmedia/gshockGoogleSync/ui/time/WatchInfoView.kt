@@ -23,6 +23,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockapi.WatchInfo
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun WatchInfoView(modifier: Modifier) {
@@ -74,15 +75,13 @@ fun WatchInfoCard1(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppText(
-                    text = timeModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    text = stringResource(
                         id = R.string.home_time
                     )
                 )  // Home Time Text
                 Spacer(modifier = Modifier.width(10.dp))
                 InfoButton(
-                    infoText = timeModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    infoText = stringResource(
                         id = R.string.info_home_time
                     )
                 )  // Info Button

@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,16 +52,14 @@ fun FineAdjustmentRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AppText(
-            text = settingsViewModel.translateApi.stringResource(
-                context = LocalContext.current,
+            text = stringResource(
                 R.string.fine_time_adjustment
             ),
             fontSize = 20.sp,
             modifier = Modifier.padding(end = 2.dp)
         )
         InfoButton(
-            infoText = settingsViewModel.translateApi.stringResource(
-                context = LocalContext.current,
+            infoText = stringResource(
                 R.string.fine_adjustment_info
             )
         )
@@ -81,12 +80,10 @@ fun FineAdjustmentRow(
                 initialValue = selectedValue,
                 range = -10000..10000,
                 step = 100,
-                title = settingsViewModel.translateApi.stringResource(
-                    context = LocalContext.current,
+                title = stringResource(
                     R.string.fine_adjustment
                 ),
-                label = settingsViewModel.translateApi.stringResource(
-                    context = LocalContext.current,
+                label = stringResource(
                     R.string.ms_between_10000_and_10000
                 ),
                 onDismiss = { showDialog = false },

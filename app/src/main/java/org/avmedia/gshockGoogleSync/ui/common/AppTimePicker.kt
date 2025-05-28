@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.EntryPointAccessors
@@ -61,8 +62,7 @@ fun AppTimePicker(
             AppButton(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
-                text = alarmsViewModel.translateApi.stringResource(
-                    context = LocalContext.current,
+                text = stringResource(
                     id = R.string.cancel
                 )
             )
@@ -70,8 +70,7 @@ fun AppTimePicker(
             AppButton(
                 onClick = { onConfirm(timePickerState) },
                 modifier = Modifier.weight(1f), // Equal width buttons
-                text = alarmsViewModel.translateApi.stringResource(
-                    context = LocalContext.current,
+                text = stringResource(
                     id = R.string.ok
                 )
             )

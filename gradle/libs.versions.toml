@@ -23,7 +23,6 @@ timber = "5.0.1"
 sunrisesunset = "1.2"
 hiltNavigationCompose = "1.2.0"
 gshockapi = "1.4.45"
-dynamicresourcetranslator = "1.5.1"
 lifecycle = "2.8.7"
 material3 = "1.3.2"
 compose-ui = "1.8.0"
@@ -69,7 +68,6 @@ sunrisesunsetcalculator = { group = "com.luckycatlabs", name = "SunriseSunsetCal
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-hilt-navigation-fragment = { group = "androidx.hilt", name = "hilt-navigation-fragment", version.ref = "hiltCompiler" }
 gshockapi = { module = "com.github.izivkov:GShockAPI", version.ref = "gshockapi" }
-izivkov-dynamicresourcetranslator = { module = "com.github.izivkov:DynamicResourceTranslator", version.ref = "dynamicresourcetranslator" }
 adhan2 = { module = "com.batoulapps.adhan:adhan2", version.ref = "adhan2" }
 rrule = { module = "com.github.PhilJay:RRule", version.ref = "rrule" }
 compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose-ui" }

@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,8 +69,7 @@ fun Locale(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 AppTextLarge(
-                    text = settingsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    text = stringResource(
                         id = R.string.time_format
                     ),
                     modifier = Modifier
@@ -91,8 +91,7 @@ fun Locale(
                         }
                     )
                     AppTextLarge(
-                        text = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string._12h
                         )
                     )
@@ -106,8 +105,7 @@ fun Locale(
                         }
                     )
                     AppTextLarge(
-                        text = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string._24h
                         )
                     )
@@ -120,8 +118,7 @@ fun Locale(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     AppTextLarge(
-                        text = settingsViewModel.translateApi.stringResource(
-                            context = LocalContext.current,
+                        text = stringResource(
                             id = R.string.date_format
                         ),
                         modifier = Modifier
@@ -141,8 +138,7 @@ fun Locale(
                             }
                         )
                         AppTextLarge(
-                            text = settingsViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            text = stringResource(
                                 id = R.string.mm_dd
                             )
                         )
@@ -158,8 +154,7 @@ fun Locale(
                             }
                         )
                         AppTextLarge(
-                            text = settingsViewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            text = stringResource(
                                 id = R.string.dd_mm
                             )
                         )
@@ -174,8 +169,7 @@ fun Locale(
                     .wrapContentHeight()
             ) {
                 AppTextLarge(
-                    text = settingsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    text = stringResource(
                         id = R.string.language
                     ),
                     modifier = Modifier
@@ -225,8 +219,7 @@ fun LanguageDropdownMenu(
             readOnly = true,  // To prevent user from typing in the field
             label = {
                 AppText(
-                    text = settingsViewModel.translateApi.stringResource(
-                        LocalContext.current,
+                    text = stringResource(
                         R.string.select_language
                     )
                 )

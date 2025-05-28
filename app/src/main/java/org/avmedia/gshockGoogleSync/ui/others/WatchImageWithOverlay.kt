@@ -26,9 +26,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -81,8 +80,7 @@ fun WatchImageWithOverlay(
         )
 
         OverlayText(
-            text = ptrConnectionViewModel.translateApi.stringResource(
-                LocalContext.current,
+            text = stringResource(
                 R.string.press_and_hold_for_3_seconds
             ),
 
@@ -92,8 +90,7 @@ fun WatchImageWithOverlay(
         )
 
         OverlayText(
-            text = ptrConnectionViewModel.translateApi.stringResource(
-                LocalContext.current,
+            text = stringResource(
                 R.string.short_press_to_run_actions
             ),
             alignment = Alignment.BottomEnd,
@@ -112,7 +109,6 @@ fun WatchImageWithOverlay(
 fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
-    translateApi: TranslateRepository,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val screenHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
@@ -135,8 +131,7 @@ fun WatchImageWithOverlayAlwaysConnected(
             contentAlignment = Alignment.TopCenter
         ) {
             Text(
-                text = translateApi.stringResource(
-                    LocalContext.current,
+                text = stringResource(
                     R.string.find_phone_instruction
                 ),
                 color = Color.Red,

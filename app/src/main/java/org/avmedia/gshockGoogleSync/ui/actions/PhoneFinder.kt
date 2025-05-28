@@ -12,7 +12,6 @@ import android.media.MediaPlayer
 import android.media.RingtoneManager
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.di.TranslateEntryPoint
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import timber.log.Timber
 import java.util.concurrent.Executors
@@ -27,11 +26,6 @@ class PhoneFinder(context: Context) {
         private var phoneFinder: PhoneFinder? = null
 
         fun ring(context: Context) {
-            val translateApi = EntryPointAccessors.fromApplication(
-                context,
-                TranslateEntryPoint::class.java
-            ).getTranslateRepository()
-
             // get alarm uri
             var alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             if (alarmUri == null) {
@@ -39,8 +33,7 @@ class PhoneFinder(context: Context) {
             }
             if (alarmUri == null) {
                 AppSnackbar(
-                    translateApi.getString(
-                        context,
+                    context.getString(
                         R.string.unable_to_get_default_sound_uri
                     )
                 )

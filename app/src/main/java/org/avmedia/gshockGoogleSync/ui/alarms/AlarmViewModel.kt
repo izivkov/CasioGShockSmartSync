@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
@@ -27,7 +26,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
-    val translateApi: TranslateRepository,
     @ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
@@ -80,7 +78,7 @@ class AlarmViewModel @Inject constructor(
                     settings.hourlyChime = alarms.value[0].hasHourlyChime
                     api.setSettings(settings)
                 }
-                AppSnackbar(translateApi.getString(appContext, R.string.alarms_set_to_watch))
+                AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
             }.onFailure {
                 ProgressEvents.onNext("Error", it.message ?: "")
             }

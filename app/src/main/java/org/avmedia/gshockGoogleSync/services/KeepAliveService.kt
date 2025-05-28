@@ -9,7 +9,6 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import javax.inject.Inject
 
 const val CHANNEL_ID = "KeepAliveServiceChannel"
@@ -18,9 +17,6 @@ const val NOTIFICATION_ID = 1
 // Foreground Service
 @AndroidEntryPoint
 class KeepAliveService : LifecycleService() {
-
-    @Inject
-    lateinit var translateApi: TranslateRepository
 
     private var wakeLock: PowerManager.WakeLock? = null
 
@@ -38,8 +34,8 @@ class KeepAliveService : LifecycleService() {
     private fun startForegroundService() {
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(translateApi.getString(this, R.string.g_shock_smart_sync_is_running))
-            .setContentText(translateApi.getString(this, R.string.preventing_the_app_from_closing))
+            .setContentTitle(this.getString(R.string.g_shock_smart_sync_is_running))
+            .setContentText(this.getString( R.string.preventing_the_app_from_closing))
             .setSmallIcon(R.drawable.ic_watch_face)
             .build()
         startForeground(NOTIFICATION_ID, notification)

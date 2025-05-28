@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun EventItem(
@@ -37,8 +37,7 @@ fun EventItem(
 ) {
     var isEnabled by remember { mutableStateOf(enabled) }
 
-    val maxReminderMessage = eventViewModel.translateApi.stringResource(
-        context = LocalContext.current,
+    val maxReminderMessage = stringResource(
         id = R.string.max_reminders_reached
     )
 

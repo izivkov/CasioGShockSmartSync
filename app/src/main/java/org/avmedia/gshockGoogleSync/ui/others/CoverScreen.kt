@@ -22,9 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.data.repository.TranslateRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 
 @Composable
@@ -54,12 +54,10 @@ private fun LongPressHandler(
 
 @Composable
 private fun UnlockText(
-    translateApi: TranslateRepository,
     isPressed: Boolean
 ) {
     AppTextVeryLarge(
-        text = translateApi.stringResource(
-            LocalContext.current,
+        text = stringResource(
             R.string.cover_hold_to_unlock
         ),
         color = if (isPressed)
@@ -71,7 +69,6 @@ private fun UnlockText(
 
 @Composable
 fun CoverScreen(
-    translateApi: TranslateRepository,
     onUnlock: () -> Unit,
     isConnected: Boolean = true
 ) {
@@ -101,7 +98,7 @@ fun CoverScreen(
                     onUnlock()
                 }
             ) {
-                UnlockText(translateApi, isPressed)
+                UnlockText(isPressed)
             }
 
             if (isConnected) {
@@ -111,8 +108,7 @@ fun CoverScreen(
                         .padding(end = 16.dp, bottom = 12.dp)
                 ) {
                     AppText(
-                        text = translateApi.stringResource(
-                            LocalContext.current,
+                        text = stringResource(
                             R.string.cover_connected
                         ),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)

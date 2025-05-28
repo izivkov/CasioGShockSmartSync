@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
@@ -50,8 +51,7 @@ fun AppPhoneInputDialog(
             onDismissRequest = onDismiss,
             title = {
                 Text(
-                    alarmsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    stringResource(
                         R.string.enter_phone_number
                     )
                 )
@@ -63,8 +63,7 @@ fun AppPhoneInputDialog(
                         onValueChange = { inputValue = it.trim() },
                         label = {
                             Text(
-                                alarmsViewModel.translateApi.stringResource(
-                                    context = LocalContext.current,
+                                stringResource(
                                     R.string.phone_number
                                 )
                             )
@@ -86,8 +85,7 @@ fun AppPhoneInputDialog(
             },
             confirmButton = {
                 AppButton(
-                    text = alarmsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    text = stringResource(
                         R.string.ok
                     ),
                     onClick = {
@@ -101,8 +99,7 @@ fun AppPhoneInputDialog(
             dismissButton = {
                 AppButton(
                     onClick = onDismiss,
-                    text = alarmsViewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    text = stringResource(
                         R.string.cancel
                     )
                 )

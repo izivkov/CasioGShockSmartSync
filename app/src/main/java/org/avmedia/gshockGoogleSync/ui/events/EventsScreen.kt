@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -42,8 +43,7 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                 val (title, events, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    viewModel.translateApi.stringResource(
-                        context = LocalContext.current,
+                    stringResource(
                         id = R.string.events
                     ), Modifier
                         .constrainAs(title) {
@@ -78,8 +78,7 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                 ) {
                     val buttons = arrayListOf(
                         ButtonData(
-                            text = viewModel.translateApi.stringResource(
-                                context = LocalContext.current,
+                            text = stringResource(
                                 id = R.string.send_events_to_watch
                             ),
                             onClick = { viewModel.sendEventsToWatch() }

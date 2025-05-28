@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
@@ -37,8 +38,7 @@ fun FlashlightView(
 
     // Display the ActionItem with updated state and handle changes to `isEnabled`
     ActionItem(
-        title = actionsViewModel.translateApi.stringResource(
-            context = LocalContext.current,
+        title = stringResource(
             id = R.string.toggle_flashlight
         ),
         resourceId = R.drawable.flashlight,
