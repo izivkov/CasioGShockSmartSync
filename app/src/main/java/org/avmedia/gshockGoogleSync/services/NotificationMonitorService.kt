@@ -58,10 +58,6 @@ class NotificationMonitorService : NotificationListenerService() {
 
         try {
             val notification = sbn.notification
-
-            // val category = notification.category
-            // if (category == Notification.CATEGORY_STATUS) return
-
             val extras = notification.extras
 
             val title = extras.getString(Notification.EXTRA_TITLE) ?: ""
