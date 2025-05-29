@@ -19,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -33,7 +32,6 @@ fun EventItem(
     onEnabledChange: (Boolean) -> Unit,
     enabledCount: Int, // Pass in the count of currently enabled events
     maxEnabled: Int = 5, // Set the maximum number of enabled events (default is 5)
-    eventViewModel: EventViewModel = hiltViewModel()
 ) {
     var isEnabled by remember { mutableStateOf(enabled) }
 

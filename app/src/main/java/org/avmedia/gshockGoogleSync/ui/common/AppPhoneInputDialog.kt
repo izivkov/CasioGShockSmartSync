@@ -25,9 +25,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.ui.alarms.AlarmViewModel
 
 @Composable
 fun AppPhoneInputDialog(
@@ -35,7 +33,6 @@ fun AppPhoneInputDialog(
     onDismiss: () -> Unit,
     onPhoneNumberValidated: (String) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    alarmsViewModel: AlarmViewModel = hiltViewModel(),
 ) {
     var inputValue by remember { mutableStateOf(initialPhoneNumber.trim()) }
     var validationError by remember { mutableStateOf(false) }

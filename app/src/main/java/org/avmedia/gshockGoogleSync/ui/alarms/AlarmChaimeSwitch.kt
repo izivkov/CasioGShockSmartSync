@@ -12,17 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSwitchWithText
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 
 @Composable
-fun AlarmChimeSwitch(
-    modifier: Modifier,
-    alarmsViewModel: AlarmViewModel = hiltViewModel(),
-) {
+fun AlarmChimeSwitch(modifier: Modifier) {
     // State to manage whether the switch is checked or not
     val isChecked =
         remember { mutableStateOf(AlarmsModel.getAlarms().getOrNull(0)?.hasHourlyChime ?: false) }

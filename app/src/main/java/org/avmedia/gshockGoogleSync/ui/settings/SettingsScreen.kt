@@ -34,9 +34,7 @@ import org.avmedia.gshockapi.WatchInfo
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun SettingsScreen(
-    settingsViewModel: SettingsViewModel = hiltViewModel()
-) {
+fun SettingsScreen() {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

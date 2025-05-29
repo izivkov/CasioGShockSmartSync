@@ -18,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
@@ -55,7 +54,6 @@ fun WatchInfoView(modifier: Modifier) {
 @Composable
 fun WatchInfoCard1(
     modifier: Modifier = Modifier,
-    timeModel: TimeViewModel = hiltViewModel()
 ) {
     AppCard(
         modifier = modifier

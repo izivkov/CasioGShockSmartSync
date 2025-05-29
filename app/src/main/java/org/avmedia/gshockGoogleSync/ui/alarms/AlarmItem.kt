@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
@@ -48,8 +47,7 @@ fun AlarmItem(
     minutes: Int = 0,
     isAlarmEnabled: Boolean = true,
     onToggleAlarm: (Boolean) -> Unit,
-    onTimeChanged: (Int, Int) -> Unit,
-    alarmsViewModel: AlarmViewModel = hiltViewModel()
+    onTimeChanged: (Int, Int) -> Unit
 ) {
     var isEnabled by remember { mutableStateOf(isAlarmEnabled) }
     var showTimePickerDialog by remember { mutableStateOf(false) }

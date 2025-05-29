@@ -26,9 +26,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.ui.alarms.AlarmViewModel
 
 @Composable
 fun ValueSelectionDialog(
@@ -40,7 +38,6 @@ fun ValueSelectionDialog(
     title: String = "Select Value",
     label: String = "Choose a value:",
     unit: String,
-    alarmsViewModel: AlarmViewModel = hiltViewModel(),
 ) {
     val values = range.step(step).toList()
     val initialIndex = values.indexOf(initialValue)

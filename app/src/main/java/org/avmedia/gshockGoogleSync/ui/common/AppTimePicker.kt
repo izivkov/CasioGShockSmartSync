@@ -19,11 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
-import org.avmedia.gshockGoogleSync.ui.alarms.AlarmViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +30,6 @@ fun AppTimePicker(
     onDismiss: () -> Unit,
     initialHour: Int,
     initialMinute: Int,
-    alarmsViewModel: AlarmViewModel = hiltViewModel(),
 ) {
     val localContext = LocalContext.current.applicationContext
     val appContext = remember {

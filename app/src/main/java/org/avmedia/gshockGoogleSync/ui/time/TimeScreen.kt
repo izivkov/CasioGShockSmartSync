@@ -12,15 +12,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
-fun TimeScreen(
-    timeModel: TimeViewModel = hiltViewModel()
-) {
+fun TimeScreen() {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

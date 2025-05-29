@@ -25,7 +25,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
 
 @Composable
-fun ActionsScreen(actionModel: ActionsViewModel = hiltViewModel()) {
+fun ActionsScreen() {
 
     GShockSmartSyncTheme {
         Surface(

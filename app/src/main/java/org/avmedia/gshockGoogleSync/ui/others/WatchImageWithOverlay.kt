@@ -34,7 +34,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import org.avmedia.gshockGoogleSync.R
 import kotlin.math.cos
@@ -44,8 +43,7 @@ import kotlin.math.sin
 fun WatchImageWithOverlay(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
-    arrowsVerticalPosition: Float = 0.55f,
-    ptrConnectionViewModel: PreConnectionViewModel = viewModel()
+    arrowsVerticalPosition: Float = 0.55f
 ) {
     var isAnimating by remember { mutableStateOf(true) }
 

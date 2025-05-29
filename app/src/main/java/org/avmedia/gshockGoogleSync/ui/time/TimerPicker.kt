@@ -25,7 +25,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 
@@ -36,8 +35,7 @@ fun TimerPicker(
     minutes: Int,
     seconds: Int,
     onDismiss: () -> Unit,
-    onSubmit: (Int, Int, Int) -> Unit,
-    timeModel: TimeViewModel = hiltViewModel(),
+    onSubmit: (Int, Int, Int) -> Unit
 ) {
     var hourInput by remember {
         mutableStateOf(
