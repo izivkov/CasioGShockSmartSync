@@ -146,7 +146,6 @@ fun TimerTimeView(modifier: Modifier = Modifier, timeText: String) {
 @Composable
 fun SendTimerButton(
     modifier: Modifier = Modifier, onClick: () -> Unit,
-    timeModel: TimeViewModel = hiltViewModel()
 ) {
     AppButton(
         text = stringResource(
