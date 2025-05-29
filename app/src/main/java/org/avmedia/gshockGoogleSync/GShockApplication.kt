@@ -27,7 +27,7 @@ import javax.inject.Inject
 class GShockApplication : Application(), IScreenManager {
     private var _context: MainActivity? = null
     private val context
-    get() = _context ?: throw IllegalStateException("MainActivity not initialized")
+        get() = _context ?: throw IllegalStateException("MainActivity not initialized")
     private lateinit var eventHandler: MainEventHandler
 
     @Inject

@@ -197,29 +197,9 @@ Después del segundo pitido doble, la app mostrará la pantalla de ajuste de hor
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync está en funcionamiento</string>
     <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync no está en ejecución.</string>
     <string name="preventing_the_app_from_closing">Evitando que la aplicación se cierre</string>
-    <string name="health_connect_permissions_required">Se requieren permisos de Health Connect para enviar datos a la aplicación de salud.</string>
-    <string name="health">Salud</string>
-    <string name="send_to_health_app">Enviar a la aplicación de salud</string>
     <string name="health_connect_not_available">"Health Connect" no está disponible. Por favor, instálelo.</string>
     <string name="cover_hold_to_unlock">Mantén presionado para desbloquear</string>
     <string name="cover_connected">Conectado</string>
-    <string name="no_sleep_data">No hay datos de sueño</string>
-    <string name="sleep">Sueño</string>
-    <string name="min">mín</string>
-    <string name="max">máx</string>
-    <string name="h">h</string> <!-- "h" is commonly used for "hora" in Spanish as well -->
-    <string name="permission_request">Solicitud de permiso</string>
-    <string name="need_health_data">Para realizar un seguimiento de tus datos de salud, G-Shock Smart Sync necesita acceso a:</string>
-    <string name="steps_data">Datos de pasos</string>
-    <string name="heart_rate_data">Datos de frecuencia cardíaca</string>
-    <string name="sleep_data">Datos de sueño</string>
-    <string name="deny">Denegar</string>
-    <string name="allow">Permitir</string>
-    <string name="steps">Pasos</string>
-    <string name="daily_steps">Pasos diarios</string>
-    <string name="heart_rate">Frecuencia cardíaca</string>
-    <string name="exercise">Ejercicio</string>
-    <string name="exercise_session">Sesiones de ejercicio</string>
-    <string name="no_exercise_today">No hay sesiones de ejercicio hoy</string>
+    <!-- "h" is commonly used for "hora" in Spanish as well -->
     <string name="find_phone_instruction">Para ejecutar acciones, inicia la función "Buscar teléfono" en el reloj</string>
 </resources>

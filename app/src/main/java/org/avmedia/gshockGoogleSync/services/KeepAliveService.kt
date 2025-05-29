@@ -9,7 +9,6 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.R
-import javax.inject.Inject
 
 const val CHANNEL_ID = "KeepAliveServiceChannel"
 const val NOTIFICATION_ID = 1
@@ -35,7 +34,7 @@ class KeepAliveService : LifecycleService() {
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(this.getString(R.string.g_shock_smart_sync_is_running))
-            .setContentText(this.getString( R.string.preventing_the_app_from_closing))
+            .setContentText(this.getString(R.string.preventing_the_app_from_closing))
             .setSmallIcon(R.drawable.ic_watch_face)
             .build()
         startForeground(NOTIFICATION_ID, notification)

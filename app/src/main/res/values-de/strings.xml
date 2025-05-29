@@ -16,6 +16,14 @@ Nach dem zweiten Doppelton zeigt die App den Bildschirm zur Zeiteinstellung an.
 
 <p><b>Stellen Sie sicher, dass die offizielle Casio-App nicht ausgeführt wird, da sie die Funktion dieser App stören kann.</b></p> <p>Einige Uhren, wie die DW-H5600, müssen vor der ersten Verbindung gekoppelt werden. In solchen Fällen versetzen Sie Ihre Uhr in den Kopplungsmodus. Auf Ihrem Telefon erscheint ein Popup-Fenster, das Sie zur Kopplung mit der Uhr auffordert.</p> <p>Um Aktionen auszuführen, die im <b>Aktionen</b>-Bildschirm definiert sind, drücken Sie kurz die <b>UNTERE-RECHTE</b> Taste. Aktionen sind Apps auf Ihrem Telefon, wie z. B. <b>Foto aufnehmen</b>. Mit diesen Aktionen fungiert die Uhr als Fernbedienung für Ihr Telefon.</p> <p>Sie können diese App von <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a> herunterladen.</p>]]>
     </string>
+
+    <string name="alarms_screen_info"><![CDATA[Die <b>B5600/B5000/B2100</b> Uhren verfügen über 5 Alarme und eine "Signal"-Einstellung (Stundensignal), die hier angezeigt werden.
+Die Alarme können aktualisiert werden, indem Sie auf den Zeitwert jedes Alarms tippen. Es erscheint ein neues Dialogfenster, in dem Sie die Alarmzeit festlegen können.
+Nachdem die Alarme eingestellt wurden, können Sie sie an die Uhr oder an die Wecker-App auf dem Telefon senden.]]></string>
+
+    <string name="events_screen_info"><![CDATA[Dieser Bildschirm zeigt Ereignisse aus Ihrem <b>Google Kalender</b> an und ermöglicht es Ihnen, diese an die
+<b>Erinnerungen</b> der Uhr zu senden.\n\nWenn keine Ereignisse angezeigt werden, stellen Sie sicher, dass Sie zukünftige Ereignisse oder nicht abgelaufene wiederkehrende Ereignisse in Ihrem Google Kalender haben.]]></string>
+
     <string name="actions">Aktionen</string>
     <string name="title_actions">Aktionen</string>
     <string name="actions_screen_info"><![CDATA[Die ausgewählten Aktionen werden ausgeführt, wenn der Benutzer die <b>UNTERE-RECHTE</b>-Taste der Uhr im Startbildschirm <b>kurz drückt</b>. Mit diesen Aktionen fungiert die Uhr als Fernbedienung für Ihr Telefon.]]></string>
@@ -190,29 +198,9 @@ Nach dem zweiten Doppelton zeigt die App den Bildschirm zur Zeiteinstellung an.
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync wird ausgeführt</string>
     <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync läuft nicht.</string>
     <string name="preventing_the_app_from_closing">Verhindert das Schließen der App</string>
-    <string name="health_connect_permissions_required">Health Connect-Berechtigungen sind erforderlich, um Daten an die Gesundheits-App zu senden.</string>
-    <string name="health">Gesundheit</string>
-    <string name="send_to_health_app">An Gesundheits-App senden</string>
     <string name="health_connect_not_available">"Health Connect" ist nicht verfügbar. Bitte installieren Sie es.</string>
     <string name="cover_hold_to_unlock">Zum Entsperren halten</string>
     <string name="cover_connected">Verbunden</string>
-    <string name="no_sleep_data">Keine Schlafdaten</string>
-    <string name="sleep">Schlaf</string>
-    <string name="min">Min</string>
-    <string name="max">Max</string>
-    <string name="h">Std</string> <!-- "h" as in hours = "Stunden", abbreviated as "Std" -->
-    <string name="permission_request">Berechtigungsanfrage</string>
-    <string name="need_health_data">Um deine Gesundheitsdaten zu verfolgen, benötigt G-Shock Smart Sync Zugriff auf:</string>
-    <string name="steps_data">Schrittdaten</string>
-    <string name="heart_rate_data">Herzfrequenzdaten</string>
-    <string name="sleep_data">Schlafdaten</string>
-    <string name="deny">Ablehnen</string>
-    <string name="allow">Zulassen</string>
-    <string name="steps">Schritte</string>
-    <string name="daily_steps">Tägliche Schritte</string>
-    <string name="heart_rate">Herzfrequenz</string>
-    <string name="exercise">Training</string>
-    <string name="exercise_session">Trainingseinheiten</string>
-    <string name="no_exercise_today">Heute keine Trainingseinheiten</string>
+    <!-- "h" as in hours = "Stunden", abbreviated as "Std" -->
     <string name="find_phone_instruction">Um Aktionen auszuführen, starten Sie die Funktion „Telefon finden“ auf der Uhr</string>
 </resources>

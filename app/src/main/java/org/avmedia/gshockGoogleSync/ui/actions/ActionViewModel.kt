@@ -505,7 +505,7 @@ class ActionsViewModel @Inject constructor(
             ) CameraOrientation.BACK else CameraOrientation.FRONT
         }
     }
-    
+
     private fun runIt(action: Action, context: Context) {
         runCatching {
             action.run(context)

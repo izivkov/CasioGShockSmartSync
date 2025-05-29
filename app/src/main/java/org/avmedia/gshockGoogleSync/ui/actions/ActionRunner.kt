@@ -22,7 +22,9 @@ fun ActionRunner(
                 api.isAutoTimeStarted() -> actionsViewModel.runActionsForAutoTimeSetting(context)
                 api.isFindPhoneButtonPressed() -> actionsViewModel.runActionFindPhone(context)
                 api.isNormalButtonPressed() -> actionsViewModel.runActionForConnection(context)
-                api.isAlwaysConnectedConnectionPressed() -> actionsViewModel.runActionForAlwaysConnected(context)
+                api.isAlwaysConnectedConnectionPressed() -> actionsViewModel.runActionForAlwaysConnected(
+                    context
+                )
             }
         }
     )

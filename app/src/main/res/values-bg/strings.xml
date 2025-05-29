@@ -197,29 +197,9 @@
     <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync работи</string>
     <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync не работи.</string>
     <string name="preventing_the_app_from_closing">Предотвратява се затварянето на приложението</string>
-    <string name="health_connect_permissions_required">Необходими са разрешения за Health Connect, за да се изпращат данни към приложението за здраве.</string>
-    <string name="health">Здраве</string>
-    <string name="send_to_health_app">Изпрати към приложението за здраве</string>
     <string name="health_connect_not_available">"Health Connect" не е наличен. Моля, инсталирайте го.</string>
     <string name="cover_hold_to_unlock">Задръжте, за да отключите</string>
     <string name="cover_connected">Свързан</string>
-    <string name="no_sleep_data">Няма данни за сън</string>
-    <string name="sleep">Сън</string>
-    <string name="min">мин</string>
-    <string name="max">макс</string>
-    <string name="h">ч</string> <!-- "h" as in hours = "часа", abbreviated as "ч" -->
-    <string name="permission_request">Искане за разрешение</string>
-    <string name="need_health_data">За да следите здравните си данни, G-Shock Smart Sync се нуждае от достъп до:</string>
-    <string name="steps_data">Данни за стъпки</string>
-    <string name="heart_rate_data">Данни за пулс</string>
-    <string name="sleep_data">Данни за сън</string>
-    <string name="deny">Отказ</string>
-    <string name="allow">Разрешаване</string>
-    <string name="steps">Стъпки</string>
-    <string name="daily_steps">Дневни стъпки</string>
-    <string name="heart_rate">Пулс</string>
-    <string name="exercise">Упражнение</string>
-    <string name="exercise_session">Сесии с упражнения</string>
-    <string name="no_exercise_today">Няма сесии с упражнения днес</string>
+    <!-- "h" as in hours = "часа", abbreviated as "ч" -->
     <string name="find_phone_instruction">За да изпълните действията, стартирайте функцията „Намиране телефон“ на часовника</string>
 </resources>

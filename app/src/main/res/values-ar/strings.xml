@@ -191,29 +191,9 @@
     <string name="g_shock_smart_sync_is_running">تزامن G-Shock Smart قيد التشغيل</string>
     <string name="g_shock_smart_sync_is_not_running">تزامن G-Shock الذكي غير مفعل.</string>
     <string name="preventing_the_app_from_closing">يتم منع التطبيق من الإغلاق</string>
-    <string name="health_connect_permissions_required">مطلوب أذونات Health Connect لإرسال البيانات إلى تطبيق الصحة.</string>
-    <string name="health">الصحة</string>
-    <string name="send_to_health_app">إرسال إلى تطبيق الصحة</string>
     <string name="health_connect_not_available">"Health Connect" غير متوفر. يرجى تثبيته.</string>
     <string name="cover_hold_to_unlock">اضغط مع الاستمرار لإلغاء القفل</string>
     <string name="cover_connected">متصل</string>
-    <string name="no_sleep_data">لا توجد بيانات نوم</string>
-    <string name="sleep">النوم</string>
-    <string name="min">الحد الأدنى</string>
-    <string name="max">الحد الأقصى</string>
-    <string name="h">س</string> <!-- "h" as in hours = "ساعات", short form is "س" -->
-    <string name="permission_request">طلب إذن</string>
-    <string name="need_health_data">لمتابعة بيانات صحتك، يحتاج G-Shock Smart Sync إلى الوصول إلى:</string>
-    <string name="steps_data">بيانات الخطوات</string>
-    <string name="heart_rate_data">بيانات معدل ضربات القلب</string>
-    <string name="sleep_data">بيانات النوم</string>
-    <string name="deny">رفض</string>
-    <string name="allow">سماح</string>
-    <string name="steps">خطوات</string>
-    <string name="daily_steps">الخطوات اليومية</string>
-    <string name="heart_rate">معدل ضربات القلب</string>
-    <string name="exercise">التمرين</string>
-    <string name="exercise_session">جلسات التمرين</string>
-    <string name="no_exercise_today">لا توجد جلسات تمرين اليوم</string>
+    <!-- "h" as in hours = "ساعات", short form is "س" -->
     <string name="find_phone_instruction">لتنفيذ الإجراءات، ابدأ وظيفة "البحث عن الهاتف" في الساعة</string>
 </resources>

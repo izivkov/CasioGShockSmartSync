@@ -5,12 +5,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
-import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockGoogleSync.utils.Utils
+import org.avmedia.gshockapi.AppNotification
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
