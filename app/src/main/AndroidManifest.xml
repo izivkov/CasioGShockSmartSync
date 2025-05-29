@@ -51,6 +51,7 @@
 
     <application
         android:supportsRtl="true"
+        android:usesCleartextTraffic="false"
         android:configChanges="locale|layoutDirection"
         android:name=".GShockApplication"
         android:allowBackup="true"
