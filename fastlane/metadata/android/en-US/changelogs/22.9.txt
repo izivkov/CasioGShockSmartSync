@@ -1,1 +1,0 @@
-Fixed an error where the "Find Phone" action was called incorrectly during auto time update.
