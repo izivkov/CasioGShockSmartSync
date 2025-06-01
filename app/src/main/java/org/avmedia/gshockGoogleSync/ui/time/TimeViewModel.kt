@@ -58,7 +58,6 @@ class TimeViewModel @Inject constructor(
             }.onFailure { e ->
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }
-
         }
     }
 
