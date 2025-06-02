@@ -66,15 +66,36 @@ data class EventAction(
 ) : IEventAction
 
 object ProgressEvents {
+    private data class State(
+        val subscribers: Set<String> = emptySet(),
+        val eventMap: Map<String, Events> = mapOf(
+            "Init" to Events(),
+            "ConnectionStarted" to Events(),
+            "ConnectionSetupComplete" to Events(),
+            "Disconnect" to Events(),
+            "AlarmDataLoaded" to Events(),
+            "NotificationsEnabled" to Events(),
+            "NotificationsDisabled" to Events(),
+            "WatchInitializationCompleted" to Events(),
+            "AllPermissionsAccepted" to Events(),
+            "ButtonPressedInfoReceived" to Events(),
+            "ConnectionFailed" to Events(),
+            "SettingsLoaded" to Events(),
+            "NeedToUpdateUI" to Events(),
+            "CalendarUpdated" to Events(),
+            "HomeTimeUpdated" to Events(),
+            "ApiError" to Events()
+        ),
+        val reverseEventMap: Map<Events, String> = eventMap.entries.associateBy({ it.value }, { it.key })
+    )
+
+    private var state = State()
     val subscriber = Subscriber()
-    private val eventsFlow: MutableSharedFlow<Events> =
-        MutableSharedFlow(replay = 10) // Replay last 10 events
+    private val eventsFlow = MutableSharedFlow<Events>(replay = 10)
 
     fun runEventActions(name: String, eventActions: Array<EventAction>) {
         subscriber.runEventActions(name, eventActions)
     }
-
-    private val subscribers: MutableSet<String> = LinkedHashSet()
 
     class Subscriber {
         /**
@@ -84,33 +105,25 @@ object ProgressEvents {
          * subscription per name is allowed.
          */
         fun runEventActions(name: String, eventActions: Array<EventAction>) {
-            if (subscribers.contains(name)) return  // Prevent duplicate subscriptions
-            subscribers.add(name)
+            if (state.subscribers.contains(name)) return
 
-            val runActions: suspend () -> Unit = {
-                val actionMap = eventActions.associateBy { it.label }
+            state = state.copy(subscribers = state.subscribers + name)
 
-                val onNext: (Events) -> Unit = { event ->
-                    val nameOfEvent = reverseEventMap[event]
-                    if (nameOfEvent != null) {
-                        actionMap[nameOfEvent]?.action?.invoke()
+            val actionMap = eventActions.associateBy { it.label }
+
+            CoroutineScope(Dispatchers.Main).launch {
+                eventsFlow
+                    .filter { true }
+                    .catch { throwable ->
+                        Timber.d("Error on subscribe: $throwable")
+                        throwable.printStackTrace()
                     }
-                }
-
-                val onError: (Throwable) -> Unit = { throwable ->
-                    Timber.d("Error on subscribe: $throwable")
-                    throwable.printStackTrace()
-                }
-
-                CoroutineScope(Dispatchers.Main).launch {
-                    eventsFlow
-                        .filter { true }
-                        .catch { onError(it) }
-                        .collect { onNext(it) }
-                }
+                    .collect { event ->
+                        state.reverseEventMap[event]?.let { eventName ->
+                            actionMap[eventName]?.action?.invoke()
+                        }
+                    }
             }
-
-            CoroutineScope(Dispatchers.Main).launch { runActions() }
         }
 
         /**
@@ -119,10 +132,9 @@ object ProgressEvents {
          * @param name Name of the subscriber
          */
         fun stop(name: String) {
-            subscribers.remove(name)
+            state = state.copy(subscribers = state.subscribers - name)
         }
     }
-
 
     /**
      * The application can broadcast built-in events by calling this function.
@@ -147,31 +159,37 @@ object ProgressEvents {
      * @param payload: An optional parameter containing a payload of type `Any?`
      */
     fun onNext(eventName: String, payload: Any? = null) {
-        if (!eventMap.containsKey(eventName)) addEvent(eventName)
+        if (!state.eventMap.containsKey(eventName)) {
+            addEvent(eventName)
+        }
 
-        val event = eventMap[eventName]?.apply { this.payload = payload }
-        if (subscribers.isNotEmpty() && event != null) {
-            CoroutineScope(Dispatchers.Main).launch {
-                eventsFlow.emit(event)
+        state.eventMap[eventName]?.apply {
+            this.payload = payload
+        }?.let { event ->
+            if (state.subscribers.isNotEmpty()) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    eventsFlow.emit(event)
+                }
             }
         }
     }
 
-    operator fun get(eventName: String): Events? = eventMap[eventName]
+    operator fun get(eventName: String): Events? = state.eventMap[eventName]
 
     private fun addEvent(eventName: String) {
-        if (eventMap.containsKey(eventName)) return
+        if (state.eventMap.containsKey(eventName)) return
+
         val newEvent = Events()
-        eventMap[eventName] = newEvent
-        reverseEventMap[newEvent] = eventName
+        state = state.copy(
+            eventMap = state.eventMap + (eventName to newEvent),
+            reverseEventMap = state.reverseEventMap + (newEvent to eventName)
+        )
     }
 
-    fun getPayload(eventName: String): Any? {
-        return eventMap[eventName]?.payload
-    }
+    fun getPayload(eventName: String): Any? = state.eventMap[eventName]?.payload
 
     fun addPayload(eventName: String, payload: Any?) {
-        eventMap[eventName]?.payload = payload
+        state.eventMap[eventName]?.payload = payload
     }
 
     /**
@@ -201,26 +219,4 @@ object ProgressEvents {
      * ```
      */
     open class Events(var payload: Any? = null)
-
-    private var eventMap = mutableMapOf<String, Events>(
-        "Init" to Events(),
-        "ConnectionStarted" to Events(),
-        "ConnectionSetupComplete" to Events(),
-        "Disconnect" to Events(),
-        "AlarmDataLoaded" to Events(),
-        "NotificationsEnabled" to Events(),
-        "NotificationsDisabled" to Events(),
-        "WatchInitializationCompleted" to Events(),
-        "AllPermissionsAccepted" to Events(),
-        "ButtonPressedInfoReceived" to Events(),
-        "ConnectionFailed" to Events(),
-        "SettingsLoaded" to Events(),
-        "NeedToUpdateUI" to Events(),
-        "CalendarUpdated" to Events(),
-        "HomeTimeUpdated" to Events(),
-        "ApiError" to Events(),
-    )
-
-    private val reverseEventMap =
-        eventMap.entries.associateBy({ it.value }, { it.key }).toMutableMap()
 }

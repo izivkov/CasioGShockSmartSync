@@ -9,20 +9,21 @@ import org.avmedia.gshockapi.utils.Utils
 
 @RequiresApi(Build.VERSION_CODES.O)
 object DstForWorldCitiesIO {
+    private data class State(
+        val deferredResult: CompletableDeferred<String>? = null
+    )
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<String>
-    }
+    private var state = State()
 
-    suspend fun request(cityNumber: Int): String {
-        return CachedIO.request("1e0$cityNumber") { key -> getDSTForWorldCities(key) }
-    }
+    suspend fun request(cityNumber: Int): String =
+        CachedIO.request("1e0$cityNumber") { key ->
+            getDSTForWorldCities(key)
+        }
 
     private suspend fun getDSTForWorldCities(key: String): String {
-
-        DeferredValueHolder.deferredResult = CompletableDeferred<String>()
+        state = state.copy(deferredResult = CompletableDeferred())
         IO.request(key)
-        return DeferredValueHolder.deferredResult.await()
+        return state.deferredResult?.await() ?: ""
     }
 
     /*
@@ -38,19 +39,22 @@ object DstForWorldCitiesIO {
     ...
      */
 
-    suspend fun setDST(dst: String, casioTimeZone: CasioTimeZoneHelper.CasioTimeZone): String {
-        val intArray = Utils.toIntArray(dst)
-        if (intArray.size == 7) {
-            intArray[4] = casioTimeZone.offset
-            intArray[5] = casioTimeZone.dstOffset.toInt()
-            intArray[6] = casioTimeZone.dstRules
-        }
-
-        val dstByteArray = Utils.byteArrayOfIntArray(intArray.toIntArray())
-        return Utils.fromByteArrayToHexStrWithSpaces(dstByteArray)
-    }
+    fun setDST(dst: String, casioTimeZone: CasioTimeZoneHelper.CasioTimeZone): String =
+        Utils.toIntArray(dst)
+            .takeIf { it.size == 7 }
+            ?.let { array ->
+                IntArray(array.size) { i -> array[i] }.apply {
+                    this[4] = casioTimeZone.offset
+                    this[5] = casioTimeZone.dstOffset.toInt()
+                    this[6] = casioTimeZone.dstRules
+                }
+            }
+            ?.let(Utils::byteArrayOfIntArray)
+            ?.let(Utils::fromByteArrayToHexStrWithSpaces)
+            ?: dst
 
     fun onReceived(data: String) {
-        DeferredValueHolder.deferredResult.complete(data)
+        state.deferredResult?.complete(data)
+        state = State()
     }
 }

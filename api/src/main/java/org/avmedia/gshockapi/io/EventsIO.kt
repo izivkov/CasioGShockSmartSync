@@ -22,210 +22,190 @@ import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
 object EventsIO {
+    private const val MAX_REMINDERS = 5
+    private const val EMPTY_EVENT_JSON = """
+        {
+            "title": "",
+            "time": {
+                "daysOfWeek": [],
+                "enabled": false,
+                "startDate": {
+                    "day": 1,
+                    "month": "JANUARY",
+                    "year": 2000
+                },
+                "endDate": {
+                    "day": 1,
+                    "month": "JANUARY",
+                    "year": 2000
+                },
+                "incompatible": false,
+                "repeatPeriod": "NEVER"
+            }
+        }
+    """
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<Event>
-        lateinit var deferredResultTitle: CompletableDeferred<JSONObject>
-        lateinit var deferredResultTime: CompletableDeferred<JSONObject>
-    }
+    private data class State(
+        val deferredResult: CompletableDeferred<Event>? = null,
+        val deferredResultTitle: CompletableDeferred<JSONObject>? = null,
+        val deferredResultTime: CompletableDeferred<JSONObject>? = null
+    )
+
+    private var state = State()
 
     @SuppressLint("DefaultLocale")
     suspend fun request(eventNumber: Int): Event {
-        DeferredValueHolder.deferredResult = CompletableDeferred()
-        DeferredValueHolder.deferredResultTitle = CompletableDeferred()
-        DeferredValueHolder.deferredResultTime = CompletableDeferred()
+        state = state.copy(
+            deferredResult = CompletableDeferred(),
+            deferredResultTitle = CompletableDeferred(),
+            deferredResultTime = CompletableDeferred()
+        )
 
         suspend fun requestTitle(keyTitle: String): Any {
             IO.request(keyTitle)
-            return DeferredValueHolder.deferredResultTitle.await()
+            return state.deferredResultTitle?.await() ?: JSONObject()
         }
 
         suspend fun requestTime(keyTime: String): Any {
             IO.request(keyTime)
-            return DeferredValueHolder.deferredResultTime.await()
+            return state.deferredResultTime?.await() ?: JSONObject()
         }
 
-        fun combineJSONObjects(obj1: JSONObject, obj2: JSONObject): JSONObject {
-            val combined = JSONObject(obj1.toString()) // Copy all key-value pairs from obj1
-            for (key in obj2.keys()) {
-                combined.put(key, obj2.get(key)) // Overwrite or add key-value pairs from obj2
+        fun combineJSONObjects(obj1: JSONObject, obj2: JSONObject): JSONObject =
+            JSONObject(obj1.toString()).apply {
+                obj2.keys().forEach { key -> put(key, obj2.get(key)) }
             }
-            return combined
-        }
 
         suspend fun waitForEvent(eventNumber: Int) {
-            val titleVal =
-                CachedIO.request("30$eventNumber") { key -> requestTitle(key) as JSONObject }
-            val timeVal =
-                CachedIO.request("31$eventNumber") { key -> requestTime(key) as JSONObject }
+            val titleVal = CachedIO.request("30$eventNumber") { key ->
+                requestTitle(key) as JSONObject
+            }
+            val timeVal = CachedIO.request("31$eventNumber") { key ->
+                requestTime(key) as JSONObject
+            }
 
             val eventJson = combineJSONObjects(titleVal, timeVal)
-            DeferredValueHolder.deferredResult.complete(Event(eventJson))
+            state.deferredResult?.complete(Event(eventJson))
         }
 
         waitForEvent(eventNumber)
-        return DeferredValueHolder.deferredResult.await()
+        return state.deferredResult?.await() ?: Event(JSONObject())
     }
 
     fun set(events: ArrayList<Event>) {
-
-        val maxReminders = 5
-
         if (events.isEmpty()) {
             Timber.d("Events model not initialised! Cannot set reminders")
             return
         }
 
-        @Synchronized
-        fun toJson(events: ArrayList<Event>): String {
-            val gson = Gson()
-            return gson.toJson(events)
-        }
+        fun toJson(events: ArrayList<Event>): String =
+            Gson().toJson(events)
 
         fun <T> appendAndTruncate(
             arr1: ArrayList<T>,
             arr2: ArrayList<T>,
             maxSize: Int
-        ): ArrayList<T> {
-            val result = ArrayList<T>()
-
-            result.addAll(arr1)
-            result.addAll(arr2)
-
-            // Truncate the result to the specific size
-            while (result.size > maxSize) {
-                result.removeAt(result.size - 1)
+        ): ArrayList<T> =
+            ArrayList<T>().apply {
+                addAll(arr1)
+                addAll(arr2)
+                while (size > maxSize) removeAt(size - 1)
             }
 
-            return result
-        }
+        fun getEnabledEvents(events: ArrayList<Event>): ArrayList<Event> =
+            events.filter { it.enabled } as ArrayList<Event>
 
-        fun getEnabledEvents(events: ArrayList<Event>): ArrayList<Event> {
-            return events.filter { it.enabled } as ArrayList<Event>
-        }
-
-        fun padToMax(currentEvents: ArrayList<Event>, maxReminders: Int): ArrayList<Event> {
+        fun padToMax(currentEvents: ArrayList<Event>, maxReminders: Int): ArrayList<Event> =
             if (currentEvents.size >= maxReminders) {
-                // If the current list is already equal to or greater than the desired size, return it as is
-                return currentEvents
-            }
-
-            val paddedEvents = ArrayList<Event>(currentEvents)
-
-            val emptyEvent = JSONObject(
-                """
-                 {
-                    "title": "",
-                    "time": {
-                        "daysOfWeek": [],
-                        "enabled": false,
-                        "startDate": {
-                            "day": 1,
-                            "month": "JANUARY",
-                            "year": 2000
-                        },
-                        "endDate": {
-                            "day": 1,
-                            "month": "JANUARY",
-                            "year": 2000
-                        },
-                        "incompatible": false,
-                        "repeatPeriod": "NEVER"
+                currentEvents
+            } else {
+                ArrayList<Event>(currentEvents).apply {
+                    val emptyEvent = Event(JSONObject(EMPTY_EVENT_JSON))
+                    for (i in 0 until (maxReminders - currentEvents.size)) {
+                        add(emptyEvent)
                     }
                 }
-                """.trimIndent()
-            )
-
-            // Add placeholder or empty Event objects to reach the specified maxReminders count
-            repeat(maxReminders - currentEvents.size) {
-                paddedEvents.add(Event(emptyEvent))
             }
 
-            return paddedEvents
-        }
+        fun getEventsToSend(): ArrayList<Event> =
+            padToMax(
+                appendAndTruncate(
+                    getEnabledEvents(events),
+                    events.filter { !it.enabled } as ArrayList<Event>,
+                    MAX_REMINDERS
+                ),
+                MAX_REMINDERS
+            )
 
-        fun getEventsToSend(): ArrayList<Event> {
-            // send all enabled events and not-enabled if enabled less then MAX_REMINDERS
-            val currentEvents = appendAndTruncate(
-                getEnabledEvents(events),
-                events.filter { !it.enabled } as ArrayList<Event>,
-                maxReminders)
-
-            // if less then MAX_REMINDERS, pad with empty events
-            return padToMax(currentEvents, maxReminders)
-        }
-
-        val eventsToSend = toJson(getEventsToSend())
-        Connection.sendMessage("{action: \"SET_REMINDERS\", value: $eventsToSend }")
+        Connection.sendMessage("{action: \"SET_REMINDERS\", value: ${toJson(getEventsToSend())} }")
     }
 
     fun onReceived(data: String) {
-
         val decoded = ReminderDecoder.reminderTimeToJson(data + 2)
-        DeferredValueHolder.deferredResultTime.complete(decoded)
+        state.deferredResultTime?.complete(decoded)
     }
 
     fun onReceivedTitle(data: String) {
         val decoded = ReminderDecoder.reminderTitleToJson(data)
-        DeferredValueHolder.deferredResultTitle.complete(decoded)
+        state.deferredResultTitle?.complete(decoded)
     }
 
     fun sendToWatchSet(message: String) {
-        val remindersJsonArr: JSONArray = JSONObject(message).get("value") as JSONArray
+        (JSONObject(message).get("value") as JSONArray)
+            .let { remindersJsonArr ->
+                (0 until remindersJsonArr.length()).forEach { index ->
+                    val reminderJson = remindersJsonArr.getJSONObject(index)
+                    val reminderNumber = index + 1
 
-        (0 until remindersJsonArr.length()).forEach { index ->
-            val reminderJson = remindersJsonArr.getJSONObject(index)
-
-            fun setFuncTitle() {
-                processReminderTitle(index + 1, reminderJson)
+                    CachedIO.set("30$reminderNumber") {
+                        processReminderTitle(reminderNumber, reminderJson)
+                    }
+                    CachedIO.set("31$reminderNumber") {
+                        processReminderTime(reminderNumber, reminderJson)
+                    }
+                }
             }
-
-            fun setFuncTime() {
-                processReminderTime(index + 1, reminderJson)
-            }
-            CachedIO.set("30${index + 1}") { setFuncTitle() }
-            CachedIO.set("31${index + 1}") { setFuncTime() }
-        }
-
-        Timber.i("Got reminders $remindersJsonArr")
     }
 
     private fun processReminderTitle(reminderNumber: Int, reminderJson: JSONObject) {
-        // Process title
-        val title = ReminderEncoder.reminderTitleFromJson(reminderJson)
-        IO.writeCmd(
-            GetSetMode.SET, Utils.byteArrayOfInts(
-                CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code, reminderNumber
-            ) + title
-        )
+        ReminderEncoder.reminderTitleFromJson(reminderJson)
+            .let { title ->
+                Utils.byteArrayOfInts(
+                    CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code,
+                    reminderNumber
+                ) + title
+            }
+            .let { IO.writeCmd(GetSetMode.SET, it) }
     }
 
     private fun processReminderTime(reminderNumber: Int, reminderJson: JSONObject) {
-        var reminderTime = IntArray(0)
-        reminderTime += CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code
-        reminderTime += reminderNumber
-        reminderTime += ReminderEncoder.reminderTimeFromJson(reminderJson)
-
-        IO.writeCmd(GetSetMode.SET, Utils.byteArrayOfIntArray(reminderTime))
+        IntArray(0)
+            .plus(CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code)
+            .plus(reminderNumber)
+            .plus(ReminderEncoder.reminderTimeFromJson(reminderJson))
+            .let(Utils::byteArrayOfIntArray)
+            .let { IO.writeCmd(GetSetMode.SET, it) }
     }
 
     fun clearAll() {
-        var index = 1
-        repeat(5) {
+        (1..5).forEach { index ->
             IO.writeCmd(
-                GetSetMode.SET, Utils.byteArrayOfInts(
-                    CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code, index
+                GetSetMode.SET,
+                Utils.byteArrayOfInts(
+                    CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TITLE.code,
+                    index
                 ) + ByteArray(18)
             )
-            CachedIO.remove("30${index}")
+            CachedIO.remove("30$index")
 
             IO.writeCmd(
-                GetSetMode.SET, Utils.byteArrayOfInts(
-                    CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code, index
+                GetSetMode.SET,
+                Utils.byteArrayOfInts(
+                    CasioConstants.CHARACTERISTICS.CASIO_REMINDER_TIME.code,
+                    index
                 ) + ByteArray(9)
             )
-            CachedIO.remove("31${index}")
-            index += 1
+            CachedIO.remove("31$index")
         }
     }
 

@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Alarm
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.Alarms
@@ -67,7 +68,7 @@ object AlarmsIO {
         val decoded = AlarmDecoder.toJson(data).get("ALARMS")
         fromJson(decoded.toString())
 
-        if (Alarm.alarms.size == 5) {
+        if (Alarm.alarms.size == WatchInfo.alarmCount) {
             DeferredValueHolder.deferredResult.complete(Alarm.alarms)
         }
     }

@@ -4,21 +4,21 @@ import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.NotificationType
 
 object AppNotificationIO {
-
-    fun xorDecodeBuffer(buffer: String, key: Int = 0xFF): ByteArray {
-        val bufferBytes = buffer.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-        return bufferBytes.map { (it.toInt() xor key).toByte() }.toByteArray()
-    }
-
-    fun xorEncodeBuffer(decodedBytes: ByteArray, key: Int = 0xFF): ByteArray {
-        return decodedBytes.map { (it.toInt() xor key).toByte() }
+    fun xorDecodeBuffer(buffer: String, key: Int = 0xFF): ByteArray =
+        buffer.chunked(2)
+            .map { it.toInt(16).toByte() }
+            .map { (it.toInt() xor key).toByte() }
             .toByteArray()
-    }
 
-    fun xorEncodeBufferStr(decodedBytes: ByteArray, key: Int = 0xFF): String {
-        return xorEncodeBuffer(decodedBytes, key)
+    fun xorEncodeBuffer(decodedBytes: ByteArray, key: Int = 0xFF): ByteArray =
+        decodedBytes
+            .map { (it.toInt() xor key).toByte() }
+            .toByteArray()
+
+
+    fun xorEncodeBufferStr(decodedBytes: ByteArray, key: Int = 0xFF): String =
+        xorEncodeBuffer(decodedBytes, key)
             .joinToString("") { "%02x".format(it) }
-    }
 
     private fun readLengthPrefixedString(buf: ByteArray, offset: Int): Pair<String, Int> {
         if (offset + 2 > buf.size) throw IllegalArgumentException("Not enough data to read length prefix")
@@ -117,18 +117,14 @@ object AppNotificationIO {
      * @return ByteArray containing the encoded notification data
      * @throws IllegalArgumentException if any encoded string exceeds 255 bytes
      */
-    fun encodeNotificationPacket(data: AppNotification): ByteArray {
-        val header = byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x01)
-        val result = mutableListOf<Byte>()
-
-        result.addAll(header.toList())
-        result.add(data.type.value.toByte())
-        result.addAll(data.timestamp.toByteArray(Charsets.US_ASCII).toList())
-        result.addAll(writeLengthPrefixedString(data.app).toList())
-        result.addAll(writeLengthPrefixedString(data.title).toList())
-        result.addAll(writeLengthPrefixedString(data.shortText).toList())
-        result.addAll(writeLengthPrefixedString(data.text).toList())
-
-        return result.toByteArray()
-    }
+    fun encodeNotificationPacket(data: AppNotification): ByteArray =
+        buildList {
+            addAll(byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x01).toList())
+            add(data.type.value.toByte())
+            addAll(data.timestamp.toByteArray(Charsets.US_ASCII).toList())
+            addAll(writeLengthPrefixedString(data.app).toList())
+            addAll(writeLengthPrefixedString(data.title).toList())
+            addAll(writeLengthPrefixedString(data.shortText).toList())
+            addAll(writeLengthPrefixedString(data.text).toList())
+        }.toByteArray()
 }

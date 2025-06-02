@@ -5,19 +5,21 @@ import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.utils.Utils
 
 object DstWatchStateIO {
+    private data class State(
+        val deferredResult: CompletableDeferred<String>? = null
+    )
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<String>
-    }
+    private var state = State()
 
-    suspend fun request(state: IO.DstState): String {
-        return CachedIO.request("1d0${state.state}") { key -> getDSTWatchState(key) }
-    }
+    suspend fun request(state: IO.DstState): String =
+        CachedIO.request("1d0${state.state}") { key ->
+            getDSTWatchState(key)
+        }
 
     private suspend fun getDSTWatchState(key: String): String {
-        DeferredValueHolder.deferredResult = CompletableDeferred()
+        state = state.copy(deferredResult = CompletableDeferred())
         IO.request(key)
-        return DeferredValueHolder.deferredResult.await()
+        return state.deferredResult?.await() ?: ""
     }
 
     /*
@@ -31,16 +33,18 @@ object DstWatchStateIO {
     DST: bitwise flags; bit0: DST on, bit1: DST auto
     */
 
-    suspend fun setDST(dstState: String, dst: Int): String {
-
-        val intArray = Utils.toIntArray(dstState)
-        intArray[3] = dst
-
-        val newValue = Utils.byteArrayOfIntArray(intArray.toIntArray())
-        return Utils.fromByteArrayToHexStrWithSpaces(newValue)
-    }
+    suspend fun setDST(dstState: String, dst: Int): String =
+        Utils.toIntArray(dstState)
+            .let { array ->
+                IntArray(array.size) { i ->
+                    if (i == 3) dst else array[i]
+                }
+            }
+            .let(Utils::byteArrayOfIntArray)
+            .let(Utils::fromByteArrayToHexStrWithSpaces)
 
     fun onReceived(data: String) {
-        DeferredValueHolder.deferredResult.complete(data)
+        state.deferredResult?.complete(data)
+        state = State()
     }
 }

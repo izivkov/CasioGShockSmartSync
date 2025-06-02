@@ -2,6 +2,7 @@ package org.avmedia.gshockapi
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.graphics.Insets.add
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.ble.Connection
@@ -10,6 +11,8 @@ import org.avmedia.gshockapi.casio.*
 import org.avmedia.gshockapi.io.*
 import org.avmedia.gshockapi.io.IO.writeCmd
 import org.avmedia.gshockapi.utils.*
+import org.json.JSONArray
+import org.json.JSONObject
 import timber.log.Timber
 import java.time.ZoneId
 import java.util.*
@@ -329,7 +332,7 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      */
 
     override suspend fun getAlarms(): ArrayList<Alarm> {
-        return AlarmsIO.request()
+        return AlarmsIO.request()  // New method that handles conversion internally
     }
 
     /**
@@ -337,8 +340,9 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      *
      * @param ArrayList<[Alarm]>
      */
+
     override fun setAlarms(alarms: ArrayList<Alarm>) {
-        AlarmsIO.set(alarms)
+        AlarmsIO.set(alarms)  // Renamed for clarity
     }
 
     /**

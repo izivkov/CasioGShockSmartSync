@@ -2,59 +2,50 @@ import org.avmedia.gshockapi.utils.Utils
 import java.util.Locale
 
 object CachedIO {
+    private data class State(
+        val cache: Map<String, Any?> = emptyMap(),
+        val cacheOff: Boolean = false
+    )
 
-    private var cacheOff = false
-    private val cache = mutableMapOf<String, Any?>()
+    private var state = State()
 
-    // Clear the entire cache
     fun clearCache() {
-        cache.clear()
+        state = state.copy(cache = emptyMap())
     }
 
-    // Remove a specific key
     fun remove(key: String) {
-        cache.remove(key.uppercase())
+        state = state.copy(cache = state.cache - key.uppercase())
     }
 
-    // Fetch from cache or compute if not present
     suspend fun <T : Any> request(
         key: String,
         compute: suspend (String) -> T
-    ): T {
-        if (cacheOff) {
-            return compute(key).also { cache[key.uppercase()] = it }
+    ): T = when {
+        state.cacheOff -> compute(key).also { value ->
+            state = state.copy(cache = state.cache + (key.uppercase() to value))
         }
 
-        @Suppress("UNCHECKED_CAST")
-        return (cache[key.uppercase()] as? T) ?: compute(key).also {
-            cache[key.uppercase()] = it
+        else -> state.cache[key.uppercase()]?.let { it as T } ?: compute(key).also { value ->
+            state = state.copy(cache = state.cache + (key.uppercase() to value))
         }
     }
 
     fun set(key: String, func: () -> Unit) {
-        func() // Execute the lambda
-        remove(key) // Remove the cached value for the given key
+        func()
+        remove(key)
     }
 
     fun put(key: String, value: Any) {
-        cache[key.uppercase()] = value
+        state = state.copy(cache = state.cache + (key.uppercase() to value))
     }
 
-    // Get a cached value without recomputing
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Any> get(key: String): T {
-        if (!cache.containsKey(key.uppercase())) {
-            throw IllegalStateException("Key $key not found in cache")
+    fun <T : Any> get(key: String): T = state.cache[key.uppercase()]?.let { it as T }
+        ?: throw IllegalStateException("Key $key not found in cache")
+
+    fun createKey(data: String): String = Utils.toCompactString(data)
+        .let { shortStr ->
+            val startOfData = shortStr.substring(0, 2).uppercase(Locale.getDefault())
+            val keyLength = if (startOfData in arrayOf("1D", "1E", "1F", "30", "31")) 4 else 2
+            shortStr.substring(0, keyLength).uppercase(Locale.getDefault())
         }
-
-        return cache[key.uppercase()] as T
-    }
-
-    // Generate a compact key
-    fun createKey(data: String): String {
-        val shortStr = Utils.toCompactString(data)
-        val startOfData = shortStr.substring(0, 2).uppercase(Locale.getDefault())
-        val keyLength = if (startOfData in arrayOf("1D", "1E", "1F", "30", "31")) 4 else 2
-        return shortStr.substring(0, keyLength).uppercase(Locale.getDefault())
-    }
 }
