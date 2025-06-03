@@ -19,11 +19,9 @@ import org.avmedia.gshockapi.ProgressEvents
 
 @Composable
 fun AlarmChimeSwitch(modifier: Modifier) {
-    // State to manage whether the switch is checked or not
     val isChecked =
         remember { mutableStateOf(AlarmsModel.getAlarms().getOrNull(0)?.hasHourlyChime ?: false) }
 
-    // Function to run when the alarms are loaded
     val onAlarmsLoaded: () -> Unit = {
         isChecked.value = AlarmsModel.getAlarms().getOrNull(0)?.hasHourlyChime ?: false
     }
@@ -48,14 +46,14 @@ fun AlarmChimeSwitch(modifier: Modifier) {
             isChecked = isChecked.value,
             onCheckedChange = { checked ->
                 if (!AlarmsModel.isEmpty()) {
-                    AlarmsModel.getAlarms()[0].hasHourlyChime = checked
+                    val currentAlarm = AlarmsModel.getAlarms()[0]
+                    val updatedAlarm = currentAlarm.copy(hasHourlyChime = checked)
+                    AlarmsModel.updateAlarm(0, updatedAlarm)
                     isChecked.value = checked
                 }
             },
             modifier = modifier,
-            text = stringResource(
-                id = R.string.signal_chime
-            )
+            text = stringResource(id = R.string.signal_chime)
         )
     }
 }

@@ -33,18 +33,18 @@ object DstWatchStateIO {
     DST: bitwise flags; bit0: DST on, bit1: DST auto
     */
 
-    suspend fun setDST(dstState: String, dst: Int): String =
-        Utils.toIntArray(dstState)
-            .let { array ->
-                IntArray(array.size) { i ->
-                    if (i == 3) dst else array[i]
-                }
-            }
-            .let(Utils::byteArrayOfIntArray)
-            .let(Utils::fromByteArrayToHexStrWithSpaces)
+    suspend fun setDST(dstState: String, dst: Int): String {
+        val intArray = Utils.toIntArray(dstState)
+        intArray[3] = dst
+
+        val newValue = Utils.byteArrayOfIntArray(intArray.toIntArray())
+        return Utils.fromByteArrayToHexStrWithSpaces(newValue)
+    }
 
     fun onReceived(data: String) {
         state.deferredResult?.complete(data)
-        state = State()
+
+        // Do not reset state here, as it is used in the request function.
+        // state = State()
     }
 }

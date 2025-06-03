@@ -9,6 +9,7 @@ import org.avmedia.gshockapi.utils.Utils
 
 @RequiresApi(Build.VERSION_CODES.O)
 object DstForWorldCitiesIO {
+
     private data class State(
         val deferredResult: CompletableDeferred<String>? = null
     )
@@ -21,6 +22,7 @@ object DstForWorldCitiesIO {
         }
 
     private suspend fun getDSTForWorldCities(key: String): String {
+
         state = state.copy(deferredResult = CompletableDeferred())
         IO.request(key)
         return state.deferredResult?.await() ?: ""
@@ -42,19 +44,23 @@ object DstForWorldCitiesIO {
     fun setDST(dst: String, casioTimeZone: CasioTimeZoneHelper.CasioTimeZone): String =
         Utils.toIntArray(dst)
             .takeIf { it.size == 7 }
-            ?.let { array ->
-                IntArray(array.size) { i -> array[i] }.apply {
-                    this[4] = casioTimeZone.offset
-                    this[5] = casioTimeZone.dstOffset.toInt()
-                    this[6] = casioTimeZone.dstRules
-                }
+            ?.apply {
+                this[4] = casioTimeZone.offset
+                this[5] = casioTimeZone.dstOffset.toInt()
+                this[6] = casioTimeZone.dstRules
             }
-            ?.let(Utils::byteArrayOfIntArray)
-            ?.let(Utils::fromByteArrayToHexStrWithSpaces)
+            ?.let { intArray ->
+                Utils.byteArrayOfIntArray(intArray.toIntArray())
+                    .let(Utils::fromByteArrayToHexStrWithSpaces)
+            }
             ?: dst
+
 
     fun onReceived(data: String) {
         state.deferredResult?.complete(data)
-        state = State()
+
+        // Do not reset state here, as it is used in the request function.
+        // state = State()
     }
+
 }

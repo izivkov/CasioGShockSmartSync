@@ -45,8 +45,9 @@ class AlarmViewModel @Inject constructor(
 
                 if (WatchInfo.chimeInSettings) {
                     val settings = api.getSettings()
-                    val hasHourlyChime = settings.hourlyChime
-                    _alarms.value[0].hasHourlyChime = hasHourlyChime
+                    val currentAlarms = _alarms.value.toMutableList()
+                    currentAlarms[0] = currentAlarms[0].copy(hasHourlyChime = settings.hourlyChime)
+                    _alarms.value = currentAlarms
                 }
 
                 ProgressEvents.onNext("Alarms Loaded")
@@ -57,16 +58,18 @@ class AlarmViewModel @Inject constructor(
     }
 
     fun toggleAlarm(index: Int, isEnabled: Boolean) {
-        val updatedAlarms = _alarms.value.toMutableList()
-        updatedAlarms[index].enabled = isEnabled
-        _alarms.value = updatedAlarms
+        val currentAlarms = _alarms.value.toMutableList()
+        currentAlarms[index] = currentAlarms[index].copy(enabled = isEnabled)
+        _alarms.value = currentAlarms
     }
 
     fun onTimeChanged(index: Int, hours: Int, minutes: Int) {
-        val updatedAlarms = _alarms.value.toMutableList()
-        updatedAlarms[index].hour = hours
-        updatedAlarms[index].minute = minutes
-        _alarms.value = updatedAlarms
+        val currentAlarms = _alarms.value.toMutableList()
+        currentAlarms[index] = currentAlarms[index].copy(
+            hour = hours,
+            minute = minutes
+        )
+        _alarms.value = currentAlarms
     }
 
     fun sendAlarmsToWatch() {

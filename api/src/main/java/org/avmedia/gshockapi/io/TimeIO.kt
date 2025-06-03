@@ -62,58 +62,57 @@ If the timezone has no DST, we set the flag to 0
 @RequiresApi(Build.VERSION_CODES.O)
 object TimeIO {
 
-    private var timeZone: String = TimeZone.getDefault().id
-    private var casioTimezone = CasioTimeZoneHelper.findTimeZone(timeZone)
+    private data class State(
+        val timeZone: String = TimeZone.getDefault().id,
+        val casioTimezone: CasioTimeZoneHelper.CasioTimeZone = CasioTimeZoneHelper.findTimeZone(TimeZone.getDefault().id),
+    )
+
+    private var state = State()
 
     fun setTimezone(timeZone: String) {
-        this.timeZone = timeZone
-        casioTimezone = CasioTimeZoneHelper.findTimeZone(timeZone)
+        state = state.copy(
+            timeZone = timeZone,
+            casioTimezone = CasioTimeZoneHelper.findTimeZone(timeZone)
+        )
     }
 
     suspend fun set(timeMs: Long? = null) {
         initializeForSettingTime()
         val timeToSet = timeMs ?: Clock.systemDefaultZone().millis()
-
         Connection.sendMessage(
             "{action: \"SET_TIME\", value: ${timeToSet}}"
         )
     }
 
-    private suspend fun getDSTWatchState(state: IO.DstState): String {
-        return DstWatchStateIO.request(state)
-    }
-
-    @Suppress("UNUSED_PARAMETER")
     enum class DtsMask(val mask: Int) {
         OFF(0b00),
         ON(0b01),
         AUTO(0b10),
     }
 
+    private suspend fun getDSTWatchState(state: IO.DstState): String =
+        DstWatchStateIO.request(state)
+
     private suspend fun getDSTWatchStateWithTZ(state: IO.DstState): String {
         val origDTS = getDSTWatchState(state)
-
-        val dstValue =
-            (if (casioTimezone.isInDST()) DtsMask.ON.ordinal else DtsMask.OFF.ordinal) or (if (casioTimezone.hasRules()) DtsMask.AUTO.ordinal else 0)
-
+        val dstValue = (if (this.state.casioTimezone.isInDST()) DtsMask.ON.ordinal else DtsMask.OFF.ordinal) or
+                (if (this.state.casioTimezone.hasRules()) DtsMask.AUTO.ordinal else 0)
         return DstWatchStateIO.setDST(origDTS, dstValue)
     }
 
-    private suspend fun getDSTForWorldCities(cityNum: Int): String {
-        return DstForWorldCitiesIO.request(cityNum)
-    }
+    private suspend fun getDSTForWorldCities(cityNum: Int): String =
+        DstForWorldCitiesIO.request(cityNum)
 
     private suspend fun getDSTForWorldCitiesWithTZ(cityNum: Int): String {
         val origDSTForCity = getDSTForWorldCities(cityNum)
-        return DstForWorldCitiesIO.setDST(origDSTForCity, casioTimezone)
+        return DstForWorldCitiesIO.setDST(origDSTForCity, state.casioTimezone)
     }
 
-    private suspend fun getWorldCities(cityNum: Int): String {
-        return WorldCitiesIO.request(cityNum)
-    }
+    private suspend fun getWorldCities(cityNum: Int): String =
+        WorldCitiesIO.request(cityNum)
 
     private suspend fun getWorldCitiesWithTZ(cityNum: Int): String {
-        val newCity = WorldCitiesIO.parseCity(timeZone)
+        val newCity = WorldCitiesIO.parseCity(state.timeZone)
         val encoded = WorldCitiesIO.encodeAndPad(newCity!!, cityNum)
         IO.removeFromCache(encoded)
         return encoded
@@ -198,18 +197,14 @@ object TimeIO {
 
     fun sendToWatchSet(message: String) {
         val dateTimeMs: Long = JSONObject(message).get("value") as Long
-
-        val dstDurationToAdd = if (casioTimezone.isInDST()) casioTimezone.dstOffset * 60 * 15 else 0
+        val dstDurationToAdd = if (state.casioTimezone.isInDST()) state.casioTimezone.dstOffset * 60 * 15 else 0
         val msAdjustedForDST = dateTimeMs + dstDurationToAdd
 
         val instant = Instant.ofEpochMilli(msAdjustedForDST)
-        val adjustedDateTime = LocalDateTime.ofInstant(instant, casioTimezone.zoneId)
+        val adjustedDateTime = LocalDateTime.ofInstant(instant, state.casioTimezone.zoneId)
 
         val timeData = TimeEncoder.prepareCurrentTime(adjustedDateTime)
-
-        val timeCommand =
-            Utils.byteArrayOfInts(CasioConstants.CHARACTERISTICS.CASIO_CURRENT_TIME.code) + timeData
-
+        val timeCommand = Utils.byteArrayOfInts(CasioConstants.CHARACTERISTICS.CASIO_CURRENT_TIME.code) + timeData
         IO.writeCmd(GetSetMode.SET, timeCommand)
     }
 

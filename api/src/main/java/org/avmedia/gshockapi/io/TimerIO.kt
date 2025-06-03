@@ -12,7 +12,6 @@ import org.json.JSONObject
 
 @RequiresApi(Build.VERSION_CODES.O)
 object TimerIO {
-
     data class TimerState(
         val hours: Int,
         val minutes: Int,
@@ -20,20 +19,19 @@ object TimerIO {
         val totalSeconds: Int
     )
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<Int>
-    }
+    private data class State(
+        val deferredResult: CompletableDeferred<Int>? = null
+    )
 
-    suspend fun request(): Int {
-        val timerValue = CachedIO.request("18") { key -> getTimer(key) }
-        return timerValue
-    }
+    private var state = State()
+
+    suspend fun request(): Int =
+        CachedIO.request("18") { key -> getTimer(key) }
 
     private suspend fun getTimer(key: String): Int {
-
-        DeferredValueHolder.deferredResult = CompletableDeferred()
+        state = state.copy(deferredResult = CompletableDeferred())
         IO.request(key)
-        return DeferredValueHolder.deferredResult.await()
+        return state.deferredResult?.await() ?: 0
     }
 
     fun set(timerValue: Int) {
@@ -48,10 +46,12 @@ object TimerIO {
             .map { timerState -> timerState.totalSeconds }
             .fold(
                 onSuccess = { seconds ->
-                    DeferredValueHolder.deferredResult.complete(seconds)
+                    state.deferredResult?.complete(seconds)
+                    state = State()
                 },
                 onFailure = { error ->
-                    DeferredValueHolder.deferredResult.completeExceptionally(error)
+                    state.deferredResult?.completeExceptionally(error)
+                    state = State()
                 }
             )
     }
@@ -73,13 +73,11 @@ object TimerIO {
                     IO.writeCmd(GetSetMode.SET, encodedData)
                 },
                 onFailure = { error ->
-                    // Handle error appropriately
                     println("Failed to set timer: ${error.message}")
                 }
             )
     }
 
-    // Pure functions for timer calculations
     object TimerCalculator {
         fun secondsToTimerState(totalSeconds: Int): TimerState {
             val hours = totalSeconds / 3600
@@ -93,7 +91,6 @@ object TimerIO {
             hours * 3600 + minutes * 60 + seconds
     }
 
-    // Pure encoding/decoding functions
     object TimerEncoder {
         fun encode(timerState: TimerState): ByteArray =
             ByteArray(7).apply {

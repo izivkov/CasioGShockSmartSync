@@ -15,32 +15,51 @@ data class AppNotification(
     val timestamp: String,
     val app: String,
     val title: String,
-    var text: String,
-    var shortText: String = ""
+    val text: String,
+    val shortText: String = ""
 ) {
     companion object {
         private const val MAX_TEXT_BYTES = 193
         private const val MAX_SHORT_TEXT_BYTES = 40
         private const val MAX_COMBINED_BYTES = 206
-    }
 
-    init {
-        fun truncateUtf8Bytes(input: String, maxBytes: Int): String {
+        fun create(
+            type: NotificationType,
+            timestamp: String,
+            app: String,
+            title: String,
+            text: String,
+            shortText: String = ""
+        ): AppNotification {
+            val truncatedShortText = truncateUtf8Bytes(shortText, MAX_SHORT_TEXT_BYTES)
+            val truncatedText = truncateUtf8Bytes(text, MAX_TEXT_BYTES)
+            val adjustedText = adjustTextLength(truncatedText, truncatedShortText)
+
+            return AppNotification(
+                type = type,
+                timestamp = timestamp,
+                app = app,
+                title = title,
+                text = adjustedText,
+                shortText = truncatedShortText
+            )
+        }
+
+        private fun truncateUtf8Bytes(input: String, maxBytes: Int): String {
             val bytes = input.encodeToByteArray()
             return if (bytes.size <= maxBytes) input
             else bytes.copyOf(maxBytes).toString(Charsets.UTF_8)
         }
 
-        text = truncateUtf8Bytes(text, MAX_TEXT_BYTES)
-        shortText = truncateUtf8Bytes(shortText, MAX_SHORT_TEXT_BYTES)
+        private fun adjustTextLength(text: String, shortText: String): String {
+            val textBytes = text.encodeToByteArray()
+            val shortTextBytes = shortText.encodeToByteArray()
+            val totalBytes = textBytes.size + shortTextBytes.size
 
-        val textBytes = text.encodeToByteArray()
-        val shortTextBytes = shortText.encodeToByteArray()
-        val totalBytes = textBytes.size + shortTextBytes.size
-
-        if (totalBytes > MAX_COMBINED_BYTES) {
-            val allowedTextBytes = (MAX_COMBINED_BYTES - shortTextBytes.size).coerceAtLeast(0)
-            text = textBytes.copyOf(allowedTextBytes).toString(Charsets.UTF_8)
+            return if (totalBytes > MAX_COMBINED_BYTES) {
+                val allowedTextBytes = (MAX_COMBINED_BYTES - shortTextBytes.size).coerceAtLeast(0)
+                textBytes.copyOf(allowedTextBytes).toString(Charsets.UTF_8)
+            } else text
         }
     }
 

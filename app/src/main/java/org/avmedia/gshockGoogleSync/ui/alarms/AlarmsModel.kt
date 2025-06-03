@@ -27,4 +27,9 @@ object AlarmsModel {
     fun addAll(alarms: ArrayList<Alarm>) {
         this.alarms.addAll(alarms)
     }
+
+    fun updateAlarm(index: Int, alarm: Alarm) {
+        val alarms = getAlarms()
+        alarms[index] = alarm
+    }
 }

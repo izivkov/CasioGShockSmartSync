@@ -68,8 +68,8 @@ object AlarmsIO {
         val decoded = AlarmDecoder.toJson(data).get("ALARMS")
         fromJson(decoded.toString())
 
-        if (Alarm.alarms.size == WatchInfo.alarmCount) {
-            DeferredValueHolder.deferredResult.complete(Alarm.alarms)
+        if (Alarm.getAlarms().size == WatchInfo.alarmCount) {
+            DeferredValueHolder.deferredResult.complete(Alarm.getAlarms())
         }
     }
 

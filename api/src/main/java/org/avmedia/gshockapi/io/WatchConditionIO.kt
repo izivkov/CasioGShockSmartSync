@@ -8,27 +8,26 @@ import timber.log.Timber
 import kotlin.math.roundToInt
 
 object WatchConditionIO {
-
-    private object DeferredValueHolder {
-        var deferredResult: CompletableDeferred<WatchConditionValue>? = null
-    }
-
     class WatchConditionValue(val batteryLevel: Int, val temperature: Int)
 
-    suspend fun request(): WatchConditionValue {
-        return CachedIO.request("28", ::getWatchCondition)
-    }
+    private data class State(
+        val deferredResult: CompletableDeferred<WatchConditionValue>? = null
+    )
+
+    private var state = State()
+
+    suspend fun request(): WatchConditionValue =
+        CachedIO.request("28") { key -> getWatchCondition(key) }
 
     private suspend fun getWatchCondition(key: String): WatchConditionValue {
-        if (DeferredValueHolder.deferredResult == null || DeferredValueHolder.deferredResult?.isActive == false) {
-            DeferredValueHolder.deferredResult = CompletableDeferred()
-            IO.request(key)
-        }
-        return (DeferredValueHolder.deferredResult as CompletableDeferred).await()
+        state = state.copy(deferredResult = CompletableDeferred())
+        IO.request(key)
+        return state.deferredResult?.await() ?: WatchConditionValue(0, 0)
     }
 
     fun onReceived(data: String) {
-        DeferredValueHolder.deferredResult?.complete(WatchConditionDecoder.decodeValue(data))
+        state.deferredResult?.complete(WatchConditionDecoder.decodeValue(data))
+        state = State()
     }
 
     object WatchConditionDecoder {

@@ -20,20 +20,28 @@ From there, the appropriate onReceived() method is called for the corresponding 
  */
 @RequiresApi(Build.VERSION_CODES.O)
 object WatchDataListener {
+    private data class State(
+        val dataCallback: IDataReceived? = null
+    )
+
+    private var state = State()
+
     fun init() {
-        val dataReceived =
-            IDataReceived { data -> data?.let { MessageDispatcher.onReceived(it) } }
+        state = state.copy(
+            dataCallback = { data ->
+                data?.let { MessageDispatcher.onReceived(it) }
+            }
+        )
+        setupConnectionListener()
+    }
 
-        fun waitForConnectionSetupComplete() {
-            val eventActions = arrayOf(
-                EventAction("ConnectionSetupComplete") {
-                    Connection.setDataCallback(dataReceived)
-                },
-            )
+    private fun setupConnectionListener() {
+        val eventActions = arrayOf(
+            EventAction("ConnectionSetupComplete") {
+                state.dataCallback?.let { Connection.setDataCallback(it) }
+            }
+        )
 
-            ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
-        }
-
-        waitForConnectionSetupComplete()
+        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
     }
 }

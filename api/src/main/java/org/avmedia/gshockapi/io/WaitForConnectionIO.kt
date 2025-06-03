@@ -12,44 +12,42 @@ import org.avmedia.gshockapi.utils.WatchDataListener
 
 @RequiresApi(Build.VERSION_CODES.O)
 object WaitForConnectionIO {
+    private data class State(
+        val deferredResult: CompletableDeferred<String>? = null
+    )
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<String>
-    }
+    private var state = State()
 
     suspend fun request(
         context: Context,
         deviceId: String?,
-    ): String {
-        return waitForConnection(context, deviceId)
-    }
+    ): String = waitForConnection(context, deviceId)
 
     private suspend fun waitForConnection(
         context: Context,
         deviceId: String?,
     ): String {
-
         if (Connection.isConnected() || Connection.isConnecting()) {
             return "Connecting"
         }
 
-        DeferredValueHolder.deferredResult = CompletableDeferred()
+        state = state.copy(deferredResult = CompletableDeferred())
         WatchDataListener.init()
-
         Connection.startConnection(context, deviceId)
 
-        fun waitForConnectionSetupComplete() {
-            val eventActions = arrayOf(
-                EventAction("ConnectionSetupComplete") {
-                    CachedIO.clearCache()
-                    DeferredValueHolder.deferredResult.complete("OK")
-                },
-            )
+        setupConnectionListener()
+        return state.deferredResult?.await() ?: ""
+    }
 
-            ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
-        }
+    private fun setupConnectionListener() {
+        val eventActions = arrayOf(
+            EventAction("ConnectionSetupComplete") {
+                CachedIO.clearCache()
+                state.deferredResult?.complete("OK")
+                state = State()
+            }
+        )
 
-        waitForConnectionSetupComplete()
-        return DeferredValueHolder.deferredResult.await()
+        ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)
     }
 }

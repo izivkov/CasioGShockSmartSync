@@ -19,62 +19,52 @@ class TimeAdjustmentInfo(
 
 @RequiresApi(Build.VERSION_CODES.O)
 object TimeAdjustmentIO {
+    private data class State(
+        val deferredResult: CompletableDeferred<TimeAdjustmentInfo>? = null
+    )
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<TimeAdjustmentInfo>
-    }
+    private var state = State()
 
-    suspend fun request(): TimeAdjustmentInfo {
-        return CachedIO.request("GET_TIME_ADJUSTMENT") { key -> getTimeAdjustment(key) }
-    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun request(): TimeAdjustmentInfo =
+        CachedIO.request("GET_TIME_ADJUSTMENT") { key -> getTimeAdjustment(key) }
 
     private suspend fun getTimeAdjustment(key: String): TimeAdjustmentInfo {
-        DeferredValueHolder.deferredResult = CompletableDeferred()
+        state = state.copy(deferredResult = CompletableDeferred())
         Connection.sendMessage("{ action: '$key'}")
-        return DeferredValueHolder.deferredResult.await()
+        return state.deferredResult?.await() ?: error("Deferred result not initialized")
     }
 
     fun set(settings: Settings) {
-        val settingJson = Gson().toJson(settings)
-
-        CachedIO.set("GET_TIME_ADJUSTMENT") {
-            Connection.sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: ${settingJson}}")
+        settings.let {
+            Gson().toJson(it)
+        }.let { settingJson ->
+            CachedIO.set("GET_TIME_ADJUSTMENT") {
+                Connection.sendMessage("{action: \"SET_TIME_ADJUSTMENT\", value: $settingJson}")
+            }
         }
     }
 
     fun onReceived(data: String) {
-        val timeAdjustmentSet = isTimeAdjustmentSet(data)
-        val adjustmentTimeMinutes = timeOfAdjustmentMinutes(data)
-        CasioIsAutoTimeOriginalValue.value = data
-        DeferredValueHolder.deferredResult.complete(
+        data.let { input ->
+            CasioIsAutoTimeOriginalValue.value = input
             TimeAdjustmentInfo(
-                timeAdjustmentSet,
-                adjustmentTimeMinutes
+                isTimeAdjustmentSet = isTimeAdjustmentSet(input),
+                adjustmentTimeMinutes = timeOfAdjustmentMinutes(input)
             )
-        )
-    }
-
-    private fun isTimeAdjustmentSet(data: String): Boolean {
-        // syncing off: 110f0f0f0600500004000100->80<-37d2
-        // syncing on:  110f0f0f0600500004000100->00<-37d2
-
-        CasioIsAutoTimeOriginalValue.value = data // save original data for future use
-        return Utils.toIntArray(data)[12] == 0
-    }
-
-    private fun timeOfAdjustmentMinutes(data: String): Int {
-        // syncing off: 110f0f0f060050000400010080->37<-d2
-        val minutesRead = Utils.toIntArray(data)[13]
-
-        val range = 0..59
-        val minutes = if (minutesRead in range) {
-            minutesRead
-        } else {
-            30
+        }.let { info ->
+            state.deferredResult?.complete(info)
+            state = State() // Reset state
         }
-
-        return minutes
     }
+
+    private fun isTimeAdjustmentSet(data: String): Boolean =
+        Utils.toIntArray(data)[12] == 0
+
+    private fun timeOfAdjustmentMinutes(data: String): Int =
+        Utils.toIntArray(data)[13].let { minutesRead ->
+            if (minutesRead in 0..59) minutesRead else 30
+        }
 
     object CasioIsAutoTimeOriginalValue {
         var value = ""
@@ -89,45 +79,30 @@ object TimeAdjustmentIO {
     }
 
     fun sendToWatchSet(message: String) {
-        val settings = JSONObject(message).get("value") as JSONObject
-        // add the original string from Casio, so we do not mess up any ot the other settings.
-        settings.put(
-            "casioIsAutoTimeOriginalValue",
-            CasioIsAutoTimeOriginalValue.value
-        )
-        val encodedTimeAdj = encodeTimeAdjustment(settings)
-        if (encodedTimeAdj.isNotEmpty()) {
-            IO.writeCmd(GetSetMode.SET, encodedTimeAdj)
-        }
-    }
-
-    private fun encodeTimeAdjustment(settings: JSONObject): ByteArray {
-
-        val casioIsAutoTimeOriginalValue = settings.getString("casioIsAutoTimeOriginalValue")
-        if (casioIsAutoTimeOriginalValue.isEmpty()) {
-            return "".toByteArray()
-        }
-
-        // syncing off: 110f0f0f0600500004000100->80<-37d2
-        // syncing on:  110f0f0f0600500004000100->00<-37d2
-
-        val intArray = Utils.toIntArray(casioIsAutoTimeOriginalValue)
-
-        if (settings.get("timeAdjustment") == true) {
-            intArray[12] = 0x00
-        } else {
-            intArray[12] = 0x80
-        }
-
-        intArray[13] = settings.getInt("adjustmentTimeMinutes")
-
-        return intArray.foldIndexed(ByteArray(intArray.size)) { i, a, v ->
-            a.apply {
-                set(
-                    i,
-                    v.toByte()
-                )
+        JSONObject(message).get("value").let { it as JSONObject }
+            .apply {
+                put("casioIsAutoTimeOriginalValue", CasioIsAutoTimeOriginalValue.value)
             }
-        }
+            .let { settings -> encodeTimeAdjustment(settings) }
+            .takeIf { it.isNotEmpty() }
+            ?.let { encoded -> IO.writeCmd(GetSetMode.SET, encoded) }
     }
+
+    private fun encodeTimeAdjustment(settings: JSONObject): ByteArray =
+        settings.getString("casioIsAutoTimeOriginalValue")
+            .takeIf { it.isNotEmpty() }
+            ?.let { value ->
+                Utils.toIntArray(value)
+                    .apply {
+                        // syncing off: 110f0f0f0600500004000100->80<-37d2
+                        // syncing on:  110f0f0f0600500004000100->00<-37d2
+                        this[12] = if (settings.get("timeAdjustment") == true) 0x00 else 0x80
+                        this[13] = settings.getInt("adjustmentTimeMinutes")
+                    }
+                    .let { intArray ->
+                        intArray.foldIndexed(ByteArray(intArray.size)) { i, array, value ->
+                            array.apply { set(i, value.toByte()) }
+                        }
+                    }
+            } ?: ByteArray(0)
 }

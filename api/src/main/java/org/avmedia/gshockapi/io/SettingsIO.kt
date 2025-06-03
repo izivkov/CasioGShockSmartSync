@@ -16,6 +16,13 @@ import kotlin.experimental.inv
 import kotlin.experimental.or
 
 object SettingsIO {
+    private data class State(
+        val deferredResult: CompletableDeferred<Settings>? = null
+    )
+
+    private var state = State()
+
+    // Constants remain unchanged
     private const val MASK_24_HOURS = 0b00000001
     private const val MASK_BUTTON_TONE_OFF = 0b00000010
     private const val MASK_AUTO_LIGHT_OFF = 0b00000100
@@ -30,35 +37,36 @@ object SettingsIO {
 
     private const val CHIME = 0b00100000
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<Settings>
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun request(): Settings {
-        return CachedIO.request("GET_SETTINGS") { key -> getBasicSettings(key) }
-    }
+    suspend fun request(): Settings =
+        CachedIO.request("GET_SETTINGS") { key -> getBasicSettings(key) }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private suspend fun getBasicSettings(key: String): Settings {
-        DeferredValueHolder.deferredResult = CompletableDeferred<Settings>()
+        state = state.copy(deferredResult = CompletableDeferred())
         Connection.sendMessage("{ action: '$key'}")
-        return DeferredValueHolder.deferredResult.await()
+        return state.deferredResult?.await() ?: error("No deferred result available")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun set(settings: Settings) {
-        val settingJson = Gson().toJson(settings)
-        fun setFunc() {
-            Connection.sendMessage("{action: \"SET_SETTINGS\", value: ${settingJson}}")
+        settings.let {
+            Gson().toJson(it)
+        }.let { settingJson ->
+            CachedIO.set("GET_SETTINGS") {
+                Connection.sendMessage("{action: \"SET_SETTINGS\", value: $settingJson}")
+            }
         }
-        CachedIO.set("GET_SETTINGS") { setFunc() }
     }
 
     fun onReceived(data: String) {
-        val jsonData = decodeToJson(data).toString()
-        val model = Gson().fromJson(jsonData, Settings::class.java)
-        DeferredValueHolder.deferredResult.complete(model)
+        decodeToJson(data)
+            .toString()
+            .let { jsonData -> Gson().fromJson(jsonData, Settings::class.java) }
+            .let { model ->
+                state.deferredResult?.complete(model)
+                state = State() // Reset state after completion
+            }
     }
 
     /*
