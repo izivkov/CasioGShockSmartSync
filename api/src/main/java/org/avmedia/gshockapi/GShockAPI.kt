@@ -2,7 +2,6 @@ package org.avmedia.gshockapi
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.graphics.Insets.add
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.ble.Connection
@@ -11,8 +10,6 @@ import org.avmedia.gshockapi.casio.*
 import org.avmedia.gshockapi.io.*
 import org.avmedia.gshockapi.io.IO.writeCmd
 import org.avmedia.gshockapi.utils.*
-import org.json.JSONArray
-import org.json.JSONObject
 import timber.log.Timber
 import java.time.ZoneId
 import java.util.*
@@ -69,10 +66,9 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      */
 
     override suspend fun waitForConnection(deviceId: String?) {
-
         Connection.stopBleScan()
-        val connectedStatus =
-            WaitForConnectionIO.request(context, deviceId)
+        Connection.init(context)
+        val connectedStatus = WaitForConnectionIO.request(context, deviceId)
         if (connectedStatus == "OK") {
             init()
         }
@@ -91,9 +87,8 @@ class GShockAPI(private val context: Context) : IGShockAPI {
     /**
      * Returns a Boolean value indicating if the watch is currently commenced to the phone
      */
-    override fun isConnected(): Boolean {
-        return Connection.isConnected()
-    }
+    override fun isConnected(): Boolean =
+        Connection.isConnected()
 
     /**
      * Close the connection and free all associated resources.

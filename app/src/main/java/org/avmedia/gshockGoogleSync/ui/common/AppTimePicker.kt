@@ -40,9 +40,9 @@ fun AppTimePicker(
     }
 
     val timePickerState = rememberTimePickerState(
-        initialHour,
-        initialMinute,
-        is24Hour = DateFormat.is24HourFormat(appContext),
+        initialHour = if (initialHour in 0..23 && initialMinute in 0..59) initialHour else 0,
+        initialMinute = if (initialHour in 0..23 && initialMinute in 0..59) initialMinute else 0,
+        is24Hour = DateFormat.is24HourFormat(appContext)
     )
 
     Column(

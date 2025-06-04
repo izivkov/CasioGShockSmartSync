@@ -89,59 +89,68 @@ object AlarmsIO {
     }
 
     fun sendToWatchSet(message: String) {
-        val alarmsJsonArr: JSONArray = JSONObject(message).get("value") as JSONArray
-        val alarmCasio0 = Alarms.fromJsonAlarmFirstAlarm(alarmsJsonArr[0] as JSONObject)
-        IO.writeCmd(GetSetMode.SET, alarmCasio0)
-        val alarmCasio: ByteArray = Alarms.fromJsonAlarmSecondaryAlarms(alarmsJsonArr)
-        IO.writeCmd(GetSetMode.SET, alarmCasio)
+        runCatching {
+            JSONObject(message)
+                .get("value")
+                .let { it as JSONArray }
+                .let { jsonArray ->
+                    Pair(
+                        Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0)),
+                        Alarms.fromJsonAlarmSecondaryAlarms(jsonArray)
+                    )
+                }
+                .also { (firstAlarm, secondaryAlarms) ->
+                    IO.writeCmd(GetSetMode.SET, firstAlarm)
+                    IO.writeCmd(GetSetMode.SET, secondaryAlarms)
+                }
+        }.onFailure { error ->
+            Timber.e("Failed to set alarms: ${error.message}")
+        }
     }
 
     object AlarmDecoder {
-        private const val HOURLY_CHIME_MASK = 0b10000000
-        private val alarmsQueue = mutableListOf<ArrayList<Int>>()
+        fun toJson(command: String): JSONObject =
+            runCatching {
+                Utils.toIntArray(command)
+                    .let { intArray ->
+                        JSONArray().apply {
+                            when (intArray.firstOrNull()) {
+                                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code ->
+                                    ArrayList(intArray.drop(1))
+                                        .let(::createJsonAlarm)
+                                        .let(::put)
 
-        fun toJsonNew(command: String) {
-            alarmsQueue.add(Utils.toIntArray(command))
-        }
+                                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code ->
+                                    intArray.drop(1)
+                                        .chunked(4)
+                                        .map { ArrayList(it) }
+                                        .forEach { put(createJsonAlarm(it)) }
 
-        fun toJson(command: String): JSONObject {
-            val jsonResponse = JSONObject()
-            val intArray = Utils.toIntArray(command)
-            val alarms = JSONArray()
-
-            when (intArray[0]) {
-                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code -> {
-                    intArray.removeAt(0)
-                    alarms.put(createJsonAlarm(intArray))
-                    jsonResponse.put("ALARMS", alarms)
-                }
-
-                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code -> {
-                    intArray.removeAt(0)
-                    val multipleAlarms = intArray.chunked(4)
-                    multipleAlarms.forEach {
-                        alarms.put(createJsonAlarm(it as ArrayList<Int>))
+                                else -> Timber.d("Unhandled Command [$command]")
+                            }
+                        }
                     }
-                    jsonResponse.put("ALARMS", alarms)
-                }
-
-                else -> {
-                    Timber.d("Unhandled Command [$command]")
-                }
+                    .let { alarms -> JSONObject().put("ALARMS", alarms) }
+            }.getOrElse { error ->
+                Timber.e("Failed to parse command: ${error.message}")
+                JSONObject()
             }
 
-            return jsonResponse
-        }
+        private fun createJsonAlarm(intArray: ArrayList<Int>): JSONObject =
+            runCatching {
+                val HOURLY_CHIME_MASK = 0b10000000
 
-        private fun createJsonAlarm(intArray: ArrayList<Int>): JSONObject {
-            val alarm = Alarms.Alarm(
-                intArray[2],
-                intArray[3],
-                intArray[0] and Alarms.ENABLED_MASK != 0,
-                intArray[0] and HOURLY_CHIME_MASK != 0
-            )
-            val gson = Gson()
-            return JSONObject(gson.toJson(alarm))
-        }
+                Alarms.Alarm(
+                    hour = intArray[2],
+                    minute = intArray[3],
+                    enabled = intArray[0] and Alarms.ENABLED_MASK != 0,
+                    hasHourlyChime = intArray[0] and HOURLY_CHIME_MASK != 0
+                ).let { alarm ->
+                    JSONObject(Gson().toJson(alarm))
+                }
+            }.getOrElse { error ->
+                Timber.e("Failed to create alarm: ${error.message}")
+                JSONObject()
+            }
     }
 }

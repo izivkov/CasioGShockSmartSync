@@ -18,44 +18,54 @@ import org.avmedia.gshockapi.casio.MessageDispatcher
 import timber.log.Timber
 
 object Connection {
-
-    private var bleManager: IGShockManager? = null
+    private lateinit var bleManager: IGShockManager
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private suspend fun connect(device: BluetoothDevice) {
+    fun init(context: Context) {
 
-        fun onConnected(name: String, address: String) {
+        if (!::bleManager.isInitialized) {
+            bleManager = IGShockManager(context)
+        }
+    }
+
+    private suspend fun connectToDevice(device: BluetoothDevice): ConnectionResult = try {
+        bleManager.connect(device) { name, address ->
             WatchInfo.setNameAndModel(name.trimEnd('\u0000'))
             WatchInfo.setAddress(address)
             Timber.i("onConnected() end")
         }
-
-        bleManager?.connect(device) { name: String, address: String -> onConnected(name, address) }
+        ConnectionResult.Success
+    } catch (e: Exception) {
+        ConnectionResult.Error(e.message ?: "Unknown error")
     }
 
     fun disconnect() {
-        bleManager?.release()
+        bleManager.release()
     }
 
     fun close() {
-        bleManager?.close()
+        bleManager.close()
     }
 
-    fun isConnected(): Boolean {
-        return bleManager?.connectionState == ConnectionState.CONNECTED
-    }
+    private fun getConnectionState(): ConnectionState =
+        runCatching {
+            bleManager.connectionState
+        }.onFailure { error ->
+            Timber.e("Connection not initialized. Call Connection.init() before calling this function")
+        }.getOrDefault(ConnectionState.DISCONNECTED)
 
-    fun isConnecting(): Boolean {
-        return bleManager?.connectionState == ConnectionState.CONNECTING
-    }
+    fun isConnected(): Boolean =
+        getConnectionState() == ConnectionState.CONNECTED
+
+    fun isConnecting(): Boolean =
+        getConnectionState() == ConnectionState.CONNECTING
 
     fun teardownConnection() {
-        bleManager?.release()
+        bleManager.release()
     }
 
-    fun validateAddress(address: String?): Boolean {
-        return address != null && BluetoothAdapter.checkBluetoothAddress(address)
-    }
+    fun validateAddress(address: String?): Boolean =
+        address != null && BluetoothAdapter.checkBluetoothAddress(address)
 
     @SuppressLint("NewApi")
     fun sendMessage(message: String) {
@@ -63,61 +73,47 @@ object Connection {
     }
 
     fun setDataCallback(dataCallback: IDataReceived) {
-        bleManager?.setDataCallback(dataCallback)
+        bleManager.setDataCallback(dataCallback)
     }
 
     fun write(handle: GetSetMode, data: ByteArray) {
         scope.launch {
-            bleManager?.write(handle, data)
+            bleManager.write(handle, data)
         }
     }
 
-    fun isServiceSupported(handle: GetSetMode): Boolean {
-        return bleManager?.isServiceSupported(handle) == true
-    }
+    fun isServiceSupported(handle: GetSetMode): Boolean =
+        bleManager.isServiceSupported(handle)
 
     fun startConnection(context: Context, deviceId: String?) {
+
         scope.launch {
             if (deviceId.isNullOrEmpty()) {
                 stopBleScan()
-
-                fun onScanCompleted(deviceInfo: GShockScanner.DeviceInfo?) {
+                GShockScanner.scan(context) { deviceInfo ->
                     scope.launch {
-                        connect(deviceInfo?.address, context)
+                        deviceInfo?.address?.let { address ->
+                            connectToAddress(address)
+                        }
                     }
                 }
-
-                GShockScanner.scan(context, ::onScanCompleted)
             } else {
-                connect(deviceId, context)
+                connectToAddress(deviceId)
             }
         }
     }
 
-    private suspend fun connect(address: String?, context: Context) {
-        if (address.isNullOrEmpty()) {
-            return
-        }
-        val bluetoothAdapter: BluetoothAdapter? = getDefaultAdapter()
-        val device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice(address)
-        if (device == null) {
-            ProgressEvents.onNext("ApiError", "Cannot obtain remote device")
-            return
-        }
-
-        if (bleManager == null) {
-            bleManager = IGShockManager(context)
-        }
-        connect(device)
+    private suspend fun connectToAddress(address: String) {
+        getDefaultAdapter()
+            ?.getRemoteDevice(address)
+            ?.let { device -> connectToDevice(device) }
+            ?: ProgressEvents.onNext("ApiError", "Cannot obtain remote device")
     }
 
     fun isBluetoothEnabled(context: Context): Boolean {
-        val bluetoothAdapter: BluetoothAdapter by lazy {
-            val bluetoothManager =
-                context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
-            bluetoothManager.adapter
-        }
-        return bluetoothAdapter.isEnabled
+        val bluetoothManager =
+            context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
+        return bluetoothManager.adapter.isEnabled
     }
 
     fun stopBleScan() {
@@ -125,6 +121,15 @@ object Connection {
     }
 
     fun breakWait() {
-        bleManager?.release()
+        runCatching {
+            bleManager.release()
+        }.onFailure { error ->
+            Timber.e("Connection not initialized. Call Connection.init() before calling this function. ${error.message}")
+        }
     }
+}
+
+sealed class ConnectionResult {
+    object Success : ConnectionResult()
+    data class Error(val message: String) : ConnectionResult()
 }
