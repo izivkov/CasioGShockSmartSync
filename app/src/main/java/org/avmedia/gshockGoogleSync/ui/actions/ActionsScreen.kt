@@ -25,11 +25,13 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
 
 @Composable
-fun ActionsScreen() {
-
+fun ActionsScreen(
+    modifier: Modifier = Modifier,
+    actionsViewModel: ActionsViewModel = hiltViewModel(),
+) {
     GShockSmartSyncTheme {
         Surface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
             ConstraintLayout(
@@ -38,58 +40,60 @@ fun ActionsScreen() {
                 val (title, actions) = createRefs()
 
                 ScreenTitle(
-                    stringResource(
-                        id = R.string.actions
-                    ), Modifier
-                        .constrainAs(title) {
-                            top.linkTo(parent.top)  // Link top of content to parent top
-                            bottom.linkTo(actions.top)  // Link bottom of content to top of buttonsRow
-                        })
+                    text = stringResource(id = R.string.actions),
+                    modifier = Modifier.constrainAs(title) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(actions.top)
+                    }
+                )
 
-                Column(
-                    modifier = Modifier
-                        .constrainAs(actions) {
-                            top.linkTo(title.bottom)
-                            bottom.linkTo(parent.bottom)
-                            height = Dimension.fillToConstraints
-                        }
-                        .verticalScroll(rememberScrollState())  // Make content scrollable
-                        .padding(0.dp)
-                        .fillMaxWidth()
-                        .fillMaxSize()
-                ) {
-                    ActionList()
-                }
+                ActionsContent(
+                    modifier = Modifier.constrainAs(actions) {
+                        top.linkTo(title.bottom)
+                        bottom.linkTo(parent.bottom)
+                        height = Dimension.fillToConstraints
+                    },
+                    actionsViewModel = actionsViewModel
+                )
             }
         }
     }
 }
 
 @Composable
-fun ActionList() {
-
-    @Composable
-    fun createActions(): List<Any> {
-        val actionsViewModel: ActionsViewModel = hiltViewModel()
-
-        return listOfNotNull(
-            if (WatchInfo.findButtonUserDefined) PhoneFinderView(actionsViewModel::updateAction) else null,
-            SetTimeView(actionsViewModel::updateAction),
-            if (WatchInfo.hasReminders) RemindersView(actionsViewModel::updateAction) else null,
-            PhotoView(actionsViewModel::updateAction),
-            FlashlightView(actionsViewModel::updateAction),
-            VoiceAssistView(actionsViewModel::updateAction),
-            SkipToNextTrackView(actionsViewModel::updateAction),
-            PrayerAlarmsView(actionsViewModel::updateAction),
-            SeparatorView(),
-            PhoneView(actionsViewModel::updateAction),
-        )
-    }
-
+private fun ActionsContent(
+    modifier: Modifier = Modifier,
+    actionsViewModel: ActionsViewModel
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(0.dp)
+            .fillMaxWidth()
+            .fillMaxSize()
     ) {
-        ItemList(createActions())
+        ItemList(
+            items = createActionItems(actionsViewModel::updateAction)
+        )
     }
 }
 
+@Composable
+private fun createActionItems(onUpdateAction: (ActionsViewModel.Action) -> Unit): List<Any> = listOfNotNull(
+    if (WatchInfo.findButtonUserDefined) PhoneFinderView(onUpdateAction) else null,
+    SetTimeView(onUpdateAction),
+    if (WatchInfo.hasReminders) RemindersView(onUpdateAction) else null,
+    PhotoView(onUpdateAction),
+    FlashlightView(onUpdateAction),
+    VoiceAssistView(onUpdateAction),
+    SkipToNextTrackView(onUpdateAction),
+    PrayerAlarmsView(onUpdateAction),
+    SeparatorView(),
+    PhoneView(onUpdateAction)
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun ActionsScreenPreview() {
+    ActionsScreen()
+}

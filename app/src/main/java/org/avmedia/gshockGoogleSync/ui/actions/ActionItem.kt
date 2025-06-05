@@ -51,21 +51,8 @@ fun ActionItem(
             }
             AppSwitch(
                 checked = isEnabled,
-                onCheckedChange = { isChecked ->
-                    onEnabledChange(isChecked) // Update the parent or associated state
-                }
+                onCheckedChange = onEnabledChange
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewActionItem() {
-    ActionItem(
-        title = "Action Item",
-        isEnabled = true,
-        onEnabledChange = {},
-        infoText = null
-    )
 }
