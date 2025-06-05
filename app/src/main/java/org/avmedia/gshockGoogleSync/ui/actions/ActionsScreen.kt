@@ -93,10 +93,3 @@ fun ActionList() {
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewActionsScreen() {
-    ActionsScreen()
-}
-

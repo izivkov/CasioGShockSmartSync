@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -40,8 +41,6 @@ class AlarmViewModel @Inject constructor(
             runCatching {
                 val loadedAlarms = api.getAlarms()
                 _alarms.value = loadedAlarms.take(WatchInfo.alarmCount)
-                AlarmsModel.clear()
-                AlarmsModel.addAll(ArrayList(_alarms.value))
 
                 if (WatchInfo.chimeInSettings) {
                     val settings = api.getSettings()
@@ -125,5 +124,11 @@ class AlarmViewModel @Inject constructor(
                 }, index.toLong(), TimeUnit.SECONDS)
             }
         }
+    }
+
+    fun toggleHourlyChime(enabled: Boolean) {
+        val currentAlarms = _alarms.value.toMutableList()
+        currentAlarms[0] = currentAlarms[0].copy(hasHourlyChime = enabled)
+        _alarms.value = currentAlarms
     }
 }

@@ -573,17 +573,15 @@ class ActionsViewModel @Inject constructor(
     }
 
     private fun showTimeSyncNotification() {
-        val dateStr =
-            DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
-
-        var msg = "Time set at $dateStr"
+        val dateStr = DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
         val watchName = WatchInfo.name
-        msg += " for $watchName watch"
+        val text = "Time set at $dateStr for $watchName watch"
 
         notificationProvider.createNotification(
-            "G-Shock Smart Sync",
-            msg,
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationProvider.NotificationContent(
+                title = "G-Shock Smart Sync",
+                text = text
+            )
         )
     }
 

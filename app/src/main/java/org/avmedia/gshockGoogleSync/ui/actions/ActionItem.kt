@@ -41,12 +41,8 @@ fun ActionItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppIconFromResource(resourceId = resourceId)
-
                 HorizontalSeparator(width = 4.dp)
-
-                AppTextLarge(
-                    text = title,
-                )
+                AppTextLarge(text = title)
 
                 infoText?.let {
                     HorizontalSeparator(width = 4.dp)

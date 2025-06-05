@@ -3,11 +3,26 @@ package org.avmedia.gshockGoogleSync.services
 import android.content.Context
 import androidx.core.content.edit
 
-// KeepAlivePreferences.kt
-class KeepAlivePreferences(private val context: Context) {
-    private val preferences = context.getSharedPreferences("keep_alive_prefs", Context.MODE_PRIVATE)
+class KeepAlivePreferences(context: Context) {
+    private data class PreferenceState(
+        val isEnabled: Boolean
+    )
+
+    private val preferences = context.applicationContext
+        .getSharedPreferences("keep_alive_prefs", Context.MODE_PRIVATE)
 
     var isEnabled: Boolean
-        get() = preferences.getBoolean("is_enabled", false)
-        set(value) = preferences.edit { putBoolean("is_enabled", value) }
+        get() = getPreferenceState().isEnabled
+        set(value) = updatePreferenceState(PreferenceState(value))
+
+    private fun getPreferenceState(): PreferenceState =
+        PreferenceState(
+            isEnabled = preferences.getBoolean("is_enabled", false)
+        )
+
+    private fun updatePreferenceState(state: PreferenceState) {
+        preferences.edit {
+            putBoolean("is_enabled", state.isEnabled)
+        }
+    }
 }

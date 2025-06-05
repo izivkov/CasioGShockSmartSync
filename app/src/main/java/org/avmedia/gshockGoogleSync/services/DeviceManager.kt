@@ -13,63 +13,79 @@ import javax.inject.Singleton
 @Singleton
 class DeviceManager @Inject constructor(
     private val repository: GShockRepository,
-    @ApplicationContext private val appContext: Context // Inject application context
+    @ApplicationContext private val appContext: Context
 ) {
+    private data class DeviceInfo(
+        val name: String,
+        val address: String
+    )
 
     init {
-        startListener()
+        initializeEventListener()
     }
 
-    private fun startListener() {
-        val eventActions = arrayOf(
-            EventAction("DeviceName") {
-                val deviceName = ProgressEvents.getPayload("DeviceName") as String
-                if ((deviceName) == "") {
-                    LocalDataStorage.delete(appContext, "LastDeviceName")
-                } else if (deviceName.contains("CASIO") && LocalDataStorage.get(
-                        appContext,
-                        "LastDeviceName",
-                        ""
-                    ) != deviceName
-                ) {
-                    LocalDataStorage.put(appContext, "LastDeviceName", deviceName)
-                }
-            },
-            EventAction("DeviceAddress") {
-                val deviceAddress = ProgressEvents.getPayload("DeviceAddress")
-                if ((deviceAddress as String) == "") {
-                    LocalDataStorage.delete(appContext, "LastDeviceAddress")
-                }
-                if (LocalDataStorage.get(
-                        appContext,
-                        "LastDeviceAddress",
-                        ""
-                    ) != deviceAddress && repository.validateBluetoothAddress(deviceAddress)
-                ) {
-                    LocalDataStorage.put(
-                        appContext,
-                        "LastDeviceAddress", deviceAddress
-                    )
-                }
-            },
-        )
-
+    private fun initializeEventListener() {
+        val eventActions = createEventActions()
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
-    /**
-     * Saves the last connected device information for reuse.
-     */
-    fun saveLastConnectedDevice(name: String, address: String) {
-        LocalDataStorage.put(appContext, "LastDeviceName", name)
+    private fun createEventActions(): Array<EventAction> = arrayOf(
+        EventAction("DeviceName") { handleDeviceNameEvent() },
+        EventAction("DeviceAddress") { handleDeviceAddressEvent() }
+    )
+
+    private fun handleDeviceNameEvent() {
+        ProgressEvents.getPayload("DeviceName").toString()
+            .takeIf { it.isNotEmpty() }
+            ?.let { deviceName ->
+                when {
+                    deviceName.isEmpty() -> LocalDataStorage.delete(appContext, "LastDeviceName")
+                    isValidDeviceName(deviceName) -> updateDeviceName(deviceName)
+                }
+            }
+    }
+
+    private fun isValidDeviceName(deviceName: String): Boolean =
+        deviceName.contains("CASIO") &&
+                LocalDataStorage.get(appContext, "LastDeviceName", "") != deviceName
+
+    private fun updateDeviceName(deviceName: String) {
+        LocalDataStorage.put(appContext, "LastDeviceName", deviceName)
+    }
+
+    private fun handleDeviceAddressEvent() {
+        ProgressEvents.getPayload("DeviceAddress").toString()
+            .takeIf { it.isNotEmpty() }
+            ?.let { deviceAddress ->
+                when {
+                    deviceAddress.isEmpty() -> LocalDataStorage.delete(
+                        appContext,
+                        "LastDeviceAddress"
+                    )
+
+                    isValidDeviceAddress(deviceAddress) -> updateDeviceAddress(deviceAddress)
+                }
+            }
+    }
+
+    private fun isValidDeviceAddress(address: String): Boolean =
+        LocalDataStorage.get(appContext, "LastDeviceAddress", "") != address &&
+                repository.validateBluetoothAddress(address)
+
+    private fun updateDeviceAddress(address: String) {
         LocalDataStorage.put(appContext, "LastDeviceAddress", address)
     }
 
-    /**
-     * Clears saved device information when the user explicitly disconnects or forgets the device.
-     */
+    fun saveLastConnectedDevice(name: String, address: String) {
+        DeviceInfo(name, address).let { deviceInfo ->
+            LocalDataStorage.put(appContext, "LastDeviceName", deviceInfo.name)
+            LocalDataStorage.put(appContext, "LastDeviceAddress", deviceInfo.address)
+        }
+    }
+
     fun clearLastConnectedDevice() {
-        LocalDataStorage.delete(appContext, "LastDeviceName")
-        LocalDataStorage.delete(appContext, "LastDeviceAddress")
+        listOf("LastDeviceName", "LastDeviceAddress").forEach { key ->
+            LocalDataStorage.delete(appContext, key)
+        }
     }
 }

@@ -3,31 +3,43 @@ package org.avmedia.gshockGoogleSync.services
 import android.annotation.SuppressLint
 import android.content.Context
 
-// KeepAliveManager.kt
-class KeepAliveManager private constructor(private val context: Context) {
-    private val preferences = KeepAlivePreferences(context)
+class KeepAliveManager private constructor(context: Context) {
+    private data class ServiceState(
+        val isEnabled: Boolean
+    )
 
-    fun enable() {
-        preferences.isEnabled = true
-        KeepAliveService.startService(context)
-    }
+    private val preferences = KeepAlivePreferences(context.applicationContext)
+    private val appContext = context.applicationContext
 
-    fun disable() {
-        preferences.isEnabled = false
-        KeepAliveService.stopService(context)
-    }
-
+    fun enable() = updateServiceState(enabled = true)
+    fun disable() = updateServiceState(enabled = false)
     fun isEnabled(): Boolean = preferences.isEnabled
 
+    private fun updateServiceState(enabled: Boolean) {
+        ServiceState(enabled)
+            .also { state -> updatePreferences(state) }
+            .also { state -> updateService(state) }
+    }
+
+    private fun updatePreferences(state: ServiceState) {
+        preferences.isEnabled = state.isEnabled
+    }
+
+    private fun updateService(state: ServiceState) = when {
+        state.isEnabled -> KeepAliveService.startService(appContext)
+        else -> KeepAliveService.stopService(appContext)
+    }
+
     companion object {
-        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var instance: KeepAliveManager? = null
 
-        fun getInstance(context: Context): KeepAliveManager {
-            return instance ?: synchronized(this) {
-                instance ?: KeepAliveManager(context).also { instance = it }
+        fun getInstance(context: Context): KeepAliveManager =
+            instance ?: synchronized(this) {
+                instance ?: createManager(context).also { instance = it }
             }
-        }
+
+        private fun createManager(context: Context): KeepAliveManager =
+            KeepAliveManager(context)
     }
 }

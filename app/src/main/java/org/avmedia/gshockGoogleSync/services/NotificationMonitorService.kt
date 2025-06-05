@@ -8,6 +8,9 @@ import android.content.pm.PackageManager
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
@@ -26,26 +29,33 @@ data class NotificationInfo(
 )
 
 class NotificationMonitorService : NotificationListenerService() {
+    private data class ServiceState(
+        val isRunning: Boolean = false,
+        val eventActions: List<EventAction> = emptyList()
+    )
+
+    private val _state = MutableStateFlow(ServiceState())
+    private val state: StateFlow<ServiceState> = _state.asStateFlow()
 
     init {
-        notificationsSetupEventSubscription()
+        initializeEventActions()
     }
 
-    private fun notificationsSetupEventSubscription() {
-        val eventActions = arrayOf(
-            EventAction("WatchInitializationCompleted") { handleWatchInitialization() },
-            EventAction("Disconnect") { handleDisconnect() },
+    private fun initializeEventActions() {
+        val actions = listOf(
+            EventAction("WatchInitializationCompleted") { updateRunningState(true) },
+            EventAction("Disconnect") { updateRunningState(false) }
         )
-
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+        _state.value = _state.value.copy(eventActions = actions)
+        subscribeToEvents()
     }
 
-    private fun handleWatchInitialization() {
-        isRunning = true
+    private fun subscribeToEvents() {
+        ProgressEvents.runEventActions(Utils.AppHashCode(), state.value.eventActions.toTypedArray())
     }
 
-    private fun handleDisconnect() {
-        isRunning = false
+    private fun updateRunningState(running: Boolean) {
+        _state.value = _state.value.copy(isRunning = running)
     }
 
     override fun onListenerConnected() {
@@ -54,32 +64,34 @@ class NotificationMonitorService : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        if (!isRunning) return
+        if (!state.value.isRunning) return
 
-        try {
-            val notification = sbn.notification
-            val extras = notification.extras
+        processNotification(sbn)
+            .onSuccess { notificationInfo ->
+                Timber.i("Notification received: $notificationInfo")
+                createAppNotification(notificationInfo)
+                    .let { appNotification ->
+                        ProgressEvents.onNext("AppNotification", appNotification)
+                    }
+            }
+            .onFailure { error ->
+                Timber.e(error, "Error processing notification")
+            }
+    }
 
-            val title = extras.getString(Notification.EXTRA_TITLE) ?: ""
-            val text = extras.getString(Notification.EXTRA_TEXT) ?: ""
-            val shortText = extras.getString(Notification.EXTRA_SUB_TEXT) ?: ""
+    private fun processNotification(sbn: StatusBarNotification): Result<NotificationInfo> = runCatching {
+        val notification = sbn.notification
+        val extras = notification.extras
 
-            val notificationInfo = NotificationInfo(
-                packageName = sbn.packageName,
-                appName = getAppName(sbn.packageName),
-                title = title,
-                shortText = shortText,
-                text = text,
-                type = classifyNotificationType(sbn.packageName, notification),
-                timestamp = sbn.postTime
-            )
-
-            Timber.i("Notification received: $notificationInfo")
-            handleNotification(notificationInfo)
-
-        } catch (e: Exception) {
-            Timber.e(e, "Error processing notification")
-        }
+        NotificationInfo(
+            packageName = sbn.packageName,
+            appName = getAppName(sbn.packageName),
+            title = extras.getString(Notification.EXTRA_TITLE).orEmpty(),
+            text = extras.getString(Notification.EXTRA_TEXT).orEmpty(),
+            shortText = extras.getString(Notification.EXTRA_SUB_TEXT).orEmpty(),
+            type = classifyNotificationType(sbn.packageName, notification),
+            timestamp = sbn.postTime
+        )
     }
 
     private fun getAppName(packageName: String): String {

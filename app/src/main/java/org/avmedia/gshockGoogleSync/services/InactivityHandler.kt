@@ -19,26 +19,41 @@ class InactivityHandler(
     private val timeout: Duration,
     private val onInactivity: () -> Unit
 ) {
-    private val interactionFlow = MutableStateFlow(System.currentTimeMillis())
-    private var job: Job? = null
+    private data class InactivityState(
+        val lastInteractionTime: Long = System.currentTimeMillis(),
+        val monitoringJob: Job? = null
+    )
+
+    private val state = MutableStateFlow(InactivityState())
 
     fun registerInteraction() {
-        interactionFlow.value = System.currentTimeMillis()
+        state.value = state.value.copy(lastInteractionTime = System.currentTimeMillis())
     }
 
     fun startMonitoring() {
-        job = CoroutineScope(Dispatchers.Main).launch {
-            interactionFlow.collectLatest { lastInteraction ->
-                delay(timeout.inWholeMilliseconds)
-                if (System.currentTimeMillis() - lastInteraction >= timeout.inWholeMilliseconds) {
-                    onInactivity()
-                }
-            }
-        }
+        val newJob = createMonitoringJob()
+        state.value = state.value.copy(monitoringJob = newJob)
     }
 
     fun stopMonitoring() {
-        job?.cancel()
-        job = null
+        state.value.monitoringJob?.cancel()
+        state.value = state.value.copy(monitoringJob = null)
     }
+
+    private fun createMonitoringJob(): Job =
+        CoroutineScope(Dispatchers.Main).launch {
+            state.collectLatest { currentState ->
+                delay(timeout.inWholeMilliseconds)
+                checkInactivity(currentState.lastInteractionTime)
+            }
+        }
+
+    private fun checkInactivity(lastInteraction: Long) {
+        if (isInactive(lastInteraction)) {
+            onInactivity()
+        }
+    }
+
+    private fun isInactive(lastInteraction: Long): Boolean =
+        System.currentTimeMillis() - lastInteraction >= timeout.inWholeMilliseconds
 }
