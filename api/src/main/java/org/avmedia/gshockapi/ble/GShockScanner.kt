@@ -31,10 +31,10 @@ object GShockScanner {
     data class DeviceInfo(val name: String, val address: String)
 
     private lateinit var scannerFlow: Job
-    var scannedName = ""
+    private var scannedName = ""
 
     @SuppressLint("MissingPermission")
-    suspend fun scan(
+    fun scan(
         context: Context,
         scanCallback: (DeviceInfo?) -> Unit
     ) {

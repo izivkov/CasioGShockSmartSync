@@ -18,58 +18,58 @@ import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
 object AlarmsIO {
+    data class AlarmIOState(
+        val deferredResult: CompletableDeferred<ArrayList<Alarm>>? = null,
+        val alarms: ArrayList<Alarm> = ArrayList(),
+        val isProcessing: Boolean = false,
+        val error: String? = null
+    )
 
-    private object DeferredValueHolder {
-        lateinit var deferredResult: CompletableDeferred<ArrayList<Alarm>>
-    }
+    private var state = AlarmIOState()
 
-    suspend fun request(): ArrayList<Alarm> {
-        return CachedIO.request("GET_ALARMS") { key ->
-            getAlarms(key)
+    private fun updateState(transform: (AlarmIOState) -> AlarmIOState): AlarmIOState =
+        synchronized(this) {
+            state = transform(state)
+            state
         }
-    }
 
-    private suspend fun getAlarms(key: String): ArrayList<Alarm> {
-        DeferredValueHolder.deferredResult = CompletableDeferred()
-        Alarm.clear()
-        Connection.sendMessage("{ action: '$key'}")
-
-        return DeferredValueHolder.deferredResult.await()
-    }
+    suspend fun request(): ArrayList<Alarm> =
+        CachedIO.request("GET_ALARMS") { key ->
+            updateState { it.copy(
+                deferredResult = CompletableDeferred(),
+                isProcessing = true
+            )}
+            Alarm.clear()
+            Connection.sendMessage("{ action: '$key'}")
+            state.deferredResult?.await() ?: ArrayList()
+        }
 
     fun set(alarms: ArrayList<Alarm>) {
         if (alarms.isEmpty()) {
-            Timber.d("Alarm model not initialised! Cannot set alarm")
+            updateState { it.copy(error = "Alarm model not initialised!") }
             return
         }
 
-        @Synchronized
-        fun toJson(): String {
-            val gson = Gson()
-            return gson.toJson(alarms)
-        }
-
-        fun setFunc() {
-            Connection.sendMessage("{action: \"SET_ALARMS\", value: ${toJson()} }")
-        }
         CachedIO.set("SET_ALARMS") {
-            setFunc()
+            val json = Gson().toJson(alarms)
+            Connection.sendMessage("{action: \"SET_ALARMS\", value: $json }")
         }
     }
 
     fun onReceived(data: String) {
-
-        fun fromJson(jsonStr: String) {
-            val gson = Gson()
-            val alarmArr = gson.fromJson(jsonStr, Array<Alarm>::class.java)
-            Alarm.addSorted(alarmArr)
-        }
-
         val decoded = AlarmDecoder.toJson(data).get("ALARMS")
-        fromJson(decoded.toString())
+        val gson = Gson()
+        val alarmArr = gson.fromJson(decoded.toString(), Array<Alarm>::class.java)
+        Alarm.addSorted(alarmArr)
 
         if (Alarm.getAlarms().size == WatchInfo.alarmCount) {
-            DeferredValueHolder.deferredResult.complete(Alarm.getAlarms())
+            updateState { currentState ->
+                currentState.copy(
+                    alarms = Alarm.getAlarms(),
+                    isProcessing = false
+                )
+            }
+            state.deferredResult?.complete(state.alarms)
         }
     }
 
@@ -109,6 +109,31 @@ object AlarmsIO {
     }
 
     object AlarmDecoder {
+        /**
+         * Converts a command string to a JSON object containing alarm data.
+         *
+         * Command buffer structure:
+         * [0] - Command type:
+         *     - 0x2A: Single alarm (CASIO_SETTING_FOR_ALM)
+         *     - 0x2B: Multiple alarms (CASIO_SETTING_FOR_ALM2)
+         *
+         * For single alarm (0x2A):
+         * [1..4] - One 4-byte alarm entry
+         *
+         * For multiple alarms (0x2B):
+         * [1..16] - Four 4-byte alarm entries
+         *
+         * Each alarm entry is 4 bytes:
+         * [0] - Flags byte:
+         *     - bit 7 (0x80): Hourly chime enabled
+         *     - bit 0 (0x01): Alarm enabled
+         * [1] - Constant value (0x40)
+         * [2] - Hour (0-23)
+         * [3] - Minute (0-59)
+         *
+         * @param command The raw command string containing alarm data
+         * @return JSONObject with format: {"ALARMS": [array of alarm objects]}
+         */
         fun toJson(command: String): JSONObject =
             runCatching {
                 Utils.toIntArray(command)
@@ -136,10 +161,23 @@ object AlarmsIO {
                 JSONObject()
             }
 
+        /**
+         * Creates a JSON object from a 4-byte alarm data buffer.
+         * Buffer structure:
+         * [0] - Flags byte:
+         *     - bit 7 (0x80): Hourly chime enabled
+         *     - bit 0 (0x01): Alarm enabled
+         * [1] - Constant value (typically 0x40)
+         * [2] - Hour (0-23)
+         * [3] - Minute (0-59)
+         *
+         * @param intArray ArrayList containing 4 bytes of alarm data
+         * @return JSONObject containing the parsed alarm data
+         */
+        private const val HOURLY_CHIME_MASK = 0b10000000
+
         private fun createJsonAlarm(intArray: ArrayList<Int>): JSONObject =
             runCatching {
-                val HOURLY_CHIME_MASK = 0b10000000
-
                 Alarms.Alarm(
                     hour = intArray[2],
                     minute = intArray[3],
