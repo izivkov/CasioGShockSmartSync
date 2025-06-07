@@ -10,6 +10,7 @@ import androidx.lifecycle.LifecycleService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.avmedia.gshockGoogleSync.R
+import timber.log.Timber
 
 const val CHANNEL_ID = "KeepAliveServiceChannel"
 const val NOTIFICATION_ID = 1
@@ -87,12 +88,18 @@ class KeepAliveService : LifecycleService() {
     }
 
     companion object {
-        fun startService(context: Context) =
+        fun startService(context: Context) = runCatching {
             Intent(context, KeepAliveService::class.java)
                 .let { context.startForegroundService(it) }
+        }.onFailure { e ->
+            Timber.e("Failed to start KeepAliveService: ${e.message}")
+        }
 
-        fun stopService(context: Context) =
+        fun stopService(context: Context) = runCatching {
             Intent(context, KeepAliveService::class.java)
                 .let { context.stopService(it) }
+        }.onFailure { e ->
+            Timber.e("Failed to stop KeepAliveService: ${e.message}")
+        }
     }
 }

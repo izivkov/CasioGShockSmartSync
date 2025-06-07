@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.2"
+exifinterfaceVersion = "1.4.1"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -35,9 +36,11 @@ guava = "32.1.3-android"
 scanner = "1.3.0"
 ble = "2.7.3"
 client = "1.0.16"
+exifinterface = "1.3.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-exifinterface-v141 = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterfaceVersion" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -84,6 +87,7 @@ guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 scanner = { module = "no.nordicsemi.android.kotlin.ble:scanner", version.ref = "scanner" }
 ble = { module = "no.nordicsemi.android:ble", version.ref = "ble" }
 client = { module = "no.nordicsemi.android.kotlin.ble:client", version.ref = "client" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 
 [plugins]

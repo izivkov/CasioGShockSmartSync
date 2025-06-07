@@ -7,6 +7,7 @@ import android.content.Intent
 import android.media.AudioManager
 import android.os.SystemClock
 import android.view.KeyEvent
+import androidx.camera.core.CameraSelector
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -85,33 +86,20 @@ class ActionsViewModel @Inject constructor(
 
     // Method to load the initial list of actions
     private fun loadInitialActions() {
-        val initialActions = arrayListOf(
-            ToggleFlashlightAction("Toggle Flashlight", false),
-            StartVoiceAssistAction("Start Voice Assistant", false),
-            NextTrack("Skip to next track", false),
+        val initialActions = buildList {
+            add(ToggleFlashlightAction("Toggle Flashlight", false))
+            add(StartVoiceAssistAction("Start Voice Assistant", false))
+            add(NextTrack("Skip to next track", false))
+            add(FindPhoneAction(appContext.getString(R.string.find_phone), true))
+            add(SetTimeAction(appContext.getString(R.string.set_time), true, api))
+            add(SetEventsAction(appContext.getString(R.string.set_reminders), false, api, calendarEvents))
+            add(PhotoAction(appContext.getString(R.string.take_photo), false, CameraOrientation.BACK))
+            add(PrayerAlarmsAction("Set Prayer Alarms", true, api))
+            add(Separator(appContext.getString(R.string.emergency_actions), false))
+            add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
+        }
 
-            FindPhoneAction(
-                appContext.getString(R.string.find_phone),
-                true
-            ),
-            SetTimeAction(appContext.getString(R.string.set_time), true, api),
-            SetEventsAction(
-                appContext.getString(R.string.set_reminders),
-                false,
-                api,
-                calendarEvents
-            ),
-            PhotoAction(
-                appContext.getString(R.string.take_photo),
-                false,
-                CameraOrientation.BACK,
-            ),
-            PrayerAlarmsAction("Set Prayer Alarms", true, api),
-            Separator(appContext.getString(R.string.emergency_actions), false),
-            PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""),
-        )
-
-        _actions.value = initialActions
+        _actions.value = ArrayList(initialActions)
     }
 
     enum class RunEnvironment {
@@ -445,7 +433,8 @@ class ActionsViewModel @Inject constructor(
     }
 
     enum class CameraOrientation {
-        FRONT, BACK;
+        FRONT,
+        BACK;
     }
 
     data class PhotoAction(
@@ -460,7 +449,11 @@ class ActionsViewModel @Inject constructor(
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             var captureResult: String?
-            val cameraHelper = CameraCaptureHelper(context)
+            val cameraSelector = when (cameraOrientation) {
+                CameraOrientation.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
+                CameraOrientation.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
+            }
+            val cameraHelper = CameraCaptureHelper(context, cameraSelector)
 
             // Initialize the camera
             cameraHelper.initCamera()
@@ -518,7 +511,7 @@ class ActionsViewModel @Inject constructor(
                     )
                 )
 
-                else -> AppSnackbar("Could not run action \${action.title}. Reason: \$it")
+                else -> AppSnackbar("Could not run action ${action.title}. Reason: $it")
             }
         }
     }

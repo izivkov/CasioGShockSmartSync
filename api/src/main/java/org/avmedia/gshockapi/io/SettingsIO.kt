@@ -148,6 +148,7 @@ pwr. saving off:00010000
         } else {
             settings.buttonTone = settingArray[12] and SOUND_ONLY != 0
             settings.keyVibration = settingArray[12] and VIBRATION_ONLY != 0
+            settings.hourlyChime = settingArray[12] and CHIME != 0
         }
 
         settings.autoLight = settingArray[1] and MASK_AUTO_LIGHT_OFF == 0
@@ -216,6 +217,9 @@ pwr. saving off:00010000
             }
             if (settings.get("keyVibration") == true) {
                 arr[12] = (arr[12] or VIBRATION_ONLY.toByte())
+            }
+            if (settings.get("hourlyChime") == true) {
+                arr[12] = (arr[12] or CHIME.toByte())
             }
             if (settings.get("autoLight") == false) {
                 arr[1] = (arr[1] or MASK_AUTO_LIGHT_OFF.toByte())

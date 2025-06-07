@@ -62,7 +62,7 @@ object AlarmsIO {
         val alarmArr = gson.fromJson(decoded.toString(), Array<Alarm>::class.java)
         Alarm.addSorted(alarmArr)
 
-        if (Alarm.getAlarms().size == WatchInfo.alarmCount) {
+        if (Alarm.getAlarms().size == 5) { // Must be 5 even if WatchInfo.alarmCount is 4.
             updateState { currentState ->
                 currentState.copy(
                     alarms = Alarm.getAlarms(),

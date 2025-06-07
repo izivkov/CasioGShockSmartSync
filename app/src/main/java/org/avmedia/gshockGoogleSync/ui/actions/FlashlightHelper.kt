@@ -5,40 +5,52 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraManager.TorchCallback
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import timber.log.Timber
 
 object FlashlightHelper {
-    private lateinit var cameraId: String
+    private var cameraId: String? = null
     private var currentState = false
-    private lateinit var cameraManager: CameraManager
+    private var cameraManager: CameraManager? = null
 
     private val torchCallback = object : TorchCallback() {
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
             super.onTorchModeChanged(cameraId, enabled)
-            if (cameraId == FlashlightHelper.cameraId) {
+            if (cameraId == this@FlashlightHelper.cameraId) {
                 currentState = enabled
             }
         }
     }
 
-    private fun turnOnOff(context: Context, state: Boolean) {
-        cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        if (cameraManager.cameraIdList.isEmpty()) {
-            AppSnackbar(context.getString(R.string.flashlight_not_available))
-            return
+    private fun turnOnOff(context: Context, state: Boolean) = runCatching {
+        getCameraManager(context)?.let { manager ->
+            getCameraId(manager)?.let { id ->
+                manager.setTorchMode(id, state)
+                currentState = state
+            }
         }
-
-        cameraId = cameraManager.cameraIdList[0] // 0 is for the back camera
-        cameraManager.setTorchMode(cameraId, state)
-        currentState = state
+    }.onFailure { e ->
+        Timber.e("Failed to turn flashlight ${if (state) "on" else "off"}: ${e.message}")
+        AppSnackbar(context.getString(R.string.flashlight_not_available))
     }
 
-    fun toggle(context: Context) {
-        cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        cameraManager.registerTorchCallback(torchCallback, null)
-        turnOnOff(context, !currentState)
+    private fun getCameraManager(context: Context): CameraManager? = runCatching {
+        context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    }.getOrNull()
+
+    private fun getCameraId(manager: CameraManager): String? = runCatching {
+        manager.cameraIdList.firstOrNull()
+    }.getOrNull()
+
+    fun toggle(context: Context) = runCatching {
+        getCameraManager(context)?.also { manager ->
+            cameraManager = manager
+            manager.registerTorchCallback(torchCallback, null)
+            turnOnOff(context, !currentState)
+        }
+    }.onFailure { e ->
+        Timber.e("Failed to toggle flashlight: ${e.message}")
+        AppSnackbar(context.getString(R.string.flashlight_not_available))
     }
 
-    fun isOn(): Boolean {
-        return currentState
-    }
+    fun isOn(): Boolean = currentState
 }

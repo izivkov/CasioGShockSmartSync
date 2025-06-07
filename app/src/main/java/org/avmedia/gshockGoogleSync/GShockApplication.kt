@@ -20,6 +20,7 @@ import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
+import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import javax.inject.Inject
 
@@ -45,6 +46,7 @@ class GShockApplication : Application(), IScreenManager {
 
     override fun onCreate() {
         super.onCreate()
+        ActivityProvider.initialize(this)
         eventHandler = MainEventHandler(
             context = this,
             repository = repository,
