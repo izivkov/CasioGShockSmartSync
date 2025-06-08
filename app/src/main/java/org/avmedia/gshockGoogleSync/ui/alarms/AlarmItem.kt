@@ -51,7 +51,6 @@ fun AlarmItem(
 ) {
     var isEnabled by remember { mutableStateOf(isAlarmEnabled) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
-    var selectedTime by remember { mutableStateOf<TimePickerState?>(null) }
     var alarmHours by remember { mutableIntStateOf(hours) }
     var alarmMinutes by remember { mutableIntStateOf(minutes) }
 
@@ -61,18 +60,6 @@ fun AlarmItem(
             localContext,
             ApplicationContextEntryPoint::class.java
         ).getApplicationContext()
-    }
-
-    val handleConfirm: (TimePickerState) -> Unit = { timePickerState ->
-        selectedTime = timePickerState
-        alarmHours = selectedTime?.hour ?: hours
-        alarmMinutes = selectedTime?.minute ?: minutes
-        onTimeChanged(alarmHours, alarmMinutes)
-        showTimePickerDialog = false
-    }
-
-    val handleDismiss: () -> Unit = {
-        showTimePickerDialog = false
     }
 
     AppCard(
@@ -99,38 +86,36 @@ fun AlarmItem(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .padding(4.dp)
-                        .clickable {
-                            showTimePickerDialog = true
-                        },
+                        .clickable { showTimePickerDialog = true },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                AppText(
-                    text = stringResource(
-                        id = R.string.daily
-                    ),
-                )
+                AppText(text = stringResource(id = R.string.daily))
             }
             AppSwitch(
                 checked = isEnabled,
                 onCheckedChange = { checked ->
                     isEnabled = checked
                     onToggleAlarm(checked)
-                },
-                modifier = Modifier.padding(8.dp)
+                }
             )
         }
     }
 
     if (showTimePickerDialog) {
-        Dialog(onDismissRequest = handleDismiss) {
+        Dialog(onDismissRequest = { showTimePickerDialog = false }) {
             Box(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background) // Theme-based background color
-                    .padding(16.dp) // Adjust padding as needed
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp)
             ) {
                 AppTimePicker(
-                    onConfirm = handleConfirm,
-                    onDismiss = handleDismiss,
+                    onConfirm = { state ->
+                        alarmHours = state.hour
+                        alarmMinutes = state.minute
+                        onTimeChanged(alarmHours, alarmMinutes)
+                        showTimePickerDialog = false
+                    },
+                    onDismiss = { showTimePickerDialog = false },
                     initialHour = alarmHours,
                     initialMinute = alarmMinutes,
                 )
@@ -161,10 +146,4 @@ fun formatTime(hours: Int, minutes: Int, appContext: Context): String {
 
     val time = SimpleDateFormat(timeFormat, Locale.getDefault()).format(dateObj)
     return if (timeFormat.contains("aa")) from0to12(time) else time
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewAlarmItem() {
-    AlarmItem(onToggleAlarm = {}, onTimeChanged = { _, _ -> })
 }

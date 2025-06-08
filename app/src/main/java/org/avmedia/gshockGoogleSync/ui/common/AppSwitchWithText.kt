@@ -30,7 +30,7 @@ fun AppSwitchWithText(
             text = text,
             fontSize = 22.sp,
             modifier = Modifier
-                .padding(end = 4.dp)
+                .padding(end = 8.dp)
                 .wrapContentWidth()
         )
         AppSwitch(

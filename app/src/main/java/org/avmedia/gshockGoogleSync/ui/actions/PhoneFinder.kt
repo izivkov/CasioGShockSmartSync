@@ -18,29 +18,53 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class PhoneFinder(context: Context) {
-    companion object {
-        private var mp: MediaPlayer? = null
-        var resetVolume: () -> Unit? = {}
-        private var phoneFinder: PhoneFinder? = null
+object PhoneFinder {
+    private data class State(
+        val mediaPlayer: MediaPlayer? = null,
+        val sensorHandler: SensorHandler? = null,
+        val resetVolume: () -> Unit = {}
+    )
 
-        fun ring(context: Context) {
-            // get alarm uri
-            var alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            if (alarmUri == null) {
-                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-            }
-            if (alarmUri == null) {
-                AppSnackbar(
-                    context.getString(
-                        R.string.unable_to_get_default_sound_uri
-                    )
+    private var state = State()
+
+    fun ring(context: Context): Result<Unit> = runCatching {
+        getAlarmUri(context)?.let { uri ->
+            handleAudio(context, uri)
+            detectPhoneLifting(context)
+        } ?: throw IllegalStateException("No alarm URI available")
+    }.onFailure { e ->
+        Timber.e(e, "Failed to ring phone")
+        AppSnackbar(context.getString(R.string.unable_to_get_default_sound_uri))
+    }
+
+    private fun getAlarmUri(context: Context) =
+        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+
+    private fun handleAudio(context: Context, alarmUri: android.net.Uri) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+
+        // Set maximum volume
+        audioManager.setStreamVolume(
+            AudioManager.STREAM_ALARM,
+            audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+            AudioManager.FLAG_PLAY_SOUND
+        )
+
+        // Update state with new MediaPlayer and reset volume function
+        state = state.copy(
+            mediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .build()
                 )
-            }
-
-            // set volume to maximum
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+                setDataSource(context, alarmUri)
+                prepare()
+                isLooping = true
+                start()
+            },
             resetVolume = {
                 audioManager.setStreamVolume(
                     AudioManager.STREAM_ALARM,
@@ -48,139 +72,104 @@ class PhoneFinder(context: Context) {
                     AudioManager.FLAG_PLAY_SOUND
                 )
             }
-            audioManager.setStreamVolume(
-                AudioManager.STREAM_ALARM,
-                audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
-                AudioManager.FLAG_PLAY_SOUND
-            )
+        )
+    }
 
-            // init media player
-            mp = MediaPlayer()
-            mp!!.setAudioAttributes(
-                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
-            )
-            mp!!.setDataSource(context, alarmUri)
-            mp!!.prepare()
-            mp!!.isLooping = true
-            mp!!.start()
+    private fun detectPhoneLifting(context: Context) {
+        state = state.copy(sensorHandler = SensorHandler(context) { stopRing() })
+        state.sensorHandler?.startListening(context)
 
-            detectPhoneLifting(context)
-        }
-
-        private fun detectPhoneLifting(context: Context) {
-            phoneFinder = PhoneFinder(context)
-            phoneFinder?.startListening(context)
-
-            // Stop ring after 30 seconds if phone not found
-            RingCanceler.callFunctionAfterDelay(30000) {
-                phoneFinder?.stopListening()
-                stopRing()
-            }
-        }
-
-        private fun stopRing() {
-            Timber.i("Stopping ring...")
-            if (mp != null) {
-                mp!!.stop()
-                mp!!.release()
-                mp = null
-            }
-            resetVolume()
-        }
-
-        object RingCanceler {
-            private var executor: ScheduledExecutorService? = null
-
-            fun callFunctionAfterDelay(
-                delay: Long,
-                action: () -> Unit
-            ) {
-                executor = Executors.newSingleThreadScheduledExecutor()
-                executor?.schedule(action, delay, TimeUnit.MILLISECONDS)
-            }
-
-            fun cancelAction() {
-                executor?.shutdownNow()
-            }
+        RingCanceler.schedule(30000) {
+            state.sensorHandler?.stopListening()
+            stopRing()
         }
     }
 
-    private inner class SensorHandler(context: Context) : SensorEventListener {
-        private val sensorManager =
-            context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        private val accelerometer = getBestAvailableSensor(sensorManager)
-        private val proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
-
-        private var lastZ: Float = 0f
-        private val motionThreshold = 2.5f
-
-        fun startListening(context: Context) {
-            val sensorDelay =
-                if (context.checkSelfPermission(android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS)
-                    == PackageManager.PERMISSION_GRANTED
-                ) {
-                    SensorManager.SENSOR_DELAY_FASTEST
-                } else {
-                    SensorManager.SENSOR_DELAY_GAME
-                }
-
-            sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_UI)
-            sensorManager.registerListener(this, accelerometer, sensorDelay)
+    private fun stopRing() {
+        state.mediaPlayer?.let { player ->
+            player.stop()
+            player.release()
         }
-
-        fun stopListening() {
-            sensorManager.unregisterListener(this)
-        }
-
-        override fun onSensorChanged(event: SensorEvent?) {
-            event?.let {
-                if (it.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-                    handleAccelerometerEvent(it.values)
-                }
-            }
-        }
-
-        private fun handleAccelerometerEvent(values: FloatArray) {
-            if (values.size < 3) {
-                Timber.d("Unexpected sensor data size: ${values.size}, values: ${values.contentToString()}")
-                return
-            }
-
-            val x = values[0]
-            val y = values[1]
-            val z = values[2]
-
-            // Check for significant motion in any axis
-            if (abs(x) > 11 || abs(y) > 11 || abs(z) > 11) {
-                Timber.d("Phone lifted: x=$x, y=$y, z=$z")
-                stopListening()
-                RingCanceler.cancelAction()
-                stopRing()
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-            // Not used
-        }
-
-        private fun getBestAvailableSensor(sensorManager: SensorManager): Sensor? {
-            return sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-                ?: sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-                ?: sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
-        }
+        state.resetVolume()
+        state = State() // Reset state
     }
 
-    private var sensorHandler: SensorHandler? = null
+    private object RingCanceler {
+        private var executor: ScheduledExecutorService? = null
 
-    init {
-        sensorHandler = SensorHandler(context)
+        fun schedule(delay: Long, action: () -> Unit) {
+            executor?.shutdownNow()
+            executor = Executors.newSingleThreadScheduledExecutor().apply {
+                schedule(action, delay, TimeUnit.MILLISECONDS)
+            }
+        }
+
+        fun cancel() {
+            executor?.shutdownNow()
+            executor = null
+        }
     }
+}
+
+private class SensorHandler(
+    context: Context,
+    private val onPhoneLifted: () -> Unit
+) : SensorEventListener {
+    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val accelerometer = getBestAvailableSensor(sensorManager)
 
     fun startListening(context: Context) {
-        sensorHandler?.startListening(context)
+        val sensorDelay =
+            if (context.checkSelfPermission(android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                SensorManager.SENSOR_DELAY_FASTEST
+            } else {
+                SensorManager.SENSOR_DELAY_GAME
+            }
+
+        accelerometer?.let { sensor ->
+            sensorManager.registerListener(this, sensor, sensorDelay)
+        }
     }
 
     fun stopListening() {
-        sensorHandler?.stopListening()
+        sensorManager.unregisterListener(this)
     }
+
+    private object RingCanceler {
+        private var executor: ScheduledExecutorService? = null
+
+        fun schedule(delay: Long, action: () -> Unit) {
+            executor?.shutdownNow()
+            executor = Executors.newSingleThreadScheduledExecutor().apply {
+                schedule(action, delay, TimeUnit.MILLISECONDS)
+            }
+        }
+
+        fun cancel() {
+            executor?.shutdownNow()
+            executor = null
+        }
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.takeIf { it.sensor.type == Sensor.TYPE_ACCELEROMETER }?.values?.let { values ->
+            if (values.size >= 3 && values.any { abs(it) > 11 }) {
+                Timber.d("Phone lifted: x=${values[0]}, y=${values[1]}, z=${values[2]}")
+                stopListening()
+                RingCanceler.cancel()
+                onPhoneLifted()
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    private fun getBestAvailableSensor(sensorManager: SensorManager): Sensor? =
+        listOf(
+            Sensor.TYPE_ACCELEROMETER,
+            Sensor.TYPE_LINEAR_ACCELERATION,
+            Sensor.TYPE_GRAVITY
+        ).firstNotNullOfOrNull { sensorManager.getDefaultSensor(it) }
 }

@@ -5,13 +5,13 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.AlarmClock
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -27,108 +27,87 @@ import javax.inject.Inject
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
-    @ApplicationContext private val appContext: Context // Inject application context
+    @ApplicationContext private val appContext: Context
 ) : ViewModel() {
-    private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
-    val alarms: StateFlow<List<Alarm>> = _alarms
+    private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
+    val alarms: List<Alarm> get() = _alarms
 
     init {
         loadAlarms()
     }
 
-    private fun loadAlarms() {
-        viewModelScope.launch {
-            runCatching {
-                val loadedAlarms = api.getAlarms()
-                _alarms.value = loadedAlarms.take(WatchInfo.alarmCount)
-
-                if (WatchInfo.chimeInSettings) {
-                    val settings = api.getSettings()
-                    val currentAlarms = _alarms.value.toMutableList()
-                    currentAlarms[0] = currentAlarms[0].copy(hasHourlyChime = settings.hourlyChime)
-                    _alarms.value = currentAlarms
+    private fun loadAlarms() = viewModelScope.launch {
+        runCatching {
+            _alarms = api.getAlarms()
+                .take(WatchInfo.alarmCount)
+                .let { alarms ->
+                    if (WatchInfo.chimeInSettings) {
+                        val settings = api.getSettings()
+                        alarms.mapIndexed { index, alarm ->
+                            if (index == 0) alarm.copy(hasHourlyChime = settings.hourlyChime)
+                            else alarm
+                        }
+                    } else alarms
                 }
-
-                ProgressEvents.onNext("Alarms Loaded")
-            }.onFailure {
-                ProgressEvents.onNext("Error")
-            }
+            ProgressEvents.onNext("Alarms Loaded")
+        }.onFailure {
+            ProgressEvents.onNext("Error")
         }
     }
 
-    fun toggleAlarm(index: Int, isEnabled: Boolean) {
-        val currentAlarms = _alarms.value.toMutableList()
-        currentAlarms[index] = currentAlarms[index].copy(enabled = isEnabled)
-        _alarms.value = currentAlarms
+    private fun updateAlarm(index: Int, transform: (Alarm) -> Alarm) {
+        _alarms = _alarms.mapIndexed { i, alarm ->
+            if (i == index) transform(alarm) else alarm
+        }
     }
 
-    fun onTimeChanged(index: Int, hours: Int, minutes: Int) {
-        val currentAlarms = _alarms.value.toMutableList()
-        currentAlarms[index] = currentAlarms[index].copy(
-            hour = hours,
-            minute = minutes
-        )
-        _alarms.value = currentAlarms
-    }
+    fun toggleAlarm(index: Int, isEnabled: Boolean) =
+        updateAlarm(index) { it.copy(enabled = isEnabled) }
 
-    fun sendAlarmsToWatch() {
-        viewModelScope.launch {
-            runCatching {
-                api.setAlarms(alarms = ArrayList(alarms.value))
-                if (WatchInfo.chimeInSettings) {
-                    val settings = api.getSettings()
-                    settings.hourlyChime = alarms.value[0].hasHourlyChime
-                    api.setSettings(settings)
-                }
-                AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
-            }.onFailure {
-                ProgressEvents.onNext("Error", it.message ?: "")
+    fun onTimeChanged(index: Int, hours: Int, minutes: Int) =
+        updateAlarm(index) { it.copy(hour = hours, minute = minutes) }
+
+    fun toggleHourlyChime(enabled: Boolean) =
+        updateAlarm(0) { it.copy(hasHourlyChime = enabled) }
+
+    fun sendAlarmsToWatch() = viewModelScope.launch {
+        runCatching {
+            api.setAlarms(ArrayList(alarms))
+            if (WatchInfo.chimeInSettings) {
+                api.setSettings(api.getSettings().copy(hourlyChime = alarms[0].hasHourlyChime))
             }
+            AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
+        }.onFailure {
+            ProgressEvents.onNext("Error", it.message ?: "")
         }
     }
 
     fun sendAlarmsToPhone() {
-        val executorService = Executors.newSingleThreadScheduledExecutor()
-        val days = arrayListOf(
-            Calendar.MONDAY,
-            Calendar.TUESDAY,
-            Calendar.WEDNESDAY,
-            Calendar.THURSDAY,
-            Calendar.FRIDAY,
-            Calendar.SATURDAY,
-            Calendar.SUNDAY
+        val executor = Executors.newSingleThreadScheduledExecutor()
+        val handler = Handler(Looper.getMainLooper())
+        val days = listOf(
+            Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
+            Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
         )
 
-        val handler = Handler(Looper.getMainLooper()) // Create a handler to run on the main thread
-
-        alarms.value.forEachIndexed { index, alarm ->
-            if (alarm.enabled) {
+        alarms
+            .withIndex()
+            .filter { it.value.enabled }
+            .forEach { (index, alarm) ->
                 val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
                     putExtra(AlarmClock.EXTRA_MESSAGE, "Casio G-Shock Alarm")
                     putExtra(AlarmClock.EXTRA_HOUR, alarm.hour)
                     putExtra(AlarmClock.EXTRA_MINUTES, alarm.minute)
                     putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_TIME)
-                    putExtra(AlarmClock.EXTRA_DAYS, days)
+                    putExtra(AlarmClock.EXTRA_DAYS, ArrayList(days))
                     putExtra(AlarmClock.EXTRA_SKIP_UI, true)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
 
-                // Schedule the alarms with a one-second delay
-                executorService.schedule({
+                executor.schedule({
                     api.preventReconnection()
-
-                    // Use the handler to call startActivity on the main thread
-                    handler.post {
-                        appContext.startActivity(intent)
-                    }
+                    handler.post { appContext.startActivity(intent) }
                 }, index.toLong(), TimeUnit.SECONDS)
             }
-        }
-    }
-
-    fun toggleHourlyChime(enabled: Boolean) {
-        val currentAlarms = _alarms.value.toMutableList()
-        currentAlarms[0] = currentAlarms[0].copy(hasHourlyChime = enabled)
-        _alarms.value = currentAlarms
     }
 }

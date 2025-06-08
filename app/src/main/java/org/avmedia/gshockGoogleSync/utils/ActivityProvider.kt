@@ -9,16 +9,20 @@ object ActivityProvider {
     private var currentActivity: WeakReference<Activity>? = null
 
     fun initialize(application: Application) {
-        application.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
+        application.registerActivityLifecycleCallbacks(object :
+            Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 currentActivity = WeakReference(activity)
             }
+
             override fun onActivityStarted(activity: Activity) {
                 currentActivity = WeakReference(activity)
             }
+
             override fun onActivityResumed(activity: Activity) {
                 currentActivity = WeakReference(activity)
             }
+
             override fun onActivityPaused(activity: Activity) {}
             override fun onActivityStopped(activity: Activity) {}
             override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}

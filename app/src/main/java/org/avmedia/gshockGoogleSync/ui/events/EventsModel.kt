@@ -13,24 +13,20 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 object EventsModel {
-
     const val MAX_REMINDERS = 5
-
-    val events = ArrayList<Event>()
+    private var _events = ArrayList<Event>()
+    val events: ArrayList<Event>
+        get() = _events
 
     fun refresh(newEvents: ArrayList<Event>) {
-        events.clear()
-        events.addAll(newEvents)
-    }
-
-    fun getEnabledCount(): Int {
-        return (events.filter { it.enabled } as ArrayList<Event>).size
+        _events = newEvents
     }
 
     fun createEventDate(timeMs: Long, zone: ZoneId): EventDate {
-        val start: LocalDate =
-            Instant.ofEpochMilli(timeMs).atZone(zone)
-                .toLocalDate()
+        val start: LocalDate = Instant.ofEpochMilli(timeMs)
+            .atZone(zone)
+            .toLocalDate()
+
         return EventDate(
             start.year,
             start.month,

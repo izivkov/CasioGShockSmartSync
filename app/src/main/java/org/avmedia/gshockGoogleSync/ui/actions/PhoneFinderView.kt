@@ -1,14 +1,12 @@
 package org.avmedia.gshockGoogleSync.ui.actions
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 
@@ -17,34 +15,20 @@ fun PhoneFinderView(
     onUpdate: (ActionsViewModel.FindPhoneAction) -> Unit,
     actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
-    val classType = ActionsViewModel.FindPhoneAction::class.java
-    val actions by actionsViewModel.actions.collectAsState()
-    val findPhoneAction: ActionsViewModel.FindPhoneAction =
-        actionsViewModel.getAction(classType)
+    val findPhoneAction = remember {
+        actionsViewModel.getAction(ActionsViewModel.FindPhoneAction::class.java)
+    }
 
     var isEnabled by remember { mutableStateOf(findPhoneAction.enabled) }
 
-    LaunchedEffect(actions, findPhoneAction) {
-        isEnabled = findPhoneAction.enabled
-    }
-
     ActionItem(
-        title = stringResource(
-            id = R.string.find_phone
-        ),
+        title = stringResource(id = R.string.find_phone),
         resourceId = R.drawable.find_phone,
         isEnabled = isEnabled,
         onEnabledChange = { newValue ->
-            isEnabled = newValue // Update the state when the switch is toggled
+            isEnabled = newValue  // Update local state immediately
             findPhoneAction.enabled = newValue
             onUpdate(findPhoneAction.copy(enabled = newValue))
-        },
+        }
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPhoneFinderView() {
-    PhoneFinderView(onUpdate = {})
-}
-

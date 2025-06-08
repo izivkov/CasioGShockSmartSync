@@ -79,18 +79,19 @@ private fun ActionsContent(
 }
 
 @Composable
-private fun createActionItems(onUpdateAction: (ActionsViewModel.Action) -> Unit): List<Any> = listOfNotNull(
-    if (WatchInfo.findButtonUserDefined) PhoneFinderView(onUpdateAction) else null,
-    SetTimeView(onUpdateAction),
-    if (WatchInfo.hasReminders) RemindersView(onUpdateAction) else null,
-    PhotoView(onUpdateAction),
-    FlashlightView(onUpdateAction),
-    VoiceAssistView(onUpdateAction),
-    SkipToNextTrackView(onUpdateAction),
-    PrayerAlarmsView(onUpdateAction),
-    SeparatorView(),
-    PhoneView(onUpdateAction)
-)
+private fun createActionItems(onUpdateAction: (ActionsViewModel.Action) -> Unit): List<Any> =
+    listOfNotNull(
+        if (WatchInfo.findButtonUserDefined) PhoneFinderView(onUpdateAction) else null,
+        SetTimeView(onUpdateAction),
+        if (WatchInfo.hasReminders) RemindersView(onUpdateAction) else null,
+        PhotoView(onUpdateAction),
+        FlashlightView(onUpdateAction),
+        VoiceAssistView(onUpdateAction),
+        SkipToNextTrackView(onUpdateAction),
+        PrayerAlarmsView(onUpdateAction),
+        SeparatorView(),
+        PhoneView(onUpdateAction)
+    )
 
 @Preview(showBackground = true)
 @Composable

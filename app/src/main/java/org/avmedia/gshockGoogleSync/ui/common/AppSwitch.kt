@@ -10,13 +10,20 @@ fun AppSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: SwitchColors = SwitchDefaults.colors() // Default colors based on the current theme
+    colors: SwitchColors = SwitchDefaults.colors(),
+    description: String? = null
 ) {
+    val handleChange = { newValue: Boolean ->
+        if (enabled) {
+            onCheckedChange(newValue)
+        }
+    }
+
     Switch(
         checked = checked,
-        onCheckedChange = onCheckedChange,
+        onCheckedChange = handleChange,
         modifier = modifier,
         enabled = enabled,
-        colors = colors
+        colors = colors,
     )
 }

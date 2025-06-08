@@ -17,21 +17,25 @@ data class ButtonData(val text: String, val onClick: () -> Unit)
 @Composable
 fun ButtonsRow(
     buttons: List<ButtonData>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    buttonSpacing: Int = 5,
+    rowPadding: Int = 5
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 5.dp, bottom = 5.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = rowPadding.dp),
+        horizontalArrangement = horizontalArrangement,
+        verticalAlignment = verticalAlignment
     ) {
         buttons.forEach { buttonData ->
             AppButton(
                 text = buttonData.text,
                 onClick = buttonData.onClick,
                 modifier = Modifier
-                    .padding(top = 5.dp, bottom = 5.dp)
+                    .padding(vertical = buttonSpacing.dp)
             )
         }
     }

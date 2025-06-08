@@ -34,8 +34,20 @@ fun AppPhoneInputDialog(
     onPhoneNumberValidated: (String) -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
 ) {
-    var inputValue by remember { mutableStateOf(initialPhoneNumber.trim()) }
-    var validationError by remember { mutableStateOf(false) }
+    val (inputValue, setInputValue) = remember { mutableStateOf(initialPhoneNumber.trim()) }
+    val (validationError, setValidationError) = remember { mutableStateOf(false) }
+
+    val handlePhoneNumberInput = { newValue: String ->
+        setInputValue(newValue.trim())
+    }
+
+    val handleValidation = {
+        if (validatePhoneNumber(inputValue)) {
+            onPhoneNumberValidated(inputValue)
+        } else {
+            setValidationError(true)
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -47,57 +59,46 @@ fun AppPhoneInputDialog(
             onDismissRequest = onDismiss,
             title = {
                 Text(
-                    stringResource(
-                        R.string.enter_phone_number
-                    )
+                    text = stringResource(R.string.enter_phone_number),
+                    style = MaterialTheme.typography.titleLarge
                 )
             },
             text = {
                 Column {
                     OutlinedTextField(
-                        value = inputValue.trim(),
-                        onValueChange = { inputValue = it.trim() },
+                        value = inputValue,
+                        onValueChange = handlePhoneNumberInput,
                         label = {
                             Text(
-                                stringResource(
-                                    R.string.phone_number
-                                )
+                                text = stringResource(R.string.phone_number),
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         },
                         isError = validationError,
                         modifier = Modifier.fillMaxWidth(),
-                        // visualTransformation = PhoneNumberVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        textStyle = MaterialTheme.typography.bodyLarge
                     )
 
                     if (validationError) {
                         Text(
                             text = "Invalid phone number",
                             color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
             },
             confirmButton = {
                 AppButton(
-                    text = stringResource(
-                        R.string.ok
-                    ),
-                    onClick = {
-                        if (validatePhoneNumber(inputValue)) {
-                            onPhoneNumberValidated(inputValue)
-                        } else {
-                            validationError = true
-                        }
-                    })
+                    text = stringResource(R.string.ok),
+                    onClick = handleValidation
+                )
             },
             dismissButton = {
                 AppButton(
                     onClick = onDismiss,
-                    text = stringResource(
-                        R.string.cancel
-                    )
+                    text = stringResource(R.string.cancel)
                 )
             }
         )
@@ -107,54 +108,4 @@ fun AppPhoneInputDialog(
 fun validatePhoneNumber(phoneNumber: String): Boolean {
     val regex = Regex("^\\+?[0-9 ()/,*.;\\-N#]*\$|^\$")
     return regex.matches(phoneNumber.trim())
-}
-
-class PhoneNumberVisualTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        val originalText = text.text
-
-        // Format the text into groups of 3-3-4
-        val formattedText = formatText(originalText)
-
-        // Create the offset mapping
-        val offsetMapping = createOffsetMapping(originalText, formattedText)
-
-        return TransformedText(
-            text = AnnotatedString(formattedText),
-            offsetMapping = offsetMapping
-        )
-    }
-
-    private fun formatText(input: String): String {
-        val result = StringBuilder()
-        var count = 0
-        for (char in input) {
-            if (char.isDigit()) {
-                result.append(char)
-                count++
-                if (count == 3 || count == 6) {
-                    result.append(' ')
-                }
-            }
-        }
-        return result.trimEnd().toString()
-    }
-
-    private fun createOffsetMapping(originalText: String, formattedText: String): OffsetMapping {
-        return object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                var transformedOffset = offset
-                if (offset > 3) transformedOffset++
-                if (offset > 6) transformedOffset++
-                return transformedOffset.coerceAtMost(formattedText.length)
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                var originalOffset = offset
-                if (offset > 4) originalOffset--
-                if (offset > 8) originalOffset--
-                return originalOffset.coerceIn(0, originalText.length)
-            }
-        }
-    }
 }

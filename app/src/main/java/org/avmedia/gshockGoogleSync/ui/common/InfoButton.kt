@@ -16,28 +16,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun InfoButton(
     infoText: String,
+    modifier: Modifier = Modifier,
+    iconSize: Dp = 32.dp,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
+    dialogTitle: String = stringResource(id = R.string.info),
+    confirmButtonText: String = stringResource(id = R.string.ok),
+    htmlMode: Int = Html.FROM_HTML_MODE_LEGACY
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = { showDialog = !showDialog },
-        Modifier.size(32.dp),
+        modifier = modifier.size(iconSize)
     ) {
         Icon(
             imageVector = Icons.Outlined.Info,
             contentDescription = "Info Icon",
-            tint = MaterialTheme.colorScheme.primary,
+            tint = iconTint,
             modifier = Modifier
-                .size(32.dp)
-                .clickable { showDialog = true },
+                .size(iconSize)
+                .clickable { showDialog = true }
         )
 
         if (showDialog) {
@@ -45,37 +53,15 @@ fun InfoButton(
                 onDismissRequest = { showDialog = false },
                 confirmButton = {
                     Text(
-                        text = stringResource(
-                            id = R.string.ok
-                        ),
-                        modifier = Modifier.clickable {
-                            showDialog = false
-                        }
+                        text = confirmButtonText,
+                        modifier = Modifier.clickable { showDialog = false }
                     )
                 },
-                title = {
-                    Text(
-                        text = stringResource(
-                            id = R.string.info
-                        )
-                    )
-                },
+                title = { Text(text = dialogTitle) },
                 text = {
-                    Text(text = Html.fromHtml(infoText, Html.FROM_HTML_MODE_LEGACY).toString())
+                    Text(text = Html.fromHtml(infoText, htmlMode).toString())
                 }
             )
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewInfoButton() {
-    InfoButton(
-        infoText = "Get your info",
-    )
-}
-
-
-
-

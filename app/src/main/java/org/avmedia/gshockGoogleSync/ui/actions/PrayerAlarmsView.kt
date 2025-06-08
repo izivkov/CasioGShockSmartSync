@@ -1,54 +1,35 @@
 package org.avmedia.gshockGoogleSync.ui.actions
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PrayerAlarmsView(
     onUpdate: (ActionsViewModel.PrayerAlarmsAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel(),
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
-    val classType = ActionsViewModel.PrayerAlarmsAction::class.java
-
-    val actions by actionsViewModel.actions.collectAsState()
-    val prayerAlarmsAction: ActionsViewModel.PrayerAlarmsAction =
-        actionsViewModel.getAction(classType)
+    val prayerAlarmsAction = remember {
+        actionsViewModel.getAction(ActionsViewModel.PrayerAlarmsAction::class.java)
+    }
 
     var isEnabled by remember { mutableStateOf(prayerAlarmsAction.enabled) }
 
-    LaunchedEffect(actions, prayerAlarmsAction) {
-        isEnabled = prayerAlarmsAction.enabled
-    }
-
     ActionItem(
-        title = stringResource(
-            id = R.string.set_prayer_alarms
-        ),
+        title = stringResource(id = R.string.set_prayer_alarms),
         resourceId = R.drawable.prayer_times,
+        infoText = stringResource(id = R.string.prayer_times_info),
         isEnabled = isEnabled,
         onEnabledChange = { newValue ->
-            isEnabled = newValue // Update the state when the switch is toggled
+            isEnabled = newValue
             prayerAlarmsAction.enabled = newValue
-            onUpdate(prayerAlarmsAction.copy(enabled = isEnabled))
-        },
-        infoText = stringResource(
-            id = R.string.prayer_times_info
-        )
+            onUpdate(prayerAlarmsAction.copy(enabled = newValue))
+        }
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPrayerAction() {
-    PrayerAlarmsView(onUpdate = {})
-}
-

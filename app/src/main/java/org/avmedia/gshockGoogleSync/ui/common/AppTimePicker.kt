@@ -16,6 +16,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,50 +27,53 @@ import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTimePicker(
+    modifier: Modifier = Modifier,
     onConfirm: (TimePickerState) -> Unit,
     onDismiss: () -> Unit,
-    initialHour: Int,
-    initialMinute: Int,
+    initialHour: Int = 0,
+    initialMinute: Int = 0,
+    is24Hour: Boolean = DateFormat.is24HourFormat(LocalContext.current),
+    backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
-    val localContext = LocalContext.current.applicationContext
-    val appContext = remember {
-        EntryPointAccessors.fromApplication(
-            localContext,
-            ApplicationContextEntryPoint::class.java
-        ).getApplicationContext()
+    val validInitialHour = remember(initialHour) {
+        initialHour.coerceIn(0..23)
+    }
+
+    val validInitialMinute = remember(initialMinute) {
+        initialMinute.coerceIn(0..59)
     }
 
     val timePickerState = rememberTimePickerState(
-        initialHour = if (initialHour in 0..23 && initialMinute in 0..59) initialHour else 0,
-        initialMinute = if (initialHour in 0..23 && initialMinute in 0..59) initialMinute else 0,
-        is24Hour = DateFormat.is24HourFormat(appContext)
+        initialHour = validInitialHour,
+        initialMinute = validInitialMinute,
+        is24Hour = is24Hour
     )
 
     Column(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.background) // Theme-based background color
-            .padding(16.dp) // Consistent padding
+        modifier = modifier
+            .background(backgroundColor)
+            .padding(16.dp)
     ) {
         TimePicker(
             state = timePickerState,
-            modifier = Modifier.padding(vertical = 16.dp) // Padding around the time picker
+            modifier = Modifier.padding(vertical = 16.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp)) // Spacing between buttons
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         Row {
             AppButton(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
-                text = stringResource(
-                    id = R.string.cancel
-                )
+                text = stringResource(R.string.cancel)
             )
-            Spacer(modifier = Modifier.width(8.dp)) // Space between buttons
+
+            Spacer(modifier = Modifier.width(8.dp))
+
             AppButton(
                 onClick = { onConfirm(timePickerState) },
-                modifier = Modifier.weight(1f), // Equal width buttons
-                text = stringResource(
-                    id = R.string.ok
-                )
+                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.ok)
             )
         }
     }

@@ -22,21 +22,15 @@ fun AppButton(
 ) {
     TextButton(
         onClick = onClick,
-        modifier = modifier
-            .then(
-                Modifier.clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = LocalIndication.current // Default ripple indication
-                ) { onClick() }
-            ),
+        modifier = modifier,
         enabled = enabled
     ) {
         AppText(
-            text.uppercase(),
+            text = text.uppercase(),
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
             fontFamily = FontFamily.SansSerif,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Center
         )
     }
 }

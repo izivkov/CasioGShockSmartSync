@@ -24,12 +24,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun ValueSelectionDialog(
+    modifier: Modifier = Modifier,
     initialValue: Int,
     range: IntRange,
     step: Int = 1,
@@ -37,7 +42,14 @@ fun ValueSelectionDialog(
     onConfirm: (Int) -> Unit,
     title: String = "Select Value",
     label: String = "Choose a value:",
-    unit: String,
+    unit: String = "",
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    titleTextStyle: TextStyle = MaterialTheme.typography.headlineSmall,
+    labelTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    confirmButtonText: String = stringResource(id = R.string.ok),
+    dismissButtonText: String = stringResource(id = R.string.cancel),
+    spacing: Dp = 16.dp
 ) {
     val values = range.step(step).toList()
     val initialIndex = values.indexOf(initialValue)
@@ -47,32 +59,34 @@ fun ValueSelectionDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onConfirm(values[selectedIndex]) }) {
-                Text(
-                    stringResource(
-                        id = R.string.ok
-                    )
-                )
+                Text(confirmButtonText)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(
-                    stringResource(
-                        id = R.string.cancel
-                    )
-                )
+                Text(dismissButtonText)
             }
         },
-        title = { Text(title) },
+        title = {
+            Text(
+                text = title,
+                style = titleTextStyle
+            )
+        },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(label)
-                Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = modifier.fillMaxWidth()) {
+                Text(
+                    text = label,
+                    style = labelTextStyle
+                )
+                Spacer(modifier = Modifier.height(spacing))
                 NumberPickerView(
                     step = step,
                     pickerValues = values,
                     selectedIndex = selectedIndex,
                     onValueChange = { selectedIndex = it },
+                    backgroundColor = backgroundColor,
+                    contentColor = contentColor,
                     unit = unit
                 )
             }
@@ -86,26 +100,30 @@ fun NumberPickerView(
     pickerValues: List<Int>,
     selectedIndex: Int,
     onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
-    unit: String = ""
+    unit: String = "",
+    textSize: TextUnit = 20.sp,
+    cornerRadius: Dp = 8.dp,
+    padding: Dp = 4.dp,
+    wrapSelectorWheel: Boolean = false,
+    allowKeyboardInput: Boolean = false
 ) {
     val safeStep = if (step > 0) step else 1
+    require(!(pickerValues.isEmpty() || pickerValues.size < 2)) {
+        "pickerValues must have at least 2 elements."
+    }
 
-    // Ensure pickerValues are valid
-    require(!(pickerValues.isEmpty() || pickerValues.size < 2)) { "pickerValues must have at least 2 elements." }
-
-
-    // Calculate adjusted boundaries
     val adjustedMinValue = 0
     val adjustedMaxValue = (pickerValues.last() - pickerValues.first()) / safeStep
     val safeSelectedIndex = selectedIndex.coerceIn(adjustedMinValue, adjustedMaxValue)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(4.dp)
-            .background(color = backgroundColor, shape = RoundedCornerShape(8.dp)),
+            .padding(padding)
+            .background(color = backgroundColor, shape = RoundedCornerShape(cornerRadius)),
         contentAlignment = Alignment.Center
     ) {
         AndroidView(
@@ -115,25 +133,27 @@ fun NumberPickerView(
                     maxValue = adjustedMaxValue
                     value = safeSelectedIndex
                     displayedValues = pickerValues.map { "$it $unit" }.toTypedArray()
-                    descendantFocusability =
-                        NumberPicker.FOCUS_BLOCK_DESCENDANTS // Disable keyboard input
-                    // descendantFocusability = NumberPicker.FOCUS_AFTER_DESCENDANTS // Allow keyboard input
-                    wrapSelectorWheel = false
+                    descendantFocusability = if (allowKeyboardInput) {
+                        NumberPicker.FOCUS_AFTER_DESCENDANTS
+                    } else {
+                        NumberPicker.FOCUS_BLOCK_DESCENDANTS
+                    }
+                    this.wrapSelectorWheel = wrapSelectorWheel
 
-                    // Set listener for value change
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        this.textColor = contentColor.toArgb()
+                        this.textSize = textSize.value
+                    }
+
                     setOnValueChangedListener { _, _, newValue ->
                         onValueChange(pickerValues[newValue])
                     }
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        textColor = contentColor.toArgb()
-                    }
-
                 }
             },
             update = { picker ->
+                picker.value = safeSelectedIndex
                 picker.setOnValueChangedListener { _, _, newValue ->
-                    onValueChange(newValue) // Pass back the actual value
+                    onValueChange(pickerValues[newValue])
                 }
             }
         )

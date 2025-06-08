@@ -33,7 +33,10 @@ class NotificationProvider @Inject constructor(
         data class Error(val exception: Throwable) : NotificationResult
     }
 
-    fun createNotification(content: NotificationContent, config: NotificationConfig = NotificationConfig()): NotificationResult =
+    fun createNotification(
+        content: NotificationContent,
+        config: NotificationConfig = NotificationConfig()
+    ): NotificationResult =
         runCatching {
             getNotificationManager()
                 .also { manager -> ensureChannelExists(manager, config) }
@@ -62,7 +65,10 @@ class NotificationProvider @Inject constructor(
             .let { notification -> manager.notify(config.notificationId, notification) }
     }
 
-    private fun createNotificationBuilder(content: NotificationContent, config: NotificationConfig) =
+    private fun createNotificationBuilder(
+        content: NotificationContent,
+        config: NotificationConfig
+    ) =
         NotificationCompat.Builder(appContext, config.channelId)
             .setSmallIcon(R.drawable.ic_menu_day)
             .setContentTitle(content.title)

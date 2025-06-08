@@ -1,54 +1,35 @@
 package org.avmedia.gshockGoogleSync.ui.actions
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun SkipToNextTrackView(
     onUpdate: (ActionsViewModel.NextTrack) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel(),
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
-    val classType = ActionsViewModel.NextTrack::class.java
-
-    val actions by actionsViewModel.actions.collectAsState()
-    val nextTrack: ActionsViewModel.NextTrack =
-        actionsViewModel.getAction(classType)
-
-    var isEnabled by remember { mutableStateOf(nextTrack.enabled) }
-
-    LaunchedEffect(actions, nextTrack) {
-        isEnabled = nextTrack.enabled
+    val nextTrackAction = remember {
+        actionsViewModel.getAction(ActionsViewModel.NextTrack::class.java)
     }
 
+    var isEnabled by remember { mutableStateOf(nextTrackAction.enabled) }
+
     ActionItem(
-        title = stringResource(
-            id = R.string.next_track
-        ),
+        title = stringResource(id = R.string.next_track),
         resourceId = R.drawable.skip_next,
-        infoText = stringResource(
-            id = R.string.skip_to_next_track_info
-        ),
+        infoText = stringResource(id = R.string.skip_to_next_track_info),
         isEnabled = isEnabled,
         onEnabledChange = { newValue ->
-            isEnabled = newValue // Update the state when the switch is toggled
-            nextTrack.enabled = newValue
-            onUpdate(nextTrack.copy(enabled = isEnabled))
+            isEnabled = newValue
+            nextTrackAction.enabled = newValue
+            onUpdate(nextTrackAction.copy(enabled = newValue))
         }
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSkipToNextTrack() {
-    SkipToNextTrackView(onUpdate = {})
-}
-

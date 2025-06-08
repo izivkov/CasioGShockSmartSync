@@ -8,13 +8,12 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
@@ -30,22 +29,29 @@ fun AppSnackbar(message: String) {
 
 @Composable
 fun PopupMessageReceiver(
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     duration: SnackbarDuration = SnackbarDuration.Short
 ) {
+    // Store reference to hostState in controller
+    DisposableEffect(snackbarHostState) {
+        SnackbarController.snackbarHostState = snackbarHostState
+        onDispose {
+            SnackbarController.snackbarHostState = null
+        }
+    }
+
     LaunchedEffect(Unit) {
         val eventActions = arrayOf(
             EventAction("SnackbarMessage") {
-                val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-                scope.launch {
-                    val message = ProgressEvents.getPayload("SnackbarMessage") as String
-                    SnackbarController.snackbarHostState?.showSnackbar(
+                val message = ProgressEvents.getPayload("SnackbarMessage") as String
+                launch {
+                    snackbarHostState.showSnackbar(
                         message = message,
                         duration = duration
                     )
                 }
-            },
+            }
         )
-
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
@@ -53,10 +59,10 @@ fun PopupMessageReceiver(
         modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding(),
-        contentAlignment = Alignment.BottomCenter, // Align the popup at the bottom
+        contentAlignment = Alignment.BottomCenter
     ) {
         SnackbarHost(
-            hostState = SnackbarController.snackbarHostState!!,
+            hostState = snackbarHostState,
             modifier = Modifier.padding(16.dp)
         )
     }

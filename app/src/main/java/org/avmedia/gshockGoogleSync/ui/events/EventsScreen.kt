@@ -128,9 +128,3 @@ fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
         ItemList(createEvent())
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewEventsScreen() {
-    EventsScreen()
-}

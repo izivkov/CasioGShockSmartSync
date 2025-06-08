@@ -15,14 +15,18 @@ import androidx.compose.ui.unit.dp
 fun AppCard(
     modifier: Modifier = Modifier,
     padding: Dp = 2.dp,
+    elevation: Dp = 2.dp,
+    borderWidth: Dp = 1.dp,
+    borderColor: Color = Color.DarkGray,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable () -> Unit,
 ) {
     Card(
         modifier = modifier.padding(padding),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(2.dp),
-        border = BorderStroke(1.dp, color = Color.DarkGray)
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(elevation),
+        border = BorderStroke(borderWidth, color = borderColor)
     ) {
         content()
     }

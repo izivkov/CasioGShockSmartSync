@@ -79,20 +79,21 @@ class NotificationMonitorService : NotificationListenerService() {
             }
     }
 
-    private fun processNotification(sbn: StatusBarNotification): Result<NotificationInfo> = runCatching {
-        val notification = sbn.notification
-        val extras = notification.extras
+    private fun processNotification(sbn: StatusBarNotification): Result<NotificationInfo> =
+        runCatching {
+            val notification = sbn.notification
+            val extras = notification.extras
 
-        NotificationInfo(
-            packageName = sbn.packageName,
-            appName = getAppName(sbn.packageName),
-            title = extras.getString(Notification.EXTRA_TITLE).orEmpty(),
-            text = extras.getString(Notification.EXTRA_TEXT).orEmpty(),
-            shortText = extras.getString(Notification.EXTRA_SUB_TEXT).orEmpty(),
-            type = classifyNotificationType(sbn.packageName, notification),
-            timestamp = sbn.postTime
-        )
-    }
+            NotificationInfo(
+                packageName = sbn.packageName,
+                appName = getAppName(sbn.packageName),
+                title = extras.getString(Notification.EXTRA_TITLE).orEmpty(),
+                text = extras.getString(Notification.EXTRA_TEXT).orEmpty(),
+                shortText = extras.getString(Notification.EXTRA_SUB_TEXT).orEmpty(),
+                type = classifyNotificationType(sbn.packageName, notification),
+                timestamp = sbn.postTime
+            )
+        }
 
     private fun getAppName(packageName: String): String {
         return try {

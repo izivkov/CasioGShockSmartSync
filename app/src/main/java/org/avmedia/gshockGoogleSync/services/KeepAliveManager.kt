@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.services
 
-import android.annotation.SuppressLint
 import android.content.Context
 
 class KeepAliveManager private constructor(context: Context) {

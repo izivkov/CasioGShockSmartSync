@@ -12,11 +12,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun AppText(
     text: String,
     modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onBackground,
     fontSize: TextUnit = 16.sp,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
@@ -30,16 +33,18 @@ fun AppText(
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
+    style: TextStyle = TextStyle.Default
 ) {
     val currentFontScale = LocalDensity.current.fontScale
     val fixedFontSizeStyle = TextStyle(
-        fontSize = (16.sp / currentFontScale)  // Fixed font size
-    )
+        fontSize = (fontSize / currentFontScale),
+        color = color
+    ).merge(style)
 
     Text(
         text = text,
         modifier = modifier,
-        fontSize = fontSize,
+        style = fixedFontSizeStyle,
         fontStyle = fontStyle,
         fontWeight = fontWeight,
         fontFamily = fontFamily,
@@ -51,7 +56,6 @@ fun AppText(
         softWrap = softWrap,
         maxLines = maxLines,
         minLines = minLines,
-        onTextLayout = onTextLayout,
-        style = fixedFontSizeStyle // combinedStyle
+        onTextLayout = onTextLayout
     )
 }

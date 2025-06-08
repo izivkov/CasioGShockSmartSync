@@ -27,140 +27,122 @@ class RRuleValues @Inject constructor(
     @ApplicationContext private val appContext: Context,
 ) {
     data class Values(
-        var localEndDate: LocalDate? = null,
-        var incompatible: Boolean = false,
-        var daysOfWeek: ArrayList<DayOfWeek>? = null,
-        var repeatPeriod: RepeatPeriod = RepeatPeriod.NEVER
+        val localEndDate: LocalDate? = null,
+        val incompatible: Boolean = false,
+        val daysOfWeek: List<DayOfWeek> = emptyList(),
+        val repeatPeriod: RepeatPeriod = RepeatPeriod.NEVER
     )
 
-    @Suppress(
-        "SpellCheckingInspection"
-    )
-    fun getValues(
-        _rrule: String?,
-        startDate: EventDate,
-        zone: ZoneId
-    ): Values {
-        val rruleValues = Values()
-
-        if (!_rrule.isNullOrEmpty()) {
-            val rrule = rruleUntilFix(_rrule)
-
-            if (!validateRule(rrule)) {
-                rruleValues.incompatible = true
-                return rruleValues
-            }
-
-            val rruleObj = RRule(rrule)
-
-            fun isCompatible(rruleObj: RRule): Boolean {
-                val validNumberOnly = listOf(0)
-                val numberArr = rruleObj.byDay.map { it.number }
-
-                val validByMonth = rruleObj.byMonth.isEmpty()
-                val validByDay = rruleObj.byDay.isEmpty() || validNumberOnly.containsAll(numberArr)
-                val invalidByWeekly = (rruleObj.freq == Frequency.Weekly) && (rruleObj.interval > 1)
-
-                return validByMonth && validByDay && !invalidByWeekly
-            }
-
-            if (!isCompatible(rruleObj)) {
-                rruleValues.incompatible = true
-            }
-
-            if (rrule.isNotEmpty()) {
-                val rruleObjVal = RRule(rrule)
-                if (rruleObjVal.until != null) {
-                    val formatter: DateTimeFormatter =
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                    val localDate =
-                        LocalDateTime.parse(rruleObjVal.until.toString(), formatter).toLocalDate()
-                    val instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
-
-                    rruleValues.localEndDate = instant.atZone(zone).toLocalDate()
-
-                } else {
-                    val numberOfPeriods: Long = (rruleObjVal.count - 1).toLong()
-                    if (numberOfPeriods > 0) {
-                        when (rruleObjVal.freq) {
-                            Frequency.Daily -> {
-                                rruleValues.localEndDate =
-                                    LocalDate.of(
-                                        startDate.year,
-                                        startDate.month,
-                                        startDate.day
-                                    )
-                                        .plusDays(numberOfPeriods)
-                            }
-
-                            Frequency.Weekly -> {
-                                val weekDays = rruleObjVal.byDay
-
-                                rruleValues.localEndDate = calculateEndDate(
-                                    LocalDate.of(
-                                        startDate.year,
-                                        startDate.month,
-                                        startDate.day
-                                    ),
-                                    weekDays,
-                                    numberOfPeriods.toInt()
-                                )
-                            }
-
-                            Frequency.Monthly -> {
-                                rruleValues.localEndDate =
-                                    LocalDate.of(
-                                        startDate.year,
-                                        startDate.month,
-                                        startDate.day
-                                    )
-                                        .plusMonths(numberOfPeriods)
-                            }
-
-                            Frequency.Yearly -> {
-                                rruleValues.localEndDate =
-                                    LocalDate.of(
-                                        startDate.year,
-                                        startDate.month,
-                                        startDate.day
-                                    )
-                                        .plusYears(numberOfPeriods)
-                            }
-                        }
-                    }
-                }
-
-                rruleValues.repeatPeriod = toEventRepeatPeriod(rruleObjVal.freq)
-                if (rruleValues.repeatPeriod == RepeatPeriod.WEEKLY) {
-                    if (rruleObjVal.byDay.isEmpty()) {
-                        rruleValues.daysOfWeek = ArrayList<DayOfWeek>()
-                        val dayOfWeek =
-                            LocalDate.of(startDate.year, startDate.month, startDate.day).dayOfWeek
-                        rruleValues.daysOfWeek!!.add(dayOfWeek)
-                    } else {
-                        val weekDays = rruleObjVal.byDay
-                        rruleValues.daysOfWeek = createDaysOfWeek(weekDays)
-                    }
-                }
-            }
-        }
-
-        return rruleValues
+    @Suppress("UNUSED_PARAMETER")
+    private fun validateRule(rule: String): Boolean {
+        // Add possible validation here.
+        return true
     }
 
-    private fun calculateEndDate(
-        startDate: LocalDate,
-        daysOfWeek: ArrayList<WeekdayNum>,
-        n: Int
-    ): LocalDate {
-        var endDate = startDate
+    fun getValues(
+        rrule: String?,
+        startDate: EventDate,
+        zone: ZoneId
+    ): Values = when {
+        rrule.isNullOrEmpty() -> Values()
+        !validateRule(rrule) -> Values(incompatible = true)
+        else -> parseRRule(rruleUntilFix(rrule), startDate, zone)
+    }
 
-        if (daysOfWeek.isEmpty()) {
-            return endDate
+    private fun parseRRule(rrule: String, startDate: EventDate, zone: ZoneId): Values {
+        val rruleObj = RRule(rrule)
+
+        if (!isRRuleCompatible(rruleObj)) {
+            return Values(incompatible = true)
         }
 
-        val daysOfWeekLocalDay = daysOfWeek.map {
-            when (it.weekday) {
+        val endDate = calculateEndDate(rruleObj, startDate, zone)
+        val repeatPeriod = toEventRepeatPeriod(rruleObj.freq)
+        val daysOfWeek = when (repeatPeriod) {
+            RepeatPeriod.WEEKLY -> extractWeekDays(rruleObj, startDate)
+            else -> emptyList()
+        }
+
+        return Values(
+            localEndDate = endDate,
+            repeatPeriod = repeatPeriod,
+            daysOfWeek = daysOfWeek
+        )
+    }
+
+    private fun isRRuleCompatible(rruleObj: RRule): Boolean {
+        val validNumberOnly = listOf(0)
+        val numberArr = rruleObj.byDay.map { it.number }
+
+        return rruleObj.byMonth.isEmpty() &&
+                (rruleObj.byDay.isEmpty() || validNumberOnly.containsAll(numberArr)) &&
+                !(rruleObj.freq == Frequency.Weekly && rruleObj.interval > 1)
+    }
+
+    private fun extractWeekDays(rruleObj: RRule, startDate: EventDate): List<DayOfWeek> =
+        if (rruleObj.byDay.isEmpty()) {
+            listOf(LocalDate.of(startDate.year, startDate.month, startDate.day).dayOfWeek)
+        } else {
+            rruleObj.byDay.map { weekdayNum ->
+                when (weekdayNum.weekday) {
+                    Weekday.Monday -> DayOfWeek.MONDAY
+                    Weekday.Tuesday -> DayOfWeek.TUESDAY
+                    Weekday.Wednesday -> DayOfWeek.WEDNESDAY
+                    Weekday.Thursday -> DayOfWeek.THURSDAY
+                    Weekday.Friday -> DayOfWeek.FRIDAY
+                    Weekday.Saturday -> DayOfWeek.SATURDAY
+                    Weekday.Sunday -> DayOfWeek.SUNDAY
+                }
+            }
+        }
+
+    private fun calculateEndDate(rruleObj: RRule, startDate: EventDate, zone: ZoneId): LocalDate? {
+        val startLocalDate = LocalDate.of(startDate.year, startDate.month, startDate.day)
+
+        return when {
+            rruleObj.until != null -> parseUntilDate(rruleObj.until.toString(), zone)
+            rruleObj.count > 1 -> calculateEndDateFromCount(
+                startLocalDate,
+                rruleObj.count - 1,
+                rruleObj.freq,
+                rruleObj.byDay
+            )
+            else -> null
+        }
+    }
+
+    private fun parseUntilDate(untilString: String, zone: ZoneId): LocalDate {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+        return LocalDateTime.parse(untilString, formatter)
+            .toLocalDate()
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .atZone(zone)
+            .toLocalDate()
+    }
+
+    private fun calculateEndDateFromCount(
+        startDate: LocalDate,
+        count: Int,
+        frequency: Frequency,
+        byDay: ArrayList<WeekdayNum>
+    ): LocalDate = when (frequency) {
+        Frequency.Daily -> startDate.plusDays(count.toLong())
+        Frequency.Weekly -> calculateWeeklyEndDate(startDate, byDay, count)
+        Frequency.Monthly -> startDate.plusMonths(count.toLong())
+        Frequency.Yearly -> startDate.plusYears(count.toLong())
+        else -> startDate
+    }
+
+    private fun calculateWeeklyEndDate(
+        startDate: LocalDate,
+        weekDays: List<WeekdayNum>,
+        count: Int
+    ): LocalDate {
+        if (weekDays.isEmpty()) return startDate
+
+        val targetDays = weekDays.map { weekdayNum ->
+            when (weekdayNum.weekday) {
                 Weekday.Monday -> DayOfWeek.MONDAY
                 Weekday.Tuesday -> DayOfWeek.TUESDAY
                 Weekday.Wednesday -> DayOfWeek.WEDNESDAY
@@ -169,64 +151,32 @@ class RRuleValues @Inject constructor(
                 Weekday.Saturday -> DayOfWeek.SATURDAY
                 Weekday.Sunday -> DayOfWeek.SUNDAY
             }
-        }
-        var count = 0
-        while (count < n) {
-            endDate = endDate.plusDays(1)
-            if (daysOfWeekLocalDay.contains(endDate.dayOfWeek)) {
-                count++
-            }
-        }
-        return endDate
+        }.toSet()
+
+        return generateSequence(startDate) { it.plusDays(1) }
+            .filter { targetDays.contains(it.dayOfWeek) }
+            .drop(count)
+            .first()
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun validateRule(rule: String): Boolean {
-        // Add possible validation here.
-        return true
-    }
-
-    private fun toEventRepeatPeriod(freq: Frequency): RepeatPeriod {
-        return when (freq) {
-            Frequency.Monthly -> RepeatPeriod.MONTHLY
-            Frequency.Weekly -> RepeatPeriod.WEEKLY
-            Frequency.Yearly -> RepeatPeriod.YEARLY
-            Frequency.Daily -> RepeatPeriod.DAILY
-            else -> RepeatPeriod.NEVER
-        }
-    }
-
-    private fun createDaysOfWeek(weekDays: ArrayList<WeekdayNum>): ArrayList<DayOfWeek> {
-        val days: ArrayList<DayOfWeek> = ArrayList()
-        weekDays.forEach {
-            when (it.weekday.name) {
-                "Monday" -> days.add(DayOfWeek.MONDAY)
-                "Tuesday" -> days.add(DayOfWeek.TUESDAY)
-                "Wednesday" -> days.add(DayOfWeek.WEDNESDAY)
-                "Thursday" -> days.add(DayOfWeek.THURSDAY)
-                "Friday" -> days.add(DayOfWeek.FRIDAY)
-                "Saturday" -> days.add(DayOfWeek.SATURDAY)
-                else -> days.add(DayOfWeek.SUNDAY)
-            }
-        }
-
-        return days
+    private fun toEventRepeatPeriod(freq: Frequency): RepeatPeriod = when (freq) {
+        Frequency.Monthly -> RepeatPeriod.MONTHLY
+        Frequency.Weekly -> RepeatPeriod.WEEKLY
+        Frequency.Yearly -> RepeatPeriod.YEARLY
+        Frequency.Daily -> RepeatPeriod.DAILY
+        else -> RepeatPeriod.NEVER
     }
 
     private fun rruleUntilFix(rrule: String): String {
         val components = rrule.split(";", "=")
-        val index = components.indexOf("UNTIL")
-        if (index == -1) return rrule
+        val untilIndex = components.indexOf("UNTIL")
+        if (untilIndex == -1) return rrule
 
-        val untilValue = components[index + 1]
-        return runCatching {
-            DateTimeFormatter.ofPattern("yyyyMMdd").parse(untilValue)
-            val newUntilValue = untilValue + "T000000Z"
-            rrule.replace(untilValue, newUntilValue)
-        }.getOrElse {
-            // Handle the failure case (exception)
-            rrule
-        }
-
+        return components.getOrNull(untilIndex + 1)?.let { untilValue ->
+            runCatching {
+                DateTimeFormatter.ofPattern("yyyyMMdd").parse(untilValue)
+                rrule.replace(untilValue, "${untilValue}T000000Z")
+            }.getOrDefault(rrule)
+        } ?: rrule
     }
 }

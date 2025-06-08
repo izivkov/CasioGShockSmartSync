@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,14 +20,15 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSwitchWithText
 
 @Composable
 fun AlarmChimeSwitch(
-    modifier: Modifier,
-    alarmViewModel: AlarmViewModel = hiltViewModel()
+    modifier: Modifier = Modifier,
+    onUpdate: (Boolean) -> Unit,
+    alarmViewModel: AlarmViewModel = hiltViewModel(),
 ) {
-    val alarms by alarmViewModel.alarms.collectAsState()
-    val isChecked = remember { mutableStateOf(alarms.getOrNull(0)?.hasHourlyChime ?: false) }
+    val alarms = alarmViewModel.alarms
+    var isChecked by remember { mutableStateOf(alarms.getOrNull(0)?.hasHourlyChime ?: false) }
 
     LaunchedEffect(alarms) {
-        isChecked.value = alarms.getOrNull(0)?.hasHourlyChime ?: false
+        isChecked = alarms.getOrNull(0)?.hasHourlyChime ?: false
     }
 
     Column(
@@ -38,11 +39,12 @@ fun AlarmChimeSwitch(
         horizontalAlignment = Alignment.End,
     ) {
         AppSwitchWithText(
-            isChecked = isChecked.value,
+            isChecked = isChecked,
             onCheckedChange = { checked ->
                 if (alarms.isNotEmpty()) {
+                    isChecked = checked
                     alarmViewModel.toggleHourlyChime(checked)
-                    isChecked.value = checked
+                    onUpdate(checked)
                 }
             },
             modifier = modifier,

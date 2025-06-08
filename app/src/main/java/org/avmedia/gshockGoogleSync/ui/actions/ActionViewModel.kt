@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
 
-import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -92,8 +91,21 @@ class ActionsViewModel @Inject constructor(
             add(NextTrack("Skip to next track", false))
             add(FindPhoneAction(appContext.getString(R.string.find_phone), true))
             add(SetTimeAction(appContext.getString(R.string.set_time), true, api))
-            add(SetEventsAction(appContext.getString(R.string.set_reminders), false, api, calendarEvents))
-            add(PhotoAction(appContext.getString(R.string.take_photo), false, CameraOrientation.BACK))
+            add(
+                SetEventsAction(
+                    appContext.getString(R.string.set_reminders),
+                    false,
+                    api,
+                    calendarEvents
+                )
+            )
+            add(
+                PhotoAction(
+                    appContext.getString(R.string.take_photo),
+                    false,
+                    CameraOrientation.BACK
+                )
+            )
             add(PrayerAlarmsAction("Set Prayer Alarms", true, api))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
@@ -341,11 +353,13 @@ class ActionsViewModel @Inject constructor(
     }
 
     data class PrayerAlarmsAction(
-        override var title: String, override var enabled: Boolean, val api: GShockRepository
-    ) :
-        Action(title, enabled, RunMode.ASYNC) {
+        override var title: String,
+        override var enabled: Boolean,
+        val api: GShockRepository
+    ) : Action(title, enabled, RunMode.ASYNC) {
 
         private var lastSet: Long? = null
+
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             // update every 6 hours
             val setTimeConditionAlwaysConnected =
@@ -362,17 +376,19 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            val alarms = PrayerAlarmsHelper.createNextPrayerAlarms(context, WatchInfo.alarmCount)
-            if (alarms == null) {
-                Timber.e("Could not set prayer alarms")
-                return
-            }
-            mainScope.launch {
-                // getAlarms need to be run first, otherwise setAlarms() will not work
-                api.getAlarms()
-                api.setAlarms(alarms)
-                lastSet = System.currentTimeMillis()
-            }
+            PrayerAlarmsHelper.createNextPrayerAlarms(context, WatchInfo.alarmCount)
+                .onSuccess { alarms ->
+                    mainScope.launch {
+                        // getAlarms need to be run first, otherwise setAlarms() will not work
+                        api.getAlarms()
+                        api.setAlarms(ArrayList(alarms))
+                        lastSet = System.currentTimeMillis()
+                    }
+                }
+                .onFailure { error ->
+                    Timber.e("Could not set prayer alarms: ${error.message}")
+                    AppSnackbar("Failed to set prayer alarms: ${error.message}")
+                }
         }
     }
 
@@ -566,7 +582,8 @@ class ActionsViewModel @Inject constructor(
     }
 
     private fun showTimeSyncNotification() {
-        val dateStr = DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
+        val dateStr =
+            DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
         val watchName = WatchInfo.name
         val text = "Time set at $dateStr for $watchName watch"
 

@@ -58,11 +58,7 @@ private fun UnlockText(
     AppTextVeryLarge(
         text = stringResource(
             R.string.cover_hold_to_unlock
-        ),
-        color = if (isPressed)
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-        else
-            MaterialTheme.colorScheme.primary
+        )
     )
 }
 
