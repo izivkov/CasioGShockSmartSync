@@ -81,7 +81,7 @@ fun LocalTimeView(
                         id = R.string.send_to_watch
                     ),
                     onClick = {
-                        timeModel.sendTimeToWatch()
+                        timeModel.onAction(TimeAction.SendTimeToWatch)
                     }
                 )
             }

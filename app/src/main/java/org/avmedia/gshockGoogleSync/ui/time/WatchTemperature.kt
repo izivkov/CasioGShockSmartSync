@@ -26,26 +26,24 @@ fun WatchTemperature(
     timeModel: TimeViewModel = hiltViewModel()
 ) {
     var temperatureText by remember { mutableStateOf("N/A") }
-    val temperature by timeModel.temperature.collectAsState()
+    val state by timeModel.state.collectAsState()
 
     val context = LocalContext.current
 
-    LaunchedEffect(temperature) {
+    LaunchedEffect(state.temperature) {
         if (hasTemperature && isConnected && isNormalButtonPressed) {
             launch(Dispatchers.IO) {
-
                 val tm = getSystemService(context, TelephonyManager::class.java)
                 val countryCodeValue = tm?.networkCountryIso ?: ""
                 val isUS = (countryCodeValue.isNotEmpty() && countryCodeValue.uppercase() == "US")
-                val fmt =
-                    MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
+                val fmt = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
                 val measure = if (isUS) {
                     Measure(
-                        ((temperature * 9 / 5) + 32),
+                        ((state.temperature * 9 / 5) + 32),
                         MeasureUnit.FAHRENHEIT
                     )
                 } else {
-                    Measure(temperature, MeasureUnit.CELSIUS)
+                    Measure(state.temperature, MeasureUnit.CELSIUS)
                 }
 
                 launch(Dispatchers.Main) {

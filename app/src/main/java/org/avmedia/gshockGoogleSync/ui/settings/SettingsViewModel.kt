@@ -8,11 +8,11 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -23,83 +23,124 @@ import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
+
+abstract class Setting(val name: String) {
+    open fun save() {} // Default empty implementation
+}
+
+data class SettingsState(
+    val settings: List<Setting> = emptyList(),
+    val settingsMap: Map<Class<out Setting>, Setting> = emptyMap()
+)
+
+sealed class SettingsAction {
+    data class UpdateSetting<T : Setting>(val setting: T) : SettingsAction()
+    data object SetSmartDefaults : SettingsAction()
+    data object SendToWatch : SettingsAction()
+}
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val api: GShockRepository,
-    @ApplicationContext val appContext: Context // Inject application context
+    @ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
-    class AppSettings(appContext: Context) {
-        var keepAlive = LocalDataStorage.getKeepAlive(appContext)
+    fun onSettingUpdated(setting: Setting) {
+        updateSetting(setting)
     }
 
-    private val appSettings = AppSettings(appContext)
-
-    abstract class Setting(open var title: String) {
-        open fun save() {
-            // NO-OP
-        }
-    }
-
-    private val _settingsFlow = MutableStateFlow<List<Setting>>(emptyList())
-    val settings: StateFlow<List<Setting>> = _settingsFlow
-    private val settingsMap = ConcurrentHashMap<Class<out Setting>, Setting>()
-
-    private fun updateSettingsAndMap(newSettings: ArrayList<Setting>) {
-        settingsMap.clear()
-        newSettings.forEach { setting ->
-            settingsMap[setting::class.java] = setting
-        }
-        _settingsFlow.value = newSettings
-    }
-
-    fun <T : Setting> getSetting(type: Class<T>): T {
-        synchronized(settingsMap) {
-            @Suppress("UNCHECKED_CAST")
-            return settingsMap[type] as T
-        }
-    }
-
-    fun <T : Setting> updateSetting(updatedSetting: T) {
-        val currentList = _settingsFlow.value.toMutableList()
-        val index = currentList.indexOfFirst { it::class == updatedSetting::class }
-        if (index != -1) {
-            currentList[index] = updatedSetting
-            _settingsFlow.value = currentList
-            settingsMap[updatedSetting::class.java] = updatedSetting
-            updatedSetting.save()
-        }
-    }
+    private val _state = MutableStateFlow(SettingsState())
+    val state: StateFlow<SettingsState> = _state.asStateFlow()
 
     init {
+        initializeSettings()
+    }
+
+    private fun initializeSettings() {
         val newSettings = arrayListOf(
             Locale(),
             OperationSound(),
             Light(),
             PowerSavingMode(),
             TimeAdjustment(appContext),
-            KeepAlive(appContext),
+            KeepAlive(appContext)
         )
         updateSettingsAndMap(filter(newSettings))
 
-        val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
-        CoroutineScope(coroutineContext).launch {
+        /**
+         * Launches a coroutine in the ViewModel's scope using the provided dispatcher.
+         * The coroutine is automatically cancelled when the ViewModel is cleared.
+         *
+         * @param dispatcher The dispatcher to run the coroutine on (Dispatchers.Default for CPU-intensive work)
+         * @param block The coroutine code to execute
+         *
+         * Note: viewModelScope is an extension property provided by the lifecycle-viewmodel-ktx library
+         * that creates a CoroutineScope tied to the ViewModel's lifecycle.
+         */
+        viewModelScope.launch(Dispatchers.Default) {            // Convert API settings to JSON object
             val settingsJson = Gson().toJsonTree(api.getSettings()).asJsonObject
-            val appSettingsJson = Gson().toJsonTree(appSettings).asJsonObject
 
-            // Merge appSettingsJson into settingsJson
+            // We have additional settings defined in the APP, not in the API, so we need to merge them.
+            class AppSettings(appContext: Context) {
+                var keepAlive = LocalDataStorage.getKeepAlive(appContext)
+            }
+            val appSettingsJson = Gson().toJsonTree(AppSettings(appContext)).asJsonObject
+
+            // Merge default settings into API settings
             for (entry in appSettingsJson.entrySet()) {
                 settingsJson.add(entry.key, entry.value)
             }
 
-            // Serialize the merged JsonObject
+            // Convert merged settings to string and update state
             val settingStr = Gson().toJson(settingsJson)
-
             updateSettingsAndMap(fromJson(settingStr))
+        }
+    }
+
+    private fun updateSettingsAndMap(newSettings: ArrayList<Setting>) {
+        val newMap = newSettings.associateBy { it::class.java }
+        _state.update {
+            it.copy(
+                settings = newSettings,
+                settingsMap = newMap
+            )
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Setting> getSetting(type: Class<T>): T {
+        return state.value.settingsMap[type] as T
+    }
+
+    /**
+     * Updates a single setting in both the settings list and settings map, then persists the change.
+     *
+     * @param updatedSetting The new setting instance that will replace the existing one
+     *
+     * The function:
+     * 1. Makes a mutable copy of the current settings list
+     * 2. Finds the matching setting by its class type
+     * 3. Updates both the list and map with the new setting
+     * 4. Updates the state with the new collections
+     * 5. Calls save() on the setting to persist changes
+     *
+     * Note: If no matching setting is found (index == -1), no update occurs
+     */
+    private fun updateSetting(updatedSetting: Setting) {
+        val currentList = state.value.settings.toMutableList()
+        val index = currentList.indexOfFirst { it::class == updatedSetting::class }
+        if (index != -1) {
+            currentList[index] = updatedSetting
+            val newMap = state.value.settingsMap.toMutableMap()
+            newMap[updatedSetting::class.java] = updatedSetting
+            _state.update {
+                it.copy(
+                    settings = currentList,
+                    settingsMap = newMap
+                )
+            }
+            updatedSetting.save()
         }
     }
 
@@ -190,7 +231,16 @@ class SettingsViewModel @Inject constructor(
 
     @Synchronized
     fun fromJson(jsonStr: String): ArrayList<Setting> {
+        val tempMap = mutableMapOf<Class<out Setting>, Setting>()
+        // Initialize with existing settings
+        state.value.settingsMap.forEach { (clazz, setting) ->
+            tempMap[clazz] = setting
+        }
+
         val updatedObjects = mutableSetOf<Setting>()
+        // Add existing settings to the set
+        updatedObjects.addAll(tempMap.values)
+
         val jsonObj = JSONObject(jsonStr)
         val keys = jsonObj.keys()
 
@@ -217,53 +267,53 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun handleRunInBackground(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[KeepAlive::class.java] as KeepAlive
+        val setting = state.value.settingsMap[KeepAlive::class.java] as KeepAlive
         setting.keepAlive = value == true
         updatedObjects.add(setting)
     }
 
     private fun handlePowerSavingMode(value: Any, updatedObjects: MutableSet<Setting>) {
         if (WatchInfo.hasPowerSavingMode) {
-            val setting = settingsMap[PowerSavingMode::class.java] as PowerSavingMode
+            val setting = state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
             setting.powerSavingMode = value == true
             updatedObjects.add(setting)
         }
     }
 
     private fun handleTimeAdjustment(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[TimeAdjustment::class.java] as TimeAdjustment
+        val setting = state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
         setting.timeAdjustment = value == true
         updatedObjects.add(setting)
     }
 
     private fun handleAdjustmentTimeMinutes(value: Any, updatedObjects: MutableSet<Setting>) {
         if (!WatchInfo.alwaysConnected) {
-            val setting = settingsMap[TimeAdjustment::class.java] as TimeAdjustment
+            val setting = state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
             setting.adjustmentTimeMinutes = value as Int
             updatedObjects.add(setting)
         }
     }
 
     private fun handleButtonTone(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[OperationSound::class.java] as OperationSound
+        val setting = state.value.settingsMap[OperationSound::class.java] as OperationSound
         setting.sound = value == true
         updatedObjects.add(setting)
     }
 
     private fun handleButtonVibration(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[OperationSound::class.java] as OperationSound
+        val setting = state.value.settingsMap[OperationSound::class.java] as OperationSound
         setting.vibrate = value == true
         updatedObjects.add(setting)
     }
 
     private fun handleAutoLight(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[Light::class.java] as Light
+        val setting = state.value.settingsMap[Light::class.java] as Light
         setting.autoLight = value == true
         updatedObjects.add(setting)
     }
 
     private fun handleLightDuration(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[Light::class.java] as Light
+        val setting = state.value.settingsMap[Light::class.java] as Light
         setting.duration = if (value == Light.LightDuration.TWO_SECONDS.value) {
             Light.LightDuration.TWO_SECONDS
         } else {
@@ -273,7 +323,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun handleTimeFormat(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[Locale::class.java] as Locale
+        val setting = state.value.settingsMap[Locale::class.java] as Locale
         setting.timeFormat = if (value == Locale.TimeFormat.TWELVE_HOURS.value) {
             Locale.TimeFormat.TWELVE_HOURS
         } else {
@@ -283,7 +333,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun handleDateFormat(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[Locale::class.java] as Locale
+        val setting = state.value.settingsMap[Locale::class.java] as Locale
         setting.dateFormat = if (value == Locale.DateFormat.MONTH_DAY.value) {
             Locale.DateFormat.MONTH_DAY
         } else {
@@ -293,7 +343,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun handleLanguage(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = settingsMap[Locale::class.java] as Locale
+        val setting = state.value.settingsMap[Locale::class.java] as Locale
         setting.dayOfWeekLanguage = when (value) {
             Locale.DayOfWeekLanguage.ENGLISH.englishName -> Locale.DayOfWeekLanguage.ENGLISH
             Locale.DayOfWeekLanguage.SPANISH.englishName -> Locale.DayOfWeekLanguage.SPANISH
@@ -361,7 +411,7 @@ class SettingsViewModel @Inject constructor(
         if (WatchInfo.hasPowerSavingMode) {
             val batteryLevel = api.getBatteryLevel()
             val currentPowerSavingMode: PowerSavingMode =
-                settingsMap[PowerSavingMode::class.java] as PowerSavingMode
+                state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
 
             val enablePowerSetting = batteryLevel <= 15 || currentPowerSavingMode.powerSavingMode
             val powerSavings = PowerSavingMode(enablePowerSetting)
@@ -370,7 +420,13 @@ class SettingsViewModel @Inject constructor(
 
         // Time adjustment
         val notifyMe = LocalDataStorage.getTimeAdjustmentNotification(appContext)
-        val timeAdjustment = TimeAdjustment(appContext, true, 30, notifyMe, 0)
+        val timeAdjustment = TimeAdjustment(
+            appContext = appContext,
+            timeAdjustment = true,
+            adjustmentTimeMinutes = 30,
+            timeAdjustmentNotifications = notifyMe,
+            fineAdjustment = 0  // Explicitly set to 0
+        )
         smartSettings.add(timeAdjustment)
 
         // Run in background
@@ -394,24 +450,24 @@ class SettingsViewModel @Inject constructor(
     fun sendToWatch() {
         val settings = Settings()
 
-        val localeSetting: Locale = settingsMap[Locale::class.java] as Locale
+        val localeSetting: Locale = state.value.settingsMap[Locale::class.java] as Locale
         settings.language = localeSetting.dayOfWeekLanguage.englishName
         settings.timeFormat = localeSetting.timeFormat.value
         settings.dateFormat = localeSetting.dateFormat.value
 
-        val lightSetting: Light = settingsMap[Light::class.java] as Light
+        val lightSetting: Light = state.value.settingsMap[Light::class.java] as Light
         settings.autoLight = lightSetting.autoLight
         settings.lightDuration = lightSetting.duration.value
 
         if (WatchInfo.hasPowerSavingMode) {
             val powerSavingMode: PowerSavingMode =
-                settingsMap[PowerSavingMode::class.java] as PowerSavingMode
+                state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
             settings.powerSavingMode = powerSavingMode.powerSavingMode
         }
 
         if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
             val timeAdjustment: TimeAdjustment =
-                settingsMap[TimeAdjustment::class.java] as TimeAdjustment
+                state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
             settings.timeAdjustment = timeAdjustment.timeAdjustment
             settings.adjustmentTimeMinutes = timeAdjustment.adjustmentTimeMinutes
             LocalDataStorage.setTimeAdjustmentNotification(
@@ -421,7 +477,7 @@ class SettingsViewModel @Inject constructor(
         }
 
         val buttonTone: OperationSound =
-            settingsMap[OperationSound::class.java] as OperationSound
+            state.value.settingsMap[OperationSound::class.java] as OperationSound
         settings.buttonTone = buttonTone.sound
         settings.keyVibration = buttonTone.vibrate
 
@@ -432,7 +488,6 @@ class SettingsViewModel @Inject constructor(
             }.onFailure { e ->
                 ProgressEvents.onNext("ApiError", e.message ?: "")
             }
-
         }
     }
 }

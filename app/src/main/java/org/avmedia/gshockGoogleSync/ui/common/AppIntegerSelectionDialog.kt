@@ -52,7 +52,7 @@ fun ValueSelectionDialog(
     spacing: Dp = 16.dp
 ) {
     val values = range.step(step).toList()
-    val initialIndex = values.indexOf(initialValue)
+    val initialIndex = values.indexOf(initialValue).coerceIn(0, values.size - 1)
     var selectedIndex by remember { mutableIntStateOf(initialIndex) }
 
     AlertDialog(
@@ -84,7 +84,7 @@ fun ValueSelectionDialog(
                     step = step,
                     pickerValues = values,
                     selectedIndex = selectedIndex,
-                    onValueChange = { selectedIndex = it },
+                    onValueChange = { index -> selectedIndex = index },
                     backgroundColor = backgroundColor,
                     contentColor = contentColor,
                     unit = unit
@@ -104,20 +104,17 @@ fun NumberPickerView(
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     unit: String = "",
-    textSize: TextUnit = 20.sp,
+    textSize: TextUnit = 32.sp,
     cornerRadius: Dp = 8.dp,
     padding: Dp = 4.dp,
     wrapSelectorWheel: Boolean = false,
     allowKeyboardInput: Boolean = false
 ) {
-    val safeStep = if (step > 0) step else 1
-    require(!(pickerValues.isEmpty() || pickerValues.size < 2)) {
-        "pickerValues must have at least 2 elements."
-    }
+    if (pickerValues.isEmpty()) return
 
     val adjustedMinValue = 0
-    val adjustedMaxValue = (pickerValues.last() - pickerValues.first()) / safeStep
-    val safeSelectedIndex = selectedIndex.coerceIn(adjustedMinValue, adjustedMaxValue)
+    val adjustedMaxValue = pickerValues.size - 1
+    val safeSelectedIndex = selectedIndex.coerceIn(0, adjustedMaxValue)
 
     Box(
         modifier = modifier
@@ -132,12 +129,8 @@ fun NumberPickerView(
                     minValue = adjustedMinValue
                     maxValue = adjustedMaxValue
                     value = safeSelectedIndex
-                    displayedValues = pickerValues.map { "$it $unit" }.toTypedArray()
-                    descendantFocusability = if (allowKeyboardInput) {
-                        NumberPicker.FOCUS_AFTER_DESCENDANTS
-                    } else {
-                        NumberPicker.FOCUS_BLOCK_DESCENDANTS
-                    }
+                    displayedValues = pickerValues.map { "$it$unit" }.toTypedArray()
+                    descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
                     this.wrapSelectorWheel = wrapSelectorWheel
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -145,19 +138,17 @@ fun NumberPickerView(
                         this.textSize = textSize.value
                     }
 
-                    setOnValueChangedListener { _, _, newValue ->
-                        onValueChange(pickerValues[newValue])
+                    setOnValueChangedListener { _, _, newVal ->
+                        onValueChange(newVal)
                     }
                 }
             },
             update = { picker ->
                 picker.value = safeSelectedIndex
-                picker.setOnValueChangedListener { _, _, newValue ->
-                    onValueChange(pickerValues[newValue])
-                }
+                picker.minValue = adjustedMinValue
+                picker.maxValue = adjustedMaxValue
+                picker.displayedValues = pickerValues.map { "$it$unit" }.toTypedArray()
             }
         )
     }
 }
-
-fun IntRange.step(step: Int): IntProgression = this.first..this.last step step

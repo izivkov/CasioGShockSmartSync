@@ -39,15 +39,14 @@ fun Locale(
     onUpdate: (SettingsViewModel.Locale) -> Unit,
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val classType = SettingsViewModel.Locale::class.java
-    val settings by settingsViewModel.settings.collectAsState()
-    val localeSetting: SettingsViewModel.Locale = settingsViewModel.getSetting(classType)
+    val state by settingsViewModel.state.collectAsState()
+    val localeSetting = state.settingsMap[SettingsViewModel.Locale::class.java] as SettingsViewModel.Locale
 
     var timeFormat by remember { mutableStateOf(localeSetting.timeFormat) }
     var dateFormat by remember { mutableStateOf(localeSetting.dateFormat) }
     var selectedLanguage by remember { mutableStateOf(localeSetting.dayOfWeekLanguage) }
 
-    LaunchedEffect(settings, timeFormat, dateFormat, selectedLanguage) {
+    LaunchedEffect(state.settings) {
         timeFormat = localeSetting.timeFormat
         dateFormat = localeSetting.dateFormat
         selectedLanguage = localeSetting.dayOfWeekLanguage
@@ -196,13 +195,13 @@ fun LanguageDropdownMenu(
     modifier: Modifier,
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val settings by settingsViewModel.settings.collectAsState()
+    val state by settingsViewModel.state.collectAsState()
 
     val languages = SettingsViewModel.Locale.DayOfWeekLanguage.entries.map { it }
     var selectedLanguage by remember { mutableStateOf(localeSetting.dayOfWeekLanguage) }
-    var expanded by remember { mutableStateOf(false) }  // State to control menu visibility
+    var expanded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(settings) {
+    LaunchedEffect(state.settings) {
         selectedLanguage = localeSetting.dayOfWeekLanguage
     }
 

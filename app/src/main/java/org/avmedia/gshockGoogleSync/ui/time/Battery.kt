@@ -42,12 +42,11 @@ import org.avmedia.gshockapi.WatchInfo
 fun Battery(
     timeModel: TimeViewModel = hiltViewModel()
 ) {
-    val batteryLevel by timeModel.batteryLevel.collectAsState()
+    val state by timeModel.state.collectAsState()
     var result by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(batteryLevel) {
-        val percent = batteryLevel
-        result = percent
+    LaunchedEffect(state.batteryLevel) {
+        result = state.batteryLevel
     }
 
     AndroidView(
@@ -59,7 +58,6 @@ fun Battery(
             BatteryView(context)
         },
         update = { batteryView ->
-            // Update the percent value when result changes
             batteryView.setPercent(result)
         }
     )

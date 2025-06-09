@@ -20,12 +20,15 @@ fun KeepAlive(
 ) {
     val context = LocalContext.current
     val keepAliveManager = remember(context) { KeepAliveManager.getInstance(context) }
-    val settings by settingsViewModel.settings.collectAsState()
+    val state by settingsViewModel.state.collectAsState()
 
-    val keepAliveSetting = settingsViewModel.getSetting(SettingsViewModel.KeepAlive::class.java)
+    // Safe casting with elvis operator
+    val keepAliveSetting = (state.settingsMap[SettingsViewModel.KeepAlive::class.java] as? SettingsViewModel.KeepAlive)
+        ?: SettingsViewModel.KeepAlive(context) // Provide default value
+
     var keepAlive by remember { mutableStateOf(keepAliveSetting.keepAlive) }
 
-    LaunchedEffect(settings) {
+    LaunchedEffect(state.settings) {
         keepAlive = keepAliveSetting.keepAlive
     }
 

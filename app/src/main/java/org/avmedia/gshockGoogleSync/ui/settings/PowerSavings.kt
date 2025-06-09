@@ -17,32 +17,23 @@ fun PowerSavings(
     onUpdate: (SettingsViewModel.PowerSavingMode) -> Unit,
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val classType = SettingsViewModel.PowerSavingMode::class.java
+    val state by settingsViewModel.state.collectAsState()
+    val powerSavingModeSetting = state.settingsMap[SettingsViewModel.PowerSavingMode::class.java] as SettingsViewModel.PowerSavingMode
 
-    val settings by settingsViewModel.settings.collectAsState()
-    val powerSavingModeSetting: SettingsViewModel.PowerSavingMode =
-        settingsViewModel.getSetting(classType)
     var powerSavingMode by remember { mutableStateOf(powerSavingModeSetting.powerSavingMode) }
 
-    LaunchedEffect(settings) {
+    LaunchedEffect(state.settings) {
         powerSavingMode = powerSavingModeSetting.powerSavingMode
     }
 
-    val title = stringResource(
-        id = R.string.power_saving_mode
-    )
+    val title = stringResource(id = R.string.power_saving_mode)
+
     BasicSettings(
-        title = title, isSwitchOn = powerSavingMode,
+        title = title,
+        isSwitchOn = powerSavingMode,
         onSwitchToggle = { newValue ->
-            powerSavingMode = newValue // Update the state when the switch is toggled
-            powerSavingModeSetting.powerSavingMode = newValue
+            powerSavingMode = newValue
             onUpdate(powerSavingModeSetting.copy(powerSavingMode = newValue))
         }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewPowerSavings() {
-    PowerSavings(onUpdate = {})
 }

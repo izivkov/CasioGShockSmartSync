@@ -10,17 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Checkbox
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
@@ -32,22 +25,18 @@ fun OperationalTone(
     onUpdate: (SettingsViewModel.OperationSound) -> Unit,
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val classType = SettingsViewModel.OperationSound::class.java
+    val state by settingsViewModel.state.collectAsState()
+    val operationToneSetting =
+        state.settingsMap[SettingsViewModel.OperationSound::class.java] as SettingsViewModel.OperationSound
 
-    val settings by settingsViewModel.settings.collectAsState()
-    val operationToneSetting: SettingsViewModel.OperationSound =
-        settingsViewModel.getSetting(classType)
     var sound by remember { mutableStateOf(operationToneSetting.sound) }
     var vibrate by remember { mutableStateOf(operationToneSetting.vibrate) }
 
-    LaunchedEffect(settings) {
+    LaunchedEffect(state.settings) {
         sound = operationToneSetting.sound
         vibrate = operationToneSetting.vibrate
     }
 
-    val title = stringResource(
-        id = R.string.operational_sound
-    )
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,15 +50,14 @@ fun OperationalTone(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppTextLarge(
-                    text = title,
+                    text = stringResource(id = R.string.operational_sound),
                     modifier = Modifier.padding(end = 6.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 AppSwitch(
                     checked = sound,
                     onCheckedChange = { newValue ->
-                        sound = newValue // Update the state when the switch is toggled
-                        operationToneSetting.sound = newValue
+                        sound = newValue
                         onUpdate(operationToneSetting.copy(sound = newValue))
                     },
                     modifier = Modifier
@@ -96,7 +84,6 @@ fun OperationalTone(
                             checked = vibrate,
                             onCheckedChange = { newValue ->
                                 vibrate = newValue
-                                operationToneSetting.vibrate = newValue
                                 onUpdate(operationToneSetting.copy(vibrate = newValue))
                             }
                         )
@@ -106,10 +93,4 @@ fun OperationalTone(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewOperationalTone() {
-    OperationalTone(onUpdate = {})
 }

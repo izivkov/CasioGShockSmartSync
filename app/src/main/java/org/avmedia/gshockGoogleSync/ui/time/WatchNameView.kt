@@ -22,10 +22,7 @@ fun WatchNameView(
     modifier: Modifier = Modifier,
     timeModel: TimeViewModel = hiltViewModel()
 ) {
-    val watchName by timeModel.watchName.collectAsState()
-
-    LaunchedEffect(watchName) {
-    }
+    val state by timeModel.state.collectAsState()
 
     AppCard(
         modifier = modifier
@@ -33,9 +30,9 @@ fun WatchNameView(
         Box(modifier = Modifier.fillMaxHeight()) {
             WatchName(
                 modifier = Modifier
-                    .align(Alignment.Center) // Aligns the text in the center of the Box (both horizontally and vertically)
+                    .align(Alignment.Center)
                     .fillMaxWidth(),
-                text = watchName.toString()
+                text = state.watchName
             )
         }
     }

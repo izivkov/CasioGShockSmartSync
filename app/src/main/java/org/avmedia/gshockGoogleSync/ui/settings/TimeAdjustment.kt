@@ -38,20 +38,22 @@ fun TimeAdjustment(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val classType = SettingsViewModel.TimeAdjustment::class.java
-    val settings by settingsViewModel.settings.collectAsState()
+    val state by settingsViewModel.state.collectAsState()
     val timeAdjustmentSetting: SettingsViewModel.TimeAdjustment =
         settingsViewModel.getSetting(classType)
 
     var timeAdjustment by remember { mutableStateOf(timeAdjustmentSetting.timeAdjustment) }
-
     var notifyMe by remember { mutableStateOf(timeAdjustmentSetting.timeAdjustmentNotifications) }
     var adjustmentMinutes by remember { mutableStateOf(timeAdjustmentSetting.adjustmentTimeMinutes.toString()) }
+    var fineAdjustment by remember { mutableStateOf(timeAdjustmentSetting.fineAdjustment) }
 
-    LaunchedEffect(settings, timeAdjustment, notifyMe) {
+    LaunchedEffect(state) {
         timeAdjustment = timeAdjustmentSetting.timeAdjustment
         notifyMe = timeAdjustmentSetting.timeAdjustmentNotifications
         adjustmentMinutes = timeAdjustmentSetting.adjustmentTimeMinutes.toString()
+        fineAdjustment = timeAdjustmentSetting.fineAdjustment
     }
+
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -66,9 +68,12 @@ fun TimeAdjustment(
                 FineAdjustmentRow(
                     modifier = Modifier
                         .padding(end = 12.dp, start = 12.dp, top = 6.dp),
-                    onUpdate = onUpdate,
+                    value = fineAdjustment,
+                    onValueChange = { newValue ->
+                        fineAdjustment = newValue
+                        onUpdate(timeAdjustmentSetting.copy(fineAdjustment = newValue))
+                    }
                 )
-
             } else {
                 Row(
                     modifier = Modifier
@@ -153,13 +158,15 @@ fun TimeAdjustment(
                         )
                     }
                 }
-
                 FineAdjustmentRow(
                     modifier = Modifier
                         .padding(end = 12.dp, start = 12.dp, top = 6.dp),
-                    onUpdate = onUpdate,
+                    value = fineAdjustment,
+                    onValueChange = { newValue ->
+                        fineAdjustment = newValue
+                        onUpdate(timeAdjustmentSetting.copy(fineAdjustment = newValue))
+                    }
                 )
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

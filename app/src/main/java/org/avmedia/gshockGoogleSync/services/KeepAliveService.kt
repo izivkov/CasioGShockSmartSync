@@ -44,8 +44,10 @@ class KeepAliveService : LifecycleService() {
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "KeepAlive::WakeLock")
             .apply { acquire(7 * 24 * 60 * 60 * 1000L) }
 
-    private fun startWithNotification() {
+    private fun startWithNotification() = runCatching {
         startForeground(NOTIFICATION_ID, createNotification())
+    }.onFailure { e ->
+        Timber.e("Failed to start foreground service with notification: ${e.message}")
     }
 
     private fun createNotification() = NotificationCompat.Builder(this, CHANNEL_ID)

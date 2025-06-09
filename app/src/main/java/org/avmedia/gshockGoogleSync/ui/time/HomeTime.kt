@@ -21,13 +21,13 @@ fun HomeTime(
     defaultText: String = "N/A",
     timeModel: TimeViewModel = hiltViewModel()
 ) {
-    val homeTime by timeModel.homeTime.collectAsState()
+    val state by timeModel.state.collectAsState()
     var text by remember { mutableStateOf(defaultText) }
 
-    LaunchedEffect(homeTime) {
+    LaunchedEffect(state.homeTime) {
         text = withContext(Dispatchers.IO) {
             if (WatchInfo.worldCities)
-                homeTime
+                state.homeTime
             else defaultText
         }
     }

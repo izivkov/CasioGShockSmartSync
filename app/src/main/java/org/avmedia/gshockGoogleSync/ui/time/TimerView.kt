@@ -35,7 +35,7 @@ fun TimerView(
     modifier: Modifier = Modifier,
     timeModel: TimeViewModel = hiltViewModel()
 ) {
-    val timer by timeModel.timer.collectAsState()
+    val state by timeModel.state.collectAsState()
     var showTimerDialog by remember { mutableStateOf(false) }
 
     fun makeLongString(inSeconds: Int): String {
@@ -51,13 +51,9 @@ fun TimerView(
         showTimerDialog = false
     }
 
-    val handleConfirm: (hours: Int, minutes: Int, seconds: Int) -> Unit =
-        { hours, minutes, seconds ->
-            timeModel.setTimer(hours, minutes, seconds)
-            showTimerDialog = false
-        }
-
-    LaunchedEffect(timer) {
+    val handleConfirm: (hours: Int, minutes: Int, seconds: Int) -> Unit = { hours, minutes, seconds ->
+        timeModel.onAction(TimeAction.SetTimer(hours, minutes, seconds))
+        showTimerDialog = false
     }
 
     AppCard(
@@ -69,7 +65,6 @@ fun TimerView(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 14.dp),
-
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
@@ -79,18 +74,14 @@ fun TimerView(
                 verticalArrangement = Arrangement.Center
             ) {
                 AppTextLarge(
-                    text = stringResource(
-                        R.string.timer
-                    ),
+                    text = stringResource(R.string.timer)
                 )
                 TimerTimeView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
-                        .clickable {
-                            showTimerDialog = true
-                        },
-                    timeText = makeLongString(timer)
+                        .clickable { showTimerDialog = true },
+                    timeText = makeLongString(state.timer)
                 )
             }
 
@@ -102,33 +93,29 @@ fun TimerView(
                 verticalArrangement = Arrangement.Center
             ) {
                 SendTimerButton(
-                    modifier = Modifier
-                        .padding(0.dp),
+                    modifier = Modifier.padding(0.dp),
                     onClick = {
-                        timeModel.sendTimerToWatch(timer)
+                        timeModel.onAction(TimeAction.UpdateTimer(state.timer))
                     }
                 )
             }
         }
     }
+
     if (showTimerDialog) {
         Dialog(onDismissRequest = handleDismiss) {
             Box(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background) // Theme-based background color
-                    .padding(0.dp) // Adjust padding as needed
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(0.dp)
             ) {
-                val (hours, minutes, seconds) = convertSecondsToTime(timer)
-
+                val (hours, minutes, seconds) = convertSecondsToTime(state.timer)
                 TimerPicker(
                     hours = hours,
                     minutes = minutes,
                     seconds = seconds,
                     onDismiss = { handleDismiss() },
-                    onSubmit = { hr, min, sec ->
-                        // Handle the submitted time in the preview
-                        handleConfirm(hr, min, sec)
-                    }
+                    onSubmit = { hr, min, sec -> handleConfirm(hr, min, sec) }
                 )
             }
         }

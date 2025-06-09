@@ -82,17 +82,16 @@ fun SettingsScreen() {
 
 @Composable
 fun SettingsList() {
-
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     val settingsViews = arrayListOf(
-        Locale(settingsViewModel::updateSetting),
-        OperationalTone(settingsViewModel::updateSetting),
-        Light(settingsViewModel::updateSetting)
+        Locale(settingsViewModel::onSettingUpdated),
+        OperationalTone(settingsViewModel::onSettingUpdated),
+        Light(settingsViewModel::onSettingUpdated)
     ).apply {
-        if (WatchInfo.hasPowerSavingMode) add(PowerSavings(settingsViewModel::updateSetting))
-        add(TimeAdjustment(settingsViewModel::updateSetting))
-        add(KeepAlive(settingsViewModel::updateSetting))
+        if (WatchInfo.hasPowerSavingMode) add(PowerSavings(settingsViewModel::onSettingUpdated))
+        add(TimeAdjustment(settingsViewModel::onSettingUpdated))
+        add(KeepAlive(settingsViewModel::onSettingUpdated))
     }
 
     Column(
