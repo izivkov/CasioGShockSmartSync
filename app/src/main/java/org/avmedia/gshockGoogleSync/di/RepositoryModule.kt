@@ -17,7 +17,7 @@ object RepositoryModule {
     @Provides
     @Singleton
     @Named("api")
-    fun provideGShockRepository(api: GShockAPIMock): GShockRepository {
+    fun provideGShockRepository(api: GShockAPI): GShockRepository {
         return GShockRepository(api)
     }
 }

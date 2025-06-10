@@ -295,13 +295,14 @@ class ActionsViewModel @Inject constructor(
         override var title: String,
         override var enabled: Boolean,
     ) :
-        Action(title, enabled, RunMode.ASYNC) {
+        Action(title, enabled, RunMode.SYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             runCatching {
                 val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
-                    flags =
-                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK or
+                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 }
                 context.startActivity(intent)
             }.onFailure {

@@ -8,5 +8,5 @@ import javax.inject.Singleton
 
 @Singleton
 class GShockRepository @Inject constructor(
-    api: GShockAPIMock
+    api: GShockAPI
 ) : IGShockAPI by api

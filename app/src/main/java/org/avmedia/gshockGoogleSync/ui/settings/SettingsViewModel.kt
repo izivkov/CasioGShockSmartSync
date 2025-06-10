@@ -231,16 +231,7 @@ class SettingsViewModel @Inject constructor(
 
     @Synchronized
     fun fromJson(jsonStr: String): ArrayList<Setting> {
-        val tempMap = mutableMapOf<Class<out Setting>, Setting>()
-        // Initialize with existing settings
-        state.value.settingsMap.forEach { (clazz, setting) ->
-            tempMap[clazz] = setting
-        }
-
         val updatedObjects = mutableSetOf<Setting>()
-        // Add existing settings to the set
-        updatedObjects.addAll(tempMap.values)
-
         val jsonObj = JSONObject(jsonStr)
         val keys = jsonObj.keys()
 
