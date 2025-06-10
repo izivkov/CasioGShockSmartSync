@@ -36,7 +36,8 @@ fun WatchTemperature(
                 val tm = getSystemService(context, TelephonyManager::class.java)
                 val countryCodeValue = tm?.networkCountryIso ?: ""
                 val isUS = (countryCodeValue.isNotEmpty() && countryCodeValue.uppercase() == "US")
-                val fmt = MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
+                val fmt =
+                    MeasureFormat.getInstance(Locale.getDefault(), MeasureFormat.FormatWidth.SHORT)
                 val measure = if (isUS) {
                     Measure(
                         ((state.temperature * 9 / 5) + 32),

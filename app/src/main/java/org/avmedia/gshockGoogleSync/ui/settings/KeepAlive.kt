@@ -23,8 +23,9 @@ fun KeepAlive(
     val state by settingsViewModel.state.collectAsState()
 
     // Safe casting with elvis operator
-    val keepAliveSetting = (state.settingsMap[SettingsViewModel.KeepAlive::class.java] as? SettingsViewModel.KeepAlive)
-        ?: SettingsViewModel.KeepAlive(context) // Provide default value
+    val keepAliveSetting =
+        (state.settingsMap[SettingsViewModel.KeepAlive::class.java] as? SettingsViewModel.KeepAlive)
+            ?: SettingsViewModel.KeepAlive(context) // Provide default value
 
     var keepAlive by remember { mutableStateOf(keepAliveSetting.keepAlive) }
 

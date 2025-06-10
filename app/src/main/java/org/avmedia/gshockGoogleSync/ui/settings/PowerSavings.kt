@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 
@@ -18,7 +17,8 @@ fun PowerSavings(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by settingsViewModel.state.collectAsState()
-    val powerSavingModeSetting = state.settingsMap[SettingsViewModel.PowerSavingMode::class.java] as SettingsViewModel.PowerSavingMode
+    val powerSavingModeSetting =
+        state.settingsMap[SettingsViewModel.PowerSavingMode::class.java] as SettingsViewModel.PowerSavingMode
 
     var powerSavingMode by remember { mutableStateOf(powerSavingModeSetting.powerSavingMode) }
 

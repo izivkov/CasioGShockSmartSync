@@ -40,7 +40,8 @@ fun Locale(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by settingsViewModel.state.collectAsState()
-    val localeSetting = state.settingsMap[SettingsViewModel.Locale::class.java] as SettingsViewModel.Locale
+    val localeSetting =
+        state.settingsMap[SettingsViewModel.Locale::class.java] as SettingsViewModel.Locale
 
     var timeFormat by remember { mutableStateOf(localeSetting.timeFormat) }
     var dateFormat by remember { mutableStateOf(localeSetting.dateFormat) }

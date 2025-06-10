@@ -50,12 +50,14 @@ class TimeViewModel @Inject constructor(
                     timer = action.hours * 3600 + action.minutes * 60 + action.seconds
                 )
             }
+
             is TimeAction.UpdateTimer -> {
                 viewModelScope.launch {
                     api.setTimer(action.timeMs)
                     AppSnackbar(appContext.getString(R.string.timer_set))
                 }
             }
+
             TimeAction.SendTimeToWatch -> {
                 viewModelScope.launch {
                     runCatching {
@@ -70,6 +72,7 @@ class TimeViewModel @Inject constructor(
                     }
                 }
             }
+
             TimeAction.RefreshState -> refreshState()
         }
     }

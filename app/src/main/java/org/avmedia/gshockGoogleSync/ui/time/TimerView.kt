@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,10 +50,11 @@ fun TimerView(
         showTimerDialog = false
     }
 
-    val handleConfirm: (hours: Int, minutes: Int, seconds: Int) -> Unit = { hours, minutes, seconds ->
-        timeModel.onAction(TimeAction.SetTimer(hours, minutes, seconds))
-        showTimerDialog = false
-    }
+    val handleConfirm: (hours: Int, minutes: Int, seconds: Int) -> Unit =
+        { hours, minutes, seconds ->
+            timeModel.onAction(TimeAction.SetTimer(hours, minutes, seconds))
+            showTimerDialog = false
+        }
 
     AppCard(
         modifier = modifier

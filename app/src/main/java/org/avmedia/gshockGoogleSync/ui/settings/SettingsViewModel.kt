@@ -85,6 +85,7 @@ class SettingsViewModel @Inject constructor(
             class AppSettings(appContext: Context) {
                 var keepAlive = LocalDataStorage.getKeepAlive(appContext)
             }
+
             val appSettingsJson = Gson().toJsonTree(AppSettings(appContext)).asJsonObject
 
             // Merge default settings into API settings

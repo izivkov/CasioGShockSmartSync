@@ -107,6 +107,7 @@ class RRuleValues @Inject constructor(
                 rruleObj.freq,
                 rruleObj.byDay
             )
+
             else -> null
         }
     }
