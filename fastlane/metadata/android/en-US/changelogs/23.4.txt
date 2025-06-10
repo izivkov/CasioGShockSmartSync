@@ -1,0 +1,1 @@
+Refactored the code to comply with functional programming principles.
