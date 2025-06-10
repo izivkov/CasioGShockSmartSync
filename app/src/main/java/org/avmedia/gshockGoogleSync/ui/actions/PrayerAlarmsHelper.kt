@@ -109,7 +109,7 @@ object PrayerAlarmsHelper {
         }
 
     private fun isTurkey(countryCode: String): Boolean =
-        countryCode.equals("TR", ignoreCase = true)
+        countryCode.uppercase() == "TR"
 
     private fun isEurope(countryCode: String): Boolean =
         setOf(

@@ -150,14 +150,6 @@ class CameraCaptureHelper(
         onSuccess: (String) -> Unit,
         onError: (String) -> Unit
     ) {
-        // Get location using LocationProvider service
-        val location = LocationProvider.getLocation(context)?.let { loc ->
-            android.location.Location("").apply {
-                latitude = loc.latitude
-                longitude = loc.longitude
-            }
-        }
-
         // Use the existing outputOptions and add metadata
         imageCapture.takePicture(
             outputOptions,  // Use the original outputOptions

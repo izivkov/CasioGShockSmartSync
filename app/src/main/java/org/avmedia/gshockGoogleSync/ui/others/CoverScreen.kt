@@ -14,10 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -66,7 +63,6 @@ fun CoverScreen(
     isConnected: Boolean = true
 ) {
     val toneGen = remember { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100) }
-    var isPressed by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -85,7 +81,7 @@ fun CoverScreen(
             contentAlignment = Alignment.Center
         ) {
             LongPressHandler(
-                onPressed = { isPressed = it },
+                onPressed = { },
                 onLongPress = {
                     toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 100)
                     onUnlock()
