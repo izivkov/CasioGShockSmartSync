@@ -28,7 +28,7 @@ object PhoneFinder {
     private var state = State()
 
     fun ring(context: Context): Result<Unit> = runCatching {
-        getAlarmUri(context)?.let { uri ->
+        getAlarmUri()?.let { uri ->
             handleAudio(context, uri)
             detectPhoneLifting(context)
         } ?: throw IllegalStateException("No alarm URI available")
@@ -37,7 +37,7 @@ object PhoneFinder {
         AppSnackbar(context.getString(R.string.unable_to_get_default_sound_uri))
     }
 
-    private fun getAlarmUri(context: Context) =
+    private fun getAlarmUri() =
         RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
 
@@ -164,7 +164,9 @@ private class SensorHandler(
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        // Needed to satisfy interface.
+    }
 
     private fun getBestAvailableSensor(sensorManager: SensorManager): Sensor? =
         listOf(

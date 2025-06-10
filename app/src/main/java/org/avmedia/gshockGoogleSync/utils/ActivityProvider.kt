@@ -23,9 +23,17 @@ object ActivityProvider {
                 currentActivity = WeakReference(activity)
             }
 
-            override fun onActivityPaused(activity: Activity) {}
-            override fun onActivityStopped(activity: Activity) {}
-            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+            override fun onActivityPaused(activity: Activity) {
+                // Needed to satisfy Interface, but not used here
+            }
+            override fun onActivityStopped(activity: Activity) {
+                // Needed to satisfy Interface, but not used here
+            }
+
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+                // Needed to satisfy Interface, but not used here
+            }
+
             override fun onActivityDestroyed(activity: Activity) {
                 if (currentActivity?.get() == activity) {
                     currentActivity = null

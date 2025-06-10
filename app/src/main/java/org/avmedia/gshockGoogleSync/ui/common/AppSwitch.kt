@@ -11,7 +11,6 @@ fun AppSwitch(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: SwitchColors = SwitchDefaults.colors(),
-    description: String? = null
 ) {
     val handleChange = { newValue: Boolean ->
         if (enabled) {

@@ -158,11 +158,6 @@ class CameraCaptureHelper(
             }
         }
 
-        val metadata = ImageCapture.Metadata().apply {
-            // Add location if available
-            location?.let { this.location = it }
-        }
-
         // Use the existing outputOptions and add metadata
         imageCapture.takePicture(
             outputOptions,  // Use the original outputOptions

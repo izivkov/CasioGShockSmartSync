@@ -135,13 +135,6 @@ class NotificationMonitorService : NotificationListenerService() {
         }
     }
 
-    private fun handleNotification(info: NotificationInfo) {
-        val appNotification = createAppNotification(info)
-
-        // send the notification to be processed elsewhere
-        ProgressEvents.onNext("AppNotification", appNotification)
-    }
-
     companion object {
         private var isRunning = false
 

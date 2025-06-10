@@ -45,12 +45,10 @@ fun Locale(
 
     var timeFormat by remember { mutableStateOf(localeSetting.timeFormat) }
     var dateFormat by remember { mutableStateOf(localeSetting.dateFormat) }
-    var selectedLanguage by remember { mutableStateOf(localeSetting.dayOfWeekLanguage) }
 
     LaunchedEffect(state.settings) {
         timeFormat = localeSetting.timeFormat
         dateFormat = localeSetting.dateFormat
-        selectedLanguage = localeSetting.dayOfWeekLanguage
     }
 
     AppCard(

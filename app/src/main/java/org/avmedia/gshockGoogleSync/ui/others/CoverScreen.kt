@@ -52,9 +52,7 @@ private fun LongPressHandler(
 }
 
 @Composable
-private fun UnlockText(
-    isPressed: Boolean
-) {
+private fun UnlockText() {
     AppTextVeryLarge(
         text = stringResource(
             R.string.cover_hold_to_unlock
@@ -93,7 +91,7 @@ fun CoverScreen(
                     onUnlock()
                 }
             ) {
-                UnlockText(isPressed)
+                UnlockText()
             }
 
             if (isConnected) {
