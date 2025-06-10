@@ -1,0 +1,212 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
+    <string name="title_time">Hora</string>
+    <string name="title_alarms">Alarmes</string>
+    <string name="title_events">Esdeveniments</string>
+    <string name="title_settings">Configuració</string>
+    <string name="events">Esdeveniments</string>
+    <string name="alarms">Alarmes</string>
+    <string name="time">Hora</string>
+    <string name="send_alarms_to_watch">Enviar a\nRellotge</string>
+    <string name="enabled">Activat</string>
+    <string name="disabled">Desactivat</string>
+    <string name="send_alarms_to_phone">Enviar a\nTelèfon</string>
+    <string name="send_events_to_watch">Enviar a rellotge\nRecordatoris</string>
+    <string name="connection_screen_info"><![CDATA[
+
+    Per continuar a la següent pantalla, manteniu premut el botó <b>INFERIOR ESQUERRA</b> del rellotge durant 3 segons.
+    Després del segon doble bip, l\'aplicació mostrarà la pantalla de configuració de l\'hora.
+    <p><b>Assegureu-vos que l\'aplicació oficial de Casio no estigui en execució, ja que interfereix amb aquesta aplicació.</b></p>
+    <p>Alguns rellotges, com el DW-H5600, requereixen emparellament abans de connectar-se per primera vegada.
+    En aquests casos, poseu el rellotge en mode d\'emparellament. Apareixerà un missatge al vostre telèfon indicant que heu d\'emparellar-lo amb el rellotge.</p>
+    <p>Per executar Accions definides a la pantalla <b>Accions</b>, premeu breument el botó <b>INFERIOR DRET</b>. Les accions són aplicacions al vostre telèfon, com <b>Fer una foto</b>.
+    Amb aquestes accions, el rellotge funciona com un comandament a distància per al telèfon.</p>
+    <p>Podeu descarregar aquesta aplicació des de <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a></p>
+
+    ]]></string>
+
+    <string name="alarms_screen_info"><![CDATA[Els rellotges <b>B5600/B5000/B2100</b> tenen 5 alarmes i una configuració de "senyal" (senyal horari) mostrada aquí.
+    Les alarmes es poden actualitzar prement sobre el valor de l\'hora de cada alarma. Apareixerà un diàleg nou que permet establir l\'hora de l\'alarma.
+    Un cop configurades les alarmes, podeu enviar-les al rellotge o a l\'aplicació de rellotge del telèfon.]]></string>
+    <string name="events_screen_info"><![CDATA[Aquesta pantalla mostra els Esdeveniments del teu <b>Google Calendar</b> i permet enviar-los als <b>recordatoris</b> del rellotge.\n\nSi no apareixen esdeveniments, assegura\'t que tens esdeveniments futurs o esdeveniments repetitius no caducats al teu calendari de Google.]]>
+</string>
+    <string name="actions">Accions</string>
+    <string name="title_actions">Accions</string>
+    <string name="actions_screen_info"><![CDATA[Les accions seleccionades s\'executen quan l\'usuari prem breument el botó <b>INFERIOR DRET</b> del rellotge a la pantalla inicial. Amb aquestes accions, el rellotge funciona com un comandament a distància pel telèfon.]]></string>
+    <string name="feb_22_mar_24">22 febr. - 24 març</string>
+    <string name="weekly">SETMANAL</string>
+    <string name="action_item">Element d\'acció</string>
+    <string name="voice_assistant">Assistent de veu</string>
+    <string name="front_cam">Càmera frontal</string>
+    <string name="back_cam">Càmera posterior</string>
+    <string name="take_a_photo">Fer una foto</string>
+    <string name="info">Info</string>
+    <string name="daily">Diari</string>
+    <string name="_12_00">12:00</string>
+    <string name="email_item">Element de correu</string>
+    <string name="email_example_com">jo@exemple.com</string>
+    <string name="watch_alarms">Alarmes del rellotge</string>
+    <string name="signal_chime">Senyal (xiulet)</string>
+    <string name="google_calendar_events">Esdeveniments de Google Calendar</string>
+    <string name="local_time">Hora local</string>
+    <string name="send_to_watch">Enviar a\nRellotge</string>
+    <string name="phonecall_item">Element de trucada</string>
+    <string name="home_time">Hora casa</string>
+    <string name="running_actions">Accions en execució</string>
+    <string name="title_placeholder">Títol de marcador</string>
+    <string name="settings">Configuració</string>
+    <string name="send_to_watch_settings">Enviar a\nRellotge</string>
+    <string name="auto_configure_settings">Omplir valors\nautomàticament</string>
+    <string name="time_format">Format d\'hora</string>
+    <string name="_12h">12 h</string>
+    <string name="_24h">24 h</string>
+    <string name="date_format">Format de data</string>
+    <string name="language">Idioma</string>
+    <string name="operational_sound">Tonalitat de botó</string>
+    <string name="power_saving_mode">Mode d\'estalvi d\'energia</string>
+    <string name="select_language">Selecciona idioma</string>
+    <string name="auto_fill_help"><![CDATA[Els valors d\'ompliment automàtic s\'obtenen així:
+        <li>El format de data/hora i l\'idioma es prenen de la configuració del telèfon.</li>
+        <li>El to del botó es desactiva si el telèfon està en mode No molestar, i s\'activa en cas contrari.</li>
+        <li>El mode d\'estalvi s\'activarà si la bateria està al 15%% o menys.</li>
+        Nota: <i>Els valors no canviaran fins que es tornin a enviar, encara que canviïn les condicions (p. ex., si s\'activa/desactiva No molestar)</i>
+        ]]>
+    </string>
+    <string name="cancel">Cancel·lar</string>
+    <string name="ok">D\'acord</string>
+    <string name="timerDialogTitle">Temporitzador</string>
+    <string name="info_home_time">
+        <![CDATA[La <b>Hora casa</b> mostra la zona horària del rellotge.
+        Quan l\'aplicació estableix l\'hora del rellotge (manualment o automàticament), també configura la <b>Hora casa,
+        Desplaçament horari</b> i el <b>Horus d\'estiu (DST)</b> (si escau) a la zona horària actual. Per això no cal canviar entre la <b>Hora mundial</b> i la <b>Hora casa</b>
+        quan viatges a una altra zona horària.]]>
+    </string>
+    <string name="time_adjustment_info" ><![CDATA[
+    <li>La configuració <b>Ajust d\'hora</b> permet que l\'app actualitzi automàticament l\'hora del rellotge 4 vegades al dia.</li>
+    <li>Al mateix temps, l\'app actualitzarà els <b>Recordatoris (Esdeveniments)</b> del rellotge des del teu <b>Google Calendar</b> si està activada l\'acció <b>Configurar recordatoris des de Google Calendar</b>.</li>
+    ]]></string>
+    <string name="image_of_casio_watch">Rellotge Casio</string>
+    <string name="connection_screen_device"> <![CDATA[
+        <li>Per defecte, l\'app intentarà connectar-se al rellotge connectat prèviament. Si vols connectar-te a un altre rellotge,
+        prem el botó <b>OBLIDAR</b> i després connecta el nou rellotge com de costum. A partir d\'aleshores, l\'app intentarà connectar-se
+        a aquest nou rellotge.</li>
+
+        <li>L\'app detectarà automàticament el model del rellotge.</li>
+        ]]></string>
+    <string name="forget">Oblidar</string>
+    <string name="hand_adjustment">Ajust de les agulles</string>
+    <string name="move_hand_to_the_left">Moure l\'agulla cap a l\'esquerra</string>
+    <string name="reset_hand_at_12_position">Reiniciar agulla a la posició 12</string>
+    <string name="move_hand_to_the_right">Moure l\'agulla cap a la dreta</string>
+    <string name="auto_light">Llum automàtica</string>
+    <string name="off">Apagat</string>
+    <string name="on">Encesa</string>
+    <string name="illumination_period">Període d\'il·luminació</string>
+    <string name="mm_dd">MM:DD</string>
+    <string name="dd_mm">DD:MM</string>
+    <string name="time_adjustment">Ajust d\'hora</string>
+    <string name="notify_me">Notifica\'m</string>
+    <string name="timer">Temporitzador</string>
+    <string name="_00_00_00">00:00:00</string>
+    <string name="_00">00</string>
+    <string name="semi_column">:</string>
+    <string name="no_watch">Sense rellotge</string>
+    <string name="set_time">Configurar hora</string>
+    <string name="find_phone">Trobar telèfon</string>
+    <string name="set_reminders">Configurar recordatoris des de\nGoogle Calendar</string>
+
+    <string name="take_photo">Fer una foto</string>
+    <string name="toggle_flashlight">Canviar llanterna</string>
+    <string name="start_voice_assistant">Iniciar assistent de veu</string>
+    <string name="next_track">Saltar a la següent pista</string>
+    <string name="emergency_actions">Accions d\'emergència:</string>
+    <string name="make_phonecall">Fer una trucada</string>
+    <string name="adjustment_time_info"><![CDATA[
+        <li>L\'ajust automàtic de l\'hora es fa 4 vegades al dia, normalment després de les 00:00, 06:00, 12:00 i 18:00.</li>
+        <li>Aquesta configuració estableix els minuts després de l\'hora quan s\'executa l\'ajust. Per exemple, si poses 25, l\'ajust serà a les 00:25, 06:25, 12:25 i 18:25.</li>
+        <li>Si tens diversos rellotges, pots controlar individualment quan ajustar l\'hora de cadascun.</li>
+        ]]></string>
+    <string name="adjustment_time_minutes">Quan executar\n(minuts després de l\'hora)</string>
+    <string name="skip_to_next_track_info"><![CDATA[
+        Si estàs reproduint música o vídeo en un reproductor com Spotify, YouTube o YTMusic, aquesta acció passarà a la següent cançó o vídeo.
+        També funciona amb Android Auto.
+        ]]></string>
+    <string name="set_prayer_alarms">Alarmes de pregària</string>
+    <string name="prayer_times_info"><![CDATA[
+        <li>Aquesta acció configura les 5 alarmes del rellotge als horaris musulmans de pregària: <b>Fajr</b>, <b>Dhuhr</b>, <b>Asr</b>, <b>Maghrib</b> i <b>Isha</b>.</li>
+        <li>Els horaris varien segons la teva ubicació i data actual, per això és recomanable executar aquesta acció diàriament.
+        Si està activada, les alarmes també s\'actualitzaran automàticament durant l\'ajust d\'hora, 4 vegades al dia.</li>
+        <li>Els mètodes de càlcul utilitzats, segons la ubicació, són:
+            <b>NORD-AMÈRICA</b>,
+            <b>DİYANET</b>,
+            <b>EGIPTE</b>,
+            <b>DUBAI</b>,
+            <b>UMM AL QURA</b>,
+            <b>QATAR</b>,
+            <b>SINGAPORE</b>,
+            <b>KUWAIT</b> i
+            <b>MUSLIM WORLD LEAGUE</b> a la resta de llocs.
+        </li>
+        <li>Per suggeriments i correccions, contacta amb <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
+    ]]></string>
+    <string name="do_not_disturb_dnd">No molestar (DnD)</string>
+    <string name="mirror_phone_s_dnd">Reflectir DnD del telèfon</string>
+    <string name="DnD_info_message"><![CDATA[
+    En activar, totes les alarmes, temporitzadors i senyals horàries del rellotge es silenciaran.
+    <li>Si s\'activa/desactiva manualment, el DnD s\'aplicarà després de prémer el botó <b>Enviar a rellotge</b>.<\li>
+    <li>En mode mirall, s\'aplicarà immediatament al canviar la configuració DnD del telèfon, independentment de la pantalla on estiguis.<\li>
+    ]]></string>
+    <string name="auto_light_at_night_only">Llum automàtica només a la nit</string>
+    <string name="keep_alive">Mantenir viu (consumeix més bateria)</string>
+    <string name="enter_timer_time">Introduir temps del temporitzador</string>
+    <string name="max_reminders_reached">S\'ha arribat al màxim nombre de recordatoris, si us plau desactiva alguns abans de seleccionar-ne de nous</string>
+    <string name="fine_time_adjustment">Ajust fi</string>
+    <string name="_0000">0000</string>
+    <string name="fine_adjustment_info"><![CDATA[
+    Al configurar l\'hora, alguns models de rellotge poden mostrar una hora lleugerament desviada uns segons. Aquesta opció permet afinar l\'ajust.
+    El valor, en mil·lisegons, s\'afegeix a l\'hora enviada des de l\'app al rellotge. Pots posar valors entre -5000 i 5000. Per exemple,
+    si el rellotge va 2,5 segons avançat, posa -2500 per sincronitzar-lo correctament.
+    ]]></string>
+    <string name="required_permissions_denied_cannot_access_screen">Permisos requerits denegats. No es pot accedir a la pantalla!</string>
+    <string name="required_permissions_denied_cannot_access_actions">Permisos requerits denegats. No es pot accedir a les Accions.</string>
+    <string name="calendar_permission_denied_cannot_access_events">Permís de calendari denegat. No es pot accedir als Esdeveniments.</string>
+    <string name="clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions">Neteja l\'emmagatzematge de l\'app des de la configuració d\'Android i reinicia l\'app per afegir permisos.</string>
+    <string name="phone_number">Número de telèfon</string>
+    <string name="enter_phone_number">Introduir número de telèfon</string>
+    <string name="when_to_run">Quan executar</string>
+    <string name="minutes_between_0_and_59">Minuts entre 0 i 59</string>
+    <string name="fine_adjustment">Ajust fi</string>
+    <string name="ms_between_10000_and_10000">ms entre -10000 i 10000</string>
+    <string name="sending_time_to_watch">Enviant hora al rellotge…</string>
+    <string name="time_set">Hora establerta</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">Error API! Assegura\'t que l\'app oficial de G-Shock no s\'estigui executant.</string>
+    <string name="bluetooth_is_not_enabled">El Bluetooth no està activat.</string>
+    <string name="disconnected_due_to_inactivity">Desconnectat per inactivitat.</string>
+    <string name="when_found_lift_phone_to_stop_ringing">Quan es troba, aixeca el telèfon per aturar la trucada</string>
+    <string name="voice_assistant_not_available_on_this_device">Assistència de veu no disponible en aquest dispositiu!</string>
+    <string name="cannot_go_to_next_track">No es pot passar a la següent pista!</string>
+    <string name="image_captured">Imatge capturada: %1$s</string>
+    <string name="emaillocationaction_emailaddress">Acció correu ubicació: correu: %1$s</string>
+    <string name="camera_capture_error">Error de captura de càmera: %1$s</string>
+    <string name="flashlight_not_available">Llanterna no disponible</string>
+    <string name="unable_to_get_default_sound_uri">No s\'ha pogut obtenir l\'URI de so predeterminat</string>
+    <string name="alarms_set_to_watch">Alarmes configurades al rellotge</string>
+    <string name="events_set">Esdeveniments configurats</string>
+    <string name="event_not_compatible_with_watch">Esdeveniment no compatible amb el rellotge</string>
+    <string name="settings_sent_to_watch">Configuracions enviades al rellotge</string>
+    <string name="sorry_your_device_does_not_support_bluetooth_exiting">Ho sentim, el teu dispositiu no admet Bluetooth. Sortint…</string>
+    <string name="permission_required_to_turn_on_bluetooth">Es necessita permís per activar el Bluetooth.</string>
+    <string name="you_have_no_permissions_to_turn_on_bluetooth_please_turn_it_on_manually">No tens permisos per activar el Bluetooth. Activa\'l manualment, si us plau.</string>
+    <string name="permissions_are_permanently_denied_please_enable_them_in_the_app_settings">Els permisos estan denegats permanentment. Activa\'ls a la configuració de l\'aplicació.</string>
+    <string name="you_have_not_given_permission_to_to_run_action">No has donat permís per executar l\'acció %1$s.</string>
+    <string name="timer_set">Temporitzador configurat</string>
+    <string name="press_and_hold_for_3_seconds">Prem i mantén\npremut durant 3\nsegons</string>
+    <string name="short_press_to_run_actions">Pressió curta\nper executar\naccions</string>
+    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync està actiu</string>
+    <string name="preventing_the_app_from_closing">S\'està evitant el tancament de l\'aplicació</string>
+    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync no està actiu.</string>
+    <string name="health_connect_not_available">\"Health Connect\" no està disponible. Si us plau, instal·la\'l.</string>
+    <string name="cover_hold_to_unlock">Mantén premut per desbloquejar</string>
+    <string name="cover_connected">Connectat</string>
+    <string name="find_phone_instruction">Per executar accions, inicia la funció \"Troba el telèfon\" al rellotge</string>
+</resources>
