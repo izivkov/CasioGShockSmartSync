@@ -433,6 +433,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 updateSettingsAndMap(getSmartDefaults())
+
+                // Save all local storage settings, in case the user abandons the screen.
+                // Local storage setting are not sent to the watch, but are used by the app.
+                // Example: keepAlive setting.
+                state.value.settings.forEach(Setting::save)
+
             }.onFailure { e ->
                 ProgressEvents.onNext("Error", e.message ?: "")
             }
@@ -456,9 +462,6 @@ class SettingsViewModel @Inject constructor(
                 state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
             settings.powerSavingMode = powerSavingMode.powerSavingMode
         }
-
-        // Save local storage settings
-        (state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment).save()
 
         val buttonTone: OperationSound =
             state.value.settingsMap[OperationSound::class.java] as OperationSound
