@@ -64,7 +64,7 @@ class TimeViewModel @Inject constructor(
                         val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                         val timeMs = System.currentTimeMillis() + timeOffset
                         AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
-                        api.setTime(timeMs.toString())  // Convert Long to String
+                        api.setTime(timeMs = timeMs)
                         AppSnackbar(appContext.getString(R.string.time_set))
                         refreshState()
                     }.onFailure { e ->
