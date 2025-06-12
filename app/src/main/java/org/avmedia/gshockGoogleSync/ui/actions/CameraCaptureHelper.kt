@@ -172,11 +172,11 @@ class CameraCaptureHelper(
                                         )
                                         setAttribute(
                                             ExifInterface.TAG_SOFTWARE,
-                                            "GShock Smart Sync"
+                                            "G-Shock Smart Sync"
                                         )
                                         setAttribute(
                                             ExifInterface.TAG_COPYRIGHT,
-                                            "https://github.com/izivkov/GshockSmartSync"
+                                            "https://github.com/izivkov/CasioGShockSmartSync"
                                         )
 
                                         // Add date/time information

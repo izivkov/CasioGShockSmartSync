@@ -457,16 +457,8 @@ class SettingsViewModel @Inject constructor(
             settings.powerSavingMode = powerSavingMode.powerSavingMode
         }
 
-        if (!WatchInfo.alwaysConnected) { // Auto-time-adjustment does not apply for always-connected watches
-            val timeAdjustment: TimeAdjustment =
-                state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
-            settings.timeAdjustment = timeAdjustment.timeAdjustment
-            settings.adjustmentTimeMinutes = timeAdjustment.adjustmentTimeMinutes
-            LocalDataStorage.setTimeAdjustmentNotification(
-                appContext,
-                timeAdjustment.timeAdjustmentNotifications
-            )
-        }
+        // Save local storage settings
+        (state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment).save()
 
         val buttonTone: OperationSound =
             state.value.settingsMap[OperationSound::class.java] as OperationSound
