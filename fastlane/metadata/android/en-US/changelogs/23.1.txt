@@ -1,2 +1,0 @@
-Added the ability to send application-level notifications to the watch for DW-H5600.
-Bug fixes
