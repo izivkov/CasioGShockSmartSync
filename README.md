@@ -156,10 +156,8 @@ So when travelling to another timezone, just set time and you are good to go.
 For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches, I have also created an API (library) project [here](https://github.com/izivkov/GShockAPI). 
 
 ## Similar Project
-If you rather not use a mobile app, but still like to set the time on your G-Shock to the correct time,
-here is a [Python program](https://github.com/izivkov/GShockTimeServer) which can run as a server on a regular PC or Raspberry PI with Bluetooth interface.
-The project is still WIP, but you can give it a try.
 
+If you’d prefer not to use a mobile app but still want to set the correct time on your G-Shock, check out [this Python project](https://github.com/izivkov/GShockTimeServer). It can run as a server on a regular PC or Raspberry Pi with a Bluetooth interface. We’ve recently added support for an LCD display on the Pi—take a look!
 
 
 
