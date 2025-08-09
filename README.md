@@ -23,15 +23,16 @@ It offers features like setting watch reminders from Google Calendar, automatica
 Here's a more detailed breakdown:
 Functionality:
 
-#### Google Calendar Integration:
-The app allows you to sync your Google Calendar events with your G-Shock watch, displaying reminders and all-day events. 
-
+- Google Calendar Integration:
+The app allows you to sync your Google Calendar events with your G-Shock watch, displaying reminders and all-day events.
 - Automatic Timezone Adjustment:
 When traveling, the app can automatically update your watch's time based on your location.
 - Remote Control:
-The app can turn your watch into a remote control for your phone, enabling actions like taking pictures.
+The app can turn your watch into a remote control for your phone, enabling actions like taking pictures, music playback control, and more.
 - Customization:
-It allows you to configure various watch settings and even autofill some values from your phone.
+It allows you to configure various watch settings, including when to automatically update time. Can autofill some values from your phone.
+- No Casio Account Required:
+Unlike the official Casio app, the G-Shock Smart Sync app does not require a Casio account to use. Protects your privacy by not requiring a Casio account.
 
 #### Key Differences from the Official App:
 
