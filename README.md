@@ -21,7 +21,8 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 **The G-Shock Smart Sync** app is a third-party application that allows users to connect and control certain G-Shock watches with their smartphones
 It offers features like setting watch reminders from Google Calendar, automatically adjusting timezones when traveling, and acting as a remote control for your phone (e.g., taking pictures). It's an alternative to the official Casio G-Shock Connected app and is available on F-Droid.
 Here's a more detailed breakdown:
-Functionality:
+
+#### Functionality:
 
 - Google Calendar Integration:
 The app allows you to sync your Google Calendar events with your G-Shock watch, displaying reminders and all-day events.
