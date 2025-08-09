@@ -36,7 +36,6 @@ It allows you to configure various watch settings and even autofill some values 
 #### Key Differences from the Official App:
 
 Third-Party: It's not an official Casio app, but rather an independent project.
-Focus on Specific Models: The Smart Sync app primarily supports G-Shock models like the 5000/5600 series with Bluetooth, while the official app supports a wider range of G-Shock and other Casio watches.
 Open Source: The Smart Sync app is open-source and available on F-Droid.
 Google Services Integration: It specifically focuses on integrating with Google services like Calendar and Alarms. 
 
