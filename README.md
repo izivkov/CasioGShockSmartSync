@@ -23,7 +23,7 @@ It offers features like setting watch reminders from Google Calendar, automatica
 Here's a more detailed breakdown:
 Functionality:
 
-### Google Calendar Integration:
+#### Google Calendar Integration:
 The app allows you to sync your Google Calendar events with your G-Shock watch, displaying reminders and all-day events. 
 
 - Automatic Timezone Adjustment:
