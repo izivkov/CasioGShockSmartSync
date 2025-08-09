@@ -468,6 +468,10 @@ class SettingsViewModel @Inject constructor(
         settings.buttonTone = buttonTone.sound
         settings.keyVibration = buttonTone.vibrate
 
+        val timeAdjustment: TimeAdjustment = state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
+        settings.timeAdjustment = timeAdjustment.timeAdjustment
+        settings.adjustmentTimeMinutes = timeAdjustment.adjustmentTimeMinutes
+
         viewModelScope.launch {
             runCatching {
                 api.setSettings(settings)
