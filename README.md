@@ -37,7 +37,8 @@ It allows you to configure various watch settings and even autofill some values 
 
 Third-Party: It's not an official Casio app, but rather an independent project.
 Open Source: The Smart Sync app is open-source and available on F-Droid.
-Google Services Integration: It specifically focuses on integrating with Google services like Calendar and Alarms. 
+Google Services Integration: It specifically focuses on integrating with Google services like Calendar and Alarms.
+No Casio Account: Unlike the official app, it doesn't require a Casio account for use.
 
 #### Availability:
 
