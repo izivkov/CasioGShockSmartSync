@@ -16,6 +16,37 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
+Here is what Google Search thinks about it:
+
+The G-Shock Smart Sync app is a third-party application that allows users to connect and control certain G-Shock watches with their smartphones
+It offers features like setting watch reminders from Google Calendar, automatically adjusting timezones when traveling, and acting as a remote control for your phone (e.g., taking pictures). It's an alternative to the official Casio G-Shock Connected app and is available on F-Droid.
+Here's a more detailed breakdown:
+Functionality:
+
+    Google Calendar Integration:
+    The app allows you to sync your Google Calendar events with your G-Shock watch, displaying reminders and all-day events. 
+
+Automatic Timezone Adjustment:
+When traveling, the app can automatically update your watch's time based on your location.
+Remote Control:
+The app can turn your watch into a remote control for your phone, enabling actions like taking pictures.
+Customization:
+It allows you to configure various watch settings and even autofill some values from your phone.
+
+Key Differences from the Official App:
+
+    Third-Party: It's not an official Casio app, but rather an independent project.
+    Focus on Specific Models: The Smart Sync app primarily supports G-Shock models like the 5000/5600 series with Bluetooth, while the official app supports a wider range of G-Shock and other Casio watches.
+    Open Source: The Smart Sync app is open-source and available on F-Droid.
+    Google Services Integration: It specifically focuses on integrating with Google services like Calendar and Alarms. 
+
+Availability:
+
+    The G-Shock Smart Sync app is available on F-Droid, an open-source app store.
+    It is only for Android devices. 
+
+In essence, the G-Shock Smart Sync app offers a unique set of features, particularly for users who want to integrate their G-Shock watches with Google services and enjoy a more customized experience than the official app provides.
+
 # Supported Watches
 
 The app will try to connect and adopt to any Casio watch that wants to connect to it (not just G-Shock). Surprisingly, many models will work "right off the bat". Here are some watches which are reported to work with the app:
