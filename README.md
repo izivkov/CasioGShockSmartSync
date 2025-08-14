@@ -16,38 +16,95 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-### Here is what Google Search thinks about it:
+### Here is what ChatGPT thinks about it:
+# G-Shock Smart Sync
 
-**The G-Shock Smart Sync** app is a third-party application that allows users to connect and control certain G-Shock watches with their smartphones
-It offers features like setting watch reminders from Google Calendar, automatically adjusting timezones when traveling, and acting as a remote control for your phone (e.g., taking pictures). It's an alternative to the official Casio G-Shock Connected app and is available on F-Droid.
-Here's a more detailed breakdown:
+[![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
+[![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
+[![Version](https://img.shields.io/badge/version-23.8-blue)](https://github.com/izivkov/CasioGShockSmartSync/releases)
+[![Casio ID Required](https://img.shields.io/badge/Casio%20ID-No-success)](#)
+[![Connection Speed](https://img.shields.io/badge/Connection-Fast-green)](#)
+[![Maintenance](https://img.shields.io/badge/Maintenance-Active-green)](#)
+[![Supported Watches](https://img.shields.io/badge/Watches-G--Shock%2C%20Edifice%2C%20ProTrek-blue)](#)
 
-#### Functionality:
+---
 
-- Google Calendar Integration:
-The app allows you to sync your Google Calendar events with your G-Shock watch, displaying reminders and all-day events.
-- Automatic Timezone Adjustment:
-When traveling, the app can automatically update your watch's time based on your location.
-- Remote Control:
-The app can turn your watch into a remote control for your phone, enabling actions like taking pictures, music playback control, and more.
-- Customization:
-It allows you to configure various watch settings, including when to automatically update time. Can autofill some values from your phone.
-- No Casio Account Required:
-Unlike the official Casio app, the G-Shock Smart Sync app does not require a Casio account to use. Protects your privacy by not requiring a Casio account.
+## What It Is
 
-#### Key Differences from the Official App:
+**G-Shock Smart Sync** is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches that allows you to control your watch and sync data **without a Casio ID**.
 
-Third-Party: It's not an official Casio app, but rather an independent project.
-Open Source: The Smart Sync app is open-source and available on F-Droid.
-Google Services Integration: It specifically focuses on integrating with Google services like Calendar and Alarms.
-No Casio Account: Unlike the official app, it doesn't require a Casio account for use.
+### Key Features
 
-#### Availability:
+- **No Casio ID required** — skip login entirely  
+  [Shockbase](https://shockbase.org) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
 
-The G-Shock Smart Sync app is available on F-Droid, an open-source app store.
-It is only for Android devices. 
+- **Google Calendar sync** — push reminders to your watch  
+  [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
 
-In essence, the G-Shock Smart Sync app offers a unique set of features, particularly for users who want to integrate their G-Shock watches with Google services and enjoy a more customized experience than the official app provides.
+- **Automatic timezone adjustment** when you travel  
+  [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
+
+- **Remote control for your phone** — take photos or skip music tracks  
+  [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
+
+- **Sync alarms** between your phone and watch  
+  [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
+
+- **Faster Bluetooth connection** — ~3.5s vs 12s on official app  
+  [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
+
+---
+
+## Supported Watch Models
+
+Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants:
+
+`G(M)W-5600 / 5000, GA-B2100, GST-B500 / B200, MSG-B100, G-B001, GBD-H1000 (partial), MRG-B5000, GCW-B5000, GG-B100, ABL-100WE, Edifice ECB-10/20/30` and others.  
+[F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
+
+---
+
+## User Feedback
+
+> “In general I like this app a lot. I often use its actions like ‘take a photo’ or ‘skip to the next track’ to control my phone from the watch.”  
+> — [Reddit](https://www.reddit.com)
+
+> “It rings the alarm set on full volume. As soon as I touch my phone and lift it, the alarm stops. Very nice.”  
+> — [Reddit](https://www.reddit.com)
+
+**Notes:**
+- Reliable in practice
+- Find my phone feature works even if your phone is misplaced
+
+---
+
+## Summary Table
+
+| Feature                        | G-Shock Smart Sync (Unofficial App) |
+|--------------------------------|--------------------------------------|
+| Casio ID Required?             | No                                   |
+| Google Calendar Sync           | Yes                                  |
+| Auto Timezone Adjustment       | Yes                                  |
+| Remote Control (camera/music)  | Yes                                  |
+| Alarm Sync                     | Yes                                  |
+| Connection Speed               | Fast (~3.5 seconds)                  |
+| Active Maintenance             | Yes (latest from August 2025)        |
+| Supported Watches              | Many G-Shock, Edifice, Pro Trek      |
+| Reliable Phone Finder          | Yes (works in tests)                 |
+
+---
+
+## Installation
+
+- **F-Droid:** [Download here](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
+- **GitHub:** [Source & releases](https://github.com/izivkov/CasioGShockSmartSync)
+
+### Setup
+
+1. Install the app from F-Droid or GitHub
+2. Put your watch in Bluetooth pairing mode (usually hold a button until "PAIR" appears)
+3. Open Smart Sync → pair → start using alarms, calendar sync, remote control, and timezone features
+
 
 # Supported Watches
 
