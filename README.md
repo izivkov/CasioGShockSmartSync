@@ -58,7 +58,7 @@ Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants:
 > “In general I like this app a lot. I often use its actions like ‘take a photo’ or ‘skip to the next track’ to control my phone from the watch.”  
 > — [Reddit](https://www.reddit.com)
 
-> “It rings the alarm set on full volume. As soon as I touch my phone and lift it, the alarm stops. Very nice.”  
+> “[Find Phone function] It rings the alarm set on full volume. As soon as I touch my phone and lift it, the alarm stops. Very nice.”  
 > — [Reddit](https://www.reddit.com)
 
 ---
