@@ -6,17 +6,9 @@ the DW-H5600 only. If you have a watch that supports notifications, such as the 
 please let us know if it works for you.
 
 ## What is it?
-I think we can do better than the official Casio G-Shock App! This app provides the following extra features:
+I think we can do better than the official Casio G-Shock App!
 
-- Sets watch's reminders from Google Calendar
-- Automatically sets correct timezone when travelling. No need to switch between Word Time and Home time
-- Use your watch to trigger actions on your phone remotely, like taking pictures, dialling a phone number, etc.
-- Allows you to set when auto-time adjustment will run.
-- Auto-configure most watch settings from phone's configuration.
-- Phone's alarms can be synced with watch's alarms.
-- Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
-
-## Here is what ChatGPT thinks about it:
+Instead of listing all the features, here is what ChatGPT thinks about it:
 
 [![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
 [![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
