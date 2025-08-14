@@ -87,14 +87,6 @@ Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants:
 - **GitHub:** [Source & releases](https://github.com/izivkov/CasioGShockSmartSync)
 
 
-# Supported Watches
-
-The app will try to connect and adopt to any Casio watch that wants to connect to it (not just G-Shock). Surprisingly, many models will work "right off the bat". Here are some watches which are reported to work with the app:
-
-G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100, G-B001, GBD-H1000 (Partial support), MRG-B5000, GST-B600, GCW-B5000, GG-B100, ABL-100WE, Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
-
-[Let us know](mailto:izivkov@gmail.com) if it works with other watches, and if you like us to add support for your watch.
-
 ### 📢 Help Expand GShock Smart Sync!
 
 Do you have an old or new G-Shock watch that isn’t yet supported by GshockSmartSync? Your contribution can help improve the project!
