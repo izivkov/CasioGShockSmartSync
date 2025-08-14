@@ -16,8 +16,7 @@ I think we can do better than the official Casio G-Shock App! This app provides 
 - Phone's alarms can be synced with watch's alarms.
 - Super fast connection time: 3.5 seconds vs 12 seconds for the official app.
 
-### Here is what ChatGPT thinks about it:
-# G-Shock Smart Sync
+## Here is what ChatGPT thinks about it:
 
 [![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
 [![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
@@ -72,10 +71,6 @@ Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants:
 > “It rings the alarm set on full volume. As soon as I touch my phone and lift it, the alarm stops. Very nice.”  
 > — [Reddit](https://www.reddit.com)
 
-**Notes:**
-- Reliable in practice
-- Find my phone feature works even if your phone is misplaced
-
 ---
 
 ## Summary Table
@@ -98,12 +93,6 @@ Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants:
 
 - **F-Droid:** [Download here](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
 - **GitHub:** [Source & releases](https://github.com/izivkov/CasioGShockSmartSync)
-
-### Setup
-
-1. Install the app from F-Droid or GitHub
-2. Put your watch in Bluetooth pairing mode (usually hold a button until "PAIR" appears)
-3. Open Smart Sync → pair → start using alarms, calendar sync, remote control, and timezone features
 
 
 # Supported Watches
