@@ -1,5 +1,15 @@
 # Casio G-Shock Smart Sync
 
+_[![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
+[![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
+[![Version](https://img.shields.io/badge/version-23.8-blue)](https://github.com/izivkov/CasioGShockSmartSync/releases)
+[![Casio ID Required](https://img.shields.io/badge/Casio%20ID-No-success)](#)
+[![Connection Speed](https://img.shields.io/badge/Connection-Fast-green)](#)
+[![Maintenance](https://img.shields.io/badge/Maintenance-Active-green)](#)
+[![Supported Watches](https://img.shields.io/badge/Watches-G--Shock%2C%20Edifice%2C%20ProTrek-blue)](#)
+
+---_
+
 ## Announcement
 We now support sending notifications to watches that support this feature. It has been tested with 
 the DW-H5600 only. If you have a watch that supports notifications, such as the GBA or GBD series, 
@@ -9,16 +19,6 @@ please let us know if it works for you.
 I think we can do better than the official Casio G-Shock App!
 
 Instead of listing all the features, here is what ChatGPT thinks about it:
-
-[![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
-[![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
-[![Version](https://img.shields.io/badge/version-23.8-blue)](https://github.com/izivkov/CasioGShockSmartSync/releases)
-[![Casio ID Required](https://img.shields.io/badge/Casio%20ID-No-success)](#)
-[![Connection Speed](https://img.shields.io/badge/Connection-Fast-green)](#)
-[![Maintenance](https://img.shields.io/badge/Maintenance-Active-green)](#)
-[![Supported Watches](https://img.shields.io/badge/Watches-G--Shock%2C%20Edifice%2C%20ProTrek-blue)](#)
-
----
 
 **G-Shock Smart Sync** is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches that allows you to control your watch and sync data **without a Casio ID**.
 
