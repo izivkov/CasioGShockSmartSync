@@ -220,5 +220,7 @@ For those who want to build their own Android app for interfacing with the G-Sho
 
 If you’d prefer not to use a mobile app but still want to set the correct time on your G-Shock, check out [this Python project](https://github.com/izivkov/GShockTimeServer). It can run as a server on a regular PC or Raspberry Pi with a Bluetooth interface. We’ve recently added support for an LCD display on the Pi—take a look!
 
+Also check out this even tinier server running on an ESP32 microcontroller:
 
+https://github.com/izivkov/gshock-api-esp32
 
