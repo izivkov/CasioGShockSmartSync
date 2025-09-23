@@ -39,7 +39,7 @@ Instead of listing all the features, here is what ChatGPT thinks about it:
 - **Sync alarms** between your phone and watch  
   [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
 
-- **Can set the 5 alarms to Islamic Payer times at your location  
+- **Islamic Prayers** Can set the 5 alarms to Islamic Payer times at your location  
   [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
 
 - **Faster Bluetooth connection** — ~3.5s vs 12s on official app  
@@ -68,17 +68,18 @@ Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants:
 
 ## Summary Table
 
-| Feature                        | G-Shock Smart Sync (Unofficial App) |
-|--------------------------------|--------------------------------------|
-| Casio ID Required?             | No                                   |
-| Google Calendar Sync           | Yes                                  |
-| Auto Timezone Adjustment       | Yes                                  |
-| Remote Control (camera/music)  | Yes                                  |
-| Alarm Sync                     | Yes                                  |
-| Connection Speed               | Fast (~3.5 seconds)                  |
-| Active Maintenance             | Yes (latest from August 2025)        |
-| Supported Watches              | Many G-Shock, Edifice, Pro Trek      |
-| Reliable Phone Finder          | Yes (works in tests)                 |
+| Feature                       | G-Shock Smart Sync (Unofficial App) |
+|-------------------------------|-------------------------------------|
+| Casio ID Required?            | No                                  |
+| Google Calendar Sync          | Yes                                 |
+| Auto Timezone Adjustment      | Yes                                 |
+| Remote Control (camera/music) | Yes                                 |
+| Alarm Sync                    | Yes                                 |
+| Islamic Prayer Times          | Yes                                 |
+| Connection Speed              | Fast (~3.5 seconds)                 |
+| Active Maintenance            | Yes (latest from August 2025)       |
+| Supported Watches             | Many G-Shock, Edifice, Pro Trek     |
+| Reliable Phone Finder         | Yes (works in tests)                |
 
 ---
 
