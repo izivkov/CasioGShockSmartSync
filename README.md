@@ -39,7 +39,7 @@ Instead of listing all the features, here is what ChatGPT thinks about it:
 - **Sync alarms** between your phone and watch  
   [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
 
-- **Islamic Prayers** Can set the 5 alarms to Islamic Payer times at your location  
+- **Islamic Prayers** — Can set the 5 alarms to Islamic Payer times at your location  
   [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
 
 - **Faster Bluetooth connection** — ~3.5s vs 12s on official app  
