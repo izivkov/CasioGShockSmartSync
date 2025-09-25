@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace 'org.avmedia.gshockGoogleSync'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdk 26
-        targetSdk 35
-        versionCode 238
-        versionName "23.8"
+        targetSdk 36
+        versionCode 239
+        versionName "23.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,11 +39,7 @@ android {
         }
     }
     lint {
-        disable += "IconLocation"
-    }
-
-    lintOptions {
-        disable 'TypographyFractions','TypographyQuotes'
+        disable 'TypographyFractions', 'TypographyQuotes'
     }
 }
 
