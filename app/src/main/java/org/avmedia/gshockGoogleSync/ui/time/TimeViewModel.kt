@@ -13,6 +13,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 
 data class TimeState(
@@ -82,7 +83,7 @@ class TimeViewModel @Inject constructor(
             runCatching {
                 _state.value = TimeState(
                     timer = api.getTimer(),
-                    homeTime = api.getHomeTime(),
+                    homeTime = if (WatchInfo.hasHomeTime) api.getHomeTime() else "",
                     batteryLevel = api.getBatteryLevel(),
                     temperature = api.getWatchTemperature(),
                     watchName = api.getWatchName()
