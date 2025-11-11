@@ -51,7 +51,7 @@ Instead of listing all the features, here is what ChatGPT thinks about it:
 
 Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants:
 
-`G(M)W-5600 / 5000, GA-B2100, GST-B500 / B200, MSG-B100, G-B001, GBD-H1000 (partial), MRG-B5000, GCW-B5000, GG-B100, ABL-100WE, Edifice ECB-10/20/30` and others.  
+`G(M)W-5600 / 5000, GA-B2100, GST-B500 / B200, MSG-B100, G-B001, GBD-H1000 (partial), GBD-800, MRG-B5000, GCW-B5000, GG-B100, ABL-100WE, Edifice ECB-10/20/30` and others.  
 [F-Droid](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/) | [GitHub](https://github.com/izivkov/CasioGShockSmartSync)
 
 ---
