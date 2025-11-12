@@ -12,7 +12,7 @@ Instead of listing all the features, here is what ChatGPT thinks about it:
 
 **G-Shock Smart Sync** is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches that allows you to control your watch and sync data **without a Casio ID**.
 
-**[Audio Overview](https://notebooklm.google.com/notebook/f4b603d8-4786-43dc-9a46-7042bc574492?artifactId=c3f559b2-6152-4757-97bf-715301461787)**
+**[AI-Generated Overview](https://notebooklm.google.com/notebook/f4b603d8-4786-43dc-9a46-7042bc574492?artifactId=c3f559b2-6152-4757-97bf-715301461787)**
 
 [![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
 [![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
