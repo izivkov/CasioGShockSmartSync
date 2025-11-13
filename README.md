@@ -57,7 +57,8 @@ Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants. Here are th
 
 | Model              | Module Number(s)     |
 |--------------------|----------------------|
-| GM-5600 / GMW-5600 | 3229                 |
+| GW-B5600           | 3461                 |
+| GM-B5600/GMW-B5600 | 3459                 |
 | GMW-B5000          | 3459, 3461           |
 | GW-5000            | 3159, 3495           |
 | GA-B2100           | 5689                 |
