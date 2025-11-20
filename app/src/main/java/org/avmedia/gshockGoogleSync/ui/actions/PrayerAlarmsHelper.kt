@@ -22,29 +22,6 @@ import java.time.ZoneId
 import java.util.Locale
 
 object PrayerAlarmsHelper {
-    fun createPrayerAlarms(context: Context): Result<List<Alarm>> = runCatching {
-        val location = LocationProvider.getLocation(context) ?: throw IllegalStateException(
-            "Could not obtain location"
-        )
-
-        val today = LocalDate.now()
-        val date = DateComponents(today.year, today.monthValue, today.dayOfMonth)
-        val coordinates = Coordinates(location.latitude, location.longitude)
-        val parameters = getCalculationMethodForLocation().parameters
-            .copy(prayerAdjustments = PrayerAdjustments(fajr = 2))
-
-        PrayerTimes(coordinates, date, parameters).let { prayerTimes ->
-            listOf(
-                prayerTimes.fajr,
-                prayerTimes.dhuhr,
-                prayerTimes.asr,
-                prayerTimes.maghrib,
-                prayerTimes.isha
-            ).map(::prayerTimeToAlarm)
-        }
-    }.onFailure { e ->
-        AppSnackbar("Failed to create prayer alarms: ${e.message}")
-    }
 
     fun createNextPrayerAlarms(context: Context, n: Int): Result<List<Alarm>> = runCatching {
         require(n in 1..5) { "Number of alarms must be between 1 and 5" }

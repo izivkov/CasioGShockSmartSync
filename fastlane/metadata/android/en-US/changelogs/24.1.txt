@@ -1,0 +1,1 @@
+Fixed possible connection problem for some watches.
