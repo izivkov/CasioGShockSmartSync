@@ -20,9 +20,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Locale
+import kotlin.time.ExperimentalTime
 
 object PrayerAlarmsHelper {
 
+    @OptIn(ExperimentalTime::class)
     fun createNextPrayerAlarms(context: Context, n: Int): Result<List<Alarm>> = runCatching {
         require(n in 1..5) { "Number of alarms must be between 1 and 5" }
 
@@ -96,6 +98,7 @@ object PrayerAlarmsHelper {
             "SK", "SI", "ES", "SE", "CH", "UA", "GB", "VA"
         ).contains(countryCode.uppercase())
 
+    @OptIn(ExperimentalTime::class)
     private fun prayerTimeToAlarm(prayerTime: kotlinx.datetime.Instant): Alarm =
         getHoursAndMinutesFromEpochMilliseconds(prayerTime.toEpochMilliseconds()).let { (hours, minutes) ->
             Alarm(hours, minutes, enabled = true, hasHourlyChime = false)
