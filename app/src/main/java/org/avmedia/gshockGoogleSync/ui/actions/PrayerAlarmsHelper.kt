@@ -103,10 +103,6 @@ object PrayerAlarmsHelper {
      * @return The best `CalculationMethod` for that country.
      */
     private fun getCalculationMethodForLocation(countryCode: String?): CalculationMethod =
-
-        CalculationMethod.KARACHI
-
-        /*
         when {
             // Prioritize the Turkish method for Turkey and the wider European continent.
             isInTurkeyOrEurope(countryCode) -> CalculationMethod.TURKEY
@@ -125,7 +121,6 @@ object PrayerAlarmsHelper {
                 else -> CalculationMethod.MUSLIM_WORLD_LEAGUE
             }
         }
-         */
 
     private fun isInTurkeyOrEurope(countryCode: String?): Boolean {
         if (countryCode.isNullOrBlank()) return false
