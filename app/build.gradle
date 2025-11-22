@@ -14,8 +14,8 @@ android {
         applicationId "org.avmedia.gshockGoogleSync"
         minSdk 26
         targetSdk 36
-        versionCode 242
-        versionName "24.2"
+        versionCode 243
+        versionName "24.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
