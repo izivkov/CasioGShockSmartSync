@@ -34,7 +34,7 @@ object PrayerAlarmsHelper {
 
         val coordinates = Coordinates(location.latitude, location.longitude)
         val parameters = getCalculationMethodForLocation().parameters
-            .copy(prayerAdjustments = PrayerAdjustments(fajr = 2))
+            .copy(prayerAdjustments = PrayerAdjustments())
 
         generateSequence(LocalDate.now()) { it.plusDays(1) }
             .map { date ->
