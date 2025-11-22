@@ -19,7 +19,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.Locale
 import kotlin.time.ExperimentalTime
 
 object PrayerAlarmsHelper {
@@ -51,7 +50,8 @@ object PrayerAlarmsHelper {
 
         // Prepare the necessary parameters for the Adhan2 library.
         val coordinates = Coordinates(location.latitude, location.longitude)
-        val parameters = getCalculationMethodForLocation().parameters
+        val countryCode = LocationProvider.getCountryCode(context)
+        val parameters = getCalculationMethodForLocation(countryCode).parameters
             .copy(prayerAdjustments = PrayerAdjustments())
 
         // Start a lazy, infinite sequence of dates, beginning with today.
@@ -95,10 +95,24 @@ object PrayerAlarmsHelper {
     }.onFailure { e ->
         AppSnackbar("Failed to create next prayer alarms: ${e.message}")
     }
-    private fun getCalculationMethodForLocation(): CalculationMethod =
+
+    /**
+     * Determines the appropriate prayer time calculation method based on a given country code.
+     *
+     * @param countryCode The two-letter ISO country code (e.g., "US", "TR", "IN").
+     * @return The best `CalculationMethod` for that country.
+     */
+    private fun getCalculationMethodForLocation(countryCode: String?): CalculationMethod =
+
+        CalculationMethod.KARACHI
+
+        /*
         when {
-            isInTurkeyOrEurope() -> CalculationMethod.TURKEY
-            else -> when (Locale.getDefault().country.uppercase(Locale.US)) {
+            // Prioritize the Turkish method for Turkey and the wider European continent.
+            isInTurkeyOrEurope(countryCode) -> CalculationMethod.TURKEY
+
+            // Then, handle other specific regions.
+            else -> when (countryCode) {
                 "US", "CA" -> CalculationMethod.NORTH_AMERICA
                 "EG" -> CalculationMethod.EGYPTIAN
                 "PK", "IN", "BD" -> CalculationMethod.KARACHI
@@ -107,25 +121,27 @@ object PrayerAlarmsHelper {
                 "QA" -> CalculationMethod.QATAR
                 "KW" -> CalculationMethod.KUWAIT
                 "SG" -> CalculationMethod.SINGAPORE
+                // Global default for all other regions or if countryCode is null
                 else -> CalculationMethod.MUSLIM_WORLD_LEAGUE
             }
         }
+         */
 
-    private fun isInTurkeyOrEurope(): Boolean =
-        Locale.getDefault().country.let { country ->
-            isTurkey(country) || isEurope(country)
-        }
+    private fun isInTurkeyOrEurope(countryCode: String?): Boolean {
+        if (countryCode.isNullOrBlank()) return false
+        return isTurkey(countryCode) || isEurope(countryCode)
+    }
 
     private fun isTurkey(countryCode: String): Boolean =
         countryCode.uppercase() == "TR"
 
-    private fun isEurope(countryCode: String): Boolean =
+    private fun isEurope(countryCode: String?): Boolean =
         setOf(
             "AL", "AD", "AM", "AT", "AZ", "BY", "BE", "BA", "BG", "HR", "CY", "CZ", "DK", "EE",
             "FI", "FR", "GE", "DE", "GR", "HU", "IS", "IE", "IT", "KZ", "XK", "LV", "LI", "LT",
             "LU", "MT", "MD", "MC", "ME", "NL", "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS",
             "SK", "SI", "ES", "SE", "CH", "UA", "GB", "VA"
-        ).contains(countryCode.uppercase())
+        ).contains(countryCode?.uppercase())
 
     @OptIn(ExperimentalTime::class)
     private fun prayerTimeToAlarm(prayerTime: kotlinx.datetime.Instant): Alarm =
