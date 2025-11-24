@@ -1,0 +1,1 @@
+Increase accuracy for location for better prayer time setting.
