@@ -43,6 +43,7 @@ import java.util.Locale
 fun AlarmItem(
     hours: Int = 12,
     minutes: Int = 0,
+    name : String? = null,
     isAlarmEnabled: Boolean = true,
     onToggleAlarm: (Boolean) -> Unit,
     onTimeChanged: (Int, Int) -> Unit
@@ -87,7 +88,7 @@ fun AlarmItem(
                         .clickable { showTimePickerDialog = true },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                AppText(text = stringResource(id = R.string.daily))
+                AppText(text = name ?: stringResource(id = R.string.daily))
             }
             AppSwitch(
                 checked = isEnabled,

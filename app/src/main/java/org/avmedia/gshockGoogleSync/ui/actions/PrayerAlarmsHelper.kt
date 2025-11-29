@@ -13,6 +13,7 @@ import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
 import org.avmedia.gshockGoogleSync.services.LocationProvider
+import org.avmedia.gshockGoogleSync.ui.alarms.AlarmCodes
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import java.time.Instant
@@ -71,23 +72,24 @@ object PrayerAlarmsHelper {
             // E.g., [[fajr1, dhuhr1], [fajr2, dhuhr2]] -> [fajr1, dhuhr1, fajr2, dhuhr2]
             .flatMap { prayerTimes ->
                 sequenceOf(
-                    prayerTimes.fajr,
-                    prayerTimes.dhuhr,
-                    prayerTimes.asr,
-                    prayerTimes.maghrib,
-                    prayerTimes.isha
+                    AlarmCodes.FAJR to prayerTimes.fajr,
+                    AlarmCodes.DHUHR to prayerTimes.dhuhr,
+                    AlarmCodes.ASR to prayerTimes.asr,
+                    AlarmCodes.MAGHRIB to prayerTimes.maghrib,
+                    AlarmCodes.ISHA to prayerTimes.isha
                 )
             }
             // Filter the continuous stream, keeping only the prayer times that are in the future.
-            .filter { prayerTime ->
+            .filter { (name, prayerTime) -> // Unpack the pair
                 LocalDateTime.ofInstant(
                     Instant.ofEpochMilli(prayerTime.toEpochMilliseconds()),
                     ZoneId.systemDefault()
                 ) > LocalDateTime.now()
             }
             // Convert each future prayer time from the Adhan library's Instant format into our app's `Alarm` object.
-            .map(::prayerTimeToAlarm)
-            // Take only the first `n` items from the resulting stream. This is efficient because
+            .map { (alarmCode, prayerTime) -> // Unpack the pair again
+                prayerTimeToAlarm(prayerTime, alarmCode) // Call with both parameters
+            }         // Take only the first `n` items from the resulting stream. This is efficient because
             // it stops the entire sequence pipeline as soon as the desired number is reached.
             .take(n)
             // Convert the final sequence of `n` alarms into a List. This is the successful result.
@@ -139,9 +141,11 @@ object PrayerAlarmsHelper {
         ).contains(countryCode?.uppercase())
 
     @OptIn(ExperimentalTime::class)
-    private fun prayerTimeToAlarm(prayerTime: kotlinx.datetime.Instant): Alarm =
+    private fun prayerTimeToAlarm(prayerTime: kotlin.time.Instant, alarmCode: AlarmCodes): Alarm =
         getHoursAndMinutesFromEpochMilliseconds(prayerTime.toEpochMilliseconds()).let { (hours, minutes) ->
-            Alarm(hours, minutes, enabled = true, hasHourlyChime = false)
+            Alarm(hours, minutes, enabled = true,
+                hasHourlyChime = false,
+                code = alarmCode.code)
         }
 
     private fun getHoursAndMinutesFromEpochMilliseconds(epochMilliseconds: Long): Pair<Int, Int> =

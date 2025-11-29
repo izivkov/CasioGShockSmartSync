@@ -36,6 +36,7 @@ fun AlarmList(
                         hours = alarm.hour,
                         minutes = alarm.minute,
                         isAlarmEnabled = alarm.enabled,
+                        name = AlarmCodes.getName(alarm.code),
                         onToggleAlarm = { isEnabled ->
                             alarmViewModel.toggleAlarm(index, isEnabled)
                         },
