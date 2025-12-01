@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import org.avmedia.gshockapi.io.AppInfoIO
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.TimeAdjustmentInfo
 import java.util.TimeZone
@@ -53,4 +54,7 @@ interface IGShockAPI {
     fun resetHand()
     fun validateBluetoothAddress(deviceAddress: String?): Boolean
     fun preventReconnection(): Boolean
+
+    suspend fun getAppInfoUserBuffer(): ByteArray
+    suspend fun setAppInfoUserBuffer(buffer: ByteArray)
 }

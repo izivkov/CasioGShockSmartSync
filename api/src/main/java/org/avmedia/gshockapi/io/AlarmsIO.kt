@@ -182,7 +182,6 @@ object AlarmsIO {
         private fun createJsonAlarm(intArray: ArrayList<Int>): JSONObject =
             runCatching {
                 Alarms.Alarm(
-                    code = intArray[1],
                     hour = intArray[2],
                     minute = intArray[3],
                     enabled = intArray[0] and Alarms.ENABLED_MASK != 0,

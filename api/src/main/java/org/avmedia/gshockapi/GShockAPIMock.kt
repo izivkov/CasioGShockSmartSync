@@ -313,4 +313,8 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     override fun preventReconnection(): Boolean {
         return true
     }
+
+    override suspend fun getAppInfoUserBuffer(): ByteArray {return byteArrayOf()}
+
+    override suspend fun setAppInfoUserBuffer(buffer: ByteArray) {}
 }

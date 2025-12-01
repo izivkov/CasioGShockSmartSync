@@ -294,6 +294,31 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         return AppInfoIO.request()
     }
 
+    /**
+     * Retrieves the user-configurable data buffer from the watch's App Info characteristic.
+     * This provides a raw byte array for application-specific data storage.
+     *
+     * @return A ByteArray representing the user data area.
+     */
+    override suspend fun getAppInfoUserBuffer(): ByteArray {
+        // Delegate the call to AppInfoIO and convert the result to ByteArray
+        return AppInfoIO.getAllUserValues().map { it.toByte() }.toByteArray()
+    }
+
+    /**
+     * Writes a user-configurable data buffer to the watch's App Info characteristic.
+     * The provided data will be persisted on the watch.
+     *
+     * @param buffer The ByteArray containing the data to write.
+     */
+    override suspend fun setAppInfoUserBuffer(buffer: ByteArray) {
+        // Convert the ByteArray to a List<Int> as required by the underlying IO class
+        // and delegate the call.
+        AppInfoIO.setAllUserValues(buffer.map { it.toInt() })
+
+        // IMPORTANT: Persist the changes to the watch immediately after setting.
+        AppInfoIO.save()
+    }
 
     /**
      * Sets the current time on the watch from the time on the phone. In addition, it can optionally set the Home Time
