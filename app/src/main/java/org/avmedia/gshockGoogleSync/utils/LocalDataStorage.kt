@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.json.JSONObject
 
 object LocalDataStorage {
 
@@ -60,6 +61,30 @@ object LocalDataStorage {
         context.dataStore.edit { preferences ->
             preferences.remove(stringPreferencesKey(key))
         }
+    }
+
+    /**
+     * Reads all key-value pairs from the DataStore and returns them as a JSONObject.
+     * This is useful for backups or exporting settings.
+     *
+     * @param context The application context.
+     * @return A JSONObject containing all stored preferences.
+     */
+    fun toJsonObject(context: Context): JSONObject {
+        val jsonObject = JSONObject()
+        runBlocking {
+            mutex.withLock {
+                val preferences = context.dataStore.data.first()
+                preferences.asMap().forEach { (key, value) ->
+                    // We only store strings and string-representations of other types,
+                    // so we can safely cast the value.
+                    if (value is String) {
+                        jsonObject.put(key.name, value)
+                    }
+                }
+            }
+        }
+        return jsonObject
     }
 
     private fun getBoolean(context: Context, key: String): Boolean {

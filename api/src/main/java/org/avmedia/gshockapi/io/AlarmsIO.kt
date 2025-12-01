@@ -32,18 +32,16 @@ object AlarmsIO {
             state
         }
 
-    suspend fun request(): ArrayList<Alarm> =
-        CachedIO.request("GET_ALARMS") { key ->
-            updateState {
-                it.copy(
-                    deferredResult = CompletableDeferred(),
-                    isProcessing = true
-                )
-            }
-            Alarm.clear()
-            Connection.sendMessage("{ action: '$key'}")
-            state.deferredResult?.await() ?: ArrayList()
+    suspend fun request(): ArrayList<Alarm> = CachedIO.request("GET_ALARMS") { key ->
+        updateState {
+            it.copy(
+                deferredResult = CompletableDeferred(), isProcessing = true
+            )
         }
+        Alarm.clear()
+        Connection.sendMessage("{ action: '$key'}")
+        state.deferredResult?.await() ?: ArrayList()
+    }
 
     fun set(alarms: ArrayList<Alarm>) {
         if (alarms.isEmpty()) {
@@ -51,7 +49,7 @@ object AlarmsIO {
             return
         }
 
-        CachedIO.set("SET_ALARMS") {
+        CachedIO.set("GET_ALARMS") {
             val json = Gson().toJson(alarms)
             Connection.sendMessage("{action: \"SET_ALARMS\", value: $json }")
         }
@@ -66,8 +64,7 @@ object AlarmsIO {
         if (Alarm.getAlarms().size == 5) { // Must be 5 even if WatchInfo.alarmCount is 4.
             updateState { currentState ->
                 currentState.copy(
-                    alarms = Alarm.getAlarms(),
-                    isProcessing = false
+                    alarms = Alarm.getAlarms(), isProcessing = false
                 )
             }
             state.deferredResult?.complete(state.alarms)
@@ -91,18 +88,14 @@ object AlarmsIO {
 
     fun sendToWatchSet(message: String) {
         runCatching {
-            JSONObject(message)
-                .get("value")
-                .let { it as JSONArray }
-                .let { jsonArray ->
+            JSONObject(message).get("value").let { it as JSONArray }.let { jsonArray ->
                     val first = Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0))
                     println("First Alarm: $first, in binary: ${Utils.fromByteArrayToHexStr(first)}")
                     Pair(
                         Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0)),
                         Alarms.fromJsonAlarmSecondaryAlarms(jsonArray)
                     )
-                }
-                .also { (firstAlarm, secondaryAlarms) ->
+                }.also { (firstAlarm, secondaryAlarms) ->
                     IO.writeCmd(GetSetMode.SET, firstAlarm)
                     IO.writeCmd(GetSetMode.SET, secondaryAlarms)
                 }
@@ -137,32 +130,26 @@ object AlarmsIO {
          * @param command The raw command string containing alarm data
          * @return JSONObject with format: {"ALARMS": [array of alarm objects]}
          */
-        fun toJson(command: String): JSONObject =
-            runCatching {
-                Utils.toIntArray(command)
-                    .let { intArray ->
-                        JSONArray().apply {
-                            when (intArray.firstOrNull()) {
-                                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code ->
-                                    ArrayList(intArray.drop(1))
-                                        .let(::createJsonAlarm)
-                                        .let(::put)
+        fun toJson(command: String): JSONObject = runCatching {
+            Utils.toIntArray(command).let { intArray ->
+                    JSONArray().apply {
+                        when (intArray.firstOrNull()) {
+                            CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code -> ArrayList(
+                                intArray.drop(1)
+                            ).let(::createJsonAlarm).let(::put)
 
-                                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code ->
-                                    intArray.drop(1)
-                                        .chunked(4)
-                                        .map { ArrayList(it) }
-                                        .forEach { put(createJsonAlarm(it)) }
+                            CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code -> intArray.drop(
+                                1
+                            ).chunked(4).map { ArrayList(it) }.forEach { put(createJsonAlarm(it)) }
 
-                                else -> Timber.d("Unhandled Command [$command]")
-                            }
+                            else -> Timber.d("Unhandled Command [$command]")
                         }
                     }
-                    .let { alarms -> JSONObject().put("ALARMS", alarms) }
-            }.getOrElse { error ->
-                Timber.e("Failed to parse command: ${error.message}")
-                JSONObject()
-            }
+                }.let { alarms -> JSONObject().put("ALARMS", alarms) }
+        }.getOrElse { error ->
+            Timber.e("Failed to parse command: ${error.message}")
+            JSONObject()
+        }
 
         /**
          * Creates a JSON object from a 4-byte alarm data buffer.
@@ -179,19 +166,18 @@ object AlarmsIO {
          */
         private const val HOURLY_CHIME_MASK = 0b10000000
 
-        private fun createJsonAlarm(intArray: ArrayList<Int>): JSONObject =
-            runCatching {
-                Alarms.Alarm(
-                    hour = intArray[2],
-                    minute = intArray[3],
-                    enabled = intArray[0] and Alarms.ENABLED_MASK != 0,
-                    hasHourlyChime = intArray[0] and HOURLY_CHIME_MASK != 0
-                ).let { alarm ->
-                    JSONObject(Gson().toJson(alarm))
-                }
-            }.getOrElse { error ->
-                Timber.e("Failed to create alarm: ${error.message}")
-                JSONObject()
+        private fun createJsonAlarm(intArray: ArrayList<Int>): JSONObject = runCatching {
+            Alarms.Alarm(
+                hour = intArray[2],
+                minute = intArray[3],
+                enabled = intArray[0] and Alarms.ENABLED_MASK != 0,
+                hasHourlyChime = intArray[0] and HOURLY_CHIME_MASK != 0
+            ).let { alarm ->
+                JSONObject(Gson().toJson(alarm))
             }
+        }.getOrElse { error ->
+            Timber.e("Failed to create alarm: ${error.message}")
+            JSONObject()
+        }
     }
 }

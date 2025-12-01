@@ -19,6 +19,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockapi.Alarm
 
 @Composable
 fun AlarmList(
@@ -36,7 +37,7 @@ fun AlarmList(
                         hours = alarm.hour,
                         minutes = alarm.minute,
                         isAlarmEnabled = alarm.enabled,
-                        name = AlarmCodes.getName(alarm.code),
+                        name = alarm.name,
                         onToggleAlarm = { isEnabled ->
                             alarmViewModel.toggleAlarm(index, isEnabled)
                         },

@@ -88,8 +88,8 @@ fun AlarmItem(
                         .clickable { showTimePickerDialog = true },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                AppText(text = name ?: stringResource(id = R.string.daily))
-            }
+                val alarmName = if (name.isNullOrBlank()) stringResource(id = R.string.daily) else name
+                AppText(text = alarmName)            }
             AppSwitch(
                 checked = isEnabled,
                 onCheckedChange = { checked ->

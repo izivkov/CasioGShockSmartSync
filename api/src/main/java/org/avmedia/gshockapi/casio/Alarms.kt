@@ -18,7 +18,7 @@ object Alarms {
 
     private const val ALARM_CONSTANT_VALUE = 0x40
 
-    class Alarm(val hour: Int, val minute: Int, val enabled: Boolean, val hasHourlyChime: Boolean, val code:Int = 0)
+    class Alarm(val hour: Int, val minute: Int, val enabled: Boolean, val hasHourlyChime: Boolean)
 
     fun fromJsonAlarmFirstAlarm(alarmJson: JSONObject): ByteArray {
         val gson = Gson()
@@ -33,18 +33,13 @@ object Alarms {
         if (alarm.enabled) flag = flag or ENABLED_MASK
         if (alarm.hasHourlyChime) flag = flag or HOURLY_CHIME_MASK
 
-        println("First Alarm: setting flag to ${ALARM_CONSTANT_VALUE or alarm.code}")
-
-        val res = Utils.byteArrayOfInts(
+        return Utils.byteArrayOfInts(
             CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code,
             flag,
-            ALARM_CONSTANT_VALUE or alarm.code,
+            ALARM_CONSTANT_VALUE,
             alarm.hour,
             alarm.minute
         )
-
-        println("ALARM_CONSTANT_VALUE: ${ALARM_CONSTANT_VALUE}, alarm.code: ${alarm.code}, res: $res")
-        return  res
     }
 
     fun fromJsonAlarmSecondaryAlarms(alarmsJson: JSONArray): ByteArray {
@@ -67,11 +62,9 @@ object Alarms {
             if (alarm.enabled) flag = flag or ENABLED_MASK
             if (alarm.hasHourlyChime) flag = flag or HOURLY_CHIME_MASK
 
-            println("createSecondaryAlarm Alarm:s setting flag to ${ALARM_CONSTANT_VALUE or alarm.code}")
-
             allAlarms += Utils.byteArrayOfInts(
                 flag,
-                ALARM_CONSTANT_VALUE or alarm.code,
+                ALARM_CONSTANT_VALUE,
                 alarm.hour,
                 alarm.minute
             )

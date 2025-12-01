@@ -18,30 +18,13 @@ object AppInfoIO {
     // --- Magic number ---
     private var MAGIC_BYTES = byteArrayOf(0xB1.toByte(), 0xFA.toByte())
 
-    // --- User data region ---
+    // --- Buffer and user data region ---
     private var currentBuf: ByteArray = ByteArray(12) { 0 }
     private const val USER_DATA_OFFSET = 3
-    private var userDataSize = 5      // default 5, can grow later
-    private var userDataMinValue = 0
-    private var userDataMaxValue = 5
 
-    // --- Configurable user data ---
-    fun configureUserData(size: Int, minValue: Int = 0, maxValue: Int = 5) {
-        require(size > 0 && USER_DATA_OFFSET + size <= currentBuf.size) {
-            "User data size too large for buffer"
-        }
-        require(minValue <= maxValue) { "Invalid min/max values" }
-
-        userDataSize = size
-        userDataMinValue = minValue
-        userDataMaxValue = maxValue
-    }
-
-    private fun checkUserValue(value: Int) {
-        require(value in userDataMinValue..userDataMaxValue) {
-            "User value must be between $userDataMinValue..$userDataMaxValue, got $value"
-        }
-    }
+    // All remaining bytes after the magic marker
+    private val userDataSize: Int
+        get() = currentBuf.size - USER_DATA_OFFSET
 
     // --- Suspendable request ---
     suspend fun request(): String {
@@ -91,10 +74,6 @@ object AppInfoIO {
         }
     }
 
-    fun isInitialised(): Boolean {
-        return hasMagicBytes(currentBuf)
-    }
-
     private const val RESET_PATTERN = "22FFFFFFFFFFFFFFFFFFFF00"
     private fun isResetPattern(hex: String): Boolean =
         hex.equals(RESET_PATTERN, ignoreCase = true)
@@ -119,17 +98,15 @@ object AppInfoIO {
         state = State()
     }
 
-    // --- User data accessors ---
+    // --- User data accessors (all remaining bytes after magic) ---
 
     fun setUserValue(index: Int, value: Int) {
         require(index in 0 until userDataSize) { "Index must be 0..${userDataSize - 1}" }
-        checkUserValue(value)
         currentBuf[USER_DATA_OFFSET + index] = value.toByte()
     }
 
     fun setAllUserValues(values: List<Int>) {
         require(values.size == userDataSize) { "Must provide exactly $userDataSize values" }
-        values.forEach(::checkUserValue)
         for (i in 0 until userDataSize) {
             currentBuf[USER_DATA_OFFSET + i] = values[i].toByte()
         }
@@ -147,5 +124,14 @@ object AppInfoIO {
     fun save() {
         val finalHex = Utils.fromByteArrayToHexStr(currentBuf)
         IO.writeCmd(GetSetMode.SET, finalHex)
+    }
+
+    // --- Optional: generate random magic number (once per session) ---
+    fun generateRandomMagic() {
+        val r = SecureRandom()
+        val newMagic = ByteArray(2)
+        r.nextBytes(newMagic)
+        MAGIC_BYTES = newMagic
+        insertMagic(currentBuf)
     }
 }

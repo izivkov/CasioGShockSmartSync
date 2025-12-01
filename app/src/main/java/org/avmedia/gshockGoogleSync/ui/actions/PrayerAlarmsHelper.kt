@@ -12,14 +12,16 @@ import com.batoulapps.adhan2.Coordinates
 import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
+import kotlinx.datetime.Instant as AdhanInstant // Use a type alias for clarity
+import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.services.LocationProvider
-import org.avmedia.gshockGoogleSync.ui.alarms.AlarmCodes
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.Locale
 import kotlin.time.ExperimentalTime
 
 object PrayerAlarmsHelper {
@@ -67,33 +69,39 @@ object PrayerAlarmsHelper {
                     parameters
                 )
             }
-            // Take each PrayerTimes object (containing 5 prayer times) and flatten it.
-            // This converts a stream of daily-grouped prayers into one continuous stream of individual prayers.
-            // E.g., [[fajr1, dhuhr1], [fajr2, dhuhr2]] -> [fajr1, dhuhr1, fajr2, dhuhr2]
+            // Take each PrayerTimes object and flatten it into a sequence of named pairs.
+            // This preserves the name of the prayer alongside its time.
             .flatMap { prayerTimes ->
                 sequenceOf(
-                    AlarmCodes.FAJR to prayerTimes.fajr,
-                    AlarmCodes.DHUHR to prayerTimes.dhuhr,
-                    AlarmCodes.ASR to prayerTimes.asr,
-                    AlarmCodes.MAGHRIB to prayerTimes.maghrib,
-                    AlarmCodes.ISHA to prayerTimes.isha
+                    "Fajr" to prayerTimes.fajr,
+                    "Dhuhr" to prayerTimes.dhuhr,
+                    "Asr" to prayerTimes.asr,
+                    "Maghrib" to prayerTimes.maghrib,
+                    "Isha" to prayerTimes.isha
                 )
             }
             // Filter the continuous stream, keeping only the prayer times that are in the future.
-            .filter { (name, prayerTime) -> // Unpack the pair
+            .filter { (_, prayerTime) -> // Unpack the pair, we only need the time for filtering
                 LocalDateTime.ofInstant(
                     Instant.ofEpochMilli(prayerTime.toEpochMilliseconds()),
                     ZoneId.systemDefault()
                 ) > LocalDateTime.now()
             }
             // Convert each future prayer time from the Adhan library's Instant format into our app's `Alarm` object.
-            .map { (alarmCode, prayerTime) -> // Unpack the pair again
-                prayerTimeToAlarm(prayerTime, alarmCode) // Call with both parameters
-            }         // Take only the first `n` items from the resulting stream. This is efficient because
+            .map { (name, prayerTime) -> // Unpack the pair to use both name and time
+                prayerTimeToAlarm(prayerTime, name)
+            }
+            // Take only the first `n` items from the resulting stream. This is efficient because
             // it stops the entire sequence pipeline as soon as the desired number is reached.
             .take(n)
             // Convert the final sequence of `n` alarms into a List. This is the successful result.
             .toList()
+            .also { alarms ->
+                // After creating the alarms, store their names in local storage.
+                alarms.forEachIndexed { index, alarm ->
+                    LocalDataStorage.put(context, "alarm${index + 1}", alarm.name ?: "")
+                }
+            }
     }.onFailure { e ->
         AppSnackbar("Failed to create next prayer alarms: ${e.message}")
     }
@@ -130,7 +138,7 @@ object PrayerAlarmsHelper {
     }
 
     private fun isTurkey(countryCode: String): Boolean =
-        countryCode.uppercase() == "TR"
+        countryCode.uppercase(Locale.US) == "TR"
 
     private fun isEurope(countryCode: String?): Boolean =
         setOf(
@@ -138,14 +146,12 @@ object PrayerAlarmsHelper {
             "FI", "FR", "GE", "DE", "GR", "HU", "IS", "IE", "IT", "KZ", "XK", "LV", "LI", "LT",
             "LU", "MT", "MD", "MC", "ME", "NL", "MK", "NO", "PL", "PT", "RO", "RU", "SM", "RS",
             "SK", "SI", "ES", "SE", "CH", "UA", "GB", "VA"
-        ).contains(countryCode?.uppercase())
+        ).contains(countryCode?.uppercase(Locale.US))
 
     @OptIn(ExperimentalTime::class)
-    private fun prayerTimeToAlarm(prayerTime: kotlin.time.Instant, alarmCode: AlarmCodes): Alarm =
+    private fun prayerTimeToAlarm(prayerTime: AdhanInstant, name: String): Alarm =
         getHoursAndMinutesFromEpochMilliseconds(prayerTime.toEpochMilliseconds()).let { (hours, minutes) ->
-            Alarm(hours, minutes, enabled = true,
-                hasHourlyChime = false,
-                code = alarmCode.code)
+            Alarm(hours, minutes, enabled = true, hasHourlyChime = false, name = name)
         }
 
     private fun getHoursAndMinutesFromEpochMilliseconds(epochMilliseconds: Long): Pair<Int, Int> =

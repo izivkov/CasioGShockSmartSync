@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -32,23 +33,32 @@ class AlarmViewModel @Inject constructor(
     private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
     val alarms: List<Alarm> get() = _alarms
 
+    // EDITED_MARKER is no longer needed.
+
     init {
         loadAlarms()
     }
 
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
-            _alarms = api.getAlarms()
+            // No need to init LocalDataStorage here, as it's a singleton object now.
+            val alarmsFromWatch = api.getAlarms()
                 .take(WatchInfo.alarmCount)
-                .let { alarms ->
-                    if (WatchInfo.chimeInSettings) {
-                        val settings = api.getSettings()
-                        alarms.mapIndexed { index, alarm ->
-                            if (index == 0) alarm.copy(hasHourlyChime = settings.hourlyChime)
-                            else alarm
-                        }
-                    } else alarms
+                .mapIndexed { index, alarm ->
+                    // LocalDataStorage returns an empty string for non-existent keys, which is fine.
+                    val name = LocalDataStorage.get(appContext, "alarm${index + 1}", "")
+                    alarm.copy(name = name)
                 }
+
+            _alarms = if (WatchInfo.chimeInSettings) {
+                val settings = api.getSettings()
+                alarmsFromWatch.mapIndexed { index, alarm ->
+                    if (index == 0) alarm.copy(hasHourlyChime = settings.hourlyChime)
+                    else alarm
+                }
+            } else {
+                alarmsFromWatch
+            }
             ProgressEvents.onNext("Alarms Loaded")
         }.onFailure {
             ProgressEvents.onNext("Error")
@@ -64,18 +74,39 @@ class AlarmViewModel @Inject constructor(
     fun toggleAlarm(index: Int, isEnabled: Boolean) =
         updateAlarm(index) { it.copy(enabled = isEnabled) }
 
-    fun onTimeChanged(index: Int, hours: Int, minutes: Int) =
-        updateAlarm(index) { it.copy(hour = hours, minute = minutes) }
+    fun onTimeChanged(index: Int, hours: Int, minutes: Int) {
+        // When the time is changed, update the UI state, setting the name to null
+        // to signify it has been manually edited. The name in LocalDataStorage
+        // is NOT touched here.
+        updateAlarm(index) { it.copy(hour = hours, minute = minutes, name = null) }
+    }
 
     fun toggleHourlyChime(enabled: Boolean) =
         updateAlarm(0) { it.copy(hasHourlyChime = enabled) }
 
     fun sendAlarmsToWatch() = viewModelScope.launch {
-        runCatching {
-            api.setAlarms(ArrayList(alarms))
-            if (WatchInfo.chimeInSettings) {
-                api.setSettings(api.getSettings().copy(hourlyChime = alarms[0].hasHourlyChime))
+        // Before sending, process the alarms to handle null names.
+        val alarmsToSend = alarms.mapIndexed { index, alarm ->
+            if (alarm.name == null) {
+                // This alarm was manually edited. Clear its name in LocalDataStorage.
+                LocalDataStorage.put(appContext, "alarm${index + 1}", "")
+                alarm.copy(name = "")
+            } else {
+                alarm
             }
+        }
+
+        runCatching {
+            api.setAlarms(ArrayList(alarmsToSend))
+            if (WatchInfo.chimeInSettings) {
+                // Ensure we get the latest hourly chime setting from the potentially modified list
+                val chimeSetting = alarmsToSend.getOrNull(0)?.hasHourlyChime ?: false
+                api.setSettings(api.getSettings().copy(hourlyChime = chimeSetting))
+            }
+
+            // After successfully sending, reload the alarms state to have a clean UI
+            _alarms = alarmsToSend
+
             AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
         }.onFailure {
             ProgressEvents.onNext("Error", it.message ?: "")
@@ -94,8 +125,10 @@ class AlarmViewModel @Inject constructor(
             .withIndex()
             .filter { it.value.enabled }
             .forEach { (index, alarm) ->
+                // Use the Elvis operator for a clean and simple way to handle null names.
+                val displayName = alarm.name ?: ""
                 val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
-                    putExtra(AlarmClock.EXTRA_MESSAGE, "Casio G-Shock Alarm")
+                    putExtra(AlarmClock.EXTRA_MESSAGE, "Casio G-Shock Alarm $displayName")
                     putExtra(AlarmClock.EXTRA_HOUR, alarm.hour)
                     putExtra(AlarmClock.EXTRA_MINUTES, alarm.minute)
                     putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_TIME)
