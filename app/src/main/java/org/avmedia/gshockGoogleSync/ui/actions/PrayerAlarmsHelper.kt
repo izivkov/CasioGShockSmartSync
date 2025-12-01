@@ -13,7 +13,7 @@ import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
 import kotlinx.datetime.Instant as AdhanInstant // Use a type alias for clarity
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.AlarmNameStorage // Import the new storage class
 import org.avmedia.gshockGoogleSync.services.LocationProvider
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Alarm
@@ -97,9 +97,9 @@ object PrayerAlarmsHelper {
             // Convert the final sequence of `n` alarms into a List. This is the successful result.
             .toList()
             .also { alarms ->
-                // After creating the alarms, store their names in local storage.
+                // After creating the alarms, store their names using the dedicated storage class.
                 alarms.forEachIndexed { index, alarm ->
-                    LocalDataStorage.put(context, "alarm${index + 1}", alarm.name ?: "")
+                    AlarmNameStorage.put(context, index, alarm.name ?: "")
                 }
             }
     }.onFailure { e ->
@@ -151,7 +151,9 @@ object PrayerAlarmsHelper {
     @OptIn(ExperimentalTime::class)
     private fun prayerTimeToAlarm(prayerTime: AdhanInstant, name: String): Alarm =
         getHoursAndMinutesFromEpochMilliseconds(prayerTime.toEpochMilliseconds()).let { (hours, minutes) ->
-            Alarm(hours, minutes, enabled = true, hasHourlyChime = false, name = name)
+            val alarm = Alarm(hours, minutes, enabled = true, hasHourlyChime = false, name = name)
+            println ("************** Setting Alarm: ${alarm.toString()}")
+            alarm
         }
 
     private fun getHoursAndMinutesFromEpochMilliseconds(epochMilliseconds: Long): Pair<Int, Int> =

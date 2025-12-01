@@ -90,7 +90,6 @@ object AlarmsIO {
         runCatching {
             JSONObject(message).get("value").let { it as JSONArray }.let { jsonArray ->
                     val first = Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0))
-                    println("First Alarm: $first, in binary: ${Utils.fromByteArrayToHexStr(first)}")
                     Pair(
                         Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0)),
                         Alarms.fromJsonAlarmSecondaryAlarms(jsonArray)

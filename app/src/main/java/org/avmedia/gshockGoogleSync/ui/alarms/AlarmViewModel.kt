@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.AlarmNameStorage // Import the new class
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -33,20 +33,17 @@ class AlarmViewModel @Inject constructor(
     private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
     val alarms: List<Alarm> get() = _alarms
 
-    // EDITED_MARKER is no longer needed.
-
     init {
         loadAlarms()
     }
 
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
-            // No need to init LocalDataStorage here, as it's a singleton object now.
             val alarmsFromWatch = api.getAlarms()
                 .take(WatchInfo.alarmCount)
                 .mapIndexed { index, alarm ->
-                    // LocalDataStorage returns an empty string for non-existent keys, which is fine.
-                    val name = LocalDataStorage.get(appContext, "alarm${index + 1}", "")
+                    // Use AlarmNameStorage to get the name
+                    val name = AlarmNameStorage.get(appContext, index)
                     alarm.copy(name = name)
                 }
 
@@ -76,8 +73,7 @@ class AlarmViewModel @Inject constructor(
 
     fun onTimeChanged(index: Int, hours: Int, minutes: Int) {
         // When the time is changed, update the UI state, setting the name to null
-        // to signify it has been manually edited. The name in LocalDataStorage
-        // is NOT touched here.
+        // to signify it has been manually edited.
         updateAlarm(index) { it.copy(hour = hours, minute = minutes, name = null) }
     }
 
@@ -88,8 +84,9 @@ class AlarmViewModel @Inject constructor(
         // Before sending, process the alarms to handle null names.
         val alarmsToSend = alarms.mapIndexed { index, alarm ->
             if (alarm.name == null) {
-                // This alarm was manually edited. Clear its name in LocalDataStorage.
-                LocalDataStorage.put(appContext, "alarm${index + 1}", "")
+                // This alarm was manually edited. Clear its name using AlarmNameStorage.
+                AlarmNameStorage.clear(appContext, index)
+                // Return a clean alarm object to be sent to the watch.
                 alarm.copy(name = "")
             } else {
                 alarm
