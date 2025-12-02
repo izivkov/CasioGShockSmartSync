@@ -17,6 +17,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.AlarmNameStorage // Import the new class
+import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -38,6 +39,8 @@ class AlarmViewModel @Inject constructor(
     }
 
     private fun loadAlarms() = viewModelScope.launch {
+        println("Loading alarms...${LocalDataStorage.toJsonObject(appContext)}")
+
         runCatching {
             val alarmsFromWatch = api.getAlarms()
                 .take(WatchInfo.alarmCount)
