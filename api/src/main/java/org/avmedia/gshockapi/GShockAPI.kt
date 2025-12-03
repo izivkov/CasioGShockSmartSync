@@ -76,10 +76,10 @@ class GShockAPI(private val context: Context) : IGShockAPI {
 
     override suspend fun init(): Boolean {
         IO.init()
+        getAppInfo()
+
         getPressedButton()
         ProgressEvents.onNext("ButtonPressedInfoReceived")
-
-        getAppInfo()
         ProgressEvents.onNext("WatchInitializationCompleted")
         return true
     }
@@ -291,15 +291,18 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      * @return appInfo string from the watch.
      */
     override suspend fun getAppInfo(): String {
+        println("************* Calling AppInfoIO.request() from getAppInfo")
         return AppInfoIO.request()
     }
 
     override suspend fun setScratchpadData(data: ByteArray, startIndex: Int) {
+        println("************* Calling AppInfoIO.request() from setScratchpadData")
         AppInfoIO.request()
         AppInfoIO.setUserData(data, startIndex)
     }
 
     override suspend fun getScratchpadData(index: Int, length: Int): ByteArray {
+        println("************* Calling AppInfoIO.request() from getScratchpadData")
         AppInfoIO.request()
         return AppInfoIO.getUserData(index, length)
     }

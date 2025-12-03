@@ -12,6 +12,9 @@ import com.batoulapps.adhan2.Coordinates
 import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.datetime.Instant as AdhanInstant // Use a type alias for clarity
 import org.avmedia.gshockGoogleSync.utils.AlarmNameStorage // Import the new storage class
 import org.avmedia.gshockGoogleSync.services.LocationProvider
@@ -24,7 +27,11 @@ import java.time.ZoneId
 import java.util.Locale
 import kotlin.time.ExperimentalTime
 
-object PrayerAlarmsHelper {
+@Singleton
+class PrayerAlarmsHelper @Inject constructor(
+    private val alarmNameStorage: AlarmNameStorage,
+    @ApplicationContext private val context: Context
+) {
 
     /**
      * Calculates and returns the next `n` prayer times that occur after the current moment,
@@ -36,32 +43,27 @@ object PrayerAlarmsHelper {
      * and finally takes the first `n` results. This approach is highly efficient as it
      * avoids calculating unnecessary data.
      *
-     * @param context The application context, used to retrieve the device's current location.
      * @param n The number of upcoming prayer alarms to generate. Must be between 1 and 5.
      * @return A `Result<List<Alarm>>` which contains the list of `Alarm` objects on success,
      *         or an exception on failure (e.g., if location could not be determined).
      */
     @OptIn(ExperimentalTime::class)
-    fun createNextPrayerAlarms(context: Context, n: Int): Result<List<Alarm>> = runCatching {
+    fun createNextPrayerAlarms(
+        n: Int
+    ): Result<List<Alarm>> = runCatching {
         // First, validate that the requested number of alarms is within a reasonable range.
         require(n in 1..5) { "Number of alarms must be between 1 and 5" }
 
-        // Get the device's current location. If unavailable, throw an exception to be caught by runCatching.
+        // Use the context injected into the class constructor
         val location = LocationProvider.getLocation(context) ?: throw IllegalStateException(
             "Could not obtain location"
         )
-
-        // Prepare the necessary parameters for the Adhan2 library.
         val coordinates = Coordinates(location.latitude, location.longitude)
         val countryCode = LocationProvider.getCountryCode(context)
         val parameters = getCalculationMethodForLocation(countryCode).parameters
             .copy(prayerAdjustments = PrayerAdjustments())
 
-        // Start a lazy, infinite sequence of dates, beginning with today.
-        // "Lazy" means it only computes the next date when asked, saving resources.
         generateSequence(LocalDate.now()) { it.plusDays(1) }
-            // For each date in the sequence, calculate the corresponding prayer times for that day.
-            // This transforms the stream from Dates to PrayerTimes objects.
             .map { date ->
                 PrayerTimes(
                     coordinates,
@@ -69,8 +71,6 @@ object PrayerAlarmsHelper {
                     parameters
                 )
             }
-            // Take each PrayerTimes object and flatten it into a sequence of named pairs.
-            // This preserves the name of the prayer alongside its time.
             .flatMap { prayerTimes ->
                 sequenceOf(
                     "Fajr" to prayerTimes.fajr,
@@ -80,26 +80,35 @@ object PrayerAlarmsHelper {
                     "Isha" to prayerTimes.isha
                 )
             }
-            // Filter the continuous stream, keeping only the prayer times that are in the future.
-            .filter { (_, prayerTime) -> // Unpack the pair, we only need the time for filtering
+            .filter { (_, prayerTime) ->
                 LocalDateTime.ofInstant(
                     Instant.ofEpochMilli(prayerTime.toEpochMilliseconds()),
                     ZoneId.systemDefault()
                 ) > LocalDateTime.now()
             }
-            // Convert each future prayer time from the Adhan library's Instant format into our app's `Alarm` object.
-            .map { (name, prayerTime) -> // Unpack the pair to use both name and time
+            .map { (name, prayerTime) ->
                 prayerTimeToAlarm(prayerTime, name)
             }
-            // Take only the first `n` items from the resulting stream. This is efficient because
-            // it stops the entire sequence pipeline as soon as the desired number is reached.
             .take(n)
-            // Convert the final sequence of `n` alarms into a List. This is the successful result.
             .toList()
             .also { alarms ->
-                // After creating the alarms, store their names using the dedicated storage class.
-                alarms.forEachIndexed { index, alarm ->
-                    // AlarmNameStorage.put(mapOf(index to alarm.name as String), listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"))
+                // *** THIS IS THE NEW PART ***
+                // 1. Define the complete list of possible names.
+                val supportedNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Daily")
+                // Use the injected alarmNameStorage instance
+                alarmNameStorage.setSupportedNames(supportedNames)
+
+                // 2. Create a map of the generated alarms (Alarm Index -> Alarm Name).
+                val alarmMap = alarms.mapIndexedNotNull { index, alarm ->
+                    alarm.name?.let { name -> index to name }
+                }.toMap()
+
+                // 3. Use the injected alarmNameStorage instance to save the map.
+                // We run this in a coroutine because `put` is a suspend function.
+                kotlinx.coroutines.runBlocking {
+                    println (">>>>>>>>>>>>>>> Put Alarm Map: $alarmMap")
+                    alarmNameStorage.put(alarmMap)
+                    println (">>>>>>>>>>>>>>> After Put Alarm Map: $alarmMap")
                 }
             }
     }.onFailure { e ->
@@ -152,7 +161,6 @@ object PrayerAlarmsHelper {
     private fun prayerTimeToAlarm(prayerTime: AdhanInstant, name: String): Alarm =
         getHoursAndMinutesFromEpochMilliseconds(prayerTime.toEpochMilliseconds()).let { (hours, minutes) ->
             val alarm = Alarm(hours, minutes, enabled = true, hasHourlyChime = false, name = name)
-            println ("************** Setting Alarm: ${alarm.toString()}")
             alarm
         }
 

@@ -46,6 +46,8 @@ object AppInfoIO {
 
         state.deferredResult?.complete(data)
         state = State()
+
+        println ("************* AppInfoIO completed")
     }
 
     private fun initScratchPad() {

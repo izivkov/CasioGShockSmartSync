@@ -37,6 +37,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
     private val api: GShockRepository,
+    private val prayerAlarmsHelper: PrayerAlarmsHelper,
     @ApplicationContext private val appContext: Context, // Inject application context
     private val calendarEvents: CalendarEvents
 ) : ViewModel() {
@@ -107,7 +108,7 @@ class ActionsViewModel @Inject constructor(
                     CameraOrientation.BACK
                 )
             )
-            add(PrayerAlarmsAction("Set Prayer Alarms", true, api))
+            add(PrayerAlarmsAction("Set Prayer Alarms", true, api, prayerAlarmsHelper))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
@@ -357,7 +358,8 @@ class ActionsViewModel @Inject constructor(
     data class PrayerAlarmsAction(
         override var title: String,
         override var enabled: Boolean,
-        val api: GShockRepository
+        val api: GShockRepository,
+        val prayerAlarmsHelper: PrayerAlarmsHelper
     ) : Action(title, enabled, RunMode.ASYNC) {
 
         private var lastSet: Long? = null
@@ -378,7 +380,8 @@ class ActionsViewModel @Inject constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            PrayerAlarmsHelper.createNextPrayerAlarms(context, WatchInfo.alarmCount)
+            // vvv 4. CALL THE METHOD ON THE INSTANCE vvv
+            prayerAlarmsHelper.createNextPrayerAlarms(WatchInfo.alarmCount)
                 .onSuccess { alarms ->
                     mainScope.launch {
                         // getAlarms need to be run first, otherwise setAlarms() will not work

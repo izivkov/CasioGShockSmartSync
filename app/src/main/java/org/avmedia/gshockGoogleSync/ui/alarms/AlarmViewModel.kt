@@ -26,18 +26,42 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
+    private val alarmNameStorage: AlarmNameStorage,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
     private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
     val alarms: List<Alarm> get() = _alarms
 
+    val supportedNames = listOf("Daily", "Work", "Gym")
+    val alarmNamesMap = mapOf(0 to "Daily", 2 to "Gym")
+
     init {
+        alarmNameStorage.setSupportedNames(supportedNames)
         loadAlarms()
     }
 
+    fun putNames() {
+        viewModelScope.launch {
+            val supported = listOf("Daily", "Work", "Gym")
+            val myAlarmsMap = mapOf(0 to "Daily", 2 to "Gym")
+
+            // 2. Now you can use the instance to call its methods.
+            alarmNameStorage.put(myAlarmsMap)
+        }
+    }
+
+    fun getNames() {
+        viewModelScope.launch {
+            val supported = listOf("Daily", "Work", "Gym")
+
+            // Get the name for alarm at index 2
+            val alarm2Name = alarmNameStorage.get(2) // Will return "Gym"
+        }
+    }
     private fun loadAlarms() = viewModelScope.launch {
         println("Loading alarms...${LocalDataStorage.toJsonObject(appContext)}")
 
@@ -46,7 +70,7 @@ class AlarmViewModel @Inject constructor(
                 .take(WatchInfo.alarmCount)
                 .mapIndexed { index, alarm ->
                     // Use AlarmNameStorage to get the name
-                    val name = AlarmNameStorage.get(appContext, index)
+                    val name = alarmNameStorage.get(2)
                     alarm.copy(name = name)
                 }
 
@@ -88,7 +112,7 @@ class AlarmViewModel @Inject constructor(
         val alarmsToSend = alarms.mapIndexed { index, alarm ->
             if (alarm.name == null) {
                 // This alarm was manually edited. Clear its name using AlarmNameStorage.
-                AlarmNameStorage.clear()
+                alarmNameStorage.clear()
                 // Return a clean alarm object to be sent to the watch.
                 alarm.copy(name = "")
             } else {
