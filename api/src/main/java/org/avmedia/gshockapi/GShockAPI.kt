@@ -291,12 +291,10 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      * @return appInfo string from the watch.
      */
     override suspend fun getAppInfo(): String {
-        println("************* Calling AppInfoIO.request() from getAppInfo")
         return AppInfoIO.request()
     }
 
     override suspend fun setScratchpadData(data: ByteArray, startIndex: Int) {
-        println("************* Calling AppInfoIO.request() from setScratchpadData")
         AppInfoIO.request()
         AppInfoIO.setUserData(data, startIndex)
     }

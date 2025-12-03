@@ -36,41 +36,19 @@ class AlarmViewModel @Inject constructor(
     private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
     val alarms: List<Alarm> get() = _alarms
 
-    val supportedNames = listOf("Daily", "Work", "Gym")
-    val alarmNamesMap = mapOf(0 to "Daily", 2 to "Gym")
-
     init {
-        alarmNameStorage.setSupportedNames(supportedNames)
         loadAlarms()
     }
 
-    fun putNames() {
-        viewModelScope.launch {
-            val supported = listOf("Daily", "Work", "Gym")
-            val myAlarmsMap = mapOf(0 to "Daily", 2 to "Gym")
-
-            // 2. Now you can use the instance to call its methods.
-            alarmNameStorage.put(myAlarmsMap)
-        }
-    }
-
-    fun getNames() {
-        viewModelScope.launch {
-            val supported = listOf("Daily", "Work", "Gym")
-
-            // Get the name for alarm at index 2
-            val alarm2Name = alarmNameStorage.get(2) // Will return "Gym"
-        }
-    }
     private fun loadAlarms() = viewModelScope.launch {
-        println("Loading alarms...${LocalDataStorage.toJsonObject(appContext)}")
-
         runCatching {
+            alarmNameStorage.load()
+
             val alarmsFromWatch = api.getAlarms()
                 .take(WatchInfo.alarmCount)
                 .mapIndexed { index, alarm ->
                     // Use AlarmNameStorage to get the name
-                    val name = alarmNameStorage.get(2)
+                    val name = alarmNameStorage.get(index)
                     alarm.copy(name = name)
                 }
 
@@ -111,14 +89,19 @@ class AlarmViewModel @Inject constructor(
         // Before sending, process the alarms to handle null names.
         val alarmsToSend = alarms.mapIndexed { index, alarm ->
             if (alarm.name == null) {
-                // This alarm was manually edited. Clear its name using AlarmNameStorage.
-                alarmNameStorage.clear()
-                // Return a clean alarm object to be sent to the watch.
+                // This alarm was manually edited. Update its name in storage to be empty.
+                // Using an empty string with `put` will store the NO_NAME_INDEX for that slot.
+                alarmNameStorage.put("", index)
+
+                // Return a clean alarm object to be sent to the watch API.
                 alarm.copy(name = "")
             } else {
                 alarm
             }
         }
+
+        // Save any changes made in the loop above to the watch's scratchpad.
+        alarmNameStorage.save()
 
         runCatching {
             api.setAlarms(ArrayList(alarmsToSend))
@@ -128,14 +111,15 @@ class AlarmViewModel @Inject constructor(
                 api.setSettings(api.getSettings().copy(hourlyChime = chimeSetting))
             }
 
-            // After successfully sending, reload the alarms state to have a clean UI
-            _alarms = alarmsToSend
+            // After successfully sending, reload the alarms state from the watch to ensure UI consistency.
+            loadAlarms() // Reload state from the watch after saving.
 
             AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
         }.onFailure {
             ProgressEvents.onNext("Error", it.message ?: "")
         }
     }
+
 
     fun sendAlarmsToPhone() {
         val executor = Executors.newSingleThreadScheduledExecutor()

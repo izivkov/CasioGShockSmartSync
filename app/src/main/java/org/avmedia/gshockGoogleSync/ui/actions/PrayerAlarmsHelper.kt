@@ -13,19 +13,19 @@ import com.batoulapps.adhan2.PrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlinx.datetime.Instant as AdhanInstant // Use a type alias for clarity
-import org.avmedia.gshockGoogleSync.utils.AlarmNameStorage // Import the new storage class
 import org.avmedia.gshockGoogleSync.services.LocationProvider
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.utils.AlarmNameStorage
 import org.avmedia.gshockapi.Alarm
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.time.ExperimentalTime
+import kotlinx.datetime.Instant as AdhanInstant
 
 @Singleton
 class PrayerAlarmsHelper @Inject constructor(
@@ -92,23 +92,11 @@ class PrayerAlarmsHelper @Inject constructor(
             .take(n)
             .toList()
             .also { alarms ->
-                // *** THIS IS THE NEW PART ***
-                // 1. Define the complete list of possible names.
-                val supportedNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Daily")
-                // Use the injected alarmNameStorage instance
-                alarmNameStorage.setSupportedNames(supportedNames)
-
-                // 2. Create a map of the generated alarms (Alarm Index -> Alarm Name).
-                val alarmMap = alarms.mapIndexedNotNull { index, alarm ->
-                    alarm.name?.let { name -> index to name }
-                }.toMap()
-
-                // 3. Use the injected alarmNameStorage instance to save the map.
-                // We run this in a coroutine because `put` is a suspend function.
                 kotlinx.coroutines.runBlocking {
-                    println (">>>>>>>>>>>>>>> Put Alarm Map: $alarmMap")
-                    alarmNameStorage.put(alarmMap)
-                    println (">>>>>>>>>>>>>>> After Put Alarm Map: $alarmMap")
+                    alarms.forEachIndexed { index, alarm ->
+                        alarmNameStorage.put(alarm.name ?: "", index = index)
+                    }
+                    alarmNameStorage.save()
                 }
             }
     }.onFailure { e ->
