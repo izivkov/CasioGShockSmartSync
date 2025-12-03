@@ -99,7 +99,7 @@ object PrayerAlarmsHelper {
             .also { alarms ->
                 // After creating the alarms, store their names using the dedicated storage class.
                 alarms.forEachIndexed { index, alarm ->
-                    AlarmNameStorage.put(context, index, alarm.name ?: "")
+                    // AlarmNameStorage.put(mapOf(index to alarm.name as String), listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"))
                 }
             }
     }.onFailure { e ->

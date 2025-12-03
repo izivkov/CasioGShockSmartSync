@@ -48,9 +48,12 @@ interface IGShockAPI {
     fun sendAppNotification(notification: AppNotification)
     fun supportsAppNotifications(): Boolean
 
+    suspend fun setScratchpadData(data: ByteArray, startIndex: Int)
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun sendMessage(message: String)
     fun resetHand()
     fun validateBluetoothAddress(deviceAddress: String?): Boolean
     fun preventReconnection(): Boolean
+    suspend fun getScratchpadData(index: Int, length: Int): ByteArray
 }

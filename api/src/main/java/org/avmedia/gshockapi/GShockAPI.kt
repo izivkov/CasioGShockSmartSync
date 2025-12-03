@@ -294,6 +294,15 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         return AppInfoIO.request()
     }
 
+    override suspend fun setScratchpadData(data: ByteArray, startIndex: Int) {
+        AppInfoIO.request()
+        AppInfoIO.setUserData(data, startIndex)
+    }
+
+    override suspend fun getScratchpadData(index: Int, length: Int): ByteArray {
+        AppInfoIO.request()
+        return AppInfoIO.getUserData(index, length)
+    }
 
     /**
      * Sets the current time on the watch from the time on the phone. In addition, it can optionally set the Home Time
@@ -327,7 +336,7 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      */
 
     override suspend fun getAlarms(): ArrayList<Alarm> {
-        return AlarmsIO.request()  // New method that handles conversion internally
+        return AlarmsIO.request()
     }
 
     /**

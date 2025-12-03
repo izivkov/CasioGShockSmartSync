@@ -88,7 +88,7 @@ class AlarmViewModel @Inject constructor(
         val alarmsToSend = alarms.mapIndexed { index, alarm ->
             if (alarm.name == null) {
                 // This alarm was manually edited. Clear its name using AlarmNameStorage.
-                AlarmNameStorage.clear(appContext, index)
+                AlarmNameStorage.clear()
                 // Return a clean alarm object to be sent to the watch.
                 alarm.copy(name = "")
             } else {
