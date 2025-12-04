@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,12 +24,23 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
+import timber.log.Timber
 
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel = hiltViewModel(),
 ) {
+
+    DisposableEffect(Unit) {
+        onDispose {
+            // This block is executed when the screen goes out of view.
+            // You can call your ViewModel's save function or any other cleanup logic here.
+            Timber.i("Screen is now out of view. Saving state...")
+            // actionsViewModel.saveState() // Example: Call a function on your ViewModel
+        }
+    }
+
     GShockSmartSyncTheme {
         Surface(
             modifier = modifier.fillMaxSize(),

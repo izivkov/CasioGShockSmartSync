@@ -1,0 +1,99 @@
+
+> Configure project :api
+WARNING: The option setting 'android.defaults.buildfeatures.buildconfig=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+To keep using this feature, add the following to your module-level build.gradle files:
+    android.buildFeatures.buildConfig = true
+or from Android Studio, click: `Refactor` > `Migrate BuildConfig to Gradle Build Files`.
+
+> Task :api:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :api:preBuild UP-TO-DATE
+> Task :api:preDebugBuild UP-TO-DATE
+> Task :api:generateDebugBuildConfig UP-TO-DATE
+> Task :api:generateDebugResValues UP-TO-DATE
+> Task :api:generateDebugResources UP-TO-DATE
+> Task :api:packageDebugResources UP-TO-DATE
+> Task :api:parseDebugLocalResources UP-TO-DATE
+> Task :api:generateDebugRFile UP-TO-DATE
+> Task :api:compileDebugKotlin UP-TO-DATE
+> Task :api:javaPreCompileDebug UP-TO-DATE
+> Task :api:compileDebugJavaWithJavac UP-TO-DATE
+> Task :api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :api:compileDebugLibraryResources UP-TO-DATE
+> Task :api:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :api:extractDeepLinksDebug UP-TO-DATE
+> Task :api:processDebugManifest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kaptGenerateStubsDebugKotlin UP-TO-DATE
+
+> Task :app:kaptDebugKotlin FAILED
+/home/izivkov/projects/CasioGShockSmartSync/app/build/tmp/kapt3/stubs/debug/org/avmedia/gshockGoogleSync/ui/actions/PrayerAlarmsHelper.java:4: error: cannot access CalculationMethod
+import com.batoulapps.adhan2.CalculationMethod;
+                            ^
+  bad class file: /home/izivkov/.gradle/caches/modules-2/files-2.1/com.batoulapps.adhan/adhan2-jvm/0.0.6/1f2589207aed0f98fe9d2653b0f99a8eebda5300/adhan-jvm-0.0.6.jar(/com/batoulapps/adhan2/CalculationMethod.class)
+    class file has wrong version 65.0, should be 62.0
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+/home/izivkov/projects/CasioGShockSmartSync/app/build/tmp/kapt3/stubs/debug/org/avmedia/gshockGoogleSync/ui/actions/PrayerAlarmsHelper.java:5: error: cannot access Coordinates
+import com.batoulapps.adhan2.Coordinates;
+                            ^
+  bad class file: /home/izivkov/.gradle/caches/modules-2/files-2.1/com.batoulapps.adhan/adhan2-jvm/0.0.6/1f2589207aed0f98fe9d2653b0f99a8eebda5300/adhan-jvm-0.0.6.jar(/com/batoulapps/adhan2/Coordinates.class)
+    class file has wrong version 65.0, should be 62.0
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+/home/izivkov/projects/CasioGShockSmartSync/app/build/tmp/kapt3/stubs/debug/org/avmedia/gshockGoogleSync/ui/actions/PrayerAlarmsHelper.java:6: error: cannot access PrayerAdjustments
+import com.batoulapps.adhan2.PrayerAdjustments;
+                            ^
+  bad class file: /home/izivkov/.gradle/caches/modules-2/files-2.1/com.batoulapps.adhan/adhan2-jvm/0.0.6/1f2589207aed0f98fe9d2653b0f99a8eebda5300/adhan-jvm-0.0.6.jar(/com/batoulapps/adhan2/PrayerAdjustments.class)
+    class file has wrong version 65.0, should be 62.0
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+/home/izivkov/projects/CasioGShockSmartSync/app/build/tmp/kapt3/stubs/debug/org/avmedia/gshockGoogleSync/ui/actions/PrayerAlarmsHelper.java:7: error: cannot access PrayerTimes
+import com.batoulapps.adhan2.PrayerTimes;
+                            ^
+  bad class file: /home/izivkov/.gradle/caches/modules-2/files-2.1/com.batoulapps.adhan/adhan2-jvm/0.0.6/1f2589207aed0f98fe9d2653b0f99a8eebda5300/adhan-jvm-0.0.6.jar(/com/batoulapps/adhan2/PrayerTimes.class)
+    class file has wrong version 65.0, should be 62.0
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+/home/izivkov/projects/CasioGShockSmartSync/app/build/tmp/kapt3/stubs/debug/org/avmedia/gshockGoogleSync/ui/actions/PrayerAlarmsHelper.java:8: error: cannot access DateComponents
+import com.batoulapps.adhan2.data.DateComponents;
+                                 ^
+  bad class file: /home/izivkov/.gradle/caches/modules-2/files-2.1/com.batoulapps.adhan/adhan2-jvm/0.0.6/1f2589207aed0f98fe9d2653b0f99a8eebda5300/adhan-jvm-0.0.6.jar(/com/batoulapps/adhan2/data/DateComponents.class)
+    class file has wrong version 65.0, should be 62.0
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+
+[Incubating] Problems report is available at: file:///home/izivkov/projects/CasioGShockSmartSync/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:kaptDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.gradle.internal.KaptWithoutKotlincTask$KaptExecutionWorkAction
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.13/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 4s
+30 actionable tasks: 1 executed, 29 up-to-date

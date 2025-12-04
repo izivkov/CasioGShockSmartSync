@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockGoogleSync.utils.AlarmNameStorage // Import the new class
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage // Import the new class
+import org.avmedia.gshockGoogleSync.scratchpad.ScratchpadManager
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -31,6 +31,7 @@ import javax.inject.Inject
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
     private val alarmNameStorage: AlarmNameStorage,
+    private val scratchpadManager: ScratchpadManager,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
     private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
@@ -42,7 +43,7 @@ class AlarmViewModel @Inject constructor(
 
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
-            alarmNameStorage.load()
+            scratchpadManager.load()
 
             val alarmsFromWatch = api.getAlarms()
                 .take(WatchInfo.alarmCount)
@@ -101,7 +102,7 @@ class AlarmViewModel @Inject constructor(
         }
 
         // Save any changes made in the loop above to the watch's scratchpad.
-        alarmNameStorage.save()
+        scratchpadManager.save()
 
         runCatching {
             api.setAlarms(ArrayList(alarmsToSend))
