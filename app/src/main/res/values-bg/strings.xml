@@ -202,4 +202,5 @@
     <string name="cover_connected">Свързан</string>
     <!-- "h" as in hours = "часа", abbreviated as "ч" -->
     <string name="find_phone_instruction">За да изпълните действията, стартирайте функцията „Намиране телефон“ на часовника</string>
+    <string name="actions_saved">Действията са запазени</string>
 </resources>

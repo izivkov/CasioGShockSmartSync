@@ -208,4 +208,5 @@
     <string name="cover_hold_to_unlock">Mantén premut per desbloquejar</string>
     <string name="cover_connected">Connectat</string>
     <string name="find_phone_instruction">Per executar accions, inicia la funció \"Troba el telèfon\" al rellotge</string>
+    <string name="actions_saved">Accions desades</string>
 </resources>

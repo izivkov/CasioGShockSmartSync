@@ -201,4 +201,5 @@
     <string name="cover_connected">Подключено</string>
     <!-- "ч" = "час" (hour) -->
     <string name="find_phone_instruction">Чтобы выполнить действия, запустите функцию «Найти телефон» на часах</string>
+    <string name="actions_saved">Действия сохранены</string>
 </resources>

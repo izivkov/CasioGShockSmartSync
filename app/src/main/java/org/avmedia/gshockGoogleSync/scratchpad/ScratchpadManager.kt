@@ -9,43 +9,69 @@ class ScratchpadManager @Inject constructor(
     private val api: IGShockAPI
 ) {
     private val clients = mutableListOf<ScratchpadClient>()
-    private val clientOffsets = mutableMapOf<ScratchpadClient, Int>()
-    private var totalSize = 0
     private var masterBuffer: ByteArray = ByteArray(0)
 
     /**
      * Clients call this method to register themselves with the manager.
+     * The layout is determined by each client's fixed offset, not registration order.
      */
     fun register(client: ScratchpadClient) {
         if (!clients.contains(client)) {
             clients.add(client)
-            recalculateLayout()
+            updateBufferSize()
         }
     }
 
-    private fun recalculateLayout() {
-        var currentOffset = 0
-        clients.forEach { client ->
-            clientOffsets[client] = currentOffset
-            currentOffset += client.getStorageSize()
+
+    /**
+     * Updates the master buffer with the data from a specific client.
+     * This is useful for clients that want to commit their in-memory changes
+     * to the manager's central buffer without triggering a full save-to-watch cycle.
+     *
+     * @param client The client whose data should be written to the master buffer.
+     */
+    fun updateMasterBuffer(client: ScratchpadClient) {
+        val offset = client.getStorageOffset()
+        val clientBuffer = client.getBuffer()
+        if (offset + clientBuffer.size <= masterBuffer.size) {
+            clientBuffer.copyInto(destination = masterBuffer, destinationOffset = offset)
         }
-        totalSize = currentOffset
-        masterBuffer = ByteArray(totalSize)
+    }
+
+    /**
+     * Calculates the required buffer size based on all registered clients' offsets and sizes.
+     */
+    private fun updateBufferSize() {
+        if (clients.isEmpty()) {
+            masterBuffer = ByteArray(0)
+            return
+        }
+        
+        // Find the maximum end position (offset + size) across all clients
+        val maxEndPosition = clients.maxOf { it.getStorageOffset() + it.getStorageSize() }
+        
+        // Only resize if needed
+        if (masterBuffer.size < maxEndPosition) {
+            val newBuffer = ByteArray(maxEndPosition)
+            // Preserve existing data
+            masterBuffer.copyInto(newBuffer, 0, 0, masterBuffer.size)
+            masterBuffer = newBuffer
+        }
     }
 
     /**
      * Loads data from the watch and distributes it to all registered clients.
      */
     suspend fun load() {
-        if (totalSize == 0) return
-        val data = api.getScratchpadData(0, totalSize)
-        if (data.size != totalSize) {
+        if (masterBuffer.isEmpty()) return
+        val data = api.getScratchpadData(0, masterBuffer.size)
+        if (data.size != masterBuffer.size) {
             return
         }
         masterBuffer = data
 
         clients.forEach { client ->
-            val offset = clientOffsets[client] ?: 0
+            val offset = client.getStorageOffset()
             val size = client.getStorageSize()
             if (offset + size <= masterBuffer.size) {
                 val slice = masterBuffer.copyOfRange(offset, offset + size)
@@ -58,9 +84,9 @@ class ScratchpadManager @Inject constructor(
      * Gathers data from all clients and saves the combined buffer to the watch.
      */
     suspend fun save() {
-        if (totalSize == 0) return
+        if (masterBuffer.isEmpty()) return
         clients.forEach { client ->
-            val offset = clientOffsets[client] ?: 0
+            val offset = client.getStorageOffset()
             val clientBuffer = client.getBuffer()
             if (offset + clientBuffer.size <= masterBuffer.size) {
                 clientBuffer.copyInto(destination = masterBuffer, destinationOffset = offset)

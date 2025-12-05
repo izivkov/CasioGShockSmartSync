@@ -2,6 +2,12 @@ package org.avmedia.gshockGoogleSync.scratchpad
 
 interface ScratchpadClient {
     /**
+     * Returns the fixed offset (starting position) in the scratchpad buffer for this client.
+     * This ensures consistent buffer layout regardless of registration order.
+     */
+    fun getStorageOffset(): Int
+
+    /**
      * Returns the number of bytes this client requires.
      */
     fun getStorageSize(): Int

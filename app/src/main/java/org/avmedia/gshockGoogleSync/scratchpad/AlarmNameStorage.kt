@@ -58,6 +58,11 @@ class AlarmNameStorage @Inject constructor(
 
     // --- Implementation of ScratchpadClient Interface ---
 
+    override fun getStorageOffset(): Int {
+        // AlarmNameStorage starts at position 0 in the scratchpad buffer
+        return 0
+    }
+
     override fun getStorageSize(): Int {
         // Calculate the storage size dynamically.
         // Total bits needed = ALARM_COUNT * BITS_PER_ALARM
@@ -138,8 +143,20 @@ class AlarmNameStorage @Inject constructor(
         }
     }
 
-    // --- Private Helpers ---
+    suspend fun save () {
+        manager.save()
+    }
 
+    /**
+     * Loads the data from the watch into the local buffer.
+     */
+    suspend fun load() {
+        manager.load()
+    }
+
+    /*
+    * Private helpers
+     */
     private fun updateLocalBuffer(code: Int, index: Int) {
         val byteIndex = index / 2
         val isLowerBits = (index % 2) == 0

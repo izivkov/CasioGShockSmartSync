@@ -316,4 +316,5 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
 
     override suspend fun setScratchpadData(data: ByteArray, startIndex: Int) {}
     override suspend fun getScratchpadData(index: Int, length: Int): ByteArray {return byteArrayOf()}
-    }
+    override fun isScratchpadReset(): Boolean {return false}
+}

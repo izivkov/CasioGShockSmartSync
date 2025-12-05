@@ -196,4 +196,5 @@
     <string name="cover_connected">متصل</string>
     <!-- "h" as in hours = "ساعات", short form is "س" -->
     <string name="find_phone_instruction">لتنفيذ الإجراءات، ابدأ وظيفة "البحث عن الهاتف" في الساعة</string>
+    <string name="actions_saved">تم حفظ الإجراءات</string>
 </resources>

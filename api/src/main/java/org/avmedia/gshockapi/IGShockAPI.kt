@@ -56,4 +56,5 @@ interface IGShockAPI {
     fun validateBluetoothAddress(deviceAddress: String?): Boolean
     fun preventReconnection(): Boolean
     suspend fun getScratchpadData(index: Int, length: Int): ByteArray
+    fun isScratchpadReset(): Boolean
 }

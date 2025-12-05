@@ -213,4 +213,5 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
 
     <!-- "h" is standard for "heure" -->
     <string name="find_phone_instruction">Pour exécuter des actions, lancez la fonction «Rechercher le téléphone» sur la montre</string>
+    <string name="actions_saved">Actions enregistrées</string>
 </resources>

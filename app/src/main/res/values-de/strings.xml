@@ -203,4 +203,5 @@ Nachdem die Alarme eingestellt wurden, können Sie sie an die Uhr oder an die We
     <string name="cover_connected">Verbunden</string>
     <!-- "h" as in hours = "Stunden", abbreviated as "Std" -->
     <string name="find_phone_instruction">Um Aktionen auszuführen, starten Sie die Funktion „Telefon finden“ auf der Uhr</string>
+    <string name="actions_saved">Aktionen gespeichert</string>
 </resources>

@@ -31,7 +31,6 @@ import javax.inject.Inject
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
     private val alarmNameStorage: AlarmNameStorage,
-    private val scratchpadManager: ScratchpadManager,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
     private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
@@ -43,7 +42,7 @@ class AlarmViewModel @Inject constructor(
 
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
-            scratchpadManager.load()
+            alarmNameStorage.load()
 
             val alarmsFromWatch = api.getAlarms()
                 .take(WatchInfo.alarmCount)
@@ -102,7 +101,7 @@ class AlarmViewModel @Inject constructor(
         }
 
         // Save any changes made in the loop above to the watch's scratchpad.
-        scratchpadManager.save()
+        alarmNameStorage.save()
 
         runCatching {
             api.setAlarms(ArrayList(alarmsToSend))

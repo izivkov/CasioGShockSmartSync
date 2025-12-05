@@ -3,29 +3,33 @@ package org.avmedia.gshockGoogleSync.ui.actions
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+
 import android.media.AudioManager
 import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.camera.core.CameraSelector
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.scratchpad.ActionsStorage
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.CoroutineScopes.mainScope
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
@@ -38,8 +42,9 @@ import javax.inject.Inject
 class ActionsViewModel @Inject constructor(
     private val api: GShockRepository,
     private val prayerAlarmsHelper: PrayerAlarmsHelper,
-    @ApplicationContext private val appContext: Context, // Inject application context
-    private val calendarEvents: CalendarEvents
+    @ApplicationContext val appContext: Context, // Inject application context
+    private val calendarEvents: CalendarEvents,
+    private val actionsStorage: ActionsStorage
 ) : ViewModel() {
     private val _actions = MutableStateFlow<ArrayList<Action>>(arrayListOf())
     val actions: StateFlow<List<Action>> = _actions
@@ -70,7 +75,9 @@ class ActionsViewModel @Inject constructor(
         if (index != -1) {
             currentList[index] = updatedAction
             updateActionsAndMap(currentList)
-            updatedAction.save(appContext)
+            viewModelScope.launch {
+                updatedAction.save(appContext, actionsStorage)
+            }
         }
     }
 
@@ -82,7 +89,21 @@ class ActionsViewModel @Inject constructor(
 
     init {
         loadInitialActions()
-        updateActionsAndMap(loadData(appContext))
+        setupEventSubscription()
+    }
+
+    // Subscribe to watch initialization event to load data after connection
+    private fun setupEventSubscription() {
+        ProgressEvents.runEventActions(
+            "ActionViewModel",
+            arrayOf(
+                EventAction("WatchInitializationCompleted") {
+                    viewModelScope.launch {
+                        updateActionsAndMap(loadData(appContext))
+                    }
+                }
+            )
+        )
     }
 
     // Method to load the initial list of actions
@@ -91,7 +112,7 @@ class ActionsViewModel @Inject constructor(
             add(ToggleFlashlightAction("Toggle Flashlight", false))
             add(StartVoiceAssistAction("Start Voice Assistant", false))
             add(NextTrack("Skip to next track", false))
-            add(FindPhoneAction(appContext.getString(R.string.find_phone), true))
+            add(FindPhoneAction(appContext.getString(R.string.find_phone), false))
             add(SetTimeAction(appContext.getString(R.string.set_time), true, api))
             add(
                 SetEventsAction(
@@ -108,12 +129,13 @@ class ActionsViewModel @Inject constructor(
                     CameraOrientation.BACK
                 )
             )
-            add(PrayerAlarmsAction("Set Prayer Alarms", true, api, prayerAlarmsHelper))
+            add(PrayerAlarmsAction("Set Prayer Alarms", false, api, prayerAlarmsHelper))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
 
-        _actions.value = ArrayList(initialActions)
+        // Populate both _actions and actionMap immediately
+        updateActionsAndMap(initialActions)
     }
 
     enum class RunEnvironment {
@@ -143,16 +165,46 @@ class ActionsViewModel @Inject constructor(
 
         abstract fun run(context: Context)
 
-        open fun save(context: Context) {
+        open suspend fun save(context: Context, actionsStorage: ActionsStorage) {
             val key = this.javaClass.simpleName + ENABLED
             val value = enabled
-            LocalDataStorage.put(context, key, value.toString())
+
+            val actionEnum = when (this) {
+                is SetTimeAction -> ActionsStorage.Action.SET_TIME
+                is SetEventsAction -> ActionsStorage.Action.REMINDERS
+                is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
+                is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
+                is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
+                is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
+                is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
+                is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
+                is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
+                else -> null
+            }
+
+            actionEnum?.let {
+                actionsStorage.update(it, enabled)
+            }
         }
 
-        open fun load(context: Context) {
-            val key = this.javaClass.simpleName + ENABLED
-            enabled = LocalDataStorage.get(context, key, "false").toBoolean()
-            Timber.d("Load value: $key, $enabled")
+        open suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            val actionEnum = when (this) {
+                is SetTimeAction -> ActionsStorage.Action.SET_TIME
+                is SetEventsAction -> ActionsStorage.Action.REMINDERS
+                is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
+                is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
+                is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
+                is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
+                is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
+                is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
+                is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
+                else -> null
+            }
+
+            actionEnum?.let {
+                enabled = actionsStorage.getAction(it)
+            }
+            Timber.d("Load value: ${this.javaClass.simpleName}, $enabled")
         }
 
         open fun validate(context: Context): Boolean {
@@ -184,9 +236,8 @@ class ActionsViewModel @Inject constructor(
             api.setEvents(EventsModel.events)
         }
 
-        override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ENABLED
-            enabled = LocalDataStorage.get(context, key, "false").toBoolean()
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            enabled = actionsStorage.getAction(ActionsStorage.Action.REMINDERS)
         }
     }
 
@@ -198,9 +249,8 @@ class ActionsViewModel @Inject constructor(
             FlashlightHelper.toggle(context)
         }
 
-        override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ENABLED
-            enabled = LocalDataStorage.get(context, key, "false").toBoolean()
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            enabled = actionsStorage.getAction(ActionsStorage.Action.FLASHLIGHT)
         }
     }
 
@@ -225,15 +275,8 @@ class ActionsViewModel @Inject constructor(
             PhoneFinder.ring(context)
         }
 
-        override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ENABLED
-            enabled =
-                LocalDataStorage.get(
-                    context,
-                    key,
-                    if (WatchInfo.findButtonUserDefined) "true" else "false"
-                )
-                    .toBoolean()
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            enabled = actionsStorage.getAction(ActionsStorage.Action.PHONE_FINDER)
         }
     }
 
@@ -274,15 +317,8 @@ class ActionsViewModel @Inject constructor(
             }
         }
 
-        override fun load(context: Context) {
-            val key = this.javaClass.simpleName + ENABLED
-            enabled =
-                LocalDataStorage.get(
-                    context,
-                    key,
-                    if (WatchInfo.findButtonUserDefined) "false" else "true"
-                )
-                    .toBoolean()
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            enabled = actionsStorage.getAction(ActionsStorage.Action.SET_TIME)
         }
     }
 
@@ -403,7 +439,7 @@ class ActionsViewModel @Inject constructor(
             Timber.d("running ${this.javaClass.simpleName}")
         }
 
-        override fun load(context: Context) {
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
             // Do nothing.
         }
     }
@@ -431,14 +467,14 @@ class ActionsViewModel @Inject constructor(
             context.startActivity(dialIntent)
         }
 
-        override fun save(context: Context) {
-            super.save(context)
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
+            super.save(context, actionsStorage)
             val key = this.javaClass.simpleName + ".phoneNumber"
             LocalDataStorage.put(context, key, phoneNumber)
         }
 
-        override fun load(context: Context) {
-            super.load(context)
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            super.load(context, actionsStorage)
             val key = this.javaClass.simpleName + ".phoneNumber"
             phoneNumber = LocalDataStorage.get(context, key, "").toString()
         }
@@ -505,14 +541,14 @@ class ActionsViewModel @Inject constructor(
             }
         }
 
-        override fun save(context: Context) {
-            super.save(context)
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
+            super.save(context, actionsStorage)
             val key = this.javaClass.simpleName + ".cameraOrientation"
             LocalDataStorage.put(context, key, cameraOrientation.toString())
         }
 
-        override fun load(context: Context) {
-            super.load(context)
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            super.load(context, actionsStorage)
             val key = this.javaClass.simpleName + ".cameraOrientation"
             cameraOrientation = if (LocalDataStorage.get(context, key, "BACK")
                     .toString() == "BACK"
@@ -538,44 +574,44 @@ class ActionsViewModel @Inject constructor(
     }
 
     fun runActionsForActionButton(context: Context) {
-        updateActionsAndMap(loadData(context))
-
-        val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
-        ProgressEvents.onNext("ActionNames", actions.map { it.title })
-        runFilteredActions(context, actions)
+        viewModelScope.launch {
+            val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
+            ProgressEvents.onNext("ActionNames", actions.map { it.title })
+            runFilteredActions(context, actions)
+        }
     }
 
     fun runActionForConnection(context: Context) {
-        updateActionsAndMap(loadData(context))
-
-        runFilteredActions(context, _actions.value.filter {
-            it.shouldRun(RunEnvironment.NORMAL_CONNECTION)
-        })
+        viewModelScope.launch {
+            runFilteredActions(context, _actions.value.filter {
+                it.shouldRun(RunEnvironment.NORMAL_CONNECTION)
+            })
+        }
     }
 
     fun runActionForAlwaysConnected(context: Context) {
-        updateActionsAndMap(loadData(context))
-
-        runFilteredActions(context, _actions.value.filter {
-            it.shouldRun(RunEnvironment.ALWAYS_CONNECTED)
-        })
+        viewModelScope.launch {
+            runFilteredActions(context, _actions.value.filter {
+                it.shouldRun(RunEnvironment.ALWAYS_CONNECTED)
+            })
+        }
     }
 
     fun runActionsForAutoTimeSetting(context: Context) {
-        updateActionsAndMap(loadData(context))
+        viewModelScope.launch {
+            val actions = _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
+            ProgressEvents.onNext("ActionNames", actions.map { it.title })
 
-        val actions = _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
-        ProgressEvents.onNext("ActionNames", actions.map { it.title })
+            runFilteredActions(
+                context,
+                _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) })
 
-        runFilteredActions(
-            context,
-            _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) })
-
-        // show notification if configured
-        if (LocalDataStorage.getTimeAdjustmentNotification(context)
-            && !WatchInfo.alwaysConnected
-        ) { // only create notification for not-always connected watches.
-            showTimeSyncNotification()
+            // show notification if configured
+            if (LocalDataStorage.getTimeAdjustmentNotification(context)
+                && !WatchInfo.alwaysConnected
+            ) { // only create notification for not-always connected watches.
+                showTimeSyncNotification()
+            }
         }
     }
 
@@ -618,16 +654,36 @@ class ActionsViewModel @Inject constructor(
             }
     }
 
-    private fun loadData(context: Context): List<Action> {
-        _actions.value.forEach {
-            it.load(context)
+    private suspend fun loadData(context: Context): List<Action> {
+        // Load data from watch
+        actionsStorage.load()
+
+        if (api.isScratchpadReset()) {
+            _actions.value.forEach {
+                it.save(context, actionsStorage)
+            }
+            actionsStorage.save()
+        } else {
+            _actions.value.forEach {
+                it.load(context, actionsStorage)
+            }
         }
+
+        LocalDataStorage.put(context, "ActionsInitialized", "true")
+
         return _actions.value
     }
 
-    fun saveData(context: Context) {
-        _actions.value.forEach {
-            it.save(context)
+    fun save() {
+        viewModelScope.launch {
+            actionsStorage.save()
+        }
+    }
+
+    fun saveWithMessage(message: String) {
+        viewModelScope.launch {
+            actionsStorage.save()
+            AppSnackbar(message)
         }
     }
 

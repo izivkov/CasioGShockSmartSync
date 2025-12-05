@@ -211,4 +211,5 @@
     <string name="cover_connected">Connected</string>
 
     <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
+    <string name="actions_saved">Actions Saved</string>
 </resources>

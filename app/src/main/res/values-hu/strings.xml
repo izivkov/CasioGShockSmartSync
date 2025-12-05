@@ -190,4 +190,5 @@ A második dupla hangjelzés után az alkalmazás megjeleníti az időbeállít�
     <string name="cover_connected">Csatlakoztatva</string>
     <!-- "ó" is short for "óra" (hour) -->
     <string name="find_phone_instruction">A műveletek végrehajtásához indítsa el az „Telefon keresése” funkciót az órán</string>
+    <string name="actions_saved">Feladatok mentve</string>
 </resources>

@@ -2,7 +2,15 @@ package org.avmedia.gshockGoogleSync.ui.actions
 
 import PhoneView
 import PhotoView
+import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.Alignment
+import org.avmedia.gshockGoogleSync.ui.common.ButtonData
+import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,15 +37,13 @@ import timber.log.Timber
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
-    actionsViewModel: ActionsViewModel = hiltViewModel(),
+    actionsViewModel: ActionsViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
 ) {
 
     DisposableEffect(Unit) {
         onDispose {
-            // This block is executed when the screen goes out of view.
-            // You can call your ViewModel's save function or any other cleanup logic here.
             Timber.i("Screen is now out of view. Saving state...")
-            // actionsViewModel.saveState() // Example: Call a function on your ViewModel
+            actionsViewModel.save()
         }
     }
 
@@ -49,7 +55,7 @@ fun ActionsScreen(
             ConstraintLayout(
                 modifier = Modifier.fillMaxSize()
             ) {
-                val (title, actions) = createRefs()
+                val (title, actions, buttonsRow) = createRefs()
 
                 ScreenTitle(
                     text = stringResource(id = R.string.actions),
@@ -62,8 +68,18 @@ fun ActionsScreen(
                 ActionsContent(
                     modifier = Modifier.constrainAs(actions) {
                         top.linkTo(title.bottom)
-                        bottom.linkTo(parent.bottom)
+                        bottom.linkTo(buttonsRow.top)
                         height = Dimension.fillToConstraints
+                    },
+                    actionsViewModel = actionsViewModel
+                )
+
+                BottomRow(
+                    modifier = Modifier.constrainAs(buttonsRow) {
+                        top.linkTo(actions.bottom)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
                     },
                     actionsViewModel = actionsViewModel
                 )
@@ -85,25 +101,63 @@ private fun ActionsContent(
             .fillMaxSize()
     ) {
         ItemList(
-            items = createActionItems(actionsViewModel::updateAction)
+            items = createActionItems(actionsViewModel)
         )
     }
 }
 
 @Composable
-private fun createActionItems(onUpdateAction: (ActionsViewModel.Action) -> Unit): List<Any> =
+private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> =
     listOfNotNull(
-        if (WatchInfo.findButtonUserDefined) PhoneFinderView(onUpdateAction) else null,
-        SetTimeView(onUpdateAction),
-        if (WatchInfo.hasReminders) RemindersView(onUpdateAction) else null,
-        PhotoView(onUpdateAction),
-        FlashlightView(onUpdateAction),
-        VoiceAssistView(onUpdateAction),
-        SkipToNextTrackView(onUpdateAction),
-        PrayerAlarmsView(onUpdateAction),
+        if (WatchInfo.findButtonUserDefined) PhoneFinderView(
+            actionsViewModel::updateAction,
+            actionsViewModel
+        ) else null,
+        SetTimeView(actionsViewModel::updateAction, actionsViewModel),
+        if (WatchInfo.hasReminders) RemindersView(
+            actionsViewModel::updateAction,
+            actionsViewModel
+        ) else null,
+        PhotoView(actionsViewModel::updateAction, actionsViewModel),
+        FlashlightView(actionsViewModel::updateAction, actionsViewModel),
+        VoiceAssistView(actionsViewModel::updateAction, actionsViewModel),
+        SkipToNextTrackView(actionsViewModel::updateAction, actionsViewModel),
+        PrayerAlarmsView(actionsViewModel::updateAction, actionsViewModel),
         SeparatorView(),
-        PhoneView(onUpdateAction)
+        PhoneView(actionsViewModel::updateAction, actionsViewModel)
     )
+
+@Composable
+fun BottomRow(
+    modifier: Modifier,
+    actionsViewModel: ActionsViewModel
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Bottom,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            val msg = stringResource(id = R.string.actions_saved)
+            val buttons = arrayListOf(
+                ButtonData(
+                    text = stringResource(id = R.string.send_to_watch),
+                    onClick = { actionsViewModel.saveWithMessage(msg) }
+                )
+            )
+
+            ButtonsRow(buttons = buttons, modifier = Modifier.weight(2f))
+
+            Spacer(modifier = Modifier.weight(1f))
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

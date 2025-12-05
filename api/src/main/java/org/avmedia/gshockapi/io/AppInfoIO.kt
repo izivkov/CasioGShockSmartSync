@@ -24,6 +24,9 @@ object AppInfoIO {
     var lastReceivedData: ByteArray = ByteArray(0)
         private set
 
+    var wasScratchpadReset = false
+
+
     suspend fun request(): String {
         return CachedIO.request("22") { key ->
             state = state.copy(deferredResult = CompletableDeferred())
@@ -33,6 +36,7 @@ object AppInfoIO {
     }
 
     fun onReceived(data: String) {
+        wasScratchpadReset = false
         // App info:
         // This is needed to re-enable button D (Lower-right) after the watch has been reset
         // or BLE has been cleared.
@@ -70,6 +74,7 @@ object AppInfoIO {
         // Send the initialized buffer to the watch and update our local copy
         IO.writeCmd(GetSetMode.SET, buffer.toHexString())
         lastReceivedData = buffer
+        wasScratchpadReset = true
     }
 
     /**
