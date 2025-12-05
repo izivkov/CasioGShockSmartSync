@@ -1,0 +1,3 @@
+Now each watch keeps its own actions, soe we can run different actions if you have multiple watches.
+For example, one watch can be used to skip music to the next track, and another could be used to take a photo.
+Also, one watch can keep prayer time alarms, while another can keep personal alarms.

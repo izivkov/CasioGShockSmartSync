@@ -5,6 +5,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+/**
+ * The ScratchpadManager serves as the central coordinator for all scratchpad data operations.
+ * It maintains a "master buffer" (byte array) that represents the state of the watch's scratchpad memory.
+ *
+ * Responsibilities:
+ * - Aggregating data requirements from multiple [ScratchpadClient]s.
+ * - Managing the lifecycle of data synchronization (load from watch, save to watch).
+ * - Distributing relevant data slices to registered clients based on their offsets.
+ * - Collecting data from clients to form the payload for writing to the watch.
+ */
 class ScratchpadManager @Inject constructor(
     private val api: IGShockAPI
 ) {

@@ -4,7 +4,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.ceil
 
-// AlarmsLookupSet can remain as-is.
+/**
+ * A utility class providing a static lookup set for standard alarm names.
+ * These names correspond to specific indices used in the bit-packed storage format.
+ */
 class AlarmsLookupSet {
     enum class AlarmCode(val value: Int) {
         Daily(0),
@@ -28,8 +31,15 @@ class AlarmsLookupSet {
 }
 
 /**
- * Manages storage of custom alarm names. It is now a client of the ScratchpadManager
- * and operates on a buffer slice provided to it, completely decoupled from the watch API.
+ * Manages the persistent storage of custom user-defined names for alarms.
+ *
+ * This class implements [ScratchpadClient] to handle a specific slice of the scratchpad memory.
+ * It uses a bit-packing strategy to store name references (indices) efficiently within the limited byte array.
+ *
+ * Key features:
+ * - Maps string names to integer codes (and vice-versa).
+ * - Packs/unpacks these 3-bit codes into the byte buffer.
+ * - Provides high-level methods ([put], [get]) for ViewModel interaction.
  */
 @Singleton
 class AlarmNameStorage @Inject constructor(

@@ -1,5 +1,14 @@
 package org.avmedia.gshockGoogleSync.scratchpad
 
+/**
+ * Defines the contract for a component that owns and manages a specific segment (slice)
+ * of the global scratchpad memory buffer.
+ *
+ * Clients implementing this interface must provide:
+ * - A fixed offset (starting position) within the global buffer.
+ * - A fixed size (number of bytes) they require.
+ * - Mechanisms to accept updated data from the manager and provide their current data back to it.
+ */
 interface ScratchpadClient {
     /**
      * Returns the fixed offset (starting position) in the scratchpad buffer for this client.
