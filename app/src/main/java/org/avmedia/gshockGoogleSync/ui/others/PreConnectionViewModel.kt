@@ -24,13 +24,14 @@ class PreConnectionViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val noWatchString = appContext.getString(R.string.no_watch)
-    private val initialValue =
-        LocalDataStorage.get(appContext, "LastDeviceName", noWatchString) as String
-
-    private val _watchName = MutableStateFlow(initialValue)
+    private val _watchName = MutableStateFlow(noWatchString)
     val watchName: StateFlow<String> = _watchName
 
     init {
+        viewModelScope.launch {
+            val savedName = LocalDataStorage.get(appContext, "LastDeviceName", noWatchString) ?: noWatchString
+            _watchName.value = savedName
+        }
         createSubscription()
     }
 

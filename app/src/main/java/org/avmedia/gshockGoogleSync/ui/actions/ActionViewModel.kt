@@ -417,19 +417,19 @@ class ActionsViewModel @Inject constructor(
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             // vvv 4. CALL THE METHOD ON THE INSTANCE vvv
-            prayerAlarmsHelper.createNextPrayerAlarms(WatchInfo.alarmCount)
-                .onSuccess { alarms ->
-                    mainScope.launch {
+            mainScope.launch {
+                prayerAlarmsHelper.createNextPrayerAlarms(WatchInfo.alarmCount)
+                    .onSuccess { alarms ->
                         // getAlarms need to be run first, otherwise setAlarms() will not work
                         api.getAlarms()
                         api.setAlarms(ArrayList(alarms))
                         lastSet = System.currentTimeMillis()
                     }
-                }
-                .onFailure { error ->
-                    Timber.e("Could not set prayer alarms: ${error.message}")
-                    AppSnackbar("Failed to set prayer alarms: ${error.message}")
-                }
+                    .onFailure { error ->
+                        Timber.e("Could not set prayer alarms: ${error.message}")
+                        AppSnackbar("Failed to set prayer alarms: ${error.message}")
+                    }
+            }
         }
     }
 

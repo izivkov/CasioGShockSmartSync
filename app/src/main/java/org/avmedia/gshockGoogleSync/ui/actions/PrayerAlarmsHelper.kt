@@ -49,7 +49,7 @@ class PrayerAlarmsHelper @Inject constructor(
      *         or an exception on failure (e.g., if location could not be determined).
      */
     @OptIn(ExperimentalTime::class)
-    fun createNextPrayerAlarms(
+    suspend fun createNextPrayerAlarms(
         n: Int
     ): Result<List<Alarm>> = runCatching {
         // First, validate that the requested number of alarms is within a reasonable range.
@@ -93,12 +93,10 @@ class PrayerAlarmsHelper @Inject constructor(
             .take(n)
             .toList()
             .also { alarms ->
-                kotlinx.coroutines.runBlocking {
-                    alarms.forEachIndexed { index, alarm ->
-                        alarmNameStorage.put(alarm.name ?: "", index = index)
-                    }
-                    alarmNameStorage.save()
+                alarms.forEachIndexed { index, alarm ->
+                    alarmNameStorage.put(alarm.name ?: "", index = index)
                 }
+                alarmNameStorage.save()
             }
     }.onFailure { e ->
         AppSnackbar("Failed to create next prayer alarms: ${e.message}")
