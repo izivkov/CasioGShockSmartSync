@@ -72,7 +72,7 @@ class ScratchpadManager @Inject constructor(
     /**
      * Loads data from the watch and distributes it to all registered clients.
      */
-    suspend fun load() {
+    internal suspend fun load() {
         if (masterBuffer.isEmpty()) return
         val data = api.getScratchpadData(0, masterBuffer.size)
         if (data.size != masterBuffer.size) {
