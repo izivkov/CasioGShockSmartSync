@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class NotificationProvider @Inject constructor(
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) {
     data class NotificationConfig(
         val channelId: String = CHANNEL_ID,

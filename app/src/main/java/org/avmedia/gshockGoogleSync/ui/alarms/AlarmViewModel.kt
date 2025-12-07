@@ -31,7 +31,7 @@ import javax.inject.Inject
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
     private val alarmNameStorage: AlarmNameStorage,
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
     private var _alarms by mutableStateOf<List<Alarm>>(emptyList())
     val alarms: List<Alarm> get() = _alarms

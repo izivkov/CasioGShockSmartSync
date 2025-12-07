@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PreConnectionViewModel @Inject constructor(
     private val api: GShockRepository,
-    @ApplicationContext private val appContext: Context // Inject application context
+    @param:ApplicationContext private val appContext: Context // Inject application context
 ) : ViewModel() {
 
     private val noWatchString = appContext.getString(R.string.no_watch)

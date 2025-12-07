@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Singleton
 class DeviceManager @Inject constructor(
     private val repository: GShockRepository,
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) {
     private data class DeviceInfo(
         val name: String,

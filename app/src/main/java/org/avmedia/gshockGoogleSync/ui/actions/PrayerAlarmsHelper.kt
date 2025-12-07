@@ -31,8 +31,7 @@ import kotlinx.datetime.Instant as AdhanInstant
 @Singleton
 class PrayerAlarmsHelper @Inject constructor(
     private val alarmNameStorage: AlarmNameStorage,
-    private val scratchpadManager: ScratchpadManager,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
 
     /**
@@ -98,7 +97,7 @@ class PrayerAlarmsHelper @Inject constructor(
                     alarms.forEachIndexed { index, alarm ->
                         alarmNameStorage.put(alarm.name ?: "", index = index)
                     }
-                    scratchpadManager.save()
+                    alarmNameStorage.save()
                 }
             }
     }.onFailure { e ->

@@ -93,7 +93,7 @@ class ScratchpadManager @Inject constructor(
     /**
      * Gathers data from all clients and saves the combined buffer to the watch.
      */
-    suspend fun save() {
+    internal suspend fun save() {
         if (masterBuffer.isEmpty()) return
         clients.forEach { client ->
             val offset = client.getStorageOffset()

@@ -24,7 +24,7 @@ import javax.inject.Inject
 class EventViewModel @Inject constructor(
     private val api: GShockRepository,
     private val calendarEvents: CalendarEvents,
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     init {

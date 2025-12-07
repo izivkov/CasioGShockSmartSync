@@ -34,7 +34,7 @@ sealed interface TimeAction {
 @HiltViewModel
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TimeState())

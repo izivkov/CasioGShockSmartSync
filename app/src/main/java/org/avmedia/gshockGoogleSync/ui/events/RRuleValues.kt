@@ -24,7 +24,7 @@ import javax.inject.Singleton
 
 @Singleton
 class RRuleValues @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
 ) {
     data class Values(
         val localEndDate: LocalDate? = null,

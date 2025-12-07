@@ -28,7 +28,7 @@ import javax.inject.Singleton
 @Singleton
 class CalendarEvents @Inject constructor(
     private val rRuleValues: RRuleValues,
-    @ApplicationContext private val appContext: Context // Inject application context
+    @param:ApplicationContext private val appContext: Context // Inject application context
 ) {
     private val calendarObserver = CalendarObserver()
 

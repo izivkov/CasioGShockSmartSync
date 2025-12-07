@@ -43,7 +43,7 @@ sealed class SettingsAction {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val api: GShockRepository,
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     fun onSettingUpdated(setting: Setting) {
