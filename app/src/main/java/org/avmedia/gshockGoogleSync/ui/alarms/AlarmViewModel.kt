@@ -133,10 +133,8 @@ class AlarmViewModel @Inject constructor(
             .withIndex()
             .filter { it.value.enabled }
             .forEach { (index, alarm) ->
-                // Use the Elvis operator for a clean and simple way to handle null names.
-                val displayName = alarm.name ?: ""
                 val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
-                    putExtra(AlarmClock.EXTRA_MESSAGE, "Casio G-Shock Alarm $displayName")
+                    putExtra(AlarmClock.EXTRA_MESSAGE, alarm.name)
                     putExtra(AlarmClock.EXTRA_HOUR, alarm.hour)
                     putExtra(AlarmClock.EXTRA_MINUTES, alarm.minute)
                     putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_TIME)
