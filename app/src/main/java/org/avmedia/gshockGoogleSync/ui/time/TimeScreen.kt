@@ -15,9 +15,24 @@ import androidx.constraintlayout.compose.Dimension
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 
 @Composable
-fun TimeScreen() {
+fun TimeScreen(
+    timeViewModel: TimeViewModel = hiltViewModel()
+) {
+    LaunchedEffect(Unit) {
+        timeViewModel.uiEvents.collect { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    SnackbarController.snackbarHostState?.showSnackbar(event.message)
+                }
+            }
+        }
+    }
+
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),

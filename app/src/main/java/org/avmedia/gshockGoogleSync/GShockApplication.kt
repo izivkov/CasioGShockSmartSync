@@ -141,7 +141,8 @@ class GShockApplication : Application(), IScreenManager {
         var deviceAddress: String? = null
 
         if (reuseAddress) {
-            val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+            val bluetoothManager = getSystemService(android.bluetooth.BluetoothManager::class.java)
+            val bluetoothAdapter = bluetoothManager?.adapter
             if (bluetoothAdapter?.isEnabled == true) {
                 val savedDeviceAddress = LocalDataStorage.get(this, "LastDeviceAddress", "")
                 if (repository.validateBluetoothAddress(savedDeviceAddress)) {

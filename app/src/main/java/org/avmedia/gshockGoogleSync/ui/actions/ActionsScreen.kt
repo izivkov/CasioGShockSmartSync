@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import androidx.compose.ui.platform.LocalContext
@@ -26,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
@@ -39,6 +43,17 @@ fun ActionsScreen(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
 ) {
+    val actions by actionsViewModel.actions.collectAsState()
+
+    LaunchedEffect(Unit) {
+        actionsViewModel.uiEvents.collect { event ->
+            when (event) {
+                is ActionsViewModel.UiEvent.ShowSnackbar -> {
+                    SnackbarController.snackbarHostState?.showSnackbar(event.message)
+                }
+            }
+        }
+    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -107,8 +122,11 @@ private fun ActionsContent(
 }
 
 @Composable
-private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> =
-    listOfNotNull(
+private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
+    // We access the actions list to force recomposition when it changes
+    val actions by actionsViewModel.actions.collectAsState()
+
+    return listOfNotNull(
         if (WatchInfo.findButtonUserDefined) PhoneFinderView(
             actionsViewModel::updateAction,
             actionsViewModel
@@ -126,6 +144,7 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> =
         SeparatorView(),
         PhoneView(actionsViewModel::updateAction, actionsViewModel)
     )
+}
 
 @Composable
 fun BottomRow(

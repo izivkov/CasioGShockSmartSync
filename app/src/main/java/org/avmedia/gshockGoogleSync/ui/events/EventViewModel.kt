@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
@@ -27,12 +29,15 @@ class EventViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
+    private val _events = MutableStateFlow<List<Event>>(emptyList())
+    val events: StateFlow<List<Event>> = _events
+
+    private val _uiEvents = MutableSharedFlow<UiEvent>()
+    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
+
     init {
         listenForUpdateRequest()
     }
-
-    private val _events = MutableStateFlow<List<Event>>(emptyList())
-    val events: StateFlow<List<Event>> = _events
 
     fun loadEvents() {
         viewModelScope.launch {
@@ -41,11 +46,10 @@ class EventViewModel @Inject constructor(
                 _events.value = loadedEvents
                 EventsModel.refresh(loadedEvents)
             }.onFailure {
-                ProgressEvents.onNext("Error", it.message)
+                _uiEvents.emit(UiEvent.ShowSnackbar("Error: ${it.message}"))
             }
         }
     }
-
 
     fun toggleEvents(index: Int, isEnabled: Boolean) {
         _events.value = _events.value.toMutableList().apply {
@@ -90,21 +94,25 @@ class EventViewModel @Inject constructor(
     }
 
     fun sendEventsToWatch() {
-
         viewModelScope.launch {
-            val result = runCatching {
+            runCatching {
                 // Create a new list with emoji-free titles
                 val sanitizedEvents = _events.value.map { event ->
                     event.copy(title = event.title.sanitizeEventTitle())
                 }
 
                 api.setEvents(ArrayList(sanitizedEvents))
-                AppSnackbar(appContext.getString(R.string.events_set))
-            }
-
-            result.onFailure { e ->
-                ProgressEvents.onNext("Error", e.message ?: "")
+                _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.events_set)))
+            }.onFailure { e ->
+                _uiEvents.emit(UiEvent.ShowSnackbar("Error: ${e.message ?: ""}"))
             }
         }
+    }
+
+    /**
+     * Represents one-time UI events that should be handled by the UI layer.
+     */
+    sealed class UiEvent {
+        data class ShowSnackbar(val message: String) : UiEvent()
     }
 }

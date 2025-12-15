@@ -132,7 +132,6 @@ class RRuleValues @Inject constructor(
         Frequency.Weekly -> calculateWeeklyEndDate(startDate, byDay, count)
         Frequency.Monthly -> startDate.plusMonths(count.toLong())
         Frequency.Yearly -> startDate.plusYears(count.toLong())
-        else -> startDate
     }
 
     private fun calculateWeeklyEndDate(
@@ -165,7 +164,6 @@ class RRuleValues @Inject constructor(
         Frequency.Weekly -> RepeatPeriod.WEEKLY
         Frequency.Yearly -> RepeatPeriod.YEARLY
         Frequency.Daily -> RepeatPeriod.DAILY
-        else -> RepeatPeriod.NEVER
     }
 
     private fun rruleUntilFix(rrule: String): String {

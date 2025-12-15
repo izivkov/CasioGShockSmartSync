@@ -13,19 +13,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import org.avmedia.gshockapi.Alarm
+
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 
 @Composable
 fun AlarmList(
     alarmViewModel: AlarmViewModel = hiltViewModel()
 ) {
-    val alarms = alarmViewModel.alarms
+    val alarms by alarmViewModel.alarms.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -55,6 +59,16 @@ fun AlarmList(
 fun AlarmsScreen(
     alarmViewModel: AlarmViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(Unit) {
+        alarmViewModel.uiEvents.collect { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    SnackbarController.snackbarHostState?.showSnackbar(event.message)
+                }
+            }
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,

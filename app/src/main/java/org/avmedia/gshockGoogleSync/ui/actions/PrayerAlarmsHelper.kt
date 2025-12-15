@@ -26,7 +26,7 @@ import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.ExperimentalTime
-import kotlinx.datetime.Instant as AdhanInstant
+import kotlin.time.Instant as AdhanInstant
 
 @Singleton
 class PrayerAlarmsHelper @Inject constructor(

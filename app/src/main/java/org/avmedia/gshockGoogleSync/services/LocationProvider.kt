@@ -7,8 +7,9 @@ import android.location.Geocoder
 import android.location.LocationManager
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
-import androidx.compose.ui.text.intl.Locale
 import kotlin.text.uppercase
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 object LocationProvider {
     sealed interface LocationResult {
@@ -60,11 +61,13 @@ object LocationProvider {
      * 2. If that fails, it tries to use the Geocoder with the physical location (may use network).
      * 3. As a last resort, it falls back to the user's device language/region setting.
      *
+     * Note: This function is `suspend` because Geocoder\`s modern API is asynchronous.
+     *
      * @param context The application context.
      * @return A two-letter ISO country code (e.g., "US", "DE", "IN") or null if undetermined.
      */
     @SuppressLint("MissingPermission")
-    fun getCountryCode(context: Context): String? {
+    suspend fun getCountryCode(context: Context): String? {
         var countryCode: String?
 
         // --- STRATEGY 1: TRY OFFLINE NETWORK DETECTION FIRST (FAST & RELIABLE) ---
@@ -79,7 +82,7 @@ object LocationProvider {
         getLocation(context)?.let { location ->
             try {
                 val geocoder = Geocoder(context, java.util.Locale.getDefault())
-                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                val addresses = geocodeFromLocation(geocoder, location.latitude, location.longitude, 1)
                 countryCode = addresses?.firstOrNull()?.countryCode?.uppercase(java.util.Locale.US)
                 if (!countryCode.isNullOrBlank()) {
                     return countryCode
@@ -96,5 +99,23 @@ object LocationProvider {
         }
 
         return null // Return null if all strategies fail.
+    }
+
+    @SuppressLint("NewApi")
+    private suspend fun geocodeFromLocation(
+        geocoder: Geocoder,
+        latitude: Double,
+        longitude: Double,
+        maxResults: Int = 1
+    ): List<android.location.Address>? = suspendCancellableCoroutine { cont ->
+        val listener = Geocoder.GeocodeListener { addresses ->
+            if (cont.isActive) cont.resume(addresses)
+        }
+
+        try {
+            geocoder.getFromLocation(latitude, longitude, maxResults, listener)
+        } catch (e: Exception) {
+            if (cont.isActive) cont.resume(emptyList())
+        }
     }
 }

@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
+import androidx.compose.runtime.LaunchedEffect
+import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
@@ -83,6 +85,16 @@ fun SettingsScreen() {
 @Composable
 fun SettingsList() {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
+
+    LaunchedEffect(Unit) {
+        settingsViewModel.uiEvents.collect { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    SnackbarController.snackbarHostState?.showSnackbar(event.message)
+                }
+            }
+        }
+    }
 
     val settingsViews = arrayListOf(
         Locale(settingsViewModel::onSettingUpdated),

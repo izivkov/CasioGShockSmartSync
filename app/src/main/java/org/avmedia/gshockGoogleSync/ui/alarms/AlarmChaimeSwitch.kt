@@ -14,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSwitchWithText
+
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun AlarmChimeSwitch(
@@ -24,7 +26,7 @@ fun AlarmChimeSwitch(
     onUpdate: (Boolean) -> Unit,
     alarmViewModel: AlarmViewModel = hiltViewModel(),
 ) {
-    val alarms = alarmViewModel.alarms
+    val alarms by alarmViewModel.alarms.collectAsState()
     var isChecked by remember { mutableStateOf(alarms.getOrNull(0)?.hasHourlyChime ?: false) }
 
     LaunchedEffect(alarms) {

@@ -9,8 +9,11 @@ import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,6 +43,10 @@ sealed class SettingsAction {
     data object SendToWatch : SettingsAction()
 }
 
+sealed class UiEvent {
+    data class ShowSnackbar(val message: String) : UiEvent()
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val api: GShockRepository,
@@ -52,6 +59,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state.asStateFlow()
+
+    private val _uiEvents = MutableSharedFlow<UiEvent>()
+    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     init {
         initializeSettings()
@@ -440,7 +450,7 @@ class SettingsViewModel @Inject constructor(
                 state.value.settings.forEach(Setting::save)
 
             }.onFailure { e ->
-                ProgressEvents.onNext("Error", e.message ?: "")
+                _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Error"))
             }
         }
     }
@@ -475,9 +485,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 api.setSettings(settings)
-                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
+                _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.settings_sent_to_watch)))
             }.onFailure { e ->
-                ProgressEvents.onNext("ApiError", e.message ?: "")
+                _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Api Error"))
             }
         }
     }

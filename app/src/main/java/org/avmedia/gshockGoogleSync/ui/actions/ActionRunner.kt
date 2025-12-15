@@ -2,7 +2,7 @@ package org.avmedia.gshockGoogleSync.ui.actions
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction

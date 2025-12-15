@@ -3,7 +3,6 @@ package org.avmedia.gshockGoogleSync.ui.actions
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-
 import android.media.AudioManager
 import android.os.SystemClock
 import android.view.KeyEvent
@@ -11,20 +10,21 @@ import androidx.camera.core.CameraSelector
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.ActionsStorage
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.CoroutineScopes.mainScope
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
@@ -42,20 +42,39 @@ import javax.inject.Inject
 class ActionsViewModel @Inject constructor(
     private val api: GShockRepository,
     private val prayerAlarmsHelper: PrayerAlarmsHelper,
-    @ApplicationContext val appContext: Context, // Inject application context
+    @param:ApplicationContext val appContext: Context, // Inject application context
     private val calendarEvents: CalendarEvents,
-    private val actionsStorage: ActionsStorage
+    private val actionsStorage: ActionsStorage,
+    private val notificationProvider: NotificationProvider
 ) : ViewModel() {
-    private val _actions = MutableStateFlow<ArrayList<Action>>(arrayListOf())
+    private val _actions = MutableStateFlow<List<Action>>(emptyList())
     val actions: StateFlow<List<Action>> = _actions
 
-    @Inject
-    lateinit var notificationProvider: NotificationProvider
+    private val _uiEvents = MutableSharedFlow<UiEvent>()
+    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     private val actionMap = mutableMapOf<Class<out Action>, Action>()
 
     enum class RunMode {
         SYNC, ASYNC,
+    }
+
+    /**
+     * Represents one-time UI events that should be handled by the UI layer (Fragment/Activity).
+     *
+     * These events are transient and are not part of the persistent state of the screen.
+     * Examples include showing a Snackbar, navigation events, or showing a Toast.
+     *
+     * Usage:
+     * - The ViewModel emits these events via a [SharedFlow].
+     * - The UI observes the flow and performs the corresponding action (e.g., showing a message).
+     */
+    sealed class UiEvent {
+        /**
+         * Event to show a Snackbar with a specific message.
+         * @property message The text message to display in the Snackbar.
+         */
+        data class ShowSnackbar(val message: String) : UiEvent()
     }
 
     private fun updateActionsAndMap(newActions: List<Action>) {
@@ -70,14 +89,18 @@ class ActionsViewModel @Inject constructor(
     }
 
     fun <T : Action> updateAction(updatedAction: T) {
-        val currentList = _actions.value
-        val index = currentList.indexOfFirst { it::class == updatedAction::class }
-        if (index != -1) {
-            currentList[index] = updatedAction
-            updateActionsAndMap(currentList)
-            viewModelScope.launch {
-                updatedAction.save(appContext, actionsStorage)
+        _actions.update { currentList ->
+            val newList = ArrayList(currentList)
+            val index = newList.indexOfFirst { it::class == updatedAction::class }
+            if (index != -1) {
+                newList[index] = updatedAction
+                actionMap[updatedAction::class.java] = updatedAction
             }
+            newList
+        }
+
+        viewModelScope.launch {
+            updatedAction.save(appContext, actionsStorage)
         }
     }
 
@@ -311,7 +334,7 @@ class ActionsViewModel @Inject constructor(
             val timeMs = System.currentTimeMillis() + timeOffset
 
             // actions are sun on the main lifecycle scope, because the Actions Fragment never gets created.
-            mainScope.launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 api.setTime(timeMs = timeMs)
                 lastSet = timeMs
             }
@@ -417,7 +440,7 @@ class ActionsViewModel @Inject constructor(
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             // vvv 4. CALL THE METHOD ON THE INSTANCE vvv
-            mainScope.launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 prayerAlarmsHelper.createNextPrayerAlarms(WatchInfo.alarmCount)
                     .onSuccess { alarms ->
                         // getAlarms need to be run first, otherwise setAlarms() will not work
@@ -516,7 +539,7 @@ class ActionsViewModel @Inject constructor(
             cameraHelper.initCamera()
 
             // Launch a coroutine to take the picture
-            mainScope.launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 cameraHelper.takePicture(
                     onImageCaptured = { result ->
                         captureResult = result
@@ -575,7 +598,8 @@ class ActionsViewModel @Inject constructor(
 
     fun runActionsForActionButton(context: Context) {
         viewModelScope.launch {
-            val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
+            val actions =
+                _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
             ProgressEvents.onNext("ActionNames", actions.map { it.title })
             runFilteredActions(context, actions)
         }
@@ -599,7 +623,8 @@ class ActionsViewModel @Inject constructor(
 
     fun runActionsForAutoTimeSetting(context: Context) {
         viewModelScope.launch {
-            val actions = _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
+            val actions =
+                _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
             ProgressEvents.onNext("ActionNames", actions.map { it.title })
 
             runFilteredActions(
@@ -643,7 +668,10 @@ class ActionsViewModel @Inject constructor(
                 if (it.runMode == RunMode.ASYNC) {
                     Timber.d("------------> running ${it.javaClass.simpleName}")
                     // actions are run on the main lifecycle scope, because the Actions Fragment never gets created.
-                    mainScope.launch {
+                    // Using GlobalScope or a custom scope here to ensure it runs even if VM is cleared,
+                    // but ideally this should be tied to a service or work manager.
+                    // For now, mirroring previous behavior but avoiding the custom static scope.
+                    CoroutineScope(Dispatchers.Main).launch {
                         println("Running action ASYNC: ${it.title}")
                         runIt(it, context)
                     }
@@ -683,11 +711,9 @@ class ActionsViewModel @Inject constructor(
     fun saveWithMessage(message: String) {
         viewModelScope.launch {
             actionsStorage.save()
-            AppSnackbar(message)
+            _uiEvents.emit(UiEvent.ShowSnackbar(message))
         }
     }
 
-    object CoroutineScopes {
-        val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    }
+
 }

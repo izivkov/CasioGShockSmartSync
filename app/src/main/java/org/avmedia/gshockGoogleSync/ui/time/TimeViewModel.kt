@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -31,6 +33,10 @@ sealed interface TimeAction {
     data object RefreshState : TimeAction
 }
 
+sealed class UiEvent {
+    data class ShowSnackbar(val message: String) : UiEvent()
+}
+
 @HiltViewModel
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
@@ -39,6 +45,9 @@ class TimeViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TimeState())
     val state = _state.asStateFlow()
+
+    private val _uiEvents = MutableSharedFlow<UiEvent>()
+    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     init {
         refreshState()
@@ -55,7 +64,7 @@ class TimeViewModel @Inject constructor(
             is TimeAction.UpdateTimer -> {
                 viewModelScope.launch {
                     api.setTimer(action.timeMs)
-                    AppSnackbar(appContext.getString(R.string.timer_set))
+                    _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.timer_set)))
                 }
             }
 
@@ -64,12 +73,12 @@ class TimeViewModel @Inject constructor(
                     runCatching {
                         val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                         val timeMs = System.currentTimeMillis() + timeOffset
-                        AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
+                        _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.sending_time_to_watch)))
                         api.setTime(timeMs = timeMs)
-                        AppSnackbar(appContext.getString(R.string.time_set))
+                        _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.time_set)))
                         refreshState()
                     }.onFailure { e ->
-                        ProgressEvents.onNext("ApiError", e.message ?: "")
+                        _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Api Error"))
                     }
                 }
             }
@@ -89,7 +98,7 @@ class TimeViewModel @Inject constructor(
                     watchName = api.getWatchName()
                 )
             }.onFailure {
-                ProgressEvents.onNext("ApiError")
+                _uiEvents.emit(UiEvent.ShowSnackbar("Api Error"))
             }
         }
     }
