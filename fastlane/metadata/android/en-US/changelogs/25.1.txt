@@ -1,0 +1,1 @@
+Improve BLE communication stability and fix minor bugs.
