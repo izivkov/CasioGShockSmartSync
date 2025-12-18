@@ -75,6 +75,7 @@ Works with many **G-Shock**, **Edifice**, and **Pro Trek** variants. Here are th
 | Edifice ECB-10     | 5618, 5604           |
 | Edifice ECB-20     | 5638, 5603           |
 | Edifice ECB-30     | 5686, 5672           |
+| GBM-2100           | 5729                 |
 
 We are looking for feedback about the accuracy of this table, so please comment in the **Issues** section with any disrepancies.
 
