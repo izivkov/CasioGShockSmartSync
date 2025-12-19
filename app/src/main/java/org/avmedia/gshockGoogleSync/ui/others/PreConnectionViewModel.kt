@@ -14,8 +14,8 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.ble.Connection
 import javax.inject.Inject
+import org.avmedia.gshockapi.ICDPDelegate
 
 @HiltViewModel
 class PreConnectionViewModel @Inject constructor(
@@ -26,6 +26,9 @@ class PreConnectionViewModel @Inject constructor(
     private val noWatchString = appContext.getString(R.string.no_watch)
     private val _watchName = MutableStateFlow(noWatchString)
     val watchName: StateFlow<String> = _watchName
+
+    private val _triggerPairing = MutableStateFlow(false)
+    val triggerPairing: StateFlow<Boolean> = _triggerPairing
 
     init {
         viewModelScope.launch {
@@ -42,20 +45,39 @@ class PreConnectionViewModel @Inject constructor(
                 val deviceName = (ProgressEvents.getPayload("DeviceName") as? String)
                     ?.takeIf { it.isNotBlank() } ?: noWatchString
                 _watchName.value = deviceName
+            },
+            EventAction("NoPairedDevices") {
+                _triggerPairing.value = true
             }
         )
 
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
-    fun forget() {
+    fun associate(context: Context, delegate: ICDPDelegate) {
+        api.associate(context, delegate)
+    }
+
+    fun setDeviceAddress(address: String) {
         viewModelScope.launch {
-            LocalDataStorage.deleteAsync(appContext, "LastDeviceAddress")
-            LocalDataStorage.deleteAsync(appContext, "LastDeviceName")
-            Connection.breakWait()
-            ProgressEvents.onNext("DeviceName", "")
-            ProgressEvents.onNext("WaitForConnection")
+            LocalDataStorage.put(appContext, "LastDeviceAddress", address)
+            LocalDataStorage.addDeviceAddress(appContext, address)
         }
+    }
+
+    fun setDeviceName(name: String) {
+        viewModelScope.launch {
+            LocalDataStorage.put(appContext, "LastDeviceName", name)
+            _watchName.value = name
+        }
+    }
+
+    fun onPairingTriggered() {
+        _triggerPairing.value = false
+    }
+
+    fun forget() {
+        // Not yet implemented...
     }
 }
 

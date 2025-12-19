@@ -91,17 +91,15 @@ object LocalDataStorage {
         return get(context, key, "false")?.toBoolean() ?: false
     }
 
-    private fun putBoolean(context: Context, key: String, value: Boolean) {
-        scope.launch {
-            put(context, key, value.toString())
-        }
+    private suspend fun putBoolean(context: Context, key: String, value: Boolean) {
+        put(context, key, value.toString())
     }
 
     fun getTimeAdjustmentNotification(context: Context): Boolean {
         return getBoolean(context, "timeAdjustmentNotification")
     }
 
-    fun setTimeAdjustmentNotification(context: Context, value: Boolean) {
+    suspend fun setTimeAdjustmentNotification(context: Context, value: Boolean) {
         putBoolean(context, "timeAdjustmentNotification", value)
     }
 
@@ -109,16 +107,36 @@ object LocalDataStorage {
         return get(context, "fineTimeAdjustment", "0")?.toInt() ?: 0
     }
 
-    fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
+    suspend fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
         put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
 
-    fun setKeepAlive(context: Context, value: Boolean) {
+    suspend fun setKeepAlive(context: Context, value: Boolean) {
         putBoolean(context, "keepAlive", value)
     }
 
     fun getKeepAlive(context: Context): Boolean {
         // We want to set to "true" by default, that is why we don't use the getBoolean function.
         return get(context, "keepAlive", "true")?.toBoolean() ?: true
+    }
+
+    fun getDeviceAddresses(context: Context): List<String> {
+        val addresses = get(context, "DeviceAddresses", "") ?: ""
+        return if (addresses.isEmpty()) emptyList() else addresses.split(",")
+    }
+
+    suspend fun addDeviceAddress(context: Context, address: String) {
+        val addresses = getDeviceAddresses(context).toMutableList()
+        if (!addresses.contains(address)) {
+            addresses.add(address)
+            put(context, "DeviceAddresses", addresses.joinToString(","))
+        }
+    }
+
+    suspend fun removeDeviceAddress(context: Context, address: String) {
+        val addresses = getDeviceAddresses(context).toMutableList()
+        if (addresses.remove(address)) {
+            put(context, "DeviceAddresses", addresses.joinToString(","))
+        }
     }
 }

@@ -29,7 +29,8 @@ import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 abstract class Setting(val name: String) {
-    open fun save() {} // Default empty implementation
+    open suspend fun save() {
+    } // Default empty implementation
 }
 
 data class SettingsState(
@@ -151,7 +152,9 @@ class SettingsViewModel @Inject constructor(
                     settingsMap = newMap
                 )
             }
-            updatedSetting.save()
+            viewModelScope.launch {
+                updatedSetting.save()
+            }
         }
     }
 
@@ -199,7 +202,7 @@ class SettingsViewModel @Inject constructor(
     ) :
         Setting("Run in Background") {
 
-        override fun save() {
+        override suspend fun save() {
             LocalDataStorage.setKeepAlive(
                 appContext,
                 keepAlive
@@ -215,7 +218,7 @@ class SettingsViewModel @Inject constructor(
             LocalDataStorage.getTimeAdjustmentNotification(appContext),
         var fineAdjustment: Int = LocalDataStorage.getFineTimeAdjustment(appContext),
     ) : Setting("Time Adjustment") {
-        override fun save() {
+        override suspend fun save() {
             LocalDataStorage.setTimeAdjustmentNotification(
                 appContext,
                 timeAdjustmentNotifications
@@ -447,7 +450,7 @@ class SettingsViewModel @Inject constructor(
                 // Save all local storage settings, in case the user abandons the screen.
                 // Local storage setting are not sent to the watch, but are used by the app.
                 // Example: keepAlive setting.
-                state.value.settings.forEach(Setting::save)
+                state.value.settings.forEach { it.save() }
 
             }.onFailure { e ->
                 _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Error"))

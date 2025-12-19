@@ -23,6 +23,8 @@ import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import org.avmedia.gshockapi.ble.GShockPairingManager
+import android.content.Intent
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

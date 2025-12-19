@@ -29,14 +29,18 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
     val activity = context as Activity
 
     fun getRequiredPermissions(): Array<String> {
-        return mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION).apply {
+        return mutableListOf<String>().apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 addAll(
                     listOf(
-                        Manifest.permission.BLUETOOTH_SCAN,
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        Manifest.permission.BLUETOOTH_CONNECT,
                     )
                 )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    add(Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH)
+                }
+            } else {
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 add(Manifest.permission.POST_NOTIFICATIONS)

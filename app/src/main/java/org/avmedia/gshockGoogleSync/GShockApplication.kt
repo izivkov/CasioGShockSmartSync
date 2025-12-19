@@ -1,5 +1,14 @@
 package org.avmedia.gshockGoogleSync
 
+import android.companion.CompanionDeviceManager
+import android.content.Context
+import android.os.Build
+import timber.log.Timber
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.ble.GShockPairingManager
+
 import android.app.Application
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +32,7 @@ import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import javax.inject.Inject
+import org.avmedia.gshockapi.ProgressEvents
 
 @HiltAndroidApp
 class GShockApplication : Application(), IScreenManager {
@@ -53,6 +63,41 @@ class GShockApplication : Application(), IScreenManager {
             screenManager = this
         )
         eventHandler.setupEventSubscription()
+        syncAssociations()
+    }
+
+    private fun syncAssociations() {
+        val associations = GShockPairingManager.getAssociations(this)
+        CoroutineScope(Dispatchers.IO).launch {
+            associations.forEach { address ->
+                LocalDataStorage.addDeviceAddress(this@GShockApplication, address)
+            }
+
+            // Also ensure the last connected device is set if nothing is set
+            val lastAddress = LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
+            if (lastAddress.isNullOrEmpty() && associations.isNotEmpty()) {
+                LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", associations[0])
+            }
+
+            startObservingDevicePresence()
+        }
+    }
+
+    private fun startObservingDevicePresence() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val deviceManager = getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
+            if (deviceManager != null) {
+                val addresses = LocalDataStorage.getDeviceAddresses(this)
+                for (address in addresses) {
+                    try {
+                        deviceManager.startObservingDevicePresence(address)
+                        Timber.i("Started observing device presence for: $address")
+                    } catch (e: Exception) {
+                        Timber.e(e, "Failed to start observing device presence for: $address")
+                    }
+                }
+            }
+        }
     }
 
     // ScreenManager implementation
@@ -127,10 +172,9 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
-    private suspend fun waitForConnection() {
-
+    internal suspend fun waitForConnection() {
         // Use this variable to control whether we should try to scan each time for the watch,
-        // or reuse the last saved address. If set tto false, the connection is a bit slower,
+        // or reuse the last saved address. If set to false, the connection is a bit slower,
         // but the app can connect to multiple watches without pressing "FORGET".
         // Also, auto-time-sync will work for multiple watches
 
@@ -138,19 +182,34 @@ class GShockApplication : Application(), IScreenManager {
         // so actions will fail. If this flag is true, no scanning will be performed.
         // Leave it to true.
         val reuseAddress = true
-        var deviceAddress: String? = null
 
         if (reuseAddress) {
-            val bluetoothManager = getSystemService(android.bluetooth.BluetoothManager::class.java)
-            val bluetoothAdapter = bluetoothManager?.adapter
-            if (bluetoothAdapter?.isEnabled == true) {
-                val savedDeviceAddress = LocalDataStorage.get(this, "LastDeviceAddress", "")
-                if (repository.validateBluetoothAddress(savedDeviceAddress)) {
-                    deviceAddress = savedDeviceAddress
+            val savedDeviceAddresses = LocalDataStorage.getDeviceAddresses(this)
+            val lastDeviceAddress = LocalDataStorage.get(this, "LastDeviceAddress", "")
+
+            // try last device first
+            if (repository.validateBluetoothAddress(lastDeviceAddress)) {
+                repository.waitForConnection(lastDeviceAddress)
+            } else {
+                // try other devices
+                for (address in savedDeviceAddresses) {
+                    if (repository.validateBluetoothAddress(address)) {
+                        repository.waitForConnection(address)
+                        if (repository.isConnected()) break
+                    }
                 }
             }
+
+            // if still not connected and we have no associated devices, trigger pairing
+            val associations = GShockPairingManager.getAssociations(this)
+            if (!repository.isConnected() && savedDeviceAddresses.isEmpty() && associations.isEmpty()) {
+                ProgressEvents.onNext("NoPairedDevices")
+            } else if (!repository.isConnected()) {
+                repository.waitForConnection("") // Fallback / Listen for any
+            }
+        } else {
+            repository.waitForConnection("")
         }
-        repository.waitForConnection(deviceAddress)
     }
 
     @Composable

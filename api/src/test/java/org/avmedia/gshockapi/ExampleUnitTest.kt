@@ -1,6 +1,6 @@
-package org.avmedia.gshockGoogleSync
+package org.avmedia.gshockapi
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import org.junit.Assert.*
 
