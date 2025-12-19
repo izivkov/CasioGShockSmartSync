@@ -62,6 +62,8 @@ class PreConnectionViewModel @Inject constructor(
         viewModelScope.launch {
             LocalDataStorage.put(appContext, "LastDeviceAddress", address)
             LocalDataStorage.addDeviceAddress(appContext, address)
+            (appContext as? org.avmedia.gshockGoogleSync.GShockApplication)?.startObservingDevicePresence()
+            api.waitForConnection(address)
         }
     }
 

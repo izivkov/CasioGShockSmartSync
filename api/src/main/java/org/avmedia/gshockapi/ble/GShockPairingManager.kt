@@ -35,14 +35,18 @@ object GShockPairingManager {
             // .addServiceUuid(ParcelUuid(CASIO_SERVICE_UUID), null)
             .build()
 
-        val pairingRequest = AssociationRequest.Builder()
+        val builder = AssociationRequest.Builder()
             .addDeviceFilter(deviceFilter)
-            .apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
-                }
-            }
-            .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
+        }
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            builder.setSingleDevice(true)
+        }
+
+        val pairingRequest = builder.build()
 
         val callback = object : CompanionDeviceManager.Callback() {
             override fun onDeviceFound(chooserLauncher: IntentSender) {

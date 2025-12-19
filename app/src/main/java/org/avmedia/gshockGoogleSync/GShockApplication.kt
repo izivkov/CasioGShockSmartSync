@@ -83,7 +83,7 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
-    private fun startObservingDevicePresence() {
+    internal fun startObservingDevicePresence() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val deviceManager = getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
             if (deviceManager != null) {
@@ -173,43 +173,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     internal suspend fun waitForConnection() {
-        // Use this variable to control whether we should try to scan each time for the watch,
-        // or reuse the last saved address. If set to false, the connection is a bit slower,
-        // but the app can connect to multiple watches without pressing "FORGET".
-        // Also, auto-time-sync will work for multiple watches
-
-        // Note: Consequently, we discovered that the Bluetooth scanning cannot be performed in the background,
-        // so actions will fail. If this flag is true, no scanning will be performed.
-        // Leave it to true.
-        val reuseAddress = true
-
-        if (reuseAddress) {
-            val savedDeviceAddresses = LocalDataStorage.getDeviceAddresses(this)
-            val lastDeviceAddress = LocalDataStorage.get(this, "LastDeviceAddress", "")
-
-            // try last device first
-            if (repository.validateBluetoothAddress(lastDeviceAddress)) {
-                repository.waitForConnection(lastDeviceAddress)
-            } else {
-                // try other devices
-                for (address in savedDeviceAddresses) {
-                    if (repository.validateBluetoothAddress(address)) {
-                        repository.waitForConnection(address)
-                        if (repository.isConnected()) break
-                    }
-                }
-            }
-
-            // if still not connected and we have no associated devices, trigger pairing
-            val associations = GShockPairingManager.getAssociations(this)
-            if (!repository.isConnected() && savedDeviceAddresses.isEmpty() && associations.isEmpty()) {
-                ProgressEvents.onNext("NoPairedDevices")
-            } else if (!repository.isConnected()) {
-                repository.waitForConnection("") // Fallback / Listen for any
-            }
-        } else {
-            repository.waitForConnection("")
-        }
+        ProgressEvents.onNext("NoPairedDevices")
     }
 
     @Composable
