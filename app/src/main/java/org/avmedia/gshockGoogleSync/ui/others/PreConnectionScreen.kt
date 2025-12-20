@@ -17,6 +17,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -51,6 +53,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -91,7 +94,8 @@ fun PreConnectionScreen(
                 }
 
             device?.let {
-                ptrConnectionViewModel.setDevice(it.address, it.name ?: "Unknown")
+                val name = if (it.name.isNullOrBlank()) "G-SHOCK" else it.name
+                ptrConnectionViewModel.setDevice(it.address, name)
             }
         }
     }
@@ -240,11 +244,12 @@ fun PairedDeviceList(
 ) {
     Box(
         modifier = modifier
-            .padding(8.dp) // Small margin
+            .padding(4.dp)
+            .wrapContentSize(Alignment.CenterEnd)
     ) {
         Column(
             horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp) // Increased spacing to prevent overlap
         ) {
             devices.take(5).forEach { device ->
                 Row(
@@ -256,19 +261,19 @@ fun PairedDeviceList(
                             contentDescription = "Selected",
                             tint = Color.Red,
                             modifier = Modifier
-                                .size(20.dp)
-                                .padding(end = 4.dp)
+                                .size(24.dp) // Larger triangle
+                                .padding(end = 2.dp)
                         )
                     }
                     Text(
                         text = device.name,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge, // Increased text size slightly
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .clickable { onSelect(device) }
-                            .padding(vertical = 2.dp)
+                            .padding(vertical = 4.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     RemoveButton(onClick = { onDisassociate(device) })
                 }
             }
@@ -277,7 +282,7 @@ fun PairedDeviceList(
                     text = "...",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(end = 32.dp) // Offset for the missing remove button on "..."
+                    modifier = Modifier.padding(end = 40.dp)
                 )
             }
         }
@@ -286,23 +291,22 @@ fun PairedDeviceList(
 
 @Composable
 fun RemoveButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(
-        onClick = onClick,
+    Box(
         modifier = modifier
-            .padding(start = 16.dp)
-            .size(22.dp)
-            .border(0.5.dp, Color.White.copy(alpha = 0.5f), CircleShape),
-        shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Black,
-            contentColor = Color.White
-        ),
-        contentPadding = PaddingValues(0.dp)
+            .padding(start = 12.dp)
+            .size(18.dp)
+            .border(0.5.dp, Color.White.copy(alpha = 0.5f), CircleShape)
+            .background(Color.Black, CircleShape)
+            .clickable(
+                onClick = onClick,
+                role = Role.Button
+            ),
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Default.Remove,
             contentDescription = "Remove Watch",
-            modifier = Modifier.size(13.dp),
+            modifier = Modifier.size(12.dp),
             tint = Color.White
         )
     }
