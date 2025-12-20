@@ -71,18 +71,7 @@ object GShockPairingManager {
 
     @SuppressLint("NewApi")
     fun getAssociations(context: Context): List<String> {
-        val deviceManager =
-            context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
-                ?: return emptyList()
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            deviceManager.myAssociations.map { it.deviceMacAddress.toString() }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            deviceManager.associations.map { it.toString() }
-        } else {
-            @Suppress("DEPRECATION")
-            deviceManager.associations
-        }
+        return getAssociationsWithNames(context).map { it.address }
     }
 
     @SuppressLint("NewApi", "MissingPermission")
@@ -95,18 +84,19 @@ object GShockPairingManager {
             deviceManager.myAssociations.map {
                 IGShockAPI.Association(it.deviceMacAddress.toString(), it.displayName?.toString())
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // On API 31, associations are AssociationInfo objects
-            deviceManager.associations.map { info ->
-                if (info is AssociationInfo) {
-                    IGShockAPI.Association(info.deviceMacAddress.toString(), info.displayName?.toString())
+        } else {
+            @Suppress("DEPRECATION")
+            val associations = deviceManager.associations
+            associations.map { info ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && info is AssociationInfo) {
+                    IGShockAPI.Association(
+                        info.deviceMacAddress.toString(),
+                        info.displayName?.toString()
+                    )
                 } else {
                     IGShockAPI.Association(info.toString(), null)
                 }
             }
-        } else {
-            @Suppress("DEPRECATION")
-            deviceManager.associations.map { IGShockAPI.Association(it, null) }
         }
     }
 
@@ -117,6 +107,15 @@ object GShockPairingManager {
                 ?: return
 
         try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val association =
+                    deviceManager.myAssociations.find { it.deviceMacAddress.toString() == address }
+                if (association != null) {
+                    deviceManager.disassociate(association.id)
+                    return
+                }
+            }
+            @Suppress("DEPRECATION")
             deviceManager.disassociate(address)
         } catch (e: Exception) {
             // ignore

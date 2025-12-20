@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.ble.GShockPairingManager
 
 import android.app.Application
+import android.companion.ObservingDevicePresenceRequest
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -88,16 +89,31 @@ class GShockApplication : Application(), IScreenManager {
 
     internal fun startObservingDevicePresence() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val deviceManager = getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
-            if (deviceManager != null) {
-                val addresses = LocalDataStorage.getDeviceAddresses(this)
-                for (address in addresses) {
-                    try {
+            val deviceManager =
+                getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
+                    ?: return
+
+            val addresses = LocalDataStorage.getDeviceAddresses(this)
+            for (address in addresses) {
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val association = deviceManager.myAssociations.find {
+                            it.deviceMacAddress?.toString()?.equals(address, ignoreCase = true) == true
+                        }
+                        if (association != null) {
+                            val request = ObservingDevicePresenceRequest.Builder()
+                                .setAssociationId(association.id)
+                                .build()
+                            deviceManager.startObservingDevicePresence(request)
+                            Timber.i("Started observing device presence (API 33+) for: $address")
+                        }
+                    } else {
+                        @Suppress("DEPRECATION")
                         deviceManager.startObservingDevicePresence(address)
                         Timber.i("Started observing device presence for: $address")
-                    } catch (e: Exception) {
-                        Timber.e(e, "Failed to start observing device presence for: $address")
                     }
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to start observing device presence for: $address")
                 }
             }
         }
