@@ -141,6 +141,13 @@ class PreConnectionViewModel @Inject constructor(
         viewModelScope.launch {
             api.disassociate(context, address)
             LocalDataStorage.removeDeviceAddress(context, address)
+
+            val lastAddress = LocalDataStorage.get(context, "LastDeviceAddress", "")
+            if (address == lastAddress) {
+                LocalDataStorage.put(context, "LastDeviceAddress", "")
+                LocalDataStorage.put(context, "LastDeviceName", noWatchString)
+                _watchName.value = noWatchString
+            }
             loadPairedDevices()
         }
     }

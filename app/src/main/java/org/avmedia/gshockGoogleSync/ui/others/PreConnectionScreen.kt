@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -174,6 +175,9 @@ fun PreConnectionScreen(
                             onSelect = { device ->
                                 ptrConnectionViewModel.selectDevice(device)
                             },
+                            onDisassociate = { device ->
+                                ptrConnectionViewModel.disassociate(context, device.address)
+                            },
                             modifier = Modifier
                                 .padding(end = 30.dp, bottom = 20.dp)
                                 .constrainAs(deviceList) {
@@ -231,42 +235,76 @@ fun PreConnectionScreen(
 fun PairedDeviceList(
     devices: List<PreConnectionViewModel.DeviceItem>,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
+    onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    Box(
+        modifier = modifier
+            .padding(8.dp) // Small margin
     ) {
-        devices.take(5).forEach { device ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onSelect(device) }
-            ) {
-                if (device.isLastUsed) {
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            devices.take(5).forEach { device ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (device.isLastUsed) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Selected",
+                            tint = Color.Red,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .padding(end = 4.dp)
+                        )
+                    }
                     Text(
-                        text = "→",
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(end = 4.dp)
+                        text = device.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .clickable { onSelect(device) }
+                            .padding(vertical = 2.dp)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    RemoveButton(onClick = { onDisassociate(device) })
                 }
+            }
+            if (devices.size > 5) {
                 Text(
-                    text = device.name,
+                    text = "...",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(vertical = 2.dp)
+                    modifier = Modifier.padding(end = 32.dp) // Offset for the missing remove button on "..."
                 )
             }
         }
-        if (devices.size > 5) {
-            Text(
-                text = "...",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(end = 4.dp)
-            )
-        }
+    }
+}
+
+@Composable
+fun RemoveButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .padding(start = 16.dp)
+            .size(22.dp)
+            .border(0.5.dp, Color.White.copy(alpha = 0.5f), CircleShape),
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Black,
+            contentColor = Color.White
+        ),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Remove,
+            contentDescription = "Remove Watch",
+            modifier = Modifier.size(13.dp),
+            tint = Color.White
+        )
     }
 }
 
