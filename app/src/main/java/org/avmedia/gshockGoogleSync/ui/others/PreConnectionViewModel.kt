@@ -30,12 +30,57 @@ class PreConnectionViewModel @Inject constructor(
     private val _triggerPairing = MutableStateFlow(false)
     val triggerPairing: StateFlow<Boolean> = _triggerPairing
 
+    data class DeviceItem(val name: String, val address: String, val isLastUsed: Boolean)
+    private val _pairedDevices = MutableStateFlow<List<DeviceItem>>(emptyList())
+    val pairedDevices: StateFlow<List<DeviceItem>> = _pairedDevices
+
     init {
         viewModelScope.launch {
             val savedName = LocalDataStorage.get(appContext, "LastDeviceName", noWatchString) ?: noWatchString
             _watchName.value = savedName
+            loadPairedDevices()
         }
         createSubscription()
+    }
+
+    private fun loadPairedDevices() {
+        val associations = api.getAssociationsWithNames(appContext)
+        val lastAddress = LocalDataStorage.get(appContext, "LastDeviceAddress", "")
+
+        val items = associations
+            .distinctBy { it.address } // Ensure unique addresses
+            .map { association ->
+                DeviceItem(association.name ?: "Unknown", association.address, association.address == lastAddress)
+            }
+
+        _pairedDevices.value = formatDeviceNames(items)
+    }
+
+    private fun formatDeviceNames(items: List<DeviceItem>): List<DeviceItem> {
+        val nameCount = mutableMapOf<String, Int>()
+        val result = mutableListOf<DeviceItem>()
+        
+        // First pass: count occurrences
+        items.forEach { item ->
+            val baseName = item.name.removePrefix("CASIO").trim()
+            nameCount[baseName] = nameCount.getOrDefault(baseName, 0) + 1
+        }
+        
+        // Second pass: apply suffixes if needed
+        val currentCount = mutableMapOf<String, Int>()
+        items.forEach { item ->
+            val baseName = item.name.removePrefix("CASIO").trim()
+            val total = nameCount[baseName] ?: 1
+            val formattedName = if (total > 1) {
+                val index = currentCount.getOrDefault(baseName, 0) + 1
+                currentCount[baseName] = index
+                "$baseName-$index"
+            } else {
+                baseName
+            }
+            result.add(item.copy(name = formattedName))
+        }
+        return result
     }
 
     // Method to subscribe to ProgressEvents and handle the "DeviceName" action
@@ -46,8 +91,17 @@ class PreConnectionViewModel @Inject constructor(
                     ?.takeIf { it.isNotBlank() } ?: noWatchString
                 _watchName.value = deviceName
             },
+            EventAction("DeviceAddress") {
+                val address = ProgressEvents.getPayload("DeviceAddress") as? String
+                if (!address.isNullOrBlank()) {
+                    viewModelScope.launch {
+                        LocalDataStorage.put(appContext, "LastDeviceAddress", address)
+                        loadPairedDevices()
+                    }
+                }
+            },
             EventAction("NoPairedDevices") {
-                _triggerPairing.value = true
+                // _triggerPairing.value = true
             }
         )
 
@@ -58,19 +112,24 @@ class PreConnectionViewModel @Inject constructor(
         api.associate(context, delegate)
     }
 
-    fun setDeviceAddress(address: String) {
+    fun setDevice(address: String, name: String) {
         viewModelScope.launch {
             LocalDataStorage.put(appContext, "LastDeviceAddress", address)
             LocalDataStorage.addDeviceAddress(appContext, address)
+            LocalDataStorage.put(appContext, "LastDeviceName", name)
+            LocalDataStorage.setDeviceName(appContext, address, name)
+            _watchName.value = name
             (appContext as? org.avmedia.gshockGoogleSync.GShockApplication)?.startObservingDevicePresence()
+            loadPairedDevices()
             api.waitForConnection(address)
         }
     }
 
-    fun setDeviceName(name: String) {
+    fun selectDevice(device: DeviceItem) {
         viewModelScope.launch {
-            LocalDataStorage.put(appContext, "LastDeviceName", name)
-            _watchName.value = name
+            LocalDataStorage.put(appContext, "LastDeviceAddress", device.address)
+            LocalDataStorage.put(appContext, "LastDeviceName", device.name)
+            loadPairedDevices()
         }
     }
 
@@ -78,8 +137,12 @@ class PreConnectionViewModel @Inject constructor(
         _triggerPairing.value = false
     }
 
-    fun forget() {
-        // Not yet implemented...
+    fun disassociate(context: Context, address: String) {
+        viewModelScope.launch {
+            api.disassociate(context, address)
+            LocalDataStorage.removeDeviceAddress(context, address)
+            loadPairedDevices()
+        }
     }
 }
 

@@ -60,4 +60,8 @@ interface IGShockAPI {
     fun isScratchpadReset(): Boolean
 
     fun associate(context: Context, delegate: ICDPDelegate)
+    fun disassociate(context: Context, address: String)
+
+    data class Association(val address: String, val name: String?)
+    fun getAssociationsWithNames(context: Context): List<Association>
 }

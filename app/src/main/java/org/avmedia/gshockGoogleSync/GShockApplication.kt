@@ -67,16 +67,19 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     private fun syncAssociations() {
-        val associations = GShockPairingManager.getAssociations(this)
+        val associations = repository.getAssociationsWithNames(this)
         CoroutineScope(Dispatchers.IO).launch {
-            associations.forEach { address ->
-                LocalDataStorage.addDeviceAddress(this@GShockApplication, address)
+            associations.forEach { association ->
+                LocalDataStorage.addDeviceAddress(this@GShockApplication, association.address)
+                association.name?.let {
+                    LocalDataStorage.setDeviceName(this@GShockApplication, association.address, it)
+                }
             }
 
             // Also ensure the last connected device is set if nothing is set
             val lastAddress = LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
             if (lastAddress.isNullOrEmpty() && associations.isNotEmpty()) {
-                LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", associations[0])
+                LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", associations[0].address)
             }
 
             startObservingDevicePresence()
@@ -173,7 +176,12 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     internal suspend fun waitForConnection() {
-        ProgressEvents.onNext("NoPairedDevices")
+        val associations = repository.getAssociationsWithNames(this)
+        if (associations.isEmpty() && LocalDataStorage.getDeviceAddresses(this).isEmpty()) {
+            ProgressEvents.onNext("NoPairedDevices")
+        } else {
+            startObservingDevicePresence()
+        }
     }
 
     @Composable

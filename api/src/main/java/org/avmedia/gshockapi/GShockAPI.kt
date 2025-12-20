@@ -545,4 +545,12 @@ class GShockAPI(private val context: Context) : IGShockAPI {
     override fun associate(context: Context, delegate: ICDPDelegate) {
         GShockPairingManager.associate(context, delegate::onChooserReady, delegate::onError)
     }
+
+    override fun disassociate(context: Context, address: String) {
+        GShockPairingManager.disassociate(context, address)
+    }
+
+    override fun getAssociationsWithNames(context: Context): List<IGShockAPI.Association> {
+        return GShockPairingManager.getAssociationsWithNames(context)
+    }
 }

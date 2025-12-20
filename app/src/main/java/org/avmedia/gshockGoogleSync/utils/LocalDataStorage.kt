@@ -122,7 +122,7 @@ object LocalDataStorage {
 
     fun getDeviceAddresses(context: Context): List<String> {
         val addresses = get(context, "DeviceAddresses", "") ?: ""
-        return if (addresses.isEmpty()) emptyList() else addresses.split(",")
+        return if (addresses.isEmpty()) emptyList() else addresses.split(",").distinct()
     }
 
     suspend fun addDeviceAddress(context: Context, address: String) {
@@ -137,6 +137,15 @@ object LocalDataStorage {
         val addresses = getDeviceAddresses(context).toMutableList()
         if (addresses.remove(address)) {
             put(context, "DeviceAddresses", addresses.joinToString(","))
+            deleteAsync(context, "DeviceName_$address")
         }
+    }
+
+    fun getDeviceName(context: Context, address: String): String? {
+        return get(context, "DeviceName_$address")
+    }
+
+    suspend fun setDeviceName(context: Context, address: String, name: String) {
+        put(context, "DeviceName_$address", name)
     }
 }

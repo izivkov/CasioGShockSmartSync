@@ -2,6 +2,7 @@ package org.avmedia.gshockGoogleSync.ui.common
 
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,21 +19,36 @@ fun AppConnectionSpinner(
 ) {
     var isVisible by remember { mutableStateOf(false) }
 
-    AppCard(
-        modifier = modifier,
-        padding = 8.dp
-    ) {
+    DisposableEffect(Unit) {
+        val name = "AppConnectionSpinner-${java.util.UUID.randomUUID()}"
         val eventActions = arrayOf(
             EventAction("ConnectionStarted") {
                 isVisible = true
             },
             EventAction("WatchInitializationCompleted") {
                 isVisible = false
+            },
+            EventAction("ConnectionFailed") {
+                isVisible = false
+            },
+            EventAction("Disconnect") {
+                isVisible = false
+            },
+            EventAction("ApiError") {
+                isVisible = false
             }
         )
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+        ProgressEvents.runEventActions(name, eventActions)
+        onDispose {
+            ProgressEvents.subscriber.stop(name)
+        }
+    }
 
-        if (isVisible) {
+    if (isVisible) {
+        AppCard(
+            modifier = modifier,
+            padding = 8.dp
+        ) {
             CircularProgressIndicator()
         }
     }

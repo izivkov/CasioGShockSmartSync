@@ -317,4 +317,8 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     override fun isScratchpadReset(): Boolean {return false}
 
     override fun associate(context: Context, delegate: ICDPDelegate) {}
+    override fun disassociate(context: Context, address: String) {}
+    override fun getAssociationsWithNames(context: Context): List<IGShockAPI.Association> {
+        return emptyList()
+    }
 }

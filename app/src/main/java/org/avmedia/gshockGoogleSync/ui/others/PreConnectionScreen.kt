@@ -9,15 +9,34 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,7 +44,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -50,6 +71,7 @@ fun PreConnectionScreen(
     val context = LocalContext.current
     val watchName by ptrConnectionViewModel.watchName.collectAsState()
     val triggerPairing by ptrConnectionViewModel.triggerPairing.collectAsState()
+    val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
@@ -68,8 +90,7 @@ fun PreConnectionScreen(
                 }
 
             device?.let {
-                ptrConnectionViewModel.setDeviceAddress(it.address)
-                ptrConnectionViewModel.setDeviceName(it.name ?: "Unknown")
+                ptrConnectionViewModel.setDevice(it.address, it.name ?: "Unknown")
             }
         }
     }
@@ -131,7 +152,7 @@ fun PreConnectionScreen(
                     ConstraintLayout(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        val (connectionSpinner, infoButton, pairButton) = createRefs()
+                        val (connectionSpinner, infoButton, pairButton, deviceList) = createRefs()
 
                         WatchScreen(
                             imageResId = getImageId(watchName),
@@ -146,6 +167,19 @@ fun PreConnectionScreen(
                                 start.linkTo(parent.start)
                                 end.linkTo(parent.end)
                             }
+                        )
+
+                        PairedDeviceList(
+                            devices = pairedDevices,
+                            onSelect = { device ->
+                                ptrConnectionViewModel.selectDevice(device)
+                            },
+                            modifier = Modifier
+                                .padding(end = 30.dp, bottom = 20.dp)
+                                .constrainAs(deviceList) {
+                                    bottom.linkTo(pairButton.top)
+                                    end.linkTo(parent.end)
+                                }
                         )
 
                         Box(
@@ -165,12 +199,12 @@ fun PreConnectionScreen(
 
                         PairButton(
                             modifier = Modifier
-                                .padding(bottom = 30.dp)
+                                .padding(bottom = 30.dp, end = 30.dp)
                                 .constrainAs(pairButton) {
                                     bottom.linkTo(parent.bottom)
-                                    start.linkTo(parent.start)
                                     end.linkTo(parent.end)
                                 },
+                            isFlashing = pairedDevices.isEmpty(),
                             onClick = {
                                 ptrConnectionViewModel.associate(context, object : ICDPDelegate {
                                     override fun onChooserReady(chooserLauncher: IntentSender) {
@@ -188,74 +222,98 @@ fun PreConnectionScreen(
                     }
                 }
 
-                // Bottom card: only as tall as its content + padding
-                AppCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),           // reasonable padding here
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        ConstraintLayout(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            val (watchNamePanel, forgetButton, infoDeviceButton) = createRefs()
-
-                            WatchName(
-                                modifier = Modifier
-                                    .constrainAs(watchNamePanel) {
-                                        start.linkTo(parent.start)
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                    }
-                                    .padding(start = 0.dp),
-                                watchName = watchName
-                            )
-
-                            ForgetButton(
-                                modifier = Modifier
-                                    .padding(0.dp)
-                                    .constrainAs(forgetButton) {
-                                        end.linkTo(infoDeviceButton.start)
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                    }
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .padding(end = 4.dp, start = 0.dp)
-                                    .constrainAs(infoDeviceButton) {
-                                        end.linkTo(parent.end)
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                    }
-                            ) {
-                                InfoButton(
-                                    infoText = stringResource(
-                                        id = R.string.connection_screen_device
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
             }
         }
     }
 }
 
 @Composable
-fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
+fun PairedDeviceList(
+    devices: List<PreConnectionViewModel.DeviceItem>,
+    onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
         modifier = modifier,
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = "Pair New Watch", color = Color.White)
+        devices.take(5).forEach { device ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onSelect(device) }
+            ) {
+                if (device.isLastUsed) {
+                    Text(
+                        text = "→",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                }
+                Text(
+                    text = device.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(vertical = 2.dp)
+                )
+            }
+        }
+        if (devices.size > 5) {
+            Text(
+                text = "...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(end = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: Boolean = false) {
+    val infiniteTransition = rememberInfiniteTransition(label = "flashing")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
+    val currentAlpha = if (isFlashing) alpha else 1f
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Add Watch",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Button(
+            onClick = onClick,
+            modifier = Modifier
+                .size(56.dp)
+                .alpha(currentAlpha)
+                .border(1.dp, Color.White, CircleShape),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Watch",
+                modifier = Modifier.size(32.dp)
+            )
+        }
     }
 }
 

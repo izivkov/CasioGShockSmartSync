@@ -86,6 +86,7 @@ object Connection {
         bleManager.isServiceSupported(handle)
 
     fun startConnection(context: Context, deviceId: String?) {
+        ProgressEvents.onNext("ConnectionStarted")
         scope.launch {
             if (deviceId.isNullOrEmpty()) {
                 if (!isBluetoothEnabled(context)) {
