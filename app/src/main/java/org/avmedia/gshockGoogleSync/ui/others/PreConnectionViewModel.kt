@@ -50,7 +50,25 @@ class PreConnectionViewModel @Inject constructor(
         val items = associations
             .distinctBy { it.address } // Ensure unique addresses
             .map { association ->
-                DeviceItem(association.name ?: "Unknown", association.address, association.address == lastAddress)
+                val name = association.name
+                if (name != null && name.isNotBlank()) {
+                    DeviceItem(name, association.address, association.address == lastAddress)
+                } else {
+                    val storedName = LocalDataStorage.getDeviceName(appContext, association.address)
+                    if (storedName != null && storedName.isNotBlank()) {
+                        DeviceItem(
+                            storedName,
+                            association.address,
+                            association.address == lastAddress
+                        )
+                    } else {
+                        DeviceItem(
+                            noWatchString,
+                            association.address,
+                            association.address == lastAddress
+                        )
+                    }
+                }
             }
 
         _pairedDevices.value = formatDeviceNames(items)

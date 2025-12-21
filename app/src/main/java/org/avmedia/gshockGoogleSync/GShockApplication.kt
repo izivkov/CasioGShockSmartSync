@@ -1,17 +1,11 @@
 package org.avmedia.gshockGoogleSync
 
-import android.companion.CompanionDeviceManager
-import android.content.Context
-import android.os.Build
-import timber.log.Timber
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.avmedia.gshockapi.ble.GShockPairingManager
-
 import android.app.Application
+import android.companion.CompanionDeviceManager
 import android.companion.ObservingDevicePresenceRequest
+import android.os.Build
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,7 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -32,8 +30,9 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import javax.inject.Inject
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
 class GShockApplication : Application(), IScreenManager {
@@ -48,7 +47,11 @@ class GShockApplication : Application(), IScreenManager {
     @Inject
     lateinit var repository: GShockRepository
 
+    @Inject
+    lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
+
     fun init(context: MainActivity) {
+
         _context = context
         if (LocalDataStorage.getKeepAlive(context)) {
             KeepAliveManager.getInstance(context).enable()
@@ -67,6 +70,7 @@ class GShockApplication : Application(), IScreenManager {
         syncAssociations()
     }
 
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private fun syncAssociations() {
         val associations = repository.getAssociationsWithNames(this)
         CoroutineScope(Dispatchers.IO).launch {
@@ -80,17 +84,22 @@ class GShockApplication : Application(), IScreenManager {
             // Also ensure the last connected device is set if nothing is set
             val lastAddress = LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
             if (lastAddress.isNullOrEmpty() && associations.isNotEmpty()) {
-                LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", associations[0].address)
+                LocalDataStorage.put(
+                    this@GShockApplication,
+                    "LastDeviceAddress",
+                    associations[0].address
+                )
             }
 
             startObservingDevicePresence()
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     internal fun startObservingDevicePresence() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val deviceManager =
-                getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
+                getSystemService(COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
                     ?: return
 
             val addresses = LocalDataStorage.getDeviceAddresses(this)
@@ -98,7 +107,8 @@ class GShockApplication : Application(), IScreenManager {
                 try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         val association = deviceManager.myAssociations.find {
-                            it.deviceMacAddress?.toString()?.equals(address, ignoreCase = true) == true
+                            it.deviceMacAddress?.toString()
+                                ?.equals(address, ignoreCase = true) == true
                         }
                         if (association != null) {
                             val request = ObservingDevicePresenceRequest.Builder()

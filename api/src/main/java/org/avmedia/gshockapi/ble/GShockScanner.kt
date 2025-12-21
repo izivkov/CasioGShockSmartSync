@@ -1,0 +1,113 @@
+package org.avmedia.gshockapi.ble
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.os.ParcelUuid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onEmpty
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanMode
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerMatchMode
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerSettings
+import no.nordicsemi.android.kotlin.ble.core.scanner.FilteredServiceUuid
+import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
+import org.avmedia.gshockapi.ProgressEvents
+
+object GShockScanner {
+    @SuppressLint("MissingPermission")
+    val CASIO_SERVICE_UUID = "00001804-0000-1000-8000-00805f9b34fb"
+
+    data class DeviceInfo(val name: String, val address: String)
+
+    private lateinit var scannerFlow: Job
+    private var scannedName = ""
+
+    @SuppressLint("MissingPermission")
+    fun scan(
+        context: Context,
+        scanCallback: (DeviceInfo?) -> Unit
+    ) {
+        val gShockFilters: List<BleScanFilter> = listOf(
+
+            BleScanFilter(
+                serviceUuid = FilteredServiceUuid(
+                    ParcelUuid.fromString(
+                        CASIO_SERVICE_UUID
+                    )
+                )
+            ),
+        )
+        val noFilters = emptyList<BleScanFilter>()
+
+        val gShockSettings = BleScannerSettings(
+            // includeStoredBondedDevices = false,
+            // numOfMatches = BleNumOfMatches.MATCH_NUM_ONE_ADVERTISEMENT,
+            matchMode = BleScannerMatchMode.MATCH_MODE_AGGRESSIVE,
+            scanMode = BleScanMode.SCAN_MODE_LOW_LATENCY,
+        )
+
+        val scope = CoroutineScope(Dispatchers.IO)
+        val deviceSet = mutableSetOf<String>()
+        cancelFlow()
+
+        scannerFlow = scope.launch {
+            while (isActive) {
+                try {
+                    BleScanner(context).scan(
+                        filters = gShockFilters,
+                        settings = gShockSettings
+                    )
+                        .onStart {
+                            ProgressEvents.onNext("BLE Scanning Started")
+                        }
+                        .onEmpty {
+                            ProgressEvents.onNext("ApiError", "No devices found while scanning")
+                        }
+                        .onCompletion {
+                            ProgressEvents.onNext("BLE Scanning Completed")
+                        }
+                        .onEach { scanResult ->
+                            val device = scanResult.device
+                            if (device.address !in deviceSet) {
+                                deviceSet.add(device.address)
+                                device.name?.let { deviceName ->
+                                    if (deviceName.startsWith("CASIO", ignoreCase = false)) {
+                                        scanCallback(DeviceInfo(deviceName, device.address))
+                                        cancelFlow()
+                                    }
+                                }
+                            }
+                        }
+                        .cancellable()
+                        .catch { e ->
+                            ProgressEvents.onNext("ApiError", "BLE Scanning Error $e")
+                        }
+                        .collect {}
+                } catch (e: Exception) {
+                    ProgressEvents.onNext("ApiError", "Failed to start BLE Scanner: ${e.message}")
+                }
+
+                if (isActive) {
+                    delay(3000)
+                }
+            }
+        }
+    }
+
+    fun cancelFlow() {
+        if (::scannerFlow.isInitialized) {
+            scannerFlow.cancel()
+        }
+    }
+}

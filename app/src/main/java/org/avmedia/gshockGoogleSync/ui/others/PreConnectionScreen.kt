@@ -58,12 +58,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
+import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ICDPDelegate
 import timber.log.Timber
 
@@ -95,6 +99,10 @@ fun PreConnectionScreen(
 
             device?.let {
                 val name = if (it.name.isNullOrBlank()) "G-SHOCK" else it.name
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    LocalDataStorage.setDeviceName(context, it.address, name)
+                }
                 ptrConnectionViewModel.setDevice(it.address, name)
             }
         }
