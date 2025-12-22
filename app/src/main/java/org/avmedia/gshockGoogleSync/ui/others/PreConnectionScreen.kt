@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import AppText
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
@@ -15,9 +16,9 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,10 +37,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -75,12 +77,15 @@ import timber.log.Timber
 @SuppressLint("MissingPermission")
 @Composable
 fun PreConnectionScreen(
-    ptrConnectionViewModel: PreConnectionViewModel = viewModel()
+    ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val watchName by ptrConnectionViewModel.watchName.collectAsState()
     val triggerPairing by ptrConnectionViewModel.triggerPairing.collectAsState()
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
+    val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
+
+    PreparingPairingDialog(visible = showPreparing)
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
@@ -186,13 +191,18 @@ fun PreConnectionScreen(
                         PairedDeviceList(
                             devices = pairedDevices,
                             onSelect = { device ->
+                                // Uncomment the following line if you want to select a device
                                 // ptrConnectionViewModel.selectDevice(device)
                             },
                             onDisassociate = { device ->
                                 ptrConnectionViewModel.disassociate(context, device.address)
+                                val scope = CoroutineScope(Dispatchers.IO)
+                                scope.launch {
+                                    LocalDataStorage.removeDeviceAddress(context, device.address)
+                                }
                             },
                             modifier = Modifier
-                                .padding(start = 10.dp, bottom = 28.dp) // Changed padding to start
+                                .padding(start = 10.dp, bottom = 40.dp) // Changed padding to start
                                 .constrainAs(deviceList) {
                                     bottom.linkTo(parent.bottom) // Moved to bottom of card
                                     start.linkTo(parent.start)   // Moved to start (left)
@@ -223,17 +233,33 @@ fun PreConnectionScreen(
                                 },
                             isFlashing = pairedDevices.isEmpty(),
                             onClick = {
-                                ptrConnectionViewModel.associate(context, object : ICDPDelegate {
-                                    override fun onChooserReady(chooserLauncher: IntentSender) {
-                                        launcher.launch(
-                                            IntentSenderRequest.Builder(chooserLauncher).build()
-                                        )
-                                    }
+//                                ptrConnectionViewModel.associate(context, object : ICDPDelegate {
+//                                    override fun onChooserReady(chooserLauncher: IntentSender) {
+//                                        launcher.launch(
+//                                            IntentSenderRequest.Builder(chooserLauncher).build()
+//                                        )
+//                                    }
+//
+//                                    override fun onError(error: String) {
+//                                        Timber.e("Manual pairing error: $error")
+//                                    }
+//                                })
 
-                                    override fun onError(error: String) {
-                                        Timber.e("Manual pairing error: $error")
+                                ptrConnectionViewModel.associateWithUi(
+                                    context,
+                                    object : ICDPDelegate {
+
+                                        override fun onChooserReady(chooserLauncher: IntentSender) {
+                                            launcher.launch(
+                                                IntentSenderRequest.Builder(chooserLauncher).build()
+                                            )
+                                        }
+
+                                        override fun onError(error: String) {
+                                            Timber.e(error)
+                                        }
                                     }
-                                })
+                                )
                             }
                         )
                     }
@@ -397,6 +423,29 @@ fun WatchScreen(
             )
         }
     }
+}
+
+@Composable
+fun PreparingPairingDialog(
+    visible: Boolean
+) {
+    if (!visible) return
+
+    AlertDialog(
+        onDismissRequest = { /* not dismissible */ },
+        title = { AppText("Pairing your watch...") },
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                AppText("Press Lower-Left button on watch to pair")
+            }
+        },
+        confirmButton = {}
+    )
 }
 
 @Preview(showBackground = true)

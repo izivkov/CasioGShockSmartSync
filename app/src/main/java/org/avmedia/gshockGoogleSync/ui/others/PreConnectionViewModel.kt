@@ -1,6 +1,9 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.IntentSender
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,9 +16,9 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ICDPDelegate
 import org.avmedia.gshockapi.ProgressEvents
 import javax.inject.Inject
-import org.avmedia.gshockapi.ICDPDelegate
 
 @HiltViewModel
 class PreConnectionViewModel @Inject constructor(
@@ -31,16 +34,54 @@ class PreConnectionViewModel @Inject constructor(
     val triggerPairing: StateFlow<Boolean> = _triggerPairing
 
     data class DeviceItem(val name: String, val address: String, val isLastUsed: Boolean)
+
     private val _pairedDevices = MutableStateFlow<List<DeviceItem>>(emptyList())
     val pairedDevices: StateFlow<List<DeviceItem>> = _pairedDevices
 
+    private val _showPreparing = MutableStateFlow(false)
+    val showPreparing: StateFlow<Boolean> = _showPreparing
+
     init {
         viewModelScope.launch {
-            val savedName = LocalDataStorage.get(appContext, "LastDeviceName", noWatchString) ?: noWatchString
+            val savedName =
+                LocalDataStorage.get(appContext, "LastDeviceName", noWatchString) ?: noWatchString
             _watchName.value = savedName
             loadPairedDevices()
         }
         createSubscription()
+    }
+
+    private fun showPreparingUi() {
+        _showPreparing.value = true
+    }
+
+    private fun hidePreparingUi() {
+        _showPreparing.value = false
+    }
+
+    fun associateWithUi(
+        context: Context,
+        delegate: ICDPDelegate
+    ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            showPreparingUi()
+        }
+
+        associate(
+            context,
+            object : ICDPDelegate {
+
+                override fun onChooserReady(chooserLauncher: IntentSender) {
+                    hidePreparingUi()
+                    delegate.onChooserReady(chooserLauncher)
+                }
+
+                override fun onError(error: String) {
+                    hidePreparingUi()
+                    delegate.onError(error)
+                }
+            }
+        )
     }
 
     private fun loadPairedDevices() {
@@ -72,13 +113,13 @@ class PreConnectionViewModel @Inject constructor(
     private fun formatDeviceNames(items: List<DeviceItem>): List<DeviceItem> {
         val nameCount = mutableMapOf<String, Int>()
         val result = mutableListOf<DeviceItem>()
-        
+
         // First pass: count occurrences
         items.forEach { item ->
             val baseName = item.name.removePrefix("CASIO").trim()
             nameCount[baseName] = nameCount.getOrDefault(baseName, 0) + 1
         }
-        
+
         // Second pass: apply suffixes if needed
         val currentCount = mutableMapOf<String, Int>()
         items.forEach { item ->
@@ -125,6 +166,7 @@ class PreConnectionViewModel @Inject constructor(
         api.associate(context, delegate)
     }
 
+    @SuppressLint("NewApi")
     fun setDevice(address: String, name: String) {
         viewModelScope.launch {
             LocalDataStorage.put(appContext, "LastDeviceAddress", address)
@@ -134,7 +176,6 @@ class PreConnectionViewModel @Inject constructor(
             _watchName.value = name
             (appContext as? org.avmedia.gshockGoogleSync.GShockApplication)?.startObservingDevicePresence()
             loadPairedDevices()
-            api.waitForConnection(address)
         }
     }
 

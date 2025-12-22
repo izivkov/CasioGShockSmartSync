@@ -43,11 +43,6 @@ object GShockPairingManager {
         val builder = AssociationRequest.Builder()
             .addDeviceFilter(deviceFilter)
 
-        // Device profile is only available from Android 12 (S). [web:5]
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            builder.setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
-        }
-
         builder.setSingleDevice(true)
 
         val pairingRequest = builder.build()
