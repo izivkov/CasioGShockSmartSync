@@ -324,11 +324,14 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     override fun getAssociationsWithNames(context: Context): List<IGShockAPI.Association> {
         return emptyList()
     }
+    override fun getAssociations(context: Context): List<String> {
+        return emptyList()
+    }
 
     override fun scan(
         context: Context,
         filter: (DeviceInfo) -> Boolean,
         onDeviceFound: (DeviceInfo) -> Unit
-    ) {
-    }
+    ) {}
+
 }

@@ -36,7 +36,6 @@ class GShockScanService : Service() {
     }
 
     private fun startLoop() {
-        val savedAddresses = LocalDataStorage.getDeviceAddresses(this)
         val scope =
             CoroutineScope(SupervisorJob() + Dispatchers.IO)
         scope.launch(Dispatchers.IO) {
@@ -46,6 +45,7 @@ class GShockScanService : Service() {
                     repository.scan(
                         context = this@GShockScanService,
                         filter = { deviceInfo ->
+                            val savedAddresses = repository.getAssociations(this@GShockScanService)
                             savedAddresses.contains(deviceInfo.address)
                         },
                         onDeviceFound = { deviceInfo ->

@@ -5,6 +5,7 @@ import android.content.Context
 import org.avmedia.gshockapi.ICDPDelegate
 import android.os.Build
 import androidx.annotation.RequiresApi
+import org.avmedia.gshockapi.ble.GShockPairingManager
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.TimeAdjustmentInfo
 import java.util.TimeZone
@@ -64,6 +65,8 @@ interface IGShockAPI {
 
     data class Association(val address: String, val name: String?)
     fun getAssociationsWithNames(context: Context): List<Association>
+
+    fun getAssociations(context: Context): List<String>
 
     fun scan(context: Context, filter: (DeviceInfo) -> Boolean, onDeviceFound: (DeviceInfo) -> Unit)
 }
