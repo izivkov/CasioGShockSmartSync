@@ -22,7 +22,6 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.GShockScanService
-import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -56,9 +55,6 @@ class GShockApplication : Application(), IScreenManager {
     fun init(context: MainActivity) {
 
         _context = context
-        if (LocalDataStorage.getKeepAlive(context)) {
-            KeepAliveManager.getInstance(context).enable()
-        }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             val intent = Intent(context, GShockScanService::class.java)
             context.startService(intent)

@@ -111,15 +111,6 @@ object LocalDataStorage {
         put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
 
-    suspend fun setKeepAlive(context: Context, value: Boolean) {
-        putBoolean(context, "keepAlive", value)
-    }
-
-    fun getKeepAlive(context: Context): Boolean {
-        // We want to set to "true" by default, that is why we don't use the getBoolean function.
-        return get(context, "keepAlive", "true")?.toBoolean() ?: true
-    }
-
     fun getDeviceAddresses(context: Context): List<String> {
         val addresses = get(context, "DeviceAddresses", "") ?: ""
         return if (addresses.isEmpty()) emptyList() else addresses.split(",").distinct()

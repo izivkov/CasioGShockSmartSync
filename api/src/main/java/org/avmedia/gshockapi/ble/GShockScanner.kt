@@ -42,8 +42,8 @@ object GShockScanner {
         )
 
         val settings = BleScannerSettings(
-            matchMode = BleScannerMatchMode.MATCH_MODE_AGGRESSIVE,
-            scanMode = BleScanMode.SCAN_MODE_LOW_LATENCY,
+            matchMode = BleScannerMatchMode.MATCH_MODE_STICKY,
+            scanMode = BleScanMode.SCAN_MODE_LOW_POWER,
         )
 
         val scope = CoroutineScope(Dispatchers.IO)
@@ -69,8 +69,8 @@ object GShockScanner {
                             val info = DeviceInfo(name, address)
 
                             if (filter(info)) {
-                                onDeviceFound(info)
                                 cancelFlow()
+                                onDeviceFound(info)
                             }
                         }
                     }

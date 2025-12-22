@@ -48,26 +48,21 @@ class PreConnectionViewModel @Inject constructor(
         val lastAddress = LocalDataStorage.get(appContext, "LastDeviceAddress", "")
 
         val items = associations
-            .distinctBy { it.address } // Ensure unique addresses
+            .distinctBy { it.address.lowercase() } // Also handle uniqueness case-insensitively
             .map { association ->
+                // Use equals with ignoreCase = true
+                val isLastUsed = association.address.equals(lastAddress, ignoreCase = true)
                 val name = association.name
+
                 if (name != null && name.isNotBlank()) {
-                    DeviceItem(name, association.address, association.address == lastAddress)
+                    DeviceItem(name, association.address, isLastUsed)
                 } else {
                     val storedName = LocalDataStorage.getDeviceName(appContext, association.address)
-                    if (storedName != null && storedName.isNotBlank()) {
-                        DeviceItem(
-                            storedName,
-                            association.address,
-                            association.address == lastAddress
-                        )
-                    } else {
-                        DeviceItem(
-                            noWatchString,
-                            association.address,
-                            association.address == lastAddress
-                        )
-                    }
+                    DeviceItem(
+                        storedName ?: noWatchString,
+                        association.address,
+                        isLastUsed
+                    )
                 }
             }
 

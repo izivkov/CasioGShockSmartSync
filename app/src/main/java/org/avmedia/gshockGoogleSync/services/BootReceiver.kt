@@ -22,8 +22,5 @@ class BootReceiver : BroadcastReceiver() {
     }
 
     private fun handleBootCompleted(context: Context) {
-        KeepAliveManager.getInstance(context)
-            .takeIf { it.isEnabled() }
-            ?.enable()
     }
 }

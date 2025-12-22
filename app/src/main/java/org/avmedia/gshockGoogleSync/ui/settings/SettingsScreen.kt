@@ -103,7 +103,6 @@ fun SettingsList() {
     ).apply {
         if (WatchInfo.hasPowerSavingMode) add(PowerSavings(settingsViewModel::onSettingUpdated))
         add(TimeAdjustment(settingsViewModel::onSettingUpdated))
-        add(KeepAlive(settingsViewModel::onSettingUpdated))
     }
 
     Column(

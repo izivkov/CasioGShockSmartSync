@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -185,16 +186,16 @@ fun PreConnectionScreen(
                         PairedDeviceList(
                             devices = pairedDevices,
                             onSelect = { device ->
-                                ptrConnectionViewModel.selectDevice(device)
+                                // ptrConnectionViewModel.selectDevice(device)
                             },
                             onDisassociate = { device ->
                                 ptrConnectionViewModel.disassociate(context, device.address)
                             },
                             modifier = Modifier
-                                .padding(end = 30.dp, bottom = 20.dp)
+                                .padding(start = 10.dp, bottom = 28.dp) // Changed padding to start
                                 .constrainAs(deviceList) {
-                                    bottom.linkTo(pairButton.top)
-                                    end.linkTo(parent.end)
+                                    bottom.linkTo(parent.bottom) // Moved to bottom of card
+                                    start.linkTo(parent.start)   // Moved to start (left)
                                 }
                         )
 
@@ -253,36 +254,44 @@ fun PairedDeviceList(
     Box(
         modifier = modifier
             .padding(4.dp)
-            .wrapContentSize(Alignment.CenterEnd)
+            .wrapContentSize(Alignment.CenterStart) // Changed from CenterEnd
     ) {
         Column(
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Increased spacing to prevent overlap
+            horizontalAlignment = Alignment.Start, // Changed from End
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             devices.take(5).forEach { device ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start // Force alignment to the left
                 ) {
+                    // 1. Remove Button (Far Left)
+                    RemoveButton(onClick = { onDisassociate(device) })
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // 2. Watch Name (Middle)
+                    Text(
+                        text = device.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .clickable { onSelect(device) }
+                            .padding(vertical = 4.dp)
+                    )
+
+                    // 3. Selection Indicator (Right of text)
                     if (device.isLastUsed) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = "Selected",
                             tint = Color.Red,
                             modifier = Modifier
-                                .size(24.dp) // Larger triangle
-                                .padding(end = 2.dp)
+                                .size(24.dp)
+                                .padding(start = 8.dp) // Space between text and arrow
+                                .graphicsLayer(scaleX = -1f) // This flips the triangle to point left
                         )
                     }
-                    Text(
-                        text = device.name,
-                        style = MaterialTheme.typography.bodyLarge, // Increased text size slightly
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .clickable { onSelect(device) }
-                            .padding(vertical = 4.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    RemoveButton(onClick = { onDisassociate(device) })
                 }
             }
             if (devices.size > 5) {
@@ -290,7 +299,7 @@ fun PairedDeviceList(
                     text = "...",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(end = 40.dp)
+                    modifier = Modifier.padding(start = 40.dp) // Padding from the left
                 )
             }
         }
