@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.DeviceInfo
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.MessageDispatcher
@@ -100,6 +101,14 @@ object Connection {
         }
     }
 
+    fun scan(
+        context: Context,
+        filter: (DeviceInfo) -> Boolean,
+        onDeviceFound: (DeviceInfo) -> Unit
+    ) {
+        GShockScanner.scan(context, filter, onDeviceFound)
+    }
+
     private suspend fun connectToAddress(address: String) {
         getDefaultAdapter()
             ?.getRemoteDevice(address)
@@ -111,6 +120,10 @@ object Connection {
         val bluetoothManager =
             context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
         return bluetoothManager.adapter.isEnabled
+    }
+
+    fun stopBleScan() {
+        GShockScanner.cancelFlow()
     }
 
     fun breakWait() {

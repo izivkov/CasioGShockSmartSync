@@ -64,4 +64,6 @@ interface IGShockAPI {
 
     data class Association(val address: String, val name: String?)
     fun getAssociationsWithNames(context: Context): List<Association>
+
+    fun scan(context: Context, filter: (DeviceInfo) -> Boolean, onDeviceFound: (DeviceInfo) -> Unit)
 }

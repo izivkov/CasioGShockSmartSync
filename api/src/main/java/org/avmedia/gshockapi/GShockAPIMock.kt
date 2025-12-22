@@ -2,14 +2,12 @@ package org.avmedia.gshockapi
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.IntentSender
 import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.avmedia.gshockapi.ICDPDelegate
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.TimeAdjustmentInfo
 import timber.log.Timber
@@ -313,12 +311,24 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
     }
 
     override suspend fun setScratchpadData(data: ByteArray, startIndex: Int) {}
-    override suspend fun getScratchpadData(index: Int, length: Int): ByteArray {return byteArrayOf()}
-    override fun isScratchpadReset(): Boolean {return false}
+    override suspend fun getScratchpadData(index: Int, length: Int): ByteArray {
+        return byteArrayOf()
+    }
+
+    override fun isScratchpadReset(): Boolean {
+        return false
+    }
 
     override fun associate(context: Context, delegate: ICDPDelegate) {}
     override fun disassociate(context: Context, address: String) {}
     override fun getAssociationsWithNames(context: Context): List<IGShockAPI.Association> {
         return emptyList()
+    }
+
+    override fun scan(
+        context: Context,
+        filter: (DeviceInfo) -> Boolean,
+        onDeviceFound: (DeviceInfo) -> Unit
+    ) {
     }
 }

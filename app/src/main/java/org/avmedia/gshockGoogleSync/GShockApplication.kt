@@ -1,8 +1,10 @@
 package org.avmedia.gshockGoogleSync
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.companion.CompanionDeviceManager
 import android.companion.ObservingDevicePresenceRequest
+import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -19,6 +21,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
+import org.avmedia.gshockGoogleSync.services.GShockScanService
 import org.avmedia.gshockGoogleSync.services.KeepAliveManager
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
@@ -56,8 +59,13 @@ class GShockApplication : Application(), IScreenManager {
         if (LocalDataStorage.getKeepAlive(context)) {
             KeepAliveManager.getInstance(context).enable()
         }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            val intent = Intent(context, GShockScanService::class.java)
+            context.startService(intent)
+        }
     }
 
+    @SuppressLint("NewApi")
     override fun onCreate() {
         super.onCreate()
         ActivityProvider.initialize(this)
@@ -67,6 +75,7 @@ class GShockApplication : Application(), IScreenManager {
             screenManager = this
         )
         eventHandler.setupEventSubscription()
+
         syncAssociations()
     }
 
@@ -201,6 +210,7 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
+    @SuppressLint("NewApi")
     internal suspend fun waitForConnection() {
         val associations = repository.getAssociationsWithNames(this)
         if (associations.isEmpty() && LocalDataStorage.getDeviceAddresses(this).isEmpty()) {
