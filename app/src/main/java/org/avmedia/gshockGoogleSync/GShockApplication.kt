@@ -124,6 +124,13 @@ class GShockApplication : Application(), IScreenManager {
         context: Context,
         address: String
     ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            Timber.i(
+                "Device presence observation not supported on API ${Build.VERSION.SDK_INT}"
+            )
+            return
+        }
+
         val deviceManager =
             context.getSystemService(Context.COMPANION_DEVICE_SERVICE)
                     as? CompanionDeviceManager
@@ -150,7 +157,7 @@ class GShockApplication : Application(), IScreenManager {
                 )
             }
 
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            Build.VERSION.SDK_INT == Build.VERSION_CODES.S -> {
                 // Android 12 / 12L
                 startObservingAndroid12(deviceManager, address)
             }
