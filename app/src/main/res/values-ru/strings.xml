@@ -202,4 +202,6 @@
     <!-- "ч" = "час" (hour) -->
     <string name="find_phone_instruction">Чтобы выполнить действия, запустите функцию «Найти телефон» на часах</string>
     <string name="actions_saved">Действия сохранены</string>
+    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button on your watch for 3 seconds to pair.</string>
+    <string name="looking_for_a_device">Looking for a device.</string>
 </resources>

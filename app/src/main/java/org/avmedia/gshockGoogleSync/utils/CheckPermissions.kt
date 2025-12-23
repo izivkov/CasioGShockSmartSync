@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,9 +37,7 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
                         Manifest.permission.BLUETOOTH_CONNECT,
                     )
                 )
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    add(Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH)
-                }
+                add(Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH)
             } else {
                 add(Manifest.permission.ACCESS_FINE_LOCATION)
             }

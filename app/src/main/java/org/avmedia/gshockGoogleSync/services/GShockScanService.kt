@@ -53,7 +53,7 @@ class GShockScanService : Service() {
                         }
                     )
                 }
-                delay(3000) // Don't spam scans, wait 3s between checks
+                delay(6000) // Don't spam scans, wait 6s between checks
             }
         }
     }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.companion.CompanionDeviceManager
 import android.companion.ObservingDevicePresenceRequest
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.setContent
@@ -58,6 +59,8 @@ class GShockApplication : Application(), IScreenManager {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             val intent = Intent(context, GShockScanService::class.java)
             context.startService(intent)
+        } else {
+            syncAssociations()
         }
     }
 
@@ -71,24 +74,33 @@ class GShockApplication : Application(), IScreenManager {
             screenManager = this
         )
         eventHandler.setupEventSubscription()
-
-        syncAssociations()
     }
 
-    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     private fun syncAssociations() {
         val associations = repository.getAssociationsWithNames(this)
+
         CoroutineScope(Dispatchers.IO).launch {
             associations.forEach { association ->
-                LocalDataStorage.addDeviceAddress(this@GShockApplication, association.address)
+                LocalDataStorage.addDeviceAddress(
+                    this@GShockApplication,
+                    association.address
+                )
+
                 association.name?.let {
-                    LocalDataStorage.setDeviceName(this@GShockApplication, association.address, it)
+                    LocalDataStorage.setDeviceName(
+                        this@GShockApplication,
+                        association.address,
+                        it
+                    )
                 }
             }
 
-            // Also ensure the last connected device is set if nothing is set
-            val lastAddress = LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
-            if (lastAddress.isNullOrEmpty() && associations.isNotEmpty()) {
+            if (LocalDataStorage.get(
+                    this@GShockApplication,
+                    "LastDeviceAddress",
+                    ""
+                ).isNullOrEmpty() && associations.isNotEmpty()
+            ) {
                 LocalDataStorage.put(
                     this@GShockApplication,
                     "LastDeviceAddress",
@@ -96,42 +108,70 @@ class GShockApplication : Application(), IScreenManager {
                 )
             }
 
-            startObservingDevicePresence()
+            // ✅ SAFE, explicit API gating
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                startObservingDevicePresence(this@GShockApplication, associations[0].address)
+            } else {
+                Timber.i(
+                    "Skipping device presence observation on API ${Build.VERSION.SDK_INT}"
+                )
+            }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    internal fun startObservingDevicePresence() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val deviceManager =
-                getSystemService(COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
-                    ?: return
+    @RequiresApi(Build.VERSION_CODES.S)
+    internal fun startObservingDevicePresence(
+        context: Context,
+        address: String
+    ) {
+        val deviceManager =
+            context.getSystemService(Context.COMPANION_DEVICE_SERVICE)
+                    as? CompanionDeviceManager
+                ?: return
 
-            val addresses = LocalDataStorage.getDeviceAddresses(this)
-            for (address in addresses) {
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val association = deviceManager.myAssociations.find {
-                            it.deviceMacAddress?.toString()
-                                ?.equals(address, ignoreCase = true) == true
-                        }
-                        if (association != null) {
-                            val request = ObservingDevicePresenceRequest.Builder()
-                                .setAssociationId(association.id)
-                                .build()
-                            deviceManager.startObservingDevicePresence(request)
-                            Timber.i("Started observing device presence (API 33+) for: $address")
-                        }
-                    } else {
-                        @Suppress("DEPRECATION")
-                        deviceManager.startObservingDevicePresence(address)
-                        Timber.i("Started observing device presence for: $address")
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to start observing device presence for: $address")
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                val association = deviceManager.myAssociations.firstOrNull {
+                    it.deviceMacAddress?.toString()
+                        ?.equals(address, ignoreCase = true) == true
+                } ?: run {
+                    Timber.w("No association found for address: $address")
+                    return
                 }
+
+                val request = ObservingDevicePresenceRequest.Builder()
+                    .setAssociationId(association.id)
+                    .build()
+
+                deviceManager.startObservingDevicePresence(request)
+
+                Timber.i(
+                    "Started observing device presence (API 33+) for associationId=${association.id}"
+                )
+            }
+
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                // Android 12 / 12L
+                startObservingAndroid12(deviceManager, address)
+            }
+
+            else -> {
+                Timber.i(
+                    "Device presence observation not supported on API ${Build.VERSION.SDK_INT}"
+                )
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    @Suppress("DEPRECATION")
+    private fun startObservingAndroid12(
+        deviceManager: CompanionDeviceManager,
+        address: String
+    ) {
+        deviceManager.startObservingDevicePresence(address)
+
+        Timber.i("Started observing device presence (API 31–32) for: $address")
     }
 
     // ScreenManager implementation
@@ -211,8 +251,6 @@ class GShockApplication : Application(), IScreenManager {
         val associations = repository.getAssociationsWithNames(this)
         if (associations.isEmpty() && LocalDataStorage.getDeviceAddresses(this).isEmpty()) {
             ProgressEvents.onNext("NoPairedDevices")
-        } else {
-            startObservingDevicePresence()
         }
     }
 

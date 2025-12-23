@@ -7,6 +7,11 @@ import timber.log.Timber
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        // 1. Explicitly check the action at the entry point to satisfy the linter
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED) {
+            return
+        }
+
         handleIntent(context, intent)
             .onSuccess { /* Success case handled silently */ }
             .onFailure { error ->

@@ -197,4 +197,6 @@
     <!-- "h" as in hours = "ساعات", short form is "س" -->
     <string name="find_phone_instruction">لتنفيذ الإجراءات، ابدأ وظيفة "البحث عن الهاتف" في الساعة</string>
     <string name="actions_saved">تم حفظ الإجراءات</string>
+    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button on your watch for 3 seconds to pair.</string>
+    <string name="looking_for_a_device">Looking for a device.</string>
 </resources>

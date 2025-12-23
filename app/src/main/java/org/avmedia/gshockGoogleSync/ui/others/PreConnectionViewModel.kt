@@ -51,6 +51,10 @@ class PreConnectionViewModel @Inject constructor(
         createSubscription()
     }
 
+    fun hidePreparing() {
+        _showPreparing.value = false
+    }
+
     private fun showPreparingUi() {
         _showPreparing.value = true
     }
@@ -174,7 +178,7 @@ class PreConnectionViewModel @Inject constructor(
             LocalDataStorage.put(appContext, "LastDeviceName", name)
             LocalDataStorage.setDeviceName(appContext, address, name)
             _watchName.value = name
-            (appContext as? org.avmedia.gshockGoogleSync.GShockApplication)?.startObservingDevicePresence()
+            (appContext as? org.avmedia.gshockGoogleSync.GShockApplication)?.startObservingDevicePresence(appContext, address)
             loadPairedDevices()
         }
     }

@@ -67,6 +67,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
@@ -85,7 +86,11 @@ fun PreConnectionScreen(
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
 
-    PreparingPairingDialog(visible = showPreparing)
+    // PreparingPairingDialog(visible = showPreparing)
+    PreparingPairingDialog(
+        visible = showPreparing,
+        ptrConnectionViewModel = ptrConnectionViewModel
+    )
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
@@ -202,10 +207,10 @@ fun PreConnectionScreen(
                                 }
                             },
                             modifier = Modifier
-                                .padding(start = 10.dp, bottom = 40.dp) // Changed padding to start
+                                .padding(start = 10.dp, bottom = 40.dp)
                                 .constrainAs(deviceList) {
-                                    bottom.linkTo(parent.bottom) // Moved to bottom of card
-                                    start.linkTo(parent.start)   // Moved to start (left)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
                                 }
                         )
 
@@ -233,18 +238,6 @@ fun PreConnectionScreen(
                                 },
                             isFlashing = pairedDevices.isEmpty(),
                             onClick = {
-//                                ptrConnectionViewModel.associate(context, object : ICDPDelegate {
-//                                    override fun onChooserReady(chooserLauncher: IntentSender) {
-//                                        launcher.launch(
-//                                            IntentSenderRequest.Builder(chooserLauncher).build()
-//                                        )
-//                                    }
-//
-//                                    override fun onError(error: String) {
-//                                        Timber.e("Manual pairing error: $error")
-//                                    }
-//                                })
-
                                 ptrConnectionViewModel.associateWithUi(
                                     context,
                                     object : ICDPDelegate {
@@ -264,7 +257,6 @@ fun PreConnectionScreen(
                         )
                     }
                 }
-
             }
         }
     }
@@ -427,13 +419,14 @@ fun WatchScreen(
 
 @Composable
 fun PreparingPairingDialog(
-    visible: Boolean
+    visible: Boolean,
+    ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
 ) {
     if (!visible) return
 
     AlertDialog(
-        onDismissRequest = { /* not dismissible */ },
-        title = { AppText("Pairing your watch...") },
+        onDismissRequest = { ptrConnectionViewModel.hidePreparing() },
+        title = { AppText(stringResource(R.string.looking_for_a_device)) },
         text = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(
@@ -441,10 +434,16 @@ fun PreparingPairingDialog(
                     strokeWidth = 2.dp
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                AppText("Press Lower-Left button on watch to pair")
+                AppText(stringResource(R.string.press_and_hold_connection_button_to_continue))
             }
         },
-        confirmButton = {}
+        confirmButton = {},
+        dismissButton = {
+            AppButton(
+                onClick = { ptrConnectionViewModel.hidePreparing() },
+                text = stringResource(android.R.string.cancel)
+            )
+        }
     )
 }
 

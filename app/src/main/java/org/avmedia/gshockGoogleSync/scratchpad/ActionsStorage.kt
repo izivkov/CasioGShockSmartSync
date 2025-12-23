@@ -121,7 +121,7 @@ class ActionsStorage @Inject constructor(
      * Resets the client's internal buffer to a cleared state (all false).
      */
     fun clear() {
-        scratchpadBuffer = ByteArray(getStorageSize()) { 0 }
+        scratchpadBuffer = ByteArray(getStorageSize())
     }
 
     /**
