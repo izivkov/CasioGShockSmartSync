@@ -33,6 +33,7 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import javax.inject.Inject
@@ -56,11 +57,17 @@ class GShockApplication : Application(), IScreenManager {
     fun init(context: MainActivity) {
 
         _context = context
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            val intent = Intent(context, GShockScanService::class.java)
-            context.startService(intent)
-        } else {
-            syncAssociations()
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            cleanupLocalStorage(context)
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                val intent = Intent(context, GShockScanService::class.java)
+                context.startService(intent)
+            } else {
+                syncAssociations()
+            }
         }
     }
 
@@ -74,6 +81,20 @@ class GShockApplication : Application(), IScreenManager {
             screenManager = this
         )
         eventHandler.setupEventSubscription()
+    }
+
+    suspend fun cleanupLocalStorage(context: Context) {
+        val repositoryAssociations = repository.getAssociations(context)
+        val localAddresses = LocalDataStorage.getDeviceAddresses(context)
+
+        // 1. Identify which addresses SHOULD be removed
+        val addressesToRemove = localAddresses.filter { it !in repositoryAssociations }
+
+        // 2. Remove them one by one (Safe here because we aren't modifying 'localAddresses')
+        addressesToRemove.forEach { address ->
+            Timber.i("Cleaning up orphaned local association: $address")
+            LocalDataStorage.removeDeviceAddress(context, address)
+        }
     }
 
     private fun syncAssociations() {

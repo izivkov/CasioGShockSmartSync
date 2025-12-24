@@ -5,6 +5,7 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -85,6 +86,16 @@ object LocalDataStorage {
             }
         }
         return jsonObject
+    }
+
+    fun prettyPrintJson(context: Context): String {
+        val jsonIn = toJsonObject(context).toString()
+        val prettyGson = GsonBuilder().setPrettyPrinting().create()
+
+        // Parse and then format the existing JSON string
+        val jsonElement = prettyGson.fromJson(jsonIn, com.google.gson.JsonElement::class.java)
+        val prettyPrintedString = prettyGson.toJson(jsonElement)
+        return prettyPrintedString
     }
 
     private fun getBoolean(context: Context, key: String): Boolean {
