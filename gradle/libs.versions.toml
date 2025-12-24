@@ -40,7 +40,6 @@ exifinterface = "1.4.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-exifinterface-v141 = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterfaceVersion" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

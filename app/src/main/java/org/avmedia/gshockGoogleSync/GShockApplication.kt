@@ -140,6 +140,7 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
+    @SuppressLint("NewApi")
     @RequiresApi(Build.VERSION_CODES.S)
     internal fun startObservingDevicePresence(
         context: Context,

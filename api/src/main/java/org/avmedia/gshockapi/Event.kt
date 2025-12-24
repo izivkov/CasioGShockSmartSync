@@ -12,7 +12,7 @@ import timber.log.Timber
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
-import java.util.*
+import java.util.Locale
 
 data class Event(
     var title: String,

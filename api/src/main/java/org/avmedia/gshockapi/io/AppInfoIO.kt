@@ -5,8 +5,6 @@ import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.Utils.hexToBytes
-import java.security.SecureRandom
-import kotlin.text.toHexString
 
 object AppInfoIO {
     // Constants for buffer structure and validation
@@ -130,6 +128,9 @@ object AppInfoIO {
         }
 
         // 3. Extract and return the requested portion of the array.
-        return lastReceivedData.copyOfRange(readStartIndexInMainBuffer, readStartIndexInMainBuffer + len)
+        return lastReceivedData.copyOfRange(
+            readStartIndexInMainBuffer,
+            readStartIndexInMainBuffer + len
+        )
     }
 }

@@ -42,8 +42,8 @@ object GShockScanner {
         )
 
         val settings = BleScannerSettings(
-            matchMode = BleScannerMatchMode.MATCH_MODE_STICKY,
-            scanMode = BleScanMode.SCAN_MODE_LOW_POWER,
+            matchMode = BleScannerMatchMode.MATCH_MODE_AGGRESSIVE,
+            scanMode = BleScanMode.SCAN_MODE_LOW_LATENCY,
         )
 
         val scope = CoroutineScope(Dispatchers.IO)
@@ -53,8 +53,7 @@ object GShockScanner {
 
         scannerFlow = scope.launch {
             try {
-                BleScanner(context)
-                    .scan(filters = gShockFilters, settings = settings)
+                BleScanner(context).scan(filters = gShockFilters, settings = settings)
                     .onStart {
                         ProgressEvents.onNext("BLE Scanning Started")
                     }

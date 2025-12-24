@@ -2,10 +2,8 @@ package org.avmedia.gshockapi
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import org.avmedia.gshockapi.ICDPDelegate
 import android.os.Build
 import androidx.annotation.RequiresApi
-import org.avmedia.gshockapi.ble.GShockPairingManager
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.TimeAdjustmentInfo
 import java.util.TimeZone
@@ -64,6 +62,7 @@ interface IGShockAPI {
     fun disassociate(context: Context, address: String)
 
     data class Association(val address: String, val name: String?)
+
     fun getAssociationsWithNames(context: Context): List<Association>
 
     fun getAssociations(context: Context): List<String>

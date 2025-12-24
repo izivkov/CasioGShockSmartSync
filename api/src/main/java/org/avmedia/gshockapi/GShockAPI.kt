@@ -6,7 +6,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GShockPairingManager
-import org.avmedia.gshockapi.ble.GShockScanner
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.MessageDispatcher
 import org.avmedia.gshockapi.io.AlarmsIO
@@ -101,7 +100,11 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         return true
     }
 
-    override fun scan(context: Context, filter: (DeviceInfo) -> Boolean, onDeviceFound: (DeviceInfo) -> Unit) {
+    override fun scan(
+        context: Context,
+        filter: (DeviceInfo) -> Boolean,
+        onDeviceFound: (DeviceInfo) -> Unit
+    ) {
         Connection.scan(context, filter, onDeviceFound)
     }
 

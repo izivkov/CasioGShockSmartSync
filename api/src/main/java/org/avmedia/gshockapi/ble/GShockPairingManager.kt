@@ -1,11 +1,9 @@
 package org.avmedia.gshockapi.ble
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
-import android.companion.AssociationInfo
 import android.content.Context
 import android.content.IntentSender
 import android.os.Build
@@ -49,6 +47,8 @@ object GShockPairingManager {
 
         val callback = @RequiresApi(Build.VERSION_CODES.O)
         object : CompanionDeviceManager.Callback() {
+            // @Suppress("DEPRECATION")
+            @Deprecated("Deprecated in Java")
             override fun onDeviceFound(chooserLauncher: IntentSender) {
                 onChooserReady(chooserLauncher)
             }
@@ -98,6 +98,7 @@ object GShockPairingManager {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun disassociate(context: Context, address: String) {
         val deviceManager =
             context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager

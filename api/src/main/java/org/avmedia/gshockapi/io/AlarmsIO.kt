@@ -89,15 +89,15 @@ object AlarmsIO {
     fun sendToWatchSet(message: String) {
         runCatching {
             JSONObject(message).get("value").let { it as JSONArray }.let { jsonArray ->
-                    val first = Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0))
-                    Pair(
-                        Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0)),
-                        Alarms.fromJsonAlarmSecondaryAlarms(jsonArray)
-                    )
-                }.also { (firstAlarm, secondaryAlarms) ->
-                    IO.writeCmd(GetSetMode.SET, firstAlarm)
-                    IO.writeCmd(GetSetMode.SET, secondaryAlarms)
-                }
+                val first = Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0))
+                Pair(
+                    Alarms.fromJsonAlarmFirstAlarm(jsonArray.getJSONObject(0)),
+                    Alarms.fromJsonAlarmSecondaryAlarms(jsonArray)
+                )
+            }.also { (firstAlarm, secondaryAlarms) ->
+                IO.writeCmd(GetSetMode.SET, firstAlarm)
+                IO.writeCmd(GetSetMode.SET, secondaryAlarms)
+            }
         }.onFailure { error ->
             Timber.e("Failed to set alarms: ${error.message}")
         }
@@ -131,20 +131,20 @@ object AlarmsIO {
          */
         fun toJson(command: String): JSONObject = runCatching {
             Utils.toIntArray(command).let { intArray ->
-                    JSONArray().apply {
-                        when (intArray.firstOrNull()) {
-                            CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code -> ArrayList(
-                                intArray.drop(1)
-                            ).let(::createJsonAlarm).let(::put)
+                JSONArray().apply {
+                    when (intArray.firstOrNull()) {
+                        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM.code -> ArrayList(
+                            intArray.drop(1)
+                        ).let(::createJsonAlarm).let(::put)
 
-                            CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code -> intArray.drop(
-                                1
-                            ).chunked(4).map { ArrayList(it) }.forEach { put(createJsonAlarm(it)) }
+                        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_ALM2.code -> intArray.drop(
+                            1
+                        ).chunked(4).map { ArrayList(it) }.forEach { put(createJsonAlarm(it)) }
 
-                            else -> Timber.d("Unhandled Command [$command]")
-                        }
+                        else -> Timber.d("Unhandled Command [$command]")
                     }
-                }.let { alarms -> JSONObject().put("ALARMS", alarms) }
+                }
+            }.let { alarms -> JSONObject().put("ALARMS", alarms) }
         }.getOrElse { error ->
             Timber.e("Failed to parse command: ${error.message}")
             JSONObject()

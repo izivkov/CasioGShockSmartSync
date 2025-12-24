@@ -215,9 +215,15 @@ private class GShockManagerImpl(
                 ConnectionObserver.REASON_NOT_SUPPORTED -> Timber.e("Device not supported")
                 ConnectionObserver.REASON_TERMINATE_LOCAL_HOST -> Timber.d("Terminated by local host")
                 ConnectionObserver.REASON_TERMINATE_PEER_USER -> Timber.d("Terminated by peer device")
-                ConnectionObserver.REASON_LINK_LOSS -> Timber.w("Connection lost")
-            }
 
+                // Grouping the rest to satisfy the linter
+                ConnectionObserver.REASON_CANCELLED,
+                ConnectionObserver.REASON_SUCCESS,
+                ConnectionObserver.REASON_TIMEOUT,
+                ConnectionObserver.REASON_UNKNOWN -> {
+                    Timber.d("Standard disconnection: $reason")
+                }
+            }
             connectionState = ConnectionState.DISCONNECTED
 
             // Add cleanup
@@ -322,7 +328,6 @@ private class GShockManagerImpl(
             GetSetMode.GET -> CasioConstants.CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID
             GetSetMode.SET -> CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
             GetSetMode.NOTIFY -> CasioConstants.CASIO_NOTIFICATION_CHARACTERISTIC_UUID
-            else -> return false
         }
 
         val isSupported = characteristicUUIDs.containsKey(uuid.toString())
@@ -344,11 +349,6 @@ private class GShockManagerImpl(
             GetSetMode.GET -> readCharacteristicHolder
             GetSetMode.SET -> writeCharacteristicHolder
             GetSetMode.NOTIFY -> writeCharacteristicHolderNotifications
-            else -> {
-                ProgressEvents.onNext("ApiError", "Invalid handle: $handle")
-                disconnect()
-                return
-            }
         }
         val writeType =
             if (handle == GetSetMode.GET || handle == GetSetMode.NOTIFY)

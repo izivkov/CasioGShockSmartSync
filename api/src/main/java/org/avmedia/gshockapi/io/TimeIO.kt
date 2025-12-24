@@ -10,8 +10,10 @@ import org.avmedia.gshockapi.casio.CasioTimeZoneHelper
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 import timber.log.Timber
-import java.time.*
-import java.util.*
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDateTime
+import java.util.TimeZone
 
 /*
 When using the API, the app doesn't need to keep a list of world cities to set the time on the watch. It can simply provide the current timezone
