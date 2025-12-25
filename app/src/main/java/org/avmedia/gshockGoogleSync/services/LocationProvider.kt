@@ -42,15 +42,13 @@ object LocationProvider {
             }
         }.getOrNull()
 
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
     private fun getLocationResult(context: Context): LocationResult {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             ?: return LocationResult.NoProvider
 
-        return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        return locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
             ?.let { LocationResult.Success(Location.fromAndroidLocation(it)) }
-            ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                ?.let { LocationResult.Success(Location.fromAndroidLocation(it)) }
             ?: LocationResult.NoLocation
     }
 

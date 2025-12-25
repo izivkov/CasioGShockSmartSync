@@ -33,16 +33,15 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class GShockApplication : Application(), IScreenManager {
+class GShockApplication_SAVE : Application(), IScreenManager {
     private var _context: MainActivity? = null
-    private val context
-        get() = _context ?: throw IllegalStateException("MainActivity not initialized")
+    private val context: MainActivity?
+        get() = _context
     private lateinit var eventHandler: MainEventHandler
 
     @Inject
@@ -103,13 +102,13 @@ class GShockApplication : Application(), IScreenManager {
         CoroutineScope(Dispatchers.IO).launch {
             associations.forEach { association ->
                 LocalDataStorage.addDeviceAddress(
-                    this@GShockApplication,
+                    this@GShockApplication_SAVE,
                     association.address
                 )
 
                 association.name?.let {
                     LocalDataStorage.setDeviceName(
-                        this@GShockApplication,
+                        this@GShockApplication_SAVE,
                         association.address,
                         it
                     )
@@ -117,22 +116,22 @@ class GShockApplication : Application(), IScreenManager {
             }
 
             if (LocalDataStorage.get(
-                    this@GShockApplication,
+                    this@GShockApplication_SAVE,
                     "LastDeviceAddress",
                     ""
                 ).isNullOrEmpty() && associations.isNotEmpty()
             ) {
                 LocalDataStorage.put(
-                    this@GShockApplication,
+                    this@GShockApplication_SAVE,
                     "LastDeviceAddress",
                     associations[0].address
                 )
             }
 
             // ✅ SAFE, explicit API gating
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S  ) {
-                if (associations.isNotEmpty()) {
-                    startObservingDevicePresence(this@GShockApplication, associations[0].address)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                associations.forEach { association ->
+                    startObservingDevicePresence(this@GShockApplication_SAVE, association.address)
                 }
             } else {
                 Timber.i(
@@ -149,14 +148,12 @@ class GShockApplication : Application(), IScreenManager {
         address: String
     ) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            Timber.i(
-                "Device presence observation not supported on API ${Build.VERSION.SDK_INT}"
-            )
+            Timber.i("Skipping device presence observation on API ${Build.VERSION.SDK_INT}")
             return
         }
 
         val deviceManager =
-            context.getSystemService(Context.COMPANION_DEVICE_SERVICE)
+            context.getSystemService(COMPANION_DEVICE_SERVICE)
                     as? CompanionDeviceManager
                 ?: return
 
@@ -181,15 +178,9 @@ class GShockApplication : Application(), IScreenManager {
                 )
             }
 
-            Build.VERSION.SDK_INT == Build.VERSION_CODES.S -> {
-                // Android 12 / 12L
-                startObservingAndroid12(deviceManager, address)
-            }
-
             else -> {
-                Timber.i(
-                    "Device presence observation not supported on API ${Build.VERSION.SDK_INT}"
-                )
+                // Windows 12 / 12L (API 31, 32)
+                startObservingAndroid12(deviceManager, address)
             }
         }
     }
@@ -207,7 +198,7 @@ class GShockApplication : Application(), IScreenManager {
 
     // ScreenManager implementation
     override fun showContentSelector(repository: GShockRepository) {
-        context.setContent {
+        _context?.setContent {
             StartScreen {
                 ContentSelector(
                     repository = repository,
@@ -218,7 +209,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showRunActionsScreen() {
-        context.setContent {
+        _context?.setContent {
             StartScreen {
                 RunActionsScreen()
             }
@@ -226,7 +217,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     private fun goToNavigationScreen() {
-        context.setContent {
+        _context?.setContent {
             StartScreen {
                 BottomNavigationBarWithPermissions(
                     repository = repository
@@ -236,7 +227,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showPreConnectionScreen() {
-        context.setContent {
+        _context?.setContent {
             StartScreen {
                 PreConnectionScreen()
             }
@@ -244,7 +235,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showInitialScreen() {
-        context.setContent {
+        _context?.setContent {
             Run()
         }
     }
@@ -258,7 +249,17 @@ class GShockApplication : Application(), IScreenManager {
         // Start ActionRunner here so we can run actions on connection
         ActionRunner(context = this, api = repository)
 
-        StartScreen { PreConnectionScreen() }
+        if (repository.isConnected()) {
+            StartScreen {
+                ContentSelector(
+                    repository = repository,
+                    onUnlocked = { goToNavigationScreen() }
+                )
+            }
+        } else {
+            StartScreen { PreConnectionScreen() }
+        }
+
         LaunchedEffect(key1 = System.currentTimeMillis()) {
             waitForConnection()
         }

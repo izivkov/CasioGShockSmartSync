@@ -214,6 +214,7 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <!-- "h" is standard for "heure" -->
     <string name="find_phone_instruction">Pour exécuter des actions, lancez la fonction «Rechercher le téléphone» sur la montre</string>
     <string name="actions_saved">Actions enregistrées</string>
-    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button on your watch for 3 seconds to pair.</string>
-    <string name="looking_for_a_device">Looking for a device.</string>
+    <string name="press_and_hold_connection_button_to_continue">Maintenez enfoncé le bouton de CONNEXION (généralement en BAS À GAUCHE) de votre montre pendant 3 secondes pour effectuer le couplage.</string>
+    <string name="looking_for_a_device">Recherche d\'un appareil.</string>
+    <string name="add_watch">Ajouter une montre</string>
 </resources>

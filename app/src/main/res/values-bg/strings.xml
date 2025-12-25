@@ -203,6 +203,7 @@
     <!-- "h" as in hours = "часа", abbreviated as "ч" -->
     <string name="find_phone_instruction">За да изпълните действията, стартирайте функцията „Намиране телефон“ на часовника</string>
     <string name="actions_saved">Действията са запазени</string>
-    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button on your watch for 3 seconds to pair.</string>
-    <string name="looking_for_a_device">Looking for a device.</string>
+    <string name="press_and_hold_connection_button_to_continue">Натиснете и задръжте бутона CONNECTION (обикновено ДОЛУ ВЛЯВО) на часовника си за 3 секунди, за да го сдвоите.</string>
+    <string name="looking_for_a_device">Търсене на устройство.</string>
+    <string name="add_watch">Добавяне на часовник</string>
 </resources>

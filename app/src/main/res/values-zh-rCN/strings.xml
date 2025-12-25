@@ -199,6 +199,7 @@
     <string name="cover_connected">已连接</string>
     <string name="find_phone_instruction">要运行操作，请在手表上启动“查找手机”功能。</string>
     <string name="actions_saved">操作已保存</string>
-    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button on your watch for 3 seconds to pair.</string>
-    <string name="looking_for_a_device">Looking for a device.</string>
+    <string name="press_and_hold_connection_button_to_continue">按住手表上的连接按钮（通常是左下角）3 秒钟以进行配对。</string>
+    <string name="looking_for_a_device">正在寻找设备。</string>
+    <string name="add_watch">添加手表</string>
 </resources>

@@ -203,6 +203,7 @@ Después del segundo pitido doble, la app mostrará la pantalla de ajuste de hor
     <!-- "h" is commonly used for "hora" in Spanish as well -->
     <string name="find_phone_instruction">Para ejecutar acciones, inicia la función "Buscar teléfono" en el reloj</string>
     <string name="actions_saved">Acciones guardadas</string>
-    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button on your watch for 3 seconds to pair.</string>
-    <string name="looking_for_a_device">Looking for a device.</string>
+    <string name="press_and_hold_connection_button_to_continue">Mantén pulsado el botón de CONEXIÓN (normalmente el inferior izquierdo) de tu reloj durante 3 segundos para emparejarlo.</string>
+    <string name="looking_for_a_device">Buscando un dispositivo.</string>
+    <string name="add_watch">Añadir reloj</string>
 </resources>

@@ -367,7 +367,7 @@ fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: B
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Add Watch",
+            text = stringResource(id = R.string.add_watch),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -387,7 +387,7 @@ fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: B
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add Watch",
+                contentDescription = stringResource(id = R.string.add_watch),
                 modifier = Modifier.size(32.dp)
             )
         }

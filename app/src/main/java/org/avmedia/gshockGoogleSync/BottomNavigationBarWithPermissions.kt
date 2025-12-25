@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.CALL_PHONE
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.READ_CALENDAR
@@ -150,7 +150,7 @@ fun BottomNavigationBarWithPermissions(
                         it += WRITE_EXTERNAL_STORAGE
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        it += ACCESS_FINE_LOCATION
+                        it += ACCESS_COARSE_LOCATION
                     }
                 }
 

@@ -209,6 +209,7 @@
     <string name="cover_connected">Connectat</string>
     <string name="find_phone_instruction">Per executar accions, inicia la funció \"Troba el telèfon\" al rellotge</string>
     <string name="actions_saved">Accions desades</string>
-    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button on your watch for 3 seconds to pair.</string>
-    <string name="looking_for_a_device">Looking for a device.</string>
+    <string name="press_and_hold_connection_button_to_continue">Manteniu premut el botó CONNECTION (normalment a baix a l\'esquerra) del rellotge durant 3 segons per vincular-lo.</string>
+    <string name="looking_for_a_device">Buscant un dispositiu.</string>
+    <string name="add_watch">Afegir rellotge</string>
 </resources>
