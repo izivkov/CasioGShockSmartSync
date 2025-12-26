@@ -111,9 +111,10 @@ fun RunActionsScreen() {
 }
 
 @Composable
-fun RunFindPhoneScreen(
-) {
-    val context = LocalContext.current
+fun RunFindPhoneScreen() {
+    // 1. Resolve strings at the top level using stringResource
+    val title = stringResource(R.string.find_phone)
+    val instruction = stringResource(R.string.when_found_lift_phone_to_stop_ringing)
 
     Box(
         modifier = Modifier
@@ -121,16 +122,9 @@ fun RunFindPhoneScreen(
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        val text = remember(context) {
-            buildString {
-                append(context.getString(R.string.find_phone))
-                append("\n\n\n")
-                append(
-                    context.getString(
-                        R.string.when_found_lift_phone_to_stop_ringing
-                    )
-                )
-            }
+        // 2. Combine the pre-resolved strings
+        val text = remember(title, instruction) {
+            "$title\n\n\n$instruction"
         }
 
         AppTextExtraLarge(
@@ -143,3 +137,4 @@ fun RunFindPhoneScreen(
         )
     }
 }
+

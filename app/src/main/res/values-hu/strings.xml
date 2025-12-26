@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
     <string name="title_time">Idő</string>
     <string name="title_alarms">Ébresztő</string>
     <string name="title_events">Események</string>
@@ -191,4 +190,7 @@ A második dupla hangjelzés után az alkalmazás megjeleníti az időbeállít�
     <!-- "ó" is short for "óra" (hour) -->
     <string name="find_phone_instruction">A műveletek végrehajtásához indítsa el az „Telefon keresése” funkciót az órán</string>
     <string name="actions_saved">Feladatok mentve</string>
+    <string name="press_and_hold_connection_button_to_continue">A párosításhoz tartsa lenyomva a CONNECTION gombot (általában a BAL ALSÓ gombot) az óráján 3 másodpercig.</string>
+    <string name="looking_for_a_device">Eszköz keresése.</string>
+    <string name="add_watch">Óra hozzáadása</string>
 </resources>

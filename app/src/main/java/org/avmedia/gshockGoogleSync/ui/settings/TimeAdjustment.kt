@@ -31,6 +31,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
 import org.avmedia.gshockapi.WatchInfo
+import androidx.compose.runtime.mutableIntStateOf
 
 @Composable
 fun TimeAdjustment(
@@ -45,7 +46,7 @@ fun TimeAdjustment(
     var timeAdjustment by remember { mutableStateOf(timeAdjustmentSetting.timeAdjustment) }
     var notifyMe by remember { mutableStateOf(timeAdjustmentSetting.timeAdjustmentNotifications) }
     var adjustmentMinutes by remember { mutableStateOf(timeAdjustmentSetting.adjustmentTimeMinutes.toString()) }
-    var fineAdjustment by remember { mutableStateOf(timeAdjustmentSetting.fineAdjustment) }
+    var fineAdjustment by remember { mutableIntStateOf(timeAdjustmentSetting.fineAdjustment) }
 
     LaunchedEffect(state) {
         timeAdjustment = timeAdjustmentSetting.timeAdjustment

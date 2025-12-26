@@ -213,4 +213,7 @@
     <!-- "時間" means "hours"; can be abbreviated as "h" if preferred -->
     <string name="find_phone_instruction">アクションを実行するには、時計で「携帯電話を探す」機能を開始してください</string>
     <string name="actions_saved">アクションが保存されました</string>
+    <string name="press_and_hold_connection_button_to_continue">ペアリングするには、時計の接続ボタン（通常は左下）を3秒間押し続けてください。</string>
+    <string name="looking_for_a_device">デバイスを探しています。</string>
+    <string name="add_watch">時計を追加</string>
 </resources>

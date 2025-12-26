@@ -212,4 +212,7 @@
 
     <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
     <string name="actions_saved">Actions Saved</string>
+    <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button (usually BOTTOM-LEFT) on your watch for 3 seconds to pair.</string>
+    <string name="looking_for_a_device">Looking for a device.</string>
+    <string name="add_watch">Add Watch</string>
 </resources>

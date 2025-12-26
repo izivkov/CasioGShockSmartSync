@@ -202,4 +202,7 @@
     <!-- "ч" = "час" (hour) -->
     <string name="find_phone_instruction">Чтобы выполнить действия, запустите функцию «Найти телефон» на часах</string>
     <string name="actions_saved">Действия сохранены</string>
+    <string name="press_and_hold_connection_button_to_continue">Нажмите и удерживайте кнопку подключения (обычно НИЖНЯЯ ЛЕВАЯ) на часах в течение 3 секунд для сопряжения.</string>
+    <string name="looking_for_a_device">Поиск устройства.</string>
+    <string name="add_watch">Добавить часы</string>
 </resources>

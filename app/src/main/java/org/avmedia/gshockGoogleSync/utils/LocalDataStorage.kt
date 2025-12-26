@@ -5,6 +5,7 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -87,21 +88,29 @@ object LocalDataStorage {
         return jsonObject
     }
 
+    fun prettyPrintJson(context: Context): String {
+        val jsonIn = toJsonObject(context).toString()
+        val prettyGson = GsonBuilder().setPrettyPrinting().create()
+
+        // Parse and then format the existing JSON string
+        val jsonElement = prettyGson.fromJson(jsonIn, com.google.gson.JsonElement::class.java)
+        val prettyPrintedString = prettyGson.toJson(jsonElement)
+        return prettyPrintedString
+    }
+
     private fun getBoolean(context: Context, key: String): Boolean {
         return get(context, key, "false")?.toBoolean() ?: false
     }
 
-    private fun putBoolean(context: Context, key: String, value: Boolean) {
-        scope.launch {
-            put(context, key, value.toString())
-        }
+    private suspend fun putBoolean(context: Context, key: String, value: Boolean) {
+        put(context, key, value.toString())
     }
 
     fun getTimeAdjustmentNotification(context: Context): Boolean {
         return getBoolean(context, "timeAdjustmentNotification")
     }
 
-    fun setTimeAdjustmentNotification(context: Context, value: Boolean) {
+    suspend fun setTimeAdjustmentNotification(context: Context, value: Boolean) {
         putBoolean(context, "timeAdjustmentNotification", value)
     }
 
@@ -109,16 +118,36 @@ object LocalDataStorage {
         return get(context, "fineTimeAdjustment", "0")?.toInt() ?: 0
     }
 
-    fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
+    suspend fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
         put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
 
-    fun setKeepAlive(context: Context, value: Boolean) {
-        putBoolean(context, "keepAlive", value)
+    fun getDeviceAddresses(context: Context): List<String> {
+        val addresses = get(context, "DeviceAddresses", "") ?: ""
+        return if (addresses.isEmpty()) emptyList() else addresses.split(",").distinct()
     }
 
-    fun getKeepAlive(context: Context): Boolean {
-        // We want to set to "true" by default, that is why we don't use the getBoolean function.
-        return get(context, "keepAlive", "true")?.toBoolean() ?: true
+    suspend fun addDeviceAddress(context: Context, address: String) {
+        val addresses = getDeviceAddresses(context).toMutableList()
+        if (!addresses.contains(address)) {
+            addresses.add(address)
+            put(context, "DeviceAddresses", addresses.joinToString(","))
+        }
+    }
+
+    suspend fun removeDeviceAddress(context: Context, address: String) {
+        val addresses = getDeviceAddresses(context).toMutableList()
+        if (addresses.remove(address)) {
+            put(context, "DeviceAddresses", addresses.joinToString(","))
+            deleteAsync(context, "DeviceName_$address")
+        }
+    }
+
+    fun getDeviceName(context: Context, address: String): String? {
+        return get(context, "DeviceName_$address")
+    }
+
+    suspend fun setDeviceName(context: Context, address: String, name: String) {
+        put(context, "DeviceName_$address", name)
     }
 }

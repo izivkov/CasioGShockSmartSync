@@ -29,7 +29,8 @@ import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 abstract class Setting(val name: String) {
-    open fun save() {} // Default empty implementation
+    open suspend fun save() {
+    } // Default empty implementation
 }
 
 data class SettingsState(
@@ -74,7 +75,6 @@ class SettingsViewModel @Inject constructor(
             Light(),
             PowerSavingMode(),
             TimeAdjustment(appContext),
-            KeepAlive(appContext)
         )
         updateSettingsAndMap(filter(newSettings))
 
@@ -90,18 +90,6 @@ class SettingsViewModel @Inject constructor(
          */
         viewModelScope.launch(Dispatchers.Default) {            // Convert API settings to JSON object
             val settingsJson = Gson().toJsonTree(api.getSettings()).asJsonObject
-
-            // We have additional settings defined in the APP, not in the API, so we need to merge them.
-            class AppSettings(appContext: Context) {
-                var keepAlive = LocalDataStorage.getKeepAlive(appContext)
-            }
-
-            val appSettingsJson = Gson().toJsonTree(AppSettings(appContext)).asJsonObject
-
-            // Merge default settings into API settings
-            for (entry in appSettingsJson.entrySet()) {
-                settingsJson.add(entry.key, entry.value)
-            }
 
             // Convert merged settings to string and update state
             val settingStr = Gson().toJson(settingsJson)
@@ -151,7 +139,9 @@ class SettingsViewModel @Inject constructor(
                     settingsMap = newMap
                 )
             }
-            updatedSetting.save()
+            viewModelScope.launch {
+                updatedSetting.save()
+            }
         }
     }
 
@@ -193,20 +183,6 @@ class SettingsViewModel @Inject constructor(
     data class PowerSavingMode(var powerSavingMode: Boolean = false) :
         Setting("Power Saving Mode")
 
-    data class KeepAlive(
-        val appContext: Context,
-        var keepAlive: Boolean = LocalDataStorage.getKeepAlive(appContext)
-    ) :
-        Setting("Run in Background") {
-
-        override fun save() {
-            LocalDataStorage.setKeepAlive(
-                appContext,
-                keepAlive
-            )
-        }
-    }
-
     data class TimeAdjustment(
         val appContext: Context,
         var timeAdjustment: Boolean = true,
@@ -215,7 +191,7 @@ class SettingsViewModel @Inject constructor(
             LocalDataStorage.getTimeAdjustmentNotification(appContext),
         var fineAdjustment: Int = LocalDataStorage.getFineTimeAdjustment(appContext),
     ) : Setting("Time Adjustment") {
-        override fun save() {
+        override suspend fun save() {
             LocalDataStorage.setTimeAdjustmentNotification(
                 appContext,
                 timeAdjustmentNotifications
@@ -261,17 +237,10 @@ class SettingsViewModel @Inject constructor(
                 "timeFormat" -> handleTimeFormat(value, updatedObjects)
                 "dateFormat" -> handleDateFormat(value, updatedObjects)
                 "language" -> handleLanguage(value, updatedObjects)
-                "keepAlive" -> handleRunInBackground(value, updatedObjects)
             }
         }
 
         return ArrayList(updatedObjects)
-    }
-
-    private fun handleRunInBackground(value: Any, updatedObjects: MutableSet<Setting>) {
-        val setting = state.value.settingsMap[KeepAlive::class.java] as KeepAlive
-        setting.keepAlive = value == true
-        updatedObjects.add(setting)
     }
 
     private fun handlePowerSavingMode(value: Any, updatedObjects: MutableSet<Setting>) {
@@ -431,11 +400,6 @@ class SettingsViewModel @Inject constructor(
         )
         smartSettings.add(timeAdjustment)
 
-        // Run in background
-        val keepAliveValue = LocalDataStorage.getKeepAlive(appContext)
-        val keepAlive = KeepAlive(appContext, keepAliveValue)
-        smartSettings.add(keepAlive)
-
         return smartSettings
     }
 
@@ -446,8 +410,7 @@ class SettingsViewModel @Inject constructor(
 
                 // Save all local storage settings, in case the user abandons the screen.
                 // Local storage setting are not sent to the watch, but are used by the app.
-                // Example: keepAlive setting.
-                state.value.settings.forEach(Setting::save)
+                state.value.settings.forEach { it.save() }
 
             }.onFailure { e ->
                 _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Error"))

@@ -7,10 +7,10 @@
     <color name="colorPrimary">@color/indigo_500</color>
 
     <!-- Light Backgrounds (Material 3 Guidelines) -->
-    <color name="grey_500_light_background">#F5F5F5</color> <!-- Lighter shade of Grey 500 -->
-    <color name="pink_A200_light_background">#FFEBEE</color> <!-- Lighter shade of Pink A200 -->
-    <color name="indigo_700_light_background">#C5CAE9</color> <!-- Lighter shade of Indigo 700 -->
+<!--    <color name="grey_500_light_background">#F5F5F5</color> &lt;!&ndash; Lighter shade of Grey 500 &ndash;&gt;-->
+<!--    <color name="pink_A200_light_background">#FFEBEE</color> &lt;!&ndash; Lighter shade of Pink A200 &ndash;&gt;-->
+<!--    <color name="indigo_700_light_background">#C5CAE9</color> &lt;!&ndash; Lighter shade of Indigo 700 &ndash;&gt;-->
 
     <!-- Dark Background with Light Text -->
-    <color name="dark_bg_light_secondary_text">#B3FFFFFF</color>
+<!--    <color name="dark_bg_light_secondary_text">#B3FFFFFF</color>-->
 </resources>

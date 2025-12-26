@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.CALL_PHONE
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.READ_CALENDAR
@@ -150,7 +150,7 @@ fun BottomNavigationBarWithPermissions(
                         it += WRITE_EXTERNAL_STORAGE
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        it += ACCESS_FINE_LOCATION
+                        it += ACCESS_COARSE_LOCATION
                     }
                 }
 
@@ -178,10 +178,17 @@ fun NavigateWithPermissions(
     errorMessage: String = stringResource(R.string.required_permissions_denied_cannot_access_screen),
 ) {
     var hasNavigated by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+    var showSnackbar by remember { mutableStateOf(false) }
 
-    if (requiredPermissions.isEmpty()) {
-        return
+    // Resolve the string safely here in the Composable scope
+    val additionalInfo = stringResource(R.string.clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions)
+    val fullErrorMessage = remember(errorMessage, additionalInfo) { errorMessage + additionalInfo }
+
+    if (requiredPermissions.isEmpty()) return
+
+    // Render the Snackbar in the UI tree, not in the effect
+    if (showSnackbar) {
+        AppSnackbar(fullErrorMessage)
     }
 
     PermissionRequiredScreen(
@@ -190,17 +197,12 @@ fun NavigateWithPermissions(
         onPermissionDenied = {
             if (!hasNavigated) {
                 hasNavigated = true
-                LaunchedEffect(Unit) { // make sure it is only called once
-                    val additionalInfo =
-                        context.getString(
-                            R.string.clear_app_storage_from_android_setting_and_restart_the_app_to_add_permissions
-                        )
-                    AppSnackbar(errorMessage + additionalInfo)
-                }
+
+                // Use SideEffect or just set state to trigger the snackbar
+                showSnackbar = true
+
                 navController.navigate(Screens.Time.route) {
-                    popUpTo(Screens.Time.route) {
-                        inclusive = true
-                    } // Avoid back stack issues
+                    popUpTo(Screens.Time.route) { inclusive = true }
                 }
             }
         }

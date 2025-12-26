@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,14 +30,16 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
     val activity = context as Activity
 
     fun getRequiredPermissions(): Array<String> {
-        return mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION).apply {
+        return mutableListOf<String>().apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 addAll(
                     listOf(
-                        Manifest.permission.BLUETOOTH_SCAN,
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        Manifest.permission.BLUETOOTH_CONNECT,
                     )
                 )
+                add(Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH)
+            } else {
+                add(Manifest.permission.ACCESS_COARSE_LOCATION)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 add(Manifest.permission.POST_NOTIFICATIONS)

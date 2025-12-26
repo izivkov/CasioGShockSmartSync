@@ -7,6 +7,9 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -74,6 +77,9 @@ class DeviceManager @Inject constructor(
 
     private fun updateDeviceAddress(address: String) {
         LocalDataStorage.put(appContext, "LastDeviceAddress", address)
+        CoroutineScope(Dispatchers.IO).launch {
+            LocalDataStorage.addDeviceAddress(appContext, address)
+        }
     }
 
     fun saveLastConnectedDevice(name: String, address: String) {

@@ -88,7 +88,7 @@ class MainEventHandler(
 
     private fun handleWaitForConnection() {
         CoroutineScope(Dispatchers.Default).launch {
-            repository.waitForConnection()
+            context.waitForConnection()
         }
     }
 }

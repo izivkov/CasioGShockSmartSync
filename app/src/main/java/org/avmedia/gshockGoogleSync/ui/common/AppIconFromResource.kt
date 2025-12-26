@@ -13,7 +13,7 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun AppIconFromResource(
-    modifier: Modifier = Modifier.size(28.dp),
+    modifier: Modifier = Modifier,
     resourceId: Int = R.drawable.prayer_times,
     contentDescription: String = "",
     tint: Color = MaterialTheme.colorScheme.primary,

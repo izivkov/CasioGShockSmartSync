@@ -1,7 +1,14 @@
 package org.avmedia.gshockGoogleSync
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.companion.CompanionDeviceManager
+import android.companion.ObservingDevicePresenceRequest
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -9,9 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
-import org.avmedia.gshockGoogleSync.services.KeepAliveManager
+import org.avmedia.gshockGoogleSync.services.GShockScanService
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -22,13 +33,20 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.Utils
+import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
 class GShockApplication : Application(), IScreenManager {
     private var _context: MainActivity? = null
-    private val context
-        get() = _context ?: throw IllegalStateException("MainActivity not initialized")
+    private val context: MainActivity?
+        get() = _context ?: ActivityProvider.getCurrentActivity() as? MainActivity
+
+    private fun safeSetContent(content: @Composable () -> Unit) {
+        context?.setContent { content() } ?: Timber.w("Cannot set content: MainActivity is not available")
+    }
     private lateinit var eventHandler: MainEventHandler
 
     @Inject
@@ -37,13 +55,27 @@ class GShockApplication : Application(), IScreenManager {
     @Inject
     lateinit var repository: GShockRepository
 
+    @Inject
+    lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
+
     fun init(context: MainActivity) {
+
         _context = context
-        if (LocalDataStorage.getKeepAlive(context)) {
-            KeepAliveManager.getInstance(context).enable()
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            cleanupLocalStorage(context)
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                val intent = Intent(context, GShockScanService::class.java)
+                context.startService(intent)
+            } else {
+                syncAssociations()
+            }
         }
     }
 
+    @SuppressLint("NewApi")
     override fun onCreate() {
         super.onCreate()
         ActivityProvider.initialize(this)
@@ -55,9 +87,70 @@ class GShockApplication : Application(), IScreenManager {
         eventHandler.setupEventSubscription()
     }
 
+    suspend fun cleanupLocalStorage(context: Context) {
+        val repositoryAssociations = repository.getAssociations(context)
+        val localAddresses = LocalDataStorage.getDeviceAddresses(context)
+
+        // 1. Identify which addresses SHOULD be removed
+        val addressesToRemove = localAddresses.filter { it !in repositoryAssociations }
+
+        // 2. Remove them one by one (Safe here because we aren't modifying 'localAddresses')
+        addressesToRemove.forEach { address ->
+            Timber.i("Cleaning up orphaned local association: $address")
+            LocalDataStorage.removeDeviceAddress(context, address)
+        }
+    }
+
+    private fun syncAssociations() {
+        val associations = repository.getAssociationsWithNames(this)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            associations.forEach { association ->
+                LocalDataStorage.addDeviceAddress(
+                    this@GShockApplication,
+                    association.address
+                )
+
+                association.name?.let {
+                    LocalDataStorage.setDeviceName(
+                        this@GShockApplication,
+                        association.address,
+                        it
+                    )
+                }
+            }
+
+            if (LocalDataStorage.get(
+                    this@GShockApplication,
+                    "LastDeviceAddress",
+                    ""
+                ).isNullOrEmpty()
+            ) {
+                associations.firstOrNull()?.let {
+                    LocalDataStorage.put(
+                        this@GShockApplication,
+                        "LastDeviceAddress",
+                        it.address
+                    )
+                }
+            }
+
+            // ✅ SAFE, explicit API gating
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                associations.forEach { association ->
+                    repository.startObservingDevicePresence(this@GShockApplication, association.address)
+                }
+            } else {
+                Timber.i(
+                    "Skipping device presence observation on API ${Build.VERSION.SDK_INT}"
+                )
+            }
+        }
+    }
+
     // ScreenManager implementation
     override fun showContentSelector(repository: GShockRepository) {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 ContentSelector(
                     repository = repository,
@@ -68,7 +161,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showRunActionsScreen() {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 RunActionsScreen()
             }
@@ -76,7 +169,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     private fun goToNavigationScreen() {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 BottomNavigationBarWithPermissions(
                     repository = repository
@@ -86,7 +179,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showPreConnectionScreen() {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 PreConnectionScreen()
             }
@@ -94,7 +187,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showInitialScreen() {
-        context.setContent {
+        safeSetContent {
             Run()
         }
     }
@@ -127,30 +220,12 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
-    private suspend fun waitForConnection() {
-
-        // Use this variable to control whether we should try to scan each time for the watch,
-        // or reuse the last saved address. If set tto false, the connection is a bit slower,
-        // but the app can connect to multiple watches without pressing "FORGET".
-        // Also, auto-time-sync will work for multiple watches
-
-        // Note: Consequently, we discovered that the Bluetooth scanning cannot be performed in the background,
-        // so actions will fail. If this flag is true, no scanning will be performed.
-        // Leave it to true.
-        val reuseAddress = true
-        var deviceAddress: String? = null
-
-        if (reuseAddress) {
-            val bluetoothManager = getSystemService(android.bluetooth.BluetoothManager::class.java)
-            val bluetoothAdapter = bluetoothManager?.adapter
-            if (bluetoothAdapter?.isEnabled == true) {
-                val savedDeviceAddress = LocalDataStorage.get(this, "LastDeviceAddress", "")
-                if (repository.validateBluetoothAddress(savedDeviceAddress)) {
-                    deviceAddress = savedDeviceAddress
-                }
-            }
+    @SuppressLint("NewApi")
+    internal suspend fun waitForConnection() {
+        val associations = repository.getAssociationsWithNames(this)
+        if (associations.isEmpty() && LocalDataStorage.getDeviceAddresses(this).isEmpty()) {
+            ProgressEvents.onNext("NoPairedDevices")
         }
-        repository.waitForConnection(deviceAddress)
     }
 
     @Composable
