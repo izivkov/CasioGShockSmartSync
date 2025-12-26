@@ -1,6 +1,6 @@
-# Release Notes - Casio G-Shock Smart Sync v25.3
+# Release Notes - Casio G-Shock Smart Sync v25.4
 
-We are excited to announce the release of version 25.3! This update brings significant improvements to device management, system compatibility, and overall stability.
+We are excited to announce version 25.4! This release focuses on perfecting the "Phone Finder" experience with improved lift-detection sensitivity and device-aware ringing logic.
 
 ## Key Features & Improvements
 

@@ -1,0 +1,1 @@
+Phone Finder Refinement: Improved lift-detection sensitivity and vertical motion tracking. Introduced automatic ring cancellation upon watch disconnection for a smoother experience.
