@@ -1,1 +1,1 @@
-Companion Device Pairing: Modernized for Android 11-14+, added multi-watch support, and a new scrollable paired devices list on the connection screen.
+Adjusted sensitivity settings for motion detection to stop Find Phone action.
