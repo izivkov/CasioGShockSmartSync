@@ -13,6 +13,9 @@ import android.media.RingtoneManager
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import timber.log.Timber
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockGoogleSync.utils.Utils
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -83,6 +86,17 @@ object PhoneFinder {
             state.sensorHandler?.stopListening()
             stopRing()
         }
+
+        setupDisconnectListener()
+    }
+
+    private fun setupDisconnectListener() {
+        val eventActions = arrayOf(
+            EventAction("Disconnect") {
+                stopRing()
+            }
+        )
+        ProgressEvents.runEventActions(Utils.AppHashCode() + "PhoneFinder", eventActions)
     }
 
     private fun stopRing() {
@@ -109,69 +123,95 @@ object PhoneFinder {
             executor = null
         }
     }
-}
 
-private class SensorHandler(
-    context: Context,
-    private val onPhoneLifted: () -> Unit
-) : SensorEventListener {
-    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val accelerometer = getBestAvailableSensor(sensorManager)
+    private class SensorHandler(
+        context: Context,
+        private val onPhoneLifted: () -> Unit
+    ) : SensorEventListener {
+        private val sensorManager =
+            context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        private val pickUpSensor = sensorManager.getDefaultSensor(25) // Hidden TYPE_PICK_UP_GESTURE
+        private val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-    fun startListening(context: Context) {
-        val sensorDelay =
-            if (context.checkSelfPermission(android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS)
-                == PackageManager.PERMISSION_GRANTED
-            ) {
-                SensorManager.SENSOR_DELAY_FASTEST
-            } else {
-                SensorManager.SENSOR_DELAY_GAME
-            }
-
-        accelerometer?.let { sensor ->
-            sensorManager.registerListener(this, sensor, sensorDelay)
-        }
-    }
-
-    fun stopListening() {
-        sensorManager.unregisterListener(this)
-    }
-
-    private object RingCanceler {
-        private var executor: ScheduledExecutorService? = null
-
-        fun schedule(delay: Long, action: () -> Unit) {
-            executor?.shutdownNow()
-            executor = Executors.newSingleThreadScheduledExecutor().apply {
-                schedule(action, delay, TimeUnit.MILLISECONDS)
-            }
-        }
-
-        fun cancel() {
-            executor?.shutdownNow()
-            executor = null
-        }
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.takeIf { it.sensor.type == Sensor.TYPE_ACCELEROMETER }?.values?.let { values ->
-            if (values.size >= 3 && values.any { abs(it) > 11 }) {
-                Timber.d("Phone lifted: x=${values[0]}, y=${values[1]}, z=${values[2]}")
+        private val triggerEventListener = object : android.hardware.TriggerEventListener() {
+            override fun onTrigger(event: android.hardware.TriggerEvent?) {
+                Timber.d("Pick-up gesture triggered")
                 stopListening()
-                RingCanceler.cancel()
                 onPhoneLifted()
             }
         }
-    }
 
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        // Needed to satisfy interface.
-    }
+        fun startListening(context: Context) {
+            if (pickUpSensor != null) {
+                Timber.d("Using TYPE_PICK_UP_GESTURE")
+                sensorManager.requestTriggerSensor(triggerEventListener, pickUpSensor)
+                return
+            }
 
-    private fun getBestAvailableSensor(sensorManager: SensorManager): Sensor? =
-        listOf(
-            Sensor.TYPE_ACCELEROMETER,
-            Sensor.TYPE_LINEAR_ACCELERATION,
-            Sensor.TYPE_GRAVITY
-        ).firstNotNullOfOrNull { sensorManager.getDefaultSensor(it) }
+            val sensorDelay =
+                if (context.checkSelfPermission(android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS)
+                    == PackageManager.PERMISSION_GRANTED
+                ) {
+                    SensorManager.SENSOR_DELAY_FASTEST
+                } else {
+                    SensorManager.SENSOR_DELAY_GAME
+                }
+
+            accelerometer?.let { sensor ->
+                sensorManager.registerListener(this, sensor, sensorDelay)
+            }
+        }
+
+        fun stopListening() {
+            if (pickUpSensor != null) {
+                sensorManager.cancelTriggerSensor(triggerEventListener, pickUpSensor)
+            }
+            sensorManager.unregisterListener(this)
+        }
+
+        private object RingCanceler {
+            private var executor: ScheduledExecutorService? = null
+
+            fun schedule(delay: Long, action: () -> Unit) {
+                executor?.shutdownNow()
+                executor = Executors.newSingleThreadScheduledExecutor().apply {
+                    schedule(action, delay, TimeUnit.MILLISECONDS)
+                }
+            }
+
+            fun cancel() {
+                executor?.shutdownNow()
+                executor = null
+            }
+        }
+
+        private var lastZ: Float? = null
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            event?.takeIf { it.sensor.type == Sensor.TYPE_ACCELEROMETER }?.values?.let { values ->
+                if (values.size >= 3) {
+                    val z = values[2]
+                    if (lastZ == null) {
+                        lastZ = z
+                        return
+                    }
+
+                    // Detect lift: A significant change in vertical acceleration (Z-axis)
+                    // When flat, Z is ~9.8. When lifted, Z increases briefly then decreases.
+                    // We check for a delta to detect motion, but also ensure it's a significant movement.
+                    val deltaZ = abs(z - lastZ!!)
+                    if (deltaZ > 1.5f && abs(z) > 10.5f) {
+                        Timber.d("Phone lifted (accel): z=$z, deltaZ=$deltaZ")
+                        stopListening()
+                        onPhoneLifted()
+                    }
+                    lastZ = z
+                }
+            }
+        }
+
+        override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+            // Needed to satisfy interface.
+        }
+    }
 }

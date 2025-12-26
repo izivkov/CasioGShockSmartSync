@@ -1,16 +1,15 @@
-name: Build APK for Tag on Master
+name: Build and Release APK
 
 on:
   push:
     tags:
       - '*'
-    branches:
-      - master
 
 jobs:
   build:
-    if: github.ref_name == 'apktest' # Ensure only tags on master branch trigger the workflow
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -20,7 +19,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '17' # Use the version your project requires
+          java-version: '17'
 
       - name: Decode and save keystore
         run: |
@@ -48,8 +47,10 @@ jobs:
           zipalign -v -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-signed.apk
           apksigner verify app/build/outputs/apk/release/app-release-signed.apk
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
+      - name: Create Release and Upload APK
+        uses: softprops/action-gh-release@v1
         with:
-          name: app-release-signed.apk
-          path: app/build/outputs/apk/release/app-release-signed.apk
+          files: app/build/outputs/apk/release/app-release-signed.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
