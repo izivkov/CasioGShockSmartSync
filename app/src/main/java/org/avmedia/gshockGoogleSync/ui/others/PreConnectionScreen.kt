@@ -25,9 +25,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
@@ -60,6 +63,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -177,6 +181,7 @@ fun PreConnectionScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         val (connectionSpinner, infoButton, pairButton, deviceList) = createRefs()
+                        val topGuideline = createGuidelineFromTop(0.82f)
 
                         WatchScreen(
                             imageResId = getImageId(watchName),
@@ -193,26 +198,35 @@ fun PreConnectionScreen(
                             }
                         )
 
-                        PairedDeviceList(
-                            devices = pairedDevices,
-                            onSelect = { device ->
-                                // Uncomment the following line if you want to select a device
-                                // ptrConnectionViewModel.selectDevice(device)
-                            },
-                            onDisassociate = { device ->
-                                ptrConnectionViewModel.disassociate(context, device.address)
-                                val scope = CoroutineScope(Dispatchers.IO)
-                                scope.launch {
-                                    LocalDataStorage.removeDeviceAddress(context, device.address)
-                                }
-                            },
+                        AppCard(
                             modifier = Modifier
-                                .padding(start = 10.dp, bottom = 40.dp)
+                                .padding(start = 16.dp, bottom = 16.dp)
                                 .constrainAs(deviceList) {
                                     bottom.linkTo(parent.bottom)
                                     start.linkTo(parent.start)
+                                    top.linkTo(topGuideline)
+                                    width = Dimension.percent(0.5f)
+                                    height = Dimension.fillToConstraints
                                 }
-                        )
+                        ) {
+                            PairedDeviceList(
+                                devices = pairedDevices,
+                                onSelect = { device ->
+                                    // Uncomment the following line if you want to select a device
+                                    // ptrConnectionViewModel.selectDevice(device)
+                                },
+                                onDisassociate = { device ->
+                                    ptrConnectionViewModel.disassociate(context, device.address)
+                                    val scope = CoroutineScope(Dispatchers.IO)
+                                    scope.launch {
+                                        LocalDataStorage.removeDeviceAddress(context, device.address)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
 
                         Box(
                             modifier = Modifier
@@ -269,19 +283,26 @@ fun PairedDeviceList(
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = modifier
-            .padding(4.dp)
-            .wrapContentSize(Alignment.CenterStart) // Changed from CenterEnd
+            .fillMaxHeight()
+            .verticalScroll(scrollState)
     ) {
         Column(
-            horizontalAlignment = Alignment.Start, // Changed from End
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Bottom // Start filling from bottom
         ) {
-            devices.take(5).forEach { device ->
+            // Spacer to push items to the bottom if the list is small
+            Spacer(modifier = Modifier.weight(1f))
+
+            devices.forEach { device ->
                 Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start // Force alignment to the left
+                    horizontalArrangement = Arrangement.Start
                 ) {
                     // 1. Remove Button (Far Left)
                     RemoveButton(onClick = { onDisassociate(device) })
@@ -295,7 +316,7 @@ fun PairedDeviceList(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .clickable { onSelect(device) }
-                            .padding(vertical = 4.dp)
+                            .weight(1f) // Let text take available space
                     )
 
                     // 3. Selection Indicator (Right of text)
@@ -306,19 +327,11 @@ fun PairedDeviceList(
                             tint = Color.Red,
                             modifier = Modifier
                                 .size(24.dp)
-                                .padding(start = 8.dp) // Space between text and arrow
-                                .graphicsLayer(scaleX = -1f) // This flips the triangle to point left
+                                .padding(start = 8.dp)
+                                .graphicsLayer(scaleX = -1f) // Triangle pointing left
                         )
                     }
                 }
-            }
-            if (devices.size > 5) {
-                Text(
-                    text = "...",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(start = 40.dp) // Padding from the left
-                )
             }
         }
     }

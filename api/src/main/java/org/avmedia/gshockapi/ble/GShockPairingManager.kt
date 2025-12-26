@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
+import android.companion.ObservingDevicePresenceRequest
 import android.content.Context
 import android.content.IntentSender
 import android.os.Build
@@ -11,6 +12,9 @@ import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.IGShockAPI
 import java.util.UUID
 import java.util.regex.Pattern
+import kotlin.collections.find
+import kotlin.collections.map
+import kotlin.run
 
 object GShockPairingManager {
     private val CASIO_SERVICE_UUID: UUID =
@@ -40,6 +44,7 @@ object GShockPairingManager {
 
         val builder = AssociationRequest.Builder()
             .addDeviceFilter(deviceFilter)
+            // .setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
 
         builder.setSingleDevice(true)
 
@@ -120,6 +125,50 @@ object GShockPairingManager {
             deviceManager.disassociate(address)
         } catch (_: Exception) {
             // ignore
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun startObservingDevicePresence(context: Context, address: String) {
+        val deviceManager =
+            context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
+                ?: return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val association = deviceManager.myAssociations.firstOrNull {
+                it.deviceMacAddress?.toString()?.equals(address, ignoreCase = true) == true
+            } ?: return
+
+            val request = ObservingDevicePresenceRequest.Builder()
+                .setAssociationId(association.id)
+                .build()
+
+            deviceManager.startObservingDevicePresence(request)
+        } else {
+            @Suppress("DEPRECATION")
+            deviceManager.startObservingDevicePresence(address)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun stopObservingDevicePresence(context: Context, address: String) {
+        val deviceManager =
+            context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager
+                ?: return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val association = deviceManager.myAssociations.firstOrNull {
+                it.deviceMacAddress?.toString()?.equals(address, ignoreCase = true) == true
+            } ?: return
+
+            val request = ObservingDevicePresenceRequest.Builder()
+                .setAssociationId(association.id)
+                .build()
+
+            deviceManager.stopObservingDevicePresence(request)
+        } else {
+            @Suppress("DEPRECATION")
+            deviceManager.stopObservingDevicePresence(address)
         }
     }
 }

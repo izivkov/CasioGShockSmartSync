@@ -45,15 +45,20 @@ import java.time.ZoneId
  *      super.onCreate(savedInstanceState)
  *      ...
  *      GlobalScope.launch {
- *          api.waitForConnection(this)
+ *          // 1. (Optional) Observe existing associations
+ *          api.getAssociations(context).forEach { address ->
+ *              api.startObservingDevicePresence(context, address)
+ *          }
+ *
+ *          // 2. Wait for connection
+ *          api.waitForConnection()
+ *
+ *          // 3. (Optional) Associate new device if needed
+ *          // api.associate(context, delegate)
+ *
  *          api.getPressedButton()
  *          api.getWatchName()
  *          api.getBatteryLevel()
- *          api.getTimer()
- *          api.getAppInfo()
- *          api.getHomeTime()
- *          api.setTime()
- *          api.sendAppNotification()
  *          ...
  *      }
  *  }
@@ -100,6 +105,13 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         return true
     }
 
+    /**
+     * Scan for G-Shock devices.
+     *
+     * @param context [Context]
+     * @param filter A lambda to filter the discovered devices.
+     * @param onDeviceFound A callback invoked when a matching device is found.
+     */
     override fun scan(
         context: Context,
         filter: (DeviceInfo) -> Boolean,
@@ -177,6 +189,11 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         return button == IO.WatchButton.LOWER_RIGHT
     }
 
+    /**
+     * Checks if the connection was initiated by a button press that keeps the watch always connected.
+     *
+     * @return **true** if the connection was initiated by the "Always Connected" button, **false** otherwise.
+     */
     override fun isAlwaysConnectedConnectionPressed(): Boolean {
         val button = ButtonPressedIO.get()
         return button == IO.WatchButton.ALLAYS_CONNECTED_CONNECTION
@@ -519,6 +536,9 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         Connection.disconnect()
     }
 
+    /**
+     * Terminate the connection and release resources.
+     */
     override fun close() {
         Connection.close()
     }
@@ -532,36 +552,104 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         return Connection.isBluetoothEnabled(context)
     }
 
+    /**
+     * Send a JSON message to the watch.
+     *
+     * @param message The JSON message string.
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     override fun sendMessage(message: String) {
         MessageDispatcher.sendToWatch(message)
     }
 
+    /**
+     * Resets the hand position of the watch.
+     */
     override fun resetHand() {
         sendMessage("{action: \"RESET_HAND\", value: \"\"}")
     }
 
+    /**
+     * Validates a Bluetooth MAC address.
+     *
+     * @param deviceAddress The Bluetooth address to validate.
+     * @return **true** if the address is valid, **false** otherwise.
+     */
     override fun validateBluetoothAddress(deviceAddress: String?): Boolean {
         return Connection.validateAddress(deviceAddress)
     }
 
+    /**
+     * Prevents the app from immediately reconnecting to the watch.
+     *
+     * @return **true** as a signal to prevent reconnection.
+     */
     override fun preventReconnection(): Boolean {
         return true
     }
 
+    /**
+     * Start the Companion Device Manager association process.
+     *
+     * @param context [Context]
+     * @param delegate Callback for when the device chooser is ready or if an error occurs.
+     */
     override fun associate(context: Context, delegate: ICDPDelegate) {
         GShockPairingManager.associate(context, delegate::onChooserReady, delegate::onError)
     }
 
+    /**
+     * Remove the association for a specific device.
+     *
+     * @param context [Context]
+     * @param address The Bluetooth address of the device to disassociate.
+     */
     override fun disassociate(context: Context, address: String) {
         GShockPairingManager.disassociate(context, address)
     }
 
+    /**
+     * Get a list of associated device addresses.
+     *
+     * @param context [Context]
+     * @return A list of Bluetooth device addresses.
+     */
     override fun getAssociations(context: Context): List<String> {
         return GShockPairingManager.getAssociations(context)
     }
 
+    /**
+     * Get a list of associations with their associated names.
+     *
+     * @param context [Context]
+     * @return A list of [IGShockAPI.Association] objects.
+     */
     override fun getAssociationsWithNames(context: Context): List<IGShockAPI.Association> {
         return GShockPairingManager.getAssociationsWithNames(context)
+    }
+
+    /**
+     * Start observing device presence for a specific device.
+     * This allows the app to be notified when the device appears or disappears.
+     *
+     * @param context [Context]
+     * @param address The Bluetooth address of the device to observe.
+     */
+    override fun startObservingDevicePresence(context: Context, address: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            GShockPairingManager.startObservingDevicePresence(context, address)
+        }
+    }
+
+    /**
+     * Stop observing device presence for a specific device.
+     *
+     * @param context [Context]
+     * @param address The Bluetooth address of the device to stop observing.
+     */
+    override fun stopObservingDevicePresence(context: Context, address: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            GShockPairingManager.stopObservingDevicePresence(context, address)
+        }
     }
 }

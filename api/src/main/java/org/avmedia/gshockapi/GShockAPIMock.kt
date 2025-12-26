@@ -329,6 +329,18 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
         return emptyList()
     }
 
+    override fun startObservingDevicePresence(
+        context: Context,
+        address: String
+    ) {
+    }
+
+    override fun stopObservingDevicePresence(
+        context: Context,
+        address: String
+    ) {
+    }
+
     override fun scan(
         context: Context,
         filter: (DeviceInfo) -> Boolean,

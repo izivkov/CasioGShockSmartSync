@@ -67,5 +67,8 @@ interface IGShockAPI {
 
     fun getAssociations(context: Context): List<String>
 
+    fun startObservingDevicePresence(context: Context, address: String)
+    fun stopObservingDevicePresence(context: Context, address: String)
+
     fun scan(context: Context, filter: (DeviceInfo) -> Boolean, onDeviceFound: (DeviceInfo) -> Unit)
 }

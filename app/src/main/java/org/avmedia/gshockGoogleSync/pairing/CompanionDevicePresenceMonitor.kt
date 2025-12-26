@@ -21,12 +21,13 @@ class CompanionDevicePresenceMonitor @Inject constructor(
 
     private val eventActions = arrayOf(
         EventAction("DeviceAppeared") {
-            val address = ProgressEvents.getPayload("DeviceAppeared") as String
+            val address = (ProgressEvents.getPayload("DeviceAppeared") as String)
+            val addressValid = address.uppercase()
 
             monitorScope.launch {
                 // Now 'repository' is guaranteed to be initialized
                 if (!repository.isConnected()) {
-                    repository.waitForConnection(address)
+                    repository.waitForConnection(addressValid)
                 }
             }
         },

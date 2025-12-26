@@ -41,8 +41,12 @@ import javax.inject.Inject
 @HiltAndroidApp
 class GShockApplication : Application(), IScreenManager {
     private var _context: MainActivity? = null
-    private val context
-        get() = _context ?: throw IllegalStateException("MainActivity not initialized")
+    private val context: MainActivity?
+        get() = _context ?: ActivityProvider.getCurrentActivity() as? MainActivity
+
+    private fun safeSetContent(content: @Composable () -> Unit) {
+        context?.setContent { content() } ?: Timber.w("Cannot set content: MainActivity is not available")
+    }
     private lateinit var eventHandler: MainEventHandler
 
     @Inject
@@ -120,19 +124,21 @@ class GShockApplication : Application(), IScreenManager {
                     this@GShockApplication,
                     "LastDeviceAddress",
                     ""
-                ).isNullOrEmpty() && associations.isNotEmpty()
+                ).isNullOrEmpty()
             ) {
-                LocalDataStorage.put(
-                    this@GShockApplication,
-                    "LastDeviceAddress",
-                    associations[0].address
-                )
+                associations.firstOrNull()?.let {
+                    LocalDataStorage.put(
+                        this@GShockApplication,
+                        "LastDeviceAddress",
+                        it.address
+                    )
+                }
             }
 
             // ✅ SAFE, explicit API gating
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S  ) {
-                if (associations.isNotEmpty()) {
-                    startObservingDevicePresence(this@GShockApplication, associations[0].address)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                associations.forEach { association ->
+                    repository.startObservingDevicePresence(this@GShockApplication, association.address)
                 }
             } else {
                 Timber.i(
@@ -142,72 +148,9 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
-    @SuppressLint("NewApi")
-    @RequiresApi(Build.VERSION_CODES.S)
-    internal fun startObservingDevicePresence(
-        context: Context,
-        address: String
-    ) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            Timber.i(
-                "Device presence observation not supported on API ${Build.VERSION.SDK_INT}"
-            )
-            return
-        }
-
-        val deviceManager =
-            context.getSystemService(Context.COMPANION_DEVICE_SERVICE)
-                    as? CompanionDeviceManager
-                ?: return
-
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                val association = deviceManager.myAssociations.firstOrNull {
-                    it.deviceMacAddress?.toString()
-                        ?.equals(address, ignoreCase = true) == true
-                } ?: run {
-                    Timber.w("No association found for address: $address")
-                    return
-                }
-
-                val request = ObservingDevicePresenceRequest.Builder()
-                    .setAssociationId(association.id)
-                    .build()
-
-                deviceManager.startObservingDevicePresence(request)
-
-                Timber.i(
-                    "Started observing device presence (API 33+) for associationId=${association.id}"
-                )
-            }
-
-            Build.VERSION.SDK_INT == Build.VERSION_CODES.S -> {
-                // Android 12 / 12L
-                startObservingAndroid12(deviceManager, address)
-            }
-
-            else -> {
-                Timber.i(
-                    "Device presence observation not supported on API ${Build.VERSION.SDK_INT}"
-                )
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.S)
-    @Suppress("DEPRECATION")
-    private fun startObservingAndroid12(
-        deviceManager: CompanionDeviceManager,
-        address: String
-    ) {
-        deviceManager.startObservingDevicePresence(address)
-
-        Timber.i("Started observing device presence (API 31–32) for: $address")
-    }
-
     // ScreenManager implementation
     override fun showContentSelector(repository: GShockRepository) {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 ContentSelector(
                     repository = repository,
@@ -218,7 +161,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showRunActionsScreen() {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 RunActionsScreen()
             }
@@ -226,7 +169,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     private fun goToNavigationScreen() {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 BottomNavigationBarWithPermissions(
                     repository = repository
@@ -236,7 +179,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showPreConnectionScreen() {
-        context.setContent {
+        safeSetContent {
             StartScreen {
                 PreConnectionScreen()
             }
@@ -244,7 +187,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showInitialScreen() {
-        context.setContent {
+        safeSetContent {
             Run()
         }
     }
