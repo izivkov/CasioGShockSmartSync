@@ -14,8 +14,8 @@ android {
         applicationId = "org.avmedia.gshockGoogleSync"
         minSdk = 26
         targetSdk = 36
-        versionCode = 252
-        versionName = "25.2"
+        versionCode = 253
+        versionName = "25.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,8 +44,8 @@ android {
 }
 
 dependencies {
-    // implementation(libs.gshockapi)
-    implementation project(':api')
+    implementation(libs.gshockapi)
+    // implementation project(':api')
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
