@@ -1,9 +1,7 @@
 # Casio G-Shock Smart Sync
 
 ## Announcement
-We now support sending notifications to watches that support this feature. It has been tested with 
-the DW-H5600 only. If you have a watch that supports notifications, such as the GBA or GBD series, 
-please let us know if it works for you.
+Added [Companion Device Pairing](https://developer.android.com/develop/connectivity/bluetooth/companion-device-pairing) for more reliable Bluetooth connections!
 
 ## What is it?
 I think we can do better than the official Casio G-Shock App!
