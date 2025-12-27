@@ -35,6 +35,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Add Android build-tools to PATH
+        run: |
+          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | tail -n 1)
+          echo "$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION" >> $GITHUB_PATH
+
       - name: Build APK
         run: ./gradlew assembleRelease
 
