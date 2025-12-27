@@ -76,6 +76,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.ICDPDelegate
 import timber.log.Timber
 
@@ -379,8 +380,8 @@ fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: B
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = stringResource(id = R.string.add_watch),
+        AppText(
+            text = Utils.wrapString(stringResource(id = R.string.add_watch), 10),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -400,7 +401,7 @@ fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: B
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = stringResource(id = R.string.add_watch),
+                contentDescription = Utils.wrapString(stringResource(id = R.string.add_watch), 10),
                 modifier = Modifier.size(32.dp)
             )
         }

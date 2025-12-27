@@ -40,6 +40,29 @@ class Utils {
             return words.joinToString("\n")
         }
 
+        fun wrapString(input: String, maxLength: Int): String {
+            val words = input.split(" ")
+            val lines = StringBuilder()
+            var currentLine = StringBuilder()
+
+            for (word in words) {
+                if (currentLine.isNotEmpty()) {
+                    if (currentLine.length + 1 + word.length <= maxLength) {
+                        currentLine.append(" ").append(word)
+                    } else {
+                        lines.append(currentLine.toString()).append("\n")
+                        currentLine = StringBuilder(word)
+                    }
+                } else {
+                    currentLine.append(word)
+                }
+            }
+            if (currentLine.isNotEmpty()) {
+                lines.append(currentLine.toString())
+            }
+            return lines.toString()
+        }
+
         fun shortenString(input: String, maxLength: Int, ellipsis: Char = '…'): String {
             require(maxLength >= 1) { "maxLength must be at least 1" }
 
