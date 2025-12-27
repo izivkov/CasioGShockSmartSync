@@ -48,6 +48,7 @@ git push origin "v$VERSION_NAME"
 if [ "$CURRENT_BRANCH" != "master" ]; then
     echo "🔄 Merging $CURRENT_BRANCH into master..."
     git checkout master
+    git pull origin master
     git merge "$CURRENT_BRANCH" --no-edit
     git push origin master
     git checkout "$CURRENT_BRANCH"
