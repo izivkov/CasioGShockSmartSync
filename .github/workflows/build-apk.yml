@@ -23,47 +23,30 @@ jobs:
 
       - name: Decode and save keystore
         run: |
-          printf "%s" "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > release.keystore
+            mkdir -p app
+            printf "%s" "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > app/release.keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
       - name: Check keystore file
         run: |
-          ls -l release.keystore
-          file release.keystore
+          ls -l app/release.keystore
+          file app/release.keystore
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Add Android build-tools to PATH
-        run: |
-          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | tail -n 1)
-          echo "$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION" >> $GITHUB_PATH
-
       - name: Build APK
         run: ./gradlew assembleRelease
-
-      - name: Align APK
-        run: |
-          zipalign -v -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-aligned.apk
-
-      - name: Sign APK
-        run: |
-          apksigner sign --ks release.keystore \
-            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
-            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
-            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out app/build/outputs/apk/release/app-release-signed.apk \
-            app/build/outputs/apk/release/app-release-aligned.apk
-
-      - name: Verify APK
-        run: |
-          apksigner verify app/build/outputs/apk/release/app-release-signed.apk
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v1
         with:
-          files: app/build/outputs/apk/release/app-release-signed.apk
+          files: app/build/outputs/apk/release/app-release.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
