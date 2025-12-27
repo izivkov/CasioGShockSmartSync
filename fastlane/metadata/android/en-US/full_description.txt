@@ -2,80 +2,70 @@ Casio G-Shock Smart Sync
 
 What is it?
 -----------
-I think we can do better than the Official Casio G-Shock App!
-This app provides the following extra features:
+This is an unofficial app for Casio G-Shock, Edifice, and Pro Trek watches. It allows you to control your watch, sync data, and configure settings without a Casio ID. It offers a faster, privacy-focused, and more powerful alternative to the official Casio app.
 
-- Sets watch's reminders from Google Calendar
-- Automatically sets correct timezone when travelling
-- Use your watch to trigger actions on your phone remotely
-- Allows you to set when auto-time adjustment will run
-- Auto-configure most watch settings from phone's configuration
-- Phone's alarms can be synced with watch's alarms
-- Super fast connection time: 3.5 seconds vs 12 seconds for the official app
+Key Features check
+------------------
+- No Account Required: Skip the Casio ID login entirely.
+- Calendar Sync: Push your calendar events (Google, Samsung, etc.) to your watch as reminders.
+- Auto Timezone: Automatically adjusts watch time when you travel.
+- Remote Control: Use your watch buttons to take photos, control music, or launch voice assistants.
+- Alarm Sync: Configure watch alarms easily from your phone.
+- Phone Finder: Trigger a loud alarm on your phone to find it.
 
 Supported Watches
 -----------------
-The app will try to connect and adapt to any Casio watch that wants to connect to it (not just G-Shock). Here are some watches which are reported to work with the app:
+The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
 
-- G(M)W-5600
-- G(M)W-5000
-- GA-B2100
-- GA-B001-1AER
-- GST-B500
-- GST-B200
-- MSG-B100
-- G-B001
-- GBD-H1000 (Partial support)
-- MRG-B5000
-- GCW-B5000
-- GG-B100
-- Edifice ECB-30
-- ECB-10
-- ECB-20
-- Most Edifice watches
-- Most Protrek models
-- ABL-100WE
+- Square: GW-B5600, GMW-B5000, GW-5000, DW-B5600
+- CasiOak: GA-B2100, GBM-2100
+- G-Steel: GST-B500, GST-B400, GST-B200
+- Edifice: ECB-10, ECB-20, ECB-30
+- Others: GBD-800, GBD-H1000, GG-B100
 
-General
--------
-The app works by sending commands to the watch via Bluetooth (BLE). The watch data is not persisted on the phone but is read from the watch each time a connection is established. Any changes on the app are sent back to the watch only when the Send to Watch button is pressed.
+Note: While these watches connect, not all specific hardware features (like fitness tracking steps on GBD models) may be fully supported yet.
 
-Setting Time
-------------
-The local time can be set from the main screen by pressing the Send to Watch button next to the current time display. The app uses your current location to get the local time. You can then set the watch time accordingly, without having to change your World Time selection on the watch. This screen also shows your Home Time location and battery level.
+App Walkthrough
+---------------
 
-Alarms
-------
-The B5600/B5000 watches have 5 alarms and a Signal or chime setting. They are first read from the watch and displayed in the app. The alarms can be updated by pressing on the time display of each alarm. A dialog will appear which allows you to select the time. Once the alarms have been set, you can send them to the watch or send them to the Alarm Clock app on the phone.
+1. Connection Screen
+This is the first screen you see. It handles the Bluetooth connection to your watch.
+- Status: Shows generic connection status.
+- Scan/Connect: Automatically scans for your watch.
+- Paired Devices: Lists your previously connected watches for quick access.
+Connection is typically much faster than the official app (~3.5s vs 12s).
 
-Events
-------
-This screen displays events from your Google Calendar and allows you to send these events to your watch's reminders. Ensure that your phone is set to auto-sync with your Google Account. Without this setting, events added to your phone will not sync with your Google account and will not appear in the app.
+2. Time Setting
+Manage your watch's timekeeping effortlessly.
+- Local Time: Displays the current time from your phone.
+- Send to Watch: Tap the button to sync your phone's time, timezone, and DST settings to the watch immediately.
+- Home Time: Shows the 'Home' city configured on the watch.
+- Battery: Displays the current battery level of the watch.
 
-Event Types and Compatibility
------------------------------
-Google Calendar supports various types of events:
-- One-time events: Single occurrences.
-- Repeating events: Daily, weekly, monthly, yearly, or complex patterns (e.g., "every second Thursday of the month").
-- Count events: Limited repetitions, such as "repeat 12 times every Monday."
+3. Alarms
+Read and configure the alarms stored on your watch.
+- View Alarms: See the current settings for all 5 alarms and the hourly signal (Chime).
+- Edit: Tap any alarm to change its time.
+- Sync: You can send these alarm settings to the watch.
 
-While the app does its best to adapt calendar events to the watch, some limitations exist:
-- Not Supported: Daily events and complex patterns (e.g., "every second Thursday of the month").
-- Count Events: Simulated on the watch using a start and end date, adjusted to match the event's start time, frequency, and count.
+4. Events (Calendar Sync)
+Sync your phone's calendar to your watch!
+- Upcoming Events: Lists future events from your phone's calendar.
+- Send to Watch: Pushes these events to the watch's Reminder feature.
+- Compatibility: Supports one-time and simple recurring events. Complex recurrence rules might show as "Incompatible".
 
-Events that cannot be adapted will appear as Incompatible. Only future events and ongoing recurring events are displayed.
+5. Actions (Remote Control)
+Turn your watch into a remote control. Assign actions to button presses on the watch.
+- Find Phone: Make your phone ring loudly.
+- Take Photo: Snap a picture with your phone's camera.
+- Next Track: Skip music tracks on your phone.
+- Voice Assist: Launch Google Assistant.
+How to use: Short-press the lower-right button on the watch (when in Time mode) to trigger the selected action.
 
-Watch-Specific Behavior
-----------l-------------
-The watch only supports all-day reminders. For Google Calendar events with a specific time, the app will convert them into all-day reminders on the watch while still retaining their date.
-
-Actions
--------
-The selected actions are run when the user short-presses the lower-right watch button from disconnected mode (initial screen). Using these actions, the watch acts like a remote control for your phone.
-
-Settings
---------
-This screen allows you to set up the watch's settings. You can auto prefill the values using information from your phone.
+6. Settings
+Configure app and watch preferences.
+- Watch Settings: Adjust specific watch configurations (light duration, power saving, etc.).
+- App Settings: Configure theme, behavior, and advanced options.
 
 Where are my World Cities?
 --------------------------
@@ -87,4 +77,4 @@ For those who want to build their own Android app for interfacing with the G-Sho
 
 Similar Project
 ---------------
-If you rather not use a mobile app, but still like to set the time on your G-Shock to the correct time, here is a Python program which can run as a server on a regular PC or Raspberry PI with Bluetooth interface. The project is still WIP, but you can give it a try.
+If you'd prefer not to use a mobile app but still want to set the correct time on your G-Shock, check out this Python project which can run as a server on a PC or Raspberry Pi: https://github.com/izivkov/GShockTimeServer
