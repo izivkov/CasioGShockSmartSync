@@ -1,1 +1,1 @@
-Phone Finder Refinement: Improved lift-detection sensitivity and vertical motion tracking. Introduced automatic ring cancellation upon watch disconnection for a smoother experience.
+Companion Device Pairing: Modernized for Android 11-14+, added multi-watch support, and a new scrollable paired devices list on the connection screen.
