@@ -8,7 +8,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-VERSION_NAME=$1
+VERSION_NAME=${1#v}
 # Calculate version code by removing dots (e.g., 25.4 -> 254)
 VERSION_CODE=$(echo $VERSION_NAME | sed 's/\.//g')
 
@@ -33,7 +33,7 @@ fi
 
 # 3. Git Operations
 echo "💾 Committing changes..."
-git add app/build.gradle "$CHANGELOG_PATH"
+git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml
 git commit -m "Release v$VERSION_NAME"
 
 echo "🏷️ Tagging release..."
