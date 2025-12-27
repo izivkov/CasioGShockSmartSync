@@ -22,16 +22,8 @@ jobs:
           java-version: '21'
 
       - name: Decode and save keystore
-#        run: |
-#            mkdir -p app
-#            printf "%s" "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > app/release.keystore
-#        env:
-#          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
-        # Note: We save it as 'release.keystore' so your Gradle
-        # file (which looks for release.keystore) still finds it.
 
       - name: Check keystore file
         run: |
