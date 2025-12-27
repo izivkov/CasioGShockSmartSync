@@ -16,9 +16,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '21'
 
       - name: Decode and save keystore
@@ -26,6 +26,11 @@ jobs:
           echo "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > release.keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Check keystore file
+        run: |
+          ls -l release.keystore
+          file release.keystore
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
