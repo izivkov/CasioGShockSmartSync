@@ -35,12 +35,11 @@ jobs:
 
       - name: Sign APK
         run: |
-          jarsigner -verbose \
-            -keystore release.keystore \
-            -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
-            -keypass ${{ secrets.KEY_PASSWORD }} \
+          jarsigner -verbose -keystore release.keystore \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -keypass "${{ secrets.KEY_PASSWORD }}" \
             app/build/outputs/apk/release/app-release-unsigned.apk \
-            ${{ secrets.KEY_ALIAS }}
+            "${{ secrets.KEY_ALIAS }}"
 
       - name: Verify APK
         run: |
