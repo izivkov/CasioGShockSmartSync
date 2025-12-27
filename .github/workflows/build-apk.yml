@@ -13,48 +13,51 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17' # JDK 17 is the most stable for Android build tools
 
-      - name: Decode and save keystore
+      - name: Decode Keystore
         run: |
-          printf "%s" "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > release.keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-
-      - name: Check keystore file
-        run: |
-          ls -l release.keystore
-          file release.keystore
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
-
+          # Use --decode with -i to handle potential formatting issues
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
+        
       - name: Build APK
         run: ./gradlew assembleRelease
+        env:
+          # Optional: Pass passwords to Gradle if your build.gradle needs them
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-      - name: Sign APK
+      - name: Zipalign APK
         run: |
-          jarsigner -verbose -keystore release.keystore \
-            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
-            -keypass "${{ secrets.KEY_PASSWORD }}" \
+          # Must align the unsigned APK BEFORE signing it
+          $ANDROID_HOME/build-tools/34.0.0/zipalign -v -p 4 \
             app/build/outputs/apk/release/app-release-unsigned.apk \
-            "${{ secrets.KEY_ALIAS }}"
+            app-release-aligned.apk
 
-      - name: Verify APK
+      - name: Sign APK with apksigner
         run: |
-          zipalign -v -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-signed.apk
-          apksigner verify app/build/outputs/apk/release/app-release-signed.apk
+          # apksigner handles modern PKCS12 keystores without the "Tag 30" error
+          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks release.keystore \
+            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
+            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
+            --out app-release-signed.apk \
+            app-release-aligned.apk
+
+      - name: Verify Signature
+        run: $ANDROID_HOME/build-tools/34.0.0/apksigner verify app-release-signed.apk
 
       - name: Create Release and Upload APK
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/release/app-release-signed.apk
+          files: app-release-signed.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
