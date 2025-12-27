@@ -27,6 +27,25 @@ android {
     kotlinOptions {
         jvmTarget = "21"
     }
+
+    signingConfigs {
+        release {
+            // These environment variables will be set in GitHub Actions
+            storeFile file(System.getenv("KEYSTORE_PATH") ?: "../sshkeys/legacy_release.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
