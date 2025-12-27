@@ -23,7 +23,7 @@ jobs:
 
       - name: Decode and save keystore
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+          echo "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > release.keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
 
