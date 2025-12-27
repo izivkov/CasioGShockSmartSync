@@ -13,51 +13,52 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17' # JDK 17 is the most stable for Android build tools
+          java-version: '21'
 
-      - name: Decode Keystore
+      - name: Decode and save keystore
         run: |
-          # Use --decode with -i to handle potential formatting issues
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
-        
+          printf "%s" "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > release.keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Check keystore file
+        run: |
+          ls -l release.keystore
+          file release.keystore
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+
       - name: Build APK
         run: ./gradlew assembleRelease
-        env:
-          # Optional: Pass passwords to Gradle if your build.gradle needs them
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
-      - name: Zipalign APK
+      - name: Align APK
         run: |
-          # Must align the unsigned APK BEFORE signing it
-          $ANDROID_HOME/build-tools/34.0.0/zipalign -v -p 4 \
-            app/build/outputs/apk/release/app-release-unsigned.apk \
-            app-release-aligned.apk
+          zipalign -v -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-aligned.apk
 
-      - name: Sign APK with apksigner
+      - name: Sign APK
         run: |
-          # apksigner handles modern PKCS12 keystores without the "Tag 30" error
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks release.keystore \
+          apksigner sign --ks release.keystore \
             --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
             --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
             --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            --out app-release-signed.apk \
-            app-release-aligned.apk
+            --out app/build/outputs/apk/release/app-release-signed.apk \
+            app/build/outputs/apk/release/app-release-aligned.apk
 
-      - name: Verify Signature
-        run: $ANDROID_HOME/build-tools/34.0.0/apksigner verify app-release-signed.apk
+      - name: Verify APK
+        run: |
+          apksigner verify app/build/outputs/apk/release/app-release-signed.apk
 
       - name: Create Release and Upload APK
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
-          files: app-release-signed.apk
+          files: app/build/outputs/apk/release/app-release-signed.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
