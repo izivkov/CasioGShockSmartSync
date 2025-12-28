@@ -18,7 +18,7 @@ fun AppCard(
     elevation: Dp = 4.dp,
     borderWidth: Dp = 0.dp,
     borderColor: Color = Color.Transparent,
-    containerColor: Color = if (androidx.compose.foundation.isSystemInDarkTheme()) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant,
+    containerColor: Color = if (androidx.compose.foundation.isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceVariant,
     content: @Composable () -> Unit,
 ) {
     Card(
