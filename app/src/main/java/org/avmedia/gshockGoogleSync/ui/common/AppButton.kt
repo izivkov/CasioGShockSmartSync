@@ -22,10 +22,10 @@ fun AppButton(
         enabled = enabled
     ) {
         AppText(
-            text = text.uppercase(),
+            text = text,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
-            fontFamily = FontFamily.SansSerif,
+            // fontFamily = FontFamily.SansSerif,
             textAlign = TextAlign.Center
         )
     }

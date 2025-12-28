@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 fun AppText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.onBackground,
+    color: Color = Color.Unspecified,
     fontSize: TextUnit = 16.sp,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
