@@ -1,6 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.common
 
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -47,9 +49,15 @@ fun AppConnectionSpinner(
     if (isVisible) {
         AppCard(
             modifier = modifier,
-            padding = 8.dp
+            padding = 8.dp,
+            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            elevation = 0.dp
         ) {
-            CircularProgressIndicator()
+            androidx.compose.foundation.layout.Box(
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
 }

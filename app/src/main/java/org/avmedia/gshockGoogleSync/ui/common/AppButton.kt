@@ -16,16 +16,16 @@ fun AppButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    TextButton(
+    androidx.compose.material3.OutlinedButton(
         onClick = onClick,
         modifier = modifier,
-        enabled = enabled
+        enabled = enabled,
+        shape = androidx.compose.foundation.shape.CircleShape // Capsule shape
     ) {
         AppText(
             text = text,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
-            // fontFamily = FontFamily.SansSerif,
             textAlign = TextAlign.Center
         )
     }
