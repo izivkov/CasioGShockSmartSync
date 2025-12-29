@@ -15,10 +15,10 @@ import androidx.compose.ui.unit.dp
 fun AppCard(
     modifier: Modifier = Modifier,
     padding: Dp = 2.dp,
-    elevation: Dp = 2.dp,
-    borderWidth: Dp = 1.dp,
-    borderColor: Color = Color.DarkGray,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
+    elevation: Dp = 4.dp,
+    borderWidth: Dp = 0.dp,
+    borderColor: Color = Color.Transparent,
+    containerColor: Color = if (androidx.compose.foundation.isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceVariant,
     content: @Composable () -> Unit,
 ) {
     Card(
@@ -26,7 +26,7 @@ fun AppCard(
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(elevation),
-        border = BorderStroke(borderWidth, color = borderColor)
+        border = if (borderWidth > 0.dp) BorderStroke(borderWidth, borderColor) else null
     ) {
         content()
     }

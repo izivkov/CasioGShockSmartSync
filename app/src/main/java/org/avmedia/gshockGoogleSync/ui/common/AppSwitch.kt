@@ -11,6 +11,7 @@ fun AppSwitch(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: SwitchColors = SwitchDefaults.colors(),
+    thumbContent: (@Composable () -> Unit)? = null,
 ) {
     val handleChange = { newValue: Boolean ->
         if (enabled) {
@@ -24,5 +25,6 @@ fun AppSwitch(
         modifier = modifier,
         enabled = enabled,
         colors = colors,
+        thumbContent = thumbContent
     )
 }
