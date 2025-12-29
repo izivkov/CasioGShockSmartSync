@@ -215,4 +215,13 @@
     <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button (usually BOTTOM-LEFT) on your watch for 3 seconds to pair.</string>
     <string name="looking_for_a_device">Looking for a device.</string>
     <string name="add_watch">Add Watch</string>
+    
+    <!-- Pairing error messages -->
+    <string name="pairing_failed_generic">Pairing failed: %1$s. Please try again.</string>
+    <string name="pairing_activity_finishing">Cannot start pairing: Activity is closing. Please try again.</string>
+    <string name="pairing_crash_recovery">Recovered from previous pairing crash. You can try pairing again.</string>
+    <string name="pairing_crash_detected"><![CDATA[
+        The app detected a previous crash during pairing. Crash logs have been saved.
+        <p>If this issue persists, please report it on <a href="https://github.com/izivkov/CasioGShockSmartSync/issues">GitHub</a> with your device model and watch model.</p>
+    ]]></string>
 </resources>
