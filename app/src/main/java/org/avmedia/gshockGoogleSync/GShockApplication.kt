@@ -72,7 +72,7 @@ class GShockApplication : Application(), IScreenManager {
         CoroutineScope(Dispatchers.IO).launch {
 
             // Check for previous pairing crash and recover if needed
-            // recoverFromPairingCrash()
+            recoverFromPairingCrash()
 
             cleanupLocalStorage(context)
 
