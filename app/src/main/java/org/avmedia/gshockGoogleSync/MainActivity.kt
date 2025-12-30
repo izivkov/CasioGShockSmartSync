@@ -24,7 +24,6 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
 import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
-import org.avmedia.gshockGoogleSync.utils.CrashReportHelper.logCrash
 import timber.log.Timber
 
 @AndroidEntryPoint
