@@ -101,26 +101,34 @@ fun PreConnectionScreen(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            if (data == null) {
+                // Log and return; some OEMs return null data even on OK
+                Timber.w("Pairing: Result OK but data is null")
+                return@rememberLauncherForActivityResult
+            }
+
             val device: BluetoothDevice? =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    println("Result data: ${result.data}")
-                    result.data?.getParcelableExtra(
+                    data.getParcelableExtra(
                         CompanionDeviceManager.EXTRA_DEVICE,
                         BluetoothDevice::class.java
                     )
                 } else {
                     @Suppress("DEPRECATION")
-                    result.data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
+                    data.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
                 }
 
-            device?.let {
-                val name = if (it.name.isNullOrBlank()) "G-SHOCK" else it.name
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    LocalDataStorage.setDeviceName(context, it.address, name)
-                }
-                ptrConnectionViewModel.setDevice(it.address, name)
+            if (device == null) {
+                Timber.w("Pairing: EXTRA_DEVICE missing in result")
+                return@rememberLauncherForActivityResult
             }
+
+            val name = if (device.name.isNullOrBlank()) "" else device.name
+            CoroutineScope(Dispatchers.IO).launch {
+                LocalDataStorage.setDeviceName(context, device.address, name)
+            }
+            ptrConnectionViewModel.setDevice(device.address, name)
         }
     }
 

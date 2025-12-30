@@ -11,9 +11,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ import org.avmedia.gshockGoogleSync.services.GShockScanService
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
 import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
@@ -34,6 +36,8 @@ import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import javax.inject.Inject
+
 
 @HiltAndroidApp
 class GShockApplication : Application(), IScreenManager {
@@ -41,17 +45,23 @@ class GShockApplication : Application(), IScreenManager {
     private val context: MainActivity?
         get() = _context ?: ActivityProvider.getCurrentActivity() as? MainActivity
 
+    var pendingCrashLog by androidx.compose.runtime.mutableStateOf<String?>(null)
+
     private fun safeSetContent(content: @Composable () -> Unit) {
         context?.setContent { content() }
-                ?: Timber.w("Cannot set content: MainActivity is not available")
+            ?: Timber.w("Cannot set content: MainActivity is not available")
     }
+
     private lateinit var eventHandler: MainEventHandler
 
-    @Inject lateinit var deviceManager: DeviceManager
+    @Inject
+    lateinit var deviceManager: DeviceManager
 
-    @Inject lateinit var repository: GShockRepository
+    @Inject
+    lateinit var repository: GShockRepository
 
-    @Inject lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
+    @Inject
+    lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
 
     fun init(context: MainActivity) {
 
@@ -62,7 +72,7 @@ class GShockApplication : Application(), IScreenManager {
         CoroutineScope(Dispatchers.IO).launch {
 
             // Check for previous pairing crash and recover if needed
-            recoverFromPairingCrash()
+            // recoverFromPairingCrash()
 
             cleanupLocalStorage(context)
 
@@ -81,18 +91,15 @@ class GShockApplication : Application(), IScreenManager {
             if (CrashReportHelper.hasPairingCrashFlag(this)) {
                 Timber.w("Detected previous pairing crash, attempting recovery")
 
-                // Log the crash for debugging
                 val latestCrash = CrashReportHelper.getLatestCrashLog(this)
+
+                // Set the pending log to be picked up by the UI
                 if (latestCrash != null) {
-                    Timber.e("Previous crash log:\n$latestCrash")
+                    pendingCrashLog = latestCrash
+                    Timber.e("Previous crash log captured for display")
                 }
 
-                // Clear the crash flag
                 CrashReportHelper.clearPairingCrashFlag(this)
-
-                // Note: We don't clear LastDeviceAddress/Name here because the user
-                // might have successfully paired before the crash. We only clear the flag.
-
                 Timber.i("Pairing crash recovery completed")
             }
         } catch (e: Exception) {
@@ -105,7 +112,7 @@ class GShockApplication : Application(), IScreenManager {
         super.onCreate()
         ActivityProvider.initialize(this)
         eventHandler =
-                MainEventHandler(context = this, repository = repository, screenManager = this)
+            MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
     }
 
@@ -136,7 +143,7 @@ class GShockApplication : Application(), IScreenManager {
             }
 
             if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
-                            .isNullOrEmpty()
+                    .isNullOrEmpty()
             ) {
                 associations.firstOrNull()?.let {
                     LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
@@ -147,8 +154,8 @@ class GShockApplication : Application(), IScreenManager {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 associations.forEach { association ->
                     repository.startObservingDevicePresence(
-                            this@GShockApplication,
-                            association.address
+                        this@GShockApplication,
+                        association.address
                     )
                 }
             } else {
@@ -200,9 +207,17 @@ class GShockApplication : Application(), IScreenManager {
     @Composable
     fun StartScreen(content: @Composable () -> Unit) {
         GShockSmartSyncTheme {
+
+            pendingCrashLog?.let { log ->
+                CrashLogDialog(
+                    crashLog = log,
+                    onDismiss = { pendingCrashLog = null }
+                )
+            }
+
             Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
             ) {
                 content()
                 PopupMessageReceiver()
@@ -224,15 +239,18 @@ class GShockApplication : Application(), IScreenManager {
             repository.isAlwaysConnectedConnectionPressed() -> {
                 CoverScreen(onUnlock = onUnlocked, isConnected = repository.isConnected())
             }
+
             repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
                 RunActionsScreen()
             }
+
             repository.isFindPhoneButtonPressed() -> {
                 RunFindPhoneScreen()
             }
+
             else -> {
                 BottomNavigationBarWithPermissions(
-                        repository = repository,
+                    repository = repository,
                 )
             }
         }
