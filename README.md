@@ -55,7 +55,7 @@ Here is a guide to the main screens of the application.
 
 ### 1. Connection Screen
 
-<img src="images/mainscreen-b5600.png" width="300" align="right" style="margin-left: 20px;">
+<img src="images/mainscreen-b5600.png" width="200" align="right" style="margin-left: 20px;">
 
 This is the first screen you see. It handles the Bluetooth connection to your watch.
 
@@ -69,7 +69,7 @@ The app communicates directly with the watch via BLE. Connection is typically mu
 
 ### 2. Time Setting
 
-<img src="images/TimeScreen.png" width="300" align="right" style="margin-left: 20px;">
+<img src="images/TimeScreen.png" width="200" align="right" style="margin-left: 20px;">
 
 Manage your watch's timekeeping effortlessly.
 
@@ -82,7 +82,7 @@ Manage your watch's timekeeping effortlessly.
 
 ### 3. Alarms
 
-<img src="images/AlarmsScreen.png" width="300" align="right" style="margin-left: 20px;">
+<img src="images/AlarmsScreen.png" width="200" align="right" style="margin-left: 20px;">
 
 Read and configure the alarms stored on your watch.
 
@@ -96,7 +96,7 @@ Read and configure the alarms stored on your watch.
 
 ### 4. Events (Calendar Sync)
 
-<img src="images/EventsScreen.png" width="300" align="right" style="margin-left: 20px;">
+<img src="images/EventsScreen.png" width="200" align="right" style="margin-left: 20px;">
 
 Sync your Android calendars to your watch!
 
@@ -110,7 +110,7 @@ The watch will display these as reminders with the date and title.
 
 ### 5. Actions (Remote Control)
 
-<img src="images/ActionsScreen.png" width="300" align="right" style="margin-left: 20px;">
+<img src="images/ActionsScreen.png" width="200" align="right" style="margin-left: 20px;">
 
 Turn your watch into a remote control. Assign actions to button presses on the watch.
 
@@ -125,7 +125,7 @@ Turn your watch into a remote control. Assign actions to button presses on the w
 
 ### 6. Settings
 
-<img src="images/Settings.png" width="300" align="right" style="margin-left: 20px;">
+<img src="images/Settings.png" width="200" align="right" style="margin-left: 20px;">
 
 Configure app and watch preferences.
 
