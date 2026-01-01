@@ -143,7 +143,7 @@ Configure app and watch preferences.
 ## Installation
 
 - **F-Droid**: [Download here](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
-- **GitHub**: [Download APK from Releases](https://github.com/izivkov/CasioGShockSmartSync/releases)
+- **GitHub**: [Download APK from Releases](https://github.com/izivkov/CasioGShockSmartSync/releases/tag/v26.5)
 
 ## Contributing
 
