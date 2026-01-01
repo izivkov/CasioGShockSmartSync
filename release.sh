@@ -31,9 +31,6 @@ echo "📝 Updating app/build.gradle..."
 sed -i "s/versionCode = .*/versionCode = $VERSION_CODE/" app/build.gradle
 sed -i "s/versionName = .*/versionName = \"$VERSION_NAME\"/" app/build.gradle
 
-# 1.5 Update README.md with the latest release link at line 146
-echo "📝 Updating README.md with latest release link..."
-sed -i "146s|https://github.com/izivkov/CasioGShockSmartSync/releases/tag/v.*|https://github.com/izivkov/CasioGShockSmartSync/releases/tag/v$VERSION_NAME)|" README.md
 
 # 2. Create latest.txt version metadata
 echo "📄 Creating latest.txt with version $VERSION_NAME..."
