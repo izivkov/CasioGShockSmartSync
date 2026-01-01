@@ -53,11 +53,7 @@ fi
 
 # 4. Git Operations
 echo "💾 Committing changes..."
-<<<<<<< HEAD
 git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml
-=======
-git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml README.md latest.txt
->>>>>>> main
 git commit -m "Release v$VERSION_NAME"
 
 echo "🏷️ Tagging release..."
