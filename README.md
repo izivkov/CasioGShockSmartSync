@@ -123,7 +123,7 @@ Turn your watch into a remote control. Assign actions to button presses on the w
   - **Set Prayer Alarms**: Set the watch's 5 alarms to Islamic Prayer Times
 - **How to use**: Short-press the lower-right button on the watch (when in Time mode) to trigger the selected action.
 
-Note: The Take Photo action requires the app to be in the foreground. If the app is in the background, the action will not work.
+*Note*: The **Take Photo** action requires the app to be in the foreground. If the app is in the background, the action will not work.
 
 <br clear="all"/>
 
