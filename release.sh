@@ -53,7 +53,8 @@ fi
 
 # 4. Git Operations
 echo "💾 Committing changes..."
-git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml
+
+git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml README.md latest.txt
 git commit -m "Release v$VERSION_NAME"
 
 echo "🏷️ Tagging release..."
@@ -79,8 +80,13 @@ if [ "$CURRENT_BRANCH" != "master" ]; then
     echo "🔄 Merging $CURRENT_BRANCH into master..."
     git checkout master
     git pull origin master
-    git merge "$CURRENT_BRANCH" --no-edit
-    git push origin master
+    if git merge "$CURRENT_BRANCH" --no-edit; then
+        git push origin master
+    else
+        echo "❌ Error: Merge into master failed due to conflicts."
+        echo "   Please resolve conflicts manually on the master branch."
+        git merge --abort
+    fi
     git checkout "$CURRENT_BRANCH"
 fi
 
