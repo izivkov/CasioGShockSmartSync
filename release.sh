@@ -90,6 +90,10 @@ echo "📝 Updating app/build.gradle..."
 sed -i "s/versionCode = .*/versionCode = $VERSION_CODE/" app/build.gradle
 sed -i "s/versionName = .*/versionName = \"$VERSION_NAME\"/" app/build.gradle
 
+# 1.5 Update README.md with the latest release link at line 146
+echo "📝 Updating README.md with latest release link..."
+sed -i "146s|https://github.com/izivkov/CasioGShockSmartSync/releases/tag/v.*|https://github.com/izivkov/CasioGShockSmartSync/releases/tag/v$VERSION_NAME)|" README.md
+
 # 2. Update F-Droid Metadata (Fastlane)
 CHANGELOG_PATH="fastlane/metadata/android/en-US/changelogs/${VERSION_NAME}.txt"
 echo "📂 Creating F-Droid changelog at $CHANGELOG_PATH..."
@@ -104,7 +108,7 @@ fi
 
 # 3. Git Operations
 echo "💾 Committing changes..."
-git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml
+git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml README.md
 git commit -m "Release v$VERSION_NAME"
 
 echo "🏷️ Tagging release..."
