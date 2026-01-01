@@ -8,7 +8,13 @@ if [ -z "$1" ] || [[ "$1" == -* ]]; then
     echo ""
     echo "Examples:"
     echo "  ./release.sh 25.4              # Create new release"
-    exit 1
+# Ensure we are on the main branch
+CURRENT_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    echo "🔄 Switching to main branch..."
+    git checkout main
+    git pull origin main
+    CURRENT_BRANCH="main"
 fi
 
 # Check if gh CLI is installed
@@ -73,18 +79,18 @@ if [ "$GH_AVAILABLE" = true ]; then
 fi
 
 # 4. Update master branch for F-Droid
-if [ "$CURRENT_BRANCH" != "master" ]; then
-    echo "🔄 Merging $CURRENT_BRANCH into master..."
+if [ "$CURRENT_BRANCH" == "main" ]; then
+    echo "🔄 Merging main into master..."
     git checkout master
     git pull origin master
-    if git merge "$CURRENT_BRANCH" --no-edit; then
+    if git merge main --no-edit; then
         git push origin master
     else
         echo "❌ Error: Merge into master failed due to conflicts."
         echo "   Please resolve conflicts manually on the master branch."
         git merge --abort
     fi
-    git checkout "$CURRENT_BRANCH"
+    git checkout main
 fi
 
 echo "✅ Release process initiated! The GitHub Action will now build and upload the APK."
