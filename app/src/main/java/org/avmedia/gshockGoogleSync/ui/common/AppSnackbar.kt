@@ -19,10 +19,6 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 
-object SnackbarController {
-    var snackbarHostState: SnackbarHostState? = null
-}
-
 fun AppSnackbar(message: String) {
     ProgressEvents.onNext("SnackbarMessage", message)
 }
@@ -33,7 +29,6 @@ fun PopupMessageReceiver(duration: SnackbarDuration = SnackbarDuration.Short) {
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        SnackbarController.snackbarHostState = snackbarHostState
         val eventActions =
                 arrayOf(
                         EventAction("SnackbarMessage") {

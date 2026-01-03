@@ -7,14 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.ui.Alignment
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
-import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
-import org.avmedia.gshockGoogleSync.ui.common.ButtonData
-import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,7 +16,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +30,9 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.ui.common.ButtonData
+import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.WatchInfo
@@ -40,8 +40,9 @@ import timber.log.Timber
 
 @Composable
 fun ActionsScreen(
-    modifier: Modifier = Modifier,
-    actionsViewModel: ActionsViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
+        modifier: Modifier = Modifier,
+        actionsViewModel: ActionsViewModel =
+                hiltViewModel(LocalContext.current as ComponentActivity),
 ) {
     val actions by actionsViewModel.actions.collectAsState()
 
@@ -49,7 +50,7 @@ fun ActionsScreen(
         actionsViewModel.uiEvents.collect { event ->
             when (event) {
                 is ActionsViewModel.UiEvent.ShowSnackbar -> {
-                    SnackbarController.snackbarHostState?.showSnackbar(event.message)
+                    AppSnackbar(event.message)
                 }
             }
         }
@@ -63,40 +64,38 @@ fun ActionsScreen(
     }
 
     GShockSmartSyncTheme {
-        Surface(
-            modifier = modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            ConstraintLayout(
-                modifier = Modifier.fillMaxSize()
-            ) {
+        Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
                 val (title, actions, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    text = stringResource(id = R.string.actions),
-                    modifier = Modifier.constrainAs(title) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(actions.top)
-                    }
+                        text = stringResource(id = R.string.actions),
+                        modifier =
+                                Modifier.constrainAs(title) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(actions.top)
+                                }
                 )
 
                 ActionsContent(
-                    modifier = Modifier.constrainAs(actions) {
-                        top.linkTo(title.bottom)
-                        bottom.linkTo(buttonsRow.top)
-                        height = Dimension.fillToConstraints
-                    },
-                    actionsViewModel = actionsViewModel
+                        modifier =
+                                Modifier.constrainAs(actions) {
+                                    top.linkTo(title.bottom)
+                                    bottom.linkTo(buttonsRow.top)
+                                    height = Dimension.fillToConstraints
+                                },
+                        actionsViewModel = actionsViewModel
                 )
 
                 BottomRow(
-                    modifier = Modifier.constrainAs(buttonsRow) {
-                        top.linkTo(actions.bottom)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
-                    actionsViewModel = actionsViewModel
+                        modifier =
+                                Modifier.constrainAs(buttonsRow) {
+                                    top.linkTo(actions.bottom)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                },
+                        actionsViewModel = actionsViewModel
                 )
             }
         }
@@ -104,21 +103,14 @@ fun ActionsScreen(
 }
 
 @Composable
-private fun ActionsContent(
-    modifier: Modifier = Modifier,
-    actionsViewModel: ActionsViewModel
-) {
+private fun ActionsContent(modifier: Modifier = Modifier, actionsViewModel: ActionsViewModel) {
     Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .padding(0.dp)
-            .fillMaxWidth()
-            .fillMaxSize()
-    ) {
-        ItemList(
-            items = createActionItems(actionsViewModel)
-        )
-    }
+            modifier =
+                    modifier.verticalScroll(rememberScrollState())
+                            .padding(0.dp)
+                            .fillMaxWidth()
+                            .fillMaxSize()
+    ) { ItemList(items = createActionItems(actionsViewModel)) }
 }
 
 @Composable
@@ -127,49 +119,44 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
     val actions by actionsViewModel.actions.collectAsState()
 
     return listOfNotNull(
-        if (WatchInfo.findButtonUserDefined) PhoneFinderView(
-            actionsViewModel::updateAction,
-            actionsViewModel
-        ) else null,
-        SetTimeView(actionsViewModel::updateAction, actionsViewModel),
-        if (WatchInfo.hasReminders) RemindersView(
-            actionsViewModel::updateAction,
-            actionsViewModel
-        ) else null,
-        PhotoView(actionsViewModel::updateAction, actionsViewModel),
-        FlashlightView(actionsViewModel::updateAction, actionsViewModel),
-        VoiceAssistView(actionsViewModel::updateAction, actionsViewModel),
-        SkipToNextTrackView(actionsViewModel::updateAction, actionsViewModel),
-        PrayerAlarmsView(actionsViewModel::updateAction, actionsViewModel),
-        SeparatorView(),
-        PhoneView(actionsViewModel::updateAction, actionsViewModel)
+            if (WatchInfo.findButtonUserDefined)
+                    PhoneFinderView(actionsViewModel::updateAction, actionsViewModel)
+            else null,
+            SetTimeView(actionsViewModel::updateAction, actionsViewModel),
+            if (WatchInfo.hasReminders)
+                    RemindersView(actionsViewModel::updateAction, actionsViewModel)
+            else null,
+            PhotoView(actionsViewModel::updateAction, actionsViewModel),
+            FlashlightView(actionsViewModel::updateAction, actionsViewModel),
+            VoiceAssistView(actionsViewModel::updateAction, actionsViewModel),
+            SkipToNextTrackView(actionsViewModel::updateAction, actionsViewModel),
+            PrayerAlarmsView(actionsViewModel::updateAction, actionsViewModel),
+            SeparatorView(),
+            PhoneView(actionsViewModel::updateAction, actionsViewModel)
     )
 }
 
 @Composable
-fun BottomRow(
-    modifier: Modifier,
-    actionsViewModel: ActionsViewModel
-) {
+fun BottomRow(modifier: Modifier, actionsViewModel: ActionsViewModel) {
     Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Bottom,
+            modifier = modifier,
+            verticalArrangement = Arrangement.Bottom,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
             val msg = stringResource(id = R.string.actions_saved)
-            val buttons = arrayListOf(
-                ButtonData(
-                    text = stringResource(id = R.string.send_to_watch),
-                    onClick = { actionsViewModel.saveWithMessage(msg) }
-                )
-            )
+            val buttons =
+                    arrayListOf(
+                            ButtonData(
+                                    text = stringResource(id = R.string.send_to_watch),
+                                    onClick = { actionsViewModel.saveWithMessage(msg) }
+                            )
+                    )
 
             ButtonsRow(buttons = buttons, modifier = Modifier.weight(2f))
 
