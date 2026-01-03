@@ -9,12 +9,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
@@ -29,35 +28,30 @@ fun AppSnackbar(message: String) {
 }
 
 @Composable
-fun PopupMessageReceiver(
-    duration: SnackbarDuration = SnackbarDuration.Short
-) {
+fun PopupMessageReceiver(duration: SnackbarDuration = SnackbarDuration.Short) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
-        val eventActions = arrayOf(
-            EventAction("SnackbarMessage") {
-                val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-                scope.launch {
-                    val message = ProgressEvents.getPayload("SnackbarMessage") as String
-                    SnackbarController.snackbarHostState?.showSnackbar(
-                        message = message,
-                        duration = duration
-                    )
-                }
-            },
-        )
+        SnackbarController.snackbarHostState = snackbarHostState
+        val eventActions =
+                arrayOf(
+                        EventAction("SnackbarMessage") {
+                            scope.launch {
+                                val message = ProgressEvents.getPayload("SnackbarMessage") as String
+                                snackbarHostState.showSnackbar(
+                                        message = message,
+                                        duration = duration
+                                )
+                            }
+                        },
+                )
 
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .systemBarsPadding(),
-        contentAlignment = Alignment.BottomCenter, // Align the popup at the bottom
-    ) {
-        SnackbarHost(
-            hostState = SnackbarController.snackbarHostState!!,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
+            modifier = Modifier.fillMaxSize().systemBarsPadding(),
+            contentAlignment = Alignment.BottomCenter, // Align the popup at the bottom
+    ) { SnackbarHost(hostState = snackbarHostState, modifier = Modifier.padding(16.dp)) }
 }

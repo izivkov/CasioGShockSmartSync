@@ -8,20 +8,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockGoogleSync.ui.common.SnackbarController
+import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
 import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import timber.log.Timber
@@ -62,28 +63,37 @@ class MainActivity : ComponentActivity() {
                 )
 
         setContent {
-            CheckPermissions {
-                bluetoothHelper.turnOnBLE {
+            GShockSmartSyncTheme {
+                var isInitialized by remember { mutableStateOf(false) }
 
-                    // initialize the app after all permissions are granted.
-                    application.init(this)
+                CheckPermissions {
+                    LaunchedEffect(Unit) {
+                        if (!isInitialized) {
+                            bluetoothHelper.turnOnBLE {
+                                application.init()
+                                isInitialized = true
+                            }
+                        }
+                    }
 
-                    setContent {
-                        GShockSmartSyncTheme {
-                            SnackbarController.snackbarHostState = remember { SnackbarHostState() }
-                            Scaffold(
-                                    snackbarHost = {
-                                        SnackbarController.snackbarHostState?.let { nonNullHostState
-                                            ->
-                                            SnackbarHost(hostState = nonNullHostState)
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxSize()
-                            ) { contentPadding ->
-                                Surface(
-                                        modifier = Modifier.fillMaxSize().padding(contentPadding),
-                                        color = MaterialTheme.colorScheme.background
-                                ) { setContent { application.Run() } }
+                    if (isInitialized) {
+                        Scaffold(
+                                modifier = Modifier.fillMaxSize(),
+                                // 2. Tell the Scaffold NOT to protect the status/nav bar areas
+                                // This allows your background to flow behind them.
+                                contentWindowInsets =
+                                        androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+                        ) { contentPadding ->
+                            Surface(
+                                    modifier = Modifier.fillMaxSize(),
+                                    color = MaterialTheme.colorScheme.background
+                            ) {
+                                // Note: If AppContainer uses 'contentPadding', it will still
+                                // push content away from edges. To take over the WHOLE screen,
+                                // you can pass 'PaddingValues(0.dp)' or ignore it inside the
+                                // AppContainer.
+                                application.AppContainer(contentPadding)
+                                PopupMessageReceiver()
                             }
                         }
                     }

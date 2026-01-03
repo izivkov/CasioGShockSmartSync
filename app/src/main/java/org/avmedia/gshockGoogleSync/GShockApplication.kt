@@ -5,16 +5,18 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,11 +24,9 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.services.GShockScanService
-import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
-import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
 import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
@@ -36,36 +36,32 @@ import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
-import javax.inject.Inject
 
+enum class AppScreen {
+    INITIAL,
+    PRE_CONNECTION,
+    CONTENT_SELECTOR,
+    MAIN_NAVIGATION,
+    RUN_ACTIONS,
+    ERROR
+}
 
 @HiltAndroidApp
 class GShockApplication : Application(), IScreenManager {
-    private var _context: MainActivity? = null
-    private val context: MainActivity?
-        get() = _context ?: ActivityProvider.getCurrentActivity() as? MainActivity
 
-    var pendingCrashLog by androidx.compose.runtime.mutableStateOf<String?>(null)
-
-    private fun safeSetContent(content: @Composable () -> Unit) {
-        context?.setContent { content() }
-            ?: Timber.w("Cannot set content: MainActivity is not available")
-    }
+    var currentScreen by mutableStateOf(AppScreen.INITIAL)
+    var errorMessage by mutableStateOf<String?>(null)
+    var pendingCrashLog by mutableStateOf<String?>(null)
 
     private lateinit var eventHandler: MainEventHandler
 
-    @Inject
-    lateinit var deviceManager: DeviceManager
+    @Inject lateinit var deviceManager: DeviceManager
 
-    @Inject
-    lateinit var repository: GShockRepository
+    @Inject lateinit var repository: GShockRepository
 
-    @Inject
-    lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
+    @Inject lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
 
-    fun init(context: MainActivity) {
-
-        _context = context
+    fun init() {
 
         Timber.i("Initializing GShockApplication")
 
@@ -74,11 +70,11 @@ class GShockApplication : Application(), IScreenManager {
             // Check for previous pairing crash and recover if needed
             recoverFromPairingCrash()
 
-            cleanupLocalStorage(context)
+            cleanupLocalStorage(this@GShockApplication)
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                val intent = Intent(context, GShockScanService::class.java)
-                context.startService(intent)
+                val intent = Intent(this@GShockApplication, GShockScanService::class.java)
+                startService(intent)
             } else {
                 syncAssociations()
             }
@@ -112,7 +108,7 @@ class GShockApplication : Application(), IScreenManager {
         super.onCreate()
         ActivityProvider.initialize(this)
         eventHandler =
-            MainEventHandler(context = this, repository = repository, screenManager = this)
+                MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
     }
 
@@ -143,7 +139,7 @@ class GShockApplication : Application(), IScreenManager {
             }
 
             if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
-                    .isNullOrEmpty()
+                            .isNullOrEmpty()
             ) {
                 associations.firstOrNull()?.let {
                     LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
@@ -154,8 +150,8 @@ class GShockApplication : Application(), IScreenManager {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 associations.forEach { association ->
                     repository.startObservingDevicePresence(
-                        this@GShockApplication,
-                        association.address
+                            this@GShockApplication,
+                            association.address
                     )
                 }
             } else {
@@ -166,63 +162,47 @@ class GShockApplication : Application(), IScreenManager {
 
     // ScreenManager implementation
     override fun showContentSelector(repository: GShockRepository) {
-        safeSetContent {
-            StartScreen {
-                ContentSelector(repository = repository, onUnlocked = { goToNavigationScreen() })
-            }
-        }
+        currentScreen = AppScreen.CONTENT_SELECTOR
     }
 
     override fun showRunActionsScreen() {
-        safeSetContent { StartScreen { RunActionsScreen() } }
+        currentScreen = AppScreen.RUN_ACTIONS
     }
 
     private fun goToNavigationScreen() {
-        safeSetContent {
-            StartScreen { BottomNavigationBarWithPermissions(repository = repository) }
-        }
+        currentScreen = AppScreen.MAIN_NAVIGATION
     }
 
     override fun showPreConnectionScreen() {
-        safeSetContent { StartScreen { PreConnectionScreen() } }
+        currentScreen = AppScreen.PRE_CONNECTION
     }
 
     override fun showInitialScreen() {
-        safeSetContent { Run() }
+        currentScreen = AppScreen.INITIAL
     }
 
     override fun showError(message: String) {
+        errorMessage = message
+        currentScreen = AppScreen.ERROR
         AppSnackbar(message)
     }
 
     @Composable
-    fun Run() {
+    fun Run(contentPadding: PaddingValues) {
         // Start ActionRunner here so we can run actions on connection
         ActionRunner(context = this, api = repository)
 
-        StartScreen { PreConnectionScreen() }
+        StartScreen(contentPadding) { PreConnectionScreen() }
         LaunchedEffect(key1 = System.currentTimeMillis()) { waitForConnection() }
     }
 
     @Composable
-    fun StartScreen(content: @Composable () -> Unit) {
-        GShockSmartSyncTheme {
-
-            pendingCrashLog?.let { log ->
-                CrashLogDialog(
-                    crashLog = log,
-                    onDismiss = { pendingCrashLog = null }
-                )
-            }
-
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                content()
-                PopupMessageReceiver()
-            }
+    fun StartScreen(contentPadding: PaddingValues, content: @Composable () -> Unit) {
+        pendingCrashLog?.let { log ->
+            CrashLogDialog(crashLog = log, onDismiss = { pendingCrashLog = null })
         }
+
+        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) { content() }
     }
 
     @SuppressLint("NewApi")
@@ -234,30 +214,47 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     @Composable
+    fun AppContainer(contentPadding: PaddingValues) {
+        when (currentScreen) {
+            AppScreen.INITIAL -> Run(contentPadding)
+            AppScreen.PRE_CONNECTION -> StartScreen(contentPadding) { PreConnectionScreen() }
+            AppScreen.CONTENT_SELECTOR ->
+                    StartScreen(contentPadding) {
+                        ContentSelector(
+                                repository = repository,
+                                onUnlocked = { goToNavigationScreen() }
+                        )
+                    }
+            AppScreen.MAIN_NAVIGATION ->
+                    StartScreen(contentPadding) {
+                        BottomNavigationBarWithPermissions(repository = repository)
+                    }
+            AppScreen.RUN_ACTIONS -> StartScreen(contentPadding) { RunActionsScreen() }
+            AppScreen.ERROR -> {
+                // Keep showing previous screen or a default one, but show error snackbar
+                // Or show a specific error screen if needed
+                StartScreen(contentPadding) { PreConnectionScreen() }
+            }
+        }
+    }
+
+    @Composable
     private fun ContentSelector(repository: GShockRepository, onUnlocked: () -> Unit) {
         when {
             repository.isAlwaysConnectedConnectionPressed() -> {
                 CoverScreen(onUnlock = onUnlocked, isConnected = repository.isConnected())
             }
-
             repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
                 RunActionsScreen()
             }
-
             repository.isFindPhoneButtonPressed() -> {
                 RunFindPhoneScreen()
             }
-
             else -> {
                 BottomNavigationBarWithPermissions(
-                    repository = repository,
+                        repository = repository,
                 )
             }
         }
-    }
-
-    override fun onTerminate() {
-        super.onTerminate()
-        _context = null
     }
 }
