@@ -8,6 +8,8 @@ if [ -z "$1" ] || [[ "$1" == -* ]]; then
     echo ""
     echo "Examples:"
     echo "  ./release.sh 25.4              # Create new release"
+    exit 1
+fi
 # Ensure we are on the main branch
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
@@ -94,3 +96,4 @@ if [ "$CURRENT_BRANCH" == "main" ]; then
 fi
 
 echo "✅ Release process initiated! The GitHub Action will now build and upload the APK."
+

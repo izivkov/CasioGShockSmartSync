@@ -1,0 +1,15 @@
+I've analyzed the issue and identified several potential triggers for the "Harmful" flag.
+
+Analysis:
+
+Sensitive Permissions: The app uses CALL_PHONE (direct dialing), READ_CALENDAR, and runs a NotificationListenerService. These are high-risk behaviors.
+Notification Access: The app requests access to all notifications. While it filters for specific apps (gmail, whatsapp, etc.), the raw capability is broad and often scrutinized.
+Privacy Policy: I found a Privacy Policy URL in the README.md, but Google Play requires a Privacy Policy link within the app (e.g., in Settings or About) that covers these permissions. I couldn't find a direct link in the SettingsScreen or About section.
+Target SDK 36: Targeting Android 16 (API 36) which is a preview version might be triggering heuristic flags.
+Recommendations:
+
+Add Privacy Policy Link: Ensure a clear link to your privacy policy is accessible from the app Settings.
+Review CALL_PHONE: Use Intent.ACTION_DIAL instead of ACTION_CALL if possible. ACTION_DIAL opens the keypad but requires user confirmation to call, which is much safer and less likely to be flagged.
+Verify Target SDK: Consider targeting stable Android 15 (API 35) instead of the preview API 36 unless you specifically need Android 16 features.
+Consent: Ensure you have a clear "disclosure and consent" screen before requesting these permissions, explaining exactly why they are needed.
+I recommend starting by adding the Privacy Policy link to the app and downgrading the target SDK to 35.
