@@ -104,6 +104,7 @@ class CameraCaptureHelper(
     private fun captureImage(onImageCaptured: (String) -> Unit, onError: (String) -> Unit) {
         state.imageCapture?.let { imageCapture ->
             createOutputOptions().let { outputOptions ->
+                state.mediaActionSound.play(MediaActionSound.SHUTTER_CLICK)
                 captureImage(imageCapture, outputOptions, onImageCaptured, onError)
             }
         }
@@ -153,20 +154,14 @@ class CameraCaptureHelper(
                     }
 
                     override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        state.mediaActionSound.play(MediaActionSound.SHUTTER_CLICK)
                         outputFileResults.savedUri?.let { uri ->
                             runCatching {
                                 context.contentResolver.openFileDescriptor(uri, "rw")?.use { pfd ->
                                     ExifInterface(pfd.fileDescriptor).apply {
-                                        // Add prominent attribution tags
-                                        setAttribute(ExifInterface.TAG_MAKE, "G-Shock Smart Sync")
+                                        // Add app attribution tags
                                         setAttribute(
-                                                ExifInterface.TAG_MODEL,
-                                                "Casio G-Shock Smart Sync"
-                                        )
-                                        setAttribute(
-                                                ExifInterface.TAG_IMAGE_DESCRIPTION,
-                                                "Captured by G-Shock Smart Sync App - https://github.com/izivkov/CasioGShockSmartSync"
+                                                ExifInterface.TAG_USER_COMMENT,
+                                                "Created by GShock Smart Sync (https://github.com/izivkov/CasioGShockSmartSync)"
                                         )
                                         setAttribute(
                                                 ExifInterface.TAG_SOFTWARE,
