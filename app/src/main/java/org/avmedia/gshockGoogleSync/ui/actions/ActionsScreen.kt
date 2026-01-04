@@ -44,8 +44,6 @@ fun ActionsScreen(
         actionsViewModel: ActionsViewModel =
                 hiltViewModel(LocalContext.current as ComponentActivity),
 ) {
-    val actions by actionsViewModel.actions.collectAsState()
-
     LaunchedEffect(Unit) {
         actionsViewModel.uiEvents.collect { event ->
             when (event) {
