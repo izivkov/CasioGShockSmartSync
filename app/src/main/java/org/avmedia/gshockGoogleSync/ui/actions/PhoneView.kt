@@ -24,90 +24,81 @@ import org.avmedia.gshockGoogleSync.ui.common.AppPhoneInputDialog
 
 @Composable
 fun PhoneView(
-    onUpdate: (ActionsViewModel.PhoneDialAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel(),
+        onUpdate: (ActionsViewModel.PhoneDialAction) -> Unit,
+        actionsViewModel: ActionsViewModel = hiltViewModel(),
 ) {
     data class ViewState(
-        val isEnabled: Boolean,
-        val phoneNumber: String,
-        val showDialog: Boolean,
-        val action: ActionsViewModel.PhoneDialAction
+            val isEnabled: Boolean,
+            val phoneNumber: String,
+            val showDialog: Boolean,
+            val action: ActionsViewModel.PhoneDialAction
     )
 
     val actions by actionsViewModel.actions.collectAsState()
-    val phoneDialAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.PhoneDialAction::class.java)
-    }
+    val phoneDialAction =
+            actions.filterIsInstance<ActionsViewModel.PhoneDialAction>().firstOrNull()
+                    ?: actionsViewModel.getAction(ActionsViewModel.PhoneDialAction::class.java)
 
     val defaultPhone = "000-000-0000"
 
-    var viewState by remember(actions, phoneDialAction) {
-        mutableStateOf(
-            ViewState(
-                isEnabled = phoneDialAction.enabled,
-                phoneNumber = phoneDialAction.phoneNumber.takeIf { it.isNotBlank() }?.trim()
-                    ?: defaultPhone,
-                showDialog = false,
-                action = phoneDialAction
-            )
-        )
-    }
+    var viewState by
+            remember(actions, phoneDialAction) {
+                mutableStateOf(
+                        ViewState(
+                                isEnabled = phoneDialAction.enabled,
+                                phoneNumber =
+                                        phoneDialAction
+                                                .phoneNumber
+                                                .takeIf { it.isNotBlank() }
+                                                ?.trim()
+                                                ?: defaultPhone,
+                                showDialog = false,
+                                action = phoneDialAction
+                        )
+                )
+            }
 
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
         ) {
-            AppIconFromResource(
-                resourceId = R.drawable.phone,
-                contentDescription = ""
-            )
+            AppIconFromResource(resourceId = R.drawable.phone, contentDescription = "")
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(6.dp)
-            ) {
-                AppTextLarge(
-                    text = stringResource(id = R.string.make_phonecall)
-                )
+            Column(modifier = Modifier.weight(1f).padding(6.dp)) {
+                AppTextLarge(text = stringResource(id = R.string.make_phonecall))
 
                 AppTextLink(
-                    text = viewState.phoneNumber,
-                    modifier = Modifier.clickable {
-                        viewState = viewState.copy(showDialog = true)
-                    },
-                    textAlign = TextAlign.Start,
-                    fontSize = 20.sp
+                        text = viewState.phoneNumber,
+                        modifier =
+                                Modifier.clickable {
+                                    viewState = viewState.copy(showDialog = true)
+                                },
+                        textAlign = TextAlign.Start,
+                        fontSize = 20.sp
                 )
 
                 if (viewState.showDialog) {
                     AppPhoneInputDialog(
-                        initialPhoneNumber = viewState.phoneNumber,
-                        onDismiss = {
-                            viewState = viewState.copy(showDialog = false)
-                        },
-                        onPhoneNumberValidated = { newValue ->
-                            val newPhone = newValue.ifEmpty { defaultPhone }
-                            viewState = viewState.copy(
-                                phoneNumber = newPhone,
-                                showDialog = false
-                            )
-                            onUpdate(viewState.action.copy(phoneNumber = newPhone))
-                        }
+                            initialPhoneNumber = viewState.phoneNumber,
+                            onDismiss = { viewState = viewState.copy(showDialog = false) },
+                            onPhoneNumberValidated = { newValue ->
+                                val newPhone = newValue.ifEmpty { defaultPhone }
+                                viewState =
+                                        viewState.copy(phoneNumber = newPhone, showDialog = false)
+                                onUpdate(viewState.action.copy(phoneNumber = newPhone))
+                            }
                     )
                 }
             }
 
             AppSwitch(
-                checked = viewState.isEnabled,
-                onCheckedChange = { newValue ->
-                    viewState = viewState.copy(isEnabled = newValue)
-                    viewState.action.enabled = newValue
-                    onUpdate(viewState.action.copy(enabled = newValue))
-                }
+                    checked = viewState.isEnabled,
+                    onCheckedChange = { newValue ->
+                        viewState = viewState.copy(isEnabled = newValue)
+                        viewState.action.enabled = newValue
+                        onUpdate(viewState.action.copy(enabled = newValue))
+                    }
             )
         }
     }
