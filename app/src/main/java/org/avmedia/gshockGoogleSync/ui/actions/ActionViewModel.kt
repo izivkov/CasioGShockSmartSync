@@ -544,7 +544,7 @@ constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            var captureResult: String?
+
             val cameraSelector =
                     when (cameraOrientation) {
                         CameraOrientation.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
@@ -552,27 +552,21 @@ constructor(
                     }
             val cameraHelper = CameraCaptureHelper(context, cameraSelector)
 
-            // Initialize the camera
-            cameraHelper.initCamera()
-
             // Launch a coroutine to take the picture
             CoroutineScope(Dispatchers.Main).launch {
-                cameraHelper.takePicture(
-                        onImageCaptured = { result ->
-                            captureResult = result
-                            AppSnackbar(context.getString(R.string.image_captured, captureResult!!))
-                            // Handle result, maybe pass it to the UI or save it
-                        },
-                        onError = { error ->
-                            captureResult = "Error: $error"
+                cameraHelper
+                        .takePicture()
+                        .onSuccess { result ->
+                            AppSnackbar(context.getString(R.string.image_captured, result))
+                        }
+                        .onFailure { error ->
                             AppSnackbar(
                                     context.getString(
                                             R.string.camera_capture_error,
-                                            captureResult!!
+                                            error.message ?: "Unknown error"
                                     )
                             )
                         }
-                )
             }
         }
 

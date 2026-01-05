@@ -22,6 +22,11 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import timber.log.Timber
 
@@ -30,85 +35,135 @@ class CameraCaptureHelper(
         private val cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 ) {
 
-    private data class CameraState(
-            val imageCapture: ImageCapture? = null,
-            val cameraExecutor: ExecutorService? = null,
-            val mediaActionSound: MediaActionSound,
-            var isCameraReady: Boolean = false
-    )
+    private var imageCapture: ImageCapture? = null
+    private var cameraExecutor: ExecutorService? = null
+    private val mediaActionSound = MediaActionSound().apply { load(MediaActionSound.SHUTTER_CLICK) }
 
-    private var state =
-            CameraState(
-                    mediaActionSound =
-                            MediaActionSound().apply { load(MediaActionSound.SHUTTER_CLICK) },
-                    isCameraReady = false
-            )
-
-    fun initCamera(): Result<Unit> = runCatching {
-        state =
-                state.copy(
-                        cameraExecutor = Executors.newSingleThreadExecutor(),
-                        imageCapture = createImageCapture()
-                )
-
-        ProcessCameraProvider.getInstance(context).get()?.let { provider -> setupCamera(provider) }
-    }
-
-    private fun createImageCapture(): ImageCapture =
-            ImageCapture.Builder().setFlashMode(ImageCapture.FLASH_MODE_AUTO).build()
-
-    private fun setupCamera(cameraProvider: ProcessCameraProvider) {
-        val currentActivity = ActivityProvider.getCurrentActivity() ?: return
-
-        if (currentActivity !is LifecycleOwner) return
-
-        state.imageCapture?.let { imageCapture ->
+    suspend fun takePicture(): Result<String> =
             runCatching {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(currentActivity, cameraSelector, imageCapture)
-                state = state.copy(isCameraReady = true)
-                Timber.d("Camera setup complete")
+                if (!isCameraBound()) {
+                    initCamera()
+                }
+
+                captureImage()
             }
-                    .onFailure { e ->
-                        Timber.e("Failed to bind camera: ${e.message}")
-                        state = state.copy(isCameraReady = false)
-                    }
-        }
+                    .onFailure { stopCamera() }
+
+    private fun isCameraBound(): Boolean {
+        return imageCapture != null
     }
 
-    fun takePicture(onImageCaptured: (String) -> Unit, onError: (String) -> Unit) {
-        if (!state.isCameraReady) {
-            // Try to reinitialize camera if it's not ready
-            initCamera()
-                    .onSuccess {
-                        // Wait a bit for camera to initialize
-                        android.os.Handler(android.os.Looper.getMainLooper())
-                                .postDelayed(
-                                        {
-                                            if (state.isCameraReady) {
-                                                captureImage(onImageCaptured, onError)
-                                            } else {
-                                                onError("Camera not ready")
-                                            }
-                                        },
-                                        500
+    private suspend fun initCamera() {
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        imageCapture = ImageCapture.Builder().setFlashMode(ImageCapture.FLASH_MODE_AUTO).build()
+
+        bindCameraToLifecycle()
+    }
+
+    private suspend fun bindCameraToLifecycle() =
+            withContext(Dispatchers.Main) {
+                val cameraProvider = getCameraProvider(context)
+                val currentActivity =
+                        ActivityProvider.getCurrentActivity()
+                                ?: throw IllegalStateException(
+                                        "No active activity found to bind camera"
                                 )
-                    }
-                    .onFailure { e -> onError("Failed to initialize camera: ${e.message}") }
-            return
-        }
 
-        captureImage(onImageCaptured, onError)
+                if (currentActivity !is LifecycleOwner) {
+                    throw IllegalStateException("Current activity is not a LifecycleOwner")
+                }
+
+                try {
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(currentActivity, cameraSelector, imageCapture!!)
+                    Timber.d("Camera setup complete")
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to bind camera")
+                    throw e
+                }
+            }
+
+    private suspend fun getCameraProvider(context: Context): ProcessCameraProvider =
+            suspendCancellableCoroutine { continuation ->
+                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                cameraProviderFuture.addListener(
+                        {
+                            try {
+                                continuation.resume(cameraProviderFuture.get())
+                            } catch (e: Exception) {
+                                continuation.resumeWithException(e)
+                            }
+                        },
+                        ContextCompat.getMainExecutor(context)
+                )
+            }
+
+    private suspend fun captureImage(): String = suspendCancellableCoroutine { continuation ->
+        val imageCapture =
+                imageCapture
+                        ?: run {
+                            continuation.resumeWithException(
+                                    IllegalStateException("Camera not initialized")
+                            )
+                            return@suspendCancellableCoroutine
+                        }
+
+        val outputOptions = createOutputOptions()
+        imageCapture.takePicture(
+                outputOptions,
+                ContextCompat.getMainExecutor(context),
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onError(exception: ImageCaptureException) {
+                        if (continuation.isActive) {
+                            continuation.resumeWithException(exception)
+                        }
+                    }
+
+                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        val savedUri = outputFileResults.savedUri
+                        if (savedUri == null) {
+                            if (continuation.isActive) {
+                                continuation.resumeWithException(
+                                        IllegalStateException("Image saved but URI is null")
+                                )
+                            }
+                            return
+                        }
+
+                        // Add EXIF data
+                        runCatching {
+                            context.contentResolver.openFileDescriptor(savedUri, "rw")?.use { pfd ->
+                                val exif = ExifInterface(pfd.fileDescriptor)
+                                addExifMetadata(exif)
+                                exif.saveAttributes()
+                            }
+                            mediaActionSound.play(MediaActionSound.SHUTTER_CLICK)
+                        }
+                                .onFailure { e -> Timber.e(e, "Error adding EXIF data") }
+
+                        if (continuation.isActive) {
+                            continuation.resume("Image saved at $savedUri")
+                        }
+                        stopCamera()
+                    }
+                }
+        )
     }
 
-    private fun captureImage(onImageCaptured: (String) -> Unit, onError: (String) -> Unit) {
-        state.imageCapture?.let { imageCapture ->
-            createOutputOptions().let { outputOptions ->
-                state.mediaActionSound.play(MediaActionSound.SHUTTER_CLICK)
-                captureImage(imageCapture, outputOptions, onImageCaptured, onError)
-            }
-        }
-                ?: onError("Camera not initialized")
+    private fun addExifMetadata(exif: ExifInterface) {
+        val timestamp =
+                SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US)
+                        .format(System.currentTimeMillis())
+
+        exif.setAttribute(ExifInterface.TAG_USER_COMMENT, "Created by GShock Smart Sync")
+        exif.setAttribute(ExifInterface.TAG_SOFTWARE, "G-Shock Smart Sync")
+        exif.setAttribute(
+                ExifInterface.TAG_COPYRIGHT,
+                "https://github.com/izivkov/CasioGShockSmartSync"
+        )
+        exif.setAttribute(ExifInterface.TAG_DATETIME, timestamp)
+        exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, timestamp)
+        exif.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, timestamp)
     }
 
     private fun createOutputOptions(): ImageCapture.OutputFileOptions {
@@ -116,94 +171,37 @@ class CameraCaptureHelper(
                 SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
                         .format(System.currentTimeMillis())
 
-        return ContentValues()
-                .apply {
+        val contentValues =
+                ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, name)
                     put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        put(
-                                MediaStore.Images.Media.RELATIVE_PATH,
-                                "${android.os.Environment.DIRECTORY_DCIM}/Camera"
-                        )
+                        put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/Camera")
                     }
                 }
-                .let { contentValues ->
-                    ImageCapture.OutputFileOptions.Builder(
-                                    context.contentResolver,
-                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                    contentValues
-                            )
-                            .build()
-                }
-    }
 
-    private fun captureImage(
-            imageCapture: ImageCapture,
-            outputOptions: ImageCapture.OutputFileOptions,
-            onSuccess: (String) -> Unit,
-            onError: (String) -> Unit
-    ) {
-        // Use the existing outputOptions and add metadata
-        imageCapture.takePicture(
-                outputOptions, // Use the original outputOptions
-                ContextCompat.getMainExecutor(context),
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onError(exception: ImageCaptureException) {
-                        onError(exception.message ?: "Unknown error")
-                        stopCamera()
-                    }
-
-                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        outputFileResults.savedUri?.let { uri ->
-                            runCatching {
-                                context.contentResolver.openFileDescriptor(uri, "rw")?.use { pfd ->
-                                    ExifInterface(pfd.fileDescriptor).apply {
-                                        // Add app attribution tags
-                                        setAttribute(
-                                                ExifInterface.TAG_USER_COMMENT,
-                                                "Created by GShock Smart Sync (https://github.com/izivkov/CasioGShockSmartSync)"
-                                        )
-                                        setAttribute(
-                                                ExifInterface.TAG_SOFTWARE,
-                                                "G-Shock Smart Sync"
-                                        )
-
-                                        // Add date/time information
-                                        val timestamp =
-                                                SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US)
-                                                        .format(System.currentTimeMillis())
-                                        setAttribute(ExifInterface.TAG_DATETIME, timestamp)
-                                        setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, timestamp)
-                                        setAttribute(
-                                                ExifInterface.TAG_DATETIME_DIGITIZED,
-                                                timestamp
-                                        )
-
-                                        saveAttributes()
-                                    }
-                                }
-                            }
-                                    .onFailure { e ->
-                                        Timber.e("Error adding EXIF data: ${e.message}")
-                                    }
-                        }
-
-                        onSuccess("Image saved at ${outputFileResults.savedUri}")
-                        stopCamera()
-                    }
-                }
-        )
+        return ImageCapture.OutputFileOptions.Builder(
+                        context.contentResolver,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        contentValues
+                )
+                .build()
     }
 
     private fun stopCamera() {
-        ProcessCameraProvider.getInstance(context).apply {
-            addListener(
-                    {
-                        get().unbindAll()
-                        state.cameraExecutor?.shutdown()
-                    },
-                    ContextCompat.getMainExecutor(context)
-            )
-        }
+        val providerFuture = ProcessCameraProvider.getInstance(context)
+        providerFuture.addListener(
+                {
+                    try {
+                        val provider = providerFuture.get()
+                        provider.unbindAll()
+                        cameraExecutor?.shutdown()
+                        imageCapture = null
+                    } catch (e: Exception) {
+                        Timber.e(e, "Error stopping camera")
+                    }
+                },
+                ContextCompat.getMainExecutor(context)
+        )
     }
 }
