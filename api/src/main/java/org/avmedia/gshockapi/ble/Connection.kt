@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.processNextEventInCurrentThread
 import org.avmedia.gshockapi.DeviceInfo
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -79,6 +80,7 @@ object Connection {
 
     fun write(handle: GetSetMode, data: ByteArray) {
         scope.launch {
+            println (">>>> Writing to handle $handle data: ${data.joinToString(", ") { String.format("%02X", it) }}")
             bleManager.write(handle, data)
         }
     }

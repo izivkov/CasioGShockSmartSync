@@ -154,6 +154,7 @@ constructor(
                     )
             )
             add(PrayerAlarmsAction("Set Prayer Alarms", false, api, prayerAlarmsHelper))
+            add(HealthDataAction("Health Data Test", false, api))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
@@ -205,6 +206,7 @@ constructor(
                         is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
                         is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
                         is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
+                        is HealthDataAction -> ActionsStorage.Action.HEALTH_DATA_TEST
                         else -> null
                     }
 
@@ -223,6 +225,7 @@ constructor(
                         is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
                         is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
                         is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
+                        is HealthDataAction -> ActionsStorage.Action.HEALTH_DATA_TEST
                         else -> null
                     }
 
@@ -462,6 +465,40 @@ constructor(
                             AppSnackbar("Failed to set prayer alarms: ${error.message}")
                         }
             }
+        }
+    }
+
+    data class HealthDataAction(
+            override var title: String,
+            override var enabled: Boolean,
+            val api: GShockRepository,
+    ) : Action(title, enabled, RunMode.ASYNC) {
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
+            return when (runEnvironment) {
+                RunEnvironment.NORMAL_CONNECTION, RunEnvironment.ALWAYS_CONNECTED -> true
+                else -> false
+            }
+        }
+
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            CoroutineScope(Dispatchers.Main).launch {
+                runCatching {
+                    val data = api.getHealthData()
+                    val msg = "Steps: ${data.steps}, Kcal: ${data.calories}"
+                    Timber.i(msg)
+                    AppSnackbar(msg)
+                }
+                        .onFailure {
+                            Timber.e(it, "Failed to get health data")
+                            AppSnackbar("Error getting health data: ${it.message}")
+                        }
+            }
+        }
+
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            enabled = actionsStorage.getAction(ActionsStorage.Action.HEALTH_DATA_TEST)
         }
     }
 

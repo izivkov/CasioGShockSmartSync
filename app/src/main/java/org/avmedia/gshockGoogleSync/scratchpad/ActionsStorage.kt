@@ -5,17 +5,16 @@ import javax.inject.Singleton
 import kotlin.math.ceil
 
 /**
- * Manages storage of boolean action settings using a typesafe enum.
- * It is a client of the ScratchpadManager and operates on a buffer slice provided to it.
+ * Manages storage of boolean action settings using a typesafe enum. It is a client of the
+ * ScratchpadManager and operates on a buffer slice provided to it.
  */
 @Singleton
-class ActionsStorage @Inject constructor(
-    private val manager: ScratchpadManager
-) : ScratchpadClient {
+class ActionsStorage @Inject constructor(private val manager: ScratchpadManager) :
+        ScratchpadClient {
 
     /**
-     * Defines the typesafe names for all actions. The `ordinal` property
-     * of each enum constant will be used as its index for storage.
+     * Defines the typesafe names for all actions. The `ordinal` property of each enum constant will
+     * be used as its index for storage.
      */
     enum class Action {
         SET_TIME,
@@ -27,6 +26,7 @@ class ActionsStorage @Inject constructor(
         SKIP_TO_NEXT_TRACK,
         PRAYER_ALARMS,
         PHONE_CALL,
+        HEALTH_DATA_TEST,
         // Add more actions here. As long as it's less than 17, the storage size will be 2 bytes.
         // For example:
         // ANOTHER_ACTION,
@@ -74,8 +74,8 @@ class ActionsStorage @Inject constructor(
     // --- Public API for ViewModel/Use-Cases ---
 
     /**
-     * Updates an action's boolean value in the local in-memory buffer.
-     * This is a fast, in-memory operation. The manager handles persisting it.
+     * Updates an action's boolean value in the local in-memory buffer. This is a fast, in-memory
+     * operation. The manager handles persisting it.
      *
      * @param action The typesafe action to update.
      * @param enabled The boolean value to set for the action.
@@ -117,16 +117,14 @@ class ActionsStorage @Inject constructor(
         return (currentByte shr bitPosition) and 1 == 1
     }
 
-    /**
-     * Resets the client's internal buffer to a cleared state (all false).
-     */
+    /** Resets the client's internal buffer to a cleared state (all false). */
     fun clear() {
         scratchpadBuffer = ByteArray(getStorageSize())
     }
 
     /**
-     * Updates an action's boolean value in the local in-memory buffer.
-     * Call save() to persist changes to the watch.
+     * Updates an action's boolean value in the local in-memory buffer. Call save() to persist
+     * changes to the watch.
      *
      * @param action The typesafe action to update.
      * @param enabled The boolean value to set for the action.
@@ -139,11 +137,8 @@ class ActionsStorage @Inject constructor(
         manager.save()
     }
 
-    /**
-     * Loads the data from the watch into the local buffer.
-     */
+    /** Loads the data from the watch into the local buffer. */
     suspend fun load() {
         manager.load()
     }
-
 }

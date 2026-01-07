@@ -28,6 +28,7 @@ import org.avmedia.gshockapi.io.WorldCitiesIO
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 import timber.log.Timber
+import kotlin.collections.joinToString
 
 object MessageDispatcher {
 
@@ -92,6 +93,8 @@ object MessageDispatcher {
     @RequiresApi(Build.VERSION_CODES.O)
     fun onReceived(data: String) {
         val intArray = Utils.toIntArray(data)
+
+        println ("<<<<  onReceived: ${intArray.joinToString(", ") { String.format("%02X", it) }}")
 
         val key = intArray[0]
         if (dataReceivedMessages[key] == null) {
