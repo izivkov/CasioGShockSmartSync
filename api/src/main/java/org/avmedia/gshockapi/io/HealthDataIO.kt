@@ -14,7 +14,7 @@ object HealthDataIO {
 
     suspend fun request(): HealthData {
 
-        return CachedIO.request("0401180018000000DC05") { key ->
+        return CachedIO.request("070000000000000000000000000000") { key ->
             state = state.copy(deferredResult = CompletableDeferred())
             IO.request(key)
             state.deferredResult?.await() ?: HealthData(0, 0, 0, 0, "")
