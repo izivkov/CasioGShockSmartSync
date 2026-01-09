@@ -39,7 +39,7 @@ fun PhotoView(
         actionsViewModel.getAction(ActionsViewModel.PhotoAction::class.java)
     }
 
-    var viewState by remember(actions, photoAction) {
+    var viewState by remember {
         mutableStateOf(
             ViewState(
                 isEnabled = photoAction.enabled,

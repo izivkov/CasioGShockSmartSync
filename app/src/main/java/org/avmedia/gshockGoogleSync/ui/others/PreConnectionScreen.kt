@@ -5,6 +5,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.IntentSender
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,7 +38,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -49,9 +52,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -62,12 +69,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
@@ -81,57 +89,98 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.ICDPDelegate
 import timber.log.Timber
 
+// Constants for Bluetooth and Timeout logic
+private const val BOND_STATE_NONE = BluetoothDevice.BOND_NONE
+private const val BOND_STATE_BONDED = BluetoothDevice.BOND_BONDED
+private const val PAIRING_TIMEOUT_MS = 60000L
+
 @SuppressLint("MissingPermission")
 @Composable
 fun PreConnectionScreen(
     ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val watchName by ptrConnectionViewModel.watchName.collectAsState()
     val triggerPairing by ptrConnectionViewModel.triggerPairing.collectAsState()
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
 
-    // PreparingPairingDialog(visible = showPreparing)
-    PreparingPairingDialog(
-        visible = showPreparing,
-        ptrConnectionViewModel = ptrConnectionViewModel
-    )
+    // Manage timeout job for the pairing process
+    val timeoutJob = remember { mutableStateOf<Job?>(null) }
+
+    // Logic to update device info once paired
+    val handleSuccessfulPairing = { device: BluetoothDevice ->
+        timeoutJob.value?.cancel()
+        val name = if (device.name.isNullOrBlank()) "" else device.name
+        scope.launch(Dispatchers.IO) {
+            LocalDataStorage.setDeviceName(context, device.address, name)
+        }
+        ptrConnectionViewModel.setDevice(device.address, name)
+        Timber.i("Pairing success detected for: ${device.address}")
+    }
+
+    // BroadcastReceiver for ROMs like IodeOS where CDM intent returns null data
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context, intent: Intent) {
+                if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == intent.action) {
+                    val device: BluetoothDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    }
+
+                    val bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BOND_STATE_NONE)
+                    if (device != null && bondState == BOND_STATE_BONDED) {
+                        handleSuccessfulPairing(device)
+                    }
+                }
+            }
+        }
+
+        val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        // Android 14 (IodeOS 4+) requires explicit export for system broadcasts
+        context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
+
+        onDispose {
+            context.unregisterReceiver(receiver)
+            timeoutJob.value?.cancel()
+        }
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            if (data == null) {
-                // Log and return; some OEMs return null data even on OK
-                Timber.w("Pairing: Result OK but data is null")
-                return@rememberLauncherForActivityResult
+            // Start timeout timer as soon as user selects a device
+            timeoutJob.value?.cancel()
+            timeoutJob.value = scope.launch {
+                delay(PAIRING_TIMEOUT_MS)
+                Timber.w("Pairing timed out: No bond state change detected within 60s.")
             }
 
-            val device: BluetoothDevice? =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    data.getParcelableExtra(
-                        CompanionDeviceManager.EXTRA_DEVICE,
-                        BluetoothDevice::class.java
-                    )
+            // Fallback for standard ROMs that return data correctly
+            val data = result.data
+            if (data != null) {
+                val device: BluetoothDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    data.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE, BluetoothDevice::class.java)
                 } else {
                     @Suppress("DEPRECATION")
                     data.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
                 }
-
-            if (device == null) {
-                Timber.w("Pairing: EXTRA_DEVICE missing in result")
-                return@rememberLauncherForActivityResult
+                device?.let { handleSuccessfulPairing(it) }
+            } else {
+                Timber.i("Launcher data is null (Expected on IodeOS). Waiting for BroadcastReceiver.")
             }
-
-            val name = if (device.name.isNullOrBlank()) "" else device.name
-            CoroutineScope(Dispatchers.IO).launch {
-                LocalDataStorage.setDeviceName(context, device.address, name)
-            }
-            ptrConnectionViewModel.setDevice(device.address, name)
         }
     }
+
+    PreparingPairingDialog(
+        visible = showPreparing,
+        ptrConnectionViewModel = ptrConnectionViewModel
+    )
 
     LaunchedEffect(triggerPairing) {
         if (triggerPairing) {
@@ -163,10 +212,7 @@ fun PreConnectionScreen(
     }
 
     val isAlwaysConnected: (String) -> Boolean = { name ->
-        when {
-            "DW-H5600" in name || "ECB" in name -> true
-            else -> false
-        }
+        "DW-H5600" in name || "ECB" in name
     }
 
     val getArrowsVerticalPosition: (String) -> Float = { _ -> 0.55f }
@@ -181,10 +227,9 @@ fun PreConnectionScreen(
                     .fillMaxSize()
                     .systemBarsPadding()
             ) {
-                // Top card fills the remaining space
                 AppCard(
                     modifier = Modifier
-                        .weight(1f)        // <- take all remaining height
+                        .weight(1f)
                         .fillMaxWidth()
                 ) {
                     ConstraintLayout(
@@ -221,14 +266,10 @@ fun PreConnectionScreen(
                         ) {
                             PairedDeviceList(
                                 devices = pairedDevices,
-                                onSelect = { device ->
-                                    // Uncomment the following line if you want to select a device
-                                    // ptrConnectionViewModel.selectDevice(device)
-                                },
+                                onSelect = {},
                                 onDisassociate = { device ->
                                     ptrConnectionViewModel.disassociate(context, device.address)
-                                    val scope = CoroutineScope(Dispatchers.IO)
-                                    scope.launch {
+                                    scope.launch(Dispatchers.IO) {
                                         LocalDataStorage.removeDeviceAddress(context, device.address)
                                     }
                                 },
@@ -265,7 +306,6 @@ fun PreConnectionScreen(
                                 ptrConnectionViewModel.associateWithUi(
                                     context,
                                     object : ICDPDelegate {
-
                                         override fun onChooserReady(chooserLauncher: IntentSender) {
                                             launcher.launch(
                                                 IntentSenderRequest.Builder(chooserLauncher).build()
@@ -303,33 +343,31 @@ fun PairedDeviceList(
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Bottom // Start filling from bottom
+            verticalArrangement = Arrangement.Bottom
         ) {
-            // Spacer to push items to the bottom if the list is small
             Spacer(modifier = Modifier.weight(1f))
 
             devices.forEach { device ->
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    // 1. Remove Button (Far Left)
                     RemoveButton(onClick = { onDisassociate(device) })
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    // 2. Watch Name (Middle)
                     Text(
                         text = device.name,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .clickable { onSelect(device) }
-                            .weight(1f) // Let text take available space
+                            .weight(1f)
                     )
 
-                    // 3. Selection Indicator (Right of text)
                     if (device.isLastUsed) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
@@ -338,7 +376,7 @@ fun PairedDeviceList(
                             modifier = Modifier
                                 .size(24.dp)
                                 .padding(start = 8.dp)
-                                .graphicsLayer(scaleX = -1f) // Triangle pointing left
+                                .graphicsLayer(scaleX = -1f)
                         )
                     }
                 }
@@ -426,16 +464,9 @@ fun WatchScreen(
 ) {
     Box(modifier = modifier) {
         if (isAlwaysConnected) {
-            WatchImageWithOverlayAlwaysConnected(
-                modifier,
-                imageResId
-            )
+            WatchImageWithOverlayAlwaysConnected(modifier, imageResId)
         } else {
-            WatchImageWithOverlay(
-                modifier,
-                imageResId,
-                arrowsVerticalPosition
-            )
+            WatchImageWithOverlay(modifier, imageResId, arrowsVerticalPosition)
         }
     }
 }
