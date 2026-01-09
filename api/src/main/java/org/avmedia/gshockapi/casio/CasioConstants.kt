@@ -22,6 +22,8 @@ object CasioConstants {
         val CASIO_NOTIFICATION_CHARACTERISTIC_UUID: UUID =
                 UUID.fromString("26eb0030-b012-49a8-b1f8-394fb2032b0f")
 
+        val CASIO_CONVOY_CHARACTERISTIC_UUID:UUID = UUID.fromString("26eb0024-b012-49a8-b1f8-394fb2032b0f");
+
         /* Others:
         CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID = UUID.fromString("26eb002c-b012-49a8-b1f8-394fb2032b0f");
         CASIO_ALL_FEATURES_CHARACTERISTIC_UUID = UUID.fromString("26eb002d-b012-49a8-b1f8-394fb2032b0f");
