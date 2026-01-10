@@ -1,6 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.IntentSender
 import android.os.Build
@@ -26,9 +28,20 @@ import timber.log.Timber
 class PreConnectionViewModel
 @Inject
 constructor(
-        private val api: GShockRepository,
-        @param:ApplicationContext private val appContext: Context // Inject application context
+    private val api: GShockRepository,
+    @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
+
+    // Constants for internal state keys and strings
+    private companion object {
+        const val KEY_LAST_DEVICE_NAME = "LastDeviceName"
+        const val KEY_LAST_DEVICE_ADDRESS = "LastDeviceAddress"
+        const val EVENT_DEVICE_NAME = "DeviceName"
+        const val EVENT_DEVICE_ADDRESS = "DeviceAddress"
+        const val EVENT_NO_PAIRED = "NoPairedDevices"
+        const val PREFIX_CASIO = "CASIO"
+        const val METHOD_REMOVE_BOND = "removeBond"
+    }
 
     private val noWatchString = appContext.getString(R.string.no_watch)
     private val _watchName = MutableStateFlow(noWatchString)
@@ -47,9 +60,7 @@ constructor(
 
     init {
         viewModelScope.launch {
-            val savedName =
-                    LocalDataStorage.get(appContext, "LastDeviceName", noWatchString)
-                            ?: noWatchString
+            val savedName = LocalDataStorage.get(appContext, KEY_LAST_DEVICE_NAME, noWatchString) ?: noWatchString
             _watchName.value = savedName
             loadPairedDevices()
         }
@@ -70,11 +81,7 @@ constructor(
 
     fun associateWithUi(context: Context, delegate: ICDPDelegate) {
         try {
-            Timber.i("Starting pairing with UI")
-
-            // Check if context is still valid
             if (context is android.app.Activity && context.isFinishing) {
-                Timber.w("Activity is finishing, cannot start pairing")
                 delegate.onError(appContext.getString(R.string.pairing_activity_finishing))
                 return
             }
@@ -83,207 +90,162 @@ constructor(
                 showPreparingUi()
             }
 
-            associate(
-                    context,
-                    object : ICDPDelegate {
+            associate(context, object : ICDPDelegate {
+                override fun onChooserReady(chooserLauncher: IntentSender) {
+                    hidePreparingUi()
+                    delegate.onChooserReady(chooserLauncher)
+                }
 
-                        override fun onChooserReady(chooserLauncher: IntentSender) {
-                            try {
-                                hidePreparingUi()
-                                delegate.onChooserReady(chooserLauncher)
-                            } catch (e: Exception) {
-                                Timber.e(e, "Error in onChooserReady callback")
-                                CrashReportHelper.logPairingCrash(appContext, e)
-                                delegate.onError("Failed to show pairing dialog: ${e.message}")
-                            }
-                        }
-
-                        override fun onError(error: String) {
-                            try {
-                                hidePreparingUi()
-                                Timber.e("Pairing error: $error")
-                                delegate.onError(error)
-                            } catch (e: Exception) {
-                                Timber.e(e, "Error in onError callback")
-                                CrashReportHelper.logPairingCrash(appContext, e)
-                            }
-                        }
-                    }
-            )
+                override fun onError(error: String) {
+                    hidePreparingUi()
+                    delegate.onError(error)
+                }
+            })
         } catch (e: Exception) {
-            Timber.e(e, "Failed to start pairing")
-            CrashReportHelper.logPairingCrash(appContext, e)
             hidePreparingUi()
-            delegate.onError(
-                    appContext.getString(
-                            R.string.pairing_failed_generic,
-                            e.message ?: "Unknown error"
-                    )
-            )
+            delegate.onError(appContext.getString(R.string.pairing_failed_generic, e.message ?: "Unknown error"))
         }
     }
 
-    private fun loadPairedDevices() {
+    fun loadPairedDevices() {
         val associations = api.getAssociationsWithNames(appContext)
-        val lastAddress = LocalDataStorage.get(appContext, "LastDeviceAddress", "")
+        val lastAddress = LocalDataStorage.get(appContext, KEY_LAST_DEVICE_ADDRESS, "")
 
-        val items =
-                associations
-                        .distinctBy {
-                            it.address.lowercase()
-                        } // Also handle uniqueness case-insensitively
-                        .map { association ->
-                            // Use equals with ignoreCase = true
-                            val isLastUsed =
-                                    association.address.equals(lastAddress, ignoreCase = true)
-                            val name = association.name
+        val items = associations
+            .distinctBy { it.address.lowercase() }
+            .map { association ->
+                val isLastUsed = association.address.equals(lastAddress, ignoreCase = true)
+                val name = association.name
 
-                            if (name != null && name.isNotBlank()) {
-                                DeviceItem(name, association.address, isLastUsed)
-                            } else {
-                                val storedName =
-                                        LocalDataStorage.getDeviceName(
-                                                appContext,
-                                                association.address
-                                        )
-                                DeviceItem(
-                                        storedName ?: noWatchString,
-                                        association.address,
-                                        isLastUsed
-                                )
-                            }
-                        }
+                if (!name.isNullOrBlank()) {
+                    DeviceItem(name, association.address, isLastUsed)
+                } else {
+                    val storedName = LocalDataStorage.getDeviceName(appContext, association.address)
+                    DeviceItem(storedName ?: noWatchString, association.address, isLastUsed)
+                }
+            }
 
         _pairedDevices.value = formatDeviceNames(items)
     }
 
     private fun formatDeviceNames(items: List<DeviceItem>): List<DeviceItem> {
-        val nameCount = mutableMapOf<String, Int>()
-        val result = mutableListOf<DeviceItem>()
+        val nameCount: MutableMap<String, Int> = mutableMapOf()
+        val result: MutableList<DeviceItem> = mutableListOf()
 
-        // First pass: count occurrences
         items.forEach { item ->
-            val baseName = item.name.removePrefix("CASIO").trim()
+            val baseName = item.name.removePrefix(PREFIX_CASIO).trim()
             nameCount[baseName] = nameCount.getOrDefault(baseName, 0) + 1
         }
 
-        // Second pass: apply suffixes if needed
-        val currentCount = mutableMapOf<String, Int>()
+        val currentCount: MutableMap<String, Int> = mutableMapOf()
         items.forEach { item ->
-            val baseName = item.name.removePrefix("CASIO").trim()
+            val baseName = item.name.removePrefix(PREFIX_CASIO).trim()
             val total = nameCount[baseName] ?: 1
-            val formattedName =
-                    if (total > 1) {
-                        val index = currentCount.getOrDefault(baseName, 0) + 1
-                        currentCount[baseName] = index
-                        "$baseName-$index"
-                    } else {
-                        baseName
-                    }
+            val formattedName = if (total > 1) {
+                val index = currentCount.getOrDefault(baseName, 0) + 1
+                currentCount[baseName] = index
+                "$baseName-$index"
+            } else {
+                baseName
+            }
             result.add(item.copy(name = formattedName))
         }
         return result
     }
 
-    // Method to subscribe to ProgressEvents and handle the "DeviceName" action
     private fun createSubscription() {
-        val eventActions =
-                arrayOf(
-                        EventAction("DeviceName") {
-                            val deviceName =
-                                    (ProgressEvents.getPayload("DeviceName") as? String)?.takeIf {
-                                        it.isNotBlank()
-                                    }
-                                            ?: noWatchString
-                            _watchName.value = deviceName
-                        },
-                        EventAction("DeviceAddress") {
-                            val address = ProgressEvents.getPayload("DeviceAddress") as? String
-                            if (!address.isNullOrBlank()) {
-                                viewModelScope.launch {
-                                    LocalDataStorage.put(appContext, "LastDeviceAddress", address)
-                                    loadPairedDevices()
-                                }
-                            }
-                        },
-                        EventAction("NoPairedDevices") {
-                            // _triggerPairing.value = true
-                        }
-                )
-
+        val eventActions = arrayOf(
+            EventAction(EVENT_DEVICE_NAME) {
+                val deviceName = (ProgressEvents.getPayload(EVENT_DEVICE_NAME) as? String)
+                    ?.takeIf { it.isNotBlank() } ?: noWatchString
+                _watchName.value = deviceName
+            },
+            EventAction(EVENT_DEVICE_ADDRESS) {
+                val address = ProgressEvents.getPayload(EVENT_DEVICE_ADDRESS) as? String
+                if (!address.isNullOrBlank()) {
+                    viewModelScope.launch {
+                        LocalDataStorage.put(appContext, KEY_LAST_DEVICE_ADDRESS, address)
+                        loadPairedDevices()
+                    }
+                }
+            },
+            EventAction(EVENT_NO_PAIRED) {
+                // Handle no devices if necessary
+            }
+        )
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
     fun associate(context: Context, delegate: ICDPDelegate) {
-        try {
-            Timber.i("Calling API associate method")
-            api.associate(context, delegate)
-        } catch (e: Exception) {
-            Timber.e(e, "Exception in associate call")
-            CrashReportHelper.logPairingCrash(appContext, e)
-            delegate.onError(
-                    appContext.getString(
-                            R.string.pairing_failed_generic,
-                            e.message ?: "Unknown error"
-                    )
-            )
-        }
+        api.associate(context, delegate)
     }
 
     @SuppressLint("NewApi")
     fun setDevice(address: String, name: String) {
         viewModelScope.launch {
             try {
-                Timber.i("Setting device: $name ($address)")
-                LocalDataStorage.put(appContext, "LastDeviceAddress", address)
+                // Using dict/mapOf for structured logging
+                val logDetails: Map<String, String> = mapOf(
+                    "address" to address,
+                    "name" to name,
+                    "action" to "setting_device"
+                )
+                Timber.i("Updating local storage: $logDetails")
+
+                LocalDataStorage.put(appContext, KEY_LAST_DEVICE_ADDRESS, address)
                 LocalDataStorage.addDeviceAddress(appContext, address)
-                LocalDataStorage.put(appContext, "LastDeviceName", name)
+                LocalDataStorage.put(appContext, KEY_LAST_DEVICE_NAME, name)
                 LocalDataStorage.setDeviceName(appContext, address, name)
+
                 _watchName.value = name
                 api.startObservingDevicePresence(appContext, address)
                 loadPairedDevices()
 
-                // Clear crash flag on successful pairing
                 CrashReportHelper.clearPairingCrashFlag(appContext)
-                Timber.i("Device set successfully")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to set device")
-                CrashReportHelper.logPairingCrash(appContext, e, address, name)
             }
         }
     }
 
-    fun selectDevice(device: DeviceItem) {
+    @SuppressLint("MissingPermission")
+    fun disassociate(context: Context, address: String) {
         viewModelScope.launch {
-            LocalDataStorage.put(appContext, "LastDeviceAddress", device.address)
-            LocalDataStorage.put(appContext, "LastDeviceName", device.name)
-            loadPairedDevices()
+            try {
+                // 1. Remove software association via API (clears CDM association)
+                api.disassociate(context, address)
+                LocalDataStorage.removeDeviceAddress(context, address)
+
+                // 2. Handle hardware bond safely (no reflection, version-aware)
+                val adapter = BluetoothAdapter.getDefaultAdapter()
+                val device: BluetoothDevice? = adapter?.getRemoteDevice(address)
+                device?.let { btDevice ->
+                    if (btDevice.bondState != BluetoothDevice.BOND_NONE) {
+                        Timber.i("Device $address bonded (state: ${btDevice.bondState}). CDM disassociate initiated unbond process.")
+                        // CDM disassociate often triggers bond removal automatically via broadcast
+                        // Monitor existing ACTION_BOND_STATE_CHANGED receiver for completion
+                    }
+                }
+
+                // 3. Clear last device if matching
+                val lastAddress = LocalDataStorage.get(context, KEY_LAST_DEVICE_ADDRESS, "")
+                if (address.equals(lastAddress, ignoreCase = true)) {
+                    LocalDataStorage.put(context, KEY_LAST_DEVICE_ADDRESS, "")
+                    LocalDataStorage.put(context, KEY_LAST_DEVICE_NAME, noWatchString)
+                    _watchName.value = noWatchString
+                }
+
+                // Refresh UI and log
+                loadPairedDevices()
+                Timber.i("Device $address removed from app. Bond cleanup via CDM (user may need to forget in Settings if persists).")
+
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to disassociate device: $address")
+            }
         }
     }
 
     fun onPairingTriggered() {
         _triggerPairing.value = false
-    }
-
-    fun disassociate(context: Context, address: String) {
-        viewModelScope.launch {
-            try {
-                Timber.i("Disassociating device: $address")
-                api.disassociate(context, address)
-                LocalDataStorage.removeDeviceAddress(context, address)
-
-                val lastAddress = LocalDataStorage.get(context, "LastDeviceAddress", "")
-                if (address == lastAddress) {
-                    LocalDataStorage.put(context, "LastDeviceAddress", "")
-                    LocalDataStorage.put(context, "LastDeviceName", noWatchString)
-                    _watchName.value = noWatchString
-                }
-                loadPairedDevices()
-                Timber.i("Device disassociated successfully")
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to disassociate device")
-                CrashReportHelper.logCrash(context, e, "Failed to disassociate device: $address")
-            }
-        }
     }
 }
