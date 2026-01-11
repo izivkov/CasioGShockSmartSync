@@ -2,12 +2,63 @@
 
 # release.sh - Automates the release process for Casio G-Shock Smart Sync
 
+# Debug release process
+if [ "$1" == "debug" ]; then
+    echo "🐞 Processing Debug Build..."
+    
+    APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+    
+    # Build if not exists
+    if [ ! -f "$APK_PATH" ]; then
+        echo "🔨 Building Debug APK..."
+        ./gradlew assembleDebug
+    fi
+    
+    if [ ! -f "$APK_PATH" ]; then
+        echo "❌ Error: Debug APK not found at $APK_PATH"
+        exit 1
+    fi
+
+    # Check for gh availability
+    if ! command -v gh &> /dev/null; then
+         echo "❌ GitHub CLI (gh) is not installed. Please install it to upload to GitHub."
+         exit 1
+    fi
+
+    echo "📤 Uploading to GitHub Releases (tag: debug)..."
+    
+    # Delete existing 'debug' tag/release if it exists (swallow errors)
+    gh release delete debug -y --cleanup-tag &> /dev/null || true
+    
+    # Create new release with the APK
+    gh release create debug "$APK_PATH" \
+       --prerelease \
+       --title "Latest Debug Build" \
+       --notes "Debug build uploaded via release.sh on $(date)"
+       
+    if [ $? -eq 0 ]; then
+       echo ""
+       echo "✅ Debug APK Uploaded to GitHub!"
+       # Attempt to get the repository URL for a clickable link
+       REPO=$(gh repo view --json url -q .url)
+       echo "🔗 Release: $REPO/releases/tag/debug"
+    else
+       echo "❌ GitHub upload failed."
+    fi
+    
+    echo "📂 Local file location:"
+    echo "   $(pwd)/$APK_PATH"
+    
+    exit 0
+fi
+
 # Normal release process (new release)
 if [ -z "$1" ] || [[ "$1" == -* ]]; then
-    echo "Usage: ./release.sh <version_name>"
+    echo "Usage: ./release.sh <version_name> [OR debug]"
     echo ""
     echo "Examples:"
     echo "  ./release.sh 25.4              # Create new release"
+    echo "  ./release.sh debug             # Upload debug APK"
     exit 1
 fi
 # Ensure we are on the main branch
