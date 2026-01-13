@@ -10,6 +10,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresPermission
+import androidx.compose.material3.TimeInput
+import timber.log.Timber
 
 object CompanionDeviceHelper {
     private const val EXTRA_ASSOC = "android.companion.extra.ASSOCIATION_INFO"
@@ -23,7 +25,10 @@ object CompanionDeviceHelper {
      * Checks multiple keys and fallback types (ScanResult/AssociationInfo).
      */
     fun extractDevice(data: Intent?): BluetoothDevice? {
-        if (data == null) return null
+        if (data == null) {
+            Timber.i("Intent empty, giving up device extraction.")
+            return null
+        }
 
         // 1. Standard BluetoothDevice extraction
         var device: BluetoothDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -35,6 +40,7 @@ object CompanionDeviceHelper {
 
         // 2. Fallback: Check for ScanResult wrapping
         if (device == null) {
+            Timber.i("Intent empty, checking ScanResult wrapping...")
             val scanResult: ScanResult? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 data.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE, ScanResult::class.java)
             } else {
@@ -46,6 +52,7 @@ object CompanionDeviceHelper {
 
         // 3. Fallback: Check for AssociationInfo (Android 13+)
         if (device == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Timber.i("Intent empty, checking AssociationInfo...")
             val info = data.getParcelableExtra(EXTRA_ASSOC, AssociationInfo::class.java)
             info?.deviceMacAddress?.let { mac ->
                 val adapter = BluetoothAdapter.getDefaultAdapter()
@@ -53,6 +60,7 @@ object CompanionDeviceHelper {
             }
         }
 
+        Timber.i("Extracted device: ${device?.address ?: "null"}")
         return device
     }
 
