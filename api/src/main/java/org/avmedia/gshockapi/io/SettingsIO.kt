@@ -30,7 +30,7 @@ object SettingsIO {
 
     private const val LIGHT_DURATION_LONG = 0b00000001
     private const val RESET_VALUE = 0
-    private const val FOND_CLASSIC_MASK = 0x20
+    private const val FONT_CLASSIC_MASK = 0x20
 
 
     // Button tone and vibration settings (DW-H5600 specific)
@@ -198,7 +198,7 @@ object SettingsIO {
         }
 
         if (WatchInfo.hasMultipleFonts) {
-            if (settingArray[8] == FOND_CLASSIC_MASK) {
+            if (settingArray[8] and FONT_CLASSIC_MASK != 0) {
                 settings.font = "Classic"
             } else {
                 settings.font = "Standard"
@@ -268,7 +268,7 @@ object SettingsIO {
                 var flags = RESET_VALUE
                 if (WatchInfo.hasMultipleFonts) {
                     if (settings["font"] == "Classic") {
-                        flags = flags or FOND_CLASSIC_MASK
+                        flags = flags or FONT_CLASSIC_MASK
                     }
                 }
                 arr[8] = flags.toByte()
