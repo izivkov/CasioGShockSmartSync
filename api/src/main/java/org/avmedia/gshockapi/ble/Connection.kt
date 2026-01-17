@@ -28,7 +28,6 @@ object Connection {
             bleManager = IGShockManager(context)
         }
     }
-
     private suspend fun connectToDevice(device: BluetoothDevice): ConnectionResult = try {
         bleManager.connect(device) { name, address ->
             WatchInfo.setNameAndModel(name.trimEnd('\u0000'))

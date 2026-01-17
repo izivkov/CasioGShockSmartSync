@@ -4,9 +4,6 @@ import CachedIO
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
-import kotlin.experimental.and
-import kotlin.experimental.inv
-import kotlin.experimental.or
 import kotlinx.coroutines.CompletableDeferred
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
@@ -15,6 +12,9 @@ import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
+import kotlin.experimental.and
+import kotlin.experimental.inv
+import kotlin.experimental.or
 
 object SettingsIO {
     private data class State(val deferredResult: CompletableDeferred<Settings>? = null)
@@ -28,6 +28,11 @@ object SettingsIO {
     private const val POWER_SAVING_MODE = 0b00010000
     private const val DO_NOT_DISTURB_OFF = 0b01000000
 
+    private const val LIGHT_DURATION_LONG = 0b00000001
+    private const val RESET_VALUE = 0
+    private const val FOND_CLASSIC_MASK = 0x20
+
+
     // Button tone and vibration settings (DW-H5600 specific)
     private const val SOUND_AND_VIBRATION = 0b1100 // Both sound and vibration (0xC)
     private const val VIBRATION_ONLY = 0b1000 // Vibration only (0x8)
@@ -38,7 +43,7 @@ object SettingsIO {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun request(): Settings =
-            CachedIO.request("GET_SETTINGS") { key -> getBasicSettings(key) }
+        CachedIO.request("GET_SETTINGS") { key -> getBasicSettings(key) }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private suspend fun getBasicSettings(key: String): Settings {
@@ -58,12 +63,12 @@ object SettingsIO {
 
     fun onReceived(data: String) {
         decodeToJson(data)
-                .toString()
-                .let { jsonData -> Gson().fromJson(jsonData, Settings::class.java) }
-                .let { model ->
-                    state.deferredResult?.complete(model)
-                    state = State() // Reset state after completion
-                }
+            .toString()
+            .let { jsonData -> Gson().fromJson(jsonData, Settings::class.java) }
+            .let { model ->
+                state.deferredResult?.complete(model)
+                state = State() // Reset state after completion
+            }
     }
 
     /*
@@ -88,8 +93,10 @@ object SettingsIO {
     off:    13 06 00 00 00 00 00 00 00 00 00 00
 
     For GMW-BZ5000
-    standard font: 13 05 01 00 00 00 00 00 00 00 00 00 20 00 00 00
-    classic font:  13 05 02 00 00 00 00 00 00 00 00 00 20 00 00 00 
+    standard font:          13 05 01 00 01 00 00 00 00 00 00 00
+    classic font:           13 05 00 00 01 00 00 00 20 00 00 00
+    light duration 1.5s:    13 05 00 00 01 00 00 00 20 00 00 00
+    light duration 3s:      13 05 01 00 01 00 00 00 20 00 00 00
 
     For DW-H5600
             13 00 00 00 00 00 00 00 00 00 00 00 04 00 00 06 00  // sound    0b0100
@@ -179,13 +186,19 @@ object SettingsIO {
         if (settingArray[5] == 5) {
             settings.language = "Russian"
         }
-        if (settingArray[2] == 1) {
+
+        val flags = settingArray[2]
+
+        // Check Bit 0 for Light Duration
+        // Using bitwise AND to isolate the specific flag
+        if ((flags and LIGHT_DURATION_LONG) != 0) {
             settings.lightDuration = "4s"
         } else {
             settings.lightDuration = "2s"
         }
+
         if (WatchInfo.hasMultipleFonts) {
-            if (settingArray[2] and 2 != 0) {
+            if (settingArray[8] == FOND_CLASSIC_MASK) {
                 settings.font = "Classic"
             } else {
                 settings.font = "Standard"
@@ -198,10 +211,10 @@ object SettingsIO {
     @Suppress("UNUSED_PARAMETER")
     fun sendToWatch(message: String) {
         IO.writeCmd(
-                GetSetMode.GET,
-                Utils.byteArray(
-                        CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte()
-                )
+            GetSetMode.GET,
+            Utils.byteArray(
+                CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BASIC.code.toByte()
+            )
         )
     }
 
@@ -239,14 +252,27 @@ object SettingsIO {
             if (settings.get("DnD") == false) {
                 arr[1] = (arr[1] or DO_NOT_DISTURB_OFF.toByte())
             }
-            if (settings.get("lightDuration") == "4s") {
-                arr[2] = 1
-            }
-            if (WatchInfo.hasMultipleFonts) {
-                if (settings.get("font") == "Classic") {
-                    arr[2] = arr[2] or 0x2
+
+            { // Build the bitmask for light duration and font
+                var flags = RESET_VALUE
+                // Set Bit 0 if duration is long
+                if (settings["lightDuration"] == "4s") {
+                    flags = flags or LIGHT_DURATION_LONG
                 }
-            }
+
+                // Assign the final bitmask back to the array
+                arr[2] = flags.toByte()
+            }();
+
+            {
+                var flags = RESET_VALUE
+                if (WatchInfo.hasMultipleFonts) {
+                    if (settings["font"] == "Classic") {
+                        flags = flags or FOND_CLASSIC_MASK
+                    }
+                }
+                arr[8] = flags.toByte()
+            }()
 
             if (settings.get("dateFormat") == "DD:MM") arr[4] = 1
 
