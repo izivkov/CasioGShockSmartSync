@@ -174,34 +174,38 @@ fun PreConnectionScreen(
         }
     }
 
-    val launcher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartIntentSenderForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                timeoutJob.value?.cancel()
-                timeoutJob.value =
-                    scope.launch {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // 1. Extract the device using your helper
+            val device = CompanionDeviceHelper.extractDevice(result.data)
+
+            if (device != null) {
+                // 2. Check if we need to bond
+                if (device.bondState != BluetoothDevice.BOND_BONDED) {
+                    Timber.i("Starting OS pairing (createBond) for ${device.address}")
+
+                    // 3. Trigger the actual system pairing dialog
+                    device.createBond()
+
+                    // Start a timeout job to catch if the user cancels the dialog
+                    timeoutJob.value?.cancel()
+                    timeoutJob.value = scope.launch {
                         delay(PAIRING_TIMEOUT_MS)
-                        AppSnackbar("Pairing timed out: No bond state change detected.")
+                        Timber.w("Pairing timed out")
+                        // Handle UI timeout state here if needed
                     }
-
-                // Utilize the external helper for extraction and fallback
-                var device: BluetoothDevice? = CompanionDeviceHelper.extractDevice(result.data)
-
-                if (device == null) {
-                    Timber.i("Intent empty, checking association fallback...")
-                    val associations = CompanionDeviceHelper.getAssociationsFallback(context)
-                    associations.lastOrNull()?.get("address")?.let { address ->
-                        val adapter = BluetoothAdapter.getDefaultAdapter()
-                        device = adapter.getRemoteDevice(address)
-                    }
+                } else {
+                    // Already paired, go straight to success logic
+                    handleSuccessfulPairing(device)
                 }
-
-                device?.let { handleSuccessfulPairing(it) }
-                    ?: Timber.i("Waiting for BroadcastReceiver...")
             }
+        } else {
+            Timber.i("CDM Association cancelled by user")
         }
+    }
+
 
     PreparingPairingDialog(visible = showPreparing, ptrConnectionViewModel = ptrConnectionViewModel)
 
@@ -374,7 +378,6 @@ fun PairedDeviceList(
         .fillMaxHeight()
         .verticalScroll(scrollState)) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            Spacer(modifier = Modifier.weight(1f))
             devices.forEach { device ->
                 Row(
                     modifier = Modifier
@@ -384,13 +387,20 @@ fun PairedDeviceList(
                 ) {
                     RemoveButton(onClick = { onDisassociate(device) })
                     Spacer(modifier = Modifier.width(12.dp))
+
                     Text(
                         text = device.name,
                         style = MaterialTheme.typography.bodyLarge,
+                        // --- TRUNCATION LOGIC START ---
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        softWrap = false,
+                        // --- TRUNCATION LOGIC END ---
                         modifier = Modifier
                             .clickable { onSelect(device) }
-                            .weight(1f)
+                            .weight(1f) // This ensures the text truncates instead of growing
                     )
+
                     if (device.isLastUsed) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,

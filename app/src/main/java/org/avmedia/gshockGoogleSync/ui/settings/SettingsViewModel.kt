@@ -407,7 +407,9 @@ constructor(
             smartSettings.add(powerSavings)
         }
         if (WatchInfo.hasMultipleFonts) {
-            val font = Font(Font.FontType.STANDARD)
+            val currentFontName = api.getSettings().font
+            val newFontName = if (currentFontName == "Classic") Font.FontType.CLASSIC else Font.FontType.STANDARD
+            val font = Font(newFontName)
             smartSettings.add(font)
         }
 
