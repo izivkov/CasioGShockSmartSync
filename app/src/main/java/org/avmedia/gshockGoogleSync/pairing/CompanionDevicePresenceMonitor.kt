@@ -38,6 +38,6 @@ class CompanionDevicePresenceMonitor @Inject constructor(
     )
 
     init {
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+        ProgressEvents.runEventActions("CompanionDevicePresenceMonitor", eventActions)
     }
 }

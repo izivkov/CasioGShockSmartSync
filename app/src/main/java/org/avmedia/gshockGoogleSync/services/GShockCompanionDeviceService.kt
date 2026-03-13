@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.services
 
 import android.companion.CompanionDeviceService
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,6 +36,28 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
         val address = associationInfo.deviceMacAddress?.toString() ?: return
         Timber.i("Device disappeared (API 33+): $address")
         ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+    }
+
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    override fun onDevicePresenceEvent(event: android.companion.DevicePresenceEvent) {
+        val associationId = event.associationId
+        val eventType = event.event
+        
+        // Find the association address from the ID
+        val deviceManager = getSystemService(Context.COMPANION_DEVICE_SERVICE) as android.companion.CompanionDeviceManager
+        val association = deviceManager.myAssociations.find { it.id == associationId }
+        val address = association?.deviceMacAddress?.toString() ?: return
+
+        when (eventType) {
+            android.companion.DevicePresenceEvent.EVENT_BLE_APPEARED -> {
+                Timber.i("Device appeared (API 36+): $address")
+                ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
+            }
+            android.companion.DevicePresenceEvent.EVENT_BLE_DISAPPEARED -> {
+                Timber.i("Device disappeared (API 36+): $address")
+                ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+            }
+        }
     }
 
     private fun sanitizeAddress(address: String): String {
