@@ -177,6 +177,7 @@
     <string name="unable_to_get_default_sound_uri">غير قادر على الحصول على رابط الصوت الافتراضي</string>
     <string name="alarms_set_to_watch">تم ضبط المنبهات على الساعة</string>
     <string name="events_set">تم ضبط الأحداث</string>
+    <string name="events_sent_to_watch">تم إرسال الأحداث إلى الساعة</string>
     <string name="event_not_compatible_with_watch">الحدث غير متوافق مع الساعة</string>
     <string name="settings_sent_to_watch">تم إرسال الإعدادات إلى الساعة</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">عذراً، جهازك لا يدعم البلوتوث. يتم الإغلاق…</string>

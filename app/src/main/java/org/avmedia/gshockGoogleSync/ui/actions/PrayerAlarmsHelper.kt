@@ -92,6 +92,7 @@ class PrayerAlarmsHelper @Inject constructor(
             }
             .take(n)
             .toList()
+            .sortedWith(compareBy({ it.hour }, { it.minute }))
             .also { alarms ->
                 alarms.forEachIndexed { index, alarm ->
                     alarmNameStorage.put(alarm.name ?: "", index = index)

@@ -183,6 +183,7 @@
     <string name="unable_to_get_default_sound_uri">Не удалось получить URI звука по умолчанию</string>
     <string name="alarms_set_to_watch">Будильники настроены на часы</string>
     <string name="events_set">События установлены</string>
+    <string name="events_sent_to_watch">События отправлены на часы</string>
     <string name="event_not_compatible_with_watch">Событие несовместимо с часами</string>
     <string name="settings_sent_to_watch">Настройки отправлены на часы</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Извините, ваше устройство не поддерживает Bluetooth. Закрытие…</string>

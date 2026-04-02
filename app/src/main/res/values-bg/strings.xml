@@ -183,6 +183,7 @@
     <string name="unable_to_get_default_sound_uri">Не може да се получи стандартен URI за звук</string>
     <string name="alarms_set_to_watch">Алармите са настроени на часовника</string>
     <string name="events_set">Настроени събития</string>
+    <string name="events_sent_to_watch">Събитията са изпратени към часовника</string>
     <string name="event_not_compatible_with_watch">Събитието не е съвместимо с часовника</string>
     <string name="settings_sent_to_watch">Настройки изпратени към часовника</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Извинете, вашето устройство не поддържа Bluetooth. Излизане…</string>

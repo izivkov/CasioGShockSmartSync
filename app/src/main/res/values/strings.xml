@@ -194,6 +194,7 @@
     <string name="unable_to_get_default_sound_uri">Unable to get default sound URI</string>
     <string name="alarms_set_to_watch">Alarms Set to Watch</string>
     <string name="events_set">Events Set</string>
+    <string name="events_sent_to_watch">Events sent to watch</string>
     <string name="event_not_compatible_with_watch">Event not compatible with Watch</string>
     <string name="settings_sent_to_watch">Settings Sent to Watch</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Sorry, your device does not support Bluetooth. Exiting…</string>
