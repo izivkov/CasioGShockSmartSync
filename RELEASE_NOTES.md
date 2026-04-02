@@ -1,3 +1,54 @@
+# Release Notes — April 2, 2026
+
+## 🐛 Bug Fixes
+
+### Prayer Alarm Names Misalignment (Critical)
+Fixed a critical bug where prayer alarm names were incorrectly assigned to alarm slots on the watch. 
+
+**Root cause:** The app selects the next upcoming prayers based on the current time of day, which means the first alarm may not be Fajr — it could be any prayer (e.g., Maghrib at 3 PM). However, the watch displays alarms sorted by time of day (hour:minute), while the names were stored by slot index in the order they were generated. This caused a mismatch between displayed times and prayer names.
+
+**Fix:** Alarms are now sorted by time of day (`hour`, `minute`) before being assigned to watch slots and saved to `AlarmNameStorage`. This ensures the slot order matches the watch's display order, so names always correctly correspond to their prayer times.
+
+**File changed:** `PrayerAlarmsHelper.kt`
+
+### Connection Issues for Some Watches
+Improved the reliability of the `CompanionDevicePresenceMonitor` which handles automatic reconnection when a watch comes in and out of Bluetooth range.
+
+**Changes:**
+- Added **null-safety** for `DeviceAppeared` and `DeviceDisappeared` event payloads — previously, a null or unexpected payload type would cause a crash.
+- Added **error handling** (`try/catch`) around the connection attempt in `DeviceAppeared`, preventing unhandled exceptions from crashing the monitor.
+- Added **Timber logging** throughout the monitor for easier debugging of connection lifecycle events (`Device appeared`, `Device not connected. Attempting to connect...`, `Device already connected`, `Device disappeared`).
+
+**File changed:** `CompanionDevicePresenceMonitor.kt`
+
+---
+
+## ✨ Improvements
+
+### Events Sent Confirmation
+Added an `AppSnackbar` notification ("Events sent to watch") when calendar events are automatically sent to the watch via the Actions system (e.g., during auto time adjustment or button press). Previously, only the manual send from the Events screen showed feedback.
+
+**File changed:** `ActionViewModel.kt`
+
+### Localization
+Added the new `events_sent_to_watch` string resource with translations for all 10 supported languages:
+
+| Language | Translation |
+|----------|------------|
+| English | Events sent to watch |
+| Arabic | تم إرسال الأحداث إلى الساعة |
+| Bulgarian | Събитията са изпратени към часовника |
+| Catalan | Esdeveniments enviats al rellotge |
+| German | Ereignisse an die Uhr gesendet |
+| Spanish | Eventos enviados al reloj |
+| French | Événements envoyés à la montre |
+| Hungarian | Események elküldve az órára |
+| Japanese | イベントを時計に送信しました |
+| Russian | События отправлены на часы |
+| Chinese (Simplified) | 事件已发送到手表 |
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v25.4
 
 We are excited to announce version 25.4! This release focuses on perfecting the "Phone Finder" experience with improved lift-detection sensitivity and device-aware ringing logic.
