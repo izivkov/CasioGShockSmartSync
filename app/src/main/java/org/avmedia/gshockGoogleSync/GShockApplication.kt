@@ -110,6 +110,14 @@ class GShockApplication : Application(), IScreenManager {
         eventHandler =
                 MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+            Timber.d("Timber planted for Debug") // If you see this, Timber is working
+        } else {
+            // Optional: Plant a tree that only logs Errors to a crash reporter like Firebase
+            // Timber.plant(ReleaseTree())
+        }
     }
 
     suspend fun cleanupLocalStorage(context: Context) {
