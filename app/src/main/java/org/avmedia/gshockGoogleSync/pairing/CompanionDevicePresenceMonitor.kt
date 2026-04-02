@@ -8,6 +8,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,19 +22,39 @@ class CompanionDevicePresenceMonitor @Inject constructor(
 
     private val eventActions = arrayOf(
         EventAction("DeviceAppeared") {
-            val address = (ProgressEvents.getPayload("DeviceAppeared") as String)
+            val address = ProgressEvents.getPayload("DeviceAppeared") as? String
+            
+            if (address == null) {
+                Timber.e("DeviceAppeared triggered but payload address is null or not a String")
+                return@EventAction
+            }
+
             val addressValid = address.uppercase()
+            Timber.i("Device appeared: $addressValid")
 
             monitorScope.launch {
-                // Now 'repository' is guaranteed to be initialized
-                if (!repository.isConnected()) {
-                    repository.waitForConnection(addressValid)
+                try {
+                    // Now 'repository' is guaranteed to be initialized
+                    if (!repository.isConnected()) {
+                        Timber.i("Device not connected. Attempting to connect to $addressValid...")
+                        repository.waitForConnection(addressValid)
+                    } else {
+                        Timber.i("Device already connected. Skipping wait.")
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Error occurred while waiting for connection to $addressValid")
                 }
             }
         },
         EventAction("DeviceDisappeared") {
-            val address = ProgressEvents.getPayload("DeviceDisappeared") as String
-            // Handle disappearance if needed
+            val address = ProgressEvents.getPayload("DeviceDisappeared") as? String
+            
+            if (address == null) {
+                Timber.e("DeviceDisappeared triggered but payload address is null")
+                return@EventAction
+            }
+            
+            Timber.i("Device disappeared: $address")
         }
     )
 

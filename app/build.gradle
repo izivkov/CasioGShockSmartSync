@@ -16,7 +16,6 @@ android {
         targetSdk = 36
         versionCode = 403
         versionName = "40.3"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
