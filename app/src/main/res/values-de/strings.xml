@@ -184,7 +184,7 @@ Nachdem die Alarme eingestellt wurden, können Sie sie an die Uhr oder an die We
     <string name="unable_to_get_default_sound_uri">Kann die Standard-Sound-URI nicht abrufen</string>
     <string name="alarms_set_to_watch">Wecker auf die Uhr gestellt</string>
     <string name="events_set">Ereignisse gesetzt</string>
-    <string name="events_sent_to_watch">Ereignisse an die Uhr gesendet</string>
+    <string name="reminders_sent_to_watch">Erinnerungen an die Uhr gesendet</string>
     <string name="event_not_compatible_with_watch">Ereignis nicht mit der Uhr kompatibel</string>
     <string name="settings_sent_to_watch">Einstellungen an die Uhr gesendet</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Entschuldigung, Ihr Gerät unterstützt Bluetooth nicht. Wird beendet…</string>

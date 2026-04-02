@@ -193,7 +193,7 @@
     <string name="unable_to_get_default_sound_uri">デフォルトのサウンドURIを取得できません</string>
     <string name="alarms_set_to_watch">アラームが時計に設定されました</string>
     <string name="events_set">イベントが設定されました</string>
-    <string name="events_sent_to_watch">イベントを時計に送信しました</string>
+    <string name="reminders_sent_to_watch">リマインダーを時計に送信しました</string>
     <string name="event_not_compatible_with_watch">イベントが時計と互換性がありません</string>
     <string name="settings_sent_to_watch">設定が時計に送信されました</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">申し訳ありませんが、このデバイスはBluetoothをサポートしていません。終了します…</string>

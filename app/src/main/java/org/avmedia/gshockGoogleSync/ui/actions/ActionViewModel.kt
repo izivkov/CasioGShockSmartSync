@@ -256,7 +256,6 @@ constructor(
             Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(calendarEvents.getEventsFromCalendar())
             api.setEvents(EventsModel.events)
-            AppSnackbar(context.getString(R.string.events_sent_to_watch))
         }
 
         override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
@@ -712,7 +711,7 @@ constructor(
     fun saveWithMessage(message: String) {
         viewModelScope.launch {
             actionsStorage.save()
-            _uiEvents.emit(UiEvent.ShowSnackbar(message))
+            AppSnackbar(message)
         }
     }
 }

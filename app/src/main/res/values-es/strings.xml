@@ -184,7 +184,7 @@ Después del segundo pitido doble, la app mostrará la pantalla de ajuste de hor
     <string name="unable_to_get_default_sound_uri">No se puede obtener el URI de sonido predeterminado</string>
     <string name="alarms_set_to_watch">Alarmas configuradas en el reloj</string>
     <string name="events_set">Eventos configurados</string>
-    <string name="events_sent_to_watch">Eventos enviados al reloj</string>
+    <string name="reminders_sent_to_watch">Recordatorios enviados al reloj</string>
     <string name="event_not_compatible_with_watch">El evento no es compatible con el reloj</string>
     <string name="settings_sent_to_watch">Configuraciones enviadas al reloj</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Lo siento, su dispositivo no soporta Bluetooth. Saliendo…</string>

@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
@@ -64,7 +65,7 @@ class TimeViewModel @Inject constructor(
             is TimeAction.UpdateTimer -> {
                 viewModelScope.launch {
                     api.setTimer(action.timeMs)
-                    _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.timer_set)))
+                    AppSnackbar(appContext.getString(R.string.timer_set))
                 }
             }
 
@@ -73,12 +74,12 @@ class TimeViewModel @Inject constructor(
                     runCatching {
                         val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                         val timeMs = System.currentTimeMillis() + timeOffset
-                        _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.sending_time_to_watch)))
+                        AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
                         api.setTime(timeMs = timeMs)
-                        _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.time_set)))
+                        AppSnackbar(appContext.getString(R.string.time_set))
                         refreshState()
                     }.onFailure { e ->
-                        _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Api Error"))
+                        AppSnackbar(e.message ?: "Api Error")
                     }
                 }
             }
@@ -98,7 +99,7 @@ class TimeViewModel @Inject constructor(
                     watchName = api.getWatchName()
                 )
             }.onFailure {
-                _uiEvents.emit(UiEvent.ShowSnackbar("Api Error"))
+                AppSnackbar("Api Error")
             }
         }
     }

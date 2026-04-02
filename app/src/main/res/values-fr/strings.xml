@@ -193,7 +193,7 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="unable_to_get_default_sound_uri">Impossible d\'obtenir l\'URI du son par défaut</string>
     <string name="alarms_set_to_watch">Alarmes réglées sur la montre</string>
     <string name="events_set">Événements définis</string>
-    <string name="events_sent_to_watch">Événements envoyés à la montre</string>
+    <string name="reminders_sent_to_watch">Rappels envoyés à la montre</string>
     <string name="event_not_compatible_with_watch">Événement non compatible avec la montre</string>
     <string name="settings_sent_to_watch">Paramètres envoyés à la montre</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Désolé, votre appareil ne prend pas en charge le Bluetooth. Fermeture…</string>

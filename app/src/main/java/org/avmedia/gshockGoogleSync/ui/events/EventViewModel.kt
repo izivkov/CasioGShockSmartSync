@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.Utils
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -46,7 +47,7 @@ class EventViewModel @Inject constructor(
                 _events.value = loadedEvents
                 EventsModel.refresh(loadedEvents)
             }.onFailure {
-                _uiEvents.emit(UiEvent.ShowSnackbar("Error: ${it.message}"))
+                AppSnackbar("Error: ${it.message}")
             }
         }
     }
@@ -102,9 +103,9 @@ class EventViewModel @Inject constructor(
                 }
 
                 api.setEvents(ArrayList(sanitizedEvents))
-                _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.events_set)))
+                AppSnackbar(appContext.getString(R.string.reminders_sent_to_watch))
             }.onFailure { e ->
-                _uiEvents.emit(UiEvent.ShowSnackbar("Error: ${e.message ?: ""}"))
+                AppSnackbar("Error: ${e.message ?: ""}")
             }
         }
     }

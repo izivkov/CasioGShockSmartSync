@@ -25,6 +25,7 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 
 abstract class Setting(val name: String) {
     open suspend fun save() {} // Default empty implementation
@@ -437,7 +438,7 @@ constructor(
                 // Local storage setting are not sent to the watch, but are used by the app.
                 state.value.settings.forEach { it.save() }
             }
-                    .onFailure { e -> _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Error")) }
+                    .onFailure { e -> AppSnackbar(e.message ?: "Error") }
         }
     }
 
@@ -477,12 +478,10 @@ constructor(
         viewModelScope.launch {
             runCatching {
                 api.setSettings(settings)
-                _uiEvents.emit(
-                        UiEvent.ShowSnackbar(appContext.getString(R.string.settings_sent_to_watch))
-                )
+                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
             }
                     .onFailure { e ->
-                        _uiEvents.emit(UiEvent.ShowSnackbar(e.message ?: "Api Error"))
+                        AppSnackbar(e.message ?: "Api Error")
                     }
         }
     }

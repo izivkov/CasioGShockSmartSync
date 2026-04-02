@@ -15,6 +15,7 @@ import org.avmedia.gshockGoogleSync.scratchpad.ScratchpadManager
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import java.util.Calendar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -174,7 +175,7 @@ class AlarmViewModel @Inject constructor(
             // After successfully sending, reload the alarms state from the watch to ensure UI consistency.
             loadAlarms() // Reload state from the watch after saving.
 
-            _uiEvents.emit(UiEvent.ShowSnackbar(appContext.getString(R.string.alarms_set_to_watch)))
+            AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
         }.onFailure {
             ProgressEvents.onNext("Error", it.message ?: "")
         }

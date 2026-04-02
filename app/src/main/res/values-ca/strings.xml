@@ -191,7 +191,7 @@
     <string name="unable_to_get_default_sound_uri">No s\'ha pogut obtenir l\'URI de so predeterminat</string>
     <string name="alarms_set_to_watch">Alarmes configurades al rellotge</string>
     <string name="events_set">Esdeveniments configurats</string>
-    <string name="events_sent_to_watch">Esdeveniments enviats al rellotge</string>
+    <string name="reminders_sent_to_watch">Recordatoris enviats al rellotge</string>
     <string name="event_not_compatible_with_watch">Esdeveniment no compatible amb el rellotge</string>
     <string name="settings_sent_to_watch">Configuracions enviades al rellotge</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Ho sentim, el teu dispositiu no admet Bluetooth. Sortint…</string>

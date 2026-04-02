@@ -51,7 +51,7 @@ class PrayerAlarmsHelper @Inject constructor(
     @OptIn(ExperimentalTime::class)
     suspend fun createNextPrayerAlarms(
         n: Int
-    ): Result<List<Alarm>> = runCatching {
+    ): Result<List<Alarm>> = runCatching<List<Alarm>> {
         // First, validate that the requested number of alarms is within a reasonable range.
         require(n in 1..5) { "Number of alarms must be between 1 and 5" }
 
@@ -92,7 +92,6 @@ class PrayerAlarmsHelper @Inject constructor(
             }
             .take(n)
             .toList()
-            .sortedWith(compareBy({ it.hour }, { it.minute }))
             .also { alarms ->
                 alarms.forEachIndexed { index, alarm ->
                     alarmNameStorage.put(alarm.name ?: "", index = index)
