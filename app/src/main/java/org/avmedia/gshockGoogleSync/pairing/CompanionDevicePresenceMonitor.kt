@@ -36,7 +36,7 @@ class CompanionDevicePresenceMonitor @Inject constructor(
                 try {
                     // Now 'repository' is guaranteed to be initialized
                     if (!repository.isConnected()) {
-                        Timber.i("Device not connected. Attempting to connect to $addressValid...")
+                        Timber.i("$addressValid waitForConnection...")
                         repository.waitForConnection(addressValid)
                     } else {
                         Timber.i("Device already connected. Skipping wait.")
