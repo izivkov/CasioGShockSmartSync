@@ -23,7 +23,7 @@ class CompanionDevicePresenceMonitor @Inject constructor(
     private val eventActions = arrayOf(
         EventAction("DeviceAppeared") {
             val address = ProgressEvents.getPayload("DeviceAppeared") as? String
-            
+
             if (address == null) {
                 Timber.e("DeviceAppeared triggered but payload address is null or not a String")
                 return@EventAction
@@ -36,7 +36,7 @@ class CompanionDevicePresenceMonitor @Inject constructor(
                 try {
                     // Now 'repository' is guaranteed to be initialized
                     if (!repository.isConnected()) {
-                        Timber.i("$addressValid waitForConnection...")
+                        Timber.i("$addressValid waitForConnection")
                         repository.waitForConnection(addressValid)
                     } else {
                         Timber.i("Device already connected. Skipping wait.")
@@ -48,12 +48,12 @@ class CompanionDevicePresenceMonitor @Inject constructor(
         },
         EventAction("DeviceDisappeared") {
             val address = ProgressEvents.getPayload("DeviceDisappeared") as? String
-            
+
             if (address == null) {
                 Timber.e("DeviceDisappeared triggered but payload address is null")
                 return@EventAction
             }
-            
+
             Timber.i("Device disappeared: $address")
         }
     )
