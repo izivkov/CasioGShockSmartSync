@@ -1,12 +1,16 @@
 package org.avmedia.gshockGoogleSync
 
 import android.bluetooth.BluetoothDevice
+import android.content.Intent
+import android.provider.Settings
+import android.app.AlertDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
+import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
@@ -30,7 +34,8 @@ class MainEventHandler(
             EventAction("Disconnect") { handleDisconnect() },
             EventAction("HomeTimeUpdated") {},
             EventAction("RunActions") { handleRunAction() },
-            EventAction("AppNotification") { handleAppNotification() }
+            EventAction("AppNotification") { handleAppNotification() },
+            EventAction("LocationServicesDisabled") { handleLocationServicesDisabled() }
         )
 
         ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
@@ -89,6 +94,25 @@ class MainEventHandler(
     private fun handleWaitForConnection() {
         CoroutineScope(Dispatchers.Default).launch {
             context.waitForConnection()
+        }
+    }
+
+    private fun handleLocationServicesDisabled() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val activity = ActivityProvider.getCurrentActivity() ?: run {
+                Timber.e("No activity available to show location services dialog")
+                return@launch
+            }
+
+            AlertDialog.Builder(activity)
+                .setTitle("Location Services Required")
+                .setMessage("Android requires Location Services to be enabled for Bluetooth scanning. This app does not use your location — it is an Android system requirement.")
+                .setPositiveButton("Open Settings") { _, _ ->
+                    activity.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+                .setNegativeButton("Cancel", null)
+                .setCancelable(false)
+                .show()
         }
     }
 }

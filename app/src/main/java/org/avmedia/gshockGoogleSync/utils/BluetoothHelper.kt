@@ -1,3 +1,5 @@
+package org.avmedia.gshockGoogleSync.utils
+
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter

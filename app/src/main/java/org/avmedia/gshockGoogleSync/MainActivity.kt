@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync
 
-import BluetoothHelper
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -23,6 +22,7 @@ import java.util.concurrent.TimeUnit
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
+import org.avmedia.gshockGoogleSync.utils.BluetoothHelper
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
 import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import timber.log.Timber

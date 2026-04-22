@@ -1,8 +1,7 @@
 [versions]
 agp = "8.12.3"
-exifinterfaceVersion = "1.4.2"
 kotlin = "2.2.0"
-coreKtx = "1.17.0"
+coreKtx = "1.18.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -23,21 +22,15 @@ rrule = "1.0.3"
 timber = "5.0.1"
 sunrisesunset = "1.2"
 hiltNavigationCompose = "1.3.0"
-gshockapi = "1.4.66"
+gshockapi = "1.4.69"
 lifecycle = "2.10.0"
 material3 = "1.4.0"
-compose-ui = "1.10.2"
+compose-ui = "1.10.6"
 constraintlayout-compose = "1.1.1"
-datastore = "1.2.0"
-healthconnect = "1.1.0"
-guava = "33.5.3-android"
+datastore = "1.2.1"
 
-# just for api
-scanner = "1.3.1"
-ble = "2.11.0"
-client = "1.3.1"
 exifinterface = "1.4.2"
-transportApi = "4.1.0"
+transportApi = "4.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -80,16 +73,9 @@ constraintlayout-compose = { group = "androidx.constraintlayout", name = "constr
 
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
-androidx-health-connect = { group = "androidx.health.connect", name = "connect-client", version.ref = "healthconnect" }
-guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
-# just for api
-scanner = { module = "no.nordicsemi.android.kotlin.ble:scanner", version.ref = "scanner" }
-ble = { module = "no.nordicsemi.android:ble", version.ref = "ble" }
-client = { module = "no.nordicsemi.android.kotlin.ble:client", version.ref = "client" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 transport-api = { group = "com.google.android.datatransport", name = "transport-api", version.ref = "transportApi" }
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -97,4 +83,3 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
