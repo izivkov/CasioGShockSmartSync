@@ -34,6 +34,7 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 addAll(
                     listOf(
+                        Manifest.permission.BLUETOOTH_SCAN,
                         Manifest.permission.BLUETOOTH_CONNECT,
                     )
                 )
@@ -115,4 +116,3 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
         Timer("SettingUp", false).schedule(6000) { activity.finish() }
     }
 }
-

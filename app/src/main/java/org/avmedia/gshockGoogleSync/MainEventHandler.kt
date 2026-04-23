@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
+import org.avmedia.gshockGoogleSync.services.ReconnectManager
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.AppNotification
@@ -22,7 +23,8 @@ import java.util.concurrent.TimeUnit
 class MainEventHandler(
     private val context: GShockApplication,
     private val repository: GShockRepository,
-    private val screenManager: IScreenManager
+    private val screenManager: IScreenManager,
+    private val reconnectManager: ReconnectManager
 ) {
     fun setupEventSubscription() {
         val eventActions = arrayOf(
@@ -42,6 +44,7 @@ class MainEventHandler(
     }
 
     private fun handleWatchInitialization() {
+        reconnectManager.onConnected()
         if (repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
         }
@@ -58,6 +61,7 @@ class MainEventHandler(
     }
 
     private fun handleConnectionFailure() {
+        reconnectManager.onConnectionFailure()
         Timber.e("Failed to connect to the watch")
     }
 
@@ -83,7 +87,9 @@ class MainEventHandler(
 
     private fun handleDisconnect() {
         ProgressEvents.getPayload("Disconnect")?.let { device ->
-            repository.teardownConnection(device as BluetoothDevice)
+            val bluetoothDevice = device as BluetoothDevice
+            repository.teardownConnection(bluetoothDevice)
+            reconnectManager.onDisconnect(bluetoothDevice.address)
         }
 
         Executors.newSingleThreadScheduledExecutor().schedule({

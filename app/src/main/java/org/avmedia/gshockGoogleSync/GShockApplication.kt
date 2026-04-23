@@ -1,11 +1,12 @@
 package org.avmedia.gshockGoogleSync
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +26,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
-import org.avmedia.gshockGoogleSync.services.GShockScanService
+import org.avmedia.gshockGoogleSync.services.ReconnectManager
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
@@ -63,6 +64,8 @@ class GShockApplication : Application(), IScreenManager {
 
     @Inject lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
 
+    @Inject lateinit var reconnectManager: ReconnectManager
+
     fun init() {
 
         Timber.i("Initializing GShockApplication")
@@ -73,13 +76,8 @@ class GShockApplication : Application(), IScreenManager {
             recoverFromPairingCrash()
 
             cleanupLocalStorage(this@GShockApplication)
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                val intent = Intent(this@GShockApplication, GShockScanService::class.java)
-                startService(intent)
-            } else {
-                syncAssociations()
-            }
+            syncAssociations()
+            reconnectManager.onKnownDevicesChanged()
         }
     }
 
@@ -110,8 +108,40 @@ class GShockApplication : Application(), IScreenManager {
         super.onCreate()
         ActivityProvider.initialize(this)
         eventHandler =
-            MainEventHandler(context = this, repository = repository, screenManager = this)
+            MainEventHandler(
+                context = this,
+                repository = repository,
+                screenManager = this,
+                reconnectManager = reconnectManager
+            )
         eventHandler.setupEventSubscription()
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            private var startedActivities = 0
+
+            override fun onActivityStarted(activity: Activity) {
+                startedActivities += 1
+                if (startedActivities == 1) {
+                    reconnectManager.onAppForegroundChanged(true)
+                }
+            }
+
+            override fun onActivityStopped(activity: Activity) {
+                startedActivities = (startedActivities - 1).coerceAtLeast(0)
+                if (startedActivities == 0) {
+                    reconnectManager.onAppForegroundChanged(false)
+                }
+            }
+
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+
+            override fun onActivityResumed(activity: Activity) = Unit
+
+            override fun onActivityPaused(activity: Activity) = Unit
+
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+
+            override fun onActivityDestroyed(activity: Activity) = Unit
+        })
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -126,14 +156,16 @@ class GShockApplication : Application(), IScreenManager {
         val repositoryAssociations = repository.getAssociations(context)
         val localAddresses = LocalDataStorage.getDeviceAddresses(context)
 
-        // 1. Identify which addresses SHOULD be removed
-        val addressesToRemove = localAddresses.filter { it !in repositoryAssociations }
-
-        // 2. Remove them one by one (Safe here because we aren't modifying 'localAddresses')
-        addressesToRemove.forEach { address ->
-            Timber.i("Cleaning up orphaned local association: $address")
-            LocalDataStorage.removeDeviceAddress(context, address)
+        if (repositoryAssociations.isEmpty() && localAddresses.isNotEmpty()) {
+            Timber.w("CDM returned no associations. Preserving %d locally cached device(s) for scan fallback.", localAddresses.size)
+            return
         }
+
+        localAddresses
+            .filter { it !in repositoryAssociations }
+            .forEach { address ->
+                Timber.w("Device %s is missing from CDM associations. Preserving local cache for scan fallback.", address)
+            }
     }
 
     private fun isLocationEnabled(): Boolean {
@@ -143,6 +175,7 @@ class GShockApplication : Application(), IScreenManager {
 
     private fun syncAssociations() {
         val associations = repository.getAssociationsWithNames(this)
+        val localAddresses = LocalDataStorage.getDeviceAddresses(this)
 
         CoroutineScope(Dispatchers.IO).launch {
             associations.forEach { association ->
@@ -158,6 +191,8 @@ class GShockApplication : Application(), IScreenManager {
             ) {
                 associations.firstOrNull()?.let {
                     LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
+                } ?: localAddresses.firstOrNull()?.let {
+                    LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it)
                 }
             }
 
@@ -173,10 +208,16 @@ class GShockApplication : Application(), IScreenManager {
                             association.address
                         )
                     }
+
+                    if (associations.isEmpty() && localAddresses.isNotEmpty()) {
+                        Timber.w("No CDM associations available. Relying on scan fallback for %d cached device(s).", localAddresses.size)
+                    }
                 }
             } else {
                 Timber.i("Skipping device presence observation on API ${Build.VERSION.SDK_INT}")
             }
+
+            reconnectManager.onKnownDevicesChanged()
         }
     }
 

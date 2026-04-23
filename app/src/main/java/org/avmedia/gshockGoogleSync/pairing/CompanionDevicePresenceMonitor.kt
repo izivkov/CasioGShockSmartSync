@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.services.ReconnectManager
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -14,10 +14,8 @@ import javax.inject.Singleton
 
 @Singleton
 class CompanionDevicePresenceMonitor @Inject constructor(
-    // 1. Inject the repository directly in the constructor
-    private val repository: GShockRepository
+    private val reconnectManager: ReconnectManager
 ) {
-    // Use a class-level scope to manage coroutines safely
     private val monitorScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val eventActions = arrayOf(
@@ -33,17 +31,7 @@ class CompanionDevicePresenceMonitor @Inject constructor(
             Timber.i("Device appeared: $addressValid")
 
             monitorScope.launch {
-                try {
-                    // Now 'repository' is guaranteed to be initialized
-                    if (!repository.isConnected()) {
-                        Timber.i("$addressValid waitForConnection")
-                        repository.waitForConnection(addressValid)
-                    } else {
-                        Timber.i("Device already connected. Skipping wait.")
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "Error occurred while waiting for connection to $addressValid")
-                }
+                reconnectManager.onDeviceAppeared(addressValid)
             }
         },
         EventAction("DeviceDisappeared") {

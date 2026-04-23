@@ -1,12 +1,16 @@
 package org.avmedia.gshockGoogleSync.services
 
+import android.Manifest
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.IBinder
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.ble.GShockScanner
 import timber.log.Timber
@@ -25,11 +29,23 @@ class GShockScanService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Timber.i("GShockScanService: started")
 
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Timber.w("GShockScanService: stopping because BLUETOOTH_SCAN is not granted")
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         GShockScanner.startScan(
             context       = applicationContext,
             isBluetoothOn = { bluetoothAdapter?.isEnabled == true },
             filter        = { info ->
-                repository.getAssociations(this).contains(info.address)
+                val knownAddresses =
+                    (repository.getAssociations(this) + LocalDataStorage.getDeviceAddresses(this))
+                        .map { it.uppercase() }
+                        .toSet()
+                knownAddresses.contains(info.address.uppercase())
             },
             onDeviceFound = { info ->
                 Timber.i("GShockScanService: onDeviceFound address=${info.address} name=${info.name}")
