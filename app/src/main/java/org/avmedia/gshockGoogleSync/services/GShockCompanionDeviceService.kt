@@ -21,15 +21,12 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
 
     @Deprecated("Deprecated in Java")
     override fun onDeviceAppeared(address: String) {
-        Timber.i("Device appeared (Legacy API 31-32): $address")
-        startForegroundServicePromotion()
-        ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
+        handleDeviceEvent("DeviceAppeared", address, "Device appeared (Legacy API 31-32): $address")
     }
 
     @Deprecated("Deprecated in Java")
     override fun onDeviceDisappeared(address: String) {
-        Timber.i("Device disappeared (Legacy API 31-32): $address")
-        ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+        handleDeviceEvent("DeviceDisappeared", address, "Device disappeared (Legacy API 31-32): $address")
         
         // Re-arm the observation so next appearance fires again
         val cdm = getSystemService(CompanionDeviceManager::class.java)
@@ -45,16 +42,13 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDeviceAppeared(associationInfo: android.companion.AssociationInfo) {
         val address = associationInfo.deviceMacAddress?.toString() ?: return
-        Timber.i("Device appeared (API 33+): $address")
-        startForegroundServicePromotion()
-        ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
+        handleDeviceEvent("DeviceAppeared", address, "Device appeared (API 33+): $address")
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDeviceDisappeared(associationInfo: android.companion.AssociationInfo) {
         val address = associationInfo.deviceMacAddress?.toString() ?: return
-        Timber.i("Device disappeared (API 33+): $address, associationId: ${associationInfo.id}")
-        ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+        handleDeviceEvent("DeviceDisappeared", address, "Device disappeared (API 33+): $address, associationId: ${associationInfo.id}")
     }
 
     private fun sanitizeAddress(address: String): String {
@@ -65,23 +59,41 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
     override fun onDevicePresenceEvent(event: DevicePresenceEvent) {
         super.onDevicePresenceEvent(event)
 
-        Timber.i("onDevicePresenceEvent: $event")
-
         val companionDeviceManager = getSystemService(CompanionDeviceManager::class.java)
         val associationInfo = companionDeviceManager.myAssociations.find { it.id == event.associationId }
         val address = associationInfo?.deviceMacAddress?.toString() ?: return
 
         when (event.event) {
             DevicePresenceEvent.EVENT_BLE_APPEARED, DevicePresenceEvent.EVENT_BT_CONNECTED -> {
-                Timber.i("Device appeared (API 36+): $address")
-                startForegroundServicePromotion()
-                ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
+                handleDeviceEvent("DeviceAppeared", address, "Device appeared (API 36+): $address")
             }
             DevicePresenceEvent.EVENT_BLE_DISAPPEARED, DevicePresenceEvent.EVENT_BT_DISCONNECTED -> {
-                Timber.i("Device disappeared (API 36+): $address")
-                ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+                handleDeviceEvent("DeviceDisappeared", address, "Device disappeared (API 36+): $address")
             }
         }
+    }
+
+    private var lastEventTime = 0L
+    private var lastEventType = ""
+    private var lastEventAddress = ""
+
+    private fun handleDeviceEvent(type: String, address: String, logMessage: String) {
+        val now = System.currentTimeMillis()
+        // Deduplicate identical events that occur within 1 second of each other
+        if (type == lastEventType && address == lastEventAddress && (now - lastEventTime) < 1000) {
+            return
+        }
+        
+        lastEventType = type
+        lastEventAddress = address
+        lastEventTime = now
+
+        Timber.i(logMessage)
+        
+        if (type == "DeviceAppeared") {
+            startForegroundServicePromotion()
+        }
+        ProgressEvents.onNext(type, sanitizeAddress(address))
     }
 
     private fun startForegroundServicePromotion() {
