@@ -8,6 +8,7 @@ import com.google.android.datatransport.Event
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import android.companion.CompanionDeviceManager
 
 @RequiresApi(Build.VERSION_CODES.S)
 @AndroidEntryPoint
@@ -48,5 +49,20 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
         super.onDevicePresenceEvent(event)
 
         Timber.i("onDevicePresenceEvent: $event")
+
+        val companionDeviceManager = getSystemService(CompanionDeviceManager::class.java)
+        val associationInfo = companionDeviceManager.myAssociations.find { it.id == event.associationId }
+        val address = associationInfo?.deviceMacAddress?.toString() ?: return
+
+        when (event.event) {
+            DevicePresenceEvent.EVENT_BLE_APPEARED, DevicePresenceEvent.EVENT_BT_CONNECTED -> {
+                Timber.i("Device appeared (API 36+): $address")
+                ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
+            }
+            DevicePresenceEvent.EVENT_BLE_DISAPPEARED, DevicePresenceEvent.EVENT_BT_DISCONNECTED -> {
+                Timber.i("Device disappeared (API 36+): $address")
+                ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+            }
+        }
     }
 }

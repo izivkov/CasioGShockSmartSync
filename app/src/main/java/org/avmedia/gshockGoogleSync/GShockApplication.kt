@@ -110,7 +110,7 @@ class GShockApplication : Application(), IScreenManager {
         super.onCreate()
         ActivityProvider.initialize(this)
         eventHandler =
-            MainEventHandler(context = this, repository = repository, screenManager = this)
+                MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
 
         if (BuildConfig.DEBUG) {
@@ -154,7 +154,7 @@ class GShockApplication : Application(), IScreenManager {
             }
 
             if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
-                    .isNullOrEmpty()
+                            .isNullOrEmpty()
             ) {
                 associations.firstOrNull()?.let {
                     LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
@@ -164,13 +164,15 @@ class GShockApplication : Application(), IScreenManager {
             // ✅ SAFE, explicit API gating
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (!isLocationEnabled()) {
-                    Timber.w("Location Services disabled — BLE scanning requires Location Services to be enabled. Notifying user.")
+                    Timber.w(
+                            "Location Services disabled — BLE scanning requires Location Services to be enabled. Notifying user."
+                    )
                     ProgressEvents.onNext("LocationServicesDisabled")
                 } else {
                     associations.forEach { association ->
                         repository.startObservingDevicePresence(
-                            this@GShockApplication,
-                            association.address
+                                this@GShockApplication,
+                                association.address
                         )
                     }
                 }
@@ -239,16 +241,16 @@ class GShockApplication : Application(), IScreenManager {
             AppScreen.INITIAL -> Run(contentPadding)
             AppScreen.PRE_CONNECTION -> StartScreen(contentPadding) { PreConnectionScreen() }
             AppScreen.CONTENT_SELECTOR ->
-                StartScreen(contentPadding) {
-                    ContentSelector(
-                        repository = repository,
-                        onUnlocked = { goToNavigationScreen() }
-                    )
-                }
+                    StartScreen(contentPadding) {
+                        ContentSelector(
+                                repository = repository,
+                                onUnlocked = { goToNavigationScreen() }
+                        )
+                    }
             AppScreen.MAIN_NAVIGATION ->
-                StartScreen(contentPadding) {
-                    BottomNavigationBarWithPermissions(repository = repository)
-                }
+                    StartScreen(contentPadding) {
+                        BottomNavigationBarWithPermissions(repository = repository)
+                    }
             AppScreen.RUN_ACTIONS -> StartScreen(contentPadding) { RunActionsScreen() }
             AppScreen.ERROR -> {
                 // Keep showing previous screen or a default one, but show error snackbar
@@ -272,7 +274,7 @@ class GShockApplication : Application(), IScreenManager {
             }
             else -> {
                 BottomNavigationBarWithPermissions(
-                    repository = repository,
+                        repository = repository,
                 )
             }
         }
