@@ -9,6 +9,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import android.companion.CompanionDeviceManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.pm.ServiceInfo
+import androidx.core.app.NotificationCompat
+import org.avmedia.gshockGoogleSync.R
 
 @RequiresApi(Build.VERSION_CODES.S)
 @AndroidEntryPoint
@@ -17,6 +22,7 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
     @Deprecated("Deprecated in Java")
     override fun onDeviceAppeared(address: String) {
         Timber.i("Device appeared (Legacy API 31-32): $address")
+        startForegroundServicePromotion()
         ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
     }
 
@@ -24,12 +30,23 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
     override fun onDeviceDisappeared(address: String) {
         Timber.i("Device disappeared (Legacy API 31-32): $address")
         ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+        
+        // Re-arm the observation so next appearance fires again
+        val cdm = getSystemService(CompanionDeviceManager::class.java)
+        try {
+            @Suppress("DEPRECATION")
+            cdm.startObservingDevicePresence(address)
+            Timber.i("Re-armed device presence observation for $address")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to re-arm device presence observation")
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDeviceAppeared(associationInfo: android.companion.AssociationInfo) {
         val address = associationInfo.deviceMacAddress?.toString() ?: return
         Timber.i("Device appeared (API 33+): $address")
+        startForegroundServicePromotion()
         ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
     }
 
@@ -57,11 +74,42 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
         when (event.event) {
             DevicePresenceEvent.EVENT_BLE_APPEARED, DevicePresenceEvent.EVENT_BT_CONNECTED -> {
                 Timber.i("Device appeared (API 36+): $address")
+                startForegroundServicePromotion()
                 ProgressEvents.onNext("DeviceAppeared", sanitizeAddress(address))
             }
             DevicePresenceEvent.EVENT_BLE_DISAPPEARED, DevicePresenceEvent.EVENT_BT_DISCONNECTED -> {
                 Timber.i("Device disappeared (API 36+): $address")
                 ProgressEvents.onNext("DeviceDisappeared", sanitizeAddress(address))
+            }
+        }
+    }
+
+    private fun startForegroundServicePromotion() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val channelId = "gshock_companion_channel"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    channelId,
+                    "Device Connection",
+                    NotificationManager.IMPORTANCE_LOW
+                )
+                val nm = getSystemService(NotificationManager::class.java)
+                nm.createNotificationChannel(channel)
+            }
+            val notification = NotificationCompat.Builder(this, channelId)
+                .setContentTitle("Watch Connecting")
+                .setContentText("Keeping connection alive...")
+                .setSmallIcon(R.drawable.ic_watch_later_black_24dp)
+                .build()
+
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    startForeground(1983, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE)
+                } else {
+                    startForeground(1983, notification)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to start foreground service")
             }
         }
     }

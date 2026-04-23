@@ -169,11 +169,31 @@ class GShockApplication : Application(), IScreenManager {
                     )
                     ProgressEvents.onNext("LocationServicesDisabled")
                 } else {
+                    val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
                     associations.forEach { association ->
-                        repository.startObservingDevicePresence(
-                                this@GShockApplication,
-                                association.address
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            val assocInfo = cdm.myAssociations.find { 
+                                it.deviceMacAddress?.toString().equals(association.address, ignoreCase = true) 
+                            }
+                            assocInfo?.let {
+                                val request = android.companion.ObservingDevicePresenceRequest.Builder()
+                                    .setAssociationId(it.id)
+                                    .build()
+                                try {
+                                    cdm.startObservingDevicePresence(request)
+                                } catch (e: Exception) {
+                                    Timber.e(e, "Error starting presence observation for ${association.address}")
+                                }
+                            }
+                        } else {
+                            repository.startObservingDevicePresence(
+                                    this@GShockApplication,
+                                    association.address
+                            )
+                        }
+                        
+                        // Start fallback scan for all devices
+                        startFallbackScan(this@GShockApplication, association.address)
                     }
                 }
             } else {
@@ -277,6 +297,33 @@ class GShockApplication : Application(), IScreenManager {
                         repository = repository,
                 )
             }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startFallbackScan(context: Context, address: String) {
+        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
+        val scanner = bluetoothManager.adapter?.bluetoothLeScanner ?: return
+
+        val filter = android.bluetooth.le.ScanFilter.Builder()
+            .setDeviceAddress(address.uppercase())
+            .build()
+
+        val settings = android.bluetooth.le.ScanSettings.Builder()
+            .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER)
+            .build()
+
+        val intent = Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
+        val pendingIntent = android.app.PendingIntent.getBroadcast(
+            context, 0, intent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE
+        )
+
+        try {
+            scanner.startScan(listOf(filter), settings, pendingIntent)
+            Timber.i("Started fallback PendingIntent scan for $address")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to start fallback scan")
         }
     }
 }

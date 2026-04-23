@@ -107,11 +107,16 @@
             android:name=".services.GShockCompanionDeviceService"
             android:exported="true"
             android:label="@string/app_name"
+            android:foregroundServiceType="connectedDevice"
             android:permission="android.permission.BIND_COMPANION_DEVICE_SERVICE">
             <intent-filter>
                 <action android:name="android.companion.CompanionDeviceService" />
             </intent-filter>
         </service>
+
+        <receiver
+            android:name=".receivers.BleScanReceiver"
+            android:exported="false" />
 
         <receiver
             android:name=".services.BootReceiver"
