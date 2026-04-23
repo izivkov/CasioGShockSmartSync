@@ -1,12 +1,13 @@
 package org.avmedia.gshockGoogleSync
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
+import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
-import android.os.Bundle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -26,7 +28,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
-import org.avmedia.gshockGoogleSync.services.ReconnectManager
+import org.avmedia.gshockGoogleSync.services.GShockScanService
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
@@ -64,8 +66,6 @@ class GShockApplication : Application(), IScreenManager {
 
     @Inject lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
 
-    @Inject lateinit var reconnectManager: ReconnectManager
-
     fun init() {
 
         Timber.i("Initializing GShockApplication")
@@ -77,7 +77,6 @@ class GShockApplication : Application(), IScreenManager {
 
             cleanupLocalStorage(this@GShockApplication)
             syncAssociations()
-            reconnectManager.onKnownDevicesChanged()
         }
     }
 
@@ -107,41 +106,8 @@ class GShockApplication : Application(), IScreenManager {
     override fun onCreate() {
         super.onCreate()
         ActivityProvider.initialize(this)
-        eventHandler =
-            MainEventHandler(
-                context = this,
-                repository = repository,
-                screenManager = this,
-                reconnectManager = reconnectManager
-            )
+        eventHandler = MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
-        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
-            private var startedActivities = 0
-
-            override fun onActivityStarted(activity: Activity) {
-                startedActivities += 1
-                if (startedActivities == 1) {
-                    reconnectManager.onAppForegroundChanged(true)
-                }
-            }
-
-            override fun onActivityStopped(activity: Activity) {
-                startedActivities = (startedActivities - 1).coerceAtLeast(0)
-                if (startedActivities == 0) {
-                    reconnectManager.onAppForegroundChanged(false)
-                }
-            }
-
-            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
-
-            override fun onActivityResumed(activity: Activity) = Unit
-
-            override fun onActivityPaused(activity: Activity) = Unit
-
-            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
-
-            override fun onActivityDestroyed(activity: Activity) = Unit
-        })
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
@@ -171,6 +137,28 @@ class GShockApplication : Application(), IScreenManager {
     private fun isLocationEnabled(): Boolean {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return LocationManagerCompat.isLocationEnabled(locationManager)
+    }
+
+    private fun startFallbackScanServiceIfNeeded() {
+        val knownAddresses =
+            (repository.getAssociations(this) + LocalDataStorage.getDeviceAddresses(this))
+                .map { it.uppercase() }
+                .toSet()
+
+        if (knownAddresses.isEmpty()) {
+            Timber.i("Skipping fallback BLE scan service: no known devices")
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Timber.i("Skipping fallback BLE scan service: BLUETOOTH_SCAN permission is not granted")
+            return
+        }
+
+        Timber.i("Starting fallback BLE scan service for %d known device(s)", knownAddresses.size)
+        startService(Intent(this, GShockScanService::class.java))
     }
 
     private fun syncAssociations() {
@@ -216,8 +204,7 @@ class GShockApplication : Application(), IScreenManager {
             } else {
                 Timber.i("Skipping device presence observation on API ${Build.VERSION.SDK_INT}")
             }
-
-            reconnectManager.onKnownDevicesChanged()
+            startFallbackScanServiceIfNeeded()
         }
     }
 
