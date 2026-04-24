@@ -93,7 +93,7 @@ class MainEventHandler(
 
     private fun handleWaitForConnection() {
         CoroutineScope(Dispatchers.Default).launch {
-            context.waitForConnection()
+            context.checkPairedDevicesOrNotify()
         }
     }
 

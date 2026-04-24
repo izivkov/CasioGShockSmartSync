@@ -220,7 +220,7 @@ class GShockApplication : Application(), IScreenManager {
         ActionRunner(context = this, api = repository)
 
         StartScreen(contentPadding) { PreConnectionScreen() }
-        LaunchedEffect(key1 = System.currentTimeMillis()) { waitForConnection() }
+        LaunchedEffect(key1 = System.currentTimeMillis()) { checkPairedDevicesOrNotify() }
     }
 
     @Composable
@@ -233,7 +233,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     @SuppressLint("NewApi")
-    internal suspend fun waitForConnection() {
+    internal suspend fun checkPairedDevicesOrNotify() {
         val associations = repository.getAssociationsWithNames(this)
         if (associations.isEmpty() && LocalDataStorage.getDeviceAddresses(this).isEmpty()) {
             ProgressEvents.onNext("NoPairedDevices")

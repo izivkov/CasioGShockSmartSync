@@ -7,18 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockGoogleSync.utils.DeviceEventGate
 import timber.log.Timber
 
 class BleScanReceiver : BroadcastReceiver() {
-
-    companion object {
-        // Suppress repeated DeviceAppeared events for the same address within this window.
-        // 5 seconds is long enough to cover multiple low-power scan cycles but short
-        // enough to react to a genuine re-appearance after disconnection.
-        private const val DEDUP_WINDOW_MS = 5_000L
-
-        private val lastSeenTimes = mutableMapOf<String, Long>()
-    }
 
     override fun onReceive(context: Context, intent: Intent) {
         val errorCode = intent.getIntExtra(BluetoothLeScanner.EXTRA_ERROR_CODE, -1)
@@ -34,16 +26,13 @@ class BleScanReceiver : BroadcastReceiver() {
             intent.getParcelableArrayListExtra(BluetoothLeScanner.EXTRA_LIST_SCAN_RESULT)
         }
 
-        val now = System.currentTimeMillis()
         scanResults?.forEach { result ->
             result.device?.address?.let { address ->
                 val upperAddress = address.uppercase()
-                val lastSeen = lastSeenTimes[upperAddress] ?: 0L
-                if (now - lastSeen < DEDUP_WINDOW_MS) {
-                    Timber.d("BleScanReceiver: suppressing duplicate DeviceAppeared for $upperAddress")
+                if (!DeviceEventGate.recordBleEvent(upperAddress, "DeviceAppeared")) {
+                    Timber.d("BleScanReceiver: suppressing DeviceAppeared for $upperAddress")
                     return@let
                 }
-                lastSeenTimes[upperAddress] = now
                 Timber.i("BleScanReceiver found device: $upperAddress")
                 ProgressEvents.onNext("DeviceAppeared", upperAddress)
             }
