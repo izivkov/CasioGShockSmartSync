@@ -1,4 +1,34 @@
+# Release Notes - Casio G-Shock Smart Sync v40.8 — April 24, 2026
+
+## ✨ Highlights
+
+### 🛡️ GrapheneOS & Privacy-Focused Android Support
+Full compatibility and improved reliability for GrapheneOS. We've overhauled how the app handles background connections to ensure your watch stays synced even on the most restrictive privacy settings.
+
+### 📶 Enhanced Background Connectivity
+*   **Fallback BLE Scanning**: Introduced a robust `PendingIntent`-based BLE scanning mechanism. This acts as a reliable fallback if the standard Companion Device Manager fails to report device appearance.
+*   **Event Deduplication**: Added a smart "event gate" to filter out duplicate connection events, preventing redundant sync cycles and improving battery efficiency.
+*   **Service Reliability**: The connection service now automatically re-arms presence observation, ensuring the app remains responsive to your watch even after long periods of inactivity.
+
+### ⚙️ Android 14+ Optimizations
+*   **Foreground Service Improvements**: Updated the connection service to use the latest `FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE` standards required by Android 14 (Upside Down Cake).
+*   **Modernized API Usage**: Refined device presence observation for Android 13+ (Tiramisu) using explicit request builders for better system integration.
+
+## 🛠 Improvements & Bug Fixes
+
+### ⌚ Watch Management
+*   **Automatic Sync**: Watch associations are now synchronized immediately when added or removed via the UI. This ensures the background scanner always has the correct list of devices to watch for.
+*   **Connection Stability**: Fixed several edge cases where the app could miss a connection event when multiple watches were associated.
+
+### 📚 Developer & Technical Updates
+*   **Refactored Scanner Logic**: The BLE scanning logic has been moved into the core API layer for better maintainability and consistency.
+*   **API Lint Fixes**: Resolved numerous Android Lint warnings across the `api` module to ensure better stability and performance.
+*   **Documentation**: Added comprehensive KDoc documentation for the `GShockAPI` library, making it easier for contributors and future integrations.
+
+---
+
 # Release Notes — April 2, 2026
+
 
 ## 🐛 Bug Fixes
 
