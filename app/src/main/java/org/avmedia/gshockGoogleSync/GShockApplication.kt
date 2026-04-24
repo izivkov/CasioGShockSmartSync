@@ -138,53 +138,70 @@ class GShockApplication : Application(), IScreenManager {
         return LocationManagerCompat.isLocationEnabled(locationManager)
     }
 
-    private fun syncAssociations() {
-        val associations = repository.getAssociationsWithNames(this)
-
+    internal fun syncAssociations() {
         CoroutineScope(Dispatchers.IO).launch {
-            associations.forEach { association ->
+            // 1. Get the list of associations the system knows about (the "available" pool)
+            val systemAssociations = repository.getAssociationsWithNames(this@GShockApplication)
+
+            // 2. Auto-Discovery: Add any system associations to LocalDataStorage if not already there.
+            // This ensures watches paired via Android Settings are picked up by the app.
+            systemAssociations.forEach { association ->
                 LocalDataStorage.addDeviceAddress(this@GShockApplication, association.address)
                 association.name?.let {
                     LocalDataStorage.setDeviceName(this@GShockApplication, association.address, it)
                 }
             }
 
+            // 3. Update the "LastDeviceAddress" if none is set
             if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "").isNullOrEmpty()) {
-                associations.firstOrNull()?.let {
+                systemAssociations.firstOrNull()?.let {
                     LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
                 }
             }
+
+            // 4. Re-fetch the final list of active addresses after auto-discovery
+            val finalActiveAddresses = LocalDataStorage.getDeviceAddresses(this@GShockApplication)
+                .map { it.uppercase() }
+                .toSet()
 
             if (!isLocationEnabled()) {
                 Timber.w("Location Services disabled — BLE scanning requires Location Services to be enabled. Notifying user.")
                 ProgressEvents.onNext("LocationServicesDisabled")
             } else {
-                val addresses = associations.map { it.address }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
 
-                associations.forEach { association ->
-                    // CDM presence observation only available on API 33+
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
-                        val assocInfo = cdm.myAssociations.find {
-                            it.deviceMacAddress?.toString().equals(association.address, ignoreCase = true)
-                        }
-                        assocInfo?.let {
-                            val request = android.companion.ObservingDevicePresenceRequest.Builder()
-                                .setAssociationId(it.id)
-                                .build()
+                    cdm.myAssociations.forEach { associationInfo ->
+                        val macAddress = associationInfo.deviceMacAddress?.toString()?.uppercase()
+                        val request = android.companion.ObservingDevicePresenceRequest.Builder()
+                            .setAssociationId(associationInfo.id)
+                            .build()
+
+                        // Use 'activeAddresses' (the state BEFORE this sync's auto-discovery)
+                        // to decide what to stop, OR use a more explicit check.
+                        // If it's not in our final list, we definitely don't want it.
+                        if (macAddress != null && macAddress in finalActiveAddresses) {
                             try {
                                 cdm.startObservingDevicePresence(request)
+                                Timber.d("Started presence observation for $macAddress")
                             } catch (e: Exception) {
-                                Timber.e(e, "Error starting presence observation for ${association.address}")
+                                Timber.e(e, "Error starting presence observation for $macAddress")
+                            }
+                        } else {
+                            try {
+                                cdm.stopObservingDevicePresence(request)
+                                Timber.d("Stopped presence observation for $macAddress")
+                            } catch (e: Exception) {
+                                // Likely not being observed or already stopped
                             }
                         }
-                    } else {
-                        Timber.i("CDM presence observation not available on API ${Build.VERSION.SDK_INT}, relying on fallback scan for ${association.address}")
                     }
+                } else {
+                    Timber.i("CDM presence observation not available on API ${Build.VERSION.SDK_INT}, relying on fallback scan")
                 }
 
-                // Start a single fallback scan covering all associated addresses at once
-                startFallbackScan(this@GShockApplication, addresses)
+                // Start fallback scan for all active addresses
+                startFallbackScan(this@GShockApplication, finalActiveAddresses.toList())
             }
         }
     }
@@ -287,45 +304,66 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
+    private var activeScanAddresses: Set<String>? = null
+
     @SuppressLint("MissingPermission")
     private fun startFallbackScan(context: Context, addresses: List<String>) {
-        if (addresses.isEmpty()) return
+        val newAddressesSet = addresses.map { it.uppercase() }.toSet()
+
+        // Optimization: If the addresses haven't changed, don't restart the scan
+        if (activeScanAddresses == newAddressesSet) {
+            Timber.d("Fallback scan already running for these addresses. Skipping restart.")
+            return
+        }
 
         val bluetoothManager =
-                context.getSystemService(Context.BLUETOOTH_SERVICE) as
-                        android.bluetooth.BluetoothManager
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
         val scanner = bluetoothManager.adapter?.bluetoothLeScanner ?: return
 
-        // One filter per address — all combined into a single scan session
+        // Create a PendingIntent to identify the scan
+        val intent = Intent(
+            context,
+            org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java
+        )
+        val pendingIntent = android.app.PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+                    android.app.PendingIntent.FLAG_MUTABLE
+        )
+
+        // Stop any previously active scan (handles both current session and previous app runs)
+        try {
+            scanner.stopScan(pendingIntent)
+            Timber.i("Stopped previous fallback scan")
+        } catch (e: Exception) {
+            // This is expected if no scan was running
+        }
+
+        if (addresses.isEmpty()) {
+            activeScanAddresses = null
+            return
+        }
+
         val filters = addresses.map { address ->
             android.bluetooth.le.ScanFilter.Builder()
-                    .setDeviceAddress(address.uppercase())
-                    .build()
+                .setDeviceAddress(address.uppercase())
+                .build()
         }
 
         val settings =
-                android.bluetooth.le.ScanSettings.Builder()
-                        .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER)
-                        .build()
-
-        val intent =
-                Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
-        // A single PendingIntent serves all addresses; requestCode=0 is stable since
-        // we are no longer creating one PendingIntent per device.
-        val pendingIntent =
-                android.app.PendingIntent.getBroadcast(
-                        context,
-                        0,
-                        intent,
-                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or
-                                android.app.PendingIntent.FLAG_MUTABLE
-                )
+            android.bluetooth.le.ScanSettings.Builder()
+                .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER)
+                .build()
 
         try {
             scanner.startScan(filters, settings, pendingIntent)
+            activeScanAddresses = newAddressesSet
             Timber.i("Started fallback PendingIntent scan for ${addresses.size} device(s): $addresses")
         } catch (e: Exception) {
             Timber.e(e, "Failed to start fallback scan")
+            activeScanAddresses = null
         }
     }
 }

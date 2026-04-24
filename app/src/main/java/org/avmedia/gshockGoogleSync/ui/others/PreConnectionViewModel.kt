@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.Intent
 import android.content.IntentSender
 import android.os.Build
 import androidx.lifecycle.ViewModel
@@ -15,6 +14,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.GShockApplication
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
@@ -181,11 +181,9 @@ constructor(
         api.associate(context, delegate)
     }
 
-    @SuppressLint("NewApi")
     fun setDevice(address: String, name: String) {
         viewModelScope.launch {
             try {
-                // Using dict/mapOf for structured logging
                 val logDetails: Map<String, String> = mapOf(
                     "address" to address,
                     "name" to name,
@@ -199,28 +197,11 @@ constructor(
                 LocalDataStorage.setDeviceName(appContext, address, name)
 
                 _watchName.value = name
-                
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    val cdm = appContext.getSystemService(android.companion.CompanionDeviceManager::class.java)
-                    val assocInfo = cdm.myAssociations.find { 
-                        it.deviceMacAddress?.toString().equals(address, ignoreCase = true) 
-                    }
-                    assocInfo?.let {
-                        val request = android.companion.ObservingDevicePresenceRequest.Builder()
-                            .setAssociationId(it.id)
-                            .build()
-                        try {
-                            cdm.startObservingDevicePresence(request)
-                        } catch (e: Exception) {
-                            Timber.e(e, "Error starting presence observation for $address")
-                        }
-                    }
-                } else {
-                    api.startObservingDevicePresence(appContext, address)
-                }
-                
-                startFallbackScan(appContext, address)
-                
+
+                // Re-sync all associations so CDM presence observers and the BLE
+                // fallback scan are rebuilt for the full, current device list.
+                (appContext as? GShockApplication)?.syncAssociations()
+
                 loadPairedDevices()
 
                 CrashReportHelper.clearPairingCrashFlag(appContext)
@@ -257,6 +238,10 @@ constructor(
                     _watchName.value = noWatchString
                 }
 
+                // Re-sync all associations so the BLE fallback scan and CDM presence
+                // observers are rebuilt without the removed device.
+                (appContext as? GShockApplication)?.syncAssociations()
+
                 // Refresh UI and log
                 loadPairedDevices()
                 Timber.i("Device $address removed from app. Bond cleanup via CDM (user may need to forget in Settings if persists).")
@@ -271,30 +256,4 @@ constructor(
         _triggerPairing.value = false
     }
 
-    @SuppressLint("MissingPermission")
-    private fun startFallbackScan(context: Context, address: String) {
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
-        val scanner = bluetoothManager.adapter?.bluetoothLeScanner ?: return
-
-        val filter = android.bluetooth.le.ScanFilter.Builder()
-            .setDeviceAddress(address.uppercase())
-            .build()
-
-        val settings = android.bluetooth.le.ScanSettings.Builder()
-            .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER)
-            .build()
-
-        val intent = Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
-        val pendingIntent = android.app.PendingIntent.getBroadcast(
-            context, 0, intent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE
-        )
-
-        try {
-            scanner.startScan(listOf(filter), settings, pendingIntent)
-            Timber.i("Started fallback PendingIntent scan for $address")
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to start fallback scan")
-        }
-    }
 }
