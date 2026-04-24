@@ -99,9 +99,7 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name=".services.GShockScanService"
-            android:exported="false" />
+
 
         <service
             android:name=".services.GShockCompanionDeviceService"

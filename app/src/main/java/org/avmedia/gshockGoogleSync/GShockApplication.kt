@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +26,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
-import org.avmedia.gshockGoogleSync.services.GShockScanService
+
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
@@ -63,6 +64,7 @@ class GShockApplication : Application(), IScreenManager {
 
     @Inject lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
 
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun init() {
 
         Timber.i("Initializing GShockApplication")
@@ -74,12 +76,7 @@ class GShockApplication : Application(), IScreenManager {
 
             cleanupLocalStorage(this@GShockApplication)
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                val intent = Intent(this@GShockApplication, GShockScanService::class.java)
-                startService(intent)
-            } else {
-                syncAssociations()
-            }
+            syncAssociations()
         }
     }
 
@@ -147,57 +144,45 @@ class GShockApplication : Application(), IScreenManager {
         CoroutineScope(Dispatchers.IO).launch {
             associations.forEach { association ->
                 LocalDataStorage.addDeviceAddress(this@GShockApplication, association.address)
-
                 association.name?.let {
                     LocalDataStorage.setDeviceName(this@GShockApplication, association.address, it)
                 }
             }
 
-            if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
-                            .isNullOrEmpty()
-            ) {
+            if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "").isNullOrEmpty()) {
                 associations.firstOrNull()?.let {
                     LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
                 }
             }
 
-            // ✅ SAFE, explicit API gating
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (!isLocationEnabled()) {
-                    Timber.w(
-                            "Location Services disabled — BLE scanning requires Location Services to be enabled. Notifying user."
-                    )
-                    ProgressEvents.onNext("LocationServicesDisabled")
-                } else {
-                    val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
-                    associations.forEach { association ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            val assocInfo = cdm.myAssociations.find { 
-                                it.deviceMacAddress?.toString().equals(association.address, ignoreCase = true) 
-                            }
-                            assocInfo?.let {
-                                val request = android.companion.ObservingDevicePresenceRequest.Builder()
-                                    .setAssociationId(it.id)
-                                    .build()
-                                try {
-                                    cdm.startObservingDevicePresence(request)
-                                } catch (e: Exception) {
-                                    Timber.e(e, "Error starting presence observation for ${association.address}")
-                                }
-                            }
-                        } else {
-                            repository.startObservingDevicePresence(
-                                    this@GShockApplication,
-                                    association.address
-                            )
-                        }
-                        
-                        // Start fallback scan for all devices
-                        startFallbackScan(this@GShockApplication, association.address)
-                    }
-                }
+            if (!isLocationEnabled()) {
+                Timber.w("Location Services disabled — BLE scanning requires Location Services to be enabled. Notifying user.")
+                ProgressEvents.onNext("LocationServicesDisabled")
             } else {
-                Timber.i("Skipping device presence observation on API ${Build.VERSION.SDK_INT}")
+                associations.forEach { association ->
+                    // CDM presence observation only available on API 33+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
+                        val assocInfo = cdm.myAssociations.find {
+                            it.deviceMacAddress?.toString().equals(association.address, ignoreCase = true)
+                        }
+                        assocInfo?.let {
+                            val request = android.companion.ObservingDevicePresenceRequest.Builder()
+                                .setAssociationId(it.id)
+                                .build()
+                            try {
+                                cdm.startObservingDevicePresence(request)
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error starting presence observation for ${association.address}")
+                            }
+                        }
+                    } else {
+                        Timber.i("CDM presence observation not available on API ${Build.VERSION.SDK_INT}, relying on fallback scan for ${association.address}")
+                    }
+
+                    // Fallback scan runs on all API levels
+                    startFallbackScan(this@GShockApplication, association.address)
+                }
             }
         }
     }
@@ -302,22 +287,35 @@ class GShockApplication : Application(), IScreenManager {
 
     @SuppressLint("MissingPermission")
     private fun startFallbackScan(context: Context, address: String) {
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
+        val bluetoothManager =
+                context.getSystemService(Context.BLUETOOTH_SERVICE) as
+                        android.bluetooth.BluetoothManager
         val scanner = bluetoothManager.adapter?.bluetoothLeScanner ?: return
 
-        val filter = android.bluetooth.le.ScanFilter.Builder()
-            .setDeviceAddress(address.uppercase())
-            .build()
+        val filter =
+                android.bluetooth.le.ScanFilter.Builder()
+                        .setDeviceAddress(address.uppercase())
+                        .build()
 
-        val settings = android.bluetooth.le.ScanSettings.Builder()
-            .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER)
-            .build()
+        val settings =
+                android.bluetooth.le.ScanSettings.Builder()
+                        .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER)
+                        .build()
 
-        val intent = Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
-        val pendingIntent = android.app.PendingIntent.getBroadcast(
-            context, 0, intent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE
-        )
+        val intent =
+                Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
+        // Use a unique requestCode per address so each device gets its own PendingIntent.
+        // requestCode=0 for all devices would cause each getBroadcast() call to silently
+        // replace the previous one, meaning only the last registered device would be scanned.
+        val requestCode = address.uppercase().hashCode()
+        val pendingIntent =
+                android.app.PendingIntent.getBroadcast(
+                        context,
+                        requestCode,
+                        intent,
+                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+                                android.app.PendingIntent.FLAG_MUTABLE
+                )
 
         try {
             scanner.startScan(listOf(filter), settings, pendingIntent)
