@@ -29,6 +29,9 @@ compose-ui = "1.10.6"
 constraintlayout-compose = "1.1.1"
 datastore = "1.2.1"
 
+# just for api
+ble = "2.11.0"
+client = "1.3.1"
 exifinterface = "1.4.2"
 transportApi = "4.1.1"
 
@@ -74,6 +77,9 @@ constraintlayout-compose = { group = "androidx.constraintlayout", name = "constr
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
 
+# just for api
+ble = { module = "no.nordicsemi.android:ble", version.ref = "ble" }
+client = { module = "no.nordicsemi.android.kotlin.ble:client", version.ref = "client" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 transport-api = { group = "com.google.android.datatransport", name = "transport-api", version.ref = "transportApi" }
 

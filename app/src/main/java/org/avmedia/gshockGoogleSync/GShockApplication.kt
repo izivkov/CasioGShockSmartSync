@@ -316,10 +316,6 @@ class GShockApplication : Application(), IScreenManager {
             return
         }
 
-        val bluetoothManager =
-            context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
-        val scanner = bluetoothManager.adapter?.bluetoothLeScanner ?: return
-
         // Create a PendingIntent to identify the scan
         val intent = Intent(
             context,
@@ -333,37 +329,12 @@ class GShockApplication : Application(), IScreenManager {
                     android.app.PendingIntent.FLAG_MUTABLE
         )
 
-        // Stop any previously active scan (handles both current session and previous app runs)
-        try {
-            scanner.stopScan(pendingIntent)
-            Timber.i("Stopped previous fallback scan")
-        } catch (e: Exception) {
-            // This is expected if no scan was running
-        }
+        repository.startFallbackScan(context, addresses, pendingIntent)
 
         if (addresses.isEmpty()) {
             activeScanAddresses = null
-            return
-        }
-
-        val filters = addresses.map { address ->
-            android.bluetooth.le.ScanFilter.Builder()
-                .setDeviceAddress(address.uppercase())
-                .build()
-        }
-
-        val settings =
-            android.bluetooth.le.ScanSettings.Builder()
-                .setScanMode(android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER)
-                .build()
-
-        try {
-            scanner.startScan(filters, settings, pendingIntent)
+        } else {
             activeScanAddresses = newAddressesSet
-            Timber.i("Started fallback PendingIntent scan for ${addresses.size} device(s): $addresses")
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to start fallback scan")
-            activeScanAddresses = null
         }
     }
 }
