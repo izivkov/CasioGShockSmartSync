@@ -159,6 +159,8 @@ class GShockApplication : Application(), IScreenManager {
                 Timber.w("Location Services disabled — BLE scanning requires Location Services to be enabled. Notifying user.")
                 ProgressEvents.onNext("LocationServicesDisabled")
             } else {
+                val addresses = associations.map { it.address }
+
                 associations.forEach { association ->
                     // CDM presence observation only available on API 33+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -179,10 +181,10 @@ class GShockApplication : Application(), IScreenManager {
                     } else {
                         Timber.i("CDM presence observation not available on API ${Build.VERSION.SDK_INT}, relying on fallback scan for ${association.address}")
                     }
-
-                    // Fallback scan runs on all API levels
-                    startFallbackScan(this@GShockApplication, association.address)
                 }
+
+                // Start a single fallback scan covering all associated addresses at once
+                startFallbackScan(this@GShockApplication, addresses)
             }
         }
     }
@@ -286,16 +288,20 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     @SuppressLint("MissingPermission")
-    private fun startFallbackScan(context: Context, address: String) {
+    private fun startFallbackScan(context: Context, addresses: List<String>) {
+        if (addresses.isEmpty()) return
+
         val bluetoothManager =
                 context.getSystemService(Context.BLUETOOTH_SERVICE) as
                         android.bluetooth.BluetoothManager
         val scanner = bluetoothManager.adapter?.bluetoothLeScanner ?: return
 
-        val filter =
-                android.bluetooth.le.ScanFilter.Builder()
-                        .setDeviceAddress(address.uppercase())
-                        .build()
+        // One filter per address — all combined into a single scan session
+        val filters = addresses.map { address ->
+            android.bluetooth.le.ScanFilter.Builder()
+                    .setDeviceAddress(address.uppercase())
+                    .build()
+        }
 
         val settings =
                 android.bluetooth.le.ScanSettings.Builder()
@@ -304,22 +310,20 @@ class GShockApplication : Application(), IScreenManager {
 
         val intent =
                 Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
-        // Use a unique requestCode per address so each device gets its own PendingIntent.
-        // requestCode=0 for all devices would cause each getBroadcast() call to silently
-        // replace the previous one, meaning only the last registered device would be scanned.
-        val requestCode = address.uppercase().hashCode()
+        // A single PendingIntent serves all addresses; requestCode=0 is stable since
+        // we are no longer creating one PendingIntent per device.
         val pendingIntent =
                 android.app.PendingIntent.getBroadcast(
                         context,
-                        requestCode,
+                        0,
                         intent,
                         android.app.PendingIntent.FLAG_UPDATE_CURRENT or
                                 android.app.PendingIntent.FLAG_MUTABLE
                 )
 
         try {
-            scanner.startScan(listOf(filter), settings, pendingIntent)
-            Timber.i("Started fallback PendingIntent scan for $address")
+            scanner.startScan(filters, settings, pendingIntent)
+            Timber.i("Started fallback PendingIntent scan for ${addresses.size} device(s): $addresses")
         } catch (e: Exception) {
             Timber.e(e, "Failed to start fallback scan")
         }
