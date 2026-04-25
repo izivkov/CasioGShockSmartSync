@@ -14,8 +14,8 @@ android {
         applicationId = "org.avmedia.gshockGoogleSync"
         minSdk = 26
         targetSdk = 36
-        versionCode = 408
-        versionName = "40.8"
+        versionCode = 409
+        versionName = "40.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
