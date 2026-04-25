@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.services
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.companion.CompanionDeviceManager
@@ -63,7 +64,8 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
         return address.uppercase().replace("-", ":")
     }
 
-    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    @SuppressLint("NewApi")
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     override fun onDevicePresenceEvent(event: DevicePresenceEvent) {
         super.onDevicePresenceEvent(event)
 
@@ -101,17 +103,15 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
     }
 
     private fun startForegroundServicePromotion() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val channelId = "gshock_companion_channel"
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    channelId,
-                    "Device Connection",
-                    NotificationManager.IMPORTANCE_LOW
-                )
-                val nm = getSystemService(NotificationManager::class.java)
-                nm.createNotificationChannel(channel)
-            }
+        val channelId = "gshock_companion_channel"
+        val channel = NotificationChannel(
+            channelId,
+            "Device Connection",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        val nm = getSystemService(NotificationManager::class.java)
+        nm.createNotificationChannel(channel)
+
             val notification = NotificationCompat.Builder(this, channelId)
                 .setContentTitle("Watch Connecting")
                 .setContentText("Keeping connection alive...")
@@ -131,6 +131,5 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
             } catch (e: Exception) {
                 Timber.e(e, "Failed to start foreground service")
             }
-        }
     }
 }

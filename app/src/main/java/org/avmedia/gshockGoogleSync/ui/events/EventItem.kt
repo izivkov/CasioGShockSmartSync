@@ -25,8 +25,8 @@ fun EventItem(
     enabled: Boolean,
     onEnabledChange: (Boolean) -> Unit,
     enabledCount: Int,
-    maxEnabled: Int = 5,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    maxEnabled: Int = 5
 ) {
     val maxReminderMessage = stringResource(id = R.string.max_reminders_reached)
 

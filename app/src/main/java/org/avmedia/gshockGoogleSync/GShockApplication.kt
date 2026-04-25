@@ -64,7 +64,6 @@ class GShockApplication : Application(), IScreenManager {
 
     @Inject lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
 
-    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun init() {
 
         Timber.i("Initializing GShockApplication")
@@ -138,6 +137,7 @@ class GShockApplication : Application(), IScreenManager {
         return LocationManagerCompat.isLocationEnabled(locationManager)
     }
 
+    @SuppressLint("NewApi")
     internal fun syncAssociations() {
         CoroutineScope(Dispatchers.IO).launch {
             // 1. Get the list of associations the system knows about (the "available" pool)
