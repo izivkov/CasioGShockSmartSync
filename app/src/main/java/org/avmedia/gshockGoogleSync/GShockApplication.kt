@@ -2,10 +2,6 @@ package org.avmedia.gshockGoogleSync
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
-import android.content.Intent
-import android.location.LocationManager
-import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,14 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.core.location.LocationManagerCompat
 import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
+import org.avmedia.gshockGoogleSync.pairing.DeviceAssociationManager
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -33,10 +28,8 @@ import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
-import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import javax.inject.Inject
 
 enum class AppScreen {
     INITIAL,
@@ -52,59 +45,35 @@ class GShockApplication : Application(), IScreenManager {
 
     var currentScreen by mutableStateOf(AppScreen.INITIAL)
     var errorMessage by mutableStateOf<String?>(null)
-    var pendingCrashLog by mutableStateOf<String?>(null)
 
     private lateinit var eventHandler: MainEventHandler
 
-    @Inject lateinit var deviceManager: DeviceManager
+    @Inject
+    lateinit var deviceManager: DeviceManager
 
-    @Inject lateinit var repository: GShockRepository
+    @Inject
+    lateinit var repository: GShockRepository
 
-    @Inject lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
+    @Inject
+    lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
+
+    @Inject
+    lateinit var deviceAssociationManager: DeviceAssociationManager
 
     fun init() {
-
         Timber.i("Initializing GShockApplication")
-
         CoroutineScope(Dispatchers.IO).launch {
-
-            // Check for previous pairing crash and recover if needed
-            recoverFromPairingCrash()
-
-            cleanupLocalStorage(this@GShockApplication)
-
-            syncAssociations()
+            deviceAssociationManager.init()
         }
     }
 
-    /** Recover from a previous pairing crash by clearing potentially corrupted state */
-    private suspend fun recoverFromPairingCrash() {
-        try {
-            if (CrashReportHelper.hasPairingCrashFlag(this)) {
-                Timber.w("Detected previous pairing crash, attempting recovery")
-
-                val latestCrash = CrashReportHelper.getLatestCrashLog(this)
-
-                // Set the pending log to be picked up by the UI
-                if (latestCrash != null) {
-                    pendingCrashLog = latestCrash
-                    Timber.e("Previous crash log captured for display")
-                }
-
-                CrashReportHelper.clearPairingCrashFlag(this)
-                Timber.i("Pairing crash recovery completed")
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to recover from pairing crash")
-        }
-    }
 
     @SuppressLint("NewApi")
     override fun onCreate() {
         super.onCreate()
         ActivityProvider.initialize(this)
         eventHandler =
-                MainEventHandler(context = this, repository = repository, screenManager = this)
+            MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
 
         if (BuildConfig.DEBUG) {
@@ -116,133 +85,6 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
-    suspend fun cleanupLocalStorage(context: Context) {
-        val repositoryAssociations = repository.getAssociations(context)
-        val localAddresses = LocalDataStorage.getDeviceAddresses(context)
-
-        // 1. Identify which addresses SHOULD be removed
-        val addressesToRemove = localAddresses.filter { it !in repositoryAssociations }
-
-        // 2. Remove them one by one (Safe here because we aren't modifying 'localAddresses')
-        addressesToRemove.forEach { address ->
-            Timber.i("Cleaning up orphaned local association: $address")
-            LocalDataStorage.removeDeviceAddress(context, address)
-        }
-    }
-
-    private fun isLocationEnabled(): Boolean {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return LocationManagerCompat.isLocationEnabled(locationManager)
-    }
-
-    @SuppressLint("NewApi")
-    internal fun syncAssociations() {
-        CoroutineScope(Dispatchers.IO).launch {
-            // 1. Get the list of associations the system knows about
-            val systemAssociations = repository.getAssociationsWithNames(this@GShockApplication)
-
-            // 2. Auto-Discovery: Add any system associations to LocalDataStorage if not already
-            // there
-            systemAssociations.forEach { association ->
-                LocalDataStorage.addDeviceAddress(this@GShockApplication, association.address)
-                association.name?.let {
-                    LocalDataStorage.setDeviceName(this@GShockApplication, association.address, it)
-                }
-            }
-
-            // 3. Update the "LastDeviceAddress" if none is set
-            if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
-                            .isNullOrEmpty()
-            ) {
-                systemAssociations.firstOrNull()?.let {
-                    LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
-                }
-            }
-
-            // 4. Re-fetch the final list of active addresses after auto-discovery
-            val finalActiveAddresses =
-                    LocalDataStorage.getDeviceAddresses(this@GShockApplication)
-                            .map { it.uppercase() }
-                            .toSet()
-
-            if (!isLocationEnabled()) {
-                Timber.w(
-                        "Location Services disabled — BLE scanning requires Location Services. Notifying user."
-                )
-                ProgressEvents.onNext("LocationServicesDisabled")
-                return@launch
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
-
-                cdm.myAssociations.forEach { associationInfo ->
-                    val macAddress =
-                            associationInfo.deviceMacAddress?.toString()?.uppercase()
-                                    ?: return@forEach
-
-                    if (macAddress in finalActiveAddresses) {
-                        try {
-                            // Preferred: associationId-based (API 33+, works on GrapheneOS)
-                            val request =
-                                    android.companion.ObservingDevicePresenceRequest.Builder()
-                                            .setAssociationId(associationInfo.id)
-                                            .build()
-                            cdm.startObservingDevicePresence(request)
-                            Timber.d("CDM presence started (request-based) for $macAddress")
-                        } catch (e: NoSuchMethodError) {
-                            // Fallback: MAC-based (works on crDroid and other custom ROMs)
-                            Timber.w(
-                                    "Request-based CDM unavailable, falling back to address-based for $macAddress"
-                            )
-                            try {
-                                cdm.startObservingDevicePresence(macAddress)
-                            } catch (e2: Exception) {
-                                Timber.e(e2, "Both CDM presence methods failed for $macAddress")
-                            }
-                        } catch (e: Exception) {
-                            Timber.e(e, "Error starting presence observation for $macAddress")
-                        }
-                    } else {
-                        try {
-                            val request =
-                                    android.companion.ObservingDevicePresenceRequest.Builder()
-                                            .setAssociationId(associationInfo.id)
-                                            .build()
-                            cdm.stopObservingDevicePresence(request)
-                            Timber.d("CDM presence stopped for $macAddress")
-                        } catch (e: NoSuchMethodError) {
-                            Timber.w(
-                                    "Request-based CDM unavailable, falling back to address-based stop for $macAddress"
-                            )
-                            try {
-                                cdm.stopObservingDevicePresence(macAddress)
-                            } catch (e2: Exception) {
-                                // Likely not being observed or already stopped — safe to ignore
-                            }
-                        } catch (e: Exception) {
-                            // Likely not being observed or already stopped — safe to ignore
-                        }
-                    }
-                }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // API 31-32: only string-based API available
-                systemAssociations.forEach { association ->
-                    repository.startObservingDevicePresence(
-                            this@GShockApplication,
-                            association.address
-                    )
-                }
-            } else {
-                Timber.i(
-                        "CDM presence observation not available on API ${Build.VERSION.SDK_INT}, relying on fallback scan"
-                )
-            }
-
-            // Start fallback scan for all active addresses (runs on all API levels)
-            startFallbackScan(this@GShockApplication, finalActiveAddresses.toList())
-        }
-    }
 
     // ScreenManager implementation
     override fun showContentSelector(repository: GShockRepository) {
@@ -277,25 +119,24 @@ class GShockApplication : Application(), IScreenManager {
         ActionRunner(context = this, api = repository)
 
         StartScreen(contentPadding) { PreConnectionScreen() }
-        LaunchedEffect(key1 = System.currentTimeMillis()) { checkPairedDevicesOrNotify() }
+        LaunchedEffect(key1 = System.currentTimeMillis()) {
+            deviceAssociationManager.checkPairedDevicesOrNotify()
+        }
     }
 
     @Composable
     fun StartScreen(contentPadding: PaddingValues, content: @Composable () -> Unit) {
-        pendingCrashLog?.let { log ->
-            CrashLogDialog(crashLog = log, onDismiss = { pendingCrashLog = null })
+        deviceAssociationManager.pendingCrashLog?.let { log ->
+            CrashLogDialog(
+                crashLog = log,
+                onDismiss = { deviceAssociationManager.pendingCrashLog = null })
         }
 
-        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) { content() }
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding)) { content() }
     }
 
-    @SuppressLint("NewApi")
-    internal suspend fun checkPairedDevicesOrNotify() {
-        val associations = repository.getAssociationsWithNames(this)
-        if (associations.isEmpty() && LocalDataStorage.getDeviceAddresses(this).isEmpty()) {
-            ProgressEvents.onNext("NoPairedDevices")
-        }
-    }
 
     @Composable
     fun AppContainer(contentPadding: PaddingValues) {
@@ -303,16 +144,18 @@ class GShockApplication : Application(), IScreenManager {
             AppScreen.INITIAL -> Run(contentPadding)
             AppScreen.PRE_CONNECTION -> StartScreen(contentPadding) { PreConnectionScreen() }
             AppScreen.CONTENT_SELECTOR ->
-                    StartScreen(contentPadding) {
-                        ContentSelector(
-                                repository = repository,
-                                onUnlocked = { goToNavigationScreen() }
-                        )
-                    }
+                StartScreen(contentPadding) {
+                    ContentSelector(
+                        repository = repository,
+                        onUnlocked = { goToNavigationScreen() }
+                    )
+                }
+
             AppScreen.MAIN_NAVIGATION ->
-                    StartScreen(contentPadding) {
-                        BottomNavigationBarWithPermissions(repository = repository)
-                    }
+                StartScreen(contentPadding) {
+                    BottomNavigationBarWithPermissions(repository = repository)
+                }
+
             AppScreen.RUN_ACTIONS -> StartScreen(contentPadding) { RunActionsScreen() }
             AppScreen.ERROR -> {
                 // Keep showing previous screen or a default one, but show error snackbar
@@ -328,50 +171,21 @@ class GShockApplication : Application(), IScreenManager {
             repository.isAlwaysConnectedConnectionPressed() -> {
                 CoverScreen(onUnlock = onUnlocked, isConnected = repository.isConnected())
             }
+
             repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> {
                 RunActionsScreen()
             }
+
             repository.isFindPhoneButtonPressed() -> {
                 RunFindPhoneScreen()
             }
+
             else -> {
                 BottomNavigationBarWithPermissions(
-                        repository = repository,
+                    repository = repository,
                 )
             }
         }
     }
 
-    private var activeScanAddresses: Set<String>? = null
-
-    @SuppressLint("MissingPermission")
-    private fun startFallbackScan(context: Context, addresses: List<String>) {
-        val newAddressesSet = addresses.map { it.uppercase() }.toSet()
-
-        // Optimization: If the addresses haven't changed, don't restart the scan
-        if (activeScanAddresses == newAddressesSet) {
-            Timber.d("Fallback scan already running for these addresses. Skipping restart.")
-            return
-        }
-
-        // Create a PendingIntent to identify the scan
-        val intent =
-                Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
-        val pendingIntent =
-                android.app.PendingIntent.getBroadcast(
-                        context,
-                        0,
-                        intent,
-                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or
-                                android.app.PendingIntent.FLAG_MUTABLE
-                )
-
-        repository.startFallbackScan(context, addresses, pendingIntent)
-
-        if (addresses.isEmpty()) {
-            activeScanAddresses = null
-        } else {
-            activeScanAddresses = newAddressesSet
-        }
-    }
 }

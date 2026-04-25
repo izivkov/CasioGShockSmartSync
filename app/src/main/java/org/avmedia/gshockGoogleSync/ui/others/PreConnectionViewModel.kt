@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.GShockApplication
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.pairing.DeviceAssociationManager
 import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
@@ -52,6 +53,8 @@ constructor(
     val triggerPairing: StateFlow<Boolean> = _triggerPairing
 
     data class DeviceItem(val name: String, val address: String, val isLastUsed: Boolean)
+
+    @Inject lateinit var deviceAssociationManager: DeviceAssociationManager
 
     private val _pairedDevices = MutableStateFlow<List<DeviceItem>>(emptyList())
     val pairedDevices: StateFlow<List<DeviceItem>> = _pairedDevices
@@ -200,7 +203,7 @@ constructor(
 
                 // Re-sync all associations so CDM presence observers and the BLE
                 // fallback scan are rebuilt for the full, current device list.
-                (appContext as? GShockApplication)?.syncAssociations()
+                deviceAssociationManager?.syncAssociations()
 
                 loadPairedDevices()
 
@@ -240,7 +243,7 @@ constructor(
 
                 // Re-sync all associations so the BLE fallback scan and CDM presence
                 // observers are rebuilt without the removed device.
-                (appContext as? GShockApplication)?.syncAssociations()
+                deviceAssociationManager.syncAssociations()
 
                 // Refresh UI and log
                 loadPairedDevices()
