@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +25,6 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.services.DeviceManager
-
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
@@ -140,11 +138,11 @@ class GShockApplication : Application(), IScreenManager {
     @SuppressLint("NewApi")
     internal fun syncAssociations() {
         CoroutineScope(Dispatchers.IO).launch {
-            // 1. Get the list of associations the system knows about (the "available" pool)
+            // 1. Get the list of associations the system knows about
             val systemAssociations = repository.getAssociationsWithNames(this@GShockApplication)
 
-            // 2. Auto-Discovery: Add any system associations to LocalDataStorage if not already there.
-            // This ensures watches paired via Android Settings are picked up by the app.
+            // 2. Auto-Discovery: Add any system associations to LocalDataStorage if not already
+            // there
             systemAssociations.forEach { association ->
                 LocalDataStorage.addDeviceAddress(this@GShockApplication, association.address)
                 association.name?.let {
@@ -153,56 +151,96 @@ class GShockApplication : Application(), IScreenManager {
             }
 
             // 3. Update the "LastDeviceAddress" if none is set
-            if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "").isNullOrEmpty()) {
+            if (LocalDataStorage.get(this@GShockApplication, "LastDeviceAddress", "")
+                            .isNullOrEmpty()
+            ) {
                 systemAssociations.firstOrNull()?.let {
                     LocalDataStorage.put(this@GShockApplication, "LastDeviceAddress", it.address)
                 }
             }
 
             // 4. Re-fetch the final list of active addresses after auto-discovery
-            val finalActiveAddresses = LocalDataStorage.getDeviceAddresses(this@GShockApplication)
-                .map { it.uppercase() }
-                .toSet()
+            val finalActiveAddresses =
+                    LocalDataStorage.getDeviceAddresses(this@GShockApplication)
+                            .map { it.uppercase() }
+                            .toSet()
 
             if (!isLocationEnabled()) {
-                Timber.w("Location Services disabled — BLE scanning requires Location Services to be enabled. Notifying user.")
+                Timber.w(
+                        "Location Services disabled — BLE scanning requires Location Services. Notifying user."
+                )
                 ProgressEvents.onNext("LocationServicesDisabled")
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
+                return@launch
+            }
 
-                    cdm.myAssociations.forEach { associationInfo ->
-                        val macAddress = associationInfo.deviceMacAddress?.toString()?.uppercase()
-                        val request = android.companion.ObservingDevicePresenceRequest.Builder()
-                            .setAssociationId(associationInfo.id)
-                            .build()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val cdm = getSystemService(android.companion.CompanionDeviceManager::class.java)
 
-                        // Use 'activeAddresses' (the state BEFORE this sync's auto-discovery)
-                        // to decide what to stop, OR use a more explicit check.
-                        // If it's not in our final list, we definitely don't want it.
-                        if (macAddress != null && macAddress in finalActiveAddresses) {
+                cdm.myAssociations.forEach { associationInfo ->
+                    val macAddress =
+                            associationInfo.deviceMacAddress?.toString()?.uppercase()
+                                    ?: return@forEach
+
+                    if (macAddress in finalActiveAddresses) {
+                        try {
+                            // Preferred: associationId-based (API 33+, works on GrapheneOS)
+                            val request =
+                                    android.companion.ObservingDevicePresenceRequest.Builder()
+                                            .setAssociationId(associationInfo.id)
+                                            .build()
+                            cdm.startObservingDevicePresence(request)
+                            Timber.d("CDM presence started (request-based) for $macAddress")
+                        } catch (e: NoSuchMethodError) {
+                            // Fallback: MAC-based (works on crDroid and other custom ROMs)
+                            Timber.w(
+                                    "Request-based CDM unavailable, falling back to address-based for $macAddress"
+                            )
                             try {
-                                cdm.startObservingDevicePresence(request)
-                                Timber.d("Started presence observation for $macAddress")
-                            } catch (e: Exception) {
-                                Timber.e(e, "Error starting presence observation for $macAddress")
+                                cdm.startObservingDevicePresence(macAddress)
+                            } catch (e2: Exception) {
+                                Timber.e(e2, "Both CDM presence methods failed for $macAddress")
                             }
-                        } else {
+                        } catch (e: Exception) {
+                            Timber.e(e, "Error starting presence observation for $macAddress")
+                        }
+                    } else {
+                        try {
+                            val request =
+                                    android.companion.ObservingDevicePresenceRequest.Builder()
+                                            .setAssociationId(associationInfo.id)
+                                            .build()
+                            cdm.stopObservingDevicePresence(request)
+                            Timber.d("CDM presence stopped for $macAddress")
+                        } catch (e: NoSuchMethodError) {
+                            Timber.w(
+                                    "Request-based CDM unavailable, falling back to address-based stop for $macAddress"
+                            )
                             try {
-                                cdm.stopObservingDevicePresence(request)
-                                Timber.d("Stopped presence observation for $macAddress")
-                            } catch (e: Exception) {
-                                // Likely not being observed or already stopped
+                                cdm.stopObservingDevicePresence(macAddress)
+                            } catch (e2: Exception) {
+                                // Likely not being observed or already stopped — safe to ignore
                             }
+                        } catch (e: Exception) {
+                            // Likely not being observed or already stopped — safe to ignore
                         }
                     }
-                } else {
-                    Timber.i("CDM presence observation not available on API ${Build.VERSION.SDK_INT}, relying on fallback scan")
                 }
-
-                // Start fallback scan for all active addresses
-                startFallbackScan(this@GShockApplication, finalActiveAddresses.toList())
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // API 31-32: only string-based API available
+                systemAssociations.forEach { association ->
+                    repository.startObservingDevicePresence(
+                            this@GShockApplication,
+                            association.address
+                    )
+                }
+            } else {
+                Timber.i(
+                        "CDM presence observation not available on API ${Build.VERSION.SDK_INT}, relying on fallback scan"
+                )
             }
+
+            // Start fallback scan for all active addresses (runs on all API levels)
+            startFallbackScan(this@GShockApplication, finalActiveAddresses.toList())
         }
     }
 
@@ -317,17 +355,16 @@ class GShockApplication : Application(), IScreenManager {
         }
 
         // Create a PendingIntent to identify the scan
-        val intent = Intent(
-            context,
-            org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java
-        )
-        val pendingIntent = android.app.PendingIntent.getBroadcast(
-            context,
-            0,
-            intent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or
-                    android.app.PendingIntent.FLAG_MUTABLE
-        )
+        val intent =
+                Intent(context, org.avmedia.gshockGoogleSync.receivers.BleScanReceiver::class.java)
+        val pendingIntent =
+                android.app.PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        intent,
+                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+                                android.app.PendingIntent.FLAG_MUTABLE
+                )
 
         repository.startFallbackScan(context, addresses, pendingIntent)
 
