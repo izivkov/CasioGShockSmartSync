@@ -23,7 +23,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DeviceAssociationManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val repository: GShockRepository
 ) {
     var pendingCrashLog by mutableStateOf<String?>(null)
@@ -217,10 +217,10 @@ class DeviceAssociationManager @Inject constructor(
 
         repository.startFallbackScan(context, addresses, pendingIntent)
 
-        if (addresses.isEmpty()) {
-            activeScanAddresses = null
+        activeScanAddresses = if (addresses.isEmpty()) {
+            null
         } else {
-            activeScanAddresses = newAddressesSet
+            newAddressesSet
         }
     }
 }
