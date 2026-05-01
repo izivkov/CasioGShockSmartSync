@@ -1,20 +1,16 @@
 package org.avmedia.gshockGoogleSync.ui.alarms
 
 import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
-import java.time.DayOfWeek
-import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,48 +20,47 @@ class WeeklyAlarmScheduler @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     init {
-        ProgressEvents.runEventActions(Utils.AppHashCode(), arrayOf(
-            EventAction("WatchInitializationCompleted") {
-                CoroutineScope(Dispatchers.IO).launch { applyTodaySchedule() }
-            }
-        ))
+        ProgressEvents.runEventActions(
+            Utils.AppHashCode() + "WeeklyAlarmScheduler",
+            arrayOf(
+                EventAction("WatchInitializationCompleted") {
+                    CoroutineScope(Dispatchers.IO).launch { applyTodaySchedule() }
+                }
+            )
+        )
     }
 
+    fun ensureInitialized() = Unit
+
     suspend fun applyTodaySchedule() {
-        val json = LocalDataStorage.get(context, AlarmViewModel.ALARM_DAYS_KEY) ?: return
-        if (json.isBlank()) return
+        val viewMode = AlarmSyncStorage.loadViewMode(context)
+        val alarmDays = AlarmSyncStorage.loadDaySelections(context)
+        val storedAlarms = AlarmSyncStorage.loadAlarms(context)
+        val shouldWrite = AlarmSyncStorage.isDirty(context) || viewMode == AlarmViewMode.WEEKLY
 
-        val type = object : TypeToken<Map<String, List<String>>>() {}.type
-        val rawDays = runCatching {
-            Gson().fromJson<Map<String, List<String>>>(json, type)
-        }.getOrNull() ?: return
+        if (!shouldWrite) return
 
-        if (rawDays.isEmpty()) return
-
-        val alarmDays = rawDays.mapNotNull { (k, v) ->
-            val index = k.toIntOrNull() ?: return@mapNotNull null
-            val days = v.mapNotNull { runCatching { DayOfWeek.valueOf(it) }.getOrNull() }.toSet()
-            index to days
-        }.toMap()
-
-        val today = LocalDate.now().dayOfWeek
         val currentAlarms = runCatching { api.getAlarms() }.getOrElse {
-            Timber.e(it, "Failed to get alarms for weekly schedule")
+            Timber.e(it, "Failed to get alarms before applying local schedule")
             return
         }
 
-        val newAlarms = currentAlarms.mapIndexed { index, alarm ->
-            val selected = alarmDays[index]
-            if (!selected.isNullOrEmpty() && today !in selected)
-                alarm.copy(enabled = false)
-            else
-                alarm
-        }
+        val desiredAlarms = storedAlarms?.takeIf { it.isNotEmpty() } ?: currentAlarms
+        val newAlarms = AlarmSchedulePlanner.applyWeeklySchedule(
+            alarms = desiredAlarms,
+            alarmDays = alarmDays,
+            now = LocalDateTime.now(),
+            viewMode = viewMode
+        )
 
         if (newAlarms != currentAlarms) {
             runCatching { api.setAlarms(ArrayList(newAlarms)) }.onFailure {
                 Timber.e(it, "Failed to apply per-alarm day schedule")
+            }.onSuccess {
+                AlarmSyncStorage.saveAlarms(context, desiredAlarms, dirty = false)
             }
+        } else if (AlarmSyncStorage.isDirty(context)) {
+            AlarmSyncStorage.saveAlarms(context, desiredAlarms, dirty = false)
         }
     }
 }

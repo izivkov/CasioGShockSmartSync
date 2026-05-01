@@ -5,8 +5,6 @@ import android.content.Intent
 import android.provider.AlarmClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -18,8 +16,8 @@ import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.util.Calendar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,6 +48,7 @@ class AlarmViewModel @Inject constructor(
     companion object {
         const val ALARM_VIEW_MODE_KEY = "AlarmViewMode"
         const val ALARM_DAYS_KEY = "AlarmDaySelections"
+        private const val DEFAULT_LOCAL_ALARM_COUNT = 5
     }
 
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
@@ -66,12 +65,11 @@ class AlarmViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            val modeStr = LocalDataStorage.get(appContext, ALARM_VIEW_MODE_KEY)
-            _viewMode.value = if (modeStr == AlarmViewMode.WEEKLY.name) AlarmViewMode.WEEKLY else AlarmViewMode.SIMPLE
+            _viewMode.value = AlarmSyncStorage.loadViewMode(appContext)
+            _alarmDays.value = AlarmSyncStorage.loadDaySelections(appContext)
 
-            val daysJson = LocalDataStorage.get(appContext, ALARM_DAYS_KEY)
-            if (!daysJson.isNullOrBlank()) {
-                _alarmDays.value = parseDaysJson(daysJson)
+            AlarmSyncStorage.loadAlarms(appContext)?.let {
+                _alarms.value = it
             }
         }
         loadAlarms()
@@ -79,6 +77,12 @@ class AlarmViewModel @Inject constructor(
 
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
+            val localDraft = AlarmSyncStorage.loadAlarms(appContext)
+            if (AlarmSyncStorage.isDirty(appContext) && !localDraft.isNullOrEmpty()) {
+                _alarms.value = localDraft
+                return@runCatching
+            }
+
             alarmNameStorage.load()
 
             val alarmsFromWatch = api.getAlarms()
@@ -98,18 +102,26 @@ class AlarmViewModel @Inject constructor(
                 alarmsFromWatch
             }
             _alarms.value = newAlarms
+            AlarmSyncStorage.saveAlarms(appContext, newAlarms, dirty = false)
             ProgressEvents.onNext("Alarms Loaded")
         }.onFailure {
+            _alarms.value = AlarmSyncStorage.loadAlarms(appContext)
+                ?: createDefaultLocalAlarms()
             ProgressEvents.onNext("Error")
         }
     }
 
+    private fun createDefaultLocalAlarms(): List<Alarm> {
+        val count = WatchInfo.alarmCount.takeIf { it > 0 } ?: DEFAULT_LOCAL_ALARM_COUNT
+        return List(count) { Alarm(0, 0, false, false, "") }
+    }
+
     private fun updateAlarm(index: Int, transform: (Alarm) -> Alarm) {
-        _alarms.update { currentAlarms ->
-            currentAlarms.mapIndexed { i, alarm ->
-                if (i == index) transform(alarm) else alarm
-            }
+        val updated = _alarms.value.mapIndexed { i, alarm ->
+            if (i == index) transform(alarm) else alarm
         }
+        _alarms.value = updated
+        AlarmSyncStorage.saveAlarms(appContext, updated, dirty = true)
     }
 
     fun toggleAlarm(index: Int, isEnabled: Boolean) =
@@ -124,7 +136,8 @@ class AlarmViewModel @Inject constructor(
 
     fun setViewMode(mode: AlarmViewMode) {
         _viewMode.value = mode
-        LocalDataStorage.put(appContext, ALARM_VIEW_MODE_KEY, mode.name)
+        AlarmSyncStorage.saveViewMode(appContext, mode)
+        AlarmSyncStorage.saveAlarms(appContext, _alarms.value, dirty = true)
     }
 
     fun toggleDay(alarmIndex: Int, day: DayOfWeek) {
@@ -134,29 +147,15 @@ class AlarmViewModel @Inject constructor(
             current + (alarmIndex to updated)
         }
         saveDays()
+        AlarmSyncStorage.saveAlarms(appContext, _alarms.value, dirty = true)
     }
 
     private fun saveDays() {
-        val toStore = _alarmDays.value
-            .mapKeys { it.key.toString() }
-            .mapValues { it.value.map { d -> d.name } }
-        LocalDataStorage.put(appContext, ALARM_DAYS_KEY, Gson().toJson(toStore))
-    }
-
-    private fun parseDaysJson(json: String): Map<Int, Set<DayOfWeek>> {
-        val type = object : TypeToken<Map<String, List<String>>>() {}.type
-        val raw = runCatching {
-            Gson().fromJson<Map<String, List<String>>>(json, type)
-        }.getOrNull() ?: return emptyMap()
-        return raw.mapNotNull { (k, v) ->
-            val index = k.toIntOrNull() ?: return@mapNotNull null
-            val days = v.mapNotNull { runCatching { DayOfWeek.valueOf(it) }.getOrNull() }.toSet()
-            index to days
-        }.toMap()
+        AlarmSyncStorage.saveDaySelections(appContext, _alarmDays.value)
     }
 
     fun sendAlarmsToWatch() = viewModelScope.launch {
-        val alarmsToSend = _alarms.value.mapIndexed { index, alarm ->
+        val desiredAlarms = _alarms.value.mapIndexed { index, alarm ->
             if (alarm.name == null) {
                 alarmNameStorage.put("", index)
                 alarm.copy(name = "")
@@ -166,15 +165,24 @@ class AlarmViewModel @Inject constructor(
         }
 
         alarmNameStorage.save()
+        AlarmSyncStorage.saveAlarms(appContext, desiredAlarms, dirty = true)
+
+        val alarmsToSend = AlarmSchedulePlanner.applyWeeklySchedule(
+            alarms = desiredAlarms,
+            alarmDays = _alarmDays.value,
+            now = LocalDateTime.now(),
+            viewMode = _viewMode.value
+        )
 
         runCatching {
+            api.getAlarms()
             api.setAlarms(ArrayList(alarmsToSend))
             if (WatchInfo.chimeInSettings) {
                 val chimeSetting = alarmsToSend.getOrNull(0)?.hasHourlyChime ?: false
                 api.setSettings(api.getSettings().copy(hourlyChime = chimeSetting))
             }
 
-            loadAlarms()
+            AlarmSyncStorage.saveAlarms(appContext, desiredAlarms, dirty = false)
 
             AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
         }.onFailure {

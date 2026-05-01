@@ -21,10 +21,10 @@ import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.pairing.DeviceAssociationManager
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
+import org.avmedia.gshockGoogleSync.ui.alarms.WeeklyAlarmScheduler
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
 import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
-import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
@@ -60,8 +60,12 @@ class GShockApplication : Application(), IScreenManager {
     @Inject
     lateinit var deviceAssociationManager: DeviceAssociationManager
 
+    @Inject
+    lateinit var weeklyAlarmScheduler: WeeklyAlarmScheduler
+
     fun init() {
         Timber.i("Initializing GShockApplication")
+        weeklyAlarmScheduler.ensureInitialized()
         CoroutineScope(Dispatchers.IO).launch {
             deviceAssociationManager.init()
         }
@@ -100,7 +104,7 @@ class GShockApplication : Application(), IScreenManager {
     }
 
     override fun showPreConnectionScreen() {
-        currentScreen = AppScreen.PRE_CONNECTION
+        currentScreen = AppScreen.MAIN_NAVIGATION
     }
 
     override fun showInitialScreen() {
@@ -118,7 +122,7 @@ class GShockApplication : Application(), IScreenManager {
         // Start ActionRunner here so we can run actions on connection
         ActionRunner(context = this, api = repository)
 
-        StartScreen(contentPadding) { PreConnectionScreen() }
+        StartScreen(contentPadding) { BottomNavigationBarWithPermissions(repository = repository) }
         LaunchedEffect(key1 = System.currentTimeMillis()) {
             deviceAssociationManager.checkPairedDevicesOrNotify()
         }
@@ -142,7 +146,10 @@ class GShockApplication : Application(), IScreenManager {
     fun AppContainer(contentPadding: PaddingValues) {
         when (currentScreen) {
             AppScreen.INITIAL -> Run(contentPadding)
-            AppScreen.PRE_CONNECTION -> StartScreen(contentPadding) { PreConnectionScreen() }
+            AppScreen.PRE_CONNECTION ->
+                StartScreen(contentPadding) {
+                    BottomNavigationBarWithPermissions(repository = repository)
+                }
             AppScreen.CONTENT_SELECTOR ->
                 StartScreen(contentPadding) {
                     ContentSelector(
@@ -160,7 +167,9 @@ class GShockApplication : Application(), IScreenManager {
             AppScreen.ERROR -> {
                 // Keep showing previous screen or a default one, but show error snackbar
                 // Or show a specific error screen if needed
-                StartScreen(contentPadding) { PreConnectionScreen() }
+                StartScreen(contentPadding) {
+                    BottomNavigationBarWithPermissions(repository = repository)
+                }
             }
         }
     }
