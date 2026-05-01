@@ -17,6 +17,8 @@ android {
         versionCode = 409
         versionName = "40.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        testProguardFiles 'proguard-rules.pro'
     }
 
     compileOptions {
