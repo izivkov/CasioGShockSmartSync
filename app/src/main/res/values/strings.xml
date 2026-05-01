@@ -7,6 +7,8 @@
     <string name="events">Events</string>
     <string name="alarms">Alarms</string>
     <string name="time">Time</string>
+    <string name="alarm_view_simple">Simple</string>
+    <string name="alarm_view_weekly">Weekly</string>
     <string name="send_alarms_to_watch">Send to\n Watch</string>
     <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
