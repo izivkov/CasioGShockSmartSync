@@ -5,17 +5,21 @@ import android.content.Intent
 import android.provider.AlarmClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage // Import the new class
-import org.avmedia.gshockGoogleSync.scratchpad.ScratchpadManager
+import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockapi.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import java.time.DayOfWeek
 import java.util.Calendar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,28 +31,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
+enum class AlarmViewMode { SIMPLE, WEEKLY }
 
 /**
  * Represents one-time UI events that should be handled by the UI layer.
  */
 sealed class UiEvent {
-    /**
-     * Event to show a Snackbar with a specific message.
-     * @property message The text message to display.
-     */
     data class ShowSnackbar(val message: String) : UiEvent()
 }
 
-/**
- * ViewModel for managing the Alarms screen.
- *
- * This ViewModel handles:
- * - Loading alarms from the watch via [GShockRepository].
- * - loading and saving alarm names using [AlarmNameStorage].
- * - Maintaining the state of the alarms list.
- * - Sending updated alarms back to the watch.
- * - Syncing enabled alarms to the phone's native alarm app.
- */
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
@@ -56,13 +47,33 @@ class AlarmViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
+    companion object {
+        const val ALARM_VIEW_MODE_KEY = "AlarmViewMode"
+        const val ALARM_DAYS_KEY = "AlarmDaySelections"
+    }
+
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms.asStateFlow()
 
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
+    private val _viewMode = MutableStateFlow(AlarmViewMode.SIMPLE)
+    val viewMode: StateFlow<AlarmViewMode> = _viewMode.asStateFlow()
+
+    private val _alarmDays = MutableStateFlow<Map<Int, Set<DayOfWeek>>>(emptyMap())
+    val alarmDays: StateFlow<Map<Int, Set<DayOfWeek>>> = _alarmDays.asStateFlow()
+
     init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val modeStr = LocalDataStorage.get(appContext, ALARM_VIEW_MODE_KEY)
+            _viewMode.value = if (modeStr == AlarmViewMode.WEEKLY.name) AlarmViewMode.WEEKLY else AlarmViewMode.SIMPLE
+
+            val daysJson = LocalDataStorage.get(appContext, ALARM_DAYS_KEY)
+            if (!daysJson.isNullOrBlank()) {
+                _alarmDays.value = parseDaysJson(daysJson)
+            }
+        }
         loadAlarms()
     }
 
@@ -73,7 +84,6 @@ class AlarmViewModel @Inject constructor(
             val alarmsFromWatch = api.getAlarms()
                 .take(WatchInfo.alarmCount)
                 .mapIndexed { index, alarm ->
-                    // Use AlarmNameStorage to get the name
                     val name = alarmNameStorage.get(index)
                     alarm.copy(name = name)
                 }
@@ -102,78 +112,69 @@ class AlarmViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Toggles the enabled state of an alarm at the specified index.
-     *
-     * @param index The index of the alarm in the list.
-     * @param isEnabled The new enabled state.
-     */
     fun toggleAlarm(index: Int, isEnabled: Boolean) =
         updateAlarm(index) { it.copy(enabled = isEnabled) }
 
-    /**
-     * Updates the time for a specific alarm.
-     *
-     * Note: When the time is changed, the alarm name is set to null to indicate
-     * that it has been manually edited and may need its name cleared or updated.
-     *
-     * @param index The index of the alarm.
-     * @param hours The new hour (0-23).
-     * @param minutes The new minute (0-59).
-     */
     fun onTimeChanged(index: Int, hours: Int, minutes: Int) {
-        // When the time is changed, the UI state is updated, setting the name to null
-        // to signify it has been manually edited.
         updateAlarm(index) { it.copy(hour = hours, minute = minutes, name = null) }
     }
 
-    /**
-     * Toggles the hourly chime setting (Hourly Signal) for the watch.
-     * This is typically associated with the first alarm slot on some models.
-     *
-     * @param enabled The new state of the hourly chime.
-     */
     fun toggleHourlyChime(enabled: Boolean) =
         updateAlarm(0) { it.copy(hasHourlyChime = enabled) }
 
-    /**
-     * Sends the current state of all alarms to the watch.
-     *
-     * This process involves:
-     * 1. Updating the `AlarmNameStorage` with any name changes (clearing names for edited alarms).
-     * 2. Sending the list of alarms to the watch via [api.setAlarms].
-     * 3. Updating the hourly chime setting if applicable.
-     * 4. Reloading the alarms from the watch to confirm the state.
-     * 5. Emitting a [UiEvent.ShowSnackbar] on success.
-     */
+    fun setViewMode(mode: AlarmViewMode) {
+        _viewMode.value = mode
+        LocalDataStorage.put(appContext, ALARM_VIEW_MODE_KEY, mode.name)
+    }
+
+    fun toggleDay(alarmIndex: Int, day: DayOfWeek) {
+        _alarmDays.update { current ->
+            val days = current[alarmIndex] ?: emptySet()
+            val updated = if (day in days) days - day else days + day
+            current + (alarmIndex to updated)
+        }
+        saveDays()
+    }
+
+    private fun saveDays() {
+        val toStore = _alarmDays.value
+            .mapKeys { it.key.toString() }
+            .mapValues { it.value.map { d -> d.name } }
+        LocalDataStorage.put(appContext, ALARM_DAYS_KEY, Gson().toJson(toStore))
+    }
+
+    private fun parseDaysJson(json: String): Map<Int, Set<DayOfWeek>> {
+        val type = object : TypeToken<Map<String, List<String>>>() {}.type
+        val raw = runCatching {
+            Gson().fromJson<Map<String, List<String>>>(json, type)
+        }.getOrNull() ?: return emptyMap()
+        return raw.mapNotNull { (k, v) ->
+            val index = k.toIntOrNull() ?: return@mapNotNull null
+            val days = v.mapNotNull { runCatching { DayOfWeek.valueOf(it) }.getOrNull() }.toSet()
+            index to days
+        }.toMap()
+    }
+
     fun sendAlarmsToWatch() = viewModelScope.launch {
-        // Before sending, process the alarms to handle null names.
         val alarmsToSend = _alarms.value.mapIndexed { index, alarm ->
             if (alarm.name == null) {
-                // This alarm was manually edited. Update its name in storage to be empty.
-                // Using an empty string with `put` will store the NO_NAME_INDEX for that slot.
                 alarmNameStorage.put("", index)
-
-                // Return a clean alarm object to be sent to the watch API.
                 alarm.copy(name = "")
             } else {
                 alarm
             }
         }
 
-        // Save any changes made in the loop above to the watch's scratchpad.
         alarmNameStorage.save()
 
         runCatching {
             api.setAlarms(ArrayList(alarmsToSend))
             if (WatchInfo.chimeInSettings) {
-                // Ensure we get the latest hourly chime setting from the potentially modified list
                 val chimeSetting = alarmsToSend.getOrNull(0)?.hasHourlyChime ?: false
                 api.setSettings(api.getSettings().copy(hourlyChime = chimeSetting))
             }
 
-            // After successfully sending, reload the alarms state from the watch to ensure UI consistency.
-            loadAlarms() // Reload state from the watch after saving.
+            loadAlarms()
 
             AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
         }.onFailure {
@@ -181,15 +182,8 @@ class AlarmViewModel @Inject constructor(
         }
     }
 
-
-    /**
-     * Sends the enabled alarms from the app to the phone's native Alarm Clock application.
-     *
-     * This creates an alarm intent for each enabled alarm in the list and starts it.
-     * It includes a delay between intents to ensure they are processed correctly.
-     */
     fun sendAlarmsToPhone() {
-        val days = arrayListOf(
+        val allDays = arrayListOf(
             Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
             Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
         )
@@ -199,6 +193,10 @@ class AlarmViewModel @Inject constructor(
                 .withIndex()
                 .filter { it.value.enabled }
                 .forEach { (index, alarm) ->
+                    val selectedDays = _alarmDays.value[index]
+                    val days = if (selectedDays.isNullOrEmpty()) allDays
+                               else ArrayList(selectedDays.map { it.toCalendarDay() })
+
                     val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
                         putExtra(AlarmClock.EXTRA_MESSAGE, alarm.name)
                         putExtra(AlarmClock.EXTRA_HOUR, alarm.hour)
@@ -211,8 +209,18 @@ class AlarmViewModel @Inject constructor(
 
                     api.preventReconnection()
                     appContext.startActivity(intent)
-                    delay(1000L) // Wait 1 second before processing the next one
+                    delay(1000L)
                 }
         }
+    }
+
+    private fun DayOfWeek.toCalendarDay(): Int = when (this) {
+        DayOfWeek.MONDAY -> Calendar.MONDAY
+        DayOfWeek.TUESDAY -> Calendar.TUESDAY
+        DayOfWeek.WEDNESDAY -> Calendar.WEDNESDAY
+        DayOfWeek.THURSDAY -> Calendar.THURSDAY
+        DayOfWeek.FRIDAY -> Calendar.FRIDAY
+        DayOfWeek.SATURDAY -> Calendar.SATURDAY
+        DayOfWeek.SUNDAY -> Calendar.SUNDAY
     }
 }

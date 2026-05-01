@@ -7,16 +7,21 @@ import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -25,6 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,6 +43,8 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppTimePicker
+import java.time.DayOfWeek
+import java.time.format.TextStyle
 import java.util.Date
 import java.util.Locale
 
@@ -43,10 +53,13 @@ import java.util.Locale
 fun AlarmItem(
     hours: Int = 12,
     minutes: Int = 0,
-    name : String? = null,
+    name: String? = null,
     isAlarmEnabled: Boolean = true,
     onToggleAlarm: (Boolean) -> Unit,
-    onTimeChanged: (Int, Int) -> Unit
+    onTimeChanged: (Int, Int) -> Unit,
+    showDaySelector: Boolean = false,
+    selectedDays: Set<DayOfWeek> = emptySet(),
+    onDayToggled: (DayOfWeek) -> Unit = {}
 ) {
     var isEnabled by remember { mutableStateOf(isAlarmEnabled) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
@@ -66,37 +79,48 @@ fun AlarmItem(
             .fillMaxWidth()
             .padding(0.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Column {
             Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AppTextExtraLarge(
-                    text = formatTime(alarmHours, alarmMinutes, appContext),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                Row(
                     modifier = Modifier
-                        .padding(4.dp)
-                        .clickable { showTimePickerDialog = true },
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                val alarmName = if (name.isNullOrBlank()) stringResource(id = R.string.daily) else name
-                AppText(text = alarmName)            }
-            AppSwitch(
-                checked = isEnabled,
-                onCheckedChange = { checked ->
-                    isEnabled = checked
-                    onToggleAlarm(checked)
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AppTextExtraLarge(
+                        text = formatTime(alarmHours, alarmMinutes, appContext),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .clickable { showTimePickerDialog = true },
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    val alarmName = if (name.isNullOrBlank()) stringResource(id = R.string.daily) else name
+                    AppText(text = alarmName)
                 }
-            )
+                AppSwitch(
+                    checked = isEnabled,
+                    onCheckedChange = { checked ->
+                        isEnabled = checked
+                        onToggleAlarm(checked)
+                    }
+                )
+            }
+
+            if (showDaySelector) {
+                DaySelector(
+                    selectedDays = selectedDays,
+                    onDayToggled = onDayToggled,
+                    isEnabled = isEnabled
+                )
+            }
         }
     }
 
@@ -117,6 +141,51 @@ fun AlarmItem(
                     onDismiss = { showTimePickerDialog = false },
                     initialHour = alarmHours,
                     initialMinute = alarmMinutes,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DaySelector(
+    selectedDays: Set<DayOfWeek>,
+    onDayToggled: (DayOfWeek) -> Unit,
+    isEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        DayOfWeek.entries.forEach { day ->
+            val isSelected = day in selectedDays
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .alpha(if (isEnabled) 1f else 0.4f)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.primary
+                        else Color.Transparent
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outline,
+                        shape = CircleShape
+                    )
+                    .clickable(enabled = isEnabled) { onDayToggled(day) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
         }
