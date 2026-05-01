@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
-import AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState

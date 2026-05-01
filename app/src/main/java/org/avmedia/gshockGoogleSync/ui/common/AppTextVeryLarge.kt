@@ -1,3 +1,5 @@
+package org.avmedia.gshockGoogleSync.ui.common
+
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

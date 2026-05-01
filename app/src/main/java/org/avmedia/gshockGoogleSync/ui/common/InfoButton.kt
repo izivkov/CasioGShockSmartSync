@@ -4,7 +4,7 @@ import android.text.Html
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +39,7 @@ fun InfoButton(
         modifier = modifier.size(iconSize)
     ) {
         Icon(
-            imageVector = Icons.Outlined.Info,
+            imageVector = Icons.Default.Info,
             contentDescription = "Info Icon",
             tint = iconTint,
             modifier = Modifier

@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.actions
 
 import AppSwitch
-import AppTextLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppTextLarge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

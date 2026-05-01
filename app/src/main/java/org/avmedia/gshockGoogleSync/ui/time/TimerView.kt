@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
-import AppTextExtraLarge
-import AppTextLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppTextExtraLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppTextLarge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

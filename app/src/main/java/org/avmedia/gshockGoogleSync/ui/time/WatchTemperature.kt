@@ -1,3 +1,4 @@
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import android.icu.text.MeasureFormat
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit

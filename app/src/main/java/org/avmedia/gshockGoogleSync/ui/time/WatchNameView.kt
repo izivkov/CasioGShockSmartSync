@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
-import AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth

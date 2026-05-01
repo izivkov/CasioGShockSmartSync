@@ -1,9 +1,9 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
 import AppSwitch
-import AppText
-import AppTextLarge
-import AppTextLink
+import org.avmedia.gshockGoogleSync.ui.common.AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppTextLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppTextLink
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

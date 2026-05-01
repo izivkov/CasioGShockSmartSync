@@ -1,8 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.alarms
 
 import AppSwitch
-import AppText
-import AppTextExtraLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppTextExtraLarge
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.text.format.DateFormat

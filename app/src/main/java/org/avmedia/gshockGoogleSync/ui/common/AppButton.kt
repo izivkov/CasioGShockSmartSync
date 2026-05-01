@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.common
 
-import AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
-import AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import WatchTemperature
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import AppText
-import AppTextVeryLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppTextVeryLarge
 import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.compose.foundation.gestures.awaitFirstDown

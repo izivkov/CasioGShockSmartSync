@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.events
 
 import AppSwitch
-import AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

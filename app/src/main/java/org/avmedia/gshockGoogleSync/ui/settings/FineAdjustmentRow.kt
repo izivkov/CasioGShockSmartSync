@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
-import AppText
-import AppTextLink
+import org.avmedia.gshockGoogleSync.ui.common.AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppTextLink
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

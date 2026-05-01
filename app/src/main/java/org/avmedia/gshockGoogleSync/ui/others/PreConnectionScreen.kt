@@ -1,9 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -41,7 +40,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -427,7 +425,14 @@ fun RemoveButton(onClick: () -> Unit) {
                 .background(Color.Black, CircleShape)
                 .clickable(onClick = onClick, role = Role.Button),
         contentAlignment = Alignment.Center
-    ) { Icon(Icons.Default.Remove, "Remove", modifier = Modifier.size(12.dp), tint = Color.White) }
+    ) {
+        Text(
+            text = "—",
+            color = Color.White,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
 }
 
 @Composable

@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
-import AppText
-import AppTextLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppTextLarge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

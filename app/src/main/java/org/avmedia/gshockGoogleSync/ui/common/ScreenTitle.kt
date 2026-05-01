@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.common
 
-import AppText
+import org.avmedia.gshockGoogleSync.ui.common.AppText
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable

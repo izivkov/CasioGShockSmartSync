@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import AppTextExtraLarge
+import org.avmedia.gshockGoogleSync.ui.common.AppTextExtraLarge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
