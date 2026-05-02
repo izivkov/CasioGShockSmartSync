@@ -1,15 +1,15 @@
 package com.beamburst.casswatch.ui.time
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -20,6 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
@@ -186,16 +189,44 @@ private fun BatteryMetric(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.width(Spacing.sm))
-                LinearProgressIndicator(
-                    progress = { (batteryLevel.coerceIn(0, 100) / 100f) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(Spacing.xs),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant
-                )
+                Spacer(modifier = Modifier.width(Spacing.xs))
+                BatteryGlyph(batteryLevel = batteryLevel)
             }
         }
+    }
+}
+
+@Composable
+private fun BatteryGlyph(batteryLevel: Int) {
+    val outline = MaterialTheme.colorScheme.primary
+    val fill = MaterialTheme.colorScheme.primary
+    Canvas(modifier = Modifier.size(width = Spacing.xxl, height = Spacing.lg)) {
+        val capWidth = size.width * 0.08f
+        val bodyWidth = size.width - capWidth - 2f
+        val bodyHeight = size.height * 0.72f
+        val bodyTop = (size.height - bodyHeight) / 2f
+        val radius = bodyHeight * 0.18f
+        val fillInset = 3f
+        val fillWidth = (bodyWidth - fillInset * 2) * (batteryLevel.coerceIn(0, 100) / 100f)
+
+        drawRoundRect(
+            color = outline,
+            topLeft = androidx.compose.ui.geometry.Offset(0f, bodyTop),
+            size = Size(bodyWidth, bodyHeight),
+            cornerRadius = CornerRadius(radius, radius),
+            style = Stroke(width = 2f)
+        )
+        drawRoundRect(
+            color = fill,
+            topLeft = androidx.compose.ui.geometry.Offset(fillInset, bodyTop + fillInset),
+            size = Size(fillWidth, bodyHeight - fillInset * 2),
+            cornerRadius = CornerRadius(radius / 2, radius / 2)
+        )
+        drawRoundRect(
+            color = outline,
+            topLeft = androidx.compose.ui.geometry.Offset(bodyWidth + 1f, bodyTop + bodyHeight * 0.3f),
+            size = Size(capWidth, bodyHeight * 0.4f),
+            cornerRadius = CornerRadius(radius / 2, radius / 2)
+        )
     }
 }

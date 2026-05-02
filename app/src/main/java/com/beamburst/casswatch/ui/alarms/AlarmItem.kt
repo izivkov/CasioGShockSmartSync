@@ -98,13 +98,12 @@ fun AlarmItem(
                         text = formatTime(alarmHours, alarmMinutes, appContext),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .padding(Spacing.xs)
-                            .clickable { showTimePickerDialog = true },
+                        modifier = Modifier.clickable { showTimePickerDialog = true },
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
-                    val alarmName = if (name.isNullOrBlank()) stringResource(id = R.string.daily) else name
-                    AppText(text = alarmName)
+                    if (!name.isNullOrBlank()) {
+                        AppText(text = name)
+                    }
                 }
                 AppSwitch(
                     checked = isEnabled,

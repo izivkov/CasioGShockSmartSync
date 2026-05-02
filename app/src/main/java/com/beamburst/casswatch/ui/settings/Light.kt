@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,6 +29,7 @@ import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Light(
     onUpdate: (SettingsViewModel.Light) -> Unit,
@@ -91,25 +96,26 @@ fun Light(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    RadioButton(
+                    SingleChoiceSegmentedButtonRow {
+                        SegmentedButton(
                         selected = lightDuration == SettingsViewModel.Light.LightDuration.TWO_SECONDS,
                         onClick = {
                             lightDuration = SettingsViewModel.Light.LightDuration.TWO_SECONDS
                             onUpdate(lightSetting.copy(duration = lightDuration))
                         },
-                        modifier = Modifier.padding(end = Spacing.xxs)
-                    )
-                    AppText(text = WatchInfo.shortLightDuration)
-
-                    RadioButton(
-                        selected = lightDuration == SettingsViewModel.Light.LightDuration.FOUR_SECONDS,
-                        onClick = {
-                            lightDuration = SettingsViewModel.Light.LightDuration.FOUR_SECONDS
-                            onUpdate(lightSetting.copy(duration = lightDuration))
-                        },
-                        modifier = Modifier.padding(end = Spacing.xxs)
-                    )
-                    AppText(text = WatchInfo.longLightDuration)
+                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                            label = { Text(WatchInfo.shortLightDuration) }
+                        )
+                        SegmentedButton(
+                            selected = lightDuration == SettingsViewModel.Light.LightDuration.FOUR_SECONDS,
+                            onClick = {
+                                lightDuration = SettingsViewModel.Light.LightDuration.FOUR_SECONDS
+                                onUpdate(lightSetting.copy(duration = lightDuration))
+                            },
+                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                            label = { Text(WatchInfo.longLightDuration) }
+                        )
+                    }
                 }
             }
         }

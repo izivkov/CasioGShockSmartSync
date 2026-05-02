@@ -10,8 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -159,29 +158,39 @@ fun TimeAdjustment(
                         onUpdate(timeAdjustmentSetting.copy(fineAdjustment = newValue))
                     }
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Spacing.xxs),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AppText(
-                        text = stringResource(
-                            id = R.string.notify_me
-                        ),
-                        modifier = Modifier.wrapContentWidth(),
-                    )
-                    Checkbox(
-                        checked = notifyMe,
-                        onCheckedChange = { newValue ->
-                            notifyMe = newValue // Update the state when the switch is toggled
-                            timeAdjustmentSetting.timeAdjustmentNotifications = newValue
-                            onUpdate(timeAdjustmentSetting.copy(timeAdjustmentNotifications = newValue))
-                        }
-                    )
-                }
             }
+            NotifyMeRow(
+                checked = notifyMe,
+                onCheckedChange = { newValue ->
+                    notifyMe = newValue
+                    timeAdjustmentSetting.timeAdjustmentNotifications = newValue
+                    onUpdate(timeAdjustmentSetting.copy(timeAdjustmentNotifications = newValue))
+                }
+            )
         }
+    }
+}
+
+@Composable
+private fun NotifyMeRow(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AppText(
+            text = stringResource(id = R.string.notify_me),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
+        )
+        AppSwitch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }
 
