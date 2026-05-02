@@ -64,14 +64,23 @@ class TimeViewModel @Inject constructor(
 
             is TimeAction.UpdateTimer -> {
                 viewModelScope.launch {
-                    api.setTimer(action.timeMs)
-                    AppSnackbar(appContext.getString(R.string.timer_set))
+                    if (!api.isConnected()) {
+                        AppSnackbar(appContext.getString(R.string.watch_not_connected))
+                    } else {
+                        api.setTimer(action.timeMs)
+                        AppSnackbar(appContext.getString(R.string.timer_set))
+                    }
                 }
             }
 
             TimeAction.SendTimeToWatch -> {
                 viewModelScope.launch {
                     runCatching {
+                        if (!api.isConnected()) {
+                            AppSnackbar(appContext.getString(R.string.watch_not_connected))
+                            return@runCatching
+                        }
+
                         val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
                         val timeMs = System.currentTimeMillis() + timeOffset
                         AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
@@ -91,6 +100,17 @@ class TimeViewModel @Inject constructor(
     private fun refreshState() {
         viewModelScope.launch {
             runCatching {
+                if (!api.isConnected()) {
+                    _state.value = TimeState(
+                        watchName = LocalDataStorage.get(
+                            appContext,
+                            "LastDeviceName",
+                            appContext.getString(R.string.no_watch)
+                        ) ?: appContext.getString(R.string.no_watch)
+                    )
+                    return@runCatching
+                }
+
                 _state.value = TimeState(
                     timer = api.getTimer(),
                     homeTime = if (WatchInfo.hasHomeTime) api.getHomeTime() else "",

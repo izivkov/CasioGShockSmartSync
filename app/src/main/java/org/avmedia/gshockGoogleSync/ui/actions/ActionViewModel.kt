@@ -705,13 +705,27 @@ constructor(
     }
 
     fun save() {
-        viewModelScope.launch { actionsStorage.save() }
+        if (!api.isConnected()) return
+
+        viewModelScope.launch {
+            runCatching { actionsStorage.save() }
+                    .onFailure { Timber.e(it, "Failed to save actions to watch") }
+        }
     }
 
     fun saveWithMessage(message: String) {
         viewModelScope.launch {
-            actionsStorage.save()
-            AppSnackbar(message)
+            if (!api.isConnected()) {
+                AppSnackbar(appContext.getString(R.string.watch_not_connected))
+                return@launch
+            }
+
+            runCatching { actionsStorage.save() }
+                    .onSuccess { AppSnackbar(message) }
+                    .onFailure {
+                        Timber.e(it, "Failed to save actions to watch")
+                        AppSnackbar(it.message ?: appContext.getString(R.string.actions_save_failed))
+                    }
         }
     }
 }

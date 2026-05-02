@@ -91,7 +91,10 @@ constructor(
          * Note: viewModelScope is an extension property provided by the lifecycle-viewmodel-ktx
          * library that creates a CoroutineScope tied to the ViewModel's lifecycle.
          */
-        viewModelScope.launch(Dispatchers.Default) { // Convert API settings to JSON object
+        viewModelScope.launch(Dispatchers.Default) {
+            if (!api.isConnected()) return@launch
+
+            // Convert API settings to JSON object
             val settingsJson = Gson().toJsonTree(api.getSettings()).asJsonObject
 
             // Convert merged settings to string and update state
@@ -398,7 +401,7 @@ constructor(
         smartSettings.add(light)
 
         // Power Save Mode
-        if (WatchInfo.hasPowerSavingMode) {
+        if (WatchInfo.hasPowerSavingMode && api.isConnected()) {
             val batteryLevel = api.getBatteryLevel()
             val currentPowerSavingMode: PowerSavingMode =
                     state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
@@ -407,7 +410,7 @@ constructor(
             val powerSavings = PowerSavingMode(enablePowerSetting)
             smartSettings.add(powerSavings)
         }
-        if (WatchInfo.hasMultipleFonts) {
+        if (WatchInfo.hasMultipleFonts && api.isConnected()) {
             val currentFontName = api.getSettings().font
             val newFontName = if (currentFontName == "Classic") Font.FontType.CLASSIC else Font.FontType.STANDARD
             val font = Font(newFontName)
@@ -477,6 +480,11 @@ constructor(
 
         viewModelScope.launch {
             runCatching {
+                if (!api.isConnected()) {
+                    AppSnackbar(appContext.getString(R.string.watch_not_connected))
+                    return@runCatching
+                }
+
                 api.setSettings(settings)
                 AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
             }

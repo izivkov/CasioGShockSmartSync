@@ -78,6 +78,11 @@ class AlarmViewModel @Inject constructor(
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
             val localDraft = AlarmSyncStorage.loadAlarms(appContext)
+            if (!api.isConnected()) {
+                _alarms.value = localDraft ?: createDefaultLocalAlarms()
+                return@runCatching
+            }
+
             if (AlarmSyncStorage.isDirty(appContext) && !localDraft.isNullOrEmpty()) {
                 _alarms.value = localDraft
                 return@runCatching
@@ -155,6 +160,11 @@ class AlarmViewModel @Inject constructor(
     }
 
     fun sendAlarmsToWatch() = viewModelScope.launch {
+        if (!api.isConnected()) {
+            AppSnackbar(appContext.getString(R.string.watch_not_connected))
+            return@launch
+        }
+
         val desiredAlarms = _alarms.value.mapIndexed { index, alarm ->
             if (alarm.name == null) {
                 alarmNameStorage.put("", index)
