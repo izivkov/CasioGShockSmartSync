@@ -27,7 +27,7 @@ object AlarmSyncStorage {
 
     data class SyncRecord(
         val syncedAt: Long,
-        val sentAlarmHashes: Set<String>
+        val sentAlarmHashes: List<String>  // Gson deserializes JSON arrays as ArrayList; List avoids type-erasure ambiguity
     )
 
     fun saveAlarms(context: Context, alarms: List<Alarm>, dirty: Boolean, firedAts: Map<Int, Long> = emptyMap()) {
@@ -45,25 +45,17 @@ object AlarmSyncStorage {
         LocalDataStorage.put(context, ALARMS_DIRTY_KEY, dirty.toString())
     }
 
-    fun loadAlarms(context: Context): List<Alarm>? {
+    private fun loadStoredAlarms(context: Context): List<StoredAlarm>? {
         val json = LocalDataStorage.get(context, ALARMS_KEY) ?: return null
         if (json.isBlank()) return null
-
         val type = object : TypeToken<List<StoredAlarm>>() {}.type
-        val stored = runCatching {
-            gson.fromJson<List<StoredAlarm>>(json, type)
-        }.getOrNull() ?: return null
-
-        return stored.map {
-            Alarm(
-                it.hour,
-                it.minute,
-                it.enabled,
-                it.hasHourlyChime,
-                it.name
-            )
-        }
+        return runCatching { gson.fromJson<List<StoredAlarm>>(json, type) }.getOrNull()
     }
+
+    fun loadAlarms(context: Context): List<Alarm>? =
+        loadStoredAlarms(context)?.map {
+            Alarm(it.hour, it.minute, it.enabled, it.hasHourlyChime, it.name)
+        }
 
     fun isDirty(context: Context): Boolean =
         LocalDataStorage.get(context, ALARMS_DIRTY_KEY, "false")?.toBoolean() ?: false
@@ -111,13 +103,9 @@ object AlarmSyncStorage {
         return runCatching { gson.fromJson(json, SyncRecord::class.java) }.getOrNull()
     }
 
-    fun loadFiredAts(context: Context): Map<Int, Long> {
-        val json = LocalDataStorage.get(context, ALARMS_KEY) ?: return emptyMap()
-        if (json.isBlank()) return emptyMap()
-        val type = object : TypeToken<List<StoredAlarm>>() {}.type
-        val stored: List<StoredAlarm> = runCatching { gson.fromJson<List<StoredAlarm>>(json, type) }.getOrNull() ?: return emptyMap()
-        return stored.mapIndexedNotNull { index, alarm ->
-            alarm.firedAt?.let { index to it }
-        }.toMap()
-    }
+    fun loadFiredAts(context: Context): Map<Int, Long> =
+        loadStoredAlarms(context)
+            ?.mapIndexedNotNull { i, a -> a.firedAt?.let { i to it } }
+            ?.toMap()
+            ?: emptyMap()
 }
