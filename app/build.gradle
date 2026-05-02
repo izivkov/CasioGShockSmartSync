@@ -7,16 +7,18 @@ plugins {
 }
 
 android {
-    namespace = 'org.avmedia.gshockGoogleSync'
+    namespace = 'com.beamburst.casswatch'
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.avmedia.gshockGoogleSync"
+        applicationId = "com.beamburst.casswatch"
         minSdk = 26
         targetSdk = 36
         versionCode = 409
         versionName = "40.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        testProguardFiles 'proguard-rules.pro'
     }
 
     compileOptions {
@@ -43,7 +45,13 @@ android {
             if (signingConfigs.release.storeFile != null) {
                 signingConfig signingConfigs.release
             }
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -109,7 +117,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences.core)
 
     implementation(libs.androidx.material.icons.core)
-    implementation(libs.androidx.material.icons.extended)
 }
 
 // Allow references to generated code

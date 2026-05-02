@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# release.sh - Automates the release process for Casio G-Shock Smart Sync
+# release.sh - Automates the release process for Cassiopeia Watch
 
 # Debug release process
 if [ "$1" == "debug" ]; then

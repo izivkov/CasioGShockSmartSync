@@ -1,0 +1,129 @@
+package com.beamburst.casswatch.ui.events
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.CassiopeiaWatchTheme
+import com.beamburst.casswatch.theme.Spacing
+import com.beamburst.casswatch.ui.common.ButtonData
+import com.beamburst.casswatch.ui.common.ButtonsRow
+import com.beamburst.casswatch.ui.common.ItemList
+import com.beamburst.casswatch.ui.common.ItemView
+import com.beamburst.casswatch.ui.common.ScreenTitle
+import org.avmedia.gshockapi.Event
+
+@Composable
+fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
+
+    CassiopeiaWatchTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            ConstraintLayout(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                val (title, events, buttonsRow) = createRefs()
+
+                ScreenTitle(
+                    stringResource(
+                        id = R.string.events
+                    ), Modifier
+                        .constrainAs(title) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(events.top)
+                        })
+
+                Column(
+                    modifier = Modifier
+                        .constrainAs(events) {
+                            top.linkTo(title.bottom)
+                            bottom.linkTo(buttonsRow.top)
+                            height = Dimension.fillToConstraints
+                        }
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = Spacing.lg)
+                        .fillMaxWidth()
+                        .fillMaxSize()
+                ) {
+                    EventList()
+                }
+
+                Column(
+                    modifier = Modifier
+                        .constrainAs(buttonsRow) {
+                            top.linkTo(events.bottom)  // Link top of buttonsRow to bottom of content
+                            bottom.linkTo(parent.bottom)  // Keep buttons at the bottom
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }
+                        .fillMaxWidth()
+                ) {
+                    val buttons = arrayListOf(
+                        ButtonData(
+                            text = stringResource(
+                                id = R.string.send_events_to_watch
+                            ),
+                            onClick = { viewModel.sendEventsToWatch() }
+                        )
+                    )
+                    ButtonsRow(buttons = buttons)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
+
+    val events by eventViewModel.events.collectAsState()
+
+    LaunchedEffect(Unit) {
+        eventViewModel.loadEvents()
+    }
+
+    @Composable
+    fun createEvent(): List<Any> {
+        val eventItems = mutableListOf<Any>()
+        val enabledCount = events.count { it.enabled } // Count how many items are enabled
+
+        events.forEachIndexed { index: Int, event: Event ->
+            ItemView {
+                EventItem(
+                    title = event.title,
+                    period = event.getPeriodFormatted(),
+                    frequency = event.getFrequencyFormatted(),
+                    enabled = event.enabled,
+                    onEnabledChange = { newValue ->
+                        eventViewModel.toggleEvents(index, newValue)
+                    },
+                    enabledCount = enabledCount
+                )
+            }
+        }
+
+        return eventItems.toList()
+    }
+
+    Column(
+        modifier = Modifier
+    ) {
+        ItemList(createEvent())
+    }
+}

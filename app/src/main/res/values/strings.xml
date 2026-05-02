@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
+    <string name="app_name" translatable="false">Cassiopeia Watch</string>
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
     <string name="title_events">Events</string>
@@ -7,7 +7,7 @@
     <string name="events">Events</string>
     <string name="alarms">Alarms</string>
     <string name="time">Time</string>
-    <string name="alarm_view_simple">Simple</string>
+    <string name="alarm_view_simple">Daily</string>
     <string name="alarm_view_weekly">Weekly</string>
     <string name="send_alarms_to_watch">Send to\n Watch</string>
     <string name="enabled">Enabled</string>
@@ -23,7 +23,7 @@
     In such cases, put your watch into pairing mode. A pop-up will appear on your phone prompting you to pair with the watch.</p>
     <p>To run Actions defined in the <b>Actions</b> screen, short-press the <b>LOWER-RIGHT</b> button. Actions are apps on your phone, like <b>Take a photo</b>.
     Using actions, the watch acts like a remote control for your phone.</p>
-    <p>You can download this app from <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a></p>
+    <p>You can download this app from <a href="https://f-droid.org/en/packages/com.beamburst.casswatch">F-DROID</a></p>
 
     ]]></string>
 
@@ -59,7 +59,6 @@
     <string name="title_placeholder">Title Placeholder</string>
     <string name="settings">Settings</string>
     <string name="send_to_watch_settings">Send to\nWatch</string>
-    <string name="auto_configure_settings">Auto Fill\nValues</string>
     <string name="font" translatable="false">Font</string>
     <string name="time_format">Time Format</string>
     <string name="_12h">12h</string>
@@ -69,13 +68,6 @@
     <string name="operational_sound">Button Operation Tone</string>
     <string name="power_saving_mode">Power Saving Mode</string>
     <string name="select_language">Select Language</string>
-    <string name="auto_fill_help"><![CDATA[The auto-fill values are derived as follows:
-        <li>Time/Date format and Language, are obtained from the Phone\'s setting.</li>
-        <li>Button tone is turned OFF if the phone is in DnD mode, ON otherwise.</li>
-        <li>Power Saving will be set to ON if the battery\'s level is at 15%% or less.</li>
-        Note: <i>The values will not change until sent again, even if the conditions change (i.e DnD is turned ON/OFF)</i>
-        ]]>
-    </string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="timerDialogTitle">Timer</string>
@@ -216,9 +208,14 @@
 
     <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
     <string name="actions_saved">Actions Saved</string>
+    <string name="actions_save_failed">Failed to save actions.</string>
     <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button (usually BOTTOM-LEFT) on your watch for 3 seconds to pair.</string>
     <string name="looking_for_a_device">Looking for a device.</string>
     <string name="add_watch">Add Watch</string>
+    <string name="manage_watches">Manage Watches</string>
+    <string name="watches">Watches</string>
+    <string name="no_paired_watches">No paired watches.</string>
+    <string name="watch_not_connected">Watch is not connected.</string>
     
     <!-- Pairing error messages -->
     <string name="pairing_failed_generic" translatable="false">Pairing failed: %1$s. Please try again.</string>

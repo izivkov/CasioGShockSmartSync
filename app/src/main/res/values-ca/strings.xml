@@ -20,7 +20,7 @@
     En aquests casos, poseu el rellotge en mode d\'emparellament. Apareixerà un missatge al vostre telèfon indicant que heu d\'emparellar-lo amb el rellotge.</p>
     <p>Per executar Accions definides a la pantalla <b>Accions</b>, premeu breument el botó <b>INFERIOR DRET</b>. Les accions són aplicacions al vostre telèfon, com <b>Fer una foto</b>.
     Amb aquestes accions, el rellotge funciona com un comandament a distància per al telèfon.</p>
-    <p>Podeu descarregar aquesta aplicació des de <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a></p>
+    <p>Podeu descarregar aquesta aplicació des de <a href="https://f-droid.org/en/packages/com.beamburst.casswatch">F-DROID</a></p>
 
     ]]></string>
 
@@ -55,7 +55,6 @@
     <string name="title_placeholder">Títol de marcador</string>
     <string name="settings">Configuració</string>
     <string name="send_to_watch_settings">Enviar a\nRellotge</string>
-    <string name="auto_configure_settings">Omplir valors\nautomàticament</string>
     <string name="time_format">Format d\'hora</string>
     <string name="_12h">12 h</string>
     <string name="_24h">24 h</string>
@@ -64,13 +63,6 @@
     <string name="operational_sound">Tonalitat de botó</string>
     <string name="power_saving_mode">Mode d\'estalvi d\'energia</string>
     <string name="select_language">Selecciona idioma</string>
-    <string name="auto_fill_help"><![CDATA[Els valors d\'ompliment automàtic s\'obtenen així:
-        <li>El format de data/hora i l\'idioma es prenen de la configuració del telèfon.</li>
-        <li>El to del botó es desactiva si el telèfon està en mode No molestar, i s\'activa en cas contrari.</li>
-        <li>El mode d\'estalvi s\'activarà si la bateria està al 15%% o menys.</li>
-        Nota: <i>Els valors no canviaran fins que es tornin a enviar, encara que canviïn les condicions (p. ex., si s\'activa/desactiva No molestar)</i>
-        ]]>
-    </string>
     <string name="cancel">Cancel·lar</string>
     <string name="ok">D\'acord</string>
     <string name="timerDialogTitle">Temporitzador</string>

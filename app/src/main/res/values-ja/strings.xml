@@ -14,7 +14,7 @@
     <string name="connection_screen_info"><![CDATA[次の画面に進むには、時計の <b>左下</b> ボタンを3秒間長押ししてください。
 2回目の二重ビープ音の後、アプリに時刻設定画面が表示されます。
 
-<p><b>公式のCasioアプリが起動していないことを確認してください。起動しているとこのアプリの動作に支障をきたします。</b></p> <p>DW-H5600のような一部の時計は、初回接続時にペアリングが必要です。 その場合は、時計をペアリングモードにしてください。スマートフォンにペアリングを求めるポップアップが表示されます。</p> <p><b>アクション</b>画面で定義されたアクションを実行するには、時計の <b>右下</b> ボタンを短く押してください。 アクションとは、<b>写真を撮る</b> など、スマートフォン上のアプリを実行する機能です。 この機能により、時計がスマートフォンのリモコンとして動作します。</p> <p>このアプリは <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a> からダウンロードできます。</p>]]>
+<p><b>公式のCasioアプリが起動していないことを確認してください。起動しているとこのアプリの動作に支障をきたします。</b></p> <p>DW-H5600のような一部の時計は、初回接続時にペアリングが必要です。 その場合は、時計をペアリングモードにしてください。スマートフォンにペアリングを求めるポップアップが表示されます。</p> <p><b>アクション</b>画面で定義されたアクションを実行するには、時計の <b>右下</b> ボタンを短く押してください。 アクションとは、<b>写真を撮る</b> など、スマートフォン上のアプリを実行する機能です。 この機能により、時計がスマートフォンのリモコンとして動作します。</p> <p>このアプリは <a href="https://f-droid.org/en/packages/com.beamburst.casswatch">F-DROID</a> からダウンロードできます。</p>]]>
     </string>
     <string name="alarms_screen_info"><![CDATA[<b>B5600/B5000/B2100</b>ウォッチには、ここに表示される5つのアラームと「信号」（毎時チャイム）設定があります。
     アラームは各アラームの時刻値を押すことで更新できます。新しいダイアログが表示され、アラームの時間を設定できます。
@@ -47,7 +47,6 @@
     <string name="title_placeholder">タイトルプレースホルダー</string>
     <string name="settings">設定</string>
     <string name="send_to_watch_settings">ウォッチに\n送信</string>
-    <string name="auto_configure_settings">値を自動設定</string>
     <string name="time_format">時間形式</string>
     <string name="_12h">12時間</string>
     <string name="_24h">24時間</string>
@@ -56,13 +55,6 @@
     <string name="operational_sound">ボタン操作音</string>
     <string name="power_saving_mode">省電力モード</string>
     <string name="select_language">言語を選択</string>
-    <string name="auto_fill_help"><![CDATA[自動入力値は以下のように取得されます：
-        <li>時間/日付形式と言語は、スマートフォンの設定から取得されます。</li>
-        <li>ボタン音は、スマートフォンが「おやすみモード（DnD）」の場合はOFF、それ以外の場合はONになります。</li>
-        <li>省電力は、バッテリー残量が15％以下の場合にONに設定されます。</li>
-        注記：<i>条件が変わっても（例: おやすみモードがON/OFFされても）、再送信するまで値は変更されません。</i>
-        ]]>
-    </string>
     <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
 
