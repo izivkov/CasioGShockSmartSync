@@ -22,10 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppButton
 import com.beamburst.casswatch.ui.common.AppCard
 
@@ -64,13 +64,13 @@ fun TimerView(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp),
+                .padding(vertical = Spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier
-                    .weight(2f)
-                    .padding(horizontal = 12.dp),
+                    .weight(1f)
+                    .padding(horizontal = Spacing.lg),
                 verticalArrangement = Arrangement.Center
             ) {
                 AppTextLarge(
@@ -79,7 +79,7 @@ fun TimerView(
                 TimerTimeView(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp)
+                        .padding(top = Spacing.sm)
                         .clickable { showTimerDialog = true },
                     timeText = makeLongString(state.timer)
                 )
@@ -88,12 +88,12 @@ fun TimerView(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(0.dp),
+                    .padding(horizontal = Spacing.sm),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 SendTimerButton(
-                    modifier = Modifier.padding(0.dp),
+                    modifier = Modifier.padding(Spacing.xxs),
                     onClick = {
                         timeModel.onAction(TimeAction.UpdateTimer(state.timer))
                     }
@@ -107,7 +107,7 @@ fun TimerView(
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(0.dp)
+                    .padding(Spacing.xxs)
             ) {
                 val (hours, minutes, seconds) = convertSecondsToTime(state.timer)
                 TimerPicker(

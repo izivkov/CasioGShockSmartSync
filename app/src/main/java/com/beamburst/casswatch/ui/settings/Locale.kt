@@ -27,10 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
-import com.beamburst.casswatch.ui.common.AppCard
+import com.beamburst.casswatch.theme.Spacing
 import org.avmedia.gshockapi.WatchInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,14 +50,11 @@ fun Locale(
         dateFormat = localeSetting.dateFormat
     }
 
-    AppCard(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
+    SettingCard(modifier = Modifier.fillMaxWidth()) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 2.dp, bottom = 2.dp)
+                .padding(contentPadding)
         ) {
             // Time Format Section
             Row(
@@ -71,7 +67,7 @@ fun Locale(
                     ),
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 12.dp)
+                        .padding(end = Spacing.md)
                 )
 
                 Row(
@@ -92,7 +88,7 @@ fun Locale(
                             id = R.string._12h
                         )
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(Spacing.sm))
                     RadioButton(
                         selected = timeFormat == SettingsViewModel.Locale.TimeFormat.TWENTY_FOUR_HOURS,
                         onClick = {
@@ -120,7 +116,7 @@ fun Locale(
                         ),
                         modifier = Modifier
                             .weight(1f)
-                            .padding(end = 6.dp)
+                            .padding(end = Spacing.sm)
                     )
 
                     Row(
@@ -140,7 +136,7 @@ fun Locale(
                             )
                         )
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(Spacing.sm))
 
                         RadioButton(
                             selected = dateFormat == SettingsViewModel.Locale.DateFormat.DAY_MONTH,
@@ -171,13 +167,13 @@ fun Locale(
                     ),
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 0.dp)
+                        .padding(end = Spacing.xxs)
                 )
 
                 LanguageDropdownMenu(
                     modifier = Modifier
                         .weight(1.5f)
-                        .padding(bottom = 2.dp),
+                        .padding(bottom = Spacing.xxs),
                     onUpdate = onUpdate,
                     localeSetting = localeSetting,
                 )
@@ -255,4 +251,3 @@ fun LanguageDropdownMenu(
 fun PreviewLocale() {
     Locale(onUpdate = {})
 }
-

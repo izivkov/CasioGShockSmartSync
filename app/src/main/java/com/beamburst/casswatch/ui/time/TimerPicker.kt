@@ -23,9 +23,8 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppButton
 
 
@@ -92,17 +91,17 @@ fun TimerPicker(
                         isError = hourInput.text.toIntOrNull() !in 0..23,
                         modifier = Modifier
                             .weight(1f),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 40.sp),
+                        textStyle = MaterialTheme.typography.headlineMedium,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
                     // Larger and centered `:` separator
                     Text(
                         text = ":",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 40.sp),
+                        style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(horizontal = 2.dp)
+                            .padding(horizontal = Spacing.xxs)
                     )
 
                     // Minutes input
@@ -122,17 +121,17 @@ fun TimerPicker(
                         isError = minuteInput.text.toIntOrNull() !in 0..59,
                         modifier = Modifier
                             .weight(1f),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 40.sp),
+                        textStyle = MaterialTheme.typography.headlineMedium,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
                     // Larger and centered `:` separator
                     Text(
                         text = ":",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 40.sp),
+                        style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(horizontal = 2.dp)
+                            .padding(horizontal = Spacing.xxs)
                     )
 
                     // Seconds input
@@ -152,7 +151,7 @@ fun TimerPicker(
                         isError = secondInput.text.toIntOrNull() !in 0..59,
                         modifier = Modifier
                             .weight(1f),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 40.sp),
+                        textStyle = MaterialTheme.typography.headlineMedium,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }
@@ -197,4 +196,3 @@ fun PreviewTimePickerDialog() {
         }
     )
 }
-

@@ -1,8 +1,12 @@
 package com.beamburst.casswatch.ui.time
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -10,12 +14,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.theme.CassiopeiaWatchTheme
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppSnackbar
 import com.beamburst.casswatch.ui.common.ScreenTitle
 
@@ -33,56 +35,34 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
 
     CassiopeiaWatchTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            ConstraintLayout {
-                val (title, localTime, timer, watchName, watchInfo) = createRefs()
-
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = Spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
                 ScreenTitle(
-                        stringResource(id = R.string.time),
-                        Modifier.constrainAs(title) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
+                    stringResource(id = R.string.time),
+                    Modifier
                 )
 
                 LocalTimeView(
-                        Modifier.fillMaxWidth()
-                                .padding(vertical = 0.dp) // Adjust padding as needed
-                                .constrainAs(localTime) {
-                                    top.linkTo(title.bottom)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                }
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.lg)
                 )
 
                 TimerView(
-                        modifier =
-                                Modifier.fillMaxWidth().constrainAs(timer) {
-                                    top.linkTo(localTime.bottom)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.lg)
                 )
 
-                WatchNameView(
-                        modifier =
-                                Modifier.fillMaxWidth().constrainAs(watchName) {
-                                    top.linkTo(timer.bottom)
-                                    bottom.linkTo(watchInfo.top)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                    height = Dimension.fillToConstraints
-                                }
-                )
-
-                WatchInfoView(
-                        modifier =
-                                Modifier.fillMaxWidth().constrainAs(watchInfo) {
-                                    top.linkTo(watchName.bottom)
-                                    bottom.linkTo(parent.bottom)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                }
+                WatchSummaryCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.lg)
                 )
             }
         }

@@ -18,10 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
-import com.beamburst.casswatch.ui.common.AppCard
+import com.beamburst.casswatch.theme.Spacing
 import org.avmedia.gshockapi.WatchInfo
 
 @Composable
@@ -42,11 +41,11 @@ fun Font(
 
     LaunchedEffect(state.settings) { fontType = fontSetting.font }
 
-    AppCard(modifier = Modifier.fillMaxWidth()) {
+    SettingCard(modifier = Modifier.fillMaxWidth()) { contentPadding ->
         Column(
                 modifier =
                         Modifier.fillMaxWidth()
-                                .padding(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 4.dp)
+                                .padding(contentPadding)
         ) {
             Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -67,7 +66,7 @@ fun Font(
                                 fontType = SettingsViewModel.Font.FontType.STANDARD
                                 onUpdate(fontSetting.copy(font = fontType))
                             },
-                            modifier = Modifier.padding(end = 0.dp)
+                            modifier = Modifier.padding(end = Spacing.xxs)
                     )
                     AppText(text = "Standard")
 
@@ -77,7 +76,7 @@ fun Font(
                                 fontType = SettingsViewModel.Font.FontType.CLASSIC
                                 onUpdate(fontSetting.copy(font = fontType))
                             },
-                            modifier = Modifier.padding(end = 0.dp)
+                            modifier = Modifier.padding(end = Spacing.xxs)
                     )
                     AppText(text = "Classic")
                 }

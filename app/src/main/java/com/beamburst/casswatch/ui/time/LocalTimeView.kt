@@ -21,10 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppButton
 import com.beamburst.casswatch.ui.common.AppCard
 import java.util.TimeZone
@@ -38,17 +38,17 @@ fun LocalTimeView(
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.padding(vertical = 20.dp),
+            modifier = Modifier.padding(vertical = Spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // First Column: Local Time and TimeZoneTextView
             Column(
                 modifier = Modifier
-                    .weight(2f)
-                    .padding(horizontal = 12.dp),
+                    .weight(1f)
+                    .padding(horizontal = Spacing.lg),
             ) {
                 AppTextLarge(
-                    modifier = Modifier.padding(start = 6.dp),
+                    modifier = Modifier.padding(start = Spacing.sm),
                     text = stringResource(
                         id = R.string.local_time
                     ),
@@ -62,7 +62,7 @@ fun LocalTimeView(
                     TimeZoneTextView(
                         modifier = Modifier
                             .align(Alignment.CenterStart)
-                            .padding(start = 6.dp),
+                            .padding(start = Spacing.sm),
                         textSize = 16.sp
                     )
                 }
@@ -72,7 +72,7 @@ fun LocalTimeView(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(0.dp),
+                    .padding(horizontal = Spacing.sm),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -93,7 +93,7 @@ fun LocalTimeView(
 fun TextClockComposable(
     modifier: Modifier = Modifier,
 ) {
-    RealTimeClock(modifier = modifier.padding(start = 0.dp))
+    RealTimeClock(modifier = modifier.padding(start = Spacing.xxs))
 }
 
 @Composable
@@ -137,6 +137,6 @@ fun PreviewLocalTimeCard() {
         Modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(vertical = 0.dp) // Adjust padding as needed
+            .padding(vertical = Spacing.xxs)
     )
 }

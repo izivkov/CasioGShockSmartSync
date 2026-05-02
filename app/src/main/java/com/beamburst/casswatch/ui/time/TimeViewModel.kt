@@ -26,7 +26,8 @@ data class TimeState(
     val homeTime: String = "",
     val batteryLevel: Int = 0,
     val temperature: Int = 0,
-    val watchName: String = ""
+    val watchName: String = "",
+    val isConnected: Boolean = false
 )
 
 sealed interface TimeAction {
@@ -125,7 +126,8 @@ class TimeViewModel @Inject constructor(
                     homeTime = if (WatchInfo.hasHomeTime) api.getHomeTime() else "",
                     batteryLevel = api.getBatteryLevel(),
                     temperature = api.getWatchTemperature(),
-                    watchName = api.getWatchName()
+                    watchName = api.getWatchName(),
+                    isConnected = true
                 )
             }.onFailure {
                 AppSnackbar("Api Error")

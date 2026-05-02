@@ -11,8 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.beamburst.casswatch.ui.common.AppCard
+import com.beamburst.casswatch.theme.Spacing
 
 @Composable
 fun BasicSettings(
@@ -20,14 +19,11 @@ fun BasicSettings(
     isSwitchOn: Boolean,
     onSwitchToggle: (Boolean) -> Unit
 ) {
-    AppCard(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
+    SettingCard(modifier = Modifier.fillMaxWidth()) { contentPadding ->
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 0.dp, bottom = 0.dp),
+                .padding(contentPadding),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -37,7 +33,7 @@ fun BasicSettings(
             ) {
                 AppTextLarge(
                     text = title,
-                    modifier = Modifier.padding(end = 6.dp)
+                    modifier = Modifier.padding(end = Spacing.sm)
                 )
             }
 

@@ -20,10 +20,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
-import com.beamburst.casswatch.ui.common.AppCard
+import com.beamburst.casswatch.theme.Spacing
 import org.avmedia.gshockapi.WatchInfo
 
 @Composable
@@ -43,21 +42,17 @@ fun OperationalTone(
         vibrate = operationToneSetting.vibrate
     }
 
-    AppCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
-    ) {
+    SettingCard(modifier = Modifier.fillMaxWidth()) { contentPadding ->
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp),
+                    .padding(contentPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppTextLarge(
                     text = stringResource(id = R.string.operational_sound),
-                    modifier = Modifier.padding(end = 6.dp)
+                    modifier = Modifier.padding(end = Spacing.sm)
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 AppSwitch(
@@ -68,7 +63,6 @@ fun OperationalTone(
                     },
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(end = 12.dp)
                 )
             }
 
@@ -76,7 +70,7 @@ fun OperationalTone(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 12.dp, top = 0.dp),
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.xxs),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(

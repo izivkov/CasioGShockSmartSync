@@ -15,9 +15,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.InfoButton
 import com.beamburst.casswatch.ui.common.ValueSelectionDialog
 
@@ -33,8 +32,8 @@ fun FineAdjustmentRow(
     ) {
         AppText(
             text = stringResource(id = R.string.fine_adjustment),
-            fontSize = 20.sp,
-            modifier = Modifier.padding(end = 6.dp)
+            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(end = Spacing.sm)
         )
         InfoButton(
             infoText = stringResource(id = R.string.fine_adjustment_info)
@@ -48,7 +47,7 @@ fun FineAdjustmentRow(
             text = "$value ms",
             modifier = Modifier
                 .clickable { showDialog = true }
-                .padding(6.dp),
+                .padding(Spacing.sm),
         )
 
         if (showDialog) {

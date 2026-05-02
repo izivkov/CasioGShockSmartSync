@@ -16,12 +16,12 @@ fun ScreenTitle(
 ) {
     val defaultModifier = Modifier
         .fillMaxWidth()
-        .padding(Spacing.xxs)
+        .padding(horizontal = Spacing.xl, vertical = Spacing.md)
 
     AppText(
         text = text,
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.headlineSmall,
         modifier = defaultModifier.then(modifier),
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Start
     )
 }

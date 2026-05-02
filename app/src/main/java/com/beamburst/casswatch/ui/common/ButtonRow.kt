@@ -9,8 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.Spacing
 
 data class ButtonData(val text: String, val onClick: () -> Unit)
 
@@ -20,13 +20,13 @@ fun ButtonsRow(
     modifier: Modifier = Modifier,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
-    buttonSpacing: Int = 5,
-    rowPadding: Int = 5
+    buttonSpacing: androidx.compose.ui.unit.Dp = Spacing.sm,
+    rowPadding: androidx.compose.ui.unit.Dp = Spacing.sm
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = rowPadding.dp),
+            .padding(vertical = rowPadding),
         horizontalArrangement = horizontalArrangement,
         verticalAlignment = verticalAlignment
     ) {
@@ -35,7 +35,7 @@ fun ButtonsRow(
                 text = buttonData.text,
                 onClick = buttonData.onClick,
                 modifier = Modifier
-                    .padding(vertical = buttonSpacing.dp)
+                    .padding(vertical = buttonSpacing)
             )
         }
     }

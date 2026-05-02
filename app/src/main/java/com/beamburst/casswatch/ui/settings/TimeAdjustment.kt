@@ -23,15 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
-import com.beamburst.casswatch.ui.common.AppCard
 import com.beamburst.casswatch.ui.common.InfoButton
 import com.beamburst.casswatch.ui.common.ValueSelectionDialog
 import org.avmedia.gshockapi.WatchInfo
 import androidx.compose.runtime.mutableIntStateOf
+import com.beamburst.casswatch.theme.Spacing
 
 @Composable
 fun TimeAdjustment(
@@ -55,20 +53,16 @@ fun TimeAdjustment(
         fineAdjustment = timeAdjustmentSetting.fineAdjustment
     }
 
-    AppCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
-    ) {
+    SettingCard(modifier = Modifier.fillMaxWidth()) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(0.dp)
+                .padding(contentPadding)
         ) {
             if (WatchInfo.alwaysConnected) {
                 FineAdjustmentRow(
                     modifier = Modifier
-                        .padding(end = 12.dp, start = 12.dp, top = 6.dp),
+                        .padding(top = Spacing.xs),
                     value = fineAdjustment,
                     onValueChange = { newValue ->
                         fineAdjustment = newValue
@@ -78,15 +72,14 @@ fun TimeAdjustment(
             } else {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp),
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppTextLarge(
                         text = stringResource(
                             id = R.string.time_adjustment
                         ),
-                        modifier = Modifier.padding(end = 6.dp)
+                        modifier = Modifier.padding(end = Spacing.sm)
                     )
                     InfoButton(
                         infoText = stringResource(
@@ -103,22 +96,20 @@ fun TimeAdjustment(
                         },
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(end = 12.dp)
                     )
                 }
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp, end = 12.dp),
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AppText(
                         text = stringResource(
                             id = R.string.adjustment_time_minutes
                         ),
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(end = 6.dp)
+                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(end = Spacing.sm)
                     )
                     InfoButton(
                         infoText = stringResource(
@@ -134,7 +125,7 @@ fun TimeAdjustment(
                         text = "$adjustmentMinutes m",
                         modifier = Modifier
                             .clickable { showDialog = true }
-                            .padding(6.dp),
+                            .padding(Spacing.sm),
                     )
                     if (showDialog) {
                         ValueSelectionDialog(
@@ -161,7 +152,7 @@ fun TimeAdjustment(
                 }
                 FineAdjustmentRow(
                     modifier = Modifier
-                        .padding(end = 12.dp, start = 12.dp, top = 6.dp),
+                        .padding(top = Spacing.xs),
                     value = fineAdjustment,
                     onValueChange = { newValue ->
                         fineAdjustment = newValue
@@ -171,7 +162,7 @@ fun TimeAdjustment(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 12.dp, top = 0.dp),
+                        .padding(top = Spacing.xxs),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppText(
@@ -199,5 +190,3 @@ fun TimeAdjustment(
 fun PreviewTimeAdjustment() {
     TimeAdjustment(onUpdate = {})
 }
-
-

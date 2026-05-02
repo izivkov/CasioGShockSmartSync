@@ -19,12 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.theme.CassiopeiaWatchTheme
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppSnackbar
 import com.beamburst.casswatch.ui.common.ButtonData
 import com.beamburst.casswatch.ui.common.ButtonsRow
@@ -67,7 +67,7 @@ fun SettingsScreen() {
                                                         .verticalScroll(
                                                                 rememberScrollState()
                                                         ) // Make content scrollable
-                                                        .padding(0.dp)
+                                                        .padding(horizontal = Spacing.lg)
                                                         .fillMaxWidth()
                                                         .fillMaxSize()
                                 ) { SettingsList() }
@@ -136,7 +136,7 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
                         // left
                         ) {
                         Box(
-                                modifier = Modifier.weight(1f).fillMaxWidth().padding(end = 0.dp),
+                                modifier = Modifier.weight(1f).fillMaxWidth().padding(end = Spacing.xxs),
                                 contentAlignment =
                                         Alignment.CenterEnd // Aligns content to the right
                         ) { InfoButton(infoText = stringResource(id = R.string.auto_fill_help)) }

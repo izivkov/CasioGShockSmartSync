@@ -16,10 +16,10 @@ import com.beamburst.casswatch.theme.Spacing
 fun AppCard(
     modifier: Modifier = Modifier,
     padding: Dp = Spacing.xs,
-    elevation: Dp = 4.dp,
-    borderWidth: Dp = 0.dp,
-    borderColor: Color = Color.Transparent,
-    containerColor: Color = if (androidx.compose.foundation.isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surfaceContainer,
+    elevation: Dp = 1.dp,
+    borderWidth: Dp = 1.dp,
+    borderColor: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable () -> Unit,
 ) {
     Card(

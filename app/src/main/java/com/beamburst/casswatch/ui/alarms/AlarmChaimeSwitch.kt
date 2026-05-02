@@ -1,9 +1,10 @@
 package com.beamburst.casswatch.ui.alarms
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,7 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.theme.Spacing
-import com.beamburst.casswatch.ui.common.AppSwitchWithText
+import com.beamburst.casswatch.ui.common.AppCard
+import com.beamburst.casswatch.ui.common.AppText
+import AppSwitch
 
 import androidx.compose.runtime.collectAsState
 
@@ -33,24 +36,29 @@ fun AlarmChimeSwitch(
         isChecked = alarms.getOrNull(0)?.hasHourlyChime ?: false
     }
 
-    Column(
-        modifier = Modifier
-            .padding(Spacing.md)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.End,
-    ) {
-        AppSwitchWithText(
-            isChecked = isChecked,
-            onCheckedChange = { checked ->
-                if (alarms.isNotEmpty()) {
-                    isChecked = checked
-                    alarmViewModel.toggleHourlyChime(checked)
-                    onUpdate(checked)
+    AppCard(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.lg),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            AppText(
+                text = stringResource(id = R.string.signal_chime),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            AppSwitch(
+                checked = isChecked,
+                onCheckedChange = { checked ->
+                    if (alarms.isNotEmpty()) {
+                        isChecked = checked
+                        alarmViewModel.toggleHourlyChime(checked)
+                        onUpdate(checked)
+                    }
                 }
-            },
-            modifier = modifier,
-            text = stringResource(id = R.string.signal_chime)
-        )
+            )
+        }
     }
 }
