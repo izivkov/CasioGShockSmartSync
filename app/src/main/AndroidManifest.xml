@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <permission
-        android:name="com.your.package.RECEIVE_BOOT_COMPLETED"
+        android:name="com.beamburst.casswatch.RECEIVE_BOOT_COMPLETED"
         android:protectionLevel="signature" />
 
     <!-- Location Permissions -->
@@ -118,7 +118,7 @@
             android:name=".services.BootReceiver"
             android:enabled="true"
             android:exported="true"
-            android:permission="org.avmedia.gshockGoogleSync.RECEIVE_BOOT_COMPLETED">
+            android:permission="com.beamburst.casswatch.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

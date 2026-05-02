@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
+    <string name="app_name" translatable="false">Cassiopeia Watch</string>
     <string name="title_time">Time</string>
     <string name="title_alarms">Alarms</string>
     <string name="title_events">Events</string>
@@ -23,7 +23,7 @@
     In such cases, put your watch into pairing mode. A pop-up will appear on your phone prompting you to pair with the watch.</p>
     <p>To run Actions defined in the <b>Actions</b> screen, short-press the <b>LOWER-RIGHT</b> button. Actions are apps on your phone, like <b>Take a photo</b>.
     Using actions, the watch acts like a remote control for your phone.</p>
-    <p>You can download this app from <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a></p>
+    <p>You can download this app from <a href="https://f-droid.org/en/packages/com.beamburst.casswatch">F-DROID</a></p>
 
     ]]></string>
 

@@ -1,0 +1,29 @@
+package com.beamburst.casswatch.di
+
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import com.beamburst.casswatch.data.repository.GShockRepository
+import org.avmedia.gshockapi.GShockAPI
+import org.avmedia.gshockapi.IGShockAPI
+import javax.inject.Named
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object RepositoryModule {
+
+    @Provides
+    @Singleton
+    @Named("api")
+    fun provideGShockRepository(api: GShockAPI): GShockRepository {
+        return GShockRepository(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideIGShockAPI(repository: GShockRepository): IGShockAPI {
+        return repository
+    }
+}

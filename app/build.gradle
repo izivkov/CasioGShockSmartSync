@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = 'org.avmedia.gshockGoogleSync'
+    namespace = 'com.beamburst.casswatch'
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.avmedia.gshockGoogleSync"
+        applicationId = "com.beamburst.casswatch"
         minSdk = 26
         targetSdk = 36
         versionCode = 409
