@@ -4,15 +4,14 @@ import AppSwitch
 import com.beamburst.casswatch.ui.common.AppText
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.ui.common.AppCard
 import com.beamburst.casswatch.ui.common.AppSnackbar
@@ -33,29 +32,26 @@ fun EventItem(
     AppCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(0.dp)
+            .padding(Spacing.xs)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
+                .padding(Spacing.md)
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 6.dp, end = 6.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp)
                 ) {
                     AppText(
                         text = title,
-                        fontSize = 24.sp,
+                        style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .weight(1f)
-                            .padding(end = 0.dp, bottom = 0.dp)
                     )
                     AppSwitch(
                         checked = enabled,
@@ -69,29 +65,25 @@ fun EventItem(
                         modifier = Modifier.align(Alignment.Top)
                     )
                 }
-                ConstraintLayout(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp)
+                        .padding(top = Spacing.xs),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
-                    val (periodRef, frequencyRef) = createRefs()
-
                     AppText(
                         text = period,
-                        modifier = Modifier
-                            .padding(start = 0.dp)
-                            .constrainAs(periodRef) {
-                                start.linkTo(parent.start)
-                                top.linkTo(parent.top)
-                            }
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        modifier = Modifier.weight(1f)
                     )
 
                     AppText(
                         text = frequency,
-                        modifier = Modifier.constrainAs(frequencyRef) {
-                            end.linkTo(parent.end)
-                            top.linkTo(parent.top)
-                        }
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
             }

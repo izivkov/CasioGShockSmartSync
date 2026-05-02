@@ -15,6 +15,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -92,7 +93,7 @@ fun BottomNavigationBarWithPermissions(
             .detectInactivity(inactivityHandler),
         bottomBar = {
             NavigationBar(
-                modifier = Modifier.padding(0.dp)
+                modifier = Modifier
             ) {
                 BottomNavigationItem().bottomNavigationItems()
                     .forEachIndexed { _, navigationItem ->
@@ -116,7 +117,10 @@ fun BottomNavigationBarWithPermissions(
                                     restoreState = true
                                 }
                             },
-                            alwaysShowLabel = false,
+                            alwaysShowLabel = true,
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     }
             }

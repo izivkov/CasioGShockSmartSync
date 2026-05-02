@@ -3,11 +3,11 @@ package com.beamburst.casswatch.ui.common
 import com.beamburst.casswatch.ui.common.AppText
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.beamburst.casswatch.theme.Spacing
 
 @Composable
 fun ScreenTitle(
@@ -16,11 +16,11 @@ fun ScreenTitle(
 ) {
     val defaultModifier = Modifier
         .fillMaxWidth()
-        .padding(2.dp)
+        .padding(Spacing.xxs)
 
     AppText(
         text = text,
-        fontSize = 24.sp,
+        style = MaterialTheme.typography.titleLarge,
         modifier = defaultModifier.then(modifier),
         textAlign = TextAlign.Center
     )

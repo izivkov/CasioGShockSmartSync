@@ -2,7 +2,7 @@ package com.beamburst.casswatch.ui.alarms
 
 import AppSwitch
 import com.beamburst.casswatch.ui.common.AppText
-import com.beamburst.casswatch.ui.common.AppTextExtraLarge
+import com.beamburst.casswatch.ui.common.AppTextVeryLarge
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.text.format.DateFormat
@@ -43,6 +43,7 @@ import com.beamburst.casswatch.R
 import com.beamburst.casswatch.di.ApplicationContextEntryPoint
 import com.beamburst.casswatch.ui.common.AppCard
 import com.beamburst.casswatch.ui.common.AppTimePicker
+import com.beamburst.casswatch.theme.Spacing
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Date
@@ -77,13 +78,13 @@ fun AlarmItem(
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(0.dp),
+            .padding(Spacing.xs),
     ) {
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp),
+                    .padding(Spacing.md),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -93,15 +94,15 @@ fun AlarmItem(
                         .padding(end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AppTextExtraLarge(
+                    AppTextVeryLarge(
                         text = formatTime(alarmHours, alarmMinutes, appContext),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
-                            .padding(4.dp)
+                            .padding(Spacing.xs)
                             .clickable { showTimePickerDialog = true },
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Spacing.sm))
                     val alarmName = if (name.isNullOrBlank()) stringResource(id = R.string.daily) else name
                     AppText(text = alarmName)
                 }
@@ -129,7 +130,7 @@ fun AlarmItem(
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
+                    .padding(Spacing.lg)
             ) {
                 AppTimePicker(
                     onConfirm = { state ->
@@ -157,7 +158,7 @@ private fun DaySelector(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -165,7 +166,7 @@ private fun DaySelector(
             val isSelected = day in selectedDays
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(40.dp)
                     .alpha(if (isEnabled) 1f else 0.4f)
                     .clip(CircleShape)
                     .background(

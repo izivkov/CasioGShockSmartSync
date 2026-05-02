@@ -14,14 +14,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun AppTextLarge(
     text: String,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle(
-        fontSize = 20.sp,
+    textStyle: TextStyle = MaterialTheme.typography.titleLarge.copy(
         color = MaterialTheme.colorScheme.onBackground
     ),
     fontStyle: FontStyle? = null,

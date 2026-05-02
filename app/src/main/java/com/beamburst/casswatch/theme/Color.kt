@@ -4,11 +4,11 @@ import androidx.compose.ui.graphics.Color
 
 // G-Shock Expressive Palette
 
-// Primary - Electric Violet / Blue
-val PrimaryLight = Color(0xFF6200EE)
+// Primary - Deep Blue
+val PrimaryLight = Color(0xFF1A47B0)
 val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFEADDFF)
-val OnPrimaryContainerLight = Color(0xFF21005D)
+val PrimaryContainerLight = Color(0xFFDCE4FF)
+val OnPrimaryContainerLight = Color(0xFF001A41)
 
 // Secondary - Teal / Cyan (Vibrant accent)
 val SecondaryLight = Color(0xFF03DAC6)
@@ -39,10 +39,10 @@ val OutlineLight = Color(0xFF79747E)
 
 
 // Dark Theme Colors
-val PrimaryDark = Color(0xFFD0BCFF)
-val OnPrimaryDark = Color(0xFF381E72)
-val PrimaryContainerDark = Color(0xFF4F378B)
-val OnPrimaryContainerDark = Color(0xFFEADDFF)
+val PrimaryDark = Color(0xFFB0C7FF)
+val OnPrimaryDark = Color(0xFF002B72)
+val PrimaryContainerDark = Color(0xFF143F9C)
+val OnPrimaryContainerDark = Color(0xFFDCE4FF)
 
 val SecondaryDark = Color(0xFF66FFF9)
 val OnSecondaryDark = Color(0xFF003734)

@@ -14,12 +14,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.theme.CassiopeiaWatchTheme
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.ButtonData
 import com.beamburst.casswatch.ui.common.ButtonsRow
 import com.beamburst.casswatch.ui.common.ItemList
@@ -56,8 +56,8 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                             bottom.linkTo(buttonsRow.top)
                             height = Dimension.fillToConstraints
                         }
-                        .verticalScroll(rememberScrollState())  // Make content scrollable
-                        .padding(0.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = Spacing.lg)
                         .fillMaxWidth()
                         .fillMaxSize()
                 ) {

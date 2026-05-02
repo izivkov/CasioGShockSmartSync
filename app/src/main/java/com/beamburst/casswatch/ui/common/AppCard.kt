@@ -10,11 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.beamburst.casswatch.theme.Spacing
 
 @Composable
 fun AppCard(
     modifier: Modifier = Modifier,
-    padding: Dp = 2.dp,
+    padding: Dp = Spacing.xs,
     elevation: Dp = 4.dp,
     borderWidth: Dp = 0.dp,
     borderColor: Color = Color.Transparent,

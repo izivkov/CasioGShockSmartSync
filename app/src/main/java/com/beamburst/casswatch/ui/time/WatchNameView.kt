@@ -1,12 +1,11 @@
 package com.beamburst.casswatch.ui.time
 
-import com.beamburst.casswatch.ui.common.AppText
+import com.beamburst.casswatch.theme.Spacing
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,12 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.ui.common.AppButton
 import com.beamburst.casswatch.ui.common.AppCard
+import com.beamburst.casswatch.ui.common.AppTextVeryLarge
 
 @Composable
 fun WatchNameView(
@@ -47,7 +45,7 @@ fun WatchNameView(
                 AppButton(
                     text = stringResource(R.string.manage_watches),
                     onClick = { showWatchManager = true },
-                    modifier = Modifier.padding(top = 16.dp)
+                    modifier = Modifier.padding(top = Spacing.lg)
                 )
             }
         }
@@ -63,13 +61,10 @@ fun WatchName(
     modifier: Modifier = Modifier,
     text: String
 ) {
-    AppText(
-        text = text.replace(Regex("(CASIO)"), "$1\n"),
-        fontSize = 48.sp,
-        textAlign = TextAlign.Center, // Center-aligns each line
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentWidth(Alignment.CenterHorizontally)
+    AppTextVeryLarge(
+        text = text,
+        textAlign = TextAlign.Center,
+        modifier = modifier.fillMaxWidth()
     )
 }
 

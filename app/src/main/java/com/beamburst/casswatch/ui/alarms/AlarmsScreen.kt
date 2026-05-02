@@ -19,11 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppSnackbar
 import com.beamburst.casswatch.ui.common.ButtonData
 import com.beamburst.casswatch.ui.common.ButtonsRow
@@ -99,7 +99,7 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                         end.linkTo(parent.end)
                     }
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
                 SegmentedButton(
                     selected = viewMode == AlarmViewMode.SIMPLE,

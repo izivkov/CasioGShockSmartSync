@@ -13,9 +13,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
+import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppSwitchWithText
 
 import androidx.compose.runtime.collectAsState
@@ -35,7 +35,7 @@ fun AlarmChimeSwitch(
 
     Column(
         modifier = Modifier
-            .padding(0.dp)
+            .padding(Spacing.md)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.End,

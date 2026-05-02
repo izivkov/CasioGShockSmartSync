@@ -14,7 +14,9 @@ import kotlinx.coroutines.launch
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.data.repository.GShockRepository
 import com.beamburst.casswatch.utils.LocalDataStorage
+import com.beamburst.casswatch.utils.Utils
 import com.beamburst.casswatch.ui.common.AppSnackbar
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
@@ -51,6 +53,13 @@ class TimeViewModel @Inject constructor(
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     init {
+        ProgressEvents.runEventActions(
+            Utils.AppHashCode(),
+            arrayOf(
+                EventAction("WatchInitializationCompleted") { refreshState() },
+                EventAction("Disconnect") { refreshState() }
+            )
+        )
         refreshState()
     }
 
