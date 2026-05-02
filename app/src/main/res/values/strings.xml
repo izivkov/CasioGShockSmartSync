@@ -205,6 +205,10 @@
     <string name="health_connect_not_available">\"Health Connect\" not available. Please install it.</string>
     <string name="cover_hold_to_unlock">Hold to unlock</string>
     <string name="cover_connected">Connected</string>
+    <string name="alarm_editor_title">Edit alarm</string>
+    <string name="alarm_editor_label">Label</string>
+    <string name="alarm_editor_repeat">Repeat</string>
+    <string name="alarm_editor_save">Save</string>
 
     <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
     <string name="actions_saved">Actions Saved</string>
