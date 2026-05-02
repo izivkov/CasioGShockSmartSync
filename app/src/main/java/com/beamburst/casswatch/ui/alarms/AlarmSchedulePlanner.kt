@@ -10,7 +10,8 @@ object AlarmSchedulePlanner {
         alarms: List<Alarm>,
         alarmDays: Map<Int, Set<DayOfWeek>>,
         now: LocalDateTime,
-        viewMode: AlarmViewMode
+        viewMode: AlarmViewMode,
+        firedAts: Map<Int, Long> = emptyMap()   // index → firedAt millis; empty = backward compat
     ): List<Alarm> {
         if (viewMode == AlarmViewMode.SIMPLE) return alarms
 
@@ -19,10 +20,17 @@ object AlarmSchedulePlanner {
 
         return alarms.mapIndexed { index, alarm ->
             val selectedDays = alarmDays[index]
-            if (!alarm.enabled || selectedDays.isNullOrEmpty()) {
-                alarm
-            } else {
-                alarm.copy(
+            when {
+                !alarm.enabled -> alarm                              // already off → pass through
+                selectedDays.isNullOrEmpty() -> {
+                    // Fire-once: no days selected
+                    if (firedAts.containsKey(index)) {
+                        alarm.copy(enabled = false)                  // consumed → disable on watch
+                    } else {
+                        alarm                                        // unfired → send enabled (watch fires daily)
+                    }
+                }
+                else -> alarm.copy(
                     enabled = selectedDays.contains(today) && alarm.time().isAfter(currentTime)
                 )
             }
