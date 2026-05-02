@@ -48,7 +48,6 @@ Después del segundo pitido doble, la app mostrará la pantalla de ajuste de hor
     <string name="title_placeholder">Marcador de título</string>
     <string name="settings">Configuraciones</string>
     <string name="send_to_watch_settings">Enviar al\nReloj</string>
-    <string name="auto_configure_settings">Auto\nrrellenar</string>
     <string name="time_format">Formato de hora</string>
     <string name="_12h">12h</string>
     <string name="_24h">24h</string>
@@ -57,13 +56,6 @@ Después del segundo pitido doble, la app mostrará la pantalla de ajuste de hor
     <string name="operational_sound">Tono de operación de botón</string>
     <string name="power_saving_mode">Modo de ahorro de energía</string>
     <string name="select_language">Seleccionar idioma</string>
-    <string name="auto_fill_help"><![CDATA[Los valores de autocompletar se derivan de la siguiente manera:
-        <li>El formato de Hora/Fecha y el idioma se obtienen de la configuración del teléfono.</li>
-        <li>El tono de botón se apaga si el teléfono está en modo No molestar (DnD), y se enciende en caso contrario.</li>
-        <li>El ahorro de energía se activará si el nivel de batería es del 15%% o menos.</li>
-        Nota: <i>Los valores no cambiarán hasta que se envíen nuevamente, incluso si las condiciones cambian (es decir, si se activa o desactiva el DnD).</i>
-        ]]>
-    </string>
     <string name="cancel">Cancelar</string>
     <string name="ok">Aceptar</string>
     <string name="timerDialogTitle">Temporizador</string>

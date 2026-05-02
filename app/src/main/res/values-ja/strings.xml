@@ -47,7 +47,6 @@
     <string name="title_placeholder">タイトルプレースホルダー</string>
     <string name="settings">設定</string>
     <string name="send_to_watch_settings">ウォッチに\n送信</string>
-    <string name="auto_configure_settings">値を自動設定</string>
     <string name="time_format">時間形式</string>
     <string name="_12h">12時間</string>
     <string name="_24h">24時間</string>
@@ -56,13 +55,6 @@
     <string name="operational_sound">ボタン操作音</string>
     <string name="power_saving_mode">省電力モード</string>
     <string name="select_language">言語を選択</string>
-    <string name="auto_fill_help"><![CDATA[自動入力値は以下のように取得されます：
-        <li>時間/日付形式と言語は、スマートフォンの設定から取得されます。</li>
-        <li>ボタン音は、スマートフォンが「おやすみモード（DnD）」の場合はOFF、それ以外の場合はONになります。</li>
-        <li>省電力は、バッテリー残量が15％以下の場合にONに設定されます。</li>
-        注記：<i>条件が変わっても（例: おやすみモードがON/OFFされても）、再送信するまで値は変更されません。</i>
-        ]]>
-    </string>
     <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
 

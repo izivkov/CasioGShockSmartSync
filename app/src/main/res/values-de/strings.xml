@@ -50,7 +50,6 @@ Nachdem die Alarme eingestellt wurden, können Sie sie an die Uhr oder an die We
     <string name="title_placeholder">Titel-Platzhalter</string>
     <string name="settings">Einstellungen</string>
     <string name="send_to_watch_settings">An die\nUhr senden</string>
-    <string name="auto_configure_settings">Auto-\nAusfüllen</string>
     <string name="time_format">Zeitformat</string>
     <string name="_12h">12h</string>
     <string name="_24h">24h</string>
@@ -59,13 +58,6 @@ Nachdem die Alarme eingestellt wurden, können Sie sie an die Uhr oder an die We
     <string name="operational_sound">Tastenton</string>
     <string name="power_saving_mode">Energiesparmodus</string>
     <string name="select_language">Sprache auswählen</string>
-    <string name="auto_fill_help"><![CDATA[Die Werte der automatischen Ausfüllfunktion werden wie folgt abgeleitet:
-        <li>Das Zeit-/Datumsformat und die Sprache werden aus den Einstellungen des Telefons übernommen.</li>
-        <li>Der Tastenton wird deaktiviert, wenn das Telefon im DnD-Modus ist, ansonsten aktiviert.</li>
-        <li>Der Energiesparmodus wird aktiviert, wenn der Akkustand 15 %% oder weniger beträgt.</li>
-        Hinweis: <i>Die Werte ändern sich nicht, bis sie erneut gesendet werden, selbst wenn sich die Bedingungen ändern (z. B. DnD wird ein-/ausgeschaltet).</i>
-        ]]>
-    </string>
     <string name="cancel">Abbrechen</string>
     <string name="ok">OK</string>
     <string name="timerDialogTitle">Timer</string>

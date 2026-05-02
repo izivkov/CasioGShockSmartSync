@@ -48,7 +48,6 @@
     <string name="title_placeholder">Место для названия</string>
     <string name="settings">Настройки</string>
     <string name="send_to_watch_settings">Отправить на\nчасы</string>
-    <string name="auto_configure_settings">Авто\nзаполнение</string>
     <string name="time_format">Формат времени</string>
     <string name="_12h">12ч</string>
     <string name="_24h">24ч</string>
@@ -57,13 +56,6 @@
     <string name="operational_sound">Звук кнопки</string>
     <string name="power_saving_mode">Режим энергосбережения</string>
     <string name="select_language">Выбрать язык</string>
-    <string name="auto_fill_help"><![CDATA[Автозаполнение значений происходит следующим образом:
-        <li>Формат времени/даты и язык получаются из настроек телефона.</li>
-        <li>Звук кнопки отключается, если телефон в режиме "Не беспокоить", включается в остальных случаях.</li>
-        <li>Режим энергосбережения включается, если уровень заряда батареи 15%% или меньше.</li>
-        Примечание: <i>Значения не изменятся, пока не будут отправлены снова, даже если условия изменятся (например, режим "Не беспокоить" включен/выключен).</i>
-    ]]>
-    </string>
     <string name="cancel">Отмена</string>
     <string name="ok">ОК</string>
     <string name="timerDialogTitle">Таймер</string>

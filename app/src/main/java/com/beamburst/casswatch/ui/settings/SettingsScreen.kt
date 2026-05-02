@@ -21,13 +21,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.theme.CassiopeiaWatchTheme
 import com.beamburst.casswatch.theme.Spacing
+import com.beamburst.casswatch.ui.common.AppButton
 import com.beamburst.casswatch.ui.common.AppSnackbar
 import com.beamburst.casswatch.ui.common.AppText
-import com.beamburst.casswatch.ui.common.ButtonData
-import com.beamburst.casswatch.ui.common.ButtonsRow
-import com.beamburst.casswatch.ui.common.InfoButton
 import com.beamburst.casswatch.ui.common.ScreenTitle
-import com.beamburst.casswatch.utils.Utils
 import org.avmedia.gshockapi.WatchInfo
 
 @SuppressLint("MutableCollectionMutableState")
@@ -119,32 +116,12 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
                 .fillMaxWidth()
                 .padding(start = Spacing.md, end = Spacing.sm, top = Spacing.xs, bottom = Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            horizontalArrangement = Arrangement.End
         ) {
-            InfoButton(infoText = stringResource(id = R.string.auto_fill_help))
-
-            val buttons =
-                arrayListOf(
-                    ButtonData(
-                        text =
-                            Utils.shortenStringNewLine(
-                                stringResource(
-                                    id =
-                                        R.string
-                                            .auto_configure_settings
-                                ),
-                                15,
-                                "AUTO"
-                            ),
-                        onClick = { settingsViewModel.setSmartDefaults() }
-                    ),
-                    ButtonData(
-                        text = stringResource(id = R.string.send_to_watch),
-                        onClick = { settingsViewModel.sendToWatch() }
-                    )
-                )
-
-            ButtonsRow(buttons = buttons, modifier = Modifier.weight(1f), rowPadding = Spacing.xxs)
+            AppButton(
+                onClick = { settingsViewModel.sendToWatch() },
+                text = stringResource(id = R.string.send_to_watch)
+            )
         }
     }
 }

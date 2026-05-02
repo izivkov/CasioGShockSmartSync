@@ -1,7 +1,6 @@
 package com.beamburst.casswatch.ui.settings
 
 import com.beamburst.casswatch.ui.common.AppText
-import com.beamburst.casswatch.ui.common.AppTextLarge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,7 +51,7 @@ fun Font(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AppTextLarge(
+                SettingsLabel(
                         text = stringResource(id = R.string.font),
                 )
 

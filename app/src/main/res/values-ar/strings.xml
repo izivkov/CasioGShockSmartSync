@@ -47,7 +47,6 @@
     <string name="title_placeholder">عنصر نائب للعنوان</string>
     <string name="settings">الإعدادات</string>
     <string name="send_to_watch_settings">إرسال إلى\nالساعة</string>
-    <string name="auto_configure_settings">تعبئة القيم تلقائياً</string>
     <string name="time_format">تنسيق الوقت</string>
     <string name="_12h">12 ساعة</string>
     <string name="_24h">24 ساعة</string>
@@ -56,13 +55,6 @@
     <string name="operational_sound">صوت أزرار التشغيل</string>
     <string name="power_saving_mode">وضع توفير الطاقة</string>
     <string name="select_language">اختر اللغة</string>
-    <string name="auto_fill_help"><![CDATA[القيم التي يتم تعبئتها تلقائياً مستمدة كما يلي:
-        <li>تنسيق الوقت/التاريخ واللغة يتم الحصول عليها من إعدادات الهاتف.</li>
-        <li>يتم إيقاف نغمة الأزرار إذا كان الهاتف في وضع "عدم الإزعاج"، ويتم تشغيلها في حالات أخرى.</li>
-        <li>سيتم ضبط وضع توفير الطاقة إذا كانت نسبة البطارية 15٪ أو أقل.</li>
-        ملاحظة: <i>لن تتغير القيم إلا إذا تم إرسالها مرة أخرى، حتى إذا تغيرت الشروط (مثل تفعيل/تعطيل وضع عدم الإزعاج).</i>
-        ]]>
-    </string>
     <string name="cancel">إلغاء</string>
     <string name="ok">موافق</string>
     <string name="timerDialogTitle">المؤقت</string>

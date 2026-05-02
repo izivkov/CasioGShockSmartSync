@@ -56,7 +56,6 @@ Si aucun événement n\'apparaît, assurez-vous que vous avez des événements �
     <string name="title_placeholder">Titre Placeholder</string>
     <string name="settings">Paramètres</string>
     <string name="send_to_watch_settings">Envoyer à\nla montre</string>
-    <string name="auto_configure_settings">Auto\nremplir</string>
     <string name="time_format">Format de l\heure</string>
 
 
@@ -67,14 +66,6 @@ Si aucun événement n\'apparaît, assurez-vous que vous avez des événements �
     <string name="operational_sound">Ton des boutons</string>
     <string name="power_saving_mode">Mode économie d\'énergie</string>
     <string name="select_language">Sélectionner la langue</string>
-
-    <string name="auto_fill_help"><![CDATA[Les valeurs auto-remplies sont obtenues comme suit :
-<li>Le format de l\'heure/de la date et la langue sont obtenus depuis les paramètres du téléphone.</li>
-<li>Le ton des boutons est désactivé si le téléphone est en mode Ne Pas Déranger (DnD), activé sinon.</li>
-<li>Le mode économie d\'énergie est activé si le niveau de batterie est à 15%% ou moins.</li>
-Note : <i>Les valeurs ne changeront pas tant qu\'elles ne sont pas renvoyées, même si les conditions changent (par ex. le DnD est activé/désactivé)</i>
-]]>
-</string>
     <string name="cancel">Annuler</string>
     <string name="ok">OK</string>
     <string name="timerDialogTitle">Minuteur</string>

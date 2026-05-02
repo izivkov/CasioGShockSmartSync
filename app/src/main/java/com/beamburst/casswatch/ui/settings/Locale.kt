@@ -1,7 +1,6 @@
 package com.beamburst.casswatch.ui.settings
 
 import com.beamburst.casswatch.ui.common.AppText
-import com.beamburst.casswatch.ui.common.AppTextLarge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -61,7 +60,7 @@ fun Locale(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                AppTextLarge(
+                SettingsLabel(
                     text = stringResource(
                         id = R.string.time_format
                     ),
@@ -83,7 +82,7 @@ fun Locale(
                             )
                         }
                     )
-                    AppTextLarge(
+                    AppText(
                         text = stringResource(
                             id = R.string._12h
                         )
@@ -97,7 +96,7 @@ fun Locale(
                             onUpdate(localeSetting.copy(timeFormat = timeFormat))
                         }
                     )
-                    AppTextLarge(
+                    AppText(
                         text = stringResource(
                             id = R.string._24h
                         )
@@ -110,7 +109,7 @@ fun Locale(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    AppTextLarge(
+                    SettingsLabel(
                         text = stringResource(
                             id = R.string.date_format
                         ),
@@ -130,7 +129,7 @@ fun Locale(
                                 onUpdate(localeSetting.copy(dateFormat = dateFormat))
                             }
                         )
-                        AppTextLarge(
+                        AppText(
                             text = stringResource(
                                 id = R.string.mm_dd
                             )
@@ -146,7 +145,7 @@ fun Locale(
                                 onUpdate(localeSetting.copy(dateFormat = dateFormat))
                             }
                         )
-                        AppTextLarge(
+                        AppText(
                             text = stringResource(
                                 id = R.string.dd_mm
                             )
@@ -161,7 +160,7 @@ fun Locale(
                     .fillMaxWidth()
                     .wrapContentHeight()
             ) {
-                AppTextLarge(
+                SettingsLabel(
                     text = stringResource(
                         id = R.string.language
                     ),

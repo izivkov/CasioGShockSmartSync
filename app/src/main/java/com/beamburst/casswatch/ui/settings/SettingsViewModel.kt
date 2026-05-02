@@ -1,14 +1,11 @@
 package com.beamburst.casswatch.ui.settings
 
-import android.annotation.SuppressLint
-import android.app.NotificationManager
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.text.SimpleDateFormat
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,11 +18,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.data.repository.GShockRepository
+import com.beamburst.casswatch.ui.common.AppSnackbar
 import com.beamburst.casswatch.utils.LocalDataStorage
 import org.avmedia.gshockapi.Settings
 import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
-import com.beamburst.casswatch.ui.common.AppSnackbar
 
 abstract class Setting(val name: String) {
     open suspend fun save() {} // Default empty implementation
@@ -38,7 +35,6 @@ data class SettingsState(
 
 sealed class SettingsAction {
     data class UpdateSetting<T : Setting>(val setting: T) : SettingsAction()
-    data object SetSmartDefaults : SettingsAction()
     data object SendToWatch : SettingsAction()
 }
 
@@ -170,11 +166,11 @@ constructor(
 
     data class Light(
             var autoLight: Boolean = false,
-            var duration: LightDuration = LightDuration.TWO_SECONDS,
+            var duration: LightDuration = LightDuration.ONE_POINT_FIVE_SECONDS,
     ) : Setting("Light") {
         enum class LightDuration(val value: String) {
-            TWO_SECONDS("2s"),
-            FOUR_SECONDS("4s")
+            ONE_POINT_FIVE_SECONDS("1.5s"),
+            THREE_SECONDS("3s")
         }
     }
 
@@ -287,10 +283,10 @@ constructor(
     private fun handleLightDuration(value: Any, updatedObjects: MutableSet<Setting>) {
         val setting = state.value.settingsMap[Light::class.java] as Light
         setting.duration =
-                if (value == Light.LightDuration.TWO_SECONDS.value) {
-                    Light.LightDuration.TWO_SECONDS
+                if (value == Light.LightDuration.ONE_POINT_FIVE_SECONDS.value) {
+                    Light.LightDuration.ONE_POINT_FIVE_SECONDS
                 } else {
-                    Light.LightDuration.FOUR_SECONDS
+                    Light.LightDuration.THREE_SECONDS
                 }
         updatedObjects.add(setting)
     }
@@ -342,106 +338,6 @@ constructor(
                         Font.FontType.STANDARD
                     }
             updatedObjects.add(setting)
-        }
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    private suspend fun getSmartDefaults(): ArrayList<Setting> {
-        val smartSettings = arrayListOf<Setting>()
-        val currentLocale = java.util.Locale.getDefault()
-
-        // Locale
-        val language =
-                when (currentLocale.language) {
-                    "en" -> Locale.DayOfWeekLanguage.ENGLISH
-                    "es" -> Locale.DayOfWeekLanguage.SPANISH
-                    "fr" -> Locale.DayOfWeekLanguage.FRENCH
-                    "de" -> Locale.DayOfWeekLanguage.GERMAN
-                    "it" -> Locale.DayOfWeekLanguage.ITALIAN
-                    "ru" -> Locale.DayOfWeekLanguage.RUSSIAN
-                    else -> Locale.DayOfWeekLanguage.ENGLISH
-                }
-
-        val dateTimePattern = SimpleDateFormat().toPattern()
-        val datePattern = dateTimePattern.split(" ")[0]
-        val timePattern = dateTimePattern.split(" ")[1]
-
-        val dateFormat =
-                if (datePattern.lowercase().startsWith("d")) {
-                    Locale.DateFormat.DAY_MONTH
-                } else {
-                    Locale.DateFormat.MONTH_DAY
-                }
-        val timeFormat =
-                if (timePattern[0] == 'h') {
-                    Locale.TimeFormat.TWELVE_HOURS
-                } else {
-                    Locale.TimeFormat.TWENTY_FOUR_HOURS
-                }
-        val locale =
-                Locale(
-                        timeFormat = timeFormat,
-                        dateFormat = dateFormat,
-                        dayOfWeekLanguage = language
-                )
-        smartSettings.add(locale)
-
-        // Button sounds
-        val notificationManager =
-                appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val buttonTone =
-                notificationManager.currentInterruptionFilter ==
-                        NotificationManager.INTERRUPTION_FILTER_ALL
-        val operationSound = OperationSound(buttonTone)
-        smartSettings.add(operationSound)
-
-        // Light settings
-        val autoLight = false
-        val light = Light(autoLight, Light.LightDuration.TWO_SECONDS)
-        smartSettings.add(light)
-
-        // Power Save Mode
-        if (WatchInfo.hasPowerSavingMode && api.isConnected()) {
-            val batteryLevel = api.getBatteryLevel()
-            val currentPowerSavingMode: PowerSavingMode =
-                    state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
-
-            val enablePowerSetting = batteryLevel <= 15 || currentPowerSavingMode.powerSavingMode
-            val powerSavings = PowerSavingMode(enablePowerSetting)
-            smartSettings.add(powerSavings)
-        }
-        if (WatchInfo.hasMultipleFonts && api.isConnected()) {
-            val currentFontName = api.getSettings().font
-            val newFontName = if (currentFontName == "Classic") Font.FontType.CLASSIC else Font.FontType.STANDARD
-            val font = Font(newFontName)
-            smartSettings.add(font)
-        }
-
-        // Time adjustment
-        val notifyMe = LocalDataStorage.getTimeAdjustmentNotification(appContext)
-        val timeAdjustment =
-                TimeAdjustment(
-                        appContext = appContext,
-                        timeAdjustment = true,
-                        adjustmentTimeMinutes = 30,
-                        timeAdjustmentNotifications = notifyMe,
-                        fineAdjustment = 0 // Explicitly set to 0
-                )
-        smartSettings.add(timeAdjustment)
-
-        return smartSettings
-    }
-
-    fun setSmartDefaults() {
-        viewModelScope.launch {
-            runCatching {
-                updateSettingsAndMap(getSmartDefaults())
-
-                // Save all local storage settings, in case the user abandons the screen.
-                // Local storage setting are not sent to the watch, but are used by the app.
-                state.value.settings.forEach { it.save() }
-            }
-                    .onFailure { e -> AppSnackbar(e.message ?: "Error") }
         }
     }
 

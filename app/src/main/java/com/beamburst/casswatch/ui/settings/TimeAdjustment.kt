@@ -1,8 +1,6 @@
 package com.beamburst.casswatch.ui.settings
 
 import AppSwitch
-import com.beamburst.casswatch.ui.common.AppText
-import com.beamburst.casswatch.ui.common.AppTextLarge
 import com.beamburst.casswatch.ui.common.AppTextLink
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -74,7 +71,7 @@ fun TimeAdjustment(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AppTextLarge(
+                    SettingsLabel(
                         text = stringResource(
                             id = R.string.time_adjustment
                         ),
@@ -103,11 +100,10 @@ fun TimeAdjustment(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    AppText(
+                    SettingsLabel(
                         text = stringResource(
                             id = R.string.adjustment_time_minutes
                         ),
-                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(end = Spacing.sm)
                     )
                     InfoButton(
@@ -182,9 +178,8 @@ private fun NotifyMeRow(
             .padding(top = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AppText(
+        SettingsLabel(
             text = stringResource(id = R.string.notify_me),
-            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
         )
         AppSwitch(

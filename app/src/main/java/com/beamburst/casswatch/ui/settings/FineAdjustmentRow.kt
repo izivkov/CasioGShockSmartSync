@@ -1,6 +1,5 @@
 package com.beamburst.casswatch.ui.settings
 
-import com.beamburst.casswatch.ui.common.AppText
 import com.beamburst.casswatch.ui.common.AppTextLink
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -30,9 +29,8 @@ fun FineAdjustmentRow(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppText(
+        SettingsLabel(
             text = stringResource(id = R.string.fine_adjustment),
-            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(end = Spacing.sm)
         )
         InfoButton(

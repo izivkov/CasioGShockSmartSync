@@ -2,7 +2,6 @@ package com.beamburst.casswatch.ui.settings
 
 import AppSwitch
 import com.beamburst.casswatch.ui.common.AppText
-import com.beamburst.casswatch.ui.common.AppTextLarge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,7 +49,7 @@ fun OperationalTone(
                     .padding(contentPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AppTextLarge(
+                SettingsLabel(
                     text = stringResource(id = R.string.operational_sound),
                     modifier = Modifier.padding(end = Spacing.sm)
                 )

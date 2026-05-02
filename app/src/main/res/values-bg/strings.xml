@@ -47,7 +47,6 @@
     <string name="title_placeholder">Заглавие Място</string>
     <string name="settings">Настройки</string>
     <string name="send_to_watch_settings">Изпрати на\nЧасовник</string>
-    <string name="auto_configure_settings">Авто</string>
     <string name="time_format">Часов формат</string>
     <string name="_12h">12ч</string>
     <string name="_24h">24ч</string>
@@ -56,13 +55,6 @@
     <string name="operational_sound">Тон на бутона</string>
     <string name="power_saving_mode">Режим за пестене на енергия</string>
     <string name="select_language">Изберете език</string>
-    <string name="auto_fill_help"><![CDATA[Автоматично попълнените стойности се извличат по следния начин:
-        <li>Формат на време/дата и език се получават от настройките на телефона.</li>
-        <li>Тонът на бутона се изключва, ако телефонът е в режим Не пречи, в противен случай е включен.</li>
-        <li>Пестенето на енергия ще бъде включено, ако нивото на батерията е 15%% или по-малко.</li>
-        Забележка: <i>Стойностите няма да се променят, докато не бъдат изпратени отново, дори ако условията се променят (напр. DnD се включва/изключва)</i>
-        ]]>
-    </string>
     <string name="cancel">Отказ</string>
     <string name="ok">ОК</string>
     <string name="timerDialogTitle">Таймер</string>

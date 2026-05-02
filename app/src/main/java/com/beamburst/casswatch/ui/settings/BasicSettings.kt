@@ -1,7 +1,6 @@
 package com.beamburst.casswatch.ui.settings
 
 import AppSwitch
-import com.beamburst.casswatch.ui.common.AppTextLarge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,7 @@ fun BasicSettings(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
-                AppTextLarge(
+                SettingsLabel(
                     text = title,
                     modifier = Modifier.padding(end = Spacing.sm)
                 )
