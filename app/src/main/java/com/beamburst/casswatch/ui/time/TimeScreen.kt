@@ -43,7 +43,7 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 ScreenTitle(
-                    stringResource(id = R.string.time),
+                    stringResource(id = R.string.app_name),
                     Modifier
                 )
 

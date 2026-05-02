@@ -35,7 +35,8 @@ fun ButtonsRow(
                 text = buttonData.text,
                 onClick = buttonData.onClick,
                 modifier = Modifier
-                    .padding(vertical = buttonSpacing)
+                    .weight(1f)
+                    .padding(horizontal = Spacing.xs, vertical = buttonSpacing)
             )
         }
     }

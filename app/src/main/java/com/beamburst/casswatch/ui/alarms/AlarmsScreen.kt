@@ -1,5 +1,6 @@
 package com.beamburst.casswatch.ui.alarms
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.theme.Spacing
@@ -36,7 +35,7 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
     val viewMode by alarmViewModel.viewMode.collectAsState()
     val alarmDays by alarmViewModel.alarmDays.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         alarms.forEachIndexed { index, alarm ->
             key(index) {
                 ItemView {
@@ -79,25 +78,14 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (title, modeToggle, alarms, buttonsRow) = createRefs()
-
+        Column(modifier = Modifier.fillMaxSize()) {
             ScreenTitle(
                 text = stringResource(id = R.string.watch_alarms),
-                modifier = Modifier.constrainAs(title) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(modeToggle.top)
-                }
+                modifier = Modifier
             )
 
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
-                    .constrainAs(modeToggle) {
-                        top.linkTo(title.bottom)
-                        bottom.linkTo(alarms.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
@@ -117,13 +105,12 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 
             Column(
                 modifier = Modifier
-                    .constrainAs(alarms) {
-                        top.linkTo(modeToggle.bottom)
-                        bottom.linkTo(buttonsRow.top)
-                        height = Dimension.fillToConstraints
-                    }
+                    .weight(1f)
                     .verticalScroll(rememberScrollState())
+                    .padding(horizontal = Spacing.lg)
                     .fillMaxWidth()
+                    .padding(bottom = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 AlarmList(alarmViewModel)
                 AlarmChimeSwitch(
@@ -145,13 +132,10 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
             ButtonsRow(
                 buttons = buttons,
                 modifier = Modifier
-                    .constrainAs(buttonsRow) {
-                        top.linkTo(alarms.bottom)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
                     .fillMaxWidth()
+                    .padding(horizontal = Spacing.lg),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                rowPadding = Spacing.sm
             )
         }
     }
