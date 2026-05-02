@@ -17,6 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class WeeklyAlarmScheduler @Inject constructor(
     private val api: GShockRepository,
+    private val alarmSyncState: AlarmSyncState,
     @param:ApplicationContext private val context: Context
 ) {
     init {
@@ -36,6 +37,7 @@ class WeeklyAlarmScheduler @Inject constructor(
         val viewMode = AlarmSyncStorage.loadViewMode(context)
         val alarmDays = AlarmSyncStorage.loadDaySelections(context)
         val storedAlarms = AlarmSyncStorage.loadAlarms(context)
+        val firedAts = AlarmSyncStorage.loadFiredAts(context)
         val shouldWrite = AlarmSyncStorage.isDirty(context) || viewMode == AlarmViewMode.WEEKLY
 
         if (!shouldWrite) return
@@ -50,17 +52,23 @@ class WeeklyAlarmScheduler @Inject constructor(
             alarms = desiredAlarms,
             alarmDays = alarmDays,
             now = LocalDateTime.now(),
-            viewMode = viewMode
+            viewMode = viewMode,
+            firedAts = firedAts
         )
 
         if (newAlarms != currentAlarms) {
             runCatching { api.setAlarms(ArrayList(newAlarms)) }.onFailure {
                 Timber.e(it, "Failed to apply per-alarm day schedule")
             }.onSuccess {
-                AlarmSyncStorage.saveAlarms(context, desiredAlarms, dirty = false)
+                AlarmSyncStorage.saveAlarms(context, desiredAlarms, dirty = false, firedAts = firedAts)
+                val hashes = desiredAlarms.mapIndexed { index, alarm ->
+                    val days = alarmDays[index] ?: emptySet()
+                    alarmHash(alarm.hour, alarm.minute, days, alarm.enabled)
+                }.toSet().toList()
+                alarmSyncState.update(AlarmSyncStorage.SyncRecord(System.currentTimeMillis(), hashes))
             }
         } else if (AlarmSyncStorage.isDirty(context)) {
-            AlarmSyncStorage.saveAlarms(context, desiredAlarms, dirty = false)
+            AlarmSyncStorage.saveAlarms(context, desiredAlarms, dirty = false, firedAts = firedAts)
         }
     }
 }
