@@ -56,7 +56,7 @@ fun AlarmEditorSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.xl, bottom = Spacing.xl)
+                .padding(start = Spacing.xl, end = Spacing.xl, bottom = Spacing.xl)
         ) {
             AppText(
                 text = stringResource(R.string.alarm_editor_title),
