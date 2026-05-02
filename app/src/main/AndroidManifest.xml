@@ -34,6 +34,7 @@
     <!-- Notification and Alarm Permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <!-- For Android 10 (Q) and below -->
     <uses-permission
@@ -123,6 +124,10 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".ui.alarms.PhoneFallbackReceiver"
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
