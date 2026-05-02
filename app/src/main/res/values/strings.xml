@@ -209,6 +209,16 @@
     <string name="alarm_editor_label">Label</string>
     <string name="alarm_editor_repeat">Repeat</string>
     <string name="alarm_editor_save">Save</string>
+    <string name="footer_last_sync">Last sync: %1$s</string>
+    <string name="footer_never">Never</string>
+    <string name="footer_active">%1$d active</string>
+    <string name="footer_disabled">%1$d disabled</string>
+    <string name="disconnected_info_title">Watch not connected</string>
+    <string name="disconnected_info_body">Connect your watch to send or receive alarms. You can still send current alarms to your phone clock.</string>
+    <string name="exact_alarm_dialog_title">Phone-side safety net</string>
+    <string name="exact_alarm_dialog_body">If your watch is not connected when the alarm should ring, the phone can fire it via your default clock app. This needs permission to schedule exact alarms.</string>
+    <string name="exact_alarm_dialog_settings">Open settings</string>
+    <string name="exact_alarm_dialog_not_now">Not now</string>
 
     <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
     <string name="actions_saved">Actions Saved</string>

@@ -12,7 +12,9 @@ import kotlinx.coroutines.launch
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.data.repository.GShockRepository
 import com.beamburst.casswatch.scratchpad.AlarmNameStorage
+import com.beamburst.casswatch.utils.Utils
 import org.avmedia.gshockapi.Alarm
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import com.beamburst.casswatch.ui.common.AppSnackbar
@@ -85,6 +87,9 @@ class AlarmViewModel @Inject constructor(
     private val _alarmDays = MutableStateFlow<Map<Int, Set<DayOfWeek>>>(emptyMap())
     val alarmDays: StateFlow<Map<Int, Set<DayOfWeek>>> = _alarmDays.asStateFlow()
 
+    private val _isConnected = MutableStateFlow(false)
+    val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
     private val _firedAts = MutableStateFlow<Map<Int, Long>>(emptyMap())
     val firedAts: StateFlow<Map<Int, Long>> = _firedAts.asStateFlow()
 
@@ -92,8 +97,18 @@ class AlarmViewModel @Inject constructor(
     val editorTarget: StateFlow<AlarmDraft?> = _editorTarget.asStateFlow()
 
     private var exactAlarmPermissionRequested = false
+    val lastSync: StateFlow<AlarmSyncStorage.SyncRecord?> = alarmSyncState.lastSync
 
     init {
+        ProgressEvents.runEventActions(
+            Utils.AppHashCode(),
+            arrayOf(
+                EventAction("DeviceAppeared") { _isConnected.value = true },
+                EventAction("DeviceDisappeared") { _isConnected.value = false },
+                EventAction("Disconnect") { _isConnected.value = false }
+            )
+        )
+
         viewModelScope.launch(Dispatchers.IO) {
             _viewMode.value = AlarmSyncStorage.loadViewMode(appContext)
             _alarmDays.value = AlarmSyncStorage.loadDaySelections(appContext)
@@ -140,7 +155,9 @@ class AlarmViewModel @Inject constructor(
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
             val localDraft = AlarmSyncStorage.loadAlarms(appContext)
-            if (!api.isConnected()) {
+            val connected = api.isConnected()
+            _isConnected.value = connected
+            if (!connected) {
                 _alarms.value = localDraft ?: createDefaultLocalAlarms()
                 return@runCatching
             }
