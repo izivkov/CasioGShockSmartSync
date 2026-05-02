@@ -3,9 +3,6 @@ package com.beamburst.casswatch.ui.alarms
 import AppSwitch
 import com.beamburst.casswatch.ui.common.AppText
 import com.beamburst.casswatch.ui.common.AppTextVeryLarge
-import android.content.Context
-import android.icu.text.SimpleDateFormat
-import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,8 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,20 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import dagger.hilt.android.EntryPointAccessors
-import com.beamburst.casswatch.R
-import com.beamburst.casswatch.di.ApplicationContextEntryPoint
 import com.beamburst.casswatch.ui.common.AppCard
-import com.beamburst.casswatch.ui.common.AppTimePicker
 import com.beamburst.casswatch.theme.Spacing
 import java.time.DayOfWeek
 import java.time.format.TextStyle
-import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,29 +43,20 @@ fun AlarmItem(
     minutes: Int = 0,
     name: String? = null,
     isAlarmEnabled: Boolean = true,
+    showAsEnabled: Boolean = isAlarmEnabled,
     onToggleAlarm: (Boolean) -> Unit,
-    onTimeChanged: (Int, Int) -> Unit,
+    onTap: () -> Unit,
     showDaySelector: Boolean = false,
     selectedDays: Set<DayOfWeek> = emptySet(),
     onDayToggled: (DayOfWeek) -> Unit = {}
 ) {
-    var isEnabled by remember { mutableStateOf(isAlarmEnabled) }
-    var showTimePickerDialog by remember { mutableStateOf(false) }
-    var alarmHours by remember { mutableIntStateOf(hours) }
-    var alarmMinutes by remember { mutableIntStateOf(minutes) }
-
-    val localContext = LocalContext.current.applicationContext
-    val appContext = remember {
-        EntryPointAccessors.fromApplication(
-            localContext,
-            ApplicationContextEntryPoint::class.java
-        ).getApplicationContext()
-    }
+    var isEnabled by remember(isAlarmEnabled) { mutableStateOf(isAlarmEnabled) }
 
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(Spacing.xs),
+            .padding(Spacing.xs)
+            .clickable { onTap() },
     ) {
         Column {
             Row(
@@ -95,18 +73,17 @@ fun AlarmItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppTextVeryLarge(
-                        text = formatTime(alarmHours, alarmMinutes, appContext),
+                        text = String.format(Locale.US, "%02d:%02d", hours, minutes),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.clickable { showTimePickerDialog = true },
                     )
-                    Spacer(modifier = Modifier.width(Spacing.sm))
                     if (!name.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.width(Spacing.sm))
                         AppText(text = name)
                     }
                 }
                 AppSwitch(
-                    checked = isEnabled,
+                    checked = showAsEnabled,
                     onCheckedChange = { checked ->
                         isEnabled = checked
                         onToggleAlarm(checked)
@@ -119,28 +96,6 @@ fun AlarmItem(
                     selectedDays = selectedDays,
                     onDayToggled = onDayToggled,
                     isEnabled = isEnabled
-                )
-            }
-        }
-    }
-
-    if (showTimePickerDialog) {
-        Dialog(onDismissRequest = { showTimePickerDialog = false }) {
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(Spacing.lg)
-            ) {
-                AppTimePicker(
-                    onConfirm = { state ->
-                        alarmHours = state.hour
-                        alarmMinutes = state.minute
-                        onTimeChanged(alarmHours, alarmMinutes)
-                        showTimePickerDialog = false
-                    },
-                    onDismiss = { showTimePickerDialog = false },
-                    initialHour = alarmHours,
-                    initialMinute = alarmMinutes,
                 )
             }
         }
@@ -190,28 +145,4 @@ private fun DaySelector(
             }
         }
     }
-}
-
-fun formatTime(hours: Int, minutes: Int, appContext: Context): String {
-
-    fun from0to12(formattedTime: String): String {
-        return if (formattedTime.startsWith("0")) {
-            "12${formattedTime.substring(1)}"
-        } else {
-            formattedTime
-        }
-    }
-
-    val sdf = SimpleDateFormat("H:mm", Locale.getDefault())
-    val dateObj: Date = sdf.parse("${hours}:${minutes}")
-
-    val is24HourFormat = DateFormat.is24HourFormat(appContext)
-    val timeFormat = if (is24HourFormat) {
-        "H:mm"
-    } else {
-        "K:mm aa"
-    }
-
-    val time = SimpleDateFormat(timeFormat, Locale.getDefault()).format(dateObj)
-    return if (timeFormat.contains("aa")) from0to12(time) else time
 }
