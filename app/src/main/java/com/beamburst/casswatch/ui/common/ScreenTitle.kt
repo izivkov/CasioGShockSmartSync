@@ -20,7 +20,7 @@ fun ScreenTitle(
 
     AppText(
         text = text,
-        style = MaterialTheme.typography.headlineSmall,
+        style = MaterialTheme.typography.titleLarge,
         modifier = defaultModifier.then(modifier),
         textAlign = TextAlign.Start
     )

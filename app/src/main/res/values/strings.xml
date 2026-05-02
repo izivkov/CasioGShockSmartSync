@@ -213,6 +213,16 @@
     <string name="looking_for_a_device">Looking for a device.</string>
     <string name="add_watch">Add Watch</string>
     <string name="manage_watches">Manage Watches</string>
+
+    <string name="status_connected">Connected</string>
+    <string name="status_not_connected">Not connected</string>
+    <string name="status_live">Live</string>
+    <string name="status_offline">Offline</string>
+    <string name="metric_battery">Battery</string>
+    <string name="metric_temperature">Temp</string>
+    <string name="settings_section_locale">Locale</string>
+    <string name="settings_section_watch_behavior">Watch behavior</string>
+    <string name="settings_section_sync">Sync</string>
     <string name="watches">Watches</string>
     <string name="no_paired_watches">No paired watches.</string>
     <string name="watch_not_connected">Watch is not connected.</string>

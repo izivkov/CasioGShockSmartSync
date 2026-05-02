@@ -76,10 +76,10 @@ fun SettingsList() {
         }
     }
 
-    SettingsSectionTitle("Locale")
+    SettingsSectionTitle(stringResource(R.string.settings_section_locale))
     Locale(settingsViewModel::onSettingUpdated)
 
-    SettingsSectionTitle("Watch behavior")
+    SettingsSectionTitle(stringResource(R.string.settings_section_watch_behavior))
     OperationalTone(settingsViewModel::onSettingUpdated)
     Light(settingsViewModel::onSettingUpdated)
     if (WatchInfo.hasPowerSavingMode) {
@@ -89,7 +89,7 @@ fun SettingsList() {
         Font(settingsViewModel::onSettingUpdated)
     }
 
-    SettingsSectionTitle("Sync")
+    SettingsSectionTitle(stringResource(R.string.settings_section_sync))
     TimeAdjustment(settingsViewModel::onSettingUpdated)
 }
 

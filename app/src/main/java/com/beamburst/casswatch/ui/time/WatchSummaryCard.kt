@@ -61,7 +61,7 @@ fun WatchSummaryCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     AppText(
-                        text = if (state.isConnected) "Connected" else "Not connected",
+                        text = if (state.isConnected) stringResource(R.string.status_connected) else stringResource(R.string.status_not_connected),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -93,8 +93,8 @@ fun WatchSummaryCard(
 
                 if (WatchInfo.hasTemperature) {
                     SummaryMetric(
-                        label = "Temp",
-                        value = if (state.isConnected) "${state.temperature} C" else "N/A",
+                        label = stringResource(R.string.metric_temperature),
+                        value = if (state.isConnected) "${state.temperature}°C" else "N/A",
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -128,7 +128,7 @@ private fun StatusPill(connected: Boolean) {
         shape = MaterialTheme.shapes.small
     ) {
         AppText(
-            text = if (connected) "Live" else "Offline",
+            text = if (connected) stringResource(R.string.status_live) else stringResource(R.string.status_offline),
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)
         )
@@ -179,7 +179,7 @@ private fun BatteryMetric(
             verticalArrangement = Arrangement.spacedBy(Spacing.xxs)
         ) {
             AppText(
-                text = "Battery",
+                text = stringResource(R.string.metric_battery),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -1,7 +1,5 @@
 package com.beamburst.casswatch.ui.time
 
-import com.beamburst.casswatch.ui.common.AppText
-import com.beamburst.casswatch.ui.common.AppTextLarge
 import RealTimeClock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,9 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.beamburst.casswatch.ui.common.AppText
+import com.beamburst.casswatch.ui.common.AppTextLarge
 import com.beamburst.casswatch.R
 import com.beamburst.casswatch.theme.Spacing
 import com.beamburst.casswatch.ui.common.AppButton
@@ -63,8 +62,7 @@ fun LocalTimeView(
                     TimeZoneTextView(
                         modifier = Modifier
                             .align(Alignment.CenterStart)
-                            .padding(start = Spacing.sm),
-                        textSize = 16.sp
+                            .padding(start = Spacing.sm)
                     )
                 }
             }
@@ -98,25 +96,19 @@ fun TextClockComposable(
 }
 
 @Composable
-fun TimeZoneTextView(modifier: Modifier = Modifier, textSize: TextUnit) {
-    // Use remember to store the time zone ID in a state variable
+fun TimeZoneTextView(modifier: Modifier = Modifier) {
     var timeZoneId by remember { mutableStateOf(TimeZone.getDefault().id) }
 
-    // LaunchedEffect to monitor changes in the time zone and update the state
     LaunchedEffect(Unit) {
         while (true) {
-            val newTimeZoneId = TimeZone.getDefault().id
-            timeZoneId = newTimeZoneId
-
-            // Check for changes periodically
-            kotlinx.coroutines.delay(1000L) // Adjust the interval as needed
+            timeZoneId = TimeZone.getDefault().id
+            kotlinx.coroutines.delay(1000L)
         }
     }
 
-    // Display the text with the current time zone ID
     AppText(
         text = timeZoneId,
-        fontSize = textSize,
+        style = MaterialTheme.typography.bodyMedium,
         modifier = modifier
     )
 }

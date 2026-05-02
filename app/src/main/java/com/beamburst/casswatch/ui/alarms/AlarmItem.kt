@@ -91,7 +91,7 @@ fun AlarmItem(
                 Row(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 8.dp),
+                        .padding(end = Spacing.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppTextVeryLarge(
