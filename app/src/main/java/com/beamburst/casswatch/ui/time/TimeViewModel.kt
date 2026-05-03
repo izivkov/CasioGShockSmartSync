@@ -107,17 +107,17 @@ class TimeViewModel @Inject constructor(
         }
     }
 
+    private fun resolveWatchName(): String {
+        val stored = LocalDataStorage.get(appContext, "LastDeviceName", "")
+        if (!stored.isNullOrBlank()) return stored.removePrefix("CASIO").trim()
+        return appContext.getString(R.string.no_watch)
+    }
+
     private fun refreshState() {
         viewModelScope.launch {
             runCatching {
                 if (!api.isConnected()) {
-                    _state.value = TimeState(
-                        watchName = LocalDataStorage.get(
-                            appContext,
-                            "LastDeviceName",
-                            appContext.getString(R.string.no_watch)
-                        ) ?: appContext.getString(R.string.no_watch)
-                    )
+                    _state.value = TimeState(watchName = resolveWatchName())
                     return@runCatching
                 }
 
@@ -126,7 +126,7 @@ class TimeViewModel @Inject constructor(
                     homeTime = if (WatchInfo.hasHomeTime) api.getHomeTime() else "",
                     batteryLevel = api.getBatteryLevel(),
                     temperature = api.getWatchTemperature(),
-                    watchName = api.getWatchName(),
+                    watchName = resolveWatchName(),
                     isConnected = true
                 )
             }.onFailure {

@@ -3,20 +3,14 @@ package com.beamburst.casswatch.ui.alarms
 import AppSwitch
 import com.beamburst.casswatch.ui.common.AppText
 import com.beamburst.casswatch.ui.common.AppTextVeryLarge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,9 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.beamburst.casswatch.ui.common.AppCard
@@ -37,7 +31,6 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlarmItem(
     hours: Int = 12,
@@ -48,102 +41,130 @@ fun AlarmItem(
     onToggleAlarm: (Boolean) -> Unit,
     onTap: () -> Unit,
     showDaySelector: Boolean = false,
-    selectedDays: Set<DayOfWeek> = emptySet(),
-    onDayToggled: (DayOfWeek) -> Unit = {}
+    selectedDays: Set<DayOfWeek> = emptySet()
 ) {
     var isEnabled by remember(isAlarmEnabled) { mutableStateOf(isAlarmEnabled) }
+    val isWeekly = showDaySelector
 
     AppCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(Spacing.xs)
+            .padding(vertical = Spacing.xxs)
             .clickable { onTap() },
     ) {
-        Column {
+        if (isWeekly) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(Spacing.md),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = Spacing.sm),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
                 ) {
+                    if (!name.isNullOrBlank()) {
+                        AppText(
+                            text = name,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     AppTextVeryLarge(
                         text = String.format(Locale.US, "%02d:%02d", hours, minutes),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    if (!name.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.width(Spacing.sm))
-                        AppText(text = name)
-                    }
                 }
-                AppSwitch(
-                    checked = showAsEnabled,
-                    onCheckedChange = { checked ->
-                        isEnabled = checked
-                        onToggleAlarm(checked)
-                    }
-                )
-            }
 
-            if (showDaySelector) {
-                DaySelector(
-                    selectedDays = selectedDays,
-                    onDayToggled = onDayToggled,
-                    isEnabled = isEnabled
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    WeekdayTextRow(
+                        selectedDays = selectedDays,
+                        enabled = isEnabled
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    AppSwitch(
+                        checked = showAsEnabled,
+                        onCheckedChange = { checked ->
+                            isEnabled = checked
+                            onToggleAlarm(checked)
+                        },
+                        modifier = Modifier.graphicsLayer(scaleX = 0.82f, scaleY = 0.82f)
+                    )
+                }
+            }
+        } else {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.md),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 )
+                {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = Spacing.sm),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AppTextVeryLarge(
+                            text = String.format(Locale.US, "%02d:%02d", hours, minutes),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        if (!name.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.width(Spacing.sm))
+                            AppText(text = name)
+                        }
+                    }
+                    AppSwitch(
+                        checked = showAsEnabled,
+                        onCheckedChange = { checked ->
+                            isEnabled = checked
+                            onToggleAlarm(checked)
+                        }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun DaySelector(
+private fun WeekdayTextRow(
     selectedDays: Set<DayOfWeek>,
-    onDayToggled: (DayOfWeek) -> Unit,
-    isEnabled: Boolean,
-    modifier: Modifier = Modifier
+    enabled: Boolean
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         DayOfWeek.entries.forEach { day ->
             val isSelected = day in selectedDays
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .alpha(if (isEnabled) 1f else 0.4f)
-                    .clip(CircleShape)
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.primary
-                        else Color.Transparent
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.outline,
-                        shape = CircleShape
-                    )
-                    .clickable(enabled = isEnabled) { onDayToggled(day) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelSmall
-                )
+            val baseColor = if (isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
             }
+            Text(
+                text = day.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                color = when {
+                    enabled -> baseColor
+                    isSelected -> baseColor.copy(alpha = 0.8f)
+                    else -> baseColor.copy(alpha = 0.45f)
+                },
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    textDecoration = if (isSelected) TextDecoration.Underline else TextDecoration.None
+                )
+            )
         }
     }
 }

@@ -62,8 +62,7 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                         },
                         onTap = { alarmViewModel.openEditor(index) },
                         showDaySelector = viewMode == AlarmViewMode.WEEKLY,
-                        selectedDays = alarmDays[index] ?: emptySet(),
-                        onDayToggled = { day -> alarmViewModel.toggleDay(index, day) }
+                        selectedDays = alarmDays[index] ?: emptySet()
                     )
                 }
             }
@@ -119,8 +118,7 @@ private fun AlarmsActionRow(alarmViewModel: AlarmViewModel) {
         ButtonsRow(
             buttons = buttons,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.lg),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             rowPadding = Spacing.sm
         )
@@ -129,7 +127,7 @@ private fun AlarmsActionRow(alarmViewModel: AlarmViewModel) {
             onSendToPhone = { alarmViewModel.sendAlarmsToPhone() },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
+                .padding(vertical = Spacing.sm)
         )
     }
 }
@@ -176,43 +174,49 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
         color = MaterialTheme.colorScheme.background,
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            ScreenTitle(
-                text = stringResource(id = R.string.watch_alarms),
-                modifier = Modifier
-            )
-
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
-            ) {
-                SegmentedButton(
-                    selected = viewMode == AlarmViewMode.SIMPLE,
-                    onClick = { alarmViewModel.setViewMode(AlarmViewMode.SIMPLE) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                    label = { Text(stringResource(R.string.alarm_view_simple)) }
-                )
-                SegmentedButton(
-                    selected = viewMode == AlarmViewMode.WEEKLY,
-                    onClick = { alarmViewModel.setViewMode(AlarmViewMode.WEEKLY) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                    label = { Text(stringResource(R.string.alarm_view_weekly)) }
-                )
-            }
-
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = Spacing.lg)
                     .fillMaxWidth()
                     .padding(bottom = Spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
-                AlarmList(alarmViewModel)
-                AlarmChimeSwitch(
-                    onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }
+                ScreenTitle(
+                    text = stringResource(id = R.string.watch_alarms),
+                    modifier = Modifier
                 )
+
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
+                ) {
+                    SegmentedButton(
+                        selected = viewMode == AlarmViewMode.SIMPLE,
+                        onClick = { alarmViewModel.setViewMode(AlarmViewMode.SIMPLE) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                        label = { Text(stringResource(R.string.alarm_view_simple)) }
+                    )
+                    SegmentedButton(
+                        selected = viewMode == AlarmViewMode.WEEKLY,
+                        onClick = { alarmViewModel.setViewMode(AlarmViewMode.WEEKLY) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                        label = { Text(stringResource(R.string.alarm_view_weekly)) }
+                    )
+                }
+
+                AlarmList(alarmViewModel)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    AlarmChimeSwitch(
+                        onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }
+                    )
+                    AlarmsActionRow(alarmViewModel = alarmViewModel)
+                }
             }
 
             AlarmsFooter(
@@ -221,8 +225,6 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                 alarmViewModel = alarmViewModel
             )
-
-            AlarmsActionRow(alarmViewModel = alarmViewModel)
         }
     }
 }

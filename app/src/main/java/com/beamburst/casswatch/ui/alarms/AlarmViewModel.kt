@@ -97,15 +97,34 @@ class AlarmViewModel @Inject constructor(
     val editorTarget: StateFlow<AlarmDraft?> = _editorTarget.asStateFlow()
 
     private var exactAlarmPermissionRequested = false
+    private val eventSubscriberName = "AlarmViewModel-${System.identityHashCode(this)}"
     val lastSync: StateFlow<AlarmSyncStorage.SyncRecord?> = alarmSyncState.lastSync
 
     init {
         ProgressEvents.runEventActions(
-            Utils.AppHashCode(),
+            eventSubscriberName,
             arrayOf(
-                EventAction("DeviceAppeared") { _isConnected.value = true },
+                EventAction("DeviceAppeared") {
+                    viewModelScope.launch {
+                        refreshConnectionState()
+                        if (_isConnected.value) loadAlarms()
+                    }
+                },
+                EventAction("ConnectionSetupComplete") {
+                    viewModelScope.launch {
+                        _isConnected.value = true
+                        loadAlarms()
+                    }
+                },
+                EventAction("WatchInitializationCompleted") {
+                    viewModelScope.launch {
+                        _isConnected.value = true
+                        loadAlarms()
+                    }
+                },
                 EventAction("DeviceDisappeared") { _isConnected.value = false },
-                EventAction("Disconnect") { _isConnected.value = false }
+                EventAction("Disconnect") { _isConnected.value = false },
+                EventAction("ConnectionFailed") { _isConnected.value = false }
             )
         )
 
@@ -113,6 +132,7 @@ class AlarmViewModel @Inject constructor(
             _viewMode.value = AlarmSyncStorage.loadViewMode(appContext)
             _alarmDays.value = AlarmSyncStorage.loadDaySelections(appContext)
             _firedAts.value = AlarmSyncStorage.loadFiredAts(appContext)
+            _isConnected.value = api.isConnected()
 
             AlarmSyncStorage.loadAlarms(appContext)?.let {
                 _alarms.value = it
@@ -120,6 +140,11 @@ class AlarmViewModel @Inject constructor(
         }
         loadAlarms()
         startFireTimeTick()
+    }
+
+    override fun onCleared() {
+        ProgressEvents.subscriber.stop(eventSubscriberName)
+        super.onCleared()
     }
 
     private fun startFireTimeTick() = viewModelScope.launch {
@@ -152,12 +177,25 @@ class AlarmViewModel @Inject constructor(
         }
     }
 
+    private suspend fun hasLocalAppAlarms(localDraft: List<Alarm>?): Boolean {
+        if (localDraft.isNullOrEmpty()) return false
+        if (localDraft.any { it.enabled || it.hour != 0 || it.minute != 0 || !it.name.isNullOrBlank() || it.hasHourlyChime }) {
+            return true
+        }
+        val days = AlarmSyncStorage.loadDaySelections(appContext)
+        return days.values.any { it.isNotEmpty() }
+    }
+
     private fun loadAlarms() = viewModelScope.launch {
         runCatching {
             val localDraft = AlarmSyncStorage.loadAlarms(appContext)
             val connected = api.isConnected()
-            _isConnected.value = connected
             if (!connected) {
+                _alarms.value = localDraft ?: createDefaultLocalAlarms()
+                return@runCatching
+            }
+
+            if (hasLocalAppAlarms(localDraft)) {
                 _alarms.value = localDraft ?: createDefaultLocalAlarms()
                 return@runCatching
             }
@@ -193,6 +231,10 @@ class AlarmViewModel @Inject constructor(
                 ?: createDefaultLocalAlarms()
             ProgressEvents.onNext("Error")
         }
+    }
+
+    private suspend fun refreshConnectionState() {
+        _isConnected.value = api.isConnected()
     }
 
     private fun createDefaultLocalAlarms(): List<Alarm> {
@@ -331,7 +373,7 @@ class AlarmViewModel @Inject constructor(
             _firedAts.value = updated
         }
 
-        updateAlarm(index) { it.copy(hour = hour, minute = minute, name = name.ifBlank { null }) }
+        updateAlarm(index) { it.copy(hour = hour, minute = minute, name = name.ifBlank { null }, enabled = true) }
         _alarmDays.update { it + (index to days) }
         AlarmSyncStorage.saveDaySelections(appContext, _alarmDays.value)
         _editorTarget.value = null

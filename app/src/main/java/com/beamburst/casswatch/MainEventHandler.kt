@@ -10,14 +10,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.beamburst.casswatch.data.repository.GShockRepository
 import com.beamburst.casswatch.services.NotificationMonitorService
+import com.beamburst.casswatch.ui.common.AppSnackbar
 import com.beamburst.casswatch.utils.ActivityProvider
 import com.beamburst.casswatch.utils.Utils
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class MainEventHandler(
     private val context: GShockApplication,
@@ -82,13 +81,13 @@ class MainEventHandler(
     }
 
     private fun handleDisconnect() {
-        ProgressEvents.getPayload("Disconnect")?.let { device ->
-            repository.teardownConnection(device as BluetoothDevice)
+        val disconnectedDevice = ProgressEvents.getPayload("Disconnect") as? BluetoothDevice
+        disconnectedDevice?.let { device ->
+            repository.teardownConnection(device)
         }
-
-        Executors.newSingleThreadScheduledExecutor().schedule({
-            screenManager.showInitialScreen()
-        }, 0L, TimeUnit.SECONDS)
+        disconnectedDevice?.name
+            ?.takeIf { it.isNotBlank() }
+            ?.let { name -> AppSnackbar("$name disconnected") }
     }
 
     private fun handleWaitForConnection() {

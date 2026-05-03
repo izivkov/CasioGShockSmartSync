@@ -40,6 +40,7 @@ Si aucun événement n\'apparaît, assurez-vous que vous avez des événements �
     <string name="take_a_photo">Prendre une photo</string>
     <string name="info">Info</string>
     <string name="daily">Quotidien</string>
+    <string name="alarm_view_simple">Quotidien</string>
     <string name="_12_00">12:00</string>
     <string name="email_item">Élément Email</string>
 
@@ -209,4 +210,33 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="press_and_hold_connection_button_to_continue">Maintenez enfoncé le bouton de CONNEXION (généralement en BAS À GAUCHE) de votre montre pendant 3 secondes pour effectuer le couplage.</string>
     <string name="looking_for_a_device">Recherche d\'un appareil.</string>
     <string name="add_watch">Ajouter une montre</string>
+    <string name="alarm_view_weekly">HEBDOMADAIRE</string>
+    <string name="alarm_editor_title">Edit alarm</string>
+    <string name="alarm_editor_label">Label</string>
+    <string name="alarm_editor_repeat">Repeat</string>
+    <string name="alarm_editor_save">Save</string>
+    <string name="footer_last_sync">Last sync: %1</string>
+    <string name="footer_never">Never</string>
+    <string name="footer_active">%1 active</string>
+    <string name="footer_disabled">%1 disabled</string>
+    <string name="disconnected_info_title">Watch not connected</string>
+    <string name="disconnected_info_body">Connect your watch to send or receive alarms. You can still send current alarms to your phone clock.</string>
+    <string name="exact_alarm_dialog_title">Phone-side safety net</string>
+    <string name="exact_alarm_dialog_body">If your watch is not connected when the alarm should ring, the phone can fire it via your default clock app. This needs permission to schedule exact alarms.</string>
+    <string name="exact_alarm_dialog_settings">Open settings</string>
+    <string name="exact_alarm_dialog_not_now">Not now</string>
+    <string name="actions_save_failed">Failed to save actions.</string>
+    <string name="manage_watches">Manage watches</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_not_connected">Not connected</string>
+    <string name="status_live">Live</string>
+    <string name="status_offline">Offline</string>
+    <string name="metric_battery">Battery</string>
+    <string name="metric_temperature">Temperature</string>
+    <string name="settings_section_locale">Locale</string>
+    <string name="settings_section_watch_behavior">Watch behavior</string>
+    <string name="settings_section_sync">Sync</string>
+    <string name="watches">Watches</string>
+    <string name="no_paired_watches">No paired watches</string>
+    <string name="watch_not_connected">Watch not connected</string>
 </resources>

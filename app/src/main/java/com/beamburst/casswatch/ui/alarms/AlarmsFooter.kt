@@ -19,13 +19,10 @@ fun AlarmsFooter(
     alarmViewModel: AlarmViewModel
 ) {
     val lastSync by alarmViewModel.lastSync.collectAsState()
-    val alarms by alarmViewModel.alarms.collectAsState()
-    val firedAts by alarmViewModel.firedAts.collectAsState()
 
-    val activeCount = alarms.indices.count { index ->
-        alarms[index].enabled && !firedAts.containsKey(index)
-    }
-    val disabledCount = alarms.count { !it.enabled }
+    val syncedHashes = lastSync?.sentAlarmHashes.orEmpty()
+    val activeCount = syncedHashes.count { parseEnabled(it) }
+    val disabledCount = syncedHashes.size - activeCount
 
     val syncText = lastSync?.let { formatTimeAgo(it.syncedAt) }
         ?: stringResource(R.string.footer_never)
@@ -72,4 +69,9 @@ private fun formatTimeAgo(syncedAt: Long): String {
         else -> java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault())
             .format(java.util.Date(syncedAt))
     }
+}
+
+private fun parseEnabled(hash: String): Boolean {
+    val tail = hash.substringAfterLast(':', "")
+    return tail.equals("true", ignoreCase = true)
 }
