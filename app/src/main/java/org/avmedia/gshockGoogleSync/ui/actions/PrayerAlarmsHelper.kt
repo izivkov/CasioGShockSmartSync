@@ -107,7 +107,7 @@ class PrayerAlarmsHelper @Inject constructor(
      */
     private fun getRegionalConfiguration(
         countryCode: String?,
-        coords: Coordinates
+        co./rel ords: Coordinates
     ): Triple<CalculationMethod, PrayerAdjustments, Madhab> {
         val code = countryCode?.uppercase(Locale.US)
 
