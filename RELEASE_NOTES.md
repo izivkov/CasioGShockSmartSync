@@ -1,4 +1,40 @@
+# Release Notes - Casio G-Shock Smart Sync v41.0 — May 6, 2026
+
+## ✨ Highlights
+
+### 🕋 Advanced Regional Prayer Alarms
+Significant overhaul of the prayer alarm system to support complex regional requirements:
+*   **Jammu & Kashmir Support**: Added a specialized geofence for the J&K region, automatically applying the **Karachi calculation method** and **Hanafi Madhab** for precise local timings.
+*   **Southeast Asia "Safety Buffer"**: For users in **Indonesia, Malaysia, and Brunei**, the app now includes a 2-minute safety buffer for all prayer times (and -2m for sunrise) to align with local religious standards.
+*   **Intelligent Madhab Selection**: The system now automatically switches between **Shafi** and **Hanafi** schools of thought based on the user's detected location and regional defaults.
+*   **Refined Regional Defaults**: Improved default calculation methods for various countries to ensure out-of-the-box accuracy.
+
+### 🛠 Improvements & Stability
+*   **Code Optimization**: Internal refactoring of the `PrayerAlarmsHelper` for better maintainability and performance.
+*   **Cleanups**: General code cleanup across the `pairing` and `ui` modules to improve app responsiveness.
+
+---
+
+# Release Notes - Casio G-Shock Smart Sync v40.9 — April 25, 2026
+
+## ✨ Highlights
+
+### 🛡️ Custom ROM & Legacy Compatibility
+*   **crDroid & LineageOS Support**: Fixed an issue where the app would fail to start background observation on certain custom ROMs. We've implemented a robust fallback mechanism that switches to MAC-based tracking if the system's Companion Device Manager (CDM) lacks modern request-based APIs.
+*   **Improved Service Reliability**: Enhanced the connection monitor to gracefully handle "Method Not Found" errors on non-standard Android distributions.
+
+### ⌚ Enhanced Watch Management
+*   **Multi-Watch Support**: Significant improvements to how the app handles multiple associated G-Shock watches. The background scanner is now more efficient at tracking and connecting to whichever watch is nearby.
+*   **Paired Device UI**: Introduced a new, scrollable list for paired devices on the connection screen, making it much easier for users with large collections to manage their watches.
+
+### ⚙️ Pairing & Connectivity
+*   **Modernized Pairing**: Updated the pairing flow for Android 11 through 14+ to ensure compatibility with the latest system security requirements.
+*   **Presence Detection**: Refined the `onDeviceAppeared` logic to reduce connection latency when a watch comes into range.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v40.8 — April 24, 2026
+
 
 ## ✨ Highlights
 

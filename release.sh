@@ -95,22 +95,39 @@ sed -i "s/versionName = .*/versionName = \"$VERSION_NAME\"/" app/build.gradle
 echo "📄 Creating latest.txt with version $VERSION_NAME..."
 echo "$VERSION_NAME" > latest.txt
 
-# 3. Update F-Droid Metadata (Fastlane)
+# 3. Update F-Droid Metadata (Fastlane) and Prepare GitHub Notes
 CHANGELOG_PATH="fastlane/metadata/android/en-US/changelogs/${VERSION_NAME}.txt"
-echo "📂 Creating F-Droid changelog at $CHANGELOG_PATH..."
+GITHUB_NOTES_FILE="github_notes_${VERSION_NAME}.md"
+
+echo "📂 Extracting release notes from RELEASE_NOTES.md..."
 
 if [ -f "RELEASE_NOTES.md" ]; then
-    # Extract the first few lines or a summary from RELEASE_NOTES.md
-    # For now, we'll take the content under "Key Features & Improvements"
-    echo "Companion Device Pairing: Modernized for Android 11-14+, added multi-watch support, and a new scrollable paired devices list on the connection screen." > "$CHANGELOG_PATH"
+    # Extract the section for this version (everything between this version header and the next ---)
+    awk "/# Release Notes - Casio G-Shock Smart Sync v$VERSION_NAME/{flag=1;next} /---/{flag=0} flag" RELEASE_NOTES.md > "$GITHUB_NOTES_FILE"
+    
+    if [ ! -s "$GITHUB_NOTES_FILE" ]; then
+        echo "⚠️  Warning: Could not find release notes for v$VERSION_NAME in RELEASE_NOTES.md"
+        echo "New release $VERSION_NAME" > "$GITHUB_NOTES_FILE"
+        echo "New release $VERSION_NAME" > "$CHANGELOG_PATH"
+    else
+        # For F-Droid changelog, take the Highlights or the first few bullet points (Fastlane limit)
+        # We strip Markdown symbols for the plain-text changelog
+        grep "^*" "$GITHUB_NOTES_FILE" | sed 's/^* //' | sed 's/\*\*//g' | head -n 5 | tr '\n' ' ' | sed 's/  */ /g' | cut -c1-450 > "$CHANGELOG_PATH"
+        # If the above resulted in an empty file (no bullets), just use the first line of notes
+        if [ ! -s "$CHANGELOG_PATH" ]; then
+            head -n 3 "$GITHUB_NOTES_FILE" | tr '\n' ' ' | cut -c1-450 > "$CHANGELOG_PATH"
+        fi
+        echo "✅ Created F-Droid changelog and GitHub notes."
+    fi
 else
+    echo "New release $VERSION_NAME" > "$GITHUB_NOTES_FILE"
     echo "New release $VERSION_NAME" > "$CHANGELOG_PATH"
 fi
 
 # 4. Git Operations
 echo "💾 Committing changes..."
 
-git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml README.md latest.txt
+git add app/build.gradle "$CHANGELOG_PATH" gradle.properties release.sh .github/workflows/build-apk.yml README.md latest.txt RELEASE_NOTES.md
 git commit -m "Release v$VERSION_NAME"
 
 echo "🏷️ Tagging release..."
@@ -124,11 +141,8 @@ git push origin "v$VERSION_NAME"
 # Create GitHub Release
 if [ "$GH_AVAILABLE" = true ]; then
     echo "🎁 Creating GitHub release v$VERSION_NAME..."
-    if [ -f "$CHANGELOG_PATH" ]; then
-        gh release create "v$VERSION_NAME" --title "Release v$VERSION_NAME" --notes-file "$CHANGELOG_PATH"
-    else
-        gh release create "v$VERSION_NAME" --title "Release v$VERSION_NAME" --notes "New release $VERSION_NAME"
-    fi
+    gh release create "v$VERSION_NAME" --title "Release v$VERSION_NAME" --notes-file "$GITHUB_NOTES_FILE"
+    rm "$GITHUB_NOTES_FILE"
 fi
 
 # 4. Update master branch for F-Droid
