@@ -1,3 +1,15 @@
+# Release Notes - Casio G-Shock Smart Sync v41.2 — May 8, 2026
+
+## ✨ Highlights
+
+### 🌙 Dark Mode Splash Screen
+Fixed a long-standing issue where a bright white splash screen would appear on app startup even when the device was in dark mode.
+*   **Modern Splash API**: Implemented the official `androidx.core:core-splashscreen` library for a smoother, system-integrated startup experience.
+*   **Theme Awareness**: The splash screen now dynamically respects your system's dark/light theme settings, providing a comfortable transition in dark environments.
+*   **Visual Consistency**: Matched the splash screen background with the app's internal color palette for both light and dark modes.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v41.0 — May 6, 2026
 
 ## ✨ Highlights

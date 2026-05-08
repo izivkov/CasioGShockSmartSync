@@ -14,8 +14,8 @@ android {
         applicationId = "org.avmedia.gshockGoogleSync"
         minSdk = 26
         targetSdk = 36
-        versionCode = 412
-        versionName = "41.2"
+        versionCode = 413
+        versionName = "41.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -110,6 +110,7 @@ dependencies {
 
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.core.splashscreen)
 }
 
 // Allow references to generated code
