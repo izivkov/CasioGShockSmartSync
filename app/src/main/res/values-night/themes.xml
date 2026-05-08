@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- res/values/themes.xml -->
-    <style name="Theme.NavigationBarMedium" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.NavigationBarMedium" parent="android:Theme.Material.NoActionBar">
     </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">

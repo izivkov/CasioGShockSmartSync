@@ -28,6 +28,8 @@ material3 = "1.4.0"
 compose-ui = "1.10.6"
 constraintlayout-compose = "1.1.1"
 datastore = "1.2.1"
+splashscreen = "1.2.0"
+
 
 # just for api
 ble = "2.11.0"
@@ -82,6 +84,8 @@ ble = { module = "no.nordicsemi.android:ble", version.ref = "ble" }
 client = { module = "no.nordicsemi.android.kotlin.ble:client", version.ref = "client" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 transport-api = { group = "com.google.android.datatransport", name = "transport-api", version.ref = "transportApi" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
