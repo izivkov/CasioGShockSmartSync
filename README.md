@@ -162,6 +162,65 @@ We welcome contributions!
 
 ---
 
+## For Developers
+
+### Capturing BLE Messages with Wireshark
+
+Wireshark can be used to inspect the raw Bluetooth Low Energy (BLE) packets exchanged between your Android phone and the G-Shock watch. This is useful for reverse-engineering watch protocols or debugging communication issues.
+
+#### 1. Phone Setup (Enable HCI Snoop Log)
+
+Android has a built-in BLE packet logger. Enable it via Developer Options:
+
+1. Go to **Settings → About Phone** and tap **Build Number** 7 times to enable Developer Options.
+2. Go to **Settings → Developer Options**.
+3. Enable **Bluetooth HCI Snoop Log** (exact label varies by device/Android version).
+4. **Restart Bluetooth** (toggle it off and on) to start logging.
+5. Reproduce the action you want to capture (e.g., connect the app to the watch and sync time).
+6. Disable the snoop log again, then pull the log file from the device:
+
+```bash
+adb bugreport bugreport.zip
+```
+
+The HCI log is embedded in the bugreport. Alternatively, on many devices it is available directly at:
+
+```bash
+adb pull /sdcard/btsnoop_hci.log
+```
+
+> **Tip**: The exact path may differ. Search inside the bugreport ZIP for a file named `btsnoop_hci.log`.
+
+#### 2. Install Wireshark
+
+```bash
+# Ubuntu / Debian
+sudo apt install wireshark
+
+# macOS (Homebrew)
+brew install --cask wireshark
+```
+
+Or download the installer from [wireshark.org](https://www.wireshark.org/download.html).
+
+#### 3. Open and Filter the Log
+
+1. Open Wireshark and go to **File → Open**, then select `btsnoop_hci.log`.
+2. Wireshark will decode the BLE packets automatically.
+3. Use display filters to focus on relevant traffic:
+
+| Goal | Filter |
+|:---|:---|
+| All BLE ATT traffic | `btatt` |
+| Specific device by address | `bluetooth.addr == AA:BB:CC:DD:EE:FF` |
+| ATT write operations | `btatt.opcode == 0x12` |
+| ATT notifications | `btatt.opcode == 0x1b` |
+
+4. Right-click a packet → **Follow → Bluetooth ATT Stream** to trace a full conversation.
+5. The **Packet Bytes** pane at the bottom shows the raw hex payload sent to/from the watch.
+
+---
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
