@@ -1,3 +1,17 @@
+# Release Notes - Casio G-Shock Smart Sync v41.4 — May 12, 2026
+
+## ✨ Highlights
+
+### 📶 Improved Boot-Time Reliability
+Fixed an issue where the background synchronization service might fail to start if the device booted up faster than the Bluetooth adapter could initialize.
+*   **Bluetooth State Listener**: Added a dedicated `BluetoothStateReceiver` to automatically re-trigger device discovery the moment Bluetooth becomes available. This resolves race conditions caused by the system's `BOOT_COMPLETED` broadcast firing too early.
+
+### 📚 Developer & Technical Updates
+*   **Wireshark BLE Documentation**: Added a comprehensive guide to `README.md` explaining how developers and contributors can capture and analyze raw Bluetooth Low Energy (BLE) packets between the phone and watch using Android's HCI Snoop Log and Wireshark.
+*   **API Update**: Updated the internal `gshockapi` library to version `1.4.71`, which adds support for setting and retrieving reminders for the **DW-B5600** watch model.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v41.2 — May 8, 2026
 
 ## ✨ Highlights
