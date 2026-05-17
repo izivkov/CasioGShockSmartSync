@@ -114,7 +114,7 @@ class DeviceAssociationManager @Inject constructor(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 cdm.myAssociations.forEach { associationInfo ->
                     val macAddress = associationInfo.deviceMacAddress?.toString()?.uppercase() ?: return@forEach
-                    manageDevicePresence(cdm, associationInfo, macAddress, macAddress in finalActiveAddresses)
+                    manageDevicePresence(cdm, macAddress, macAddress in finalActiveAddresses)
                 }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 // API 31-32: only string-based API available
@@ -145,43 +145,30 @@ class DeviceAssociationManager @Inject constructor(
         }
     }
 
+    // NOTE: The associationInfo parameter has been removed. All CDM API branching
+    // (including ObservingDevicePresenceRequest for API 36+) is handled inside
+    // GShockPairingManager, keeping this layer free of direct framework class references
+    // that may be absent on OEM builds (e.g. Samsung A52s Android 14).
     @SuppressLint("NewApi")
     private fun manageDevicePresence(
         cdm: android.companion.CompanionDeviceManager,
-        associationInfo: android.companion.AssociationInfo,
         macAddress: String,
         shouldObserve: Boolean
     ) {
         try {
-            // Preferred: associationId-based (API 33+, works on GrapheneOS)
-            val request = android.companion.ObservingDevicePresenceRequest.Builder()
-                .setAssociationId(associationInfo.id)
-                .build()
-
             if (shouldObserve) {
-                cdm.startObservingDevicePresence(request)
-                Timber.d("CDM presence started (request-based) for $macAddress")
+                repository.startObservingDevicePresence(context, macAddress)
+                Timber.d("CDM presence started for $macAddress")
             } else {
-                cdm.stopObservingDevicePresence(request)
+                @Suppress("DEPRECATION")
+                cdm.stopObservingDevicePresence(macAddress)
                 Timber.d("CDM presence stopped for $macAddress")
             }
         } catch (e: Throwable) {
-            // Handle ROMs like LineageOS/crDroid that might report API 33 but lack the new method
-            if (e is NoSuchMethodError || e is Exception) {
-                Timber.w("Modern CDM method failed, falling back to address-based for $macAddress")
-                try {
-                    if (shouldObserve) {
-                        repository.startObservingDevicePresence(context, macAddress)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        cdm.stopObservingDevicePresence(macAddress)
-                    }
-                } catch (e2: Exception) {
-                    if (shouldObserve) Timber.e(e2, "Address-based CDM failed for $macAddress")
-                }
-            } else {
-                throw e
-            }
+            // Catch Throwable (not just Exception) to handle NoClassDefFoundError and
+            // NoSuchMethodError thrown by OEM builds that report a high API level but
+            // are missing AOSP classes at runtime.
+            if (shouldObserve) Timber.e(e, "CDM presence management failed for $macAddress")
         }
     }
 

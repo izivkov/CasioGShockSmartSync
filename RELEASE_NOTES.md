@@ -1,3 +1,14 @@
+# Release Notes - Casio G-Shock Smart Sync v41.5 — May 17, 2026
+
+## ✨ Highlights
+
+### 🛡️ OEM Compatibility & Stability
+*   **Samsung A52s & Android 14 Fix**: Addressed a critical crash on certain OEM builds (e.g., Samsung) where the system falsely advertises support for modern Companion Device Manager (CDM) APIs but lacks the underlying framework classes.
+*   **Robust Error Handling**: Upgraded background presence observation error handling to catch framework-level errors (`NoClassDefFoundError`), preventing crashes on non-standard Android distributions.
+*   **API Update**: Updated the internal `gshockapi` library to version `1.4.73`.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v41.4 — May 12, 2026
 
 ## ✨ Highlights
