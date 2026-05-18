@@ -28,7 +28,7 @@ import javax.inject.Singleton
 @Singleton
 class CalendarEvents @Inject constructor(
     private val rRuleValues: RRuleValues,
-    @param:ApplicationContext private val appContext: Context // Inject application context
+    @param:ApplicationContext private val appContext: Context
 ) {
     private val calendarObserver = CalendarObserver()
 
@@ -51,19 +51,44 @@ class CalendarEvents @Inject constructor(
             "${CalendarContract.Instances.BEGIN} ASC"
         )
 
+        val birthdayCalendarIds = getBirthdayCalendarIds(cr)
+
         calendarObserver.register(cr, uri)
         cursor?.let {
-            processCursor(it, events)
+            processCursor(it, events, birthdayCalendarIds)
         }
         cursor?.close()
 
         return events
     }
 
+    private fun getBirthdayCalendarIds(cr: ContentResolver): Set<Long> {
+        val projection = arrayOf(CalendarContract.Calendars._ID)
+        val selection = """
+            ${CalendarContract.Calendars.ACCOUNT_TYPE} = ?
+            AND LOWER(${CalendarContract.Calendars.CALENDAR_DISPLAY_NAME}) LIKE ?
+        """
+        val selectionArgs = arrayOf("com.google", "%birthday%")
+
+        val cursor = cr.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )
+
+        val ids = mutableSetOf<Long>()
+        cursor?.use {
+            while (it.moveToNext()) ids.add(it.getLong(0))
+        }
+        return ids
+    }
+
     private fun buildCalendarUri(): Uri {
         val startMillis = Calendar.getInstance().timeInMillis
         val endMillis = Calendar.getInstance()
-            .apply { add(Calendar.YEAR, 2) }.timeInMillis // limit to 2 years in the future.
+            .apply { add(Calendar.YEAR, 2) }.timeInMillis
 
         val builder: Uri.Builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
         ContentUris.appendId(builder, startMillis)
@@ -80,7 +105,8 @@ class CalendarEvents @Inject constructor(
             CalendarContract.Instances.END,
             CalendarContract.Instances.ALL_DAY,
             CalendarContract.Instances.RRULE,
-            CalendarContract.Instances.DTSTART
+            CalendarContract.Instances.DTSTART,
+            CalendarContract.Instances.CALENDAR_ID
         )
     }
 
@@ -100,15 +126,20 @@ class CalendarEvents @Inject constructor(
         """.trimIndent()
     }
 
-    private fun processCursor(cursor: Cursor, events: ArrayList<Event>) {
+    private fun processCursor(cursor: Cursor, events: ArrayList<Event>, birthdayCalendarIds: Set<Long>) {
         val seenEventIds = mutableSetOf<Long>()
-        cursor.moveToPosition(-1) // move before the first event
+        cursor.moveToPosition(-1)
 
         while (cursor.moveToNext()) {
             val eventId =
                 cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID))
             val eventStart =
                 cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN))
+            val calendarId =
+                cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.CALENDAR_ID))
+
+            // Skip birthday calendar events, with title check as fallback
+            if (calendarId in birthdayCalendarIds) continue
 
             if (eventId !in seenEventIds && eventStart > System.currentTimeMillis()) {
                 seenEventIds.add(eventId)
@@ -117,11 +148,13 @@ class CalendarEvents @Inject constructor(
         }
     }
 
-    // @SuppressLint("Range")
     private fun processEvent(cursor: Cursor, events: ArrayList<Event>) {
-
         val titleIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.TITLE)
-        val title: String? = if (titleIndex >= 0) cursor.getString(titleIndex) else "(No title)"
+        val title: String = if (titleIndex >= 0) cursor.getString(titleIndex) ?: "(No title)" else "(No title)"
+
+        if (title.equals("Birthday", ignoreCase = true) || title.equals("Birthday Vents", ignoreCase = true)) {
+            return
+        }
 
         val dateStartIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.DTSTART)
         val dateStart: String? = if (dateStartIndex >= 0) cursor.getString(dateStartIndex) else null
@@ -148,12 +181,12 @@ class CalendarEvents @Inject constructor(
         }
 
         val end = LocalDate.of(endDate.year, endDate.month, endDate.day)
-        if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) return // skip expired events
+        if (!startDate.equals(endDate) && end.isBefore(LocalDate.now())) return
 
         val enabled = events.size < EventsModel.MAX_REMINDERS
         events.add(
             Event(
-                title as String,
+                title,
                 startDate,
                 endDate,
                 repeatPeriod,

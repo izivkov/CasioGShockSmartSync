@@ -1,4 +1,14 @@
-# Release Notes - Casio G-Shock Smart Sync v41.5 — May 17, 2026
+# Release Notes - Casio G-Shock Smart Sync v41.7 — May 18, 2026
+
+## ✨ Highlights
+
+### 📅 Calendar Sync Improvements
+*   **Birthday Filter**: The Google Calendar synchronization now intelligently filters out calendars containing "Birthday" in their name, as well as individual events titled "Birthday" or "Birthday Vents". This prevents the watch's limited reminder slots from being cluttered with auto-generated contact birthdays.
+*   **API Compatibility**: Fixed a compilation error and improved the stability of calendar queries by utilizing `CalendarContract.Instances.CALENDAR_ID` for precise event filtering and association, ensuring smoother syncs across all supported Android versions.
+
+---
+
+# Release Notes - Casio G-Shock Smart Sync v41.6 — May 18, 2026
 
 ## ✨ Highlights
 
