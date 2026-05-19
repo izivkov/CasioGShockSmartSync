@@ -4,7 +4,9 @@
 
 ### 📅 Calendar Sync Improvements
 *   **Birthday Filter**: The Google Calendar synchronization now intelligently filters out calendars containing "Birthday" in their name, as well as individual events titled "Birthday" or "Birthday Vents". This prevents the watch's limited reminder slots from being cluttered with auto-generated contact birthdays.
+*   **Read-Only Calendar Filter**: Improved calendar filtering to correctly exclude read-only Google calendars (e.g., subscribed holidays or view-only shared calendars) by verifying calendar access levels. This ensures only relevant, user-managed events are synced while preserving compatibility with non-Google calendar providers.
 *   **API Compatibility**: Fixed a compilation error and improved the stability of calendar queries by utilizing `CalendarContract.Instances.CALENDAR_ID` for precise event filtering and association, ensuring smoother syncs across all supported Android versions.
+*   **Enhanced Debugging**: Added detailed logging for calendar event fields (organizer, package, description) to aid in troubleshooting future syncing anomalies.
 
 ---
 

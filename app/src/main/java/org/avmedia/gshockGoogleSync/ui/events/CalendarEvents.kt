@@ -42,45 +42,53 @@ class CalendarEvents @Inject constructor(
         val cr: ContentResolver = context.contentResolver
 
         val uri = buildCalendarUri()
-        val selectionArgs = arrayOf(CalendarContract.Calendars.CAL_ACCESS_OWNER.toString())
         val cursor = cr.query(
             uri,
             getProjection(),
             buildSelection(),
-            selectionArgs,
+            null,
             "${CalendarContract.Instances.BEGIN} ASC"
         )
 
-        val birthdayCalendarIds = getBirthdayCalendarIds(cr)
+        val excludedCalendarIds = getExcludedCalendarIds(cr)
 
         calendarObserver.register(cr, uri)
         cursor?.let {
-            processCursor(it, events, birthdayCalendarIds)
+            processCursor(it, events, excludedCalendarIds)
         }
         cursor?.close()
 
         return events
     }
 
-    private fun getBirthdayCalendarIds(cr: ContentResolver): Set<Long> {
-        val projection = arrayOf(CalendarContract.Calendars._ID)
-        val selection = """
-            ${CalendarContract.Calendars.ACCOUNT_TYPE} = ?
-            AND LOWER(${CalendarContract.Calendars.CALENDAR_DISPLAY_NAME}) LIKE ?
-        """
-        val selectionArgs = arrayOf("com.google", "%birthday%")
+    private fun getExcludedCalendarIds(cr: ContentResolver): Set<Long> {
+        val projection = arrayOf(
+            CalendarContract.Calendars._ID,
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+            CalendarContract.Calendars.ACCOUNT_TYPE,
+            CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL
+        )
 
         val cursor = cr.query(
             CalendarContract.Calendars.CONTENT_URI,
             projection,
-            selection,
-            selectionArgs,
-            null
+            null, null, null
         )
 
         val ids = mutableSetOf<Long>()
         cursor?.use {
-            while (it.moveToNext()) ids.add(it.getLong(0))
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                val name = it.getString(1) ?: ""
+                val accountType = it.getString(2) ?: ""
+                val accessLevel = it.getInt(3)
+
+                // Only apply accessLevel filter for Google accounts where 700 semantics are known
+                if (accountType == "com.google" && accessLevel < 700) ids.add(id)
+
+                // Exclude birthday calendars regardless of provider
+                if (name.contains("birthday", ignoreCase = true)) ids.add(id)
+            }
         }
         return ids
     }
@@ -106,7 +114,10 @@ class CalendarEvents @Inject constructor(
             CalendarContract.Instances.ALL_DAY,
             CalendarContract.Instances.RRULE,
             CalendarContract.Instances.DTSTART,
-            CalendarContract.Instances.CALENDAR_ID
+            CalendarContract.Instances.CALENDAR_ID,
+            CalendarContract.Events.CUSTOM_APP_PACKAGE,
+            CalendarContract.Events.DESCRIPTION,
+            CalendarContract.Events.ORGANIZER,
         )
     }
 
@@ -126,7 +137,7 @@ class CalendarEvents @Inject constructor(
         """.trimIndent()
     }
 
-    private fun processCursor(cursor: Cursor, events: ArrayList<Event>, birthdayCalendarIds: Set<Long>) {
+    private fun processCursor(cursor: Cursor, events: ArrayList<Event>, excludedCalendarIds: Set<Long>) {
         val seenEventIds = mutableSetOf<Long>()
         cursor.moveToPosition(-1)
 
@@ -138,8 +149,7 @@ class CalendarEvents @Inject constructor(
             val calendarId =
                 cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.CALENDAR_ID))
 
-            // Skip birthday calendar events, with title check as fallback
-            if (calendarId in birthdayCalendarIds) continue
+            if (calendarId in excludedCalendarIds) continue
 
             if (eventId !in seenEventIds && eventStart > System.currentTimeMillis()) {
                 seenEventIds.add(eventId)
@@ -152,9 +162,18 @@ class CalendarEvents @Inject constructor(
         val titleIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.TITLE)
         val title: String = if (titleIndex >= 0) cursor.getString(titleIndex) ?: "(No title)" else "(No title)"
 
-        if (title.equals("Birthday", ignoreCase = true) || title.equals("Birthday Vents", ignoreCase = true)) {
-            return
-        }
+        val calendarId = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.CALENDAR_ID))
+        val appPackage = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.CUSTOM_APP_PACKAGE))
+        val description = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.DESCRIPTION))
+        val organizer = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.ORGANIZER))
+
+        android.util.Log.d("CalendarDebug",
+            "Event: title=$title, " +
+                    "calendarId=$calendarId, " +
+                    "appPackage=$appPackage, " +
+                    "description=$description, " +
+                    "organizer=$organizer"
+        )
 
         val dateStartIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.DTSTART)
         val dateStart: String? = if (dateStartIndex >= 0) cursor.getString(dateStartIndex) else null
