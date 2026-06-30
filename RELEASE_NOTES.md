@@ -1,3 +1,14 @@
+# Release Notes - Casio G-Shock Smart Sync v42.1 — June 29, 2026
+
+## ✨ Highlights
+
+### ⌚ Enhanced Watch Support
+*   **GW-BX5600 and MTG-B1000 Integration**: Added robust support for the new GW-BX5600 and MTG-B1000 watch models.
+*   **Protocol Improvements**: Implemented dynamic time-synchronization protocols and secondary dial synchronization tailored for the new watch models.
+*   **API Update**: Updated the internal `gshockapi` library to version `1.4.76` to leverage new I/O modules, dynamic characteristic initialization, and enhanced protocol stability.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v41.7 — May 18, 2026
 
 ## ✨ Highlights
@@ -19,7 +30,7 @@
 *   **Robust Error Handling**: Upgraded background presence observation error handling to catch framework-level errors (`NoClassDefFoundError`), preventing crashes on non-standard Android distributions.
 *   **API Update**: Updated the internal `gshockapi` library to version `1.4.73`.
 
----cd Gs    
+---
 
 # Release Notes - Casio G-Shock Smart Sync v41.4 — May 12, 2026
 
