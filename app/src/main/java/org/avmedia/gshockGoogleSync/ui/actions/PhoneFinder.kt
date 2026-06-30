@@ -58,9 +58,11 @@ object PhoneFinder {
         // Update state with new MediaPlayer and reset volume function
         state = state.copy(
             mediaPlayer = MediaPlayer().apply {
+                setWakeMode(context, android.os.PowerManager.PARTIAL_WAKE_LOCK)
                 setAudioAttributes(
                     AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build()
                 )
                 setDataSource(context, alarmUri)
