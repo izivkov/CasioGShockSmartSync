@@ -171,45 +171,92 @@ object PhoneFinder {
             sensorManager.unregisterListener(this)
         }
 
-        private object RingCanceler {
-            private var executor: ScheduledExecutorService? = null
+        // --- Gesture-based pickup detection (works even while walking) ---
 
-            fun schedule(delay: Long, action: () -> Unit) {
-                executor?.shutdownNow()
-                executor = Executors.newSingleThreadScheduledExecutor().apply {
-                    schedule(action, delay, TimeUnit.MILLISECONDS)
+        // We track the gravity-component direction (low-passed accel vector) to detect
+        // a genuine reorientation, plus a magnitude spike to detect the grab itself.
+
+        private var gravX = 0f
+        private var gravY = 0f
+        private var gravZ = SensorManager.GRAVITY_EARTH
+        private var gravityInitialized = false
+        private val gravityAlpha = 0.8f  // low-pass filter constant
+
+        private var baselineGravX = 0f
+        private var baselineGravY = 0f
+        private var baselineGravZ = SensorManager.GRAVITY_EARTH
+        private var lastBaselineUpdateMs = 0L
+        private val baselineUpdateIntervalMs = 1500L // refresh "resting orientation" periodically
+
+        private var lastTriggerTimeMs = 0L
+        private val cooldownMs = 2000L
+
+        // Spike threshold: a deliberate grab is sharper than a footstep bounce.
+        private val grabSpikeThreshold = 4.0f
+
+        // Orientation change threshold: angle (in terms of dot product) between
+        // baseline gravity direction and current gravity direction.
+        private val reorientationDotThreshold = 0.85f // cos(~32°) — below this = reoriented
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            event?.takeIf { it.sensor.type == Sensor.TYPE_ACCELEROMETER }?.let { e ->
+                val x = e.values[0]
+                val y = e.values[1]
+                val z = e.values[2]
+
+                val now = System.currentTimeMillis()
+                val magnitude = kotlin.math.sqrt(x * x + y * y + z * z)
+                val deviation = abs(magnitude - SensorManager.GRAVITY_EARTH)
+
+                // Low-pass filter to isolate the gravity component (current orientation)
+                if (!gravityInitialized) {
+                    gravX = x; gravY = y; gravZ = z
+                    baselineGravX = x; baselineGravY = y; baselineGravZ = z
+                    lastBaselineUpdateMs = now
+                    gravityInitialized = true
+                    return
                 }
-            }
+                gravX = gravityAlpha * gravX + (1 - gravityAlpha) * x
+                gravY = gravityAlpha * gravY + (1 - gravityAlpha) * y
+                gravZ = gravityAlpha * gravZ + (1 - gravityAlpha) * z
 
-            fun cancel() {
-                executor?.shutdownNow()
-                executor = null
+                // Periodically refresh the "resting orientation" baseline, but ONLY when
+                // motion is calm — so walking's steady bounce doesn't get treated as a
+                // pickup, and so the baseline tracks "phone sitting in pocket" rather
+                // than a moment mid-grab.
+                if (deviation < 1.0f && now - lastBaselineUpdateMs > baselineUpdateIntervalMs) {
+                    baselineGravX = gravX; baselineGravY = gravY; baselineGravZ = gravZ
+                    lastBaselineUpdateMs = now
+                }
+
+                // Detect a grab: sharp spike in magnitude (the act of snatching the phone)
+                if (deviation > grabSpikeThreshold && now - lastTriggerTimeMs > cooldownMs) {
+                    // Confirm with an orientation check: has the gravity direction
+                    // shifted meaningfully from the established baseline? Walking
+                    // jostles but does not reorient the phone in a pocket; pulling
+                    // it out does.
+                    val dot = normalizedDot(gravX, gravY, gravZ, baselineGravX, baselineGravY, baselineGravZ)
+
+                    if (dot < reorientationDotThreshold) {
+                        Timber.d("Phone picked up: deviation=$deviation, orientationDot=$dot")
+                        lastTriggerTimeMs = now
+                        stopListening()
+                        onPhoneLifted()
+                    } else {
+                        Timber.d("Spike without reorientation (likely footstep): deviation=$deviation, dot=$dot")
+                    }
+                }
             }
         }
 
-        private var lastZ: Float? = null
-
-        override fun onSensorChanged(event: SensorEvent?) {
-            event?.takeIf { it.sensor.type == Sensor.TYPE_ACCELEROMETER }?.values?.let { values ->
-                if (values.size >= 3) {
-                    val z = values[2]
-                    if (lastZ == null) {
-                        lastZ = z
-                        return
-                    }
-
-                    // Detect lift: A significant change in vertical acceleration (Z-axis)
-                    // When flat, Z is ~9.8. When lifted, Z increases briefly then decreases.
-                    // We check for a delta to detect motion, but also ensure it's a significant movement.
-                    val deltaZ = abs(z - lastZ!!)
-                    if (deltaZ > 1.5f && abs(z) > 10.5f) {
-                        Timber.d("Phone lifted (accel): z=$z, deltaZ=$deltaZ")
-                        stopListening()
-                        onPhoneLifted()
-                    }
-                    lastZ = z
-                }
-            }
+        private fun normalizedDot(
+            ax: Float, ay: Float, az: Float,
+            bx: Float, by: Float, bz: Float
+        ): Float {
+            val magA = kotlin.math.sqrt(ax * ax + ay * ay + az * az)
+            val magB = kotlin.math.sqrt(bx * bx + by * by + bz * bz)
+            if (magA == 0f || magB == 0f) return 1f
+            return (ax * bx + ay * by + az * bz) / (magA * magB)
         }
 
         override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
