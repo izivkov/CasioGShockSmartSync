@@ -5,7 +5,7 @@
 ### ⌚ Enhanced Watch Support
 *   **GW-BX5600 and MTG-B1000 Integration**: Added robust support for the new GW-BX5600 and MTG-B1000 watch models.
 *   **Protocol Improvements**: Implemented dynamic time-synchronization protocols and secondary dial synchronization tailored for the new watch models.
-*   **API Update**: Updated the internal `gshockapi` library to version `1.4.76` to leverage new I/O modules, dynamic characteristic initialization, and enhanced protocol stability.
+*   **API Update**: Updated the internal `gshockapi` library to version `1.4.77` to leverage new I/O modules, dynamic characteristic initialization, and enhanced protocol stability.
 
 ---
 
