@@ -1,3 +1,25 @@
+# Release Notes - Casio G-Shock Smart Sync v42.5 — October 24, 2024
+
+## ✨ Highlights
+
+### 🌍 Local Mean & Solar Time Support
+Introduced advanced time synchronization options for users interested in astronomical and local geographic time:
+*   **New Time Options**: You can now select between **System Time**, **Local Mean Time (LMT)**, and **Local Solar Time (LST)** directly from the Time screen.
+*   **LMT Calculation**: Automatically calculates time based on your exact longitude (1° = 4 minutes offset from UTC).
+*   **Local Solar Time**: Uses the `adhan2` library to calculate the "True Solar Time" based on the sun's actual position (Equation of Time).
+*   **Watch Synchronization**: When you press "Send to Watch" or when the app syncs automatically, it now respects your selected time type, allowing your G-Shock to display LMT or LST.
+*   **Persistent Settings**: Your time type selection is securely stored in the watch's internal "scratchpad" memory and persists across sessions.
+
+### ℹ️ Educational Info Dialog
+*   **Interactive Info Button**: Added a new information button next to the time zone selector with clear, brief explanations of what each time type represents.
+*   **Multilingual Support**: The info dialog and new time labels are fully translated into **11 languages**, including Arabic, Bulgarian, Catalan, Chinese, French, German, Hungarian, Japanese, Russian, and Spanish.
+
+### 🛠 Reliability & Performance
+*   **Connection Stability**: Added a brief 0.5s safety delay during the connection handshake to improve reliability with certain watch models.
+*   **Real-Time Offset Clock**: The on-screen clock now dynamically updates to show the selected LMT or LST in real-time.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.1 — June 29, 2026
 
 ## ✨ Highlights
