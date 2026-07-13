@@ -18,6 +18,8 @@ import java.util.Date
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -56,6 +58,8 @@ constructor(
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     private val actionMap = mutableMapOf<Class<out Action>, Action>()
+
+    private var saveJob: Job? = null
 
     enum class RunMode {
         SYNC,
@@ -102,7 +106,28 @@ constructor(
             newList
         }
 
-        viewModelScope.launch { updatedAction.save(appContext, actionsStorage) }
+        viewModelScope.launch {
+            updatedAction.save(appContext, actionsStorage)
+
+            saveJob?.cancel()
+            saveJob =
+                    viewModelScope.launch {
+                        delay(3000)
+                        actionsStorage.save()
+                        _uiEvents.emit(
+                                UiEvent.ShowSnackbar(appContext.getString(R.string.actions_saved))
+                        )
+                        saveJob = null
+                    }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        saveJob?.let {
+            saveJob?.cancel()
+            viewModelScope.launch { actionsStorage.save() }
+        }
     }
 
     @Suppress("UNCHECKED_CAST")

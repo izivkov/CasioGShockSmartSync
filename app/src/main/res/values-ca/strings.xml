@@ -12,16 +12,11 @@
     <string name="send_alarms_to_phone">Enviar a\nTelèfon</string>
     <string name="send_events_to_watch">Enviar a rellotge\nRecordatoris</string>
     <string name="connection_screen_info"><![CDATA[
+    Per passar a la pantalla següent, mantingueu premut el botó <b>INFERIOR ESQUERRE</b> del rellotge durant 3 segons.
+    Després del segon doble senyal acústic, l\'aplicació mostrarà la pantalla d\'ajust de l\'hora.
 
-    Per continuar a la següent pantalla, manteniu premut el botó <b>INFERIOR ESQUERRA</b> del rellotge durant 3 segons.
-    Després del segon doble bip, l\'aplicació mostrarà la pantalla de configuració de l\'hora.
-    <p><b>Assegureu-vos que l\'aplicació oficial de Casio no estigui en execució, ja que interfereix amb aquesta aplicació.</b></p>
-    <p>Alguns rellotges, com el DW-H5600, requereixen emparellament abans de connectar-se per primera vegada.
-    En aquests casos, poseu el rellotge en mode d\'emparellament. Apareixerà un missatge al vostre telèfon indicant que heu d\'emparellar-lo amb el rellotge.</p>
-    <p>Per executar Accions definides a la pantalla <b>Accions</b>, premeu breument el botó <b>INFERIOR DRET</b>. Les accions són aplicacions al vostre telèfon, com <b>Fer una foto</b>.
-    Amb aquestes accions, el rellotge funciona com un comandament a distància per al telèfon.</p>
-    <p>Podeu descarregar aquesta aplicació des de <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync">F-DROID</a></p>
-
+    <p>Per executar les accions seleccionades a la pantalla <b>Accions</b>, premeu breument el botó <b>INFERIOR DRET</b>. Les accions són aplicacions al telèfon, com ara <b>Fer una foto</b>.
+    Mitjançant les accions, el rellotge actua com un control remot per al vostre telèfon.</p>
     ]]></string>
 
     <string name="alarms_screen_info"><![CDATA[Els rellotges <b>B5600/B5000/B2100</b> tenen 5 alarmes i una configuració de "senyal" (senyal horari) mostrada aquí.
