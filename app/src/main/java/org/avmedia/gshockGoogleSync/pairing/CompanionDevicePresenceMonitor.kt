@@ -38,7 +38,6 @@ class CompanionDevicePresenceMonitor @Inject constructor(
                     if (!repository.isConnected()) {
                         Timber.i("$addressValid waitForConnection")
                         repository.waitForConnection(addressValid)
-                        org.avmedia.gshockapi.utils.Utils.beep(org.avmedia.gshockapi.utils.Utils.ToneType.MEDIUM, duration = 50)
 
                     } else {
                         Timber.i("Device already connected. Skipping wait.")

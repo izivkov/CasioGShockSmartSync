@@ -12,7 +12,12 @@ Introduced advanced time synchronization options for users interested in astrono
 
 ### ℹ️ Educational Info Dialog
 *   **Interactive Info Button**: Added a new information button next to the time zone selector with clear, brief explanations of what each time type represents.
-*   **Multilingual Support**: The info dialog and new time labels are fully translated into **11 languages**, including Arabic, Bulgarian, Catalan, Chinese, French, German, Hungarian, Japanese, Russian, and Spanish.
+*   **Multilingual Support**: Updated the info dialog and instructions with full translations for **11 languages**, including Arabic, Bulgarian, Catalan, Chinese, French, German, Hungarian, Japanese, Russian, and Spanish.
+
+### ⚙️ Enhanced Automation & UI
+*   **Automatic Action Saving**: Removed the manual "Send to Watch" button in the Actions screen. Settings are now saved automatically in the background 3 seconds after a change is made, or immediately upon leaving the screen.
+*   **Simplified Instructions**: Streamlined the connection screen instructions across all languages, making it easier to understand how to pair and run actions.
+*   **UI Spacing**: Improved the layout of the time screen with better spacing for easier interaction.
 
 ### 🛠 Reliability & Performance
 *   **Connection Stability**: Added a brief 0.5s safety delay during the connection handshake to improve reliability with certain watch models.

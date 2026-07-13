@@ -34,9 +34,9 @@ import timber.log.Timber
 
 @Composable
 fun ActionsScreen(
-        modifier: Modifier = Modifier,
-        actionsViewModel: ActionsViewModel =
-                hiltViewModel(LocalContext.current as ComponentActivity),
+    modifier: Modifier = Modifier,
+    actionsViewModel: ActionsViewModel =
+        hiltViewModel(LocalContext.current as ComponentActivity),
 ) {
     LaunchedEffect(Unit) {
         actionsViewModel.uiEvents.collect { event ->
@@ -61,22 +61,22 @@ fun ActionsScreen(
                 val (title, actions) = createRefs()
 
                 ScreenTitle(
-                        text = stringResource(id = R.string.actions),
-                        modifier =
-                                Modifier.constrainAs(title) {
-                                    top.linkTo(parent.top)
-                                    bottom.linkTo(actions.top)
-                                }
+                    text = stringResource(id = R.string.actions),
+                    modifier =
+                        Modifier.constrainAs(title) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(actions.top)
+                        }
                 )
 
                 ActionsContent(
-                        modifier =
-                                Modifier.constrainAs(actions) {
-                                    top.linkTo(title.bottom)
-                                    bottom.linkTo(parent.bottom)
-                                    height = Dimension.fillToConstraints
-                                },
-                        actionsViewModel = actionsViewModel
+                    modifier =
+                        Modifier.constrainAs(actions) {
+                            top.linkTo(title.bottom)
+                            bottom.linkTo(parent.bottom)
+                            height = Dimension.fillToConstraints
+                        },
+                    actionsViewModel = actionsViewModel
                 )
             }
         }
@@ -86,11 +86,12 @@ fun ActionsScreen(
 @Composable
 private fun ActionsContent(modifier: Modifier = Modifier, actionsViewModel: ActionsViewModel) {
     Column(
-            modifier =
-                    modifier.verticalScroll(rememberScrollState())
-                            .padding(0.dp)
-                            .fillMaxWidth()
-                            .fillMaxSize()
+        modifier =
+            modifier
+                .verticalScroll(rememberScrollState())
+                .padding(0.dp)
+                .fillMaxWidth()
+                .fillMaxSize()
     ) { ItemList(items = createActionItems(actionsViewModel)) }
 }
 
@@ -100,20 +101,20 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
     val actions by actionsViewModel.actions.collectAsState()
 
     return listOfNotNull(
-            if (WatchInfo.findButtonUserDefined)
-                    PhoneFinderView(actionsViewModel::updateAction, actionsViewModel)
-            else null,
-            SetTimeView(actionsViewModel::updateAction, actionsViewModel),
-            if (WatchInfo.hasReminders)
-                    RemindersView(actionsViewModel::updateAction, actionsViewModel)
-            else null,
-            PhotoView(actionsViewModel::updateAction, actionsViewModel),
-            FlashlightView(actionsViewModel::updateAction, actionsViewModel),
-            VoiceAssistView(actionsViewModel::updateAction, actionsViewModel),
-            SkipToNextTrackView(actionsViewModel::updateAction, actionsViewModel),
-            PrayerAlarmsView(actionsViewModel::updateAction, actionsViewModel),
-            SeparatorView(),
-            PhoneView(actionsViewModel::updateAction, actionsViewModel)
+        if (WatchInfo.findButtonUserDefined)
+            PhoneFinderView(actionsViewModel::updateAction, actionsViewModel)
+        else null,
+        SetTimeView(actionsViewModel::updateAction, actionsViewModel),
+        if (WatchInfo.hasReminders)
+            RemindersView(actionsViewModel::updateAction, actionsViewModel)
+        else null,
+        PhotoView(actionsViewModel::updateAction, actionsViewModel),
+        FlashlightView(actionsViewModel::updateAction, actionsViewModel),
+        VoiceAssistView(actionsViewModel::updateAction, actionsViewModel),
+        SkipToNextTrackView(actionsViewModel::updateAction, actionsViewModel),
+        PrayerAlarmsView(actionsViewModel::updateAction, actionsViewModel),
+        SeparatorView(),
+        PhoneView(actionsViewModel::updateAction, actionsViewModel)
     )
 }
 
