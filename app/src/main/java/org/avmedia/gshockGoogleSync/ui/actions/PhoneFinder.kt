@@ -31,53 +31,89 @@ object PhoneFinder {
     private var state = State()
 
     fun ring(context: Context): Result<Unit> = runCatching {
-        getAlarmUri()?.let { uri ->
+        getAlarmUri(context)?.let { uri ->
             handleAudio(context, uri)
             detectPhoneLifting(context)
-        } ?: throw IllegalStateException("No alarm URI available")
+        } ?: throw IllegalStateException("No playable alarm or ringtone available on this device")
     }.onFailure { e ->
-        Timber.e(e, "Failed to ring phone")
-        AppSnackbar(context.getString(R.string.unable_to_get_default_sound_uri))
+        Timber.e(e, "Failed to ring phone: ${e.message}")
+        AppSnackbar("Unable to play alarm sound: ${e.message}")
     }
 
-    private fun getAlarmUri() =
-        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+    private fun getAlarmUri(context: Context): android.net.Uri? {
+        val candidates = listOf(
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        ).filterNotNull()
+
+        // Try the standard "default" indirection URIs first.
+        for (uri in candidates) {
+            if (isPlayable(context, uri)) return uri
+        }
+
+        // None of the defaults are playable (e.g. unset on this device/emulator) —
+        // fall back to the first concrete ringtone the system actually has on file.
+        val manager = RingtoneManager(context).apply { setType(RingtoneManager.TYPE_ALARM) }
+        val cursor = manager.cursor
+        if (cursor.moveToFirst()) {
+            return manager.getRingtoneUri(cursor.position)
+        }
+
+        return null
+    }
+
+    private fun isPlayable(context: Context, uri: android.net.Uri): Boolean {
+        return try {
+            context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { true } ?: false
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     private fun handleAudio(context: Context, alarmUri: android.net.Uri) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
 
-        // Set maximum volume
         audioManager.setStreamVolume(
             AudioManager.STREAM_ALARM,
             audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
             AudioManager.FLAG_PLAY_SOUND
         )
 
-        // Update state with new MediaPlayer and reset volume function
-        state = state.copy(
-            mediaPlayer = MediaPlayer().apply {
-                setWakeMode(context, android.os.PowerManager.PARTIAL_WAKE_LOCK)
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-                setDataSource(context, alarmUri)
-                prepare()
-                isLooping = true
-                start()
-            },
-            resetVolume = {
-                audioManager.setStreamVolume(
-                    AudioManager.STREAM_ALARM,
-                    previousVolume,
-                    AudioManager.FLAG_PLAY_SOUND
-                )
-            }
-        )
+        val resetVolume: () -> Unit = {
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, previousVolume, AudioManager.FLAG_PLAY_SOUND)
+        }
+
+        val player = createPlayer(context, alarmUri)
+        if (player == null) {
+            resetVolume()
+            throw IllegalStateException("Unable to create a playable MediaPlayer for URI: $alarmUri")
+        }
+
+        state = state.copy(mediaPlayer = player, resetVolume = resetVolume)
+    }
+
+    private fun createPlayer(context: Context, uri: android.net.Uri): MediaPlayer? {
+        val player = MediaPlayer()
+        return try {
+            player.setWakeMode(context, android.os.PowerManager.PARTIAL_WAKE_LOCK)
+            player.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            player.setDataSource(context, uri)
+            player.prepare()
+            player.isLooping = true
+            player.start()
+            player
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to create MediaPlayer for URI: $uri")
+            player.release() // clean up immediately instead of leaking until GC finalizes it
+            null
+        }
     }
 
     private fun detectPhoneLifting(context: Context) {

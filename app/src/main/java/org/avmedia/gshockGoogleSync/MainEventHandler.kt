@@ -94,6 +94,7 @@ class MainEventHandler(
     private fun handleWaitForConnection() {
         CoroutineScope(Dispatchers.Default).launch {
             context.deviceAssociationManager.checkPairedDevicesOrNotify()
+            org.avmedia.gshockapi.utils.Utils.beep(org.avmedia.gshockapi.utils.Utils.ToneType.HIGH, duration = 50, delay = 0)
         }
     }
 
