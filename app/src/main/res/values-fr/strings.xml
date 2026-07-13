@@ -218,4 +218,11 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="press_and_hold_connection_button_to_continue">Maintenez enfoncé le bouton de CONNEXION (généralement en BAS À GAUCHE) de votre montre pendant 3 secondes pour effectuer le couplage.</string>
     <string name="looking_for_a_device">Recherche d\'un appareil.</string>
     <string name="add_watch">Ajouter une montre</string>
+    <string name="local_solar_time">Heure Solaire Locale</string>
+    <string name="local_mean_time">Heure Moyenne Locale</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>Système :</b> Utilise le fuseau horaire actuel du téléphone.</li>
+        <li><b>Heure Moyenne Locale :</b> Calculée en fonction de votre longitude. Un degré équivaut à 4 minutes de décalage par rapport à l\'UTC.</li>
+        <li><b>Heure Solaire Locale :</b> Calculée en fonction de la position du soleil (Équation du temps). Midi correspond au moment où le soleil est à son point le plus élevé.</li>
+    ]]></string>
 </resources>

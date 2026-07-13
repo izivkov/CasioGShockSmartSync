@@ -208,4 +208,11 @@ Nachdem die Alarme eingestellt wurden, können Sie sie an die Uhr oder an die We
     <string name="press_and_hold_connection_button_to_continue">Halten Sie die Verbindungstaste (normalerweise UNTEN LINKS) an Ihrer Uhr 3 Sekunden lang gedrückt, um sie zu koppeln.</string>
     <string name="looking_for_a_device">Suche nach einem Gerät.</string>
     <string name="add_watch">Uhr hinzufügen</string>
+    <string name="local_solar_time">Lokale Sonnenzeit</string>
+    <string name="local_mean_time">Lokale mittlere Ortszeit</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>System:</b> Verwendet die aktuelle Zeitzone des Telefons.</li>
+        <li><b>Lokale mittlere Ortszeit:</b> Berechnet auf Basis Ihrer Längengrad-Position. Ein Grad entspricht einem Versatz von 4 Minuten zur UTC.</li>
+        <li><b>Lokale Sonnenzeit:</b> Berechnet auf Basis des Sonnenstandes (Zeitgleichung). Mittag ist, wenn die Sonne ihren höchsten Punkt erreicht hat.</li>
+    ]]></string>
 </resources>

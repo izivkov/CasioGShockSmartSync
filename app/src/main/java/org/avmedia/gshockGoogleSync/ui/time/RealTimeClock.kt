@@ -12,15 +12,15 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun RealTimeClock(modifier: Modifier = Modifier) {
+fun RealTimeClock(modifier: Modifier = Modifier, offsetMs: Long = 0L) {
     // State to hold the current time
-    var currentTime by remember { mutableStateOf(getCurrentTime(getSystemTimeFormat())) }
+    var currentTime by remember(offsetMs) { mutableStateOf(getCurrentTime(getSystemTimeFormat(), offsetMs)) }
 
     // LaunchedEffect to update time every second
-    LaunchedEffect(Unit) {
+    LaunchedEffect(offsetMs) {
         while (true) {
             delay(1000L) // Delay for 1 second
-            currentTime = getCurrentTime(getSystemTimeFormat())
+            currentTime = getCurrentTime(getSystemTimeFormat(), offsetMs)
         }
     }
 
@@ -36,9 +36,9 @@ enum class TimeFormat(val pattern: String) {
     TwentyFourHour("H:mm:ss") // 24-hour format
 }
 
-fun getCurrentTime(format: TimeFormat): String {
+fun getCurrentTime(format: TimeFormat, offsetMs: Long = 0L): String {
     val sdf = SimpleDateFormat(format.pattern, Locale.getDefault())
-    return sdf.format(Date())
+    return sdf.format(Date(System.currentTimeMillis() + offsetMs))
 }
 
 fun getSystemTimeFormat(): TimeFormat {

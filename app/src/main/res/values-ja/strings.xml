@@ -217,4 +217,11 @@
     <string name="press_and_hold_connection_button_to_continue">ペアリングするには、時計の接続ボタン（通常は左下）を3秒間押し続けてください。</string>
     <string name="looking_for_a_device">デバイスを探しています。</string>
     <string name="add_watch">時計を追加</string>
+    <string name="local_solar_time">地方真太陽時</string>
+    <string name="local_mean_time">地方平均時</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>システム:</b> スマートフォンの現在のタイムゾーンを使用します。</li>
+        <li><b>地方平均時 (LMT):</b> 経度に基づいて計算されます。経度1度はUTCから4分のオフセットに相当します。</li>
+        <li><b>地方真太陽時:</b> 太陽の位置（均時差）に基づいて計算されます。正午は太陽が最も高い位置にある時刻です。</li>
+    ]]></string>
 </resources>

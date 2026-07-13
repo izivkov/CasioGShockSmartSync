@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -13,7 +15,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
+import org.avmedia.gshockGoogleSync.services.LocationProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.SolarTimeHelper
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -24,7 +29,9 @@ data class TimeState(
     val homeTime: String = "",
     val batteryLevel: Int = 0,
     val temperature: Int = 0,
-    val watchName: String = ""
+    val watchName: String = "",
+    val timeZoneOption: TimeSettingsStorage.TimeZoneOption = TimeSettingsStorage.TimeZoneOption.SYSTEM,
+    val timeOffset: Long = 0L
 )
 
 sealed interface TimeAction {
@@ -32,6 +39,7 @@ sealed interface TimeAction {
     data class UpdateTimer(val timeMs: Int) : TimeAction
     data object SendTimeToWatch : TimeAction
     data object RefreshState : TimeAction
+    data class SetTimeZoneOption(val option: TimeSettingsStorage.TimeZoneOption) : TimeAction
 }
 
 sealed class UiEvent {
@@ -41,6 +49,7 @@ sealed class UiEvent {
 @HiltViewModel
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
+    private val timeSettingsStorage: TimeSettingsStorage,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -49,6 +58,8 @@ class TimeViewModel @Inject constructor(
 
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
+
+    private var saveJob: Job? = null
 
     init {
         refreshState()
@@ -72,8 +83,8 @@ class TimeViewModel @Inject constructor(
             TimeAction.SendTimeToWatch -> {
                 viewModelScope.launch {
                     runCatching {
-                        val timeOffset = LocalDataStorage.getFineTimeAdjustment(appContext)
-                        val timeMs = System.currentTimeMillis() + timeOffset
+                        val fineAdjustment = LocalDataStorage.getFineTimeAdjustment(appContext)
+                        val timeMs = System.currentTimeMillis() + fineAdjustment + _state.value.timeOffset
                         AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
                         api.setTime(timeMs = timeMs)
                         AppSnackbar(appContext.getString(R.string.time_set))
@@ -85,18 +96,65 @@ class TimeViewModel @Inject constructor(
             }
 
             TimeAction.RefreshState -> refreshState()
+
+            is TimeAction.SetTimeZoneOption -> {
+                val offset = calculateOffset(action.option)
+                _state.value = _state.value.copy(
+                    timeZoneOption = action.option,
+                    timeOffset = offset
+                )
+                timeSettingsStorage.setTimeZoneOption(action.option)
+
+                saveJob?.cancel()
+                saveJob = viewModelScope.launch {
+                    delay(3000)
+                    timeSettingsStorage.save()
+                    saveJob = null
+                }
+            }
+        }
+    }
+
+    private fun calculateOffset(option: TimeSettingsStorage.TimeZoneOption): Long {
+        val location = LocationProvider.getLocation(appContext) ?: return 0L
+        return when (option) {
+            TimeSettingsStorage.TimeZoneOption.SYSTEM -> 0L
+            TimeSettingsStorage.TimeZoneOption.LOCAL_MEAN_TIME -> SolarTimeHelper.getLocalMeanTimeOffsetMs(
+                location.longitude
+            )
+
+            TimeSettingsStorage.TimeZoneOption.LOCAL_SOLAR_TIME -> SolarTimeHelper.getLocalSolarTimeOffsetMs(
+                location.latitude,
+                location.longitude
+            )
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        saveJob?.let {
+            saveJob?.cancel()
+            viewModelScope.launch {
+                timeSettingsStorage.save()
+            }
         }
     }
 
     private fun refreshState() {
         viewModelScope.launch {
             runCatching {
+                timeSettingsStorage.load()
+                val option = timeSettingsStorage.getTimeZoneOption()
+                val offset = calculateOffset(option)
+
                 _state.value = TimeState(
                     timer = api.getTimer(),
                     homeTime = if (WatchInfo.hasHomeTime) api.getHomeTime() else "",
                     batteryLevel = api.getBatteryLevel(),
                     temperature = api.getWatchTemperature(),
-                    watchName = api.getWatchName()
+                    watchName = api.getWatchName(),
+                    timeZoneOption = option,
+                    timeOffset = offset
                 )
             }.onFailure {
                 AppSnackbar("Api Error")

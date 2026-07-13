@@ -203,4 +203,11 @@
     <string name="press_and_hold_connection_button_to_continue">按住手表上的连接按钮（通常是左下角）3 秒钟以进行配对。</string>
     <string name="looking_for_a_device">正在寻找设备。</string>
     <string name="add_watch">添加手表</string>
+    <string name="local_solar_time">当地真太阳时</string>
+    <string name="local_mean_time">当地平时</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>系统：</b> 使用手机当前的系统时区。</li>
+        <li><b>当地平时 (LMT)：</b> 根据经度计算。经度每隔1度，与协调世界时 (UTC) 的偏差为4分钟。</li>
+        <li><b>当地真太阳时：</b> 根据太阳位置计算（均时差）。正午是指太阳到达最高点的时刻。</li>
+    ]]></string>
 </resources>

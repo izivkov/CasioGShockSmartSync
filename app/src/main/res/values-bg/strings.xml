@@ -207,4 +207,11 @@
     <string name="press_and_hold_connection_button_to_continue">Натиснете и задръжте бутона CONNECTION (обикновено ДОЛУ ВЛЯВО) на часовника си за 3 секунди, за да го сдвоите.</string>
     <string name="looking_for_a_device">Търсене на устройство.</string>
     <string name="add_watch">Добавяне на часовник</string>
+    <string name="local_solar_time">Местно Слънчево Време</string>
+    <string name="local_mean_time">Местно Средно Време</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>Система:</b> Използва текущата часова зона на телефона.</li>
+        <li><b>Местно Средно Време:</b> Изчислено въз основа на вашата географска дължина. Един градус се равнява на 4 минути отместване от UTC.</li>
+        <li><b>Местно Слънчево Време:</b> Изчислено въз основа на позицията на слънцето (Уравнение на времето). Обед е, когато слънцето е в най-високата си точка.</li>
+    ]]></string>
 </resources>

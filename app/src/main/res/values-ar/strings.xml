@@ -201,4 +201,11 @@
     <string name="press_and_hold_connection_button_to_continue">اضغط مع الاستمرار على زر الاتصال (عادة ما يكون أسفل اليسار) في ساعتك لمدة 3 ثوانٍ للاقتران.</string>
     <string name="looking_for_a_device">جاري البحث عن جهاز.</string>
     <string name="add_watch">إضافة ساعة</string>
+    <string name="local_solar_time">التوقيت الشمسي المحلي</string>
+    <string name="local_mean_time">التوقيت المتوسط المحلي</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>النظام:</b> استخدام المنطقة الزمنية الحالية للهاتف.</li>
+        <li><b>التوقيت المتوسط المحلي:</b> يتم حسابه بناءً على خط الطول الخاص بك. كل درجة تعادل 4 دقائق من الإزاحة عن توقيت UTC.</li>
+        <li><b>التوقيت الشمسي المحلي:</b> يتم حسابه بناءً على موقع الشمس (معادلة الوقت). الظهر هو عندما تكون الشمس في أعلى نقطة لها.</li>
+    ]]></string>
 </resources>

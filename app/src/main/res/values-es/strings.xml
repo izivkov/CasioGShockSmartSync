@@ -207,4 +207,11 @@ Después del segundo pitido doble, la app mostrará la pantalla de ajuste de hor
     <string name="press_and_hold_connection_button_to_continue">Mantén pulsado el botón de CONEXIÓN (normalmente el inferior izquierdo) de tu reloj durante 3 segundos para emparejarlo.</string>
     <string name="looking_for_a_device">Buscando un dispositivo.</string>
     <string name="add_watch">Añadir reloj</string>
+    <string name="local_solar_time">Hora Solar Local</string>
+    <string name="local_mean_time">Hora Media Local</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>Sistema:</b> Usa la zona horaria actual del teléfono.</li>
+        <li><b>Hora Media Local:</b> Calculada según su longitud. Un grado equivale a 4 minutos de diferencia con respecto al UTC.</li>
+        <li><b>Hora Solar Local:</b> Calculada según la posición del sol (Ecuación del Tiempo). El mediodía es cuando el sol está en su punto más alto.</li>
+    ]]></string>
 </resources>

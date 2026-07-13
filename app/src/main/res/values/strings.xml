@@ -46,6 +46,13 @@
     <string name="signal_chime">Signal (chime)</string>
     <string name="google_calendar_events">Google Calendar Events</string>
     <string name="local_time">Local Time</string>
+    <string name="local_solar_time">Local Solar Time</string>
+    <string name="local_mean_time">Local Mean Time</string>
+    <string name="time_zone_info"><![CDATA[
+        <li><b>System:</b> Use the phone\'s current time zone.</li>
+        <li><b>Local Mean Time:</b> Calculated based on your longitude. One degree equals 4 minutes of offset from UTC.</li>
+        <li><b>Local Solar Time:</b> Calculated based on the sun\'s position (Equation of Time). Noon is when the sun is at its highest point.</li>
+    ]]></string>
     <string name="send_to_watch">Send to\nWatch</string>
     <string name="phonecall_item">PhoneCall Item</string>
     <string name="home_time">Home Time</string>
