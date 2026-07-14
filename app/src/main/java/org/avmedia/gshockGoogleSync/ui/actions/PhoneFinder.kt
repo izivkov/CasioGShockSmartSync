@@ -2,7 +2,9 @@ package org.avmedia.gshockGoogleSync.ui.actions
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -166,6 +168,14 @@ object PhoneFinder {
         }
         notificationManager.createNotificationChannel(channel)
 
+        val fullScreenIntent = Intent(context, FindPhoneActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val fullScreenPendingIntent = PendingIntent.getActivity(
+            context, 0, fullScreenIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("Phone Finder Active")
             .setContentText("Your phone is ringing!")
@@ -173,6 +183,7 @@ object PhoneFinder {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setFullScreenIntent(fullScreenPendingIntent, true)
             .setOngoing(true)
             .build()
 
@@ -200,7 +211,7 @@ object PhoneFinder {
         ProgressEvents.runEventActions(Utils.AppHashCode() + "PhoneFinder", eventActions)
     }
 
-    private fun stopRing(context: Context, reason: String = "Unknown") {
+    fun stopRing(context: Context, reason: String = "Unknown") {
         Timber.d("PhoneFinder: stopRing() called. Reason: $reason")
         state.mediaPlayer?.let {
             try {
