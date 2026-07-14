@@ -212,9 +212,11 @@ Nachdem die Alarme eingestellt wurden, können Sie sie an die Uhr oder an die We
     <string name="add_watch">Uhr hinzufügen</string>
     <string name="local_solar_time">Lokale Sonnenzeit</string>
     <string name="local_mean_time">Lokale mittlere Ortszeit</string>
+    <string name="sidereal_time">Sternzeit</string>
     <string name="time_zone_info"><![CDATA[
         <li><b>System:</b> Verwendet die aktuelle Zeitzone des Telefons.</li>
         <li><b>Lokale mittlere Ortszeit:</b> Berechnet auf Basis Ihrer Längengrad-Position. Ein Grad entspricht einem Versatz von 4 Minuten zur UTC.</li>
         <li><b>Lokale Sonnenzeit:</b> Berechnet auf Basis des Sonnenstandes (Zeitgleichung). Mittag ist, wenn die Sonne ihren höchsten Punkt erreicht hat.</li>
+        <li><b>Sternzeit:</b> Berechnet auf der Grundlage der Erdrotation relativ zu den Sternen. Ein Sterntag ist etwa 4 Minuten kürzer als ein Sonnentag.</li>
     ]]></string>
 </resources>

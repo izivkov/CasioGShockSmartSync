@@ -199,9 +199,11 @@
     <string name="add_watch">Óra hozzáadása</string>
     <string name="local_solar_time">Helyi valódi szoláris idő</string>
     <string name="local_mean_time">Helyi középidő</string>
+    <string name="sidereal_time">Sziderikus idő</string>
     <string name="time_zone_info"><![CDATA[
         <li><b>Rendszer:</b> A telefon aktuális időzónáját használja.</li>
         <li><b>Helyi középidő:</b> A földrajzi hosszúság alapján számítva. Egy fok 4 perc eltérést jelent az UTC-hez képest.</li>
         <li><b>Helyi valódi szoláris idő:</b> A nap pozíciója alapján számítva (időegyenlet). A dél az a pillanat, amikor a nap a legmagasabb ponton van.</li>
+        <li><b>Sziderikus idő:</b> A Föld csillagokhoz viszonyított forgása alapján számítva. Egy sziderikus nap körülbelül 4 perccel rövidebb, mint egy szoláris nap.</li>
     ]]></string>
 </resources>

@@ -208,9 +208,11 @@
     <string name="add_watch">添加手表</string>
     <string name="local_solar_time">当地真太阳时</string>
     <string name="local_mean_time">当地平时</string>
+    <string name="sidereal_time">恒星时</string>
     <string name="time_zone_info"><![CDATA[
         <li><b>系统：</b> 使用手机当前的系统时区。</li>
         <li><b>当地平时 (LMT)：</b> 根据经度计算。经度每隔1度，与协调世界时 (UTC) 的偏差为4分钟。</li>
         <li><b>当地真太阳时：</b> 根据太阳位置计算（均时差）。正午是指太阳到达最高点的时刻。</li>
+        <li><b>恒星时:</b> 基于地球相对于恒星的自转计算。恒星日比太阳日短约 4 分钟。</li>
     ]]></string>
 </resources>

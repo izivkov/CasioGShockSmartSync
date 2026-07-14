@@ -211,9 +211,11 @@
     <string name="add_watch">Añadir reloj</string>
     <string name="local_solar_time">Hora Solar Local</string>
     <string name="local_mean_time">Hora Media Local</string>
+    <string name="sidereal_time">Tiempo sidéreo</string>
     <string name="time_zone_info"><![CDATA[
         <li><b>Sistema:</b> Usa la zona horaria actual del teléfono.</li>
         <li><b>Hora Media Local:</b> Calculada según su longitud. Un grado equivale a 4 minutos de diferencia con respecto al UTC.</li>
         <li><b>Hora Solar Local:</b> Calculada según la posición del sol (Ecuación del Tiempo). El mediodía es cuando el sol está en su punto más alto.</li>
+        <li><b>Tiempo sidéreo:</b> Calculado basándose en la rotación de la Tierra en relación con las estrellas. Un día sidéreo es aproximadamente 4 minutos más corto que un día solar.</li>
     ]]></string>
 </resources>

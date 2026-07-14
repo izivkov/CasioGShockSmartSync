@@ -16,11 +16,8 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
-import org.avmedia.gshockGoogleSync.services.LocationProvider
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.SolarTimeHelper
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 
@@ -107,7 +104,7 @@ class TimeViewModel @Inject constructor(
 
                 saveJob?.cancel()
                 saveJob = viewModelScope.launch {
-                    delay(3000)
+                    delay(0)
                     timeSettingsStorage.save()
                     saveJob = null
                 }
@@ -116,18 +113,7 @@ class TimeViewModel @Inject constructor(
     }
 
     private fun calculateOffset(option: TimeSettingsStorage.TimeZoneOption): Long {
-        val location = LocationProvider.getLocation(appContext) ?: return 0L
-        return when (option) {
-            TimeSettingsStorage.TimeZoneOption.SYSTEM -> 0L
-            TimeSettingsStorage.TimeZoneOption.LOCAL_MEAN_TIME -> SolarTimeHelper.getLocalMeanTimeOffsetMs(
-                location.longitude
-            )
-
-            TimeSettingsStorage.TimeZoneOption.LOCAL_SOLAR_TIME -> SolarTimeHelper.getLocalSolarTimeOffsetMs(
-                location.latitude,
-                location.longitude
-            )
-        }
+        return SolarTimeHelper.calculateTimeOffset(appContext, option)
     }
 
     override fun onCleared() {

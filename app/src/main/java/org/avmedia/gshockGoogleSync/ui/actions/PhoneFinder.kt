@@ -1,15 +1,19 @@
 package org.avmedia.gshockGoogleSync.ui.actions
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.AudioAttributes
+import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.os.PowerManager
+import androidx.core.app.NotificationCompat
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import timber.log.Timber
@@ -22,22 +26,96 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 object PhoneFinder {
+    private const val NOTIFICATION_ID = 1001
+    private const val CHANNEL_ID = "phone_finder_channel"
+    private const val WAKE_LOCK_TAG = "gshockGoogleSync:PhoneFinderWakeLock"
+    private const val WAKE_LOCK_TIMEOUT_MS = 35_000L
+
     private data class State(
         val mediaPlayer: MediaPlayer? = null,
         val sensorHandler: SensorHandler? = null,
+        val wakeLock: PowerManager.WakeLock? = null,
+        val audioFocusRequest: AudioFocusRequest? = null,
         val resetVolume: () -> Unit = {}
     )
 
     private var state = State()
 
     fun ring(context: Context): Result<Unit> = runCatching {
+        Timber.d("PhoneFinder: ring() called")
+        acquireWakeLock(context)
         getAlarmUri(context)?.let { uri ->
-            handleAudio(context, uri)
+            startAudio(context, uri)
+            showNotification(context)
             detectPhoneLifting(context)
-        } ?: throw IllegalStateException("No playable alarm or ringtone available on this device")
+        } ?: throw IllegalStateException("No playable alarm or ringtone available")
     }.onFailure { e ->
-        Timber.e(e, "Failed to ring phone: ${e.message}")
-        AppSnackbar("Unable to play alarm sound: ${e.message}")
+        Timber.e(e, "Failed to ring phone")
+        AppSnackbar(context.getString(R.string.unable_to_get_default_sound_uri))
+        stopRing(context, "Ring failure")
+    }
+
+    private fun acquireWakeLock(context: Context) {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        @Suppress("DEPRECATION")
+        val wakeLock = powerManager.newWakeLock(
+            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or 
+            PowerManager.ACQUIRE_CAUSES_WAKEUP or 
+            PowerManager.ON_AFTER_RELEASE,
+            WAKE_LOCK_TAG
+        ).apply {
+            setReferenceCounted(false)
+            acquire(WAKE_LOCK_TIMEOUT_MS)
+        }
+        Timber.d("PhoneFinder: wake lock acquired (Screen Bright + Wakeup)")
+        state = state.copy(wakeLock = wakeLock)
+    }
+
+    private fun startAudio(context: Context, alarmUri: android.net.Uri) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+        
+        audioManager.setStreamVolume(
+            AudioManager.STREAM_ALARM,
+            audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+            AudioManager.FLAG_PLAY_SOUND
+        )
+
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+            .build()
+
+        val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            .setAudioAttributes(audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener { } // Required for delayed focus gain
+            .build()
+
+        val focusResult = audioManager.requestAudioFocus(focusRequest)
+        Timber.d("PhoneFinder: Audio focus request result: $focusResult")
+
+        val mediaPlayer = MediaPlayer().apply {
+            setAudioAttributes(audioAttributes)
+            setDataSource(context, alarmUri)
+            isLooping = true
+            setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK)
+            prepare()
+            start()
+        }
+
+        val resetVolume: () -> Unit = {
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, previousVolume, 0)
+            audioManager.abandonAudioFocusRequest(focusRequest)
+        }
+
+        state = state.copy(
+            mediaPlayer = mediaPlayer, 
+            audioFocusRequest = focusRequest, 
+            resetVolume = resetVolume
+        )
+        Timber.d("PhoneFinder: MediaPlayer started. isPlaying=${mediaPlayer.isPlaying}")
     }
 
     private fun getAlarmUri(context: Context): android.net.Uri? {
@@ -47,20 +125,22 @@ object PhoneFinder {
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         ).filterNotNull()
 
-        // Try the standard "default" indirection URIs first.
         for (uri in candidates) {
             if (isPlayable(context, uri)) return uri
         }
 
-        // None of the defaults are playable (e.g. unset on this device/emulator) —
-        // fall back to the first concrete ringtone the system actually has on file.
-        val manager = RingtoneManager(context).apply { setType(RingtoneManager.TYPE_ALARM) }
-        val cursor = manager.cursor
-        if (cursor.moveToFirst()) {
-            return manager.getRingtoneUri(cursor.position)
+        // Fallback: search for any available ringtone
+        return try {
+            val manager = RingtoneManager(context).apply { setType(RingtoneManager.TYPE_ALARM) }
+            val cursor = manager.cursor
+            if (cursor.moveToFirst()) {
+                manager.getRingtoneUri(cursor.position)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
         }
-
-        return null
     }
 
     private fun isPlayable(context: Context, uri: android.net.Uri): Boolean {
@@ -71,79 +151,80 @@ object PhoneFinder {
         }
     }
 
-    private fun handleAudio(context: Context, alarmUri: android.net.Uri) {
-        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+    private fun showNotification(context: Context) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        audioManager.setStreamVolume(
-            AudioManager.STREAM_ALARM,
-            audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
-            AudioManager.FLAG_PLAY_SOUND
-        )
-
-        val resetVolume: () -> Unit = {
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, previousVolume, AudioManager.FLAG_PLAY_SOUND)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Phone Finder",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Channel for Phone Finder alarm"
+            enableVibration(true)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
         }
+        notificationManager.createNotificationChannel(channel)
 
-        val player = createPlayer(context, alarmUri)
-        if (player == null) {
-            resetVolume()
-            throw IllegalStateException("Unable to create a playable MediaPlayer for URI: $alarmUri")
-        }
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setContentTitle("Phone Finder Active")
+            .setContentText("Your phone is ringing!")
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setOngoing(true)
+            .build()
 
-        state = state.copy(mediaPlayer = player, resetVolume = resetVolume)
-    }
-
-    private fun createPlayer(context: Context, uri: android.net.Uri): MediaPlayer? {
-        val player = MediaPlayer()
-        return try {
-            player.setWakeMode(context, android.os.PowerManager.PARTIAL_WAKE_LOCK)
-            player.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
-            player.setDataSource(context, uri)
-            player.prepare()
-            player.isLooping = true
-            player.start()
-            player
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to create MediaPlayer for URI: $uri")
-            player.release() // clean up immediately instead of leaking until GC finalizes it
-            null
-        }
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun detectPhoneLifting(context: Context) {
-        state = state.copy(sensorHandler = SensorHandler(context) { stopRing() })
-        state.sensorHandler?.startListening(context)
+        state = state.copy(sensorHandler = SensorHandler(context) { stopRing(context, "Phone lifted") })
+        state.sensorHandler?.startListening()
 
+        // Auto-stop ringing after 30 seconds
         RingCanceler.schedule(30000) {
-            state.sensorHandler?.stopListening()
-            stopRing()
+            stopRing(context, "30s timeout reached")
         }
 
-        setupDisconnectListener()
+        setupDisconnectListener(context)
     }
 
-    private fun setupDisconnectListener() {
+    private fun setupDisconnectListener(context: Context) {
         val eventActions = arrayOf(
             EventAction("Disconnect") {
-                stopRing()
+                stopRing(context, "Watch disconnected")
             }
         )
         ProgressEvents.runEventActions(Utils.AppHashCode() + "PhoneFinder", eventActions)
     }
 
-    private fun stopRing() {
-        state.mediaPlayer?.let { player ->
-            player.stop()
-            player.release()
+    private fun stopRing(context: Context, reason: String = "Unknown") {
+        Timber.d("PhoneFinder: stopRing() called. Reason: $reason")
+        state.mediaPlayer?.let {
+            try {
+                if (it.isPlaying) it.stop()
+                it.release()
+            } catch (e: Exception) {
+                Timber.e(e, "Error stopping MediaPlayer")
+            }
         }
         state.resetVolume()
+        state.sensorHandler?.stopListening()
+        state.wakeLock?.let {
+            if (it.isHeld) {
+                it.release()
+                Timber.d("PhoneFinder: wake lock released")
+            }
+        }
+        
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
+        
         state = State() // Reset state
+        Timber.d("PhoneFinder: Ringing stopped and state reset")
     }
 
     private object RingCanceler {
@@ -168,135 +249,41 @@ object PhoneFinder {
     ) : SensorEventListener {
         private val sensorManager =
             context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        private val pickUpSensor = sensorManager.getDefaultSensor(25) // Hidden TYPE_PICK_UP_GESTURE
         private val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        private var startTime = System.currentTimeMillis()
 
-        private val triggerEventListener = object : android.hardware.TriggerEventListener() {
-            override fun onTrigger(event: android.hardware.TriggerEvent?) {
-                Timber.d("Pick-up gesture triggered")
-                stopListening()
-                onPhoneLifted()
-            }
-        }
-
-        fun startListening(context: Context) {
-            if (pickUpSensor != null) {
-                Timber.d("Using TYPE_PICK_UP_GESTURE")
-                sensorManager.requestTriggerSensor(triggerEventListener, pickUpSensor)
-                return
-            }
-
-            val sensorDelay =
-                if (context.checkSelfPermission(android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS)
-                    == PackageManager.PERMISSION_GRANTED
-                ) {
-                    SensorManager.SENSOR_DELAY_FASTEST
-                } else {
-                    SensorManager.SENSOR_DELAY_GAME
-                }
-
+        fun startListening() {
+            startTime = System.currentTimeMillis()
             accelerometer?.let { sensor ->
-                sensorManager.registerListener(this, sensor, sensorDelay)
+                sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
             }
         }
 
         fun stopListening() {
-            if (pickUpSensor != null) {
-                sensorManager.cancelTriggerSensor(triggerEventListener, pickUpSensor)
-            }
             sensorManager.unregisterListener(this)
         }
 
-        // --- Gesture-based pickup detection (works even while walking) ---
-
-        // We track the gravity-component direction (low-passed accel vector) to detect
-        // a genuine reorientation, plus a magnitude spike to detect the grab itself.
-
-        private var gravX = 0f
-        private var gravY = 0f
-        private var gravZ = SensorManager.GRAVITY_EARTH
-        private var gravityInitialized = false
-        private val gravityAlpha = 0.8f  // low-pass filter constant
-
-        private var baselineGravX = 0f
-        private var baselineGravY = 0f
-        private var baselineGravZ = SensorManager.GRAVITY_EARTH
-        private var lastBaselineUpdateMs = 0L
-        private val baselineUpdateIntervalMs = 1500L // refresh "resting orientation" periodically
-
-        private var lastTriggerTimeMs = 0L
-        private val cooldownMs = 2000L
-
-        // Spike threshold: a deliberate grab is sharper than a footstep bounce.
-        private val grabSpikeThreshold = 4.0f
-
-        // Orientation change threshold: angle (in terms of dot product) between
-        // baseline gravity direction and current gravity direction.
-        private val reorientationDotThreshold = 0.85f // cos(~32°) — below this = reoriented
-
         override fun onSensorChanged(event: SensorEvent?) {
+            // Ignore first 2 seconds to allow user to put phone down or avoid false triggers
+            if (System.currentTimeMillis() - startTime < 2000) return
+
             event?.takeIf { it.sensor.type == Sensor.TYPE_ACCELEROMETER }?.let { e ->
                 val x = e.values[0]
                 val y = e.values[1]
                 val z = e.values[2]
 
-                val now = System.currentTimeMillis()
                 val magnitude = kotlin.math.sqrt(x * x + y * y + z * z)
                 val deviation = abs(magnitude - SensorManager.GRAVITY_EARTH)
 
-                // Low-pass filter to isolate the gravity component (current orientation)
-                if (!gravityInitialized) {
-                    gravX = x; gravY = y; gravZ = z
-                    baselineGravX = x; baselineGravY = y; baselineGravZ = z
-                    lastBaselineUpdateMs = now
-                    gravityInitialized = true
-                    return
-                }
-                gravX = gravityAlpha * gravX + (1 - gravityAlpha) * x
-                gravY = gravityAlpha * gravY + (1 - gravityAlpha) * y
-                gravZ = gravityAlpha * gravZ + (1 - gravityAlpha) * z
-
-                // Periodically refresh the "resting orientation" baseline, but ONLY when
-                // motion is calm — so walking's steady bounce doesn't get treated as a
-                // pickup, and so the baseline tracks "phone sitting in pocket" rather
-                // than a moment mid-grab.
-                if (deviation < 1.0f && now - lastBaselineUpdateMs > baselineUpdateIntervalMs) {
-                    baselineGravX = gravX; baselineGravY = gravY; baselineGravZ = gravZ
-                    lastBaselineUpdateMs = now
-                }
-
-                // Detect a grab: sharp spike in magnitude (the act of snatching the phone)
-                if (deviation > grabSpikeThreshold && now - lastTriggerTimeMs > cooldownMs) {
-                    // Confirm with an orientation check: has the gravity direction
-                    // shifted meaningfully from the established baseline? Walking
-                    // jostles but does not reorient the phone in a pocket; pulling
-                    // it out does.
-                    val dot = normalizedDot(gravX, gravY, gravZ, baselineGravX, baselineGravY, baselineGravZ)
-
-                    if (dot < reorientationDotThreshold) {
-                        Timber.d("Phone picked up: deviation=$deviation, orientationDot=$dot")
-                        lastTriggerTimeMs = now
-                        stopListening()
-                        onPhoneLifted()
-                    } else {
-                        Timber.d("Spike without reorientation (likely footstep): deviation=$deviation, dot=$dot")
-                    }
+                // Increased threshold to 3.0f to avoid false triggers from vibration
+                if (deviation > 3.0f) {
+                    Timber.d("Phone picked up: deviation=$deviation")
+                    stopListening()
+                    onPhoneLifted()
                 }
             }
         }
 
-        private fun normalizedDot(
-            ax: Float, ay: Float, az: Float,
-            bx: Float, by: Float, bz: Float
-        ): Float {
-            val magA = kotlin.math.sqrt(ax * ax + ay * ay + az * az)
-            val magB = kotlin.math.sqrt(bx * bx + by * by + bz * bz)
-            if (magA == 0f || magB == 0f) return 1f
-            return (ax * bx + ay * by + az * bz) / (magA * magB)
-        }
-
-        override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-            // Needed to satisfy interface.
-        }
+        override fun onAccuracyChanged(p0: Sensor?, p1: Int) {}
     }
 }

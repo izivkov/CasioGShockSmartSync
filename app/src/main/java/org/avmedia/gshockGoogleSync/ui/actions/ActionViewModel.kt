@@ -35,6 +35,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.WatchTimeUpdater
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -49,7 +50,8 @@ constructor(
         @param:ApplicationContext val appContext: Context, // Inject application context
         private val calendarEvents: CalendarEvents,
         private val actionsStorage: ActionsStorage,
-        private val notificationProvider: NotificationProvider
+        private val notificationProvider: NotificationProvider,
+        private val watchTimeUpdater: WatchTimeUpdater
 ) : ViewModel() {
     private val _actions = MutableStateFlow<List<Action>>(emptyList())
     val actions: StateFlow<List<Action>> = _actions
@@ -112,7 +114,7 @@ constructor(
             saveJob?.cancel()
             saveJob =
                     viewModelScope.launch {
-                        delay(3000)
+                        delay(0)
                         actionsStorage.save()
                         _uiEvents.emit(
                                 UiEvent.ShowSnackbar(appContext.getString(R.string.actions_saved))
@@ -162,7 +164,7 @@ constructor(
             add(StartVoiceAssistAction("Start Voice Assistant", false))
             add(NextTrack("Skip to next track", false))
             add(FindPhoneAction(appContext.getString(R.string.find_phone), false))
-            add(SetTimeAction(appContext.getString(R.string.set_time), true, api))
+            add(SetTimeAction(appContext.getString(R.string.set_time), true, watchTimeUpdater))
             add(
                     SetEventsAction(
                             appContext.getString(R.string.set_reminders),
@@ -327,7 +329,7 @@ constructor(
     data class SetTimeAction(
             override var title: String,
             override var enabled: Boolean,
-            val api: GShockRepository
+            val watchTimeUpdater: WatchTimeUpdater
     ) :
             Action(
                     title,
@@ -355,14 +357,12 @@ constructor(
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
-            val timeOffset = LocalDataStorage.getFineTimeAdjustment(context)
-            val timeMs = System.currentTimeMillis() + timeOffset
 
             // actions are sun on the main lifecycle scope, because the Actions Fragment never gets
             // created.
             CoroutineScope(Dispatchers.Main).launch {
-                api.setTime(timeMs = timeMs)
-                lastSet = timeMs
+                watchTimeUpdater.updateTime()
+                lastSet = System.currentTimeMillis()
             }
         }
 

@@ -221,9 +221,11 @@
     <string name="add_watch">時計を追加</string>
     <string name="local_solar_time">地方真太陽時</string>
     <string name="local_mean_time">地方平均時</string>
+    <string name="sidereal_time">恒星時</string>
     <string name="time_zone_info"><![CDATA[
         <li><b>システム:</b> スマートフォンの現在のタイムゾーンを使用します。</li>
         <li><b>地方平均時 (LMT):</b> 経度に基づいて計算されます。経度1度はUTCから4分のオフセットに相当します。</li>
         <li><b>地方真太陽時:</b> 太陽の位置（均時差）に基づいて計算されます。正午は太陽が最も高い位置にある時刻です。</li>
+        <li><b>恒星時:</b> 恒星に対する地球の自転に基づき計算されます。恒星日は太陽日より約4分短くなります。</li>
     ]]></string>
 </resources>

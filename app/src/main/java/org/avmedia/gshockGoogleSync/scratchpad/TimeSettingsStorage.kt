@@ -14,7 +14,8 @@ class TimeSettingsStorage @Inject constructor(
     enum class TimeZoneOption {
         SYSTEM,
         LOCAL_MEAN_TIME,
-        LOCAL_SOLAR_TIME
+        LOCAL_SOLAR_TIME,
+        SIDEREAL_TIME
     }
 
     private var scratchpadBuffer: ByteArray = ByteArray(getStorageSize())

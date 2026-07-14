@@ -210,9 +210,11 @@
     <string name="add_watch">Afegir rellotge</string>
     <string name="local_solar_time">Hora Solar Local</string>
     <string name="local_mean_time">Hora Mitjana Local</string>
+    <string name="sidereal_time">Temps sideral</string>
     <string name="time_zone_info"><![CDATA[
         <li><b>Sistema:</b> Utilitza la zona horària actual del telèfon.</li>
         <li><b>Hora Mitjana Local:</b> Calculada segons la vostra longitud. Un grau equival a 4 minuts de diferència respecte a l\'UTC.</li>
         <li><b>Hora Solar Local:</b> Calculada segons la posició del sol (Equació del Temps). El migdia és quan el sol es troba en el seu punt més alt.</li>
+        <li><b>Temps sideral:</b> Calculat basat en la rotació de la Terra respecte a les estrelles. Un dia sideral és aproximadament 4 minuts més curt que un dia solar.</li>
     ]]></string>
 </resources>

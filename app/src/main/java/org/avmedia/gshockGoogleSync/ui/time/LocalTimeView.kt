@@ -3,6 +3,7 @@ package org.avmedia.gshockGoogleSync.ui.time
 import AppText
 import AppTextLarge
 import RealTimeClock
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
@@ -136,6 +140,7 @@ fun TimeZoneTextView(
         TimeSettingsStorage.TimeZoneOption.SYSTEM -> systemTimeZoneId
         TimeSettingsStorage.TimeZoneOption.LOCAL_MEAN_TIME -> stringResource(R.string.local_mean_time)
         TimeSettingsStorage.TimeZoneOption.LOCAL_SOLAR_TIME -> stringResource(R.string.local_solar_time)
+        TimeSettingsStorage.TimeZoneOption.SIDEREAL_TIME -> stringResource(R.string.sidereal_time)
     }
 
     Row(
@@ -145,12 +150,21 @@ fun TimeZoneTextView(
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
-            modifier = Modifier.weight(1f, fill = false)
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .zIndex(1f)
         ) {
             // Display the text with the current selection
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
+                modifier = Modifier
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 AppText(
                     text = displayValue,
@@ -191,6 +205,17 @@ fun TimeZoneTextView(
                         timeModel.onAction(
                             TimeAction.SetTimeZoneOption(
                                 TimeSettingsStorage.TimeZoneOption.LOCAL_SOLAR_TIME
+                            )
+                        )
+                        expanded = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { AppText(stringResource(R.string.sidereal_time)) },
+                    onClick = {
+                        timeModel.onAction(
+                            TimeAction.SetTimeZoneOption(
+                                TimeSettingsStorage.TimeZoneOption.SIDEREAL_TIME
                             )
                         )
                         expanded = false
