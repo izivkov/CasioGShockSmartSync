@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 
@@ -26,6 +28,15 @@ class FindPhoneActivity : ComponentActivity() {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     RunFindPhoneScreen()
                 }
+            }
+        }
+
+        // Close this screen automatically once PhoneFinderService stops,
+        // regardless of whether it stopped due to timeout, sensor pickup,
+        // or a watch disconnect.
+        lifecycleScope.launch {
+            PhoneFinderService.serviceStopped.collect {
+                finish()
             }
         }
     }
