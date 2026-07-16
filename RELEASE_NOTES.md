@@ -1,4 +1,4 @@
-# Release Notes - Casio G-Shock Smart Sync v42.5 — October 24, 2024
+# Release Notes - Casio G-Shock Smart Sync v42.5 — July 14, 2026
 
 ## ✨ Highlights
 
@@ -16,13 +16,15 @@ Introduced specialized time synchronization options for users interested in astr
 *   **Multilingual Support**: Fully translated into **11 languages**, including Arabic, Bulgarian, Catalan, Chinese, French, German, Hungarian, Japanese, Russian, and Spanish.
 
 ### ⚙️ Enhanced Automation & UI
-*   **Instant Action Saving**: Removed the manual "Send to Watch" button. Settings are now saved immediately to the watch upon modification for a seamless experience.
+*   **Instant Action Saving**: Removed the manual "Send to Watch" button in the Actions screen. Settings are now saved immediately to the watch upon modification for a seamless experience.
 *   **Improved Dropdown UI**: The time zone selector now features a clear visual border and improved layering to prevent accidental interaction with underlying controls.
 *   **Simplified Instructions**: Streamlined the connection screen instructions across all languages.
+*   **Home Time Display**: Fixed an issue where the Home Time value was not correctly displayed for certain watch models.
 
 ### 🛠 Reliability & Performance
-*   **Background Phone Finder**: Overhauled the Phone Finder for Android 14+ and Pixel devices. It now uses aggressive wake-up logic and high-priority notifications to ensure the alarm is heard even when the app is backgrounded for long periods.
+*   **Foreground Phone Finder**: Overhauled the Phone Finder to use a **Foreground Service** and **Full Screen Intent**. This ensures the alarm rings reliably on **Android 14, 15, and 17** (including Pixel devices) even when the app is backgrounded or the phone is locked.
 *   **Robust Motion Detection**: Simplified the "pick up to stop" logic with a 2-second grace period and improved vibration resistance (3.0g threshold) to prevent false triggers on hard surfaces.
+*   **Optimized Scratchpad Storage**: Completely redesigned the scratchpad management to use **bit-level packing**. The entire configuration (Alarm Names, Actions, and Time Settings) now fits into a compact, fixed-layout buffer, ensuring long-term data integrity and efficiency.
 *   **Auto-Location Permissions**: The app now ensures location permissions are requested early to support astronomical calculations immediately upon install.
 *   **Real-Time Clock**: The on-screen clock dynamically updates to show the selected LMT, LST, or Sidereal time in real-time.
 
