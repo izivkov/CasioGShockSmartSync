@@ -1,107 +1,145 @@
 package org.avmedia.gshockGoogleSync.scratchpad
 
 import org.avmedia.gshockapi.IGShockAPI
+import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.ceil
 
 @Singleton
 /**
  * The ScratchpadManager serves as the central coordinator for all scratchpad data operations.
- * It maintains a "master buffer" (byte array) that represents the state of the watch's scratchpad memory.
- *
- * Responsibilities:
- * - Aggregating data requirements from multiple [ScratchpadClient]s.
- * - Managing the lifecycle of data synchronization (load from watch, save to watch).
- * - Distributing relevant data slices to registered clients based on their offsets.
- * - Collecting data from clients to form the payload for writing to the watch.
+ * It maintains a "master buffer" and is responsible for bit-packing/unpacking data for its clients.
  */
 class ScratchpadManager @Inject constructor(
     private val api: IGShockAPI
 ) {
     private val clients = mutableListOf<ScratchpadClient>()
-    private var masterBuffer: ByteArray = ByteArray(0)
 
     /**
-     * Clients call this method to register themselves with the manager.
-     * The layout is determined by each client's fixed offset, not registration order.
+     * Literal list of allowed clients in their fixed sequential order.
      */
+    private val orderedClientClasses = listOf(
+        "AlarmNameStorage",
+        "ActionsStorage",
+        "TimeSettingsStorage"
+    )
+
+    private fun getLegacyLayoutMap(): Map<String, IntArray> {
+        return mapOf(
+            "AlarmNameStorage" to intArrayOf(0, 24),
+            "ActionsStorage" to intArrayOf(24, 16),
+            "TimeSettingsStorage" to intArrayOf(40, 8)
+        )
+    }
+
+    private fun getCurrentLayoutMap(): Map<String, IntArray> {
+        val pieces = mutableMapOf<String, IntArray>()
+        var currentBitOffset = 0
+        orderedClientClasses.forEach { className ->
+            val client = clients.find { it.javaClass.simpleName == className }
+            val bitSize = client?.getBitSize() ?: when (className) {
+                "AlarmNameStorage" -> (WatchInfo.alarmCount + 1) * 3
+                "ActionsStorage" -> 9
+                "TimeSettingsStorage" -> 2
+                else -> 0
+            }
+            pieces[className] = intArrayOf(currentBitOffset, bitSize)
+            currentBitOffset += bitSize
+        }
+        return pieces
+    }
+
     fun register(client: ScratchpadClient) {
+        val className = client.javaClass.simpleName
+        if (!orderedClientClasses.contains(className)) {
+            throw IllegalArgumentException("Client class '$className' not in ordered list")
+        }
+
         if (!clients.contains(client)) {
             clients.add(client)
-            updateBufferSize()
         }
     }
 
-
-    /**
-     * Updates the master buffer with the data from a specific client.
-     * This is useful for clients that want to commit their in-memory changes
-     * to the manager's central buffer without triggering a full save-to-watch cycle.
-     *
-     * @param client The client whose data should be written to the master buffer.
-     */
-    fun updateMasterBuffer(client: ScratchpadClient) {
-        val offset = client.getStorageOffset()
-        val clientBuffer = client.getBuffer()
-        if (offset + clientBuffer.size <= masterBuffer.size) {
-            clientBuffer.copyInto(destination = masterBuffer, destinationOffset = offset)
-        }
-    }
-
-    /**
-     * Calculates the required buffer size based on all registered clients' offsets and sizes.
-     */
-    private fun updateBufferSize() {
-        if (clients.isEmpty()) {
-            masterBuffer = ByteArray(0)
-            return
-        }
-        
-        // Find the maximum end position (offset + size) across all clients
-        val maxEndPosition = clients.maxOf { it.getStorageOffset() + it.getStorageSize() }
-        
-        // Only resize if needed
-        if (masterBuffer.size < maxEndPosition) {
-            val newBuffer = ByteArray(maxEndPosition)
-            // Preserve existing data
-            masterBuffer.copyInto(newBuffer, 0, 0, masterBuffer.size)
-            masterBuffer = newBuffer
-        }
-    }
-
-    /**
-     * Loads data from the watch and distributes it to all registered clients.
-     */
     internal suspend fun load() {
-        if (masterBuffer.isEmpty()) return
-        val data = api.getScratchpadData(0, masterBuffer.size)
-        if (data.size != masterBuffer.size) {
-            return
-        }
-        masterBuffer = data
+        val masterBuffer = api.getScratchpadData(
+            oldLayout = getLegacyLayoutMap(),
+            newLayout = getCurrentLayoutMap()
+        )
 
-        clients.forEach { client ->
-            val offset = client.getStorageOffset()
-            val size = client.getStorageSize()
-            if (offset + size <= masterBuffer.size) {
-                val slice = masterBuffer.copyOfRange(offset, offset + size)
-                client.setBuffer(slice)
+        var currentBitOffset = 0
+        // We must iterate in the defined order to correctly calculate offsets
+        orderedClientClasses.forEach { className ->
+            clients.find { it.javaClass.simpleName == className }?.let { client ->
+                val bitSize = client.getBitSize()
+                val clientData = extractBits(masterBuffer, currentBitOffset, bitSize)
+                client.decode(clientData)
+                currentBitOffset += bitSize
             }
         }
     }
 
-    /**
-     * Gathers data from all clients and saves the combined buffer to the watch.
-     */
     internal suspend fun save() {
-        if (masterBuffer.isEmpty()) return
-        clients.forEach { client ->
-            val offset = client.getStorageOffset()
-            val clientBuffer = client.getBuffer()
-            if (offset + clientBuffer.size <= masterBuffer.size) {
-                clientBuffer.copyInto(destination = masterBuffer, destinationOffset = offset)
+        val totalBits = orderedClientClasses.sumOf { className ->
+            clients.find { it.javaClass.simpleName == className }?.getBitSize() ?: 0
+        }
+        if (totalBits == 0) return
+
+        val masterBuffer = ByteArray(ceil(totalBits.toDouble() / 8.0).toInt())
+        var currentBitOffset = 0
+        
+        orderedClientClasses.forEach { className ->
+            clients.find { it.javaClass.simpleName == className }?.let { client ->
+                val bitSize = client.getBitSize()
+                val clientData = client.encode()
+                insertBits(masterBuffer, currentBitOffset, bitSize, clientData)
+                currentBitOffset += bitSize
             }
         }
-        api.setScratchpadData(masterBuffer, 0)
+        
+        api.setScratchpadData(masterBuffer)
+    }
+
+    private fun extractBits(source: ByteArray, startBit: Int, bitCount: Int): ByteArray {
+        val resultSize = ceil(bitCount.toDouble() / 8.0).toInt()
+        val result = ByteArray(resultSize)
+        
+        for (i in 0 until bitCount) {
+            val srcBit = startBit + i
+            val srcByteIdx = srcBit / 8
+            val srcBitPos = srcBit % 8
+            
+            if (srcByteIdx < source.size) {
+                val bit = (source[srcByteIdx].toInt() shr srcBitPos) and 1
+                if (bit == 1) {
+                    val dstByteIdx = i / 8
+                    val dstBitPos = i % 8
+                    result[dstByteIdx] = (result[dstByteIdx].toInt() or (1 shl dstBitPos)).toByte()
+                }
+            }
+        }
+        return result
+    }
+
+    private fun insertBits(target: ByteArray, startBit: Int, bitCount: Int, source: ByteArray) {
+        for (i in 0 until bitCount) {
+            val srcByteIdx = i / 8
+            val srcBitPos = i % 8
+            val bit = (source[srcByteIdx].toInt() shr srcBitPos) and 1
+            
+            val dstBit = startBit + i
+            val dstByteIdx = dstBit / 8
+            val dstBitPos = dstBit % 8
+            
+            if (dstByteIdx < target.size) {
+                var currentByte = target[dstByteIdx].toInt()
+                if (bit == 1) {
+                    currentByte = currentByte or (1 shl dstBitPos)
+                } else {
+                    currentByte = currentByte and (1 shl dstBitPos).inv()
+                }
+                target[dstByteIdx] = currentByte.toByte()
+            }
+        }
     }
 }
