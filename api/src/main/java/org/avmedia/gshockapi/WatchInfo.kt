@@ -30,7 +30,6 @@ data object WatchInfo {
     val worldCitiesCount:       Int     get() = state.info.worldCitiesCount
     val dstCount:               Int     get() = state.info.dstCount
     val alarmCount:             Int     get() = state.info.alarmCount
-    val hasAlarms:              Boolean get() = state.info.alarmCount > 0
     val hasAutoLight:           Boolean get() = state.info.hasAutoLight
     val hasReminders:           Boolean get() = state.info.hasReminders
     val shortLightDuration:     String  get() = state.info.shortLightDuration

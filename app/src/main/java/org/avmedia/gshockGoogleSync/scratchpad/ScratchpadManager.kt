@@ -1,7 +1,6 @@
 package org.avmedia.gshockGoogleSync.scratchpad
 
 import org.avmedia.gshockapi.IGShockAPI
-import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.ceil
@@ -25,31 +24,6 @@ class ScratchpadManager @Inject constructor(
         "TimeSettingsStorage"
     )
 
-    private fun getLegacyLayoutMap(): Map<String, IntArray> {
-        return mapOf(
-            "AlarmNameStorage" to intArrayOf(0, 24),
-            "ActionsStorage" to intArrayOf(24, 16),
-            "TimeSettingsStorage" to intArrayOf(40, 8)
-        )
-    }
-
-    private fun getCurrentLayoutMap(): Map<String, IntArray> {
-        val pieces = mutableMapOf<String, IntArray>()
-        var currentBitOffset = 0
-        orderedClientClasses.forEach { className ->
-            val client = clients.find { it.javaClass.simpleName == className }
-            val bitSize = client?.getBitSize() ?: when (className) {
-                "AlarmNameStorage" -> (WatchInfo.alarmCount + 1) * 3
-                "ActionsStorage" -> 9
-                "TimeSettingsStorage" -> 2
-                else -> 0
-            }
-            pieces[className] = intArrayOf(currentBitOffset, bitSize)
-            currentBitOffset += bitSize
-        }
-        return pieces
-    }
-
     fun register(client: ScratchpadClient) {
         val className = client.javaClass.simpleName
         if (!orderedClientClasses.contains(className)) {
@@ -62,10 +36,17 @@ class ScratchpadManager @Inject constructor(
     }
 
     internal suspend fun load() {
-        val masterBuffer = api.getScratchpadData(
-            oldLayout = getLegacyLayoutMap(),
-            newLayout = getCurrentLayoutMap()
-        )
+        val masterBuffer = api.getScratchpadData()
+
+        // The watch's scratchpad is either genuinely reset, or still holds data in the
+        // old (pre-0x94) magic-number layout — either way the packed bits no longer
+        // match our current layout. Skip decoding entirely: every client already holds
+        // its own sensible defaults from construction, so leaving them undecoded is
+        // equivalent to resetting all clients to defaults. The user will simply see
+        // default settings and can re-set anything they'd customized before.
+        if (api.isScratchpadReset()) {
+            return
+        }
 
         var currentBitOffset = 0
         // We must iterate in the defined order to correctly calculate offsets
@@ -87,7 +68,7 @@ class ScratchpadManager @Inject constructor(
 
         val masterBuffer = ByteArray(ceil(totalBits.toDouble() / 8.0).toInt())
         var currentBitOffset = 0
-        
+
         orderedClientClasses.forEach { className ->
             clients.find { it.javaClass.simpleName == className }?.let { client ->
                 val bitSize = client.getBitSize()
@@ -96,19 +77,19 @@ class ScratchpadManager @Inject constructor(
                 currentBitOffset += bitSize
             }
         }
-        
+
         api.setScratchpadData(masterBuffer)
     }
 
     private fun extractBits(source: ByteArray, startBit: Int, bitCount: Int): ByteArray {
         val resultSize = ceil(bitCount.toDouble() / 8.0).toInt()
         val result = ByteArray(resultSize)
-        
+
         for (i in 0 until bitCount) {
             val srcBit = startBit + i
             val srcByteIdx = srcBit / 8
             val srcBitPos = srcBit % 8
-            
+
             if (srcByteIdx < source.size) {
                 val bit = (source[srcByteIdx].toInt() shr srcBitPos) and 1
                 if (bit == 1) {
@@ -126,11 +107,11 @@ class ScratchpadManager @Inject constructor(
             val srcByteIdx = i / 8
             val srcBitPos = i % 8
             val bit = (source[srcByteIdx].toInt() shr srcBitPos) and 1
-            
+
             val dstBit = startBit + i
             val dstByteIdx = dstBit / 8
             val dstBitPos = dstBit % 8
-            
+
             if (dstByteIdx < target.size) {
                 var currentByte = target[dstByteIdx].toInt()
                 if (bit == 1) {

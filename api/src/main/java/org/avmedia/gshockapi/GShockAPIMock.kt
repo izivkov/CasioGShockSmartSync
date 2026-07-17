@@ -298,9 +298,6 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
         return true
     }
 
-    override suspend fun setScratchpadData(data: ByteArray) {
-    }
-
     override fun resetHand() {
         Timber.i("Hand reset")
     }
@@ -313,12 +310,11 @@ class GShockAPIMock(private val context: Context) : IGShockAPI {
         return true
     }
 
-    override suspend fun getScratchpadData(
-        oldLayout: Map<String, IntArray>?,
-        newLayout: Map<String, IntArray>?
-    ): ByteArray {
+    override suspend fun getScratchpadData(): ByteArray {
         return byteArrayOf()
     }
+
+    override suspend fun setScratchpadData(data: ByteArray) {}
 
     override fun isScratchpadReset(): Boolean {
         return false
