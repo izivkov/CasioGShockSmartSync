@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 
@@ -47,6 +47,7 @@ sealed class UiEvent {
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
     private val timeSettingsStorage: TimeSettingsStorage,
+    private val watchTimeUpdater: WatchTimeUpdater,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -80,10 +81,8 @@ class TimeViewModel @Inject constructor(
             TimeAction.SendTimeToWatch -> {
                 viewModelScope.launch {
                     runCatching {
-                        val fineAdjustment = LocalDataStorage.getFineTimeAdjustment(appContext)
-                        val timeMs = System.currentTimeMillis() + fineAdjustment + _state.value.timeOffset
                         AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
-                        api.setTime(timeMs = timeMs)
+                        watchTimeUpdater.updateTime()
                         AppSnackbar(appContext.getString(R.string.time_set))
                         refreshState()
                     }.onFailure { e ->

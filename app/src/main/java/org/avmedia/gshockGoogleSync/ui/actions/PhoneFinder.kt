@@ -46,7 +46,6 @@ object PhoneFinder {
         acquireWakeLock(context)
         getAlarmUri(context)?.let { uri ->
             startAudio(context, uri)
-            showNotification(context)
             detectPhoneLifting(context)
         } ?: throw IllegalStateException("No playable alarm or ringtone available")
     }.onFailure { e ->
@@ -149,34 +148,6 @@ object PhoneFinder {
         } catch (e: Exception) {
             false
         }
-    }
-
-    private fun showNotification(context: Context) {
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Phone Finder",
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            description = "Channel for Phone Finder alarm"
-            enableVibration(true)
-            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
-        }
-        notificationManager.createNotificationChannel(channel)
-
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("Phone Finder Active")
-            .setContentText("Your phone is ringing!")
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setOngoing(true)
-            .build()
-
-        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun detectPhoneLifting(context: Context) {

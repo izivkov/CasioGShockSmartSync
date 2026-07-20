@@ -20,6 +20,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.pairing.DeviceAssociationManager
 import org.avmedia.gshockGoogleSync.services.DeviceManager
+import org.avmedia.gshockGoogleSync.services.KeepAliveService
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
@@ -71,6 +72,9 @@ class GShockApplication : Application(), IScreenManager {
     @SuppressLint("NewApi")
     override fun onCreate() {
         super.onCreate()
+
+        KeepAliveService.start(this)
+
         ActivityProvider.initialize(this)
         eventHandler =
             MainEventHandler(context = this, repository = repository, screenManager = this)
@@ -85,6 +89,10 @@ class GShockApplication : Application(), IScreenManager {
         }
     }
 
+    override fun onTerminate() {
+        super.onTerminate()
+        KeepAliveService.stop(this)
+    }
 
     // ScreenManager implementation
     override fun showContentSelector(repository: GShockRepository) {

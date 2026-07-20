@@ -1,10 +1,17 @@
 package org.avmedia.gshockGoogleSync.pairing
 
+import android.content.Context
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
+import org.avmedia.gshockGoogleSync.services.KeepAliveService
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -15,7 +22,8 @@ import javax.inject.Singleton
 @Singleton
 class CompanionDevicePresenceMonitor @Inject constructor(
     // 1. Inject the repository directly in the constructor
-    private val repository: GShockRepository
+    private val repository: GShockRepository,
+    @ApplicationContext private val context: Context
 ) {
     // Use a class-level scope to manage coroutines safely
     private val monitorScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -38,7 +46,6 @@ class CompanionDevicePresenceMonitor @Inject constructor(
                     if (!repository.isConnected()) {
                         Timber.i("$addressValid waitForConnection")
                         repository.waitForConnection(addressValid)
-
                     } else {
                         Timber.i("Device already connected. Skipping wait.")
                     }

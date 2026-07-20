@@ -1,3 +1,18 @@
+# Release Notes - Casio G-Shock Smart Sync v43.0 — July 18, 2026
+
+## ✨ Highlights
+
+### ⌚ Centralized Time Synchronization
+*   **Unified Logic**: Centralized all watch time-setting operations into a single `WatchTimeUpdater` component. This ensures that every time synchronization event follows the same robust sequence of operations.
+*   **Reliable Astronomical Offsets**: Fixed a bug where setting the time from a watch button (Action) would sometimes incorrectly revert to **System Time** instead of the user's selected **Solar Time** or **LMT**.
+*   **Scratchpad Sync**: The app now explicitly awaits and loads the latest timezone settings from the watch's internal "scratchpad" memory before every time update, ensuring total consistency between the app UI and background actions.
+
+### 🛠 Reliability & Performance
+*   **Load Time Monitoring**: Added precise performance logging for scratchpad data operations to help diagnose and optimize communication speed with the watch hardware.
+*   **Architectural Cleanup**: Removed redundant background services and simplified the time-update flow between the Time and Actions screens for better long-term maintainability.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.5 — July 14, 2026
 
 ## ✨ Highlights
