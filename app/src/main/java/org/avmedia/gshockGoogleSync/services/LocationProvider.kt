@@ -12,6 +12,11 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 object LocationProvider {
+    private const val PREF_NAME = "location_provider_cache"
+    private const val KEY_LATITUDE = "cached_latitude"
+    private const val KEY_LONGITUDE = "cached_longitude"
+    private const val KEY_HAS_CACHED_LOCATION = "has_cached_location"
+
     sealed interface LocationResult {
         data class Success(val location: Location) : LocationResult
         data object NoProvider : LocationResult
@@ -37,8 +42,11 @@ object LocationProvider {
     fun getLocation(context: Context): Location? =
         runCatching {
             when (val result = getLocationResult(context)) {
-                is LocationResult.Success -> result.location
-                else -> null
+                is LocationResult.Success -> {
+                    cacheLocation(context, result.location)
+                    result.location
+                }
+                else -> getCachedLocation(context)
             }
         }.getOrNull()
 
@@ -52,6 +60,31 @@ object LocationProvider {
             ?: LocationResult.NoLocation
     }
 
+    private fun cacheLocation(context: Context, location: Location) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putFloat(KEY_LATITUDE, location.latitude.toFloat())
+            putFloat(KEY_LONGITUDE, location.longitude.toFloat())
+            putBoolean(KEY_HAS_CACHED_LOCATION, true)
+            apply()
+        }
+    }
+
+    private fun getCachedLocation(context: Context): Location? {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val hasCachedLocation = prefs.getBoolean(KEY_HAS_CACHED_LOCATION, false)
+        if (!hasCachedLocation) {
+            return null
+        }
+
+        val latitude = prefs.getFloat(KEY_LATITUDE, 0f).toDouble()
+        val longitude = prefs.getFloat(KEY_LONGITUDE, 0f).toDouble()
+
+        return runCatching {
+            Location(latitude, longitude)
+        }.getOrNull()
+    }
+
     /**
      * Provides a reliable, offline-first country code using a hybrid strategy.
      *
@@ -59,7 +92,7 @@ object LocationProvider {
      * 2. If that fails, it tries to use the Geocoder with the physical location (may use network).
      * 3. As a last resort, it falls back to the user's device language/region setting.
      *
-     * Note: This function is `suspend` because Geocoder\`s modern API is asynchronous.
+     * Note: This function is `suspend` because Geocoder`s modern API is asynchronous.
      *
      * @param context The application context.
      * @return A two-letter ISO country code (e.g., "US", "DE", "IN") or null if undetermined.

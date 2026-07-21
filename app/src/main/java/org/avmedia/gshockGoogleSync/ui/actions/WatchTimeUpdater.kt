@@ -27,7 +27,7 @@ class WatchTimeUpdater @Inject constructor(
         val timeZoneOffset = SolarTimeHelper.calculateTimeOffset(context, timeZoneOption)
         val timeMs = System.currentTimeMillis() + fineAdjustment + timeZoneOffset
 
-        Timber.d($$"Setting time to watch with fine adjustment: $fineAdjustment and timezone offset: $timeZoneOffset")
+        Timber.d("Setting time to watch with fine adjustment: $timeZoneOption $fineAdjustment and timezone offset: $timeZoneOffset")
         api.setTime(timeMs = timeMs)
     }
 }
