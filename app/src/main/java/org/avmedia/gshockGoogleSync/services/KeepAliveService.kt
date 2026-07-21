@@ -6,16 +6,11 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import org.avmedia.gshockGoogleSync.utils.Utils
 
-/**
- * Keeps the process alive/foregrounded while watch actions may fire, so that
- * audio playback (beep) and other action logic aren't throttled or killed by
- * background execution limits. Does nothing else — no business logic here.
- */
 class KeepAliveService : Service() {
 
     companion object {
@@ -23,7 +18,6 @@ class KeepAliveService : Service() {
         private const val CHANNEL_ID = "keep_alive_channel"
 
         fun start(context: Context) {
-
             val intent = Intent(context, KeepAliveService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -46,7 +40,7 @@ class KeepAliveService : Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "G-Shock Connection",
-                NotificationManager.IMPORTANCE_LOW // silent, just a status bar icon
+                NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(channel)
         }
@@ -59,7 +53,15 @@ class KeepAliveService : Service() {
             .setOngoing(true)
             .build()
 
-        startForeground(NOTIFICATION_ID, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

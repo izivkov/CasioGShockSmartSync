@@ -106,7 +106,7 @@
             android:name=".services.KeepAliveService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="connectedDevice" />
+            android:foregroundServiceType="dataSync" />
 
         <service
             android:name=".services.GShockCompanionDeviceService"
