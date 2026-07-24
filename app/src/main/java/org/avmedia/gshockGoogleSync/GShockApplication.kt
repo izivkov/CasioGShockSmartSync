@@ -29,6 +29,7 @@ import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
+import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -73,6 +74,7 @@ class GShockApplication : Application(), IScreenManager {
     override fun onCreate() {
         super.onCreate()
 
+        CrashReportHelper.installGlobalHandler(this)
         KeepAliveService.start(this)
 
         ActivityProvider.initialize(this)

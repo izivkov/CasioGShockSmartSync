@@ -20,6 +20,29 @@ object CrashReportHelper {
     private const val MAX_LOG_FILES = 5
     private const val PAIRING_CRASH_FLAG = "PairingCrashFlag"
 
+    /**
+     * Installs a global uncaught-exception handler so crashes that
+     * aren't already wrapped in a try/catch + logCrash() call site are
+     * still written to disk before the process dies. Call once, as
+     * early as possible, from Application.onCreate().
+     *
+     * This does not suppress the crash — the app still terminates,
+     * as it must for a genuine uncaught exception — but the report
+     * is on disk afterward instead of lost.
+     */
+    fun installGlobalHandler(context: Context) {
+        val appContext = context.applicationContext
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            try {
+                logCrash(appContext, throwable, "UNCAUGHT on thread '${thread.name}'")
+            } catch (loggingFailure: Exception) {
+                Timber.e(loggingFailure, "Failed to write crash log from global handler")
+            }
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
+    }
+
     /** Log a crash with full context information */
     fun logCrash(context: Context, throwable: Throwable, additionalInfo: String = "") {
         try {
@@ -33,17 +56,17 @@ object CrashReportHelper {
 
     /** Log a pairing-specific crash */
     fun logPairingCrash(
-            context: Context,
-            throwable: Throwable,
-            deviceAddress: String? = null,
-            deviceName: String? = null
+        context: Context,
+        throwable: Throwable,
+        deviceAddress: String? = null,
+        deviceName: String? = null
     ) {
         val info = buildString {
             append("PAIRING CRASH\n")
             append("Device Address: ${deviceAddress ?: "Unknown"}\n")
             append("Device Name: ${deviceName ?: "Unknown"}\n")
             append(
-                    "Last Device Address: ${LocalDataStorage.get(context, "LastDeviceAddress", "")}\n"
+                "Last Device Address: ${LocalDataStorage.get(context, "LastDeviceAddress", "")}\n"
             )
             append("Last Device Name: ${LocalDataStorage.get(context, "LastDeviceName", "")}\n")
         }
@@ -67,13 +90,13 @@ object CrashReportHelper {
 
     /** Build a comprehensive crash report */
     private fun buildCrashReport(
-            context: Context,
-            throwable: Throwable,
-            additionalInfo: String
+        context: Context,
+        throwable: Throwable,
+        additionalInfo: String
     ): String {
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())
         val stackTrace =
-                StringWriter().apply { throwable.printStackTrace(PrintWriter(this)) }.toString()
+            StringWriter().apply { throwable.printStackTrace(PrintWriter(this)) }.toString()
 
         return buildString {
             appendLine("=== CRASH REPORT ===")
@@ -102,10 +125,10 @@ object CrashReportHelper {
             appendLine("=== PAIRING STATE ===")
             try {
                 appendLine(
-                        "Last Device Address: ${LocalDataStorage.get(context, "LastDeviceAddress", "N/A")}"
+                    "Last Device Address: ${LocalDataStorage.get(context, "LastDeviceAddress", "N/A")}"
                 )
                 appendLine(
-                        "Last Device Name: ${LocalDataStorage.get(context, "LastDeviceName", "N/A")}"
+                    "Last Device Name: ${LocalDataStorage.get(context, "LastDeviceName", "N/A")}"
                 )
                 val addresses = LocalDataStorage.getDeviceAddresses(context)
                 appendLine("Stored Device Addresses: ${addresses.joinToString(", ")}")
