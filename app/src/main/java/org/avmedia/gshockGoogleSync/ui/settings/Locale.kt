@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,7 +109,7 @@ fun Locale(
                 }
             }
 
-            if (WatchInfo.hasDateFormat) {
+            WatchFeature(id = "locale.date_format") {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()

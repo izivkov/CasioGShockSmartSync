@@ -7,16 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage // Import the new class
-import org.avmedia.gshockGoogleSync.scratchpad.ScratchpadManager
-import org.avmedia.gshockapi.Alarm
-import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import java.util.Calendar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +15,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockapi.Alarm
+import org.avmedia.gshockapi.ProgressEvents
+import java.util.Calendar
 import javax.inject.Inject
 
 
@@ -53,6 +52,7 @@ sealed class UiEvent {
 class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
     private val alarmNameStorage: AlarmNameStorage,
+    private val watchFeatureManager: IWatchFeatureManager,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -71,14 +71,14 @@ class AlarmViewModel @Inject constructor(
             alarmNameStorage.load()
 
             val alarmsFromWatch = api.getAlarms()
-                .take(WatchInfo.alarmCount)
+                .take(watchFeatureManager.getAlarmCount())
                 .mapIndexed { index, alarm ->
                     // Use AlarmNameStorage to get the name
                     val name = alarmNameStorage.get(index)
                     alarm.copy(name = name)
                 }
 
-            val newAlarms = if (WatchInfo.chimeInSettings) {
+            val newAlarms = if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
                 val settings = api.getSettings()
                 alarmsFromWatch.mapIndexed { index, alarm ->
                     if (index == 0) alarm.copy(hasHourlyChime = settings.hourlyChime)
@@ -166,7 +166,7 @@ class AlarmViewModel @Inject constructor(
 
         runCatching {
             api.setAlarms(ArrayList(alarmsToSend))
-            if (WatchInfo.chimeInSettings) {
+            if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
                 // Ensure we get the latest hourly chime setting from the potentially modified list
                 val chimeSetting = alarmsToSend.getOrNull(0)?.hasHourlyChime ?: false
                 api.setSettings(api.getSettings().copy(hourlyChime = chimeSetting))

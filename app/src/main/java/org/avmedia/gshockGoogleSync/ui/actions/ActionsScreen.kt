@@ -28,8 +28,8 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 @Composable
@@ -99,13 +99,14 @@ private fun ActionsContent(modifier: Modifier = Modifier, actionsViewModel: Acti
 private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
     // We access the actions list to force recomposition when it changes
     val actions by actionsViewModel.actions.collectAsState()
+    val watchFeatureManager = LocalWatchFeatureManager.current
 
     return listOfNotNull(
-        if (WatchInfo.findButtonUserDefined)
+        if (watchFeatureManager.isFeatureSupported("actions.find_phone"))
             PhoneFinderView(actionsViewModel::updateAction, actionsViewModel)
         else null,
         SetTimeView(actionsViewModel::updateAction, actionsViewModel),
-        if (WatchInfo.hasReminders)
+        if (watchFeatureManager.isFeatureSupported("actions.reminders"))
             RemindersView(actionsViewModel::updateAction, actionsViewModel)
         else null,
         PhotoView(actionsViewModel::updateAction, actionsViewModel),

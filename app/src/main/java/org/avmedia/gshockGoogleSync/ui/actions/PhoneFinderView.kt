@@ -27,7 +27,7 @@ fun PhoneFinderView(
         onEnabledChange = { newValue ->
             isEnabled = newValue  // Update local state immediately
             findPhoneAction.enabled = newValue
-            onUpdate(findPhoneAction.copy(enabled = newValue))
+            onUpdate(findPhoneAction)
         }
     )
 }

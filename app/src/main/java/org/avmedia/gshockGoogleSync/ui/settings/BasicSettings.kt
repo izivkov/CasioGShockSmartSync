@@ -13,40 +13,52 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 
 @Composable
 fun BasicSettings(
     title: String,
     isSwitchOn: Boolean,
+    featureId: String? = null,
     onSwitchToggle: (Boolean) -> Unit
 ) {
-    AppCard(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Row(
+    val content = @Composable {
+        AppCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 0.dp, bottom = 0.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, top = 0.dp, bottom = 0.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                AppTextLarge(
-                    text = title,
-                    modifier = Modifier.padding(end = 6.dp)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    AppTextLarge(
+                        text = title,
+                        modifier = Modifier.padding(end = 6.dp)
+                    )
+                }
+
+                // Switch to toggle the option
+                AppSwitch(
+                    checked = isSwitchOn,
+                    onCheckedChange = onSwitchToggle
                 )
             }
-
-            // Switch to toggle the option
-            AppSwitch(
-                checked = isSwitchOn,
-                onCheckedChange = onSwitchToggle
-            )
         }
+    }
+
+    if (featureId != null) {
+        WatchFeature(id = featureId) {
+            content()
+        }
+    } else {
+        content()
     }
 }
 

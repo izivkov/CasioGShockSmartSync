@@ -28,7 +28,7 @@ fun SkipToNextTrackView(
         onEnabledChange = { newValue ->
             isEnabled = newValue
             nextTrackAction.enabled = newValue
-            onUpdate(nextTrackAction.copy(enabled = newValue))
+            onUpdate(nextTrackAction)
         }
     )
 }

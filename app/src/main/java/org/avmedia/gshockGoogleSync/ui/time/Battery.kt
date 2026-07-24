@@ -36,13 +36,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 
 @Composable
 fun Battery(
     timeModel: TimeViewModel = hiltViewModel()
 ) {
     val state by timeModel.state.collectAsState()
+    val watchFeatureManager = LocalWatchFeatureManager.current
     var result by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(state.batteryLevel) {
@@ -55,7 +57,9 @@ fun Battery(
             .rotate(90f)
             .wrapContentHeight(),
         factory = { context ->
-            BatteryView(context)
+            BatteryView(context).apply {
+                this.watchFeatureManager = watchFeatureManager
+            }
         },
         update = { batteryView ->
             batteryView.setPercent(result)
@@ -69,6 +73,7 @@ class BatteryView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
+    var watchFeatureManager: IWatchFeatureManager? = null
     private var radius: Float = 0f
 
     // Top
@@ -128,7 +133,7 @@ class BatteryView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (!WatchInfo.hasBatteryLevel) {
+        if (watchFeatureManager?.isFeatureSupported("time.battery") == false) {
             return
         }
 

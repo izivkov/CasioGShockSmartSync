@@ -81,7 +81,8 @@ fun PhotoView(
                                 cameraOrientation = ActionsViewModel.CameraOrientation.FRONT
                             )
                             viewState = newState
-                            onUpdate(viewState.action.copy(cameraOrientation = newState.cameraOrientation))
+                            viewState.action.cameraOrientation = newState.cameraOrientation
+                            onUpdate(viewState.action)
                         }
                     )
 
@@ -93,7 +94,8 @@ fun PhotoView(
                                 cameraOrientation = ActionsViewModel.CameraOrientation.BACK
                             )
                             viewState = newState
-                            onUpdate(viewState.action.copy(cameraOrientation = newState.cameraOrientation))
+                            viewState.action.cameraOrientation = newState.cameraOrientation
+                            onUpdate(viewState.action)
                         }
                     )
                 }
@@ -104,7 +106,8 @@ fun PhotoView(
                 onCheckedChange = { newValue ->
                     val newState = viewState.copy(isEnabled = newValue)
                     viewState = newState
-                    onUpdate(viewState.action.copy(enabled = newValue))
+                    viewState.action.enabled = newValue
+                    onUpdate(viewState.action)
                 },
                 modifier = Modifier.padding(8.dp)
             )

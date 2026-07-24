@@ -27,7 +27,7 @@ fun FlashlightView(
         onEnabledChange = { newValue ->
             isEnabled = newValue  // Update local state immediately
             flashlightAction.enabled = newValue
-            onUpdate(flashlightAction.copy(enabled = newValue))
+            onUpdate(flashlightAction)
         }
     )
 }

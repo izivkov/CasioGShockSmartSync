@@ -35,9 +35,9 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 @HiltViewModel
@@ -50,7 +50,8 @@ constructor(
         private val calendarEvents: CalendarEvents,
         private val actionsStorage: ActionsStorage,
         private val notificationProvider: NotificationProvider,
-        private val watchTimeUpdater: WatchTimeUpdater
+        private val watchTimeUpdater: WatchTimeUpdater,
+        private val watchFeatureManager: IWatchFeatureManager
 ) : ViewModel() {
     private val _actions = MutableStateFlow<List<Action>>(emptyList())
     val actions: StateFlow<List<Action>> = _actions
@@ -197,7 +198,7 @@ constructor(
         // disconnecting periodically.
     }
 
-    abstract class Action(
+    abstract inner class Action(
             open var title: String,
             open var enabled: Boolean,
             var runMode: RunMode = RunMode.SYNC,
@@ -261,7 +262,7 @@ constructor(
         }
     }
 
-    data class SetEventsAction(
+    inner class SetEventsAction(
             override var title: String,
             override var enabled: Boolean,
             val api: GShockRepository,
@@ -270,9 +271,9 @@ constructor(
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
-                RunEnvironment.NORMAL_CONNECTION -> enabled && WatchInfo.hasReminders
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && WatchInfo.hasReminders
-                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && WatchInfo.hasReminders
+                RunEnvironment.NORMAL_CONNECTION -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders")
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders")
+                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders")
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
             }
@@ -289,7 +290,7 @@ constructor(
         }
     }
 
-    data class ToggleFlashlightAction(override var title: String, override var enabled: Boolean) :
+    inner class ToggleFlashlightAction(override var title: String, override var enabled: Boolean) :
             Action(title, enabled) {
 
         override fun run(context: Context) {
@@ -302,13 +303,13 @@ constructor(
         }
     }
 
-    data class FindPhoneAction(override var title: String, override var enabled: Boolean) :
+    inner class FindPhoneAction(override var title: String, override var enabled: Boolean) :
             Action(title, enabled) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
                 RunEnvironment.NORMAL_CONNECTION -> false
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && WatchInfo.findButtonUserDefined
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.find_phone")
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
                 RunEnvironment.FIND_PHONE_PRESSED -> true
                 RunEnvironment.ALWAYS_CONNECTED -> false
@@ -325,7 +326,7 @@ constructor(
         }
     }
 
-    data class SetTimeAction(
+    inner class SetTimeAction(
             override var title: String,
             override var enabled: Boolean,
             val watchTimeUpdater: WatchTimeUpdater
@@ -341,7 +342,7 @@ constructor(
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             // update every hour
             val setTimeConditionAlwaysConnected =
-                    (WatchInfo.alwaysConnected &&
+                    (watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
                             (lastSet == null ||
                                     System.currentTimeMillis() - lastSet!! > 1000 * 60 * 60))
 
@@ -370,14 +371,14 @@ constructor(
         }
     }
 
-    data class SetLocationAction(override var title: String, override var enabled: Boolean) :
+    inner class SetLocationAction(override var title: String, override var enabled: Boolean) :
             Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
         }
     }
 
-    data class StartVoiceAssistAction(
+    inner class StartVoiceAssistAction(
             override var title: String,
             override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.SYNC) {
@@ -405,7 +406,7 @@ constructor(
         }
     }
 
-    data class NextTrack(
+    inner class NextTrack(
             override var title: String,
             override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
@@ -443,7 +444,7 @@ constructor(
         }
     }
 
-    data class PrayerAlarmsAction(
+    inner class PrayerAlarmsAction(
             override var title: String,
             override var enabled: Boolean,
             val api: GShockRepository,
@@ -456,7 +457,7 @@ constructor(
             // update every 6 hours
             val setTimeConditionAlwaysConnected =
                     (enabled &&
-                            WatchInfo.alwaysConnected &&
+                            watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
                             (lastSet == null ||
                                     System.currentTimeMillis() - lastSet!! > 6000 * 60 * 60))
 
@@ -474,7 +475,7 @@ constructor(
             // vvv 4. CALL THE METHOD ON THE INSTANCE vvv
             CoroutineScope(Dispatchers.Main).launch {
                 prayerAlarmsHelper
-                        .createNextPrayerAlarms(WatchInfo.alarmCount)
+                        .createNextPrayerAlarms(watchFeatureManager.getAlarmCount())
                         .onSuccess { alarms ->
                             // getAlarms need to be run first, otherwise setAlarms() will not work
                             api.getAlarms()
@@ -489,7 +490,7 @@ constructor(
         }
     }
 
-    data class Separator(override var title: String, override var enabled: Boolean) :
+    inner class Separator(override var title: String, override var enabled: Boolean) :
             Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -500,14 +501,14 @@ constructor(
         }
     }
 
-    data class MapAction(override var title: String, override var enabled: Boolean) :
+    inner class MapAction(override var title: String, override var enabled: Boolean) :
             Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
         }
     }
 
-    data class PhoneDialAction(
+    inner class PhoneDialAction(
             override var title: String,
             override var enabled: Boolean,
             var phoneNumber: String
@@ -557,7 +558,7 @@ constructor(
         BACK
     }
 
-    data class PhotoAction(
+    inner class PhotoAction(
             override var title: String,
             override var enabled: Boolean,
             var cameraOrientation: CameraOrientation,
@@ -665,7 +666,7 @@ constructor(
 
             // show notification if configured
             if (LocalDataStorage.getTimeAdjustmentNotification(context) &&
-                            !WatchInfo.alwaysConnected
+                            !watchFeatureManager.isFeatureSupported("time_adjustment.always_connected")
             ) { // only create notification for not-always connected watches.
                 showTimeSyncNotification()
             }
@@ -680,7 +681,7 @@ constructor(
     private fun showTimeSyncNotification() {
         val dateStr =
                 DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
-        val watchName = WatchInfo.name
+        val watchName = watchFeatureManager.getWatchName()
         val text = "Time set at $dateStr for $watchName watch"
 
         notificationProvider.createNotification(

@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 
 @Composable
 fun HomeTime(
@@ -22,11 +22,12 @@ fun HomeTime(
     timeModel: TimeViewModel = hiltViewModel()
 ) {
     val state by timeModel.state.collectAsState()
+    val watchFeatureManager = LocalWatchFeatureManager.current
     var text by remember { mutableStateOf(defaultText) }
 
     LaunchedEffect(state.homeTime) {
         text = withContext(Dispatchers.IO) {
-            if (WatchInfo.worldCities)
+            if (watchFeatureManager.isFeatureSupported("time.world_cities"))
                 state.homeTime
             else defaultText
         }

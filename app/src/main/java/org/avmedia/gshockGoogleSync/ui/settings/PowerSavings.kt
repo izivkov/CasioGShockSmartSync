@@ -31,6 +31,7 @@ fun PowerSavings(
     BasicSettings(
         title = title,
         isSwitchOn = powerSavingMode,
+        featureId = "settings.power_saving",
         onSwitchToggle = { newValue ->
             powerSavingMode = newValue
             onUpdate(powerSavingModeSetting.copy(powerSavingMode = newValue))

@@ -21,7 +21,7 @@ import androidx.constraintlayout.compose.Dimension
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
-import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 
 @Composable
 fun WatchInfoView(modifier: Modifier) {
@@ -93,6 +93,8 @@ fun WatchInfoCard1(
 
 @Composable
 fun WatchInfoCard2(modifier: Modifier = Modifier) {
+    val watchFeatureManager = LocalWatchFeatureManager.current
+
     AppCard(
         modifier = modifier
     ) {
@@ -111,7 +113,7 @@ fun WatchInfoCard2(modifier: Modifier = Modifier) {
             }
 
             WatchTemperature(
-                hasTemperature = WatchInfo.hasTemperature,
+                hasTemperature = watchFeatureManager.isFeatureSupported("time.temperature"),
                 isNormalButtonPressed = true,
                 isConnected = true,
             )
@@ -126,4 +128,3 @@ fun WatchInfoCard2(modifier: Modifier = Modifier) {
 fun PreviewWatchInfo() {
     WatchInfoView(Modifier)
 }
-

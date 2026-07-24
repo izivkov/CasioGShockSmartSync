@@ -27,7 +27,7 @@ fun VoiceAssistView(
         onEnabledChange = { newValue ->
             isEnabled = newValue
             voiceAssistAction.enabled = newValue
-            onUpdate(voiceAssistAction.copy(enabled = newValue))
+            onUpdate(voiceAssistAction)
         }
     )
 }

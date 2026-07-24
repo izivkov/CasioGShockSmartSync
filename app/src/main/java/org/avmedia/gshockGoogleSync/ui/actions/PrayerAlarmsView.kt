@@ -28,7 +28,7 @@ fun PrayerAlarmsView(
         onEnabledChange = { newValue ->
             isEnabled = newValue
             prayerAlarmsAction.enabled = newValue
-            onUpdate(prayerAlarmsAction.copy(enabled = newValue))
+            onUpdate(prayerAlarmsAction)
         }
     )
 }

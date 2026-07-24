@@ -23,9 +23,11 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.Settings
-import org.avmedia.gshockapi.WatchInfo
 import org.json.JSONObject
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
 
 abstract class Setting(val name: String) {
     open suspend fun save() {} // Default empty implementation
@@ -51,6 +53,7 @@ class SettingsViewModel
 @Inject
 constructor(
         private val api: GShockRepository,
+        private val watchFeatureManager: IWatchFeatureManager,
         @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -66,6 +69,18 @@ constructor(
 
     init {
         initializeSettings()
+        setupEventSubscription()
+    }
+
+    private fun setupEventSubscription() {
+        ProgressEvents.runEventActions(this.javaClass.canonicalName ?: "SettingsViewModel", arrayOf(
+            EventAction("DeviceName") {
+                initializeSettings()
+            },
+            EventAction("ConnectionSetupComplete") {
+                initializeSettings()
+            }
+        ))
     }
 
     private fun initializeSettings() {
@@ -205,8 +220,8 @@ constructor(
     private fun filter(settings: ArrayList<Setting>): ArrayList<Setting> {
         return settings.filter { setting ->
             when (setting) {
-                is PowerSavingMode -> WatchInfo.hasPowerSavingMode
-                is Font -> WatchInfo.hasMultipleFonts
+                is PowerSavingMode -> watchFeatureManager.isFeatureSupported("settings.power_saving")
+                is Font -> watchFeatureManager.isFeatureSupported("settings.multiple_fonts")
                 else -> true
             }
         } as
@@ -217,10 +232,10 @@ constructor(
     fun fromJson(jsonStr: String): ArrayList<Setting> {
         val updatedObjects = mutableSetOf<Setting>()
         val jsonObj = JSONObject(jsonStr)
-        val keys = jsonObj.keys()
+        val jsonObjKeys = jsonObj.keys()
 
-        while (keys.hasNext()) {
-            val key: String = keys.next()
+        while (jsonObjKeys.hasNext()) {
+            val key: String = jsonObjKeys.next()
             val value = jsonObj.get(key)
 
             when (key) {
@@ -242,7 +257,7 @@ constructor(
     }
 
     private fun handlePowerSavingMode(value: Any, updatedObjects: MutableSet<Setting>) {
-        if (WatchInfo.hasPowerSavingMode) {
+        if (watchFeatureManager.isFeatureSupported("settings.power_saving")) {
             val setting = state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
             setting.powerSavingMode = value == true
             updatedObjects.add(setting)
@@ -256,7 +271,7 @@ constructor(
     }
 
     private fun handleAdjustmentTimeMinutes(value: Any, updatedObjects: MutableSet<Setting>) {
-        if (!WatchInfo.alwaysConnected) {
+        if (!watchFeatureManager.isFeatureSupported("time_adjustment.always_connected")) {
             val setting = state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
             setting.adjustmentTimeMinutes = value as Int
             updatedObjects.add(setting)
@@ -330,7 +345,7 @@ constructor(
     }
 
     private fun handleFont(value: Any, updatedObjects: MutableSet<Setting>) {
-        if (WatchInfo.hasMultipleFonts) {
+        if (watchFeatureManager.isFeatureSupported("settings.multiple_fonts")) {
             val setting = state.value.settingsMap[Font::class.java] as Font
             setting.font =
                     if (value == Font.FontType.CLASSIC.value) {
@@ -398,7 +413,7 @@ constructor(
         smartSettings.add(light)
 
         // Power Save Mode
-        if (WatchInfo.hasPowerSavingMode) {
+        if (watchFeatureManager.isFeatureSupported("settings.power_saving")) {
             val batteryLevel = api.getBatteryLevel()
             val currentPowerSavingMode: PowerSavingMode =
                     state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
@@ -407,7 +422,7 @@ constructor(
             val powerSavings = PowerSavingMode(enablePowerSetting)
             smartSettings.add(powerSavings)
         }
-        if (WatchInfo.hasMultipleFonts) {
+        if (watchFeatureManager.isFeatureSupported("settings.multiple_fonts")) {
             val currentFontName = api.getSettings().font
             val newFontName = if (currentFontName == "Classic") Font.FontType.CLASSIC else Font.FontType.STANDARD
             val font = Font(newFontName)
@@ -454,7 +469,7 @@ constructor(
         settings.autoLight = lightSetting.autoLight
         settings.lightDuration = lightSetting.duration.value
 
-        if (WatchInfo.hasPowerSavingMode) {
+        if (watchFeatureManager.isFeatureSupported("settings.power_saving")) {
             val powerSavingMode: PowerSavingMode =
                     state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
             settings.powerSavingMode = powerSavingMode.powerSavingMode
@@ -470,7 +485,7 @@ constructor(
         settings.timeAdjustment = timeAdjustment.timeAdjustment
         settings.adjustmentTimeMinutes = timeAdjustment.adjustmentTimeMinutes
 
-        if (WatchInfo.hasMultipleFonts) {
+        if (watchFeatureManager.isFeatureSupported("settings.multiple_fonts")) {
             val fontSetting: Font = state.value.settingsMap[Font::class.java] as Font
             settings.font = fontSetting.font.value
         }

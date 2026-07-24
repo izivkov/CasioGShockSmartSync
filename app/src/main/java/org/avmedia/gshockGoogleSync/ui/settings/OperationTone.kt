@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 
 @Composable
 fun OperationalTone(
@@ -72,7 +72,7 @@ fun OperationalTone(
                 )
             }
 
-            if (WatchInfo.vibrate) {
+            WatchFeature(id = "operation_tone.vibrate") {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

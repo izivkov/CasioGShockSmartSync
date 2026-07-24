@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,9 +30,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
-import org.avmedia.gshockapi.WatchInfo
-import androidx.compose.runtime.mutableIntStateOf
+import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 
 @Composable
 fun TimeAdjustment(
@@ -40,6 +41,7 @@ fun TimeAdjustment(
 ) {
     val classType = SettingsViewModel.TimeAdjustment::class.java
     val state by settingsViewModel.state.collectAsState()
+    val watchFeatureManager = LocalWatchFeatureManager.current
     val timeAdjustmentSetting: SettingsViewModel.TimeAdjustment =
         settingsViewModel.getSetting(classType)
 
@@ -65,7 +67,7 @@ fun TimeAdjustment(
                 .fillMaxWidth()
                 .padding(0.dp)
         ) {
-            if (WatchInfo.alwaysConnected) {
+            WatchFeature(id = "time_adjustment.always_connected") {
                 FineAdjustmentRow(
                     modifier = Modifier
                         .padding(end = 12.dp, start = 12.dp, top = 6.dp),
@@ -75,7 +77,9 @@ fun TimeAdjustment(
                         onUpdate(timeAdjustmentSetting.copy(fineAdjustment = newValue))
                     }
                 )
-            } else {
+            }
+
+            if (!watchFeatureManager.isFeatureSupported("time_adjustment.always_connected")) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -199,5 +203,3 @@ fun TimeAdjustment(
 fun PreviewTimeAdjustment() {
     TimeAdjustment(onUpdate = {})
 }
-
-

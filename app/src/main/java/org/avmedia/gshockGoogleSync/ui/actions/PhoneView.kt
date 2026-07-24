@@ -86,7 +86,8 @@ fun PhoneView(
                                 val newPhone = newValue.ifEmpty { defaultPhone }
                                 viewState =
                                         viewState.copy(phoneNumber = newPhone, showDialog = false)
-                                onUpdate(viewState.action.copy(phoneNumber = newPhone))
+                                viewState.action.phoneNumber = newPhone
+                                onUpdate(viewState.action)
                             }
                     )
                 }
@@ -97,7 +98,7 @@ fun PhoneView(
                     onCheckedChange = { newValue ->
                         viewState = viewState.copy(isEnabled = newValue)
                         viewState.action.enabled = newValue
-                        onUpdate(viewState.action.copy(enabled = newValue))
+                        onUpdate(viewState.action)
                     }
             )
         }

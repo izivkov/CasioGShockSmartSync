@@ -23,8 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
+import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 import org.avmedia.gshockGoogleSync.utils.Utils
-import org.avmedia.gshockapi.WatchInfo
 
 @Composable
 fun Light(
@@ -32,6 +33,8 @@ fun Light(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by settingsViewModel.state.collectAsState()
+    val watchFeatureManager = LocalWatchFeatureManager.current
+
     val lightSetting =
         state.settingsMap[SettingsViewModel.Light::class.java] as SettingsViewModel.Light
 
@@ -51,7 +54,7 @@ fun Light(
                 .fillMaxWidth()
                 .padding(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 4.dp)
         ) {
-            if (WatchInfo.hasAutoLight) {
+            WatchFeature(id = "light.auto_light") {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -102,7 +105,7 @@ fun Light(
                         },
                         modifier = Modifier.padding(end = 0.dp)
                     )
-                    AppText(text = WatchInfo.shortLightDuration)
+                    AppText(text = watchFeatureManager.getString("light.short_duration"))
 
                     RadioButton(
                         selected = lightDuration == SettingsViewModel.Light.LightDuration.FOUR_SECONDS,
@@ -112,7 +115,7 @@ fun Light(
                         },
                         modifier = Modifier.padding(end = 0.dp)
                     )
-                    AppText(text = WatchInfo.longLightDuration)
+                    AppText(text = watchFeatureManager.getString("light.long_duration"))
                 }
             }
         }

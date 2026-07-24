@@ -18,7 +18,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
-import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import javax.inject.Inject
 
 data class TimeState(
@@ -48,6 +48,7 @@ class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
     private val timeSettingsStorage: TimeSettingsStorage,
     private val watchTimeUpdater: WatchTimeUpdater,
+    private val watchFeatureManager: IWatchFeatureManager,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -134,7 +135,7 @@ class TimeViewModel @Inject constructor(
 
                 _state.value = TimeState(
                     timer = api.getTimer(),
-                    homeTime = if (WatchInfo.hasHomeTime) api.getHomeTime() else "",
+                    homeTime = if (watchFeatureManager.isFeatureSupported("time.home_time")) api.getHomeTime() else "",
                     batteryLevel = api.getBatteryLevel(),
                     temperature = api.getWatchTemperature(),
                     watchName = api.getWatchName(),

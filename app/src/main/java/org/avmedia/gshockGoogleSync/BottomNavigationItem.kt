@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.Utils
-import org.avmedia.gshockapi.WatchInfo
 
 data class BottomNavigationItem(
     val label: String = "",
@@ -16,6 +16,7 @@ data class BottomNavigationItem(
 ) {
     @Composable
     fun bottomNavigationItems(): List<BottomNavigationItem> {
+        val watchFeatureManager = LocalWatchFeatureManager.current
 
         val baseItems = mutableListOf(
             BottomNavigationItem(
@@ -34,7 +35,7 @@ data class BottomNavigationItem(
             ),
         )
 
-        if (WatchInfo.hasReminders) {
+        if (watchFeatureManager.isFeatureSupported("actions.reminders")) {
             baseItems.add(
                 BottomNavigationItem(
                     label = Utils.shortenString(

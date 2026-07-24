@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.scratchpad
 
-import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.ceil

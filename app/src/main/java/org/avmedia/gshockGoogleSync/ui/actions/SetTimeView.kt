@@ -28,7 +28,7 @@ fun SetTimeView(
         onEnabledChange = { newValue ->
             isEnabled = newValue  // Update local state immediately
             setTimeAction.enabled = newValue
-            onUpdate(setTimeAction.copy(enabled = newValue))
+            onUpdate(setTimeAction)
         }
     )
 }

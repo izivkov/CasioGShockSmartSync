@@ -27,7 +27,7 @@ fun RemindersView(
         onEnabledChange = { newValue ->
             isEnabled = newValue
             setEventsAction.enabled = newValue
-            onUpdate(setEventsAction.copy(enabled = newValue))
+            onUpdate(setEventsAction)
         }
     )
 }
