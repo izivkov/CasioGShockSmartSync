@@ -1,3 +1,20 @@
+# Release Notes - Casio G-Shock Smart Sync v44.0 — July 24, 2026
+
+## ✨ Highlights
+
+### 🎨 Dynamic UI Visibility
+Introduced a powerful new system to automatically adapt the app's interface to the specific hardware capabilities of your connected G-Shock watch:
+*   **Centralized Feature Management**: All watch capability logic is now handled by a new `WatchFeatureManager`. This decouples the user interface from the underlying hardware details, ensuring a cleaner and more reliable experience.
+*   **Intelligent Auto-Hiding**: Settings that your specific watch model doesn't support (such as **Power Saving Mode**, **Multiple Fonts**, or **Date Format**) will now be automatically hidden from the menus, keeping the interface simple and relevant.
+*   **Reactive UI Updates**: The app now intelligently re-evaluates available features the moment your watch finishes connecting. Navigation tabs like **Events** will dynamically appear or disappear based on whether your watch supports reminders.
+*   **"N/A" Placeholder Support**: Introduced a standard "N/A" view for entire feature cards that are unavailable, providing clear feedback when a watch model lacks a specific category of functionality.
+
+### 🛠 Architectural Improvements
+*   **Injectable Capability Layer**: ViewModels now use a shared `IWatchFeatureManager` interface instead of accessing low-level watch properties directly. This significantly improves the app's testability and overall stability.
+*   **Diagnostic Logging**: Added enhanced logging for feature evaluation to help developers quickly diagnose model-specific visibility issues.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v43.0 — July 18, 2026
 
 ## ✨ Highlights

@@ -11,7 +11,7 @@ import javax.inject.Singleton
 interface IWatchFeatureManager {
     fun isFeatureSupported(featureId: String): Boolean
     fun isCardSupported(cardId: String): Boolean
-    fun getString(featureId: String): String
+    fun getString(featureId: String): String?
     fun getWatchName(): String
     fun getAlarmCount(): Int
 }
@@ -32,6 +32,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         ))
     }
 
+    // To support a new WatchInfo feature: add one line here.
     private val featureMap = mapOf(
         "locale.date_format" to { WatchInfo.hasDateFormat },
         "settings.power_saving" to { WatchInfo.hasPowerSavingMode },
@@ -48,11 +49,15 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "time_adjustment.always_connected" to { WatchInfo.alwaysConnected }
     )
 
+    // To support a new WatchInfo string field: add one line here.
     private val stringMap = mapOf(
         "light.short_duration" to { WatchInfo.shortLightDuration },
         "light.long_duration" to { WatchInfo.longLightDuration }
     )
 
+    // To group features under one card: add/extend one line here.
+    // A cardId with no entry (or an empty list) falls back to "always supported" —
+    // see isCardSupported below.
     private val cardGroups = mapOf(
         "locale_card" to listOf("locale.date_format"),
         "power_saving_card" to listOf("settings.power_saving"),
@@ -64,22 +69,34 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
 
     override fun isFeatureSupported(featureId: String): Boolean {
         refreshCounter.intValue // Observe for recomposition
-        val supported = featureMap[featureId]?.invoke() ?: true
+        val lookup = featureMap[featureId]
+        if (lookup == null) {
+            Timber.w("isFeatureSupported: unknown featureId '$featureId' — defaulting to supported=true")
+        }
+        val supported = lookup?.invoke() ?: true
         Timber.d("isFeatureSupported: id=$featureId, supported=$supported (Watch: ${WatchInfo.model})")
         return supported
     }
 
     override fun isCardSupported(cardId: String): Boolean {
         refreshCounter.intValue // Observe for recomposition
-        val features = cardGroups[cardId] ?: return true
+        val features = cardGroups[cardId]
+        if (features == null) {
+            Timber.w("isCardSupported: unknown cardId '$cardId' — defaulting to supported=true")
+            return true
+        }
         val supported = features.any { isFeatureSupported(it) }
         Timber.d("isCardSupported: id=$cardId, supported=$supported")
         return supported
     }
 
-    override fun getString(featureId: String): String {
+    override fun getString(featureId: String): String? {
         refreshCounter.intValue // Observe for recomposition
-        return stringMap[featureId]?.invoke() ?: ""
+        val lookup = stringMap[featureId]
+        if (lookup == null) {
+            Timber.w("getString: unknown featureId '$featureId'")
+        }
+        return lookup?.invoke()
     }
 
     override fun getWatchName(): String {

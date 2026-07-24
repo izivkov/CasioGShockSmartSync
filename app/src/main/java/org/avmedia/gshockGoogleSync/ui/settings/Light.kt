@@ -105,7 +105,7 @@ fun Light(
                         },
                         modifier = Modifier.padding(end = 0.dp)
                     )
-                    AppText(text = watchFeatureManager.getString("light.short_duration"))
+                    AppText(text = watchFeatureManager.getString("light.short_duration") as String)
 
                     RadioButton(
                         selected = lightDuration == SettingsViewModel.Light.LightDuration.FOUR_SECONDS,
@@ -115,7 +115,7 @@ fun Light(
                         },
                         modifier = Modifier.padding(end = 0.dp)
                     )
-                    AppText(text = watchFeatureManager.getString("light.long_duration"))
+                    AppText(text = watchFeatureManager.getString("light.long_duration") as String)
                 }
             }
         }
