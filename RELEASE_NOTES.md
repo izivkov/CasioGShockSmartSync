@@ -1,3 +1,24 @@
+# Release Notes - Casio G-Shock Smart Sync v45.0 — July 25, 2026
+
+## ✨ Highlights
+
+### 🛡️ Global Crash Reporting
+Improved app stability and diagnostic capabilities with a new global error handling system:
+*   **Persistent Crash Logs**: Implemented a global uncaught exception handler that automatically captures and writes diagnostic logs to disk even if the app crashes unexpectedly. This ensures critical debugging information is preserved for future troubleshooting.
+*   **Early Initialization**: The reporting system now starts immediately upon application launch, providing coverage for early-lifecycle initialization errors.
+
+### 📚 Developer & Technical Deep-Dive
+Introduced comprehensive technical documentation to aid contributors and power users:
+*   **New Technical Overview**: Created `TECHNICAL-OVERVIEW.md`, providing a detailed map of the app's architecture, including the background connection lifecycle, calendar sync engine, and the "Actions" pipeline.
+*   **Internal Protocol Documentation**: Detailed the bit-packed "Scratchpad" memory layout used to store custom alarm names and action settings on the watch hardware.
+
+### 🛠 Reliability & Infrastructure
+*   **Build System Update**: Updated the Android Gradle Plugin (AGP) to **v9.3.1**, ensuring compatibility with the latest Android Studio features and build optimizations.
+*   **Service Robustness**: Enhanced the `KeepAliveService` with improved error handling and Android 14+ timeout management, ensuring background tasks terminate gracefully when system limits are reached.
+*   **Project Cleanup**: Streamlined the project structure by removing legacy local module references in favor of the production-ready GShockAPI library.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v44.0 — July 24, 2026
 
 ## ✨ Highlights
