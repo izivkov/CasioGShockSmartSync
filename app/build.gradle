@@ -66,8 +66,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.gshockapi)
-    // implementation project(':api')
+    // fication here:implementation(libs.gshockapi)
+    implementation project(':api')
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

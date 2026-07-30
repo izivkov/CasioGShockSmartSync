@@ -43,21 +43,20 @@ class CalendarEvents @Inject constructor(
         val cr: ContentResolver = context.contentResolver
 
         val uri = buildCalendarUri()
-        val cursor = cr.query(
+        val excludedCalendarIds = getExcludedCalendarIds(cr)
+
+        cr.query(
             uri,
             getProjection(),
             buildSelection(),
             null,
             "${CalendarContract.Instances.BEGIN} ASC"
-        )
-
-        val excludedCalendarIds = getExcludedCalendarIds(cr)
-
-        calendarObserver.register(cr, uri)
-        cursor?.let {
-            processCursor(it, events, excludedCalendarIds)
+        ).use { cursor ->
+            calendarObserver.register(cr, uri)
+            cursor?.let {
+                processCursor(it, events, excludedCalendarIds)
+            }
         }
-        cursor?.close()
 
         return events
     }

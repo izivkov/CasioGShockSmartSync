@@ -60,7 +60,14 @@ class NotificationMonitorService : NotificationListenerService() {
 
     override fun onListenerConnected() {
         super.onListenerConnected()
+        isBound = true
         Timber.i("Notification listener service connected")
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        isBound = false
+        Timber.i("Notification listener service disconnected")
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
@@ -136,7 +143,7 @@ class NotificationMonitorService : NotificationListenerService() {
     }
 
     companion object {
-        private var isRunning = false
+        private var isBound = false
 
         private fun isNotificationGranted(context: Context): Boolean {
             val packageName = context.packageName
@@ -147,31 +154,16 @@ class NotificationMonitorService : NotificationListenerService() {
             return flat?.contains(packageName) == true
         }
 
-        private fun toggleNotificationListenerService(context: Context) {
-            val pm = context.packageManager
-            val componentName = ComponentName(context, NotificationMonitorService::class.java)
-            pm.setComponentEnabledSetting(
-                componentName,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP
-            )
-            pm.setComponentEnabledSetting(
-                componentName,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP
-            )
-        }
 
         fun startService(context: Context) {
             if (!isNotificationGranted(context)) {
                 openNotificationListenerSettings(context)
             } else {
-                // Force reconnect the service...
-                // val toggleIntent = Intent(context, NotificationMonitorService::class.java)
-                // context.startService(toggleIntent)
-
-                // Toggling is more reliable than restarting the service
-                toggleNotificationListenerService(context)
+                if (!isBound) {
+                    requestRebind(ComponentName(context, NotificationMonitorService::class.java))
+                } else {
+                    Timber.d("NotificationMonitorService already bound. Skipping rebind.")
+                }
             }
         }
 
