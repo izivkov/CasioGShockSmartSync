@@ -35,6 +35,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
     // To support a new WatchInfo feature: add one line here.
     private val featureMap = mapOf(
         "locale.date_format" to { WatchInfo.hasDateFormat },
+        "locale.week_language" to { WatchInfo.weekLanguageSupported },
         "settings.power_saving" to { WatchInfo.hasPowerSavingMode },
         "settings.multiple_fonts" to { WatchInfo.hasMultipleFonts },
         "light.auto_light" to { WatchInfo.hasAutoLight },

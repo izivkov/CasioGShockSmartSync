@@ -159,28 +159,30 @@ fun Locale(
                 }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            ) {
-                AppTextLarge(
-                    text = stringResource(
-                        id = R.string.language
-                    ),
+            WatchFeature(id = "locale.week_language") {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 0.dp)
-                )
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                ) {
+                    AppTextLarge(
+                        text = stringResource(
+                            id = R.string.language
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 0.dp)
+                    )
 
-                LanguageDropdownMenu(
-                    modifier = Modifier
-                        .weight(1.5f)
-                        .padding(bottom = 2.dp),
-                    onUpdate = onUpdate,
-                    localeSetting = localeSetting,
-                )
+                    LanguageDropdownMenu(
+                        modifier = Modifier
+                            .weight(1.5f)
+                            .padding(bottom = 2.dp),
+                        onUpdate = onUpdate,
+                        localeSetting = localeSetting,
+                    )
+                }
             }
         }
     }
