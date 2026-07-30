@@ -35,6 +35,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
     // To support a new WatchInfo feature: add one line here.
     private val featureMap = mapOf(
         "locale.date_format" to { WatchInfo.hasDateFormat },
+        "locale.time_format" to { WatchInfo.hasTimeFormat },
         "locale.week_language" to { WatchInfo.weekLanguageSupported },
         "settings.power_saving" to { WatchInfo.hasPowerSavingMode },
         "settings.multiple_fonts" to { WatchInfo.hasMultipleFonts },
@@ -60,7 +61,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
     // A cardId with no entry (or an empty list) falls back to "always supported" —
     // see isCardSupported below.
     private val cardGroups = mapOf(
-        "locale_card" to listOf("locale.date_format"),
+        "locale_card" to listOf("locale.date_format", "locale.time_format", "locale.week_language"),
         "power_saving_card" to listOf("settings.power_saving"),
         "font_card" to listOf("settings.multiple_fonts"),
         "light_card" to listOf("light.auto_light"),

@@ -107,9 +107,15 @@ fun SettingsList() {
     }
 
     Column(modifier = Modifier) {
-        Locale(settingsViewModel::onSettingUpdated)
-        OperationalTone(settingsViewModel::onSettingUpdated)
-        Light(settingsViewModel::onSettingUpdated)
+        WatchFeature(id = "locale_card") {
+            Locale(settingsViewModel::onSettingUpdated)
+        }
+        WatchFeature(id = "operation_tone_card") {
+            OperationalTone(settingsViewModel::onSettingUpdated)
+        }
+        WatchFeature(id = "light_card") {
+            Light(settingsViewModel::onSettingUpdated)
+        }
 
         WatchFeature(id = "settings.power_saving") {
             PowerSavings(settingsViewModel::onSettingUpdated)
@@ -117,7 +123,9 @@ fun SettingsList() {
         WatchFeature(id = "settings.multiple_fonts") {
             Font(settingsViewModel::onSettingUpdated)
         }
-        TimeAdjustment(settingsViewModel::onSettingUpdated)
+        WatchFeature(id = "time_adjustment_card") {
+            TimeAdjustment(settingsViewModel::onSettingUpdated)
+        }
     }
 }
 

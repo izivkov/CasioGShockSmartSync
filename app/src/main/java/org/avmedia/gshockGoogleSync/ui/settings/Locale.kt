@@ -61,51 +61,53 @@ fun Locale(
                 .padding(start = 12.dp, end = 12.dp, top = 2.dp, bottom = 2.dp)
         ) {
             // Time Format Section
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                AppTextLarge(
-                    text = stringResource(
-                        id = R.string.time_format
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 12.dp)
-                )
-
+            WatchFeature(id = "locale.time_format") {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically // Aligns children vertically in the center
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    RadioButton(
-                        selected = timeFormat == SettingsViewModel.Locale.TimeFormat.TWELVE_HOURS,
-                        onClick = {
-                            timeFormat = SettingsViewModel.Locale.TimeFormat.TWELVE_HOURS
-                            localeSetting.timeFormat = timeFormat
-                            onUpdate(
-                                localeSetting.copy(timeFormat = timeFormat)
+                    AppTextLarge(
+                        text = stringResource(
+                            id = R.string.time_format
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 12.dp)
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically // Aligns children vertically in the center
+                    ) {
+                        RadioButton(
+                            selected = timeFormat == SettingsViewModel.Locale.TimeFormat.TWELVE_HOURS,
+                            onClick = {
+                                timeFormat = SettingsViewModel.Locale.TimeFormat.TWELVE_HOURS
+                                localeSetting.timeFormat = timeFormat
+                                onUpdate(
+                                    localeSetting.copy(timeFormat = timeFormat)
+                                )
+                            }
+                        )
+                        AppTextLarge(
+                            text = stringResource(
+                                id = R.string._12h
                             )
-                        }
-                    )
-                    AppTextLarge(
-                        text = stringResource(
-                            id = R.string._12h
                         )
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    RadioButton(
-                        selected = timeFormat == SettingsViewModel.Locale.TimeFormat.TWENTY_FOUR_HOURS,
-                        onClick = {
-                            timeFormat = SettingsViewModel.Locale.TimeFormat.TWENTY_FOUR_HOURS
-                            localeSetting.timeFormat = timeFormat
-                            onUpdate(localeSetting.copy(timeFormat = timeFormat))
-                        }
-                    )
-                    AppTextLarge(
-                        text = stringResource(
-                            id = R.string._24h
+                        Spacer(modifier = Modifier.width(10.dp))
+                        RadioButton(
+                            selected = timeFormat == SettingsViewModel.Locale.TimeFormat.TWENTY_FOUR_HOURS,
+                            onClick = {
+                                timeFormat = SettingsViewModel.Locale.TimeFormat.TWENTY_FOUR_HOURS
+                                localeSetting.timeFormat = timeFormat
+                                onUpdate(localeSetting.copy(timeFormat = timeFormat))
+                            }
                         )
-                    )
+                        AppTextLarge(
+                            text = stringResource(
+                                id = R.string._24h
+                            )
+                        )
+                    }
                 }
             }
 
