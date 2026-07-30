@@ -1,14 +1,10 @@
 <resources>
-    <string name="title_time">Време</string>
-    <string name="title_alarms">Аларми</string>
-    <string name="title_events">Събития</string>
-    <string name="title_settings">Настройки</string>
+
     <string name="events">Събития</string>
     <string name="alarms">Аларми</string>
     <string name="time">Време</string>
     <string name="send_alarms_to_watch">Изпрати на\nЧасовник</string>
-    <string name="enabled">Включено</string>
-    <string name="disabled">Изключено</string>
+
     <string name="send_alarms_to_phone">Изпрати на\nТелефон</string>
     <string name="send_events_to_watch">Изпрати на Часовник\n Напомняния</string>
     <string name="connection_screen_info"><![CDATA[
@@ -18,37 +14,26 @@
     <p>За да изпълните действията, избрани в екрана <b>Действия</b>, натиснете за кратко <b>ДОЛНИЯ ДЕСЕН</b> бутон. Действията са приложения на вашия телефон, като например <b>Снимане</b>.
     Използвайки действия, часовникът действа като дистанционно управление за вашия телефон.</p>
     ]]></string>
-    <string name="alarms_screen_info"><![CDATA[Часовниците <b>B5600/B5000/B2100</b> имат 5 аларми и настройка за "сигнал" (часов сигнал), показана тук.
-    Алармите могат да се обновят, като натиснете върху стойността на времето на всяка аларма. Ще се появи нов диалог, който позволява да зададете времето на алармата.
-    След като алармите са настроени, можете да ги изпратите към часовника или да ги изпратите в приложението Alarm Clock на телефона.]]></string>
-    <string name="events_screen_info"><![CDATA[Този екран показва събития от вашия <b>Google Calendar</b> и ви позволява да ги изпратите в напомнянията на часовника.\n\nАко няма събития, уверете се, че имате бъдещи събития или не са изтекли повтарящи се събития в Google календара.]]>
-</string>
+
     <string name="actions">Действия</string>
-    <string name="title_actions">Действия</string>
-    <string name="actions_screen_info"><![CDATA[Избраните действия се стартират, когато потребителят <b>кратко натисне</b> бутона <b>ДЕСЕН-ДОЛЕН</b> на часовника от началния екран. С тези действия часовникът действа като дистанционно управление за вашия телефон.]]></string>
-    <string name="feb_22_mar_24">Фев-22 - Мар-24</string>
-    <string name="weekly">СЕДМИЧНО</string>
-    <string name="action_item">Действие</string>
-    <string name="voice_assistant">Гласов асистент</string>
+
     <string name="front_cam">Предна</string>
     <string name="back_cam">Задна</string>
-    <string name="take_a_photo">Направи снимка</string>
+
     <string name="info">Информация</string>
     <string name="daily">Ежедневно</string>
-    <string name="_12_00">12:00</string>
-    <string name="email_item">Email елемент</string>
-    <string name="email_example_com">me@example.com</string>
+
     <string name="watch_alarms">Аларми</string>
     <string name="signal_chime">Сигнал</string>
-    <string name="google_calendar_events">Събития от Google Calendar</string>
+
     <string name="local_time">Местно време</string>
     <string name="send_to_watch">Изпрати на\nЧасовник</string>
-    <string name="phonecall_item">Телефонно обаждане</string>
+
     <string name="home_time">Настоящ град</string>
     <string name="running_actions">Изпълнявани действия</string>
-    <string name="title_placeholder">Заглавие Място</string>
+
     <string name="settings">Настройки</string>
-    <string name="send_to_watch_settings">Изпрати на\nЧасовник</string>
+
     <string name="auto_configure_settings">Авто</string>
     <string name="time_format">Часов формат</string>
     <string name="_12h">12ч</string>
@@ -67,7 +52,7 @@
     </string>
     <string name="cancel">Отказ</string>
     <string name="ok">ОК</string>
-    <string name="timerDialogTitle">Таймер</string>
+
     <string name="info_home_time">
         <![CDATA[<b>Часовник по местно време</b> показва времевата зона на часовника.
         Когато приложението настрои времето на часовника (ръчно или автоматично), ще настрои и <b>Часовник по местно време,
@@ -78,31 +63,16 @@
     <li><b>Настройка на времето</b> позволява на приложението да обновява времето на часовника 4 пъти на ден.</li>
     <li>Същевременно, приложението ще актуализира напомнянията на часовника от вашия <b>Google Calendar</b>, ако е включено действието <b>Настройка на напомняния от Google Calendar</b></li>
     ]]></string>
-    <string name="image_of_casio_watch">Casio Часовник</string>
-    <string name="connection_screen_device"> <![CDATA[
-        <li>По подразбиране, приложението ще се опита да се свърже с предишно свързан часовник. Ако искате да свържете нов часовник,
-        натиснете бутона <b>ЗАБРАВИ</b>, след което свържете новия часовник по обичайния начин. От този момент нататък, приложението ще се опита да се свърже
-        с този нов часовник.</li>
 
-        <li>Приложението автоматично ще разпознае модела на часовника.</li>
-        ]]></string>
-    <string name="forget">Забрави</string>
-    <string name="hand_adjustment">Настройка на стрелките</string>
-    <string name="move_hand_to_the_left">Преместете стрелката наляво</string>
-    <string name="reset_hand_at_12_position">Нулиране на стрелката на 12 часа</string>
-    <string name="move_hand_to_the_right">Преместете стрелката надясно</string>
     <string name="auto_light">Автоматично осветление</string>
-    <string name="off">Изключено</string>
-    <string name="on">Включено</string>
+
     <string name="illumination_period">Осветление</string>
     <string name="mm_dd">ММ:ДД</string>
     <string name="dd_mm">ДД:ММ</string>
     <string name="time_adjustment">Регулиране на времето</string>
     <string name="notify_me">Уведоми ме</string>
     <string name="timer">Таймер</string>
-    <string name="_00_00_00">00:00:00</string>
-    <string name="_00">00</string>
-    <string name="semi_column">:</string>
+
     <string name="no_watch">Няма часовник</string>
     <string name="set_time">Настройка на часа</string>
     <string name="find_phone">Намери телефона</string>
@@ -141,19 +111,10 @@
     </li>
     <li>За предложения и корекции се свържете с <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
 ]]></string>
-    <string name="do_not_disturb_dnd">Не безпокойте (DnD)</string>
-    <string name="mirror_phone_s_dnd">Оразмеряване на DnD на телефона</string>
-    <string name="DnD_info_message"><![CDATA[
-    Когато е избрано, всички аларми, таймери и часови сигнали на часовника ще бъдат заглушени.
-    <li>При ръчно включване/изключване, DnD ще влезе в сила след натискането на бутона <b>Изпрати към часовник</b>.</li>
-    <li>При отразяване, ще влезе в сила незабавно при промяна на настройката DnD на телефона, независимо от екрана, в който се намирате в момента.</li>
-]]></string>
-    <string name="auto_light_at_night_only">Автоматично осветление само през нощта</string>
-    <string name="keep_alive">Задръж живот (използва повече батерия)</string>
+
     <string name="enter_timer_time">Въведете времето за таймер</string>
     <string name="max_reminders_reached">Достигнат е максимален брой напомняния. Моля, деактивирайте някои, преди да изберете нови</string>
-    <string name="fine_time_adjustment">Финно време</string>
-    <string name="_0000">0000</string>
+
     <string name="fine_adjustment_info"><![CDATA[
     При настройка на времето, някои модели на часовници може да показват време, което е леко различно с няколко секунди. Тази настройка позволява да се настрои точно времето.
     Стойността, в милисекунди, се добавя към времето, изпратено от приложението към часовника. Можете да зададете стойности между -5000 и 5000. Например,
@@ -179,14 +140,14 @@
     <string name="voice_assistant_not_available_on_this_device">Гласовият асистент не е наличен на това устройство!</string>
     <string name="cannot_go_to_next_track">Не може да се премине към следващото парче!</string>
     <string name="image_captured">Снимка заснета: %1$s</string>
-    <string name="emaillocationaction_emailaddress">EmailLocationAction: имейл адрес: %1$s</string>
+
     <string name="camera_capture_error">Грешка при заснемане на изображението: %1$s</string>
     <string name="flashlight_not_available">Тези лампа не е налична</string>
     <string name="unable_to_get_default_sound_uri">Не може да се получи стандартен URI за звук</string>
     <string name="alarms_set_to_watch">Алармите са настроени на часовника</string>
-    <string name="events_set">Настроени събития</string>
+
     <string name="reminders_sent_to_watch">Напомнянията са изпратени към часовника</string>
-    <string name="event_not_compatible_with_watch">Събитието не е съвместимо с часовника</string>
+
     <string name="settings_sent_to_watch">Настройки изпратени към часовника</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Извинете, вашето устройство не поддържа Bluetooth. Излизане…</string>
     <string name="permission_required_to_turn_on_bluetooth">Необходими са разрешения за включване на Bluetooth.</string>
@@ -197,10 +158,7 @@
     <string name="press_and_hold_for_3_seconds">Задръж\n3 сек</string>
     <string name="short_press_to_run_actions">Натисни за\nдействия</string>
 
-    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync работи</string>
-    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync не работи.</string>
-    <string name="preventing_the_app_from_closing">Предотвратява се затварянето на приложението</string>
-    <string name="health_connect_not_available">"Health Connect" не е наличен. Моля, инсталирайте го.</string>
+
     <string name="cover_hold_to_unlock">Задръжте, за да отключите</string>
     <string name="cover_connected">Свързан</string>
     <!-- "h" as in hours = "часа", abbreviated as "ч" -->

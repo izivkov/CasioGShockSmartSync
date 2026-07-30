@@ -1,14 +1,10 @@
 <resources>
-    <string name="title_time">Время</string>
-    <string name="title_alarms">Будильники</string>
-    <string name="title_events">События</string>
-    <string name="title_settings">Настройки</string>
+
     <string name="events">События</string>
     <string name="alarms">Будильники</string>
     <string name="time">Время</string>
     <string name="send_alarms_to_watch">Отправить на\nчасы</string>
-    <string name="enabled">Включено</string>
-    <string name="disabled">Отключено</string>
+
     <string name="send_alarms_to_phone">Отправить на\nтелефон</string>
     <string name="send_events_to_watch">Отправить на часы\nНапоминания</string>
     <string name="connection_screen_info"><![CDATA[
@@ -18,38 +14,26 @@
     <p>Чтобы запустить действия, выбранные на экране <b>Действия</b>, кратковременно нажмите <b>НИЖНЮЮ ПРАВУЮ</b> кнопку. Действия — это приложения на вашем телефоне, например <b>Сделать фото</b>.
     Используя действия, часы работают как пульт дистанционного управления для вашего телефона.</p>
     ]]></string>
-    <string name="alarms_screen_info"><![CDATA[Часы <b>B5600/B5000/B2100</b> имеют 5 будильников и настройки "сигнала" (ежечасной сигнала), которые показаны здесь.
-    Будильники можно обновить, нажав на значение времени каждого будильника. Появится новое диалоговое окно, которое позволит вам установить время будильника.
-    После настройки будильников их можно отправить на часы или в приложение будильника на телефоне.]]></string>
-    <string name="events_screen_info"><![CDATA[Этот экран отображает события из вашего <b>Google Календаря</b> и позволяет отправить их на напоминания на часах.
-    <p>Если события не отображаются, убедитесь, что в вашем Google календаре есть будущие события или не истекшие повторяющиеся события.</p>]]>
-</string>
+
     <string name="actions">Действия</string>
-    <string name="title_actions">Действия</string>
-    <string name="actions_screen_info"><![CDATA[Выбранные действия выполняются, когда пользователь кратко нажимает кнопку <b>НИЖНЮЮ-ПРАВУЮ</b> на часах с начального экрана. С помощью этих действий часы становятся пультом управления для вашего телефона.]]></string>
-    <string name="feb_22_mar_24">22 фев - 24 мар</string>
-    <string name="weekly">Еженедельно</string>
-    <string name="action_item">Элемент действия</string>
-    <string name="voice_assistant">Голосовой помощник</string>
+
     <string name="front_cam">Передняя камера</string>
     <string name="back_cam">Задняя камера</string>
-    <string name="take_a_photo">Сделать фото</string>
+
     <string name="info">Информация</string>
     <string name="daily">Ежедневно</string>
-    <string name="_12_00">12:00</string>
-    <string name="email_item">Элемент почты</string>
-    <string name="email_example_com">me@example.com</string>
+
     <string name="watch_alarms">Будильники на часах</string>
     <string name="signal_chime">Сигнал (звонок)</string>
-    <string name="google_calendar_events">События Google Календаря</string>
+
     <string name="local_time">Местное время</string>
     <string name="send_to_watch">Отправить на\nчасы</string>
-    <string name="phonecall_item">Элемент телефонного звонка</string>
+
     <string name="home_time">Домашнее время</string>
     <string name="running_actions">Запущенные действия</string>
-    <string name="title_placeholder">Место для названия</string>
+
     <string name="settings">Настройки</string>
-    <string name="send_to_watch_settings">Отправить на\nчасы</string>
+
     <string name="auto_configure_settings">Авто\nзаполнение</string>
     <string name="time_format">Формат времени</string>
     <string name="_12h">12ч</string>
@@ -68,7 +52,7 @@
     </string>
     <string name="cancel">Отмена</string>
     <string name="ok">ОК</string>
-    <string name="timerDialogTitle">Таймер</string>
+
     <string name="info_home_time">
         <![CDATA[<b>Домашнее время</b> показывает часовой пояс ваших часов.
         Когда приложение устанавливает время на часах (вручную или автоматически), оно также устанавливает <b>Домашнее время</b>,
@@ -79,31 +63,15 @@
     <li><b>Настройка времени</b> позволяет приложению автоматически обновлять время на часах 4 раза в день.</li>
     <li>Одновременно приложение обновляет <b>Напоминания (События)</b> на часах из вашего <b>Google Календаря</b>, если активировано действие <b>Установить напоминания из Google Календаря</b>.</li>
     ]]></string>
-    <string name="image_of_casio_watch">Часы Casio</string>
-    <string name="connection_screen_device"> <![CDATA[
-        <li>По умолчанию приложение будет пытаться подключиться к ранее подключенным часам. Если вы хотите подключить другие часы,
-        нажмите кнопку <b>ЗАБЫТЬ</b>, а затем подключите новые часы как обычно. После этого приложение будет пытаться подключиться
-        к этим новым часам.</li>
 
-        <li>Приложение автоматически определяет модель часов.</li>
-        ]]></string>
-    <string name="forget">Забыть</string>
-    <string name="hand_adjustment">Настройка стрелок</string>
-    <string name="move_hand_to_the_left">Переместить стрелку влево</string>
-    <string name="reset_hand_at_12_position">Сбросить стрелку на 12 часов</string>
-    <string name="move_hand_to_the_right">Переместить стрелку вправо</string>
     <string name="auto_light">Автоподсветка</string>
-    <string name="off">Выключено</string>
-    <string name="on">Включено</string>
+
     <string name="illumination_period">Период подсветки</string>
     <string name="mm_dd">ММ:ДД</string>
     <string name="dd_mm">ДД:ММ</string>
     <string name="time_adjustment">Настройка времени</string>
     <string name="notify_me">Уведомить меня</string>
     <string name="timer">Таймер</string>
-    <string name="_00_00_00">00:00:00</string>
-    <string name="_00">00</string>
-    <string name="semi_column">:</string>
     <string name="no_watch">Нет часов</string>
     <string name="set_time">Установить время</string>
     <string name="find_phone">Найти телефон</string>
@@ -142,19 +110,10 @@
     </li>
     <li>Для предложений и исправлений свяжитесь с <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
 ]]></string>
-    <string name="do_not_disturb_dnd">Не беспокоить (DnD)</string>
-    <string name="mirror_phone_s_dnd">Зеркалировать DnD телефона</string>
-    <string name="DnD_info_message"><![CDATA[
-Когда выбрано, все будильники, таймеры и звуковые сигналы на часах будут отключены.
-<li>При ручном включении/выключении DnD будет применяться после нажатия кнопки <b>Отправить на часы</b>.</li>
-<li>При зеркалировании это будет применяться немедленно после изменения настроек DnD на телефоне, независимо от того, на каком экране вы находитесь.</li>
-]]></string>
-    <string name="auto_light_at_night_only">Автоподсветка только ночью</string>
-    <string name="keep_alive">Поддерживать соединение (использует больше энергии)</string>
+
     <string name="enter_timer_time">Введите время таймера</string>
     <string name="max_reminders_reached">Достигнут максимальный лимит напоминаний, пожалуйста, отключите некоторые, прежде чем выбрать новые</string>
-    <string name="fine_time_adjustment">Точная настройка</string>
-    <string name="_0000">0000</string>
+
     <string name="fine_adjustment_info"><![CDATA[
 При установке времени на некоторых моделях часов может быть небольшое отклонение на несколько секунд. Эта настройка позволяет точно настроить корректировку времени.
 Значение, в миллисекундах, добавляется к времени, отправленному из приложения на часы. Вы можете установить значения от -5000 до 5000. Например,
@@ -179,14 +138,14 @@
     <string name="voice_assistant_not_available_on_this_device">Голосовой помощник недоступен на этом устройстве!</string>
     <string name="cannot_go_to_next_track">Невозможно перейти к следующему треку!</string>
     <string name="image_captured">Изображение снято: %1$s</string>
-    <string name="emaillocationaction_emailaddress">EmailLocationAction: emailAddress: %1$s</string>
+
     <string name="camera_capture_error">Ошибка съемки камеры: %1$s</string>
     <string name="flashlight_not_available">Фонарик недоступен</string>
     <string name="unable_to_get_default_sound_uri">Не удалось получить URI звука по умолчанию</string>
     <string name="alarms_set_to_watch">Будильники настроены на часы</string>
-    <string name="events_set">События установлены</string>
+
     <string name="reminders_sent_to_watch">Напоминания отправлены на часы</string>
-    <string name="event_not_compatible_with_watch">Событие несовместимо с часами</string>
+
     <string name="settings_sent_to_watch">Настройки отправлены на часы</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Извините, ваше устройство не поддерживает Bluetooth. Закрытие…</string>
     <string name="permission_required_to_turn_on_bluetooth">Требуется разрешение для включения Bluetooth.</string>
@@ -196,10 +155,7 @@
     <string name="timer_set">Таймер установлен</string>
     <string name="press_and_hold_for_3_seconds">Удерживать\n3 сек</string>
     <string name="short_press_to_run_actions">Нажать для\nдействий</string>
-    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync запущен</string>
-    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync не запущен</string>
-    <string name="preventing_the_app_from_closing">Предотвращение закрытия приложения</string>
-    <string name="health_connect_not_available">«Health Connect» недоступен. Пожалуйста, установите его.</string>
+
     <string name="cover_hold_to_unlock">Удерживайте для разблокировки</string>
     <string name="cover_connected">Подключено</string>
     <!-- "ч" = "час" (hour) -->

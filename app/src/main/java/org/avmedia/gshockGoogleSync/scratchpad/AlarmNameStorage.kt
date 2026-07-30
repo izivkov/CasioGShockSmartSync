@@ -108,9 +108,10 @@ class AlarmNameStorage @Inject constructor(
     }
 
     fun put(name: String, index: Int) {
-        if (index !in 0 until ALARM_COUNT) return
+        if (index in 0 until ALARM_COUNT) {
             alarmCodes[index] = codesMap[name] ?: NO_NAME_INDEX
         }
+    }
 
     fun get(index: Int): String {
         if (index !in 0 until ALARM_COUNT) return ""

@@ -1,3 +1,30 @@
+# Release Notes - Casio G-Shock Smart Sync v46.0 — July 29, 2026
+
+## ✨ Highlights
+
+### ⌚ MTG-B3000 & Protocol Precision
+Comprehensive refinements to support modern dual-dial G-Shock models and resolve deep protocol anomalies:
+*   **MTG-B3000 Mastery**: Corrected battery and temperature decoding for the MTG-B3000, aligning with its specific data offsets (index 4 for battery, index 8 for temperature).
+*   **Intelligent Packet Routing**: Enhanced the `MessageDispatcher` to detect and "unwrap" complex `0x28` envelope packets used by newer models. This ensures that Home Time, Settings, and Alarms data are routed correctly even when bundled together.
+*   **Weekday Protocol Alignment**: Fixed a long-standing issue where weekdays were incorrectly offset. The app now correctly sends a 0–6 range as required by the Casio protocol.
+*   **Redundant DST Removal**: Eliminated an unnecessary manual DST calculation that was causing the watch to be set one hour fast in certain regions.
+
+### 🛡️ App Stability & Robustness
+*   **Radix 16 Crash Resolved**: Fixed a critical crash where the app attempted to parse ASCII text (like city names) as binary hex data. The utility layer now intelligently filters non-hex characters to ensure protocol integrity.
+*   **Thread-Safe IO Layer**: Overhauled the communication engine with a robust `CompletableDeferred` pattern and thread-safe state management. This eliminates race conditions where incoming Bluetooth notifications could "reset" the state before a request finished.
+*   **Safe Background Actions**: Added `try/catch` wrappers and persistent logging to all background routines. BLE failures or timeouts will no longer crash the entire application process.
+
+### 🧹 Code Quality & Cleanup
+*   **Full Project Linting**: Addressed dozens of code quality issues, including a critical `SuspiciousIndentation` error and standardizing logging via the `Timber` library.
+*   **Resource De-bloating**: Streamlined the application package by removing dozens of unused string resources and redundant drawable files.
+*   **Localized Info Update**: Removed obsolete "Dual-dial" instructions from the Time Info dialog in all 11 supported languages, ensuring clear and accurate documentation.
+
+### 🛠 System & Maintenance
+*   **Service Modernization**: Removed the legacy `KeepAliveService` to resolve `ForegroundServiceStartNotAllowedException` on modern Android versions. Background connectivity is now handled more efficiently via standard system listeners.
+*   **Unified Time Sync**: Simplified the time-setting pipeline to focus on the main dial for all models, providing a consistent experience across both single and dual-dial watches.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v45.0 — July 25, 2026
 
 ## ✨ Highlights

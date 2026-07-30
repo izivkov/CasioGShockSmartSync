@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="title_time">时间</string>
-    <string name="title_alarms">闹钟</string>
-    <string name="title_events">事件</string>
-    <string name="title_settings">设置</string>
+
     <string name="events">事件</string>
     <string name="alarms">闹钟</string>
     <string name="time">时间</string>
     <string name="send_alarms_to_watch">发送到手表</string>
-    <string name="enabled">开启</string>
-    <string name="disabled">关闭</string>
+
     <string name="send_alarms_to_phone">发送到手机</string>
     <string name="send_events_to_watch">发送到手表待办项</string>
     <string name="connection_screen_info"><![CDATA[
@@ -19,37 +15,27 @@
     <p>要运行在<b>操作</b>屏幕中选择的操作，请短按<b>右下</b>按钮。操作是手机上的应用程序，例如<b>拍照</b>。
     通过这些操作，手表可以充当手机的遥控器。</p>
     ]]></string>
-    <string name="alarms_screen_info"><![CDATA[The <b>B5600/B5000/B2100</b> 手表有5组闹钟设定并且在此处可以调整“整点提醒”设置
-    闹钟设定可以通过点按闹钟页面的时间值调整. 此时会弹出窗口要求设置脑中的时间
-    当闹钟设置好后, 你可以把闹钟设置应用到手表或者这个手机的闹钟应用.]]></string>
-    <string name="events_screen_info"><![CDATA[这一页显示来自于 <b>Google Calendar</b> 的待办事项并允许你将其发送到手表的
-    <b>reminders</b>.\n\n如果手表没有出现待办事项, 确保你的确在Google Calander设置有在未来的待办事项, 或者有尚未过期的重复事项]]>\n</string>
-    <string name="actions">Actions</string>
-    <string name="title_actions">Actions</string>
-    <string name="actions_screen_info"><![CDATA[选定的动作会在用户 <b>短按</b> 手表首屏的 <b>右下</b> 按钮后运行. 此时你的手表会像是手机的遥控一样]]></string>
-    <string name="feb_22_mar_24">2月22至5月24</string>
-    <string name="weekly">每周</string>
-    <string name="action_item">动作对象</string>
-    <string name="voice_assistant">语音助手</string>
+
+    <string name="actions">操作</string>
+
+
     <string name="front_cam">前摄像头</string>
     <string name="back_cam">后摄像头</string>
-    <string name="take_a_photo">照相</string>
+
     <string name="info">信息</string>
     <string name="daily">每日</string>
-    <string name="_12_00">12:00</string>
-    <string name="email_item">电子邮件对象</string>
-    <string name="email_example_com">me@example.com</string>
+
     <string name="watch_alarms">手表闹钟</string>
     <string name="signal_chime">整点提醒</string>
-    <string name="google_calendar_events">Google Calendar事件</string>
+
     <string name="local_time">本地时间</string>
     <string name="send_to_watch">发送到手表</string>
-    <string name="phonecall_item">手机呼叫</string>
+
     <string name="home_time">家乡时间</string>
     <string name="running_actions">正在执行的动作</string>
-    <string name="title_placeholder">标题占位符</string>
+
     <string name="settings">设置</string>
-    <string name="send_to_watch_settings">发送到手表</string>
+
     <string name="auto_configure_settings">自动填充</string>
     <string name="time_format">时间格式</string>
     <string name="_12h">12小时制</string>
@@ -64,43 +50,31 @@
         <li>按键音仅在手机置于勿扰模式时关闭</li>
         <li>在手表电量降至15%时自动开启省电模式</li>
         注意: <i>即使条件发生变化（如 勿扰模式的变动）这些值在再次发送之前不会改变，</i>
-        ]]>\n    "</string>
+        ]]>
+    </string>
     <string name="cancel">取消</string>
     <string name="ok">确认</string>
-    <string name="timerDialogTitle">计时器</string>
-    <string name="info_home_time">"\n        <![CDATA[<b>Home Time</b> 显示这个手表的时区
+
+    <string name="info_home_time">
+        <![CDATA[<b>Home Time</b> 显示这个手表的时区
         当APP设置手表的时区时 (自动/手动设置效果相同), 这也会设置手表的 <b>Home Time,
         时钟偏移</b> 和 <b>DST（夏令时）</b> (如果可以应用修改) 至当前时区. 因此也省去了旅游时调整 <b>世界时间</b> 和 <b>Home Time</b>的麻烦
-        ]]>\n    "</string>
+        ]]>
+    </string>
     <string name="time_adjustment_info"><![CDATA[
     <li><b>时间调整</b> 允许APP以一天四次的频率自动校准手表的时间</li>
     <li>同时，如果启用了“从 Google 日历设置提醒”的操作，该应用程序将会从您的 Google 日历更新手表上的提醒（事件）。</li>
     ]]></string>
-    <string name="image_of_casio_watch">卡西欧手表</string>
-    <string name="connection_screen_device">" <![CDATA[
-        <li>默认情况下，这个软件会尝试连接到上一次连接的手表. 如果你要连接到不同的手表,
-       按下 <b>忘记</b> 按钮, 像往常一样连接新的手表. 从这时开始, 该应用会连接到
-        这个新手表.</li>
 
-        <li>该软件会自动检测手表型号.</li>
-        ]]>"</string>
-    <string name="forget">忘记</string>
-    <string name="hand_adjustment">手臂调整</string>
-    <string name="move_hand_to_the_left">移动至左臂</string>
-    <string name="reset_hand_at_12_position">重置指针至12点钟方向</string>
-    <string name="move_hand_to_the_right">移动至右臂</string>
     <string name="auto_light">自动灯光</string>
-    <string name="off">关</string>
-    <string name="on">开</string>
+
     <string name="illumination_period">照明周期</string>
     <string name="mm_dd">月:日</string>
     <string name="dd_mm">日:月</string>
     <string name="time_adjustment">时间调整</string>
     <string name="notify_me">提醒我</string>
     <string name="timer">计时器</string>
-    <string name="_00_00_00">00:00:00</string>
-    <string name="_00">00</string>
-    <string name="semi_column">:</string>
+
     <string name="no_watch">无手表</string>
     <string name="set_time">自动设置时间</string>
     <string name="find_phone">查找手机</string>
@@ -116,7 +90,7 @@
         <li>这个设置用于确定时间调整发生在每小时后的分钟数。因此，如果你将这个值设置为25，时间调整将在 00:25、06:25、12:25和18:25进行</li>
         <li>如果你有多个手表，你可以分别控制它们的时间设置。</li>
     ]]></string>
-    <string name="adjustment_time_minutes">何时运行\n（小时后的分钟数</string>
+    <string name="adjustment_time_minutes">何时运行\n（小时后的分钟数）</string>
     <string name="skip_to_next_track_info"><![CDATA[
         如果你正在使用手机上的媒体播放器，比如Spotify、YouTube或YTMusic播放音乐或视频，这个操作将跳到下一首歌曲或视频。
         它还兼容Android Auto。
@@ -140,23 +114,16 @@
         <li>请发送建议和更正至 <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
         ]]></string>
 
-    <string name="do_not_disturb_dnd">请勿打扰 (DnD)</string>
-    <string name="mirror_phone_s_dnd">镜像电话的 DnD</string>
-    <string name="DnD_info_message"><![CDATA[
-    选择后，手表上的所有闹钟、定时器、整点报时都将静音。
-    <li>手动开启/关闭时，按下<b>发送到手表</b>按钮后，免打扰才会生效。<\li>
-    <li>镜像时，更改手机上的免打扰设置后，无论当前处于哪个屏幕，都会立即生效。<\li>
+
+    <string name="enter_timer_time">输入时间</string>
+    <string name="max_reminders_reached">提醒数量已达上限，请先禁用一些再选择新的</string>
+
+    <string name="fine_adjustment_info"><![CDATA[
+    设置时间时，某些手表型号显示的时间可能会有几秒钟的偏差。此设置允许您微调时间调整。
+    该值（以毫秒为单位）将添加到从应用程序发送到手表的时间中。您可以设置 -5000 到 5000 之间的值。例如，
+    如果您的手表比实际时间快 2.5 秒，请将此值设置为 -2500 以进行准确同步。
     ]]></string>
 
-    <string name="auto_light_at_night_only">“仅在夜间自动亮灯”</string>
-    <string name="keep_alive">“保持唤醒（耗电更多）”</string>
-    <string name="enter_timer_time">"输入时间 " </string>
-    <string name="max_reminders_reached">提醒数量已达上限，请先禁用一些再选择新的 " </string>
-    <string name="fine_time_adjustment">微调</string>
-    <string name="fine_adjustment_info"><![CDATA[
-    在设置时间时，某些手表型号可能会显示比实际时间快几秒。此设置允许您进行微调调整。值的单位是毫秒，并添加到应用程序发送给手表的时间中。您可以设置的范围在 -5000 到 5000 之间。例如，如果您的手表比实际时间快了 2.5 秒，请将该值设置为 -2500，以准确同步时间。
-    ]]></string>
-    <string name="_0000">0000</string>
     <string name="required_permissions_denied_cannot_access_screen">所需权限被拒绝，无法访问屏幕！</string>
     <string name="required_permissions_denied_cannot_access_actions">所需权限被拒绝，无法访问操作。</string>
     <string name="calendar_permission_denied_cannot_access_events">日历权限被拒绝，无法访问事件。</string>
@@ -178,14 +145,14 @@
     <string name="voice_assistant_not_available_on_this_device">此设备不支持语音助手！</string>
     <string name="cannot_go_to_next_track">无法跳到下一首歌曲！</string>
     <string name="image_captured">已拍摄图像：%1$s</string>
-    <string name="emaillocationaction_emailaddress">EmailLocationAction：电子邮件地址：%1$s</string>
+
     <string name="camera_capture_error">拍照错误：%1$s</string>
     <string name="flashlight_not_available">手电筒不可用</string>
     <string name="unable_to_get_default_sound_uri">无法获取默认声音 URI</string>
     <string name="alarms_set_to_watch">闹钟已设置到手表</string>
-    <string name="events_set">已设置事件</string>
+
     <string name="reminders_sent_to_watch">待办项已发送到手表</string>
-    <string name="event_not_compatible_with_watch">事件与手表不兼容</string>
+
     <string name="settings_sent_to_watch">设置已发送到手表</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">抱歉，您的设备不支持蓝牙。正在退出…</string>
     <string name="permission_required_to_turn_on_bluetooth">需要权限才能开启蓝牙。</string>
@@ -195,10 +162,7 @@
     <string name="timer_set">定时器已设置</string>
     <string name="press_and_hold_for_3_seconds">长按\n3秒</string>
     <string name="short_press_to_run_actions">短按\n执行</string>
-    <string name="g_shock_smart_sync_is_running">G-Shock 智能同步正在运行</string>
-    <string name="g_shock_smart_sync_is_not_running">G-Shock 智能同步未运行</string>
-    <string name="preventing_the_app_from_closing">正在防止应用关闭</string>
-    <string name="health_connect_not_available">“Health Connect”不可用。请安装它。</string>
+
     <string name="cover_hold_to_unlock">按住以解锁</string>
     <string name="cover_connected">已连接</string>
     <string name="find_phone_instruction">要运行操作，请在手表上启动“查找手机”功能。</string>

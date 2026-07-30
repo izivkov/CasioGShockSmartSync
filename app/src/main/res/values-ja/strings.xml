@@ -1,14 +1,10 @@
 <resources>
-    <string name="title_time">時間</string>
-    <string name="title_alarms">アラーム</string>
-    <string name="title_events">イベント</string>
-    <string name="title_settings">設定</string>
+
     <string name="events">イベント</string>
     <string name="alarms">アラーム</string>
     <string name="time">時間</string>
     <string name="send_alarms_to_watch">ウォッチに\n送信</string>
-    <string name="enabled">有効</string>
-    <string name="disabled">無効</string>
+
     <string name="send_alarms_to_phone">電話に\n送信</string>
     <string name="send_events_to_watch">ウォッチに送信\nリマインダー</string>
     <string name="connection_screen_info"><![CDATA[
@@ -18,37 +14,26 @@
     <p><b>アクション</b>画面で選択したアクションを実行するには、<b>右下</b>ボタンを短く押します。アクションは、<b>写真撮影</b>など、スマートフォン上のアプリです。
     アクションを使用すると、時計がスマートフォンのリモコンとして機能します。</p>
     ]]></string>
-    <string name="alarms_screen_info"><![CDATA[<b>B5600/B5000/B2100</b>ウォッチには、ここに表示される5つのアラームと「信号」（毎時チャイム）設定があります。
-    アラームは各アラームの時刻値を押すことで更新できます。新しいダイアログが表示され、アラームの時間を設定できます。
-    アラームを設定したら、それをウォッチに送信するか、スマートフォンのアラームクロックアプリに送信できます。]]></string>
-    <string name="events_screen_info"><![CDATA[この画面には<b>Googleカレンダー</b>のイベントが表示され、ウォッチの
-    <b>リマインダー</b>に送信することができます。\n\nイベントが表示されない場合は、将来のイベントまたは期限切れでない繰り返しイベントがGoogleカレンダーにあることを確認してください。]]></string>
+
     <string name="actions">アクション</string>
-    <string name="title_actions">アクション</string>
-    <string name="actions_screen_info"><![CDATA[選択したアクションは、ユーザーが初期画面からウォッチの<b>右下ボタン</b>を<b>短く押す</b>と実行されます。これらのアクションを使用すると、ウォッチはスマートフォンのリモコンとして動作します。]]></string>
-    <string name="feb_22_mar_24">2月22日 - 3月24日</string>
-    <string name="weekly">毎週</string>
-    <string name="action_item">アクション項目</string>
-    <string name="voice_assistant">音声アシスタント</string>
+
     <string name="front_cam">フロントカメラ</string>
     <string name="back_cam">バックカメラ</string>
-    <string name="take_a_photo">写真を撮る</string>
+
     <string name="info">情報</string>
     <string name="daily">毎日</string>
-    <string name="_12_00">12:00</string>
-    <string name="email_item">メール項目</string>
-    <string name="email_example_com">me@example.com</string>
+
     <string name="watch_alarms">ウォッチアラーム</string>
     <string name="signal_chime">信号（チャイム）</string>
-    <string name="google_calendar_events">Googleカレンダーのイベント</string>
+
     <string name="local_time">現地時間</string>
     <string name="send_to_watch">ウォッチに\n送信</string>
-    <string name="phonecall_item">電話項目</string>
+
     <string name="home_time">ホームタイム</string>
     <string name="running_actions">実行中のアクション</string>
-    <string name="title_placeholder">タイトルプレースホルダー</string>
+
     <string name="settings">設定</string>
-    <string name="send_to_watch_settings">ウォッチに\n送信</string>
+
     <string name="auto_configure_settings">値を自動設定</string>
     <string name="time_format">時間形式</string>
     <string name="_12h">12時間</string>
@@ -68,7 +53,7 @@
     <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
 
-    <string name="timerDialogTitle">タイマー</string>
+
     <string name="info_home_time">
         <![CDATA[<b>ホームタイム</b>は時計のタイムゾーンを表示します。
         アプリが時計の時間を設定する際（手動または自動）、<b>ホームタイム、タイムオフセット</b>および<b>DST</b>（適用される場合）を現在のタイムゾーンに合わせて設定します。
@@ -80,31 +65,16 @@
         <li>同時に、<b>Googleカレンダー</b>から<b>リマインダー（イベント）</b>も更新されます（<b>Googleカレンダーからリマインダーを設定</b>アクションが有効な場合）。</li>
         ]]>
     </string>
-    <string name="image_of_casio_watch">カシオ時計</string>
-    <string name="connection_screen_device">
-        <![CDATA[
-        <li>デフォルトでは、アプリは以前に接続された時計に接続を試みます。別の時計に接続したい場合は、<b>忘れる</b>ボタンを押してから、通常どおり新しい時計に接続してください。それ以降、アプリはこの新しい時計に接続を試みます。</li>
 
-        <li>アプリは時計のモデルを自動検出します。</li>
-        ]]>
-    </string>
-    <string name="forget">忘れる</string>
-    <string name="hand_adjustment">針調整</string>
-    <string name="move_hand_to_the_left">針を左に動かす</string>
-    <string name="reset_hand_at_12_position">針を12時位置にリセット</string>
-    <string name="move_hand_to_the_right">針を右に動かす</string>
     <string name="auto_light">自動ライト</string>
-    <string name="off">オフ</string>
-    <string name="on">オン</string>
+
     <string name="illumination_period">照明期間</string>
     <string name="mm_dd">MM:DD</string>
     <string name="dd_mm">DD:MM</string>
     <string name="time_adjustment">時間調整</string>
     <string name="notify_me">通知する</string>
     <string name="timer">タイマー</string>
-    <string name="_00_00_00">00:00:00</string>
-    <string name="_00">00</string>
-    <string name="semi_column">:</string>
+
     <string name="no_watch">時計なし</string>
     <string name="set_time">時間を設定</string>
     <string name="find_phone">電話を探す</string>
@@ -149,21 +119,10 @@
         <li>提案や訂正については、<a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a>までご連絡ください。</li>
         ]]>
     </string>
-    <string name="do_not_disturb_dnd">おやすみモード (DnD)</string>
-    <string name="mirror_phone_s_dnd">電話のおやすみモードを反映</string>
-    <string name="DnD_info_message">
-        <![CDATA[
-        選択すると、時計のすべてのアラーム、タイマー、時報が無音になります。
-        <li>手動でオン/オフにする場合は、<b>時計に送信</b>ボタンを押した後に有効になります。</li>
-        <li>反映設定の場合、電話のおやすみモードを変更すると即座に反映されます（現在の画面に関係なく）。</li>
-        ]]>
-    </string>
-    <string name="auto_light_at_night_only">夜間のみ自動ライト</string>
-    <string name="keep_alive">常時稼働（バッテリー消費増）</string>
+
     <string name="enter_timer_time">タイマー時間を入力</string>
     <string name="max_reminders_reached">リマインダーの最大数に達しました。一部を無効にしてから新しいリマインダーを選択してください。</string>
-    <string name="fine_time_adjustment">微調整</string>
-    <string name="_0000">0000</string>
+
     <string name="fine_adjustment_info">
         <![CDATA[
         一部の時計モデルでは、設定時間が実際の時間から数秒ずれることがあります。この設定を使用して時間調整を微調整できます。
@@ -189,14 +148,14 @@
     <string name="voice_assistant_not_available_on_this_device">音声アシスタントはこのデバイスでは利用できません！</string>
     <string name="cannot_go_to_next_track">次のトラックにスキップできません！</string>
     <string name="image_captured">画像が保存されました：%1$s</string>
-    <string name="emaillocationaction_emailaddress">EmailLocationAction: メールアドレス: %1$s</string>
+
     <string name="camera_capture_error">カメラキャプチャエラー: %1$s</string>
     <string name="flashlight_not_available">懐中電灯が利用できません</string>
     <string name="unable_to_get_default_sound_uri">デフォルトのサウンドURIを取得できません</string>
     <string name="alarms_set_to_watch">アラームが時計に設定されました</string>
-    <string name="events_set">イベントが設定されました</string>
+
     <string name="reminders_sent_to_watch">リマインダーを時計に送信しました</string>
-    <string name="event_not_compatible_with_watch">イベントが時計と互換性がありません</string>
+
     <string name="settings_sent_to_watch">設定が時計に送信されました</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">申し訳ありませんが、このデバイスはBluetoothをサポートしていません。終了します…</string>
     <string name="permission_required_to_turn_on_bluetooth">Bluetoothをオンにするには権限が必要です。</string>
@@ -207,10 +166,7 @@
     <string name="press_and_hold_for_3_seconds">3秒間\n長押し</string>
     <string name="short_press_to_run_actions">押して\n実行</string>
 
-    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync が実行中です</string>
-    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync は実行されていません</string>
-    <string name="preventing_the_app_from_closing">アプリが終了しないようにしています</string>
-    <string name="health_connect_not_available">「Health Connect」は利用できません。インストールしてください。</string>
+
     <string name="cover_hold_to_unlock">長押ししてロック解除</string>
     <string name="cover_connected">接続済み</string>
     <!-- "時間" means "hours"; can be abbreviated as "h" if preferred -->

@@ -19,6 +19,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventDate
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
@@ -167,7 +168,7 @@ class CalendarEvents @Inject constructor(
         val description = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.DESCRIPTION))
         val organizer = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.ORGANIZER))
 
-        android.util.Log.d("CalendarDebug",
+        Timber.d(
             "Event: title=$title, " +
                     "calendarId=$calendarId, " +
                     "appPackage=$appPackage, " +

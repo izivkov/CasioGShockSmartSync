@@ -1,15 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Casio G-Shock Smart Sync</string>
-    <string name="title_time">Time</string>
-    <string name="title_alarms">Alarms</string>
-    <string name="title_events">Events</string>
-    <string name="title_settings">Settings</string>
     <string name="events">Events</string>
     <string name="alarms">Alarms</string>
     <string name="time">Time</string>
     <string name="send_alarms_to_watch">Send to\n Watch</string>
-    <string name="enabled">Enabled</string>
-    <string name="disabled">Disabled</string>
     <string name="send_alarms_to_phone">Send to\nPhone</string>
     <string name="send_events_to_watch">Send to Watch\n Reminders</string>
     <string name="connection_screen_info"><![CDATA[
@@ -21,30 +15,19 @@
     Using actions, the watch acts like a remote control for your phone.</p>
     ]]></string>
 
-    <string name="alarms_screen_info"><![CDATA[The <b>B5600/B5000/B2100</b> watches have 5 alarms and a "signal" (hourly chime) settings shown here.
-    The alarms can be updated by pressing on the time value of each alarm. A new dialog will appear, which allows you to set the alarm\'s time.
-    Once the alarms have been set, you can send them to the watch, or send them to the Alarm Clock app on the phone.]]></string>
-    <string name="events_screen_info"><![CDATA[This screen displays Events from your <b>Google Calendar</b> and allows you to send them to the watch\'s
-    <b>reminders</b>.\n\nIf no events appear, make sure you have future events, or non-expired repeating events in your Google calendar.]]>
-</string>
+
+
     <string name="actions">Actions</string>
-    <string name="title_actions">Actions</string>
-    <string name="actions_screen_info"><![CDATA[The selected actions are run when the user <b>short-presses</b> the <b>LOWER-RIGHT</b> watch button from the initial screen. With these actions, the watch acts as a remote control for your phone.]]></string>
-    <string name="feb_22_mar_24">Feb-22 - Mar-24</string>
-    <string name="weekly">WEEKLY</string>
-    <string name="action_item">Action Item</string>
-    <string name="voice_assistant">Voice Assistant</string>
+
     <string name="front_cam">Front Cam</string>
     <string name="back_cam">Back Cam</string>
-    <string name="take_a_photo">Take a photo</string>
+
     <string name="info">Info</string>
     <string name="daily">Daily</string>
-    <string name="_12_00">12:00</string>
-    <string name="email_item">Email Item</string>
-    <string name="email_example_com">me@example.com</string>
+
     <string name="watch_alarms">Watch Alarms</string>
     <string name="signal_chime">Signal (chime)</string>
-    <string name="google_calendar_events">Google Calendar Events</string>
+
     <string name="local_time">Local Time</string>
     <string name="local_solar_time">Local Solar Time</string>
     <string name="local_mean_time">Local Mean Time</string>
@@ -56,12 +39,12 @@
         <li><b>Sidereal Time:</b> Calculated based on the Earth\'s rotation relative to the stars. A sidereal day is about 4 minutes shorter than a solar day.</li>
     ]]></string>
     <string name="send_to_watch">Send to\nWatch</string>
-    <string name="phonecall_item">PhoneCall Item</string>
+
     <string name="home_time">Home Time</string>
     <string name="running_actions">Running Actions</string>
-    <string name="title_placeholder">Title Placeholder</string>
+
     <string name="settings">Settings</string>
-    <string name="send_to_watch_settings">Send to\nWatch</string>
+
     <string name="auto_configure_settings">Auto Fill\nValues</string>
     <string name="font" translatable="false">Font</string>
     <string name="time_format">Time Format</string>
@@ -81,7 +64,7 @@
     </string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
-    <string name="timerDialogTitle">Timer</string>
+
     <string name="info_home_time">
         <![CDATA[<b>Home Time</b> shows the watch\'s time zone.
         When the app sets the watch\'s time (either manually or automatically), it will also set the <b>Home Time,
@@ -92,31 +75,16 @@
     <li><b>Time Adjustment</b> setting enables the App to automatically update the watch\'s time 4 times per day.</li>
     <li>At the same time, the App will update the watch\'s <b>Reminders (Events)</b> from your <b>Google Calendar</b> if the <b>Set Reminders from Google Calendar</b> action is enabled</li>
     ]]></string>
-    <string name="image_of_casio_watch">Casio Watch</string>
-    <string name="connection_screen_device"> <![CDATA[
-        <li>By default, the app will try to connect to a previously connected watch. If you like to connect to a different watch,
-        press the <b>FORGET</b> button, and then connect the new watch as usual. From then on, the app will try to connect
-        to this new watch.</li>
 
-        <li>The app will auto-detect the model of the watch.</li>
-        ]]></string>
-    <string name="forget">Forget</string>
-    <string name="hand_adjustment">Hand Adjustment</string>
-    <string name="move_hand_to_the_left">Move hand to the Left</string>
-    <string name="reset_hand_at_12_position">Reset hand at 12 position</string>
-    <string name="move_hand_to_the_right">Move hand to the Right</string>
     <string name="auto_light">Auto Light</string>
-    <string name="off">Off</string>
-    <string name="on">On</string>
+
     <string name="illumination_period">Illumination Period</string>
     <string name="mm_dd">MM:DD</string>
     <string name="dd_mm">DD:MM</string>
     <string name="time_adjustment">Time Adjustment</string>
     <string name="notify_me">Notify me</string>
     <string name="timer">Timer</string>
-    <string name="_00_00_00">00:00:00</string>
-    <string name="_00">00</string>
-    <string name="semi_column">:</string>
+
     <string name="no_watch">No Watch</string>
     <string name="set_time">Set Time</string>
     <string name="find_phone">Find Phone</string>
@@ -156,19 +124,10 @@
         </li>
         <li>For suggestions and corrections contact <a href="mailto:izivkov@gmail.com">izivkov@gmail.com</a></li>
     ]]></string>
-    <string name="do_not_disturb_dnd">Do Not Disturb (DnD)</string>
-    <string name="mirror_phone_s_dnd">Mirror Phone\'s DnD</string>
-    <string name="DnD_info_message"><![CDATA[
-    When selected, all alarms, timers, hourly chimes on the watch will be silenced.
-    <li>When manually turning ON/OFF, the DnD will take effect after the <b>Send to Watch</b> button is pressed.<\li>
-    <li>When mirroring, it will take effect immediately upon changing the DnD setting on the phone, no matter what screen you are in currently.<\li>
-    ]]></string>
-    <string name="auto_light_at_night_only">Auto-light at night only</string>
-    <string name="keep_alive">Keep Alive (uses more battery)</string>
+
     <string name="enter_timer_time">Enter Timer Time</string>
-    <string name="max_reminders_reached">Maximum number of reminders reached, Please disable some before selecting new ones" </string>
-    <string name="fine_time_adjustment">Fine Adjustment</string>
-    <string name="_0000">0000</string>
+    <string name="max_reminders_reached">Maximum number of reminders reached, Please disable some before selecting new ones</string>
+
     <string name="fine_adjustment_info"><![CDATA[
     When setting the time, some watch models may display a time that is slightly off by a few seconds. This setting allows you to fine-tune the time adjustment.
     The value, in milliseconds, is added to the time sent from the app to the watch. You can set values between -5000 and 5000. For example,
@@ -193,14 +152,14 @@
     <string name="voice_assistant_not_available_on_this_device">Voice Assistant not available on this device!</string>
     <string name="cannot_go_to_next_track">Cannot go to Next Track!</string>
     <string name="image_captured">Image captured: %1$s</string>
-    <string name="emaillocationaction_emailaddress">EmailLocationAction: emailAddress: %1$s</string>
+
     <string name="camera_capture_error">Camera capture error: %1$s</string>
     <string name="flashlight_not_available">Flashlight not available</string>
     <string name="unable_to_get_default_sound_uri">Unable to get default sound URI</string>
     <string name="alarms_set_to_watch">Alarms Set to Watch</string>
-    <string name="events_set">Events Set</string>
+
     <string name="reminders_sent_to_watch">Reminders sent to watch</string>
-    <string name="event_not_compatible_with_watch">Event not compatible with Watch</string>
+
     <string name="settings_sent_to_watch">Settings Sent to Watch</string>
     <string name="sorry_your_device_does_not_support_bluetooth_exiting">Sorry, your device does not support Bluetooth. Exiting…</string>
     <string name="permission_required_to_turn_on_bluetooth">Permission required to turn on Bluetooth.</string>
@@ -210,10 +169,7 @@
     <string name="timer_set">Timer Set</string>
     <string name="press_and_hold_for_3_seconds">Press and\nhold for 3\nseconds</string>
     <string name="short_press_to_run_actions">Short-press\nto run\nActions</string>
-    <string name="g_shock_smart_sync_is_running">G-Shock Smart Sync is Running</string>
-    <string name="preventing_the_app_from_closing">Preventing the app from closing</string>
-    <string name="g_shock_smart_sync_is_not_running">G-Shock Smart Sync is not running.</string>
-    <string name="health_connect_not_available">\"Health Connect\" not available. Please install it.</string>
+
     <string name="cover_hold_to_unlock">Hold to unlock</string>
     <string name="cover_connected">Connected</string>
 
@@ -226,9 +182,5 @@
     <!-- Pairing error messages -->
     <string name="pairing_failed_generic" translatable="false">Pairing failed: %1$s. Please try again.</string>
     <string name="pairing_activity_finishing" translatable="false">Cannot start pairing: Activity is closing. Please try again.</string>
-    <string name="pairing_crash_recovery" translatable="false">Recovered from previous pairing crash. You can try pairing again.</string>
-    <string name="pairing_crash_detected" translatable="false"><![CDATA[
-        The app detected a previous crash during pairing. Crash logs have been saved.
-        <p>If this issue persists, please report it on <a href="https://github.com/izivkov/CasioGShockSmartSync/issues">GitHub</a> with your device model and watch model.</p>
-    ]]></string>
+
 </resources>
