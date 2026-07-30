@@ -267,9 +267,6 @@ object SettingsIO {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun request(): Settings {
-        if (!WatchInfo.hasSettings) {
-            return Settings()
-        }
         return CachedIO.request("GET_SETTINGS") { key -> getBasicSettings(key) }
     }
 
@@ -303,6 +300,11 @@ object SettingsIO {
                     state = State()
                 }
             )
+    }
+
+    fun onRunError() {
+        state.deferredResult?.complete(Settings())
+        state = State()
     }
 
     @Suppress("UNUSED_PARAMETER")

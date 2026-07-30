@@ -1,5 +1,7 @@
 package org.avmedia.gshockapi.io
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import timber.log.Timber
 
 // ============================================================================
@@ -21,6 +23,7 @@ object ErrorIOFunctional {
     fun getErrorOrDefault(error: String): String = error.ifEmpty { "ERROR" }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 object ErrorIO {
     private data class State(
         val error: String = ""
@@ -33,5 +36,12 @@ object ErrorIO {
     fun onReceived(data: String) {
         state = state.copy(error = data)
         Timber.d("ErrorIO: onReceived: $data")
+
+        if (data.contains("81 13")) {
+            SettingsIO.onRunError()
+        }
+        if (data.contains("81 11")) {
+            TimeAdjustmentIO.onRunError()
+        }
     }
 }

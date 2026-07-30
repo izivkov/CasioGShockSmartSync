@@ -168,6 +168,11 @@ object TimeAdjustmentIO {
             )
     }
 
+    fun onRunError() {
+        state.deferredResult?.complete(TimeAdjustmentInfo())
+        state = State()
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun sendToWatch(message: String) {
         // Use pure function to build command

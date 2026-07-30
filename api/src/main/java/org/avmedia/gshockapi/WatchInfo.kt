@@ -53,7 +53,6 @@ data object WatchInfo {
     val hasMultipleFonts:       Boolean get() = state.info.hasMultipleFonts
     val hasStepCounter:         Boolean get() = state.info.hasStepCounter
     val hasNewTimeFormat:       Boolean get() = state.info.hasNewTimeFormat
-    val hasSettings:            Boolean get() = state.info.hasSettings
     val hasTimeAdjustment:      Boolean get() = state.info.hasTimeAdjustment
     val hasSecondDial:          Boolean get() = state.info.hasSecondDial
     val hasFineWatchCondition:  Boolean get() = state.info.hasFineWatchCondition
@@ -101,7 +100,6 @@ data object WatchInfo {
         val hasMultipleFonts: Boolean = false,
         val hasStepCounter: Boolean = false,
         val hasNewTimeFormat: Boolean = false,
-        val hasSettings: Boolean = true,
         val hasTimeAdjustment: Boolean = true,
         val hasSecondDial: Boolean = false,
         val hasFineWatchCondition: Boolean = false,
@@ -209,12 +207,12 @@ data object WatchInfo {
         ModelInfo(
             model = WatchModel.DW_H5600,
             alarmCount = 4,
-            hasAutoLight = true, hasReminders = true,
+            hasAutoLight = true, hasReminders = false,
             vibrate = true, chimeInSettings = true,
             findButtonUserDefined = true,
             shortLightDuration = "1.5s", longLightDuration = "5s",
             hasBatteryLevel = false, alwaysConnected = true, hasDateFormat = false,
-            hasSettings = false, hasTimeAdjustment = false,
+            weekLanguageSupported = false
         ),
         ModelInfo(model = WatchModel.DW,     hasAutoLight = true,  hasReminders = false),
         ModelInfo(
