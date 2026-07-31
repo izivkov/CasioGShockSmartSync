@@ -1,3 +1,30 @@
+# Release Notes - Casio G-Shock Smart Sync v47.0 — July 31, 2026
+
+## ✨ Highlights
+
+### ⌚ Dynamic Capability-Driven UI
+Introduced a highly adaptive interface that automatically tailors itself to your specific G-Shock hardware:
+*   **Smart Card Collapsing**: Settings cards (like Locale, Light, or Operational Tone) now automatically collapse and disappear if the connected watch supports *none* of the features within that category. This ensures a clean, relevant experience for every model.
+*   **Fine-Grained Item Control**: Individual settings like **Time Format**, **Date Format**, and **Language Selection** now hide independently if they are unsupported by the watch hardware.
+*   **Centralized Logic**: Unified all hardware capability mappings into a single `WatchFeatureManager`, simplifying future model integrations.
+
+### 🛡️ System Robustness & Compliance
+*   **Notification Listener Fix**: Resolved a critical "Service not registered" crash during application startup by migrating to the official Android `requestRebind()` API.
+*   **Legacy Service Removal**: Completely removed the `KeepAliveService` to ensure full compliance with Android 14+ background execution standards and resolve `ForegroundServiceStartNotAllowedException`.
+*   **Resource Management**: Implemented strict `Cursor` lifecycle management using modern Kotlin patterns to prevent memory and resource leaks.
+
+### ⌚ MTG-B3000 & Protocol Precision
+*   **MTG-B3000 Stability**: Finalized specialized 15-byte protocol handling for the MTG-B3000 timer and corrected data offsets for battery and temperature reporting.
+*   **Intelligent Routing**: Enhanced the `MessageDispatcher` to automatically unwrap complex `0x28` envelope packets, ensuring data reaches the correct handlers without corruption.
+*   **Radix 16 Crash Resolved**: Hardened the binary utility layer to safely ignore non-hex characters (like ASCII city names), preventing crashes during time-synchronization sequences.
+
+### 🧹 Code Quality & Project Health
+*   **Full Project Linting**: Addressed over 80 code quality issues, including a critical logic error in `AlarmNameStorage.kt` and standardizing all logging via the `Timber` library.
+*   **Package Optimization**: Significantly reduced application size and clutter by removing dozens of unused string resources and redundant drawable files.
+*   **Localization Synchronization**: Verified and restored missing translations across all 11 supported languages to ensure UI consistency worldwide.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v46.5 — July 29, 2026
 
 ## ✨ Highlights
