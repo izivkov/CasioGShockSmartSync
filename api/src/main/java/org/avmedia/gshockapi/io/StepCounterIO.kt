@@ -138,10 +138,13 @@ object StepCounterIO {
     }
 
     private suspend fun getStepCount(): Int {
-        state = state.copy(deferredResult = CompletableDeferred())
+        val deferred = CompletableDeferred<Int>()
+        synchronized(this) {
+            state = state.copy(deferredResult = deferred)
+        }
         // Send the step counter request: [00 11 00 00 00] to handle 0x0011
         IO.request("11")
-        return state.deferredResult?.await() ?: 0
+        return deferred.await()
     }
 
     /**
@@ -162,17 +165,23 @@ object StepCounterIO {
 
             if (stepCount != null) {
                 Timber.i("Step count parsed: $stepCount")
-                state.deferredResult?.complete(stepCount)
-                state = State()
+                synchronized(this) {
+                    state.deferredResult?.complete(stepCount)
+                    state = state.copy(deferredResult = null)
+                }
             } else {
                 Timber.w("Failed to parse step count from payload")
-                state.deferredResult?.complete(0)
-                state = State()
+                synchronized(this) {
+                    state.deferredResult?.complete(0)
+                    state = state.copy(deferredResult = null)
+                }
             }
         } catch (e: Exception) {
             Timber.e("Exception parsing step counter data: ${e.message}")
-            state.deferredResult?.complete(0)
-            state = State()
+            synchronized(this) {
+                state.deferredResult?.complete(0)
+                state = state.copy(deferredResult = null)
+            }
         }
     }
 }

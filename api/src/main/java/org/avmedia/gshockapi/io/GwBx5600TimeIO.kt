@@ -14,6 +14,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlin.math.ceil
+import kotlin.time.Duration.Companion.milliseconds
 
 @RequiresApi(Build.VERSION_CODES.O)
 object GwBx5600TimeIO {
@@ -75,18 +76,23 @@ object GwBx5600TimeIO {
     }
 
     private suspend fun request(currentStep: Int, reqPayload: ByteArray): ByteArray? {
-        step = currentStep
-        accumulator = ByteArray(0)
-        result = CompletableDeferred()
+        val deferred = CompletableDeferred<ByteArray>()
+        synchronized(this) {
+            step = currentStep
+            accumulator = ByteArray(0)
+            result = deferred
+        }
         try {
             Connection.write(GetSetMode.SP_REQUEST, reqPayload)
-            return withTimeoutOrNull(5000L) {
-                result?.await()
+            return withTimeoutOrNull(5000L.milliseconds) {
+                deferred.await()
             }
         } finally {
-            result = null
-            accumulator = ByteArray(0)
-            step = 0
+            synchronized(this) {
+                result = null
+                accumulator = ByteArray(0)
+                step = 0
+            }
         }
     }
 
@@ -112,7 +118,8 @@ object GwBx5600TimeIO {
     }
 
     fun onReceived(data: String) {
-        if (result == null) return
+        val deferred = synchronized(this) { result }
+        if (deferred == null) return
 
         // Data comes as hex string from MessageDispatcher (e.g. "0x05 1D ...")
         // We use Utils.toIntArray to safely parse it
@@ -136,7 +143,9 @@ object GwBx5600TimeIO {
         Timber.d("GwBx5600TimeIO.onReceived: step=\$step accumulated=\${accumulated}B / expected=\${expected}B")
 
         if (accumulated >= expected) {
-            result?.complete(accumulator)
+            synchronized(this) {
+                deferred.complete(accumulator)
+            }
         }
     }
 }

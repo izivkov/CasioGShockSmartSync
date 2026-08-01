@@ -283,12 +283,14 @@ object SettingsIO {
                 onSuccess = { model ->
                     synchronized(this) {
                         state.deferredResult?.complete(model)
+                        state = state.copy(deferredResult = null)
                     }
                 },
                 onFailure = { error ->
                     Timber.e("Failed to decode settings: ${error.message}")
                     synchronized(this) {
                         state.deferredResult?.completeExceptionally(error)
+                        state = state.copy(deferredResult = null)
                     }
                 }
             )
@@ -297,6 +299,7 @@ object SettingsIO {
     fun onRunError() {
         synchronized(this) {
             state.deferredResult?.complete(Settings())
+            state = state.copy(deferredResult = null)
         }
     }
 

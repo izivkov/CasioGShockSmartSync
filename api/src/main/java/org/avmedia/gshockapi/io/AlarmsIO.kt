@@ -146,10 +146,8 @@ object AlarmsIO {
 
     suspend fun request(): ArrayList<Alarm> = CachedIO.request("GET_ALARMS") { key ->
         val deferred = CompletableDeferred<ArrayList<Alarm>>()
-        updateState {
-            it.copy(
-                deferredResult = deferred, isProcessing = true
-            )
+        synchronized(this) {
+            state = state.copy(deferredResult = deferred, isProcessing = true)
         }
         Alarm.clear()
         Connection.sendMessage("{ action: '$key'}")
@@ -181,7 +179,7 @@ object AlarmsIO {
         ) {
             synchronized(this) {
                 state.deferredResult?.complete(Alarm.getAlarms())
-                state = state.copy(alarms = Alarm.getAlarms(), isProcessing = false)
+                state = state.copy(alarms = Alarm.getAlarms(), isProcessing = false, deferredResult = null)
             }
         }
     }

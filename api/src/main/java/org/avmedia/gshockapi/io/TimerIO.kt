@@ -163,12 +163,14 @@ object TimerIO {
                     Timber.d("TimerIO: Decoded seconds: $seconds")
                     synchronized(this) {
                         state.deferredResult?.complete(seconds)
+                        state = state.copy(deferredResult = null)
                     }
                 },
                 onFailure = { error ->
                     Timber.e(error, "TimerIO: Failed to decode timer data")
                     synchronized(this) {
                         state.deferredResult?.completeExceptionally(error)
+                        state = state.copy(deferredResult = null)
                     }
                 }
             )

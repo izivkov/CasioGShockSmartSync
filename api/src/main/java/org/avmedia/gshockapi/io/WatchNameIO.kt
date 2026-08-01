@@ -60,9 +60,12 @@ object WatchNameIO {
         CachedIO.request("23") { key -> getWatchName(key) }
 
     private suspend fun getWatchName(key: String): String {
-        state = state.copy(deferredResult = CompletableDeferred())
+        val deferred = CompletableDeferred<String>()
+        synchronized(this) {
+            state = state.copy(deferredResult = deferred)
+        }
         IO.request(key)
-        return state.deferredResult?.await() ?: ""
+        return deferred.await()
     }
 
     fun onReceived(data: String) {

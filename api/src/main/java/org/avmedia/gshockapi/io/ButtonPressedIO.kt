@@ -88,9 +88,12 @@ object ButtonPressedIO {
 
     suspend fun request(): IO.WatchButton {
         return CachedIO.request("10") { key ->
-            state = state.copy(deferredResult = CompletableDeferred())
+            val deferred = CompletableDeferred<IO.WatchButton>()
+            synchronized(this) {
+                state = state.copy(deferredResult = deferred)
+            }
             IO.request(key)
-            state.deferredResult?.await() ?: IO.WatchButton.INVALID
+            deferred.await()
         }.also { button ->
             state = state.copy(lastKnownButton = button)
         }
@@ -107,13 +110,17 @@ object ButtonPressedIO {
         ButtonPressedIOFunctional.parseButtonPress(data)
             .fold(
                 onSuccess = { button ->
-                    state.deferredResult?.complete(button)
-                    state = State()
+                    synchronized(this) {
+                        state.deferredResult?.complete(button)
+                        state = state.copy(deferredResult = null)
+                    }
                 },
                 onFailure = { error ->
                     Timber.e("Failed to parse button press: ${error.message}")
-                    state.deferredResult?.complete(IO.WatchButton.INVALID)
-                    state = State()
+                    synchronized(this) {
+                        state.deferredResult?.complete(IO.WatchButton.INVALID)
+                        state = state.copy(deferredResult = null)
+                    }
                 }
             )
     }

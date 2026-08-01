@@ -73,8 +73,10 @@ object WaitForConnectionIO {
     ): String {
         WaitForConnectionIOFunctional.checkConnectionAlreadyEstablished()?.let { return it }
 
-        //state.deferredResult?.cancel()
-        state = state.copy(deferredResult = CompletableDeferred())
+        val deferred = CompletableDeferred<String>()
+        synchronized(this) {
+            state = state.copy(deferredResult = deferred)
+        }
 
         setupConnectionListener()  // MUST be before startConnection to avoid race
 
@@ -84,15 +86,17 @@ object WaitForConnectionIO {
         }
         // If already connecting, just fall through and wait for the event
 
-        return state.deferredResult?.await() ?: ""
+        return deferred.await()
     }
 
     private fun setupConnectionListener() {
         val eventActions = arrayOf(
             EventAction("ConnectionSetupComplete") {
                 CachedIO.clearCache()
-                state.deferredResult?.complete(WaitForConnectionIOFunctional.getSuccessResponse())
-                state = State()
+                synchronized(this) {
+                    state.deferredResult?.complete(WaitForConnectionIOFunctional.getSuccessResponse())
+                    state = state.copy(deferredResult = null)
+                }
             }
         )
         ProgressEvents.subscriber.runEventActions(this.javaClass.name, eventActions)

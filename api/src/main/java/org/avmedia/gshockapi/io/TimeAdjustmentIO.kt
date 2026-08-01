@@ -134,9 +134,12 @@ object TimeAdjustmentIO {
     }
 
     private suspend fun getTimeAdjustment(key: String): TimeAdjustmentInfo {
-        state = state.copy(deferredResult = CompletableDeferred())
+        val deferred = CompletableDeferred<TimeAdjustmentInfo>()
+        synchronized(this) {
+            state = state.copy(deferredResult = deferred)
+        }
         Connection.sendMessage("{ action: '$key'}")
-        return state.deferredResult?.await() ?: error("Deferred result not initialized")
+        return deferred.await()
     }
 
     fun set(settings: Settings) {
@@ -157,20 +160,26 @@ object TimeAdjustmentIO {
         TimeAdjustmentIOFunctional.decode(data)
             .fold(
                 onSuccess = { info ->
-                    state.deferredResult?.complete(info)
-                    state = State() // Reset state
+                    synchronized(this) {
+                        state.deferredResult?.complete(info)
+                        state = state.copy(deferredResult = null)
+                    }
                 },
                 onFailure = { error ->
                     Timber.e("Failed to decode time adjustment: ${error.message}")
-                    state.deferredResult?.completeExceptionally(error)
-                    state = State()
+                    synchronized(this) {
+                        state.deferredResult?.completeExceptionally(error)
+                        state = state.copy(deferredResult = null)
+                    }
                 }
             )
     }
 
     fun onRunError() {
-        state.deferredResult?.complete(TimeAdjustmentInfo())
-        state = State()
+        synchronized(this) {
+            state.deferredResult?.complete(TimeAdjustmentInfo())
+            state = state.copy(deferredResult = null)
+        }
     }
 
     @Suppress("UNUSED_PARAMETER")

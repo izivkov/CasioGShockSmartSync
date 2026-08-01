@@ -148,9 +148,12 @@ object AppInfoIO {
 
     suspend fun request(): String {
         return CachedIO.request("22") { key ->
-            state = state.copy(deferredResult = CompletableDeferred())
+            val deferred = CompletableDeferred<String>()
+            synchronized(this) {
+                state = state.copy(deferredResult = deferred)
+            }
             IO.request(key)
-            state.deferredResult?.await() ?: ""
+            deferred.await()
         }
     }
 
@@ -164,8 +167,10 @@ object AppInfoIO {
             initScratchPad()
         }
 
-        state.deferredResult?.complete(data)
-        state = State()
+        synchronized(this) {
+            state.deferredResult?.complete(data)
+            state = state.copy(deferredResult = null)
+        }
     }
 
     private fun initScratchPad() {

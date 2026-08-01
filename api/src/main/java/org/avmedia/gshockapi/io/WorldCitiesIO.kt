@@ -75,9 +75,12 @@ object WorldCitiesIO {
         CachedIO.request("1f0$cityNumber") { key -> getWorldCities(key) }
 
     private suspend fun getWorldCities(key: String): String {
-        state = state.copy(deferredResult = CompletableDeferred())
+        val deferred = CompletableDeferred<String>()
+        synchronized(this) {
+            state = state.copy(deferredResult = deferred)
+        }
         IO.request(key)
-        return state.deferredResult?.await() ?: ""
+        return deferred.await()
     }
 
     fun onReceived(data: String) {
