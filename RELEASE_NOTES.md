@@ -1,3 +1,28 @@
+# Release Notes - Casio G-Shock Smart Sync v48.0 — August 1, 2026
+
+## ✨ Highlights
+
+### 🛡️ Thread-Safe I/O Architecture
+Completed a massive architectural overhaul of the application's communication layer to ensure maximum stability during high-concurrency scenarios:
+*   **Unified Concurrency Pattern**: Standardized all 13 core Bluetooth registers (Alarms, Settings, Events, Step Counter, etc.) to use a stabilized local-variable pattern. This ensures that every requestor receives its own intended response even if multiple requests are firing simultaneously.
+*   **Race Condition Resolution**: Implemented synchronized state publication and completion logic, effectively eliminating the "orphaned awaits" and UI hangs that occurred during rapid screen transitions.
+
+### ⌚ Advanced Protocol Hierarchy
+Re-engineered the watch protocol engine for better maintainability and model-specific precision:
+*   **Extensible Hierarchy**: Refactored `StandardProtocol` into a base class, allowing specialized protocols to inherit standard behavior while only overriding what's necessary.
+*   **New MipProtocol**: Introduced a dedicated protocol for modern Memory-in-Pixel models like the **GW-BX5600**, ensuring they perform the complex multi-step handshake required for modern Casio hardware.
+*   **Refined Analogue Support**: Simplified the `AnalogueProtocol` for the **MTG-B3000** and **B1000**, reducing code duplication by 60% while preserving their specialized dual-dial logic.
+
+### ⚙️ Model-Specific Refinements
+*   **DW-H5600 Optimization**: Fine-tuned the DW-H5600 to use the legacy time-setting sequence while preserving modern MIP notification support, ensuring perfect compatibility with its unique hybrid protocol.
+*   **GW-BX5600 Handshake Fix**: Resolved a critical time-sync issue by implementing dynamic payload write-back. The app now echoes the full accumulated buffer back to the watch, preventing sync failures caused by truncated data.
+
+### 🧹 System & Maintenance
+*   **GShockAPI Simplification**: Cleaned up the main library interface by delegating hardware-specific logic to the internal protocol layer.
+*   **Build System Alignment**: Re-integrated the `:api` module as a direct project dependency to facilitate faster development and tighter integration testing.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v47.0 — July 31, 2026
 
 ## ✨ Highlights
