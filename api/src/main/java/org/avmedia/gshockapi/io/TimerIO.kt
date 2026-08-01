@@ -43,7 +43,7 @@ object TimerIOFunctional {
         val hours = totalSeconds / 3600
         val minutesAndSeconds = totalSeconds % 3600
         val minutes = minutesAndSeconds / 60
-        val seconds = minutesAndSeconds / 60
+        val seconds = minutesAndSeconds % 60
         return TimerState(hours, minutes, seconds, totalSeconds)
     }
 

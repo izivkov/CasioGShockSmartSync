@@ -26,7 +26,7 @@ object GwBx5600TimeIO {
         val nowMs = timeMs ?: Clock.systemDefaultZone().millis()
         val now = LocalDateTime.ofInstant(Instant.ofEpochMilli(nowMs), ZoneId.systemDefault())
 
-        Timber.i("GwBx5600TimeIO.set: \$now")
+        Timber.i("GwBx5600TimeIO.set: $now")
 
         // Step 1
         Timber.i("Step 1/4: time-slot data")
