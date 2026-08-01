@@ -237,7 +237,6 @@ data object WatchInfo {
             shortLightDuration = "1.5s", longLightDuration = "5s",
             hasBatteryLevel = false, alwaysConnected = true, hasDateFormat = false,
             weekLanguageSupported = false,
-            protocol = MipProtocol
         ),
         ModelInfo(model = WatchModel.DW,     hasAutoLight = true,  hasReminders = false),
         ModelInfo(
