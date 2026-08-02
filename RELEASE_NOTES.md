@@ -1,3 +1,14 @@
+# Release Notes - Casio G-Shock Smart Sync v49.0 — August 2, 2026
+
+## ✨ Highlights
+
+### 📅 Enhanced Multi-Language Event Support
+Improved the readability of calendar events for users in Cyrillic-speaking regions:
+*   **Cyrillic to Latin Transliteration**: Implemented a specialized `CyrillicToLatin` engine that automatically maps Cyrillic characters (Russian, Bulgarian, etc.) to their closest Latin equivalents. This ensures that event titles are readable on the watch's hardware, which only supports standard ASCII characters.
+*   **Intelligent Text Sanitization**: Refined the event title pipeline to remove emojis, strip accents, and perform transliteration in a single pass. This provides the cleanest possible text for the watch's limited display capabilities.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v48.0 — August 1, 2026
 
 ## ✨ Highlights
