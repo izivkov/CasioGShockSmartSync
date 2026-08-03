@@ -15,6 +15,7 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -22,43 +23,6 @@ import timber.log.Timber
 import java.text.Normalizer
 import java.util.regex.Pattern
 import javax.inject.Inject
-
-// ============================================================================
-// Cyrillic -> Latin transliteration
-// ============================================================================
-// Watch displays are Latin-only with no diacritics, so this produces plain
-// ASCII output rather than the accented Latin some transliteration standards
-// (and general-purpose libraries) default to.
-object CyrillicToLatin {
-
-    private val table = mapOf(
-        'а' to "a", 'б' to "b", 'в' to "v", 'г' to "g", 'д' to "d",
-        'е' to "e", 'ё' to "e", 'ж' to "zh", 'з' to "z", 'и' to "i",
-        'й' to "y", 'к' to "k", 'л' to "l", 'м' to "m", 'н' to "n",
-        'о' to "o", 'п' to "p", 'р' to "r", 'с' to "s", 'т' to "t",
-        'у' to "u", 'ф' to "f", 'х' to "kh", 'ц' to "ts", 'ч' to "ch",
-        'ш' to "sh", 'щ' to "shch",
-        'ъ' to "",   // silent hard sign - correct Russian convention
-        'ы' to "y",
-        'ь' to "",   // silent soft sign
-        'э' to "e", 'ю' to "yu", 'я' to "ya"
-    )
-
-    private const val CYRILLIC_RANGE_START = 0x0400
-    private const val CYRILLIC_RANGE_END = 0x04FF
-    private fun isCyrillic(c: Char) = c.code in CYRILLIC_RANGE_START..CYRILLIC_RANGE_END
-
-    fun transliterate(input: String): String =
-        input.map { ch ->
-            val lower = ch.lowercaseChar()
-            if (isCyrillic(lower)) {
-                val mapped = table[lower] ?: ch.toString()
-                if (ch.isUpperCase()) mapped.replaceFirstChar { it.uppercase() } else mapped
-            } else {
-                ch.toString()
-            }
-        }.joinToString("")
-}
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
