@@ -4,8 +4,8 @@
 
 ### 🌍 Expanded Localization & Cyrillic Support
 Significant improvements for our international users, particularly in Cyrillic-speaking regions:
-*   **Cyrillic to Latin Transliteration**: Implemented a specialized `CyrillicToLatin` engine that automatically maps Cyrillic characters (Russian, Bulgarian, etc.) to their closest Latin equivalents. This ensures that event titles are perfectly readable on the watch's standard ASCII-only display.
-*   **Intelligent Text Sanitization**: Refined the event title processing pipeline to handle emojis, accents, and transliteration in a single robust pass, providing clean and readable text for all watch models.
+*   **Cyrillic to Latin Transliteration**: Implemented a specialized `CyrillicToLatin` engine that automatically maps Cyrillic characters from a wide range of languages (including Russian, Bulgarian, Serbian, Ukrainian, and more) to their closest Latin equivalents. This ensures that event titles are perfectly readable on the watch's standard ASCII-only display.
+*   **Intelligent Text Sanitization**: Refined the event title processing pipeline to handle emojis, accents, and transliteration for various Cyrillic-based languages in a single robust pass, providing clean and readable text for all watch models.
 
 ### ⌚ Adaptive UI & Capability Intelligence
 Successfully implemented a fully dynamic user interface that intelligently adapts to every G-Shock watch model in the lineup:
