@@ -22,7 +22,7 @@ import javax.inject.Singleton
 class CompanionDevicePresenceMonitor @Inject constructor(
     // 1. Inject the repository directly in the constructor
     private val repository: GShockRepository,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     // Use a class-level scope to manage coroutines safely
     private val monitorScope = CoroutineScope(Dispatchers.IO + SupervisorJob())

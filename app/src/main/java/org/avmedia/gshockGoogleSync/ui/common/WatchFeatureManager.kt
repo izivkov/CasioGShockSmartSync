@@ -40,6 +40,8 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "settings.power_saving" to { WatchInfo.hasPowerSavingMode },
         "settings.multiple_fonts" to { WatchInfo.hasMultipleFonts },
         "light.auto_light" to { WatchInfo.hasAutoLight },
+        "light.duration" to { true },
+        "operation_tone.sound" to { true },
         "operation_tone.vibrate" to { WatchInfo.vibrate },
         "time.battery" to { WatchInfo.hasBatteryLevel },
         "time.world_cities" to { WatchInfo.worldCities },
@@ -64,8 +66,8 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "locale_card" to listOf("locale.date_format", "locale.time_format", "locale.week_language"),
         "power_saving_card" to listOf("settings.power_saving"),
         "font_card" to listOf("settings.multiple_fonts"),
-        "light_card" to listOf("light.auto_light"),
-        "operation_tone_card" to listOf("operation_tone.vibrate"),
+        "light_card" to listOf("light.auto_light", "light.duration"),
+        "operation_tone_card" to listOf("operation_tone.sound", "operation_tone.vibrate"),
         "time_adjustment_card" to listOf("time_adjustment.always_connected")
     )
 

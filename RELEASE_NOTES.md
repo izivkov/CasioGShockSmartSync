@@ -1,3 +1,31 @@
+# Release Notes - Casio G-Shock Smart Sync v50.0 — August 3, 2026
+
+## ✨ Highlights
+
+### 🌍 Expanded Localization & Cyrillic Support
+Significant improvements for our international users, particularly in Cyrillic-speaking regions:
+*   **Cyrillic to Latin Transliteration**: Implemented a specialized `CyrillicToLatin` engine that automatically maps Cyrillic characters (Russian, Bulgarian, etc.) to their closest Latin equivalents. This ensures that event titles are perfectly readable on the watch's standard ASCII-only display.
+*   **Intelligent Text Sanitization**: Refined the event title processing pipeline to handle emojis, accents, and transliteration in a single robust pass, providing clean and readable text for all watch models.
+
+### ⌚ Adaptive UI & Capability Intelligence
+Successfully implemented a fully dynamic user interface that intelligently adapts to every G-Shock watch model in the lineup:
+*   **Smart Card Collapsing**: Entire settings cards (Locale, Light, Font, etc.) now automatically hide if the connected watch doesn't support *any* of the features in that group. This keeps the interface clean and model-specific.
+*   **Granular Visibility Control**: Individual rows for **Time Format**, **Date Format**, and **Language Selection** now respect hardware capability flags (`hasTimeFormat`, `hasDateFormat`, `weekLanguageSupported`) and hide independently.
+*   **Font Selection Support**: Integrated the `hasMultipleFonts` attribute into the dynamic UI, ensuring the Font card only appears for modern digital models that support it.
+
+### 🛡️ Core Stability & Thread Safety
+Completed a major hardening of the application's internal communication engine:
+*   **Global Thread-Safe IO**: Refactored all 14 core I/O handlers to use a stabilized local-variable pattern with `CompletableDeferred`. This eliminates the "hangs" that occurred when the UI triggered multiple concurrent Bluetooth requests.
+*   **Startup Crash Resolution**: Fixed a critical `IllegalArgumentException` in the notification listener by migrating to the official Android `requestRebind()` API and implementing state-aware binding tracking.
+*   **Resource Integrity**: Enforced strict `Cursor` lifecycle management in the calendar engine to eliminate potential memory and resource leaks.
+
+### ⌚ Advanced Protocol Maturity
+*   **Unified Protocol Hierarchy**: Completed the transition to an extensible protocol architecture. `MipProtocol` and `AnalogueProtocol` now inherit from a robust `StandardProtocol` base, significantly improving maintainability.
+*   **GW-BX5600 Handshake Mastery**: Verified and finalized the multi-step handshake for the GW-BX5600, including dynamic payload write-back and optimized city-data packing.
+*   **Precision Time Sync**: Aligned the entire time-setting pipeline to correctly propagate astronomical offsets (Solar, LMT) from the UI through to the hardware-specific protocol handlers.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v49.0 — August 2, 2026
 
 ## ✨ Highlights

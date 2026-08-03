@@ -158,7 +158,7 @@ data object WatchInfo {
         ),
         ModelInfo(
             model = WatchModel.GW_BX5600,
-            worldCitiesCount = 2, dstCount = 3,
+            worldCitiesCount = 6, dstCount = 3,
             hasAutoLight = true, hasReminders = false,
             shortLightDuration = "1.5s", longLightDuration = "3s",
             batteryLevelLowerLimit = 9, batteryLevelUpperLimit = 19,

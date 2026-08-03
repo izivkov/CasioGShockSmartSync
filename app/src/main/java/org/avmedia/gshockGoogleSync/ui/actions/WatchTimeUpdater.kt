@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class WatchTimeUpdater @Inject constructor(
     private val api: GShockRepository,
     private val timeSettingsStorage: TimeSettingsStorage,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     /**
      * Calculates the correct time offset according to the user's settings

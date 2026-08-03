@@ -49,27 +49,29 @@ fun OperationalTone(
             .padding(0.dp),
     ) {
         Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AppTextLarge(
-                    text = stringResource(id = R.string.operational_sound),
-                    modifier = Modifier.padding(end = 6.dp)
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                AppSwitch(
-                    checked = sound,
-                    onCheckedChange = { newValue ->
-                        sound = newValue
-                        onUpdate(operationToneSetting.copy(sound = newValue))
-                    },
+            WatchFeature(id = "operation_tone.sound") {
+                Row(
                     modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 12.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(start = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AppTextLarge(
+                        text = stringResource(id = R.string.operational_sound),
+                        modifier = Modifier.padding(end = 6.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    AppSwitch(
+                        checked = sound,
+                        onCheckedChange = { newValue ->
+                            sound = newValue
+                            onUpdate(operationToneSetting.copy(sound = newValue))
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 12.dp)
+                    )
+                }
             }
 
             WatchFeature(id = "operation_tone.vibrate") {

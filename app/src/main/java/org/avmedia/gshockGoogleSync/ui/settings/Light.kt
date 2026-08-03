@@ -81,41 +81,43 @@ fun Light(
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                AppTextLarge(
-                    text = Utils.shortenString(
-                        stringResource(id = R.string.illumination_period),
-                        20
-                    ),
-                )
-
+            WatchFeature(id = "light.duration") {
                 Row(
-                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    RadioButton(
-                        selected = lightDuration == SettingsViewModel.Light.LightDuration.TWO_SECONDS,
-                        onClick = {
-                            lightDuration = SettingsViewModel.Light.LightDuration.TWO_SECONDS
-                            onUpdate(lightSetting.copy(duration = lightDuration))
-                        },
-                        modifier = Modifier.padding(end = 0.dp)
+                    AppTextLarge(
+                        text = Utils.shortenString(
+                            stringResource(id = R.string.illumination_period),
+                            20
+                        ),
                     )
-                    AppText(text = watchFeatureManager.getString("light.short_duration") as String)
 
-                    RadioButton(
-                        selected = lightDuration == SettingsViewModel.Light.LightDuration.FOUR_SECONDS,
-                        onClick = {
-                            lightDuration = SettingsViewModel.Light.LightDuration.FOUR_SECONDS
-                            onUpdate(lightSetting.copy(duration = lightDuration))
-                        },
-                        modifier = Modifier.padding(end = 0.dp)
-                    )
-                    AppText(text = watchFeatureManager.getString("light.long_duration") as String)
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = lightDuration == SettingsViewModel.Light.LightDuration.TWO_SECONDS,
+                            onClick = {
+                                lightDuration = SettingsViewModel.Light.LightDuration.TWO_SECONDS
+                                onUpdate(lightSetting.copy(duration = lightDuration))
+                            },
+                            modifier = Modifier.padding(end = 0.dp)
+                        )
+                        AppText(text = watchFeatureManager.getString("light.short_duration") as String)
+
+                        RadioButton(
+                            selected = lightDuration == SettingsViewModel.Light.LightDuration.FOUR_SECONDS,
+                            onClick = {
+                                lightDuration = SettingsViewModel.Light.LightDuration.FOUR_SECONDS
+                                onUpdate(lightSetting.copy(duration = lightDuration))
+                            },
+                            modifier = Modifier.padding(end = 0.dp)
+                        )
+                        AppText(text = watchFeatureManager.getString("light.long_duration") as String)
+                    }
                 }
             }
         }

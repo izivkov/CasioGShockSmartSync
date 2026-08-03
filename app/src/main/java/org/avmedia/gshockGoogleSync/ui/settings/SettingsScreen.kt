@@ -117,10 +117,10 @@ fun SettingsList() {
             Light(settingsViewModel::onSettingUpdated)
         }
 
-        WatchFeature(id = "settings.power_saving") {
+        WatchFeature(id = "power_saving_card") {
             PowerSavings(settingsViewModel::onSettingUpdated)
         }
-        WatchFeature(id = "settings.multiple_fonts") {
+        WatchFeature(id = "font_card") {
             Font(settingsViewModel::onSettingUpdated)
         }
         WatchFeature(id = "time_adjustment_card") {
