@@ -79,7 +79,9 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                             text = stringResource(
                                 id = R.string.send_events_to_watch
                             ),
-                            onClick = { viewModel.sendEventsToWatch() }
+                            onClick = {
+                                viewModel.sendEventsToWatch()
+                            }
                         )
                     )
                     ButtonsRow(buttons = buttons)

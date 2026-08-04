@@ -1,11 +1,12 @@
-# Release Notes - Casio G-Shock Smart Sync v50.0 — August 3, 2026
+# Release Notes - Casio G-Shock Smart Sync v50.0 — August 4, 2026
 
 ## ✨ Highlights
 
-### 🌍 Expanded Localization & Cyrillic Support
-Significant improvements for our international users, particularly in Cyrillic-speaking regions:
-*   **Cyrillic to Latin Transliteration**: Implemented a specialized `CyrillicToLatin` engine that automatically maps Cyrillic characters from a wide range of languages (including Russian, Bulgarian, Serbian, Ukrainian, and more) to their closest Latin equivalents. This ensures that event titles are perfectly readable on the watch's standard ASCII-only display.
-*   **Intelligent Text Sanitization**: Refined the event title processing pipeline to handle emojis, accents, and transliteration for various Cyrillic-based languages in a single robust pass, providing clean and readable text for all watch models.
+### 🌍 Advanced Multi-Language Cyrillic Support
+Significant overhaul of the localization engine to provide seamless support for users in Cyrillic-speaking regions:
+*   **Specialized Transliteration Engine**: Implemented a comprehensive `CyrillicToLatin` system with tailored mappings for **Russian, Bulgarian, Macedonian, Serbian, Mongolian, and Kazakh**. The app now automatically detects your system language and applies the correct linguistic conventions (e.g., distinguishing how 'ъ' or 'щ' should be rendered in different regions).
+*   **Functional Transformer Pipeline**: Introduced a modular "pipeline" architecture for event processing. Event titles now pass through a chain of dedicated transformers that handle transliteration, emoji removal, and character filtering in a clean and predictable way.
+*   **Perfect Watch Readability**: Guarantees that calendar events and notifications are always readable on the watch hardware's standard ASCII display, regardless of the original character set.
 
 ### ⌚ Adaptive UI & Capability Intelligence
 Successfully implemented a fully dynamic user interface that intelligently adapts to every G-Shock watch model in the lineup:

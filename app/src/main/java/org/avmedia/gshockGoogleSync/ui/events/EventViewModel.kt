@@ -74,42 +74,22 @@ class EventViewModel @Inject constructor(
         )
     }
 
-    private fun String.sanitizeEventTitle(): String {
-        fun String.filterAllowedCharacters(): String {
-            val allowedSymbols =
-                " !\"#\\\$%&'()*+,-./:;<=>?@[\\]^_`{|}" // Not supported on the watch: "~。「」、・。¥±♪⟪⟫♦▶◀"
-            val regex = "[^A-Za-z0-9${Regex.escape(allowedSymbols)}]".toRegex()
-            return this.replace(regex, "*")
-        }
-
-        fun String.removeEmojis(): String {
-            return this.replace(Regex("[\\p{So}\\p{Cn}]"), "")
-        }
-
-        fun String.removeAccents(): String {
-            val normalized = Normalizer.normalize(this, Normalizer.Form.NFD)
-            return Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized)
-                .replaceAll("")
-        }
-
-        val ret = this.removeEmojis()
-            .let { CyrillicToLatin.transliterate(it) }
-            .removeAccents()
-            .filterAllowedCharacters()
-            .trim()
-
-        return ret
-    }
-
     fun sendEventsToWatch() {
         viewModelScope.launch {
             runCatching {
-                // Create a new list with emoji-free, Latin-only titles
-                val sanitizedEvents = _events.value.map { event ->
-                    event.copy(title = event.title.sanitizeEventTitle())
+                val eventTransformers: List<(List<Event>) -> List<Event>> = listOf(
+                    { events ->
+                        events.map { event ->
+                            event.copy(title = CyrillicToLatin.transliterate(event.title))
+                        }
+                    }
+                )
+
+                val processedEvents = eventTransformers.fold(_events.value) { currentEvents, transformer ->
+                    transformer(currentEvents)
                 }
 
-                api.setEvents(ArrayList(sanitizedEvents))
+                api.setEvents(ArrayList(processedEvents))
                 AppSnackbar(appContext.getString(R.string.reminders_sent_to_watch))
             }.onFailure { e ->
                 AppSnackbar("Error: ${e.message ?: ""}")

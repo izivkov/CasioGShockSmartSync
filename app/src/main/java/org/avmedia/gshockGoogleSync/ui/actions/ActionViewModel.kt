@@ -36,6 +36,8 @@ import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
+import org.avmedia.gshockapi.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
@@ -282,7 +284,20 @@ constructor(
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(calendarEvents.getEventsFromCalendar())
-            api.setEvents(EventsModel.events)
+
+            val eventTransformers: List<(List<Event>) -> List<Event>> = listOf(
+                { events ->
+                    events.map { event ->
+                        event.copy(title = CyrillicToLatin.transliterate(event.title))
+                    }
+                }
+            )
+
+            val processedEvents = eventTransformers.fold(EventsModel.events) { currentEvents, transformer ->
+                ArrayList(transformer(currentEvents))
+            }
+
+            api.setEvents(processedEvents)
         }
 
         override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
