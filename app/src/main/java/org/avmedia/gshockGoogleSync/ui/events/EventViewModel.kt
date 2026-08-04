@@ -92,11 +92,13 @@ class EventViewModel @Inject constructor(
                 .replaceAll("")
         }
 
-        return this.removeEmojis()
+        val ret = this.removeEmojis()
             .let { CyrillicToLatin.transliterate(it) }
             .removeAccents()
             .filterAllowedCharacters()
             .trim()
+
+        return ret
     }
 
     fun sendEventsToWatch() {
