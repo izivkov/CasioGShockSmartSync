@@ -4,7 +4,7 @@
 
 ### 🌍 Advanced Multi-Language Cyrillic Support
 Significant overhaul of the localization engine to provide seamless support for users in Cyrillic-speaking regions:
-*   **Specialized Transliteration Engine**: Implemented a comprehensive `CyrillicToLatin` system with tailored mappings for **Russian, Bulgarian, Macedonian, Serbian, Mongolian, and Kazakh**. The app now automatically detects your system language and applies the correct linguistic conventions (e.g., distinguishing how 'ъ' or 'щ' should be rendered in different regions).
+*   **Multi-Language Transliteration**: Implemented a comprehensive `CyrillicToLatin` engine with specialized support for **Russian, Bulgarian, Macedonian, Serbian, Ukrainian, Mongolian, and Kazakh**. The app now automatically detects the system locale and applies the correct linguistic mapping (e.g., handling the Bulgarian 'ъ' as a vowel vs. silent in Russian, or the unique Ukrainian 'і', 'ї', and 'є').
 *   **Functional Transformer Pipeline**: Introduced a modular "pipeline" architecture for event processing. Event titles now pass through a chain of dedicated transformers that handle transliteration, emoji removal, and character filtering in a clean and predictable way.
 *   **Perfect Watch Readability**: Guarantees that calendar events and notifications are always readable on the watch hardware's standard ASCII display, regardless of the original character set.
 

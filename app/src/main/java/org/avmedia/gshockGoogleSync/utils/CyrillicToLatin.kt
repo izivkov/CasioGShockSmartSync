@@ -11,7 +11,7 @@ import java.util.Locale
 
 object CyrillicToLatin {
 
-    enum class Lang { RUSSIAN, BULGARIAN, MACEDONIAN, SERBIAN, MONGOLIAN, KAZAKH }
+    enum class Lang { RUSSIAN, BULGARIAN, MACEDONIAN, SERBIAN, MONGOLIAN, KAZAKH, UKRAINIAN }
 
     private val CYRILLIC_LOCALES = mapOf(
         "ru" to Lang.RUSSIAN,
@@ -19,7 +19,8 @@ object CyrillicToLatin {
         "mk" to Lang.MACEDONIAN,
         "sr" to Lang.SERBIAN,
         "mn" to Lang.MONGOLIAN,
-        "kk" to Lang.KAZAKH
+        "kk" to Lang.KAZAKH,
+        "uk" to Lang.UKRAINIAN
     )
 
     private val russian = mapOf(
@@ -94,6 +95,16 @@ object CyrillicToLatin {
         'і' to "i"
     )
 
+    private val ukrainian = mapOf(
+        'а' to "a", 'б' to "b", 'в' to "v", 'г' to "h", 'ґ' to "g",
+        'д' to "d", 'е' to "e", 'є' to "ye", 'ж' to "zh", 'з' to "z",
+        'и' to "y", 'і' to "i", 'ї' to "yi", 'й' to "y", 'к' to "k",
+        'л' to "l", 'м' to "m", 'н' to "n", 'о' to "o", 'п' to "p",
+        'р' to "r", 'с' to "s", 'т' to "t", 'у' to "u", 'ф' to "f",
+        'х' to "kh", 'ц' to "ts", 'ч' to "ch", 'ш' to "sh", 'щ' to "shch",
+        'ь' to "", 'ю' to "yu", 'я' to "ya"
+    )
+
     private fun tableFor(lang: Lang): Map<Char, String> = when (lang) {
         Lang.RUSSIAN -> russian
         Lang.BULGARIAN -> bulgarian
@@ -101,6 +112,7 @@ object CyrillicToLatin {
         Lang.SERBIAN -> serbian
         Lang.MONGOLIAN -> mongolian
         Lang.KAZAKH -> kazakh
+        Lang.UKRAINIAN -> ukrainian
     }
 
     private const val CYRILLIC_RANGE_START = 0x0400
