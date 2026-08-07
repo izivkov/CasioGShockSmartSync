@@ -8,17 +8,16 @@ import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.camera.core.CameraSelector
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.DateFormat
 import java.time.Clock
 import java.util.Date
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +41,17 @@ import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
-@HiltViewModel
+/**
+ * Application-scoped so that watch button presses are handled even when no UI is composed.
+ *
+ * This used to be a @HiltViewModel whose event subscription was registered by the
+ * ActionRunner composable. That meant a process woken in the background by
+ * GShockCompanionDeviceService (no Activity, no composition) had nobody listening for
+ * "ButtonPressedInfoReceived", so presses were silently dropped until the user opened
+ * the app. As a @Singleton created in GShockApplication.onCreate(), the subscription
+ * exists for the whole process lifetime.
+ */
+@Singleton
 class ActionsViewModel
 @Inject
 constructor(
@@ -54,7 +63,10 @@ constructor(
         private val notificationProvider: NotificationProvider,
         private val watchTimeUpdater: WatchTimeUpdater,
         private val watchFeatureManager: IWatchFeatureManager
-) : ViewModel() {
+) {
+    /** Replaces viewModelScope. Lives as long as the process. */
+    private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
     private val _actions = MutableStateFlow<List<Action>>(emptyList())
     val actions: StateFlow<List<Action>> = _actions
 
@@ -126,8 +138,12 @@ constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
+    /**
+     * No longer a ViewModel lifecycle callback. Kept so a pending debounced save can be
+     * flushed explicitly if a caller ever needs to; the process-scoped instance is not
+     * torn down on Activity destruction.
+     */
+    fun onCleared() {
         saveJob?.let {
             saveJob?.cancel()
             viewModelScope.launch { actionsStorage.save() }
@@ -426,7 +442,7 @@ constructor(
             override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running \${this.javaClass.simpleName}")
+            Timber.d("running ${this.javaClass.simpleName}")
             runCatching {
                 val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                 val eventTime = SystemClock.uptimeMillis()
@@ -628,6 +644,7 @@ constructor(
 
     private fun runIt(action: Action, context: Context) {
         runCatching { action.run(context) }.onFailure {
+            Timber.e(it, "Action failed: '${action.title}' (${action.javaClass.simpleName})")
             when (it) {
                 is SecurityException ->
                         AppSnackbar(

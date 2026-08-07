@@ -20,7 +20,6 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
 import org.avmedia.gshockGoogleSync.pairing.DeviceAssociationManager
 import org.avmedia.gshockGoogleSync.services.DeviceManager
-import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
 import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
@@ -29,6 +28,10 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
+import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.utils.Utils
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -61,6 +64,9 @@ class GShockApplication : Application(), IScreenManager {
     @Inject
     lateinit var deviceAssociationManager: DeviceAssociationManager
 
+    @Inject
+    lateinit var actionsViewModel: ActionsViewModel
+
     fun init() {
         Timber.i("Initializing GShockApplication")
         CoroutineScope(Dispatchers.IO).launch {
@@ -73,13 +79,8 @@ class GShockApplication : Application(), IScreenManager {
     override fun onCreate() {
         super.onCreate()
 
-        CrashReportHelper.installGlobalHandler(this)
-
-        ActivityProvider.initialize(this)
-        eventHandler =
-            MainEventHandler(context = this, repository = repository, screenManager = this)
-        eventHandler.setupEventSubscription()
-
+        // Plant first: Timber calls made before a tree is planted are silently discarded,
+        // which previously swallowed all logging from the rest of onCreate().
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
             Timber.d("Timber planted for Debug") // If you see this, Timber is working
@@ -87,10 +88,55 @@ class GShockApplication : Application(), IScreenManager {
             // Optional: Plant a tree that only logs Errors to a crash reporter like Firebase
             // Timber.plant(ReleaseTree())
         }
+
+        CrashReportHelper.installGlobalHandler(this)
+
+        ActivityProvider.initialize(this)
+        eventHandler =
+            MainEventHandler(context = this, repository = repository, screenManager = this)
+        eventHandler.setupEventSubscription()
+
+        // Registered here, not from a composable, so watch button presses still run when the
+        // process was woken in the background by GShockCompanionDeviceService and no UI exists.
+        setupActionSubscriptions()
     }
 
     override fun onTerminate() {
         super.onTerminate()
+    }
+
+    /** Moved here from the former ActionRunner composable. */
+    private fun setupActionSubscriptions() {
+        val buttonActions = arrayOf(
+            EventAction("ButtonPressedInfoReceived") {
+                when {
+                    repository.isActionButtonPressed() ->
+                        actionsViewModel.runActionsForActionButton(this)
+
+                    repository.isAutoTimeStarted() ->
+                        actionsViewModel.runActionsForAutoTimeSetting(this)
+
+                    repository.isFindPhoneButtonPressed() ->
+                        actionsViewModel.runActionFindPhone(this)
+
+                    repository.isNormalButtonPressed() ->
+                        actionsViewModel.runActionForConnection(this)
+
+                    repository.isAlwaysConnectedConnectionPressed() ->
+                        actionsViewModel.runActionForAlwaysConnected(this)
+                }
+            }
+        )
+        ProgressEvents.runEventActions(Utils.AppHashCode(), buttonActions)
+
+        // Triggered by messages rather than button presses, e.g. "FindPhone" on always-connected watches
+        val otherActions = arrayOf(
+            EventAction("RunActions") {
+                actionsViewModel.runActionsForActionButton(this)
+            }
+        )
+        ProgressEvents.runEventActions(Utils.AppHashCode() + "otherActions", otherActions)
+        Timber.i("Action subscriptions registered at process scope (no UI required)")
     }
 
     // ScreenManager implementation
@@ -122,9 +168,6 @@ class GShockApplication : Application(), IScreenManager {
 
     @Composable
     fun Run(contentPadding: PaddingValues) {
-        // Start ActionRunner here so we can run actions on connection
-        ActionRunner(context = this, api = repository)
-
         StartScreen(contentPadding) { PreConnectionScreen() }
         LaunchedEffect(key1 = System.currentTimeMillis()) {
             deviceAssociationManager.checkPairedDevicesOrNotify()

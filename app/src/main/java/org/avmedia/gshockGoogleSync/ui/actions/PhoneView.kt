@@ -1,3 +1,4 @@
+import org.avmedia.gshockGoogleSync.ui.actions.rememberActionsViewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
@@ -25,7 +25,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppPhoneInputDialog
 @Composable
 fun PhoneView(
         onUpdate: (ActionsViewModel.PhoneDialAction) -> Unit,
-        actionsViewModel: ActionsViewModel = hiltViewModel(),
+        actionsViewModel: ActionsViewModel = rememberActionsViewModel(),
 ) {
     data class ViewState(
             val isEnabled: Boolean,

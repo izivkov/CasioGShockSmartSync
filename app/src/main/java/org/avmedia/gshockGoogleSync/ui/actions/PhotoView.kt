@@ -1,3 +1,4 @@
+import org.avmedia.gshockGoogleSync.ui.actions.rememberActionsViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
@@ -26,7 +26,7 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 @Composable
 fun PhotoView(
     onUpdate: (ActionsViewModel.PhotoAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel()
+    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
 ) {
     data class ViewState(
         val isEnabled: Boolean,

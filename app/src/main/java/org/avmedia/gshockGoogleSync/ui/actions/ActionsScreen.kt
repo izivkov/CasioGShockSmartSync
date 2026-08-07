@@ -23,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -36,7 +35,7 @@ import timber.log.Timber
 fun ActionsScreen(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel =
-        hiltViewModel(LocalContext.current as ComponentActivity),
+        rememberActionsViewModel(),
 ) {
     LaunchedEffect(Unit) {
         actionsViewModel.uiEvents.collect { event ->

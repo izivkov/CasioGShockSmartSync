@@ -6,13 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun RemindersView(
     onUpdate: (ActionsViewModel.SetEventsAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel()
+    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
 ) {
     val setEventsAction = remember {
         actionsViewModel.getAction(ActionsViewModel.SetEventsAction::class.java)

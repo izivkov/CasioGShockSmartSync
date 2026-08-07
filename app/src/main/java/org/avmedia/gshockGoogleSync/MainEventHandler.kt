@@ -71,10 +71,12 @@ class MainEventHandler(
     }
 
     private fun handleError() {
-        val message = ProgressEvents.getPayload("Error") as String?
+        val payload = ProgressEvents.getPayload("Error") as String?
+        val message = payload
             ?: context.getString(
                 R.string.apierror_ensure_the_official_g_shock_app_is_not_running
             )
+        Timber.e("API Error event. payload=${payload ?: "<none, using default message>"}")
 
         repository.disconnect()
         screenManager.showError(message)

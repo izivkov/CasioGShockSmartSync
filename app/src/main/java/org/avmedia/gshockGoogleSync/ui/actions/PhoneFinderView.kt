@@ -6,13 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PhoneFinderView(
     onUpdate: (ActionsViewModel.FindPhoneAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel()
+    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
 ) {
     val findPhoneAction = remember {
         actionsViewModel.getAction(ActionsViewModel.FindPhoneAction::class.java)

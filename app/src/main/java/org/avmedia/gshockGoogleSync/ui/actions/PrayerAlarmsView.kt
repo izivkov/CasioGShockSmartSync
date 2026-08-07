@@ -6,13 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PrayerAlarmsView(
     onUpdate: (ActionsViewModel.PrayerAlarmsAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel()
+    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
 ) {
     val prayerAlarmsAction = remember {
         actionsViewModel.getAction(ActionsViewModel.PrayerAlarmsAction::class.java)
