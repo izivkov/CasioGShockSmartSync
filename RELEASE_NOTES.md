@@ -1,3 +1,22 @@
+# Release Notes - Casio G-Shock Smart Sync v51.0 — August 8, 2026
+
+## ✨ Highlights
+
+### ⌚ Precision Astronomical Timekeeping
+Significant improvements to how astronomical and local offsets are applied across all watch models:
+*   **Decoupled Time & Offset**: Refactored the `setTime` API to accept an independent `offsetFromSystemTime` parameter. This allows the app to fetch the latest system time just milliseconds before sending it to the watch, while preserving the user's selected Solar or LMT adjustment for maximum accuracy.
+*   **Protocol-Wide Offset Support**: Propagated astronomical offset support through the entire protocol hierarchy (`Standard`, `Analogue`, and `Mip`), ensuring a consistent timekeeping experience regardless of watch hardware.
+
+### 🛠 Protocol & Diagnostic Refinements
+*   **Compact Hex Logging**: Updated the Bluetooth communication layer to log outbound commands as compact hex streams. This significantly improves debuggability by providing a clean, Wireshark-compatible trace of all watch interactions.
+*   **Refined GW-BX5600 Logic**: Optimized the world-city handshake for modern MIP models, ensuring robust time synchronization even with custom city configurations.
+
+### 🧹 Architectural Cleanup
+*   **Functional Event Pipeline**: Fully integrated the `CyrillicToLatin` engine into a new functional transformer pipeline for event titles. This allows for modular, chainable text sanitization before reminders are sent to the watch.
+*   **Dependency Alignment**: Streamlined the project by transitioning back to the production `gshockapi` library (v1.6.3), while maintaining the refactored `:api` module as a reference for rapid development.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v50.0 — August 4, 2026
 
 ## ✨ Highlights
