@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = 'org.avmedia.gshockGoogleSync'
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "org.avmedia.gshockGoogleSync"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 4265
         versionName = "42.6.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

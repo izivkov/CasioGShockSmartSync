@@ -117,7 +117,6 @@ class TimeViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        super.onCleared()
         saveJob?.let {
             saveJob?.cancel()
             viewModelScope.launch {
