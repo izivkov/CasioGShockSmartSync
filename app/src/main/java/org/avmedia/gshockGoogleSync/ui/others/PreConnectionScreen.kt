@@ -242,6 +242,10 @@ fun PreConnectionScreen(
                         WatchScreen(
                             imageResId =
                                 when {
+                                    // Before the GA/GW checks: "ABL-100WE" contains neither, but
+                                    // keep it first so the more specific model always wins.
+                                    "ABL" in watchName -> R.drawable.abl_100we
+
                                     "GA" in watchName || "GMA" in watchName ->
                                         R.drawable.ga_b2100
 
