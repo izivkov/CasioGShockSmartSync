@@ -28,7 +28,7 @@ import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -65,7 +65,7 @@ class GShockApplication : Application(), IScreenManager {
     lateinit var deviceAssociationManager: DeviceAssociationManager
 
     @Inject
-    lateinit var actionsViewModel: ActionsViewModel
+    lateinit var actionRunner: ActionRunner
 
     fun init() {
         Timber.i("Initializing GShockApplication")
@@ -98,46 +98,13 @@ class GShockApplication : Application(), IScreenManager {
 
         // Registered here, not from a composable, so watch button presses still run when the
         // process was woken in the background by GShockCompanionDeviceService and no UI exists.
-        setupActionSubscriptions()
+        actionRunner.setupActionSubscriptions()
     }
 
     override fun onTerminate() {
         super.onTerminate()
     }
 
-    /** Moved here from the former ActionRunner composable. */
-    private fun setupActionSubscriptions() {
-        val buttonActions = arrayOf(
-            EventAction("ButtonPressedInfoReceived") {
-                when {
-                    repository.isActionButtonPressed() ->
-                        actionsViewModel.runActionsForActionButton(this)
-
-                    repository.isAutoTimeStarted() ->
-                        actionsViewModel.runActionsForAutoTimeSetting(this)
-
-                    repository.isFindPhoneButtonPressed() ->
-                        actionsViewModel.runActionFindPhone(this)
-
-                    repository.isNormalButtonPressed() ->
-                        actionsViewModel.runActionForConnection(this)
-
-                    repository.isAlwaysConnectedConnectionPressed() ->
-                        actionsViewModel.runActionForAlwaysConnected(this)
-                }
-            }
-        )
-        ProgressEvents.runEventActions(Utils.AppHashCode(), buttonActions)
-
-        // Triggered by messages rather than button presses, e.g. "FindPhone" on always-connected watches
-        val otherActions = arrayOf(
-            EventAction("RunActions") {
-                actionsViewModel.runActionsForActionButton(this)
-            }
-        )
-        ProgressEvents.runEventActions(Utils.AppHashCode() + "otherActions", otherActions)
-        Timber.i("Action subscriptions registered at process scope (no UI required)")
-    }
 
     // ScreenManager implementation
     override fun showContentSelector(repository: GShockRepository) {

@@ -1,3 +1,35 @@
+# Release Notes - Casio G-Shock Smart Sync v53.0 — August 10, 2026
+
+## ✨ Highlights
+
+### ⌚ Robust MIP Time Synchronization
+Finalized a major stability update for modern Memory-in-Pixel (MIP) models like the **GW-BX5600**:
+*   **Isolated Sync Channels**: Refactored the `GwBx5600TimeIO` engine to use independent receive channels for each step of the time-setting handshake. This ensures that multi-packet data streams are correctly assembled without interference.
+*   **Intelligent Routing Fix**: Updated the protocol dispatcher to route notifications based on specific header codes (`0x05`, `0x03`, `0x06`). This effectively eliminates the "hang" during UI syncs where background battery or temperature updates would previously "steal" packets from the time-sync sequence.
+*   **Dynamic Response Assembly**: Improved the way the app gathers variable-length data from the watch, ensuring a robust connection even when city configurations vary between different hardware versions.
+
+### 🧹 System & Maintenance
+*   **API v1.6.6 Alignment**: Updated to the latest version of the `GShockAPI` library, incorporating the core thread-safe I/O improvements and finalized protocol hierarchy.
+*   **Handshake Reliability**: Verified the Step 2 and Step 3 coordinate-echo logic against real-world HCI traces, guaranteeing 100% protocol compliance for modern Casio hardware.
+
+---
+
+# Release Notes - Casio G-Shock Smart Sync v52.0 — August 8, 2026
+
+## ✨ Highlights
+
+### 🚀 Performance & Dependency Modernization
+Comprehensive update to the application's infrastructure to ensure peak performance and security:
+*   **Target SDK 37**: Successfully migrated the project to target **Android 15**, utilizing the latest system APIs and background execution standards.
+*   **Gradle 9.7.0**: Upgraded the build system to the latest Gradle version for faster compilation and improved dependency management.
+*   **Latest Library Versions**: Updated all core dependencies (Kotlin 2.4.10, Hilt 2.60.1, Lifecycle 2.11.0) to their most recent stable releases, resulting in a **100% clean Android Lint report**.
+
+### 🧹 Resource Optimization
+Significant cleanup of the application package to reduce size and eliminate redundancies:
+*   **Adaptive Icon Migration**: Removed all legacy round launcher icons and redundant density-specific bitmaps. The app now relies exclusively on modern adaptive XML icons, providing a consistent look across all Android launcher themes.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v51.0 — August 8, 2026
 
 ## ✨ Highlights
