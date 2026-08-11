@@ -83,6 +83,8 @@
     <string name="toggle_flashlight">启动闪光灯</string>
     <string name="start_voice_assistant">启动语音助手</string>
     <string name="next_track">跳转到下一个曲目</string>
+    <string name="play_pause">播放/暂停切换</string>
+    <string name="play_pause_info"><![CDATA[在手机当前的媒体播放器（Spotify、YouTube 等）的播放 and 暂停之间切换。]]></string>
     <string name="emergency_actions">触发应急时的行为:</string>
     <string name="make_phonecall">拨打电话</string>
     <string name="adjustment_time_info"><![CDATA[

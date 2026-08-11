@@ -88,6 +88,8 @@ lorsque vous voyagez dans un autre fuseau horaire.]]>
     <string name="toggle_flashlight">Torche</string>
     <string name="start_voice_assistant">Démarrer l\'assistant vocal</string>
     <string name="next_track">Passer à la piste suivante</string>
+    <string name="play_pause">Lecture/Pause</string>
+    <string name="play_pause_info"><![CDATA[Alterne entre lecture et pause pour le lecteur multimédia actuel sur votre téléphone (Spotify, YouTube, etc.).]]></string>
     <string name="emergency_actions">Actions d\'urgence :</string>
     <string name="make_phonecall">Passer un appel</string>
     <string name="adjustment_time_info"><![CDATA[

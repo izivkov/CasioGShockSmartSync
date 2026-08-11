@@ -8,7 +8,7 @@ The scratchpad buffer uses a **fixed layout** where each client has a predetermi
 | Offset | Size | Client | Description |
 |--------|------|--------|-------------|
 | 0 | 3 bytes | `AlarmNameStorage` | Stores 6 alarm names using 3-bit encoding (18 bits total = 3 bytes) |
-| 3 | 2 bytes | `ActionsStorage` | Stores 9 boolean action flags using 1-bit encoding (9 bits = 2 bytes) |
+| 3 | 2 bytes | `ActionsStorage` | Stores 10 boolean action flags using 1-bit encoding (10 bits = 2 bytes) |
 | **Total** | **5 bytes** | | |
 
 ## Architecture
@@ -67,10 +67,12 @@ class MyNewStorage @Inject constructor(
 - Total: 6 names × 3 bits = 18 bits = 3 bytes
 
 ### ActionsStorage (Offset: 3, Size: 2 bytes)
-- Stores 9 boolean action flags
+- Stores 10 boolean action flags
 - Each action encoded as 1 bit
-- Actions: SET_TIME, REMINDERS, PHONE_FINDER, TAKE_PHOTO, FLASHLIGHT, VOICE_ASSIST, SKIP_TO_NEXT_TRACK, PRAYER_ALARMS, PHONE_CALL
-- Total: 9 actions × 1 bit = 9 bits = 2 bytes (rounded up)
+- Actions: SET_TIME, REMINDERS, PHONE_FINDER, TAKE_PHOTO, FLASHLIGHT, VOICE_ASSIST, SKIP_TO_NEXT_TRACK, PRAYER_ALARMS, PHONE_CALL, TOGGLE_PLAY_PAUSE
+- Total: 10 actions × 1 bit = 10 bits = 2 bytes (rounded up)
 
 ## Migration Notes
 The previous implementation used dynamic layout based on registration order. This has been replaced with fixed offsets to ensure data integrity across app restarts.
+
+Note: Version has been incremented to **0x95** in `AppInfoIO` to trigger a clean reset for the new 10-bit action layout, preventing data corruption for users with existing `0x94` scratchpad data.

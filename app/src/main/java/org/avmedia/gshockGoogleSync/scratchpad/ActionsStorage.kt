@@ -22,7 +22,8 @@ class ActionsStorage @Inject constructor(
         VOICE_ASSIST,
         SKIP_TO_NEXT_TRACK,
         PRAYER_ALARMS,
-        PHONE_CALL
+        PHONE_CALL,
+        TOGGLE_PLAY_PAUSE
     }
 
     private val actionStates = BooleanArray(Action.entries.size).apply {

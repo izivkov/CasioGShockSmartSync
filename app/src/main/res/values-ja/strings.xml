@@ -83,6 +83,8 @@
     <string name="toggle_flashlight">懐中電灯を切り替える</string>
     <string name="start_voice_assistant">音声アシストを開始</string>
     <string name="next_track">次のトラックにスキップ</string>
+    <string name="play_pause">再生/一時停止の切り替え</string>
+    <string name="play_pause_info"><![CDATA[スマートフォンの現在のメディアプレーヤー（Spotify、YouTubeなど）の再生と一時停止を切り替えます。]]></string>
     <string name="emergency_actions">緊急アクション：</string>
     <string name="make_phonecall">電話をかける</string>
     <string name="adjustment_time_info">

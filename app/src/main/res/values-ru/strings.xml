@@ -80,6 +80,8 @@
     <string name="toggle_flashlight">Фонарик</string>
     <string name="start_voice_assistant">Голосовой помощник</string>
     <string name="next_track">Следующий трек</string>
+    <string name="play_pause">Воспроизведение/Пауза</string>
+    <string name="play_pause_info"><![CDATA[Переключает воспроизведение и паузу для текущего медиаплеера на вашем телефоне (Spotify, YouTube и т. д.).]]></string>
     <string name="emergency_actions">Экстренные действия:</string>
     <string name="make_phonecall">Позвонить</string>
     <string name="adjustment_time_info"><![CDATA[

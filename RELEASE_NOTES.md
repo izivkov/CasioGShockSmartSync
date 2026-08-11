@@ -1,3 +1,18 @@
+# Release Notes - Casio G-Shock Smart Sync v54.0 — August 10, 2026
+
+## ✨ Highlights
+
+### 🎵 New "Toggle Play/Pause" Media Action
+Enhanced the watch's remote control capabilities with a new media interaction:
+*   **Media Control**: Added a dedicated action to toggle between Play and Pause for any active media on your phone (Spotify, YouTube, etc.). This complements the existing "Next Track" feature, giving you more control without reaching for your device.
+*   **Scratchpad Migration (v0x95)**: Updated the watch's internal configuration format to version **0x95** to support the new 10-bit action layout. Settings will automatically reset to defaults on first connection to ensure a clean transition.
+*   **Localized Interface**: The new action is fully translated into all 11 supported languages.
+
+### 🧹 System & Maintenance
+*   **API v1.6.7 Alignment**: Transitioned back to the production version of the `GShockAPI` library, incorporating the latest thread-safe I/O architecture and protocol hierarchy improvements.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v53.0 — August 10, 2026
 
 ## ✨ Highlights

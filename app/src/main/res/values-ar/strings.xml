@@ -78,6 +78,8 @@
     <string name="toggle_flashlight">تشغيل/إيقاف المصباح</string>
     <string name="start_voice_assistant">تشغيل مساعد الصوت</string>
     <string name="next_track">تخطي إلى المسار التالي</string>
+    <string name="play_pause">تبديل التشغيل/الإيقاف المؤقت</string>
+    <string name="play_pause_info"><![CDATA[يغير بين التشغيل والإيقاف المؤقت لمشغل الوسائط الحالي على هاتفك (Spotify و YouTube وما إلى ذلك).]]></string>
     <string name="emergency_actions">الإجراءات الطارئة:</string>
     <string name="make_phonecall">إجراء مكالمة هاتفية</string>
     <string name="adjustment_time_info"><![CDATA[

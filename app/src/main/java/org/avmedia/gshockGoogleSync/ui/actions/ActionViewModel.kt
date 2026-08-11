@@ -180,7 +180,8 @@ constructor(
         val initialActions = buildList {
             add(ToggleFlashlightAction("Toggle Flashlight", false))
             add(StartVoiceAssistAction("Start Voice Assistant", false))
-            add(NextTrack("Skip to next track", false))
+            add(NextTrack(appContext.getString(R.string.next_track), false))
+            add(TogglePlayPauseAction(appContext.getString(R.string.play_pause), false))
             add(FindPhoneAction(appContext.getString(R.string.find_phone), false))
             add(SetTimeAction(appContext.getString(R.string.set_time), true, watchTimeUpdater))
             add(
@@ -248,6 +249,7 @@ constructor(
                         is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
                         is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
                         is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
+                        is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
                         is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
                         is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
                         else -> null
@@ -266,6 +268,7 @@ constructor(
                         is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
                         is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
                         is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
+                        is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
                         is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
                         is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
                         else -> null
@@ -472,6 +475,46 @@ constructor(
                             AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
                         }
                     }
+        }
+    }
+
+    inner class TogglePlayPauseAction(
+            override var title: String,
+            override var enabled: Boolean,
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            runCatching {
+                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val eventTime = SystemClock.uptimeMillis()
+
+                val downEvent =
+                        KeyEvent(
+                                eventTime,
+                                eventTime,
+                                KeyEvent.ACTION_DOWN,
+                                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                                0
+                        )
+                audioManager.dispatchMediaKeyEvent(downEvent)
+
+                val upEvent =
+                        KeyEvent(
+                                eventTime,
+                                eventTime,
+                                KeyEvent.ACTION_UP,
+                                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                                0
+                        )
+                audioManager.dispatchMediaKeyEvent(upEvent)
+            }
+                    .onFailure {
+                        Timber.e(it, "Could not toggle play/pause")
+                    }
+        }
+
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            enabled = actionsStorage.getAction(ActionsStorage.Action.TOGGLE_PLAY_PAUSE)
         }
     }
 

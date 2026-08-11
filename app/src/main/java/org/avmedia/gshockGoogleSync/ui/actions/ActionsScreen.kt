@@ -112,6 +112,7 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
         FlashlightView(actionsViewModel::updateAction, actionsViewModel),
         VoiceAssistView(actionsViewModel::updateAction, actionsViewModel),
         SkipToNextTrackView(actionsViewModel::updateAction, actionsViewModel),
+        PlayPauseView(actionsViewModel::updateAction, actionsViewModel),
         PrayerAlarmsView(actionsViewModel::updateAction, actionsViewModel),
         SeparatorView(),
         PhoneView(actionsViewModel::updateAction, actionsViewModel)
