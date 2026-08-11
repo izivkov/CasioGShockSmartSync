@@ -3,6 +3,7 @@
     <string name="events">الأحداث</string>
     <string name="alarms">المنبهات</string>
     <string name="time">الوقت</string>
+    <string name="steps">الخطوات</string>
     <string name="send_alarms_to_watch">إرسال إلى\n الساعة</string>
 
     <string name="send_alarms_to_phone">إرسال إلى\nالهاتف</string>

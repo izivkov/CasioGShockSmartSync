@@ -3,6 +3,7 @@
     <string name="events">Eventos</string>
     <string name="alarms">Alarmas</string>
     <string name="time">Hora</string>
+    <string name="steps">Pasos</string>
     <string name="send_alarms_to_watch">Enviar a\n Reloj</string>
 
     <string name="send_alarms_to_phone">Enviar al\nTeléfono</string>

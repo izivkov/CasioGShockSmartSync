@@ -28,7 +28,8 @@ data class TimeState(
     val temperature: Int = 0,
     val watchName: String = "",
     val timeZoneOption: TimeSettingsStorage.TimeZoneOption = TimeSettingsStorage.TimeZoneOption.SYSTEM,
-    val timeOffset: Long = 0L
+    val timeOffset: Long = 0L,
+    val stepCount: Int = 0
 )
 
 sealed interface TimeAction {
@@ -139,7 +140,9 @@ class TimeViewModel @Inject constructor(
                     temperature = api.getWatchTemperature(),
                     watchName = api.getWatchName(),
                     timeZoneOption = option,
-                    timeOffset = offset
+                    timeOffset = offset,
+
+                    stepCount = if (watchFeatureManager.isFeatureSupported("time.step_counter")) api.getStepCount() else 0
                 )
             }.onFailure {
                 AppSnackbar("Api Error")

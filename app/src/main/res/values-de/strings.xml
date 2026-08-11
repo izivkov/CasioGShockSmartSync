@@ -3,6 +3,7 @@
     <string name="events">Ereignisse</string>
     <string name="alarms">Wecker</string>
     <string name="time">Zeit</string>
+    <string name="steps">Schritte</string>
     <string name="send_alarms_to_watch">An die\nUhr senden</string>
 
     <string name="send_alarms_to_phone">An\nTelefon senden</string>

@@ -4,6 +4,7 @@
     <string name="events">事件</string>
     <string name="alarms">闹钟</string>
     <string name="time">时间</string>
+    <string name="steps">步数</string>
     <string name="send_alarms_to_watch">发送到手表</string>
 
     <string name="send_alarms_to_phone">发送到手机</string>

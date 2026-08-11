@@ -74,7 +74,8 @@ fun TimerView(
                 verticalArrangement = Arrangement.Center
             ) {
                 AppTextLarge(
-                    text = stringResource(R.string.timer)
+                    text = stringResource(R.string.timer),
+                    modifier = Modifier.padding(start = 6.dp)
                 )
                 TimerTimeView(
                     modifier = Modifier

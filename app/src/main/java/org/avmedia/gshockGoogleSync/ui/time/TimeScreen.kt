@@ -17,6 +17,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
@@ -55,6 +56,9 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                                 }
                 )
 
+                val watchFeatureManager = LocalWatchFeatureManager.current
+                val isStepCounterSupported = watchFeatureManager.isCardSupported("step_counter_card")
+
                 TimerView(
                         modifier =
                                 Modifier.fillMaxWidth().constrainAs(timer) {
@@ -64,10 +68,22 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                                 }
                 )
 
+                val stepCounter = createRef()
+                if (isStepCounterSupported) {
+                    StepCounterView(
+                        modifier = Modifier.fillMaxWidth()
+                            .constrainAs(stepCounter) {
+                                top.linkTo(timer.bottom)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
+                    )
+                }
+
                 WatchNameView(
                         modifier =
                                 Modifier.fillMaxWidth().constrainAs(watchName) {
-                                    top.linkTo(timer.bottom)
+                                    top.linkTo(if (isStepCounterSupported) stepCounter.bottom else timer.bottom)
                                     bottom.linkTo(watchInfo.top)
                                     start.linkTo(parent.start)
                                     end.linkTo(parent.end)
@@ -78,7 +94,6 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                 WatchInfoView(
                         modifier =
                                 Modifier.fillMaxWidth().constrainAs(watchInfo) {
-                                    top.linkTo(watchName.bottom)
                                     bottom.linkTo(parent.bottom)
                                     start.linkTo(parent.start)
                                     end.linkTo(parent.end)

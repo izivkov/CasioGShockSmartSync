@@ -49,6 +49,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "time.temperature" to { WatchInfo.hasTemperature },
         "actions.find_phone" to { WatchInfo.findButtonUserDefined },
         "actions.reminders" to { WatchInfo.hasReminders },
+        "time.step_counter" to { WatchInfo.hasStepCounter },
         "alarms.chime" to { WatchInfo.chimeInSettings },
         "time_adjustment.always_connected" to { WatchInfo.alwaysConnected }
     )
@@ -68,6 +69,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "font_card" to listOf("settings.multiple_fonts"),
         "light_card" to listOf("light.auto_light", "light.duration"),
         "operation_tone_card" to listOf("operation_tone.sound", "operation_tone.vibrate"),
+        "step_counter_card" to listOf("time.step_counter"),
         "time_adjustment_card" to listOf("time_adjustment.always_connected")
     )
 

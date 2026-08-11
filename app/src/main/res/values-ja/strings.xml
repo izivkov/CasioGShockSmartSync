@@ -3,6 +3,7 @@
     <string name="events">イベント</string>
     <string name="alarms">アラーム</string>
     <string name="time">時間</string>
+    <string name="steps">歩数</string>
     <string name="send_alarms_to_watch">ウォッチに\n送信</string>
 
     <string name="send_alarms_to_phone">電話に\n送信</string>

@@ -3,6 +3,7 @@
     <string name="events">Események</string>
     <string name="alarms">Ébresztő</string>
     <string name="time">Idő</string>
+    <string name="steps">Lépések</string>
     <string name="send_alarms_to_watch">Átküldés az órára</string>
 
     <string name="send_alarms_to_phone">Átküldés a\ntelefonra</string>

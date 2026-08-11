@@ -3,6 +3,7 @@
     <string name="events">События</string>
     <string name="alarms">Будильники</string>
     <string name="time">Время</string>
+    <string name="steps">Шаги</string>
     <string name="send_alarms_to_watch">Отправить на\nчасы</string>
 
     <string name="send_alarms_to_phone">Отправить на\nтелефон</string>
