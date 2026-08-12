@@ -13,10 +13,11 @@ kotlin {
 
 android {
     namespace = "org.avmedia.gshockapi.api"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 23
+        targetSdk = 37
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -36,10 +37,10 @@ android {
         jvmTarget = "21"
     }
     lint {
-        targetSdk 36
+        targetSdk = 37
     }
     testOptions {
-        targetSdk 36
+        targetSdk = 37
     }
 }
 
