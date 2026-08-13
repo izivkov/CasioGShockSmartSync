@@ -1,3 +1,30 @@
+# Release Notes - Casio G-Shock Smart Sync v55.0 — August 12, 2026
+
+## ✨ Highlights
+
+### ⌚ Comprehensive Watch Support & Precision Matching
+Major update to the device identification engine, synchronized with the latest official watch database:
+*   **Exhaustive Model Database**: Added support for over 100 new watch models (including `TRN-50`, `GCW-B5000`, `GMW-B5000#`, and various OCW/MTG series).
+*   **Exact Name Matching**: Refactored the identification logic to use exact string matching for model names (e.g., distinguishing between "GMW-B5000" and "GMW-B5000#"). This eliminates identification errors between similar hardware versions.
+*   **Module-Based Intelligence**: Reorganized the hardware capability engine into module-based templates (e.g., 3539, 3461, 3515). Watches sharing the same internal module now automatically inherit consistent features and protocol settings.
+
+### 👣 Real-Time Step Counter
+Introduced a new fitness tracking component for watches equipped with pedometers:
+*   **Dynamic Step Card**: Compatible watches (like the **ABL-100WE**) now display their current daily step count directly on the Time screen.
+*   **Intelligent Visibility**: The Step Counter card automatically hides for watches without fitness sensors, keeping the interface clean and focused.
+*   **Optimized Data Fetching**: Updated the sync engine to only request step data if the connected watch supports it, reducing Bluetooth traffic.
+
+### 🎨 Adaptive UI & Layout Refinements
+*   **Smart Card Visibility**: Fixed a global issue where settings cards (like **Power Saving Mode**) remained visible even if unsupported. The UI now intelligently collapses entire cards based on hardware capabilities.
+*   **Time Screen Restoration**: Restored the classic "anchored" layout. Home Time and Battery info are now pinned to the bottom, while the Watch Name card dynamically expands to fill the remaining space.
+*   **Consistent Styling**: Standardized fonts and alignment across all Time screen cards, ensuring "Local Time", "Timer", and "Steps" follow a unified visual hierarchy.
+
+### 🧹 System & Infrastructure
+*   **Target SDK 37 (Android 15)**: Updated the `:api` module to utilize the latest Android system standards and dependency optimizations.
+*   **Full Localization**: All new features and labels are fully translated into all 11 supported languages.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v54.0 — August 10, 2026
 
 ## ✨ Highlights
