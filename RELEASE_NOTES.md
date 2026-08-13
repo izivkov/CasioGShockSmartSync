@@ -19,6 +19,9 @@ Introduced a new fitness tracking component for watches equipped with pedometers
 *   **Time Screen Restoration**: Restored the classic "anchored" layout. Home Time and Battery info are now pinned to the bottom, while the Watch Name card dynamically expands to fill the remaining space.
 *   **Consistent Styling**: Standardized fonts and alignment across all Time screen cards, ensuring "Local Time", "Timer", and "Steps" follow a unified visual hierarchy.
 
+### 🛡️ App Stability & Robustness
+*   **Notification Crash Resolved**: Fixed a `ClassCastException` in the notification listener. The app now safely handles formatted notification titles and text (SpannableStrings) by converting them to plain text before processing.
+
 ### 🧹 System & Infrastructure
 *   **Target SDK 37 (Android 15)**: Updated the `:api` module to utilize the latest Android system standards and dependency optimizations.
 *   **Full Localization**: All new features and labels are fully translated into all 11 supported languages.

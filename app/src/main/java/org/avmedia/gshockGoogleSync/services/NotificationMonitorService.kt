@@ -94,9 +94,9 @@ class NotificationMonitorService : NotificationListenerService() {
             NotificationInfo(
                 packageName = sbn.packageName,
                 appName = getAppName(sbn.packageName),
-                title = extras.getString(Notification.EXTRA_TITLE).orEmpty(),
-                text = extras.getString(Notification.EXTRA_TEXT).orEmpty(),
-                shortText = extras.getString(Notification.EXTRA_SUB_TEXT).orEmpty(),
+                title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty(),
+                text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty(),
+                shortText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString().orEmpty(),
                 type = classifyNotificationType(sbn.packageName, notification),
                 timestamp = sbn.postTime
             )
