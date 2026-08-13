@@ -51,6 +51,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "actions.reminders" to { WatchInfo.hasReminders },
         "time.step_counter" to { WatchInfo.hasStepCounter },
         "alarms.chime" to { WatchInfo.chimeInSettings },
+        "time_adjustment.supported" to { WatchInfo.hasTimeAdjustment },
         "time_adjustment.always_connected" to { WatchInfo.alwaysConnected }
     )
 
@@ -70,11 +71,17 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "light_card" to listOf("light.auto_light", "light.duration"),
         "operation_tone_card" to listOf("operation_tone.sound", "operation_tone.vibrate"),
         "step_counter_card" to listOf("time.step_counter"),
-        "time_adjustment_card" to listOf("time_adjustment.always_connected")
+        "time_adjustment_card" to listOf("time_adjustment.supported", "time_adjustment.always_connected")
     )
 
     override fun isFeatureSupported(featureId: String): Boolean {
         refreshCounter.intValue // Observe for recomposition
+
+        // If it's a card group, delegate to isCardSupported to ensure entire card hides
+        if (cardGroups.containsKey(featureId)) {
+            return isCardSupported(featureId)
+        }
+
         val lookup = featureMap[featureId]
         if (lookup == null) {
             Timber.w("isFeatureSupported: unknown featureId '$featureId' — defaulting to supported=true")
