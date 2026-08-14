@@ -19,7 +19,13 @@ import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockapi.StepCounterData
+import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
+
+enum class StepDataOption {
+    TODAY, HOURLY, DAILY
+}
 
 data class TimeState(
     val timer: Int = 0,
@@ -29,7 +35,8 @@ data class TimeState(
     val watchName: String = "",
     val timeZoneOption: TimeSettingsStorage.TimeZoneOption = TimeSettingsStorage.TimeZoneOption.SYSTEM,
     val timeOffset: Long = 0L,
-    val stepCount: Int = 0
+    val stepCounterData: StepCounterData = StepCounterData.unavailable(),
+    val selectedStepDataOption: StepDataOption = StepDataOption.TODAY
 )
 
 sealed interface TimeAction {
@@ -38,6 +45,7 @@ sealed interface TimeAction {
     data object SendTimeToWatch : TimeAction
     data object RefreshState : TimeAction
     data class SetTimeZoneOption(val option: TimeSettingsStorage.TimeZoneOption) : TimeAction
+    data class SetStepDataOption(val option: StepDataOption) : TimeAction
 }
 
 sealed class UiEvent {
@@ -95,6 +103,12 @@ class TimeViewModel @Inject constructor(
 
             TimeAction.RefreshState -> refreshState()
 
+            is TimeAction.SetStepDataOption -> {
+                _state.value = _state.value.copy(
+                    selectedStepDataOption = action.option
+                )
+            }
+
             is TimeAction.SetTimeZoneOption -> {
                 val offset = calculateOffset(action.option)
                 _state.value = _state.value.copy(
@@ -141,12 +155,28 @@ class TimeViewModel @Inject constructor(
                     watchName = api.getWatchName(),
                     timeZoneOption = option,
                     timeOffset = offset,
-
-                    stepCount = if (watchFeatureManager.isFeatureSupported("time.step_counter")) api.getStepCount() else 0
+                    stepCounterData = if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
+                        if (WatchInfo.hasStepCounterMock) {
+                            generateMockStepData()
+                        } else {
+                            api.getStepCount()
+                        }
+                    } else StepCounterData.unavailable()
                 )
             }.onFailure {
                 AppSnackbar("Api Error")
             }
         }
+    }
+
+    private fun generateMockStepData(): StepCounterData {
+        return StepCounterData(
+            dayOfWeek = 1,
+            month = 8,
+            dayOfMonth = 14,
+            hourlySteps = List(144) { it * 2 },
+            dailyHistory = List(14) { it * 1000 },
+            currentDaySteps = 8888
+        )
     }
 }
