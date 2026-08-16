@@ -124,7 +124,7 @@ class PrayerAlarmsHelper @Inject constructor(
 
             // Malaysia: MWL Method + 2m Buffer
             code == "MY" -> {
-                Triple(CalculationMethod.MUSLIM_WORLD_LEAGUE, getSeAsiaAdjustments(), Madhab.SHAFI)
+                Triple(CalculationMethod.SINGAPORE, getSeAsiaAdjustments(), Madhab.SHAFI)
             }
 
             // Brunei: Singapore Method + 2m Buffer
