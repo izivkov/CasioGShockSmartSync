@@ -18,7 +18,7 @@ import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 @Composable
 fun HomeTime(
     modifier: Modifier = Modifier,
-    defaultText: String = "N/A",
+    defaultText: String = "",
     timeModel: TimeViewModel = hiltViewModel()
 ) {
     val state by timeModel.state.collectAsState()

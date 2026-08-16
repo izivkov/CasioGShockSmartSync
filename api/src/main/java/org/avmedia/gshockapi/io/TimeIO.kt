@@ -229,7 +229,7 @@ object TimeIO {
     private suspend fun initializeForSettingTime() {
         writeDST()
         writeDSTForWorldCities()
-        if (WatchInfo.hasWorldCities) {
+        if (WatchInfo.worldCities) {
             writeWorldCities()
         } else if (WatchInfo.hasHomeTime) {
             writeHomeTimes()

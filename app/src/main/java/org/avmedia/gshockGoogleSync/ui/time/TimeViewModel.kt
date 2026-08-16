@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -22,6 +23,7 @@ import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
+import kotlin.random.Random
 
 enum class StepDataOption {
     TODAY, HOURLY, DAILY
@@ -68,9 +70,14 @@ class TimeViewModel @Inject constructor(
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     private var saveJob: Job? = null
+    private var stepPollJob: Job? = null
 
     init {
         refreshState()
+
+        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) {
+            startStepCounterPolling()
+        }
     }
 
     fun onAction(action: TimeAction) {
@@ -127,11 +134,32 @@ class TimeViewModel @Inject constructor(
         }
     }
 
+    private fun startStepCounterPolling() {
+        stepPollJob?.cancel()
+        stepPollJob = viewModelScope.launch {
+            while (isActive) {
+                delay(3000) // 3 seconds interval
+                if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
+                    runCatching {
+                        val stepData = if (WatchInfo.hasStepCounterMock) {
+                            generateMockStepData()
+                        } else {
+                            api.getStepCount()
+                        }
+                        _state.value = _state.value.copy(stepCounterData = stepData)
+                    }
+                }
+            }
+        }
+    }
+
     private fun calculateOffset(option: TimeSettingsStorage.TimeZoneOption): Long {
         return SolarTimeHelper.calculateTimeOffset(appContext, option)
     }
 
     override fun onCleared() {
+        super.onCleared()
+        stepPollJob?.cancel()
         saveJob?.let {
             saveJob?.cancel()
             viewModelScope.launch {
@@ -170,13 +198,26 @@ class TimeViewModel @Inject constructor(
     }
 
     private fun generateMockStepData(): StepCounterData {
+        val hourly = List(144) { index ->
+            val hour = index / 6
+            if (hour in 7..22) {
+                Random.nextInt(20, 350)
+            } else {
+                0
+            }
+        }
+
+        val daily = List(14) {
+            Random.nextInt(4000, 12500)
+        }
+
         return StepCounterData(
-            dayOfWeek = 1,
+            dayOfWeek = 6,
             month = 8,
-            dayOfMonth = 14,
-            hourlySteps = List(144) { it * 2 },
-            dailyHistory = List(14) { it * 1000 },
-            currentDaySteps = 8888
+            dayOfMonth = 15,
+            hourlySteps = hourly,
+            dailyHistory = daily,
+            currentDaySteps = Random.nextInt(8000, 9500) // Slight variation to show real-time changes if mocked
         )
     }
 }

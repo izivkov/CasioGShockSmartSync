@@ -64,7 +64,6 @@ data object WatchInfo {
     val hasHealthFunctions:     Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasHealthFunctions
     val hasMessages:            Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasMessages
     val hasDateFormat:          Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasDateFormat
-    val hasWorldCities:         Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasWorldCities
     val hasHomeTime:            Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasHomeTime
     val hasMultipleFonts:       Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasMultipleFonts
     val hasStepCounter:         Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasStepCounter
@@ -144,6 +143,7 @@ data object WatchInfo {
             batteryLevelLowerLimit = 9, batteryLevelUpperLimit = 19,
             hasStepCounterMock = false,
         ),
+
         ModelInfo(
             model = WatchModel.DW_B5600,
             worldCitiesCount = 6, dstCount = 3,
@@ -185,7 +185,7 @@ data object WatchInfo {
             worldCitiesCount = 2, dstCount = 1, alarmCount = 1,
             hasAutoLight = false, hasReminders = false,
             shortLightDuration = "1.5s", longLightDuration = "3s",
-            hasWorldCities = false, hasHomeTime = true,
+            hasHomeTime = true,
             hasDateFormat = false, weekLanguageSupported = false,
             hasTimeFormat = false, settingsSize = 12,
             batteryLevelLowerLimit = 0, batteryLevelUpperLimit = 100,
@@ -222,8 +222,10 @@ data object WatchInfo {
             model = WatchModel.ABL_100,
             hasAutoLight = false, hasReminders = false,
             hasTemperature = false, hasBatteryLevel = false,
-            worldCities = false, hasWorldCities = false, hasHomeTime = false,
+            worldCities = false, hasHomeTime = false,
             hasStepCounter = true,
+            hasDateFormat = false,
+            weekLanguageSupported = false,
         ),
         ModelInfo(model = WatchModel.GA,     hasAutoLight = false, hasReminders = true),
         ModelInfo(model = WatchModel.GB001,  hasAutoLight = true,  hasReminders = false),
@@ -241,7 +243,8 @@ data object WatchInfo {
             shortLightDuration = "1.5s", longLightDuration = "5s",
             hasBatteryLevel = false, alwaysConnected = true, hasDateFormat = false,
             weekLanguageSupported = false,
-        ),
+            hasStepCounter = false,
+            ),
         ModelInfo(model = WatchModel.DW,     hasAutoLight = true,  hasReminders = false),
         ModelInfo(
             model = WatchModel.GBD,
@@ -252,7 +255,7 @@ data object WatchInfo {
             model = WatchModel.GBD_800,
             hasAutoLight = true, hasReminders = false,
             hasTemperature = false, hasBatteryLevel = false,
-            hasWorldCities = false, hasHomeTime = false,
+            worldCities = false, hasHomeTime = false,
         ),
         ModelInfo(
             model = WatchModel.EQB,

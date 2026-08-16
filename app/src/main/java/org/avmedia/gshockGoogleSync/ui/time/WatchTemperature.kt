@@ -25,7 +25,7 @@ fun WatchTemperature(
     isNormalButtonPressed: Boolean,
     timeModel: TimeViewModel = hiltViewModel()
 ) {
-    var temperatureText by remember { mutableStateOf("N/A") }
+    var temperatureText by remember { mutableStateOf("") }
     val state by timeModel.state.collectAsState()
 
     val context = LocalContext.current
@@ -52,7 +52,7 @@ fun WatchTemperature(
                 }
             }
         } else if (!hasTemperature) {
-            temperatureText = "N/A"
+            temperatureText = ""
         }
     }
 

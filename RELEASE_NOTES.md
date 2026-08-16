@@ -32,7 +32,7 @@ Introduced a new fitness tracking component for watches equipped with pedometers
 
 ## ✨ Highlights
 
-### 🎵 New "Toggle Play/Pause" Media Action
+### 🎵 New "Play/Pause" Media Action
 Enhanced the watch's remote control capabilities with a new media interaction:
 *   **Media Control**: Added a dedicated action to toggle between Play and Pause for any active media on your phone (Spotify, YouTube, etc.). This complements the existing "Next Track" feature, giving you more control without reaching for your device.
 *   **Scratchpad Migration (v0x95)**: Updated the watch's internal configuration format to version **0x95** to support the new 10-bit action layout. Settings will automatically reset to defaults on first connection to ensure a clean transition.
