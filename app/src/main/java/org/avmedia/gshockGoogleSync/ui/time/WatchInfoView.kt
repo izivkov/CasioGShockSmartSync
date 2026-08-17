@@ -4,8 +4,10 @@ import AppText
 import WatchTemperature
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,8 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
@@ -25,29 +25,24 @@ import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 
 @Composable
 fun WatchInfoView(modifier: Modifier) {
-    ConstraintLayout(
-        modifier = modifier.then(Modifier.fillMaxWidth())
-    ) {
-        val (watchInfo1, watchInfo2) = createRefs()
+    val watchFeatureManager = LocalWatchFeatureManager.current
+    val isHomeTimeSupported = watchFeatureManager.isCardSupported("home_time_card")
+    val isBatteryTemperatureSupported = watchFeatureManager.isCardSupported("battery_temperature_card")
 
-        WatchInfoCard1(
-            modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(watchInfo1) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(watchInfo2.start)
-                    width = Dimension.percent(0.5f)
-                    height = Dimension.fillToConstraints
-                })
-        WatchInfoCard2(modifier = Modifier.constrainAs(watchInfo2) {
-            top.linkTo(parent.top)
-            bottom.linkTo(parent.bottom)
-            start.linkTo(watchInfo1.end)
-            end.linkTo(parent.end)
-            width = Dimension.percent(0.5f)
-        })
+    Row(
+        modifier = modifier.fillMaxWidth().height(IntrinsicSize.Max),
+        horizontalArrangement = Arrangement.spacedBy(0.dp)
+    ) {
+        if (isHomeTimeSupported) {
+            WatchInfoCard1(
+                modifier = Modifier.weight(1f).fillMaxHeight()
+            )
+        }
+        if (isBatteryTemperatureSupported) {
+            WatchInfoCard2(
+                modifier = Modifier.weight(1f).fillMaxHeight()
+            )
+        }
     }
 }
 
@@ -60,32 +55,27 @@ fun WatchInfoCard1(
     ) {
         Column(
             modifier = Modifier
-                .padding(start = 0.dp, top = 0.dp, bottom = 0.dp, end = 0.dp)
-                .fillMaxWidth(),
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(6.dp))
-
             Row(
-                modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp),
+                modifier = Modifier.padding(bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppText(
-                    text = stringResource(
-                        id = R.string.home_time
-                    )
-                )  // Home Time Text
-                Spacer(modifier = Modifier.width(10.dp))
+                    text = stringResource(id = R.string.home_time)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 InfoButton(
-                    infoText = stringResource(
-                        id = R.string.info_home_time
-                    )
-                )  // Info Button
+                    infoText = stringResource(id = R.string.info_home_time)
+                )
             }
 
             HomeTime(
-                modifier = Modifier.align(Alignment.CenterHorizontally)  // HomeTime composable
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
     }
@@ -100,13 +90,14 @@ fun WatchInfoCard2(modifier: Modifier = Modifier) {
     ) {
         Column(
             modifier = Modifier
-                .padding(start = 0.dp, top = 0.dp, bottom = 0.dp, end = 0.dp)
-                .fillMaxWidth(),
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp),
+                modifier = Modifier.padding(bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Battery()
@@ -117,8 +108,6 @@ fun WatchInfoCard2(modifier: Modifier = Modifier) {
                 isNormalButtonPressed = true,
                 isConnected = true,
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

@@ -44,12 +44,12 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "operation_tone.sound" to { true },
         "operation_tone.vibrate" to { WatchInfo.vibrate },
         "time.battery" to { WatchInfo.hasBatteryLevel },
-        "time.world_cities" to { WatchInfo.worldCities },
+        "time.world_cities" to { WatchInfo.hasWorldCities },
         "time.home_time" to { WatchInfo.hasHomeTime },
         "time.temperature" to { WatchInfo.hasTemperature },
         "actions.find_phone" to { WatchInfo.findButtonUserDefined },
         "actions.reminders" to { WatchInfo.hasReminders },
-        "time.step_counter" to { WatchInfo.hasStepCounter },
+        "time.step_counter" to { WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock },
         "alarms.chime" to { WatchInfo.chimeInSettings },
         "time_adjustment.supported" to { WatchInfo.hasTimeAdjustment },
         "time_adjustment.always_connected" to { WatchInfo.alwaysConnected }
@@ -71,7 +71,9 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "light_card" to listOf("light.auto_light", "light.duration"),
         "operation_tone_card" to listOf("operation_tone.sound", "operation_tone.vibrate"),
         "step_counter_card" to listOf("time.step_counter"),
-        "time_adjustment_card" to listOf("time_adjustment.supported", "time_adjustment.always_connected")
+        "time_adjustment_card" to listOf("time_adjustment.supported", "time_adjustment.always_connected"),
+        "home_time_card" to listOf("time.home_time"),
+        "battery_temperature_card" to listOf("time.battery", "time.temperature")
     )
 
     override fun isFeatureSupported(featureId: String): Boolean {

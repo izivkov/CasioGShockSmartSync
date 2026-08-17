@@ -83,7 +83,7 @@
     <string name="toggle_flashlight">Zseblámpa bekapcsolása</string>
     <string name="start_voice_assistant">Hangasszisztens indítása</string>
     <string name="next_track">Következő zeneszám</string>
-    <string name="play_pause">Lejátszás/Szünet váltása</string>
+    <string name="play_pause">Lejátszás/Szünet</string>
     <string name="play_pause_info"><![CDATA[Vált a lejátszás és a szünet között a telefon aktuális médialejátszóján (Spotify, YouTube stb.).]]></string>
     <string name="emergency_actions">Vészhelyzeti feladat:</string>
     <string name="make_phonecall">Telefonhívás</string>
