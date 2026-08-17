@@ -44,7 +44,7 @@ class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
         "operation_tone.sound" to { true },
         "operation_tone.vibrate" to { WatchInfo.vibrate },
         "time.battery" to { WatchInfo.hasBatteryLevel },
-        "time.world_cities" to { WatchInfo.worldCities },
+        "time.world_cities" to { WatchInfo.hasWorldCities },
         "time.home_time" to { WatchInfo.hasHomeTime },
         "time.temperature" to { WatchInfo.hasTemperature },
         "actions.find_phone" to { WatchInfo.findButtonUserDefined },

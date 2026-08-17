@@ -1,3 +1,30 @@
+# Release Notes - Casio G-Shock Smart Sync v56.0 — August 16, 2026
+
+## ✨ Highlights
+
+### 👣 Enhanced Step Counter & Historical Insights
+Major upgrade to the fitness tracking capabilities for pedometer-equipped watches (like the **ABL-100WE**):
+*   **Interactive Data Views**: Introduced a new dropdown menu allowing you to switch between **Today**, **Hourly**, and **Daily** history views.
+*   **Rich Historical Charts**: 
+    *   **Hourly View**: Displays a bar chart of the last hour of activity (six 10-minute intervals) with dynamic time labels.
+    *   **Daily View**: Shows a 7-day rolling history. The rightmost bar now intelligently integrates your **live current-day steps**, providing a complete weekly picture at a glance.
+*   **Technical Documentation**: Added exhaustive KDoc documentation for the ABL-100WE activity record protocol, detailing the 400-byte payload layout and multi-packet reassembly logic.
+*   **Testing Mode**: Added a `hasStepCounterMock` feature to enable UI testing and demonstration without a physical watch.
+
+### 🎨 Balanced & Adaptive UI
+*   **Smart Feature Hiding**: Entire info cards (like **Home Time** or **Battery/Temperature**) now automatically hide if the connected watch doesn't support those specific features. This removes cluttered "N/A" placeholders and provides a cleaner, model-specific interface.
+*   **Perfectly Aligned Layout**: Implemented advanced layout constraints to ensure that the bottom info cards always maintain equal heights when displayed side-by-side, regardless of content length.
+*   **Restored Visual Hierarchy**: Fixed an issue where the **Watch Name** card would disappear when bottom features were missing. The layout now correctly re-anchors to ensure your watch model name is always visible.
+
+### 🎵 Media Action Refinements
+*   **"Play/Pause" Simplification**: Renamed the "Toggle Play/Pause" action to just **"Play/Pause"** for a cleaner look. 
+*   **Global Localization**: Updated the labels across all 11 supported languages (Arabic, German, Spanish, Hungarian, Japanese, Chinese, etc.) to ensure consistent naming conventions.
+
+### 🧹 System & Maintenance
+*   **API v1.6.9 Alignment**: Upgraded to the latest version of the `GShockAPI` library, incorporating protocol-wide refinements and the new `hasWorldCities` capability flag.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v55.0 — August 12, 2026
 
 ## ✨ Highlights
