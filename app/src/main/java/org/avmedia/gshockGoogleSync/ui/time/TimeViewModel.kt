@@ -20,7 +20,7 @@ import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
-import org.avmedia.gshockapi.StepCounterData
+import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 import kotlin.random.Random

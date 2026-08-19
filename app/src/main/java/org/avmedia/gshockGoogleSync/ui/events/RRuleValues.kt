@@ -12,8 +12,8 @@ import com.philjay.RRule
 import com.philjay.Weekday
 import com.philjay.WeekdayNum
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.avmedia.gshockapi.EventDate
-import org.avmedia.gshockapi.RepeatPeriod
+import org.avmedia.gshockapi.model.EventDate
+import org.avmedia.gshockapi.model.RepeatPeriod
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime

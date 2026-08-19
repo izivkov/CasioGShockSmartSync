@@ -16,7 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.services.LocationProvider
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
-import org.avmedia.gshockapi.Alarm
+import org.avmedia.gshockapi.model.Alarm
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

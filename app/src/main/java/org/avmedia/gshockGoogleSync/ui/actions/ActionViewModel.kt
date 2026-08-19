@@ -36,7 +36,7 @@ import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
-import org.avmedia.gshockapi.Event
+import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber

@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockapi.Settings
+import org.avmedia.gshockapi.model.Settings
 import org.json.JSONObject
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager

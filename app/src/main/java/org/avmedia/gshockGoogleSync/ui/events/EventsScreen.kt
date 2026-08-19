@@ -25,7 +25,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import org.avmedia.gshockapi.Event
+import org.avmedia.gshockapi.model.Event
 
 @Composable
 fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {

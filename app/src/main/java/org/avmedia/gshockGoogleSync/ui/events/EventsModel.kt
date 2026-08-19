@@ -6,8 +6,8 @@
 
 package org.avmedia.gshockGoogleSync.ui.events
 
-import org.avmedia.gshockapi.Event
-import org.avmedia.gshockapi.EventDate
+import org.avmedia.gshockapi.model.Event
+import org.avmedia.gshockapi.model.EventDate
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

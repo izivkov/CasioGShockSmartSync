@@ -16,8 +16,8 @@ import android.net.Uri
 import android.os.Handler
 import android.provider.CalendarContract
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.avmedia.gshockapi.Event
-import org.avmedia.gshockapi.EventDate
+import org.avmedia.gshockapi.model.Event
+import org.avmedia.gshockapi.model.EventDate
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.time.LocalDate

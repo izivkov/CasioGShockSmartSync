@@ -16,7 +16,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
-import org.avmedia.gshockapi.Event
+import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
