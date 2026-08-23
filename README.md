@@ -39,11 +39,12 @@ The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
 
 | Series | Compatible Models (Examples) | Note |
 |:---|:---|:---|
-| **Square** | GW-B5600, GMW-B5000, GW-5000, DW-B5600 | Classic square design support |
-| **CasiOak** | GA-B2100, GBM-2100 | Solar and Bluetooth variants |
-| **G-Steel** | GST-B500, GST-B400, GST-B200 | Metal series |
-| **Edifice** | ECB-10, ECB-20, ECB-30 | Bluetooth Edifice models |
-| **Others** | GBD-800, GBD-H1000, GG-B100 (Mudmaster) | Step trackers and sensors |
+| **Square** | GW-B5600, GMW-B5000, GW-B5000, DW-B5600, TRN-50 | Classic square design support |
+| **CasiOak** | GA-B2100, GBM-2100, GMC-B2100, MRG-B2100 | Octagonal bezel models |
+| **G-Steel** | GST-B100 to B1000, GST-W1000, ECB-900 | Metal series |
+| **Edifice** | ECB-10 to ECB-2300, EQB-500 to EQB-2000 | Bluetooth Edifice series |
+| **MT-G / MR-G** | MTG-B1000/B3000/B3100, MRG-B5000/B2100 | Premium metal and carbon models |
+| **Others** | ABL-100WE, GBD-100/200, GBD-H1000/H2000, GPR-B1000 | Step trackers, GPS, and sensors |
 
 > **Note**: While these watches connect, not all specific hardware features (like fitness tracking steps on GBD models) may be fully supported yet.
 
@@ -159,6 +160,7 @@ We welcome contributions!
 | [**G-Shock Time Server**](https://github.com/izivkov/GShockTimeServer) | A Python script that acts as a headless time server, automatically syncing the time on G-Shock watches over Bluetooth — ideal for Raspberry Pi or other always-on Linux devices. |
 | [**G-Shock API for ESP32**](https://github.com/izivkov/gshock-api-esp32) | A MicroPython firmware that turns a low-cost ESP32 microcontroller (with optional touch LCD display) into a standalone, always-on G-Shock time server — no phone or PC required. Watches connect automatically up to four times a day, or on-demand via a button press. |
 | [**G-Shock Smart Sync Webapp**](https://github.com/izivkov/gshock-smart-sync-webapp) | Is an experimental, web-based app that provides G-Shock watch synchronization from a browser, enabling time sync, alarms, reminders, and remote control via Web Bluetooth — no Android required. |
+| [**gshock_api**](https://github.com/izivkov/gshock_api) | A **Python API library** for G-Shock watches, featuring a pure functional architecture. It supports a wide range of models and provides a clean interface for time sync, settings, and notifications via BLE. |
 
 ---
 
