@@ -1,3 +1,23 @@
+# Release Notes - Casio G-Shock Smart Sync v57.0 — August 25, 2026
+
+## ✨ Highlights
+
+### ⌚ Smart Hardware Compatibility
+Refined the application's hardware detection to provide a smoother experience across different G-Shock families:
+*   **Intelligent Feature Flags**: Introduced the `hasAppInfo` attribute to `WatchInfo`, allowing the app to skip unsupported data queries for specific models.
+*   **ABL-100 Optimization**: Streamlined the connection process for the **ABL-100** series by bypassing application-level info requests that are not supported by the hardware.
+
+### 💾 Persistent Settings Fallback
+Ensured that users of all G-Shock models can enjoy personalized features, even those without internal "scratchpad" memory:
+*   **Local Storage Bridge**: Implemented a robust fallback mechanism that automatically redirects watch settings (like custom alarm names and action toggles) to the phone's internal storage if the watch cannot store them.
+*   **Seamless Experience**: Settings are now preserved across app restarts regardless of the watch's internal storage capabilities.
+
+### 🧹 System & Build Infrastructure
+*   **SDK Modernization**: Updated the core `:api` module to target **compileSdk 37**, ensuring full compatibility with the latest Android system libraries.
+*   **Architecture Hardening**: Refactored the `ScratchpadManager` to use modern dependency injection for local storage access, improving overall app stability.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v56.0 — August 16, 2026
 
 ## ✨ Highlights
