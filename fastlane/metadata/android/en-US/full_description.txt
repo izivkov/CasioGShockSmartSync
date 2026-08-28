@@ -1,11 +1,6 @@
-Casio G-Shock Smart Sync
+G-Shock Smart Sync is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches. It allows you to control your watch, sync data, and configure settings without a Casio ID. It offers a faster, privacy-focused, and more powerful alternative to the official Casio app.
 
-What is it?
------------
-This is an unofficial app for Casio G-Shock, Edifice, and Pro Trek watches. It allows you to control your watch, sync data, and configure settings without a Casio ID. It offers a faster, privacy-focused, and more powerful alternative to the official Casio app.
-
-Key Features check
-------------------
+Key Features:
 - No Account Required: Skip the Casio ID login entirely.
 - Calendar Sync: Push your calendar events (Google, Samsung, etc.) to your watch as reminders.
 - Auto Timezone: Automatically adjusts watch time when you travel.
@@ -13,68 +8,29 @@ Key Features check
 - Alarm Sync: Configure watch alarms easily from your phone.
 - Phone Finder: Trigger a loud alarm on your phone to find it.
 
-Supported Watches
------------------
+Supported Watch Models:
 The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
 
-- Square: GW-B5600, GMW-B5000, GW-5000, DW-B5600
-- CasiOak: GA-B2100, GBM-2100
-- G-Steel: GST-B500, GST-B400, GST-B200
-- Edifice: ECB-10, ECB-20, ECB-30
-- Others: GBD-800, GBD-H1000, GG-B100
+- Square: GW-B5600, GMW-B5000, GW-B5000, DW-B5600, TRN-50
+- CasiOak: GA-B2100, GBM-2100, GMC-B2100, MRG-B2100
+- G-Steel: GST-B100 to B1000, GST-W1000, ECB-900
+- Edifice: ECB-10 to ECB-2300, EQB-500 to EQB-2000
+- MT-G / MR-G: MTG-B1000/B3000/B3100, MRG-B5000/B2100
+- Others: ABL-100WE, GBD-100/200, GBD-H1000/H2000, GPR-B1000
 
-Note: While these watches connect, not all specific hardware features (like fitness tracking steps on GBD models) may be fully supported yet.
+Note: While these watches connect, not all specific hardware features may be fully supported yet.
 
-App Walkthrough
----------------
+App Walkthrough:
 
-1. Connection Screen
-This is the first screen you see. It handles the Bluetooth connection to your watch.
-- Status: Shows generic connection status.
-- Scan/Connect: Automatically scans for your watch.
-- Paired Devices: Lists your previously connected watches for quick access.
-Connection is typically much faster than the official app (~3.5s vs 12s).
+1. Connection Screen: Handles the Bluetooth connection via BLE. Connection is typically much faster than the official app (~3.5s vs 12s).
+2. Time Setting: Manage your watch's timekeeping effortlessly. Sync your phone's time, timezone, and DST settings to the watch immediately.
+3. Alarms: Read and configure the 5 alarms stored on your watch and the hourly signal (Chime).
+4. Events (Calendar Sync): Sync your Android calendars to your watch! Pushes events to the watch's Reminder feature.
+5. Actions (Remote Control): Turn your watch into a remote control. Assign actions to button presses (Find Phone, Take Photo, Flashlight, Next Track, Voice Assist, Set Prayer Alarms).
+6. Settings: Configure app and watch preferences like light duration, power saving, and more.
 
-2. Time Setting
-Manage your watch's timekeeping effortlessly.
-- Local Time: Displays the current time from your phone.
-- Send to Watch: Tap the button to sync your phone's time, timezone, and DST settings to the watch immediately.
-- Home Time: Shows the 'Home' city configured on the watch.
-- Battery: Displays the current battery level of the watch.
-
-3. Alarms
-Read and configure the alarms stored on your watch.
-- View Alarms: See the current settings for all 5 alarms and the hourly signal (Chime).
-- Edit: Tap any alarm to change its time.
-- Sync: You can send these alarm settings to the watch.
-
-4. Events (Calendar Sync)
-Sync your phone's calendar to your watch!
-- Upcoming Events: Lists future events from your phone's calendar.
-- Send to Watch: Pushes these events to the watch's Reminder feature.
-- Compatibility: Supports one-time and simple recurring events. Complex recurrence rules might show as "Incompatible".
-
-5. Actions (Remote Control)
-Turn your watch into a remote control. Assign actions to button presses on the watch.
-- Find Phone: Make your phone ring loudly.
-- Take Photo: Snap a picture with your phone's camera.
-- Next Track: Skip music tracks on your phone.
-- Voice Assist: Launch Google Assistant.
-How to use: Short-press the lower-right button on the watch (when in Time mode) to trigger the selected action.
-
-6. Settings
-Configure app and watch preferences.
-- Watch Settings: Adjust specific watch configurations (light duration, power saving, etc.).
-- App Settings: Configure theme, behavior, and advanced options.
-
-Where are my World Cities?
---------------------------
-Using an app to manually swap between Home Time and World Time is a bit silly. Your phone already knows where you are. When setting time, this app will also set the Home Time, Timezone, and DST state to your current location. So when travelling to another timezone, just set time and you are good to go.
-
-Build Your Own App
-------------------
-For those who want to build their own Android app for interfacing with the G-Shock 5000/5600 watches, I have also created an API (library) project here: https://github.com/izivkov/GShockAPI.
-
-Similar Project
----------------
-If you'd prefer not to use a mobile app but still want to set the correct time on your G-Shock, check out this Python project which can run as a server on a PC or Raspberry Pi: https://github.com/izivkov/GShockTimeServer
+Related Projects:
+- G-Shock Time Server: Headless time server for Raspberry Pi or Linux.
+- G-Shock API for ESP32: Standalone time server firmware for ESP32.
+- G-Shock Smart Sync Webapp: Browser-based synchronization via Web Bluetooth.
+- GShockAPI: The core library this app is built on.

@@ -44,6 +44,7 @@ fun WatchName(
 ) {
     AppText(
         text = text.replace(Regex("(CASIO)"), "$1\n"),
+        // text = "Watch Connected",
         fontSize = 48.sp,
         textAlign = TextAlign.Center, // Center-aligns each line
         modifier = modifier
