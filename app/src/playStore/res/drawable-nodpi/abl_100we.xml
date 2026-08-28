@@ -1,18 +1,90 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="200dp"
     android:height="200dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <!-- Watch Band -->
+    android:viewportWidth="680"
+    android:viewportHeight="720">
+
+    <!-- Top Strap -->
     <path
-        android:fillColor="#444444"
-        android:pathData="M8,2 L16,2 L16,5 L8,5 Z M8,19 L16,19 L16,22 L8,22 Z" />
-    <!-- Watch Case -->
+        android:fillColor="#161616"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M270,20 h140 a20,20 0 0 1 20,20 v140 a20,20 0 0 1 -20,20 h-140 a20,20 0 0 1 -20,-20 v-140 a20,20 0 0 1 20,-20 z" />
+
+    <!-- Top Vents -->
+    <group android:alpha="0.8">
+        <path android:fillColor="#555555" android:pathData="M270,50 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M295,50 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M320,50 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M345,50 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M370,50 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M395,50 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+    </group>
+
+    <!-- Bottom Strap -->
     <path
-        android:fillColor="#333333"
-        android:pathData="M12,5C8.1,5 5,8.1 5,12C5,15.9 8.1,19 12,19C15.9,19 19,15.9 19,12C19,8.1 15.9,5 12,5ZM12,17C9.2,17 7,14.8 7,12C7,9.2 9.2,7 12,7C14.8,7 17,9.2 17,12C17,14.8 14.8,17 12,17Z" />
-    <!-- Watch Face Details -->
+        android:fillColor="#161616"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M270,520 h140 a20,20 0 0 1 20,20 v140 a20,20 0 0 1 -20,20 h-140 a20,20 0 0 1 -20,-20 v-140 a20,20 0 0 1 20,-20 z" />
+
+    <!-- Bottom Vents -->
+    <group android:alpha="0.8">
+        <path android:fillColor="#555555" android:pathData="M270,550 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M295,550 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M320,550 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M345,550 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M370,550 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#555555" android:pathData="M395,550 h10 a4,4 0 0 1 4,4 v122 a4,4 0 0 1 -4,4 h-10 a4,4 0 0 1 -4,-4 v-122 a4,4 0 0 1 4,-4 z" />
+    </group>
+
+    <!-- Main Body -->
     <path
-        android:fillColor="#666666"
-        android:pathData="M12.5,9H11.5V12.5L14,14.5L14.5,13.8L12.5,12.2V9Z" />
+        android:fillColor="#141414"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M216,180 h248 a36,36 0 0 1 36,36 v288 a36,36 0 0 1 -36,36 h-248 a36,36 0 0 1 -36,-36 v-288 a36,36 0 0 1 36,-36 z" />
+
+    <!-- Bezel -->
+    <path
+        android:fillColor="#1c1c1c"
+        android:strokeColor="#555555"
+        android:strokeWidth="1.5"
+        android:pathData="M238,210 h204 a26,26 0 0 1 26,26 v248 a26,26 0 0 1 -26,26 h-204 a26,26 0 0 1 -26,-26 v-248 a26,26 0 0 1 26,-26 z" />
+
+    <!-- Buttons -->
+    <path
+        android:fillColor="#232323"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="1.5"
+        android:pathData="M151,248 h33 a9,9 0 0 1 9,9 v48 a9,9 0 0 1 -9,9 h-33 a9,9 0 0 1 -9,-9 v-48 a9,9 0 0 1 9,-9 z" />
+    <path
+        android:fillColor="#232323"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="1.5"
+        android:pathData="M151,406 h33 a9,9 0 0 1 9,9 v48 a9,9 0 0 1 -9,9 h-33 a9,9 0 0 1 -9,-9 v-48 a9,9 0 0 1 9,-9 z" />
+    <path
+        android:fillColor="#232323"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="1.5"
+        android:pathData="M496,248 h33 a9,9 0 0 1 9,9 v48 a9,9 0 0 1 -9,9 h-33 a9,9 0 0 1 -9,-9 v-48 a9,9 0 0 1 9,-9 z" />
+    <path
+        android:fillColor="#232323"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="1.5"
+        android:pathData="M496,406 h33 a9,9 0 0 1 9,9 v48 a9,9 0 0 1 -9,9 h-33 a9,9 0 0 1 -9,-9 v-48 a9,9 0 0 1 9,-9 z" />
+
+    <!-- Screws -->
+    <path android:fillColor="#AAAAAA" android:strokeColor="#3a3a3a" android:strokeWidth="1" android:pathData="M228,226 m-9,0 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0 z" />
+    <path android:fillColor="#AAAAAA" android:strokeColor="#3a3a3a" android:strokeWidth="1" android:pathData="M452,226 m-9,0 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0 z" />
+    <path android:fillColor="#AAAAAA" android:strokeColor="#3a3a3a" android:strokeWidth="1" android:pathData="M228,494 m-9,0 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0 z" />
+    <path android:fillColor="#AAAAAA" android:strokeColor="#3a3a3a" android:strokeWidth="1" android:pathData="M452,494 m-9,0 a9,9 0 1,1 18,0 a9,9 0 1,1 -18,0 z" />
+
+    <!-- Screen Area (Mostly Dark Face with Light Outline) -->
+    <path
+        android:fillColor="#1A1A1A"
+        android:strokeColor="#c9d0c9"
+        android:strokeWidth="2"
+        android:pathData="M242,232 h196 a10,10 0 0 1 10,10 v216 a10,10 0 0 1 -10,10 h-196 a10,10 0 0 1 -10,-10 v-216 a10,10 0 0 1 10,-10 z" />
+
 </vector>

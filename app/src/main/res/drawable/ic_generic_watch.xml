@@ -1,53 +1,35 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="200dp"
     android:height="200dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportWidth="680"
+    android:viewportHeight="720">
 
-    <!-- Watch Band (Top) -->
+    <!-- Top Strap -->
     <path
-        android:fillColor="#444444"
-        android:pathData="M9,2 L15,2 L15,6 L9,6 Z" />
+        android:fillColor="#161616"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M270,20 h140 a20,20 0 0 1 20,20 v140 a20,20 0 0 1 -20,20 h-140 a20,20 0 0 1 -20,-20 v-140 a20,20 0 0 1 20,-20 z" />
 
-    <!-- Watch Band (Bottom) -->
+    <!-- Bottom Strap -->
     <path
-        android:fillColor="#444444"
-        android:pathData="M9,18 L15,18 L15,22 L9,22 Z" />
+        android:fillColor="#161616"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M270,520 h140 a20,20 0 0 1 20,20 v140 a20,20 0 0 1 -20,20 h-140 a20,20 0 0 1 -20,-20 v-140 a20,20 0 0 1 20,-20 z" />
 
-    <!-- Watch Case (Octagonal-ish) -->
+    <!-- Main Body -->
     <path
-        android:fillColor="#222222"
-        android:pathData="M7,8 L9,5 L15,5 L17,8 L17,16 L15,19 L9,19 L7,16 Z" />
+        android:fillColor="#141414"
+        android:strokeColor="#AAAAAA"
+        android:strokeWidth="2"
+        android:pathData="M216,180 h248 a36,36 0 0 1 36,36 v288 a36,36 0 0 1 -36,36 h-248 a36,36 0 0 1 -36,-36 v-288 a36,36 0 0 1 36,-36 z" />
 
-    <!-- Watch Face (Circular) -->
+    <!-- Screen Area (Mostly Dark Face with Light Outline) -->
     <path
-        android:fillColor="#333333"
-        android:pathData="M12,7C9.24,7 7,9.24 7,12C7,14.76 9.24,17 12,17C14.76,17 17,14.76 17,12C17,9.24 14.76,7 12,7Z" />
-
-    <!-- LCD / Display Area -->
-    <path
-        android:fillColor="#666666"
-        android:pathData="M9,10 L15,10 L15,14 L9,14 Z" />
-
-    <!-- Buttons -->
-    <!-- Top Left Button -->
-    <path
-        android:fillColor="#111111"
-        android:pathData="M6,8 L7,8 L7,10 L6,10 Z" />
-
-    <!-- Bottom Left Button -->
-    <path
-        android:fillColor="#111111"
-        android:pathData="M6,14 L7,14 L7,16 L6,16 Z" />
-
-    <!-- Top Right Button -->
-    <path
-        android:fillColor="#111111"
-        android:pathData="M17,8 L18,8 L18,10 L17,10 Z" />
-
-    <!-- Bottom Right Button -->
-    <path
-        android:fillColor="#111111"
-        android:pathData="M17,14 L18,14 L18,16 L17,16 Z" />
+        android:fillColor="#1A1A1A"
+        android:strokeColor="#c9d0c9"
+        android:strokeWidth="2"
+        android:pathData="M242,232 h196 a10,10 0 0 1 10,10 v216 a10,10 0 0 1 -10,10 h-196 a10,10 0 0 1 -10,-10 v-216 a10,10 0 0 1 10,-10 z" />
 
 </vector>
