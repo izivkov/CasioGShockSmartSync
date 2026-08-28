@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name" translatable="false">Smart Sync for Watches</string>
+    <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Ensure the official manufacturer app is not running.</string>
+</resources>

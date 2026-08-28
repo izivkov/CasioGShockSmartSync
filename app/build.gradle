@@ -6,11 +6,21 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-android {
-    namespace = 'org.avmedia.gshockGoogleSync'
-    compileSdk = 37
+    android {
+        namespace = 'org.avmedia.gshockGoogleSync'
+        compileSdk = 37
 
-    defaultConfig {
+        flavorDimensions "distribution"
+        productFlavors {
+            github {
+                dimension "distribution"
+            }
+            playStore {
+                dimension "distribution"
+            }
+        }
+
+        defaultConfig {
         applicationId = "org.avmedia.gshockGoogleSync"
         minSdk = 26
         targetSdk = 37
