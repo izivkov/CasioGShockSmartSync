@@ -1,0 +1,53 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Watch Band (Top) -->
+    <path
+        android:fillColor="#444444"
+        android:pathData="M9,2 L15,2 L15,6 L9,6 Z" />
+
+    <!-- Watch Band (Bottom) -->
+    <path
+        android:fillColor="#444444"
+        android:pathData="M9,18 L15,18 L15,22 L9,22 Z" />
+
+    <!-- Watch Case (Octagonal-ish) -->
+    <path
+        android:fillColor="#222222"
+        android:pathData="M7,8 L9,5 L15,5 L17,8 L17,16 L15,19 L9,19 L7,16 Z" />
+
+    <!-- Watch Face (Circular) -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M12,7C9.24,7 7,9.24 7,12C7,14.76 9.24,17 12,17C14.76,17 17,14.76 17,12C17,9.24 14.76,7 12,7Z" />
+
+    <!-- LCD / Display Area -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M9,10 L15,10 L15,14 L9,14 Z" />
+
+    <!-- Buttons -->
+    <!-- Top Left Button -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M6,8 L7,8 L7,10 L6,10 Z" />
+
+    <!-- Bottom Left Button -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M6,14 L7,14 L7,16 L6,16 Z" />
+
+    <!-- Top Right Button -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M17,8 L18,8 L18,10 L17,10 Z" />
+
+    <!-- Bottom Right Button -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M17,14 L18,14 L18,16 L17,16 Z" />
+
+</vector>

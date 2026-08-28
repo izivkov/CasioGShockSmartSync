@@ -1,0 +1,63 @@
+<svg width="680" height="720" viewBox="0 0 680 720" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<clipPath id="screenClip"><rect x="228" y="228" width="224" height="154" rx="6"/></clipPath>
+</defs>
+<style>
+.body{fill:#141414;stroke:#000;stroke-width:2;}
+.bezel{fill:#1c1c1c;stroke:#000;stroke-width:1.5;}
+.screen{fill:#c9d0c9;stroke:#000;stroke-width:2;}
+.strap{fill:#161616;stroke:#000;stroke-width:2;}
+.btn{fill:#232323;stroke:#000;stroke-width:1.5;}
+.screw{fill:#050505;stroke:#3a3a3a;stroke-width:1;}
+.lcd{fill:#2b332d;font-family:monospace;}
+.vent{fill:#000;opacity:0.55;}
+.ridge{stroke:#000;stroke-width:1;opacity:0.5;}
+</style>
+<rect width="680" height="720" fill="#ffffff"/>
+<rect class="strap" x="250" y="20" width="180" height="180" rx="20"/>
+<rect class="strap" x="250" y="520" width="180" height="180" rx="20"/>
+<g class="vent">
+<rect x="270" y="50" width="10" height="130" rx="4"/>
+<rect x="295" y="50" width="10" height="130" rx="4"/>
+<rect x="320" y="50" width="10" height="130" rx="4"/>
+<rect x="345" y="50" width="10" height="130" rx="4"/>
+<rect x="370" y="50" width="10" height="130" rx="4"/>
+<rect x="395" y="50" width="10" height="130" rx="4"/>
+<rect x="270" y="550" width="10" height="130" rx="4"/>
+<rect x="295" y="550" width="10" height="130" rx="4"/>
+<rect x="320" y="550" width="10" height="130" rx="4"/>
+<rect x="345" y="550" width="10" height="130" rx="4"/>
+<rect x="370" y="550" width="10" height="130" rx="4"/>
+<rect x="395" y="550" width="10" height="130" rx="4"/>
+</g>
+<rect class="body" x="180" y="180" width="320" height="360" rx="36"/>
+<line class="ridge" x1="200" y1="200" x2="200" y2="520"/>
+<line class="ridge" x1="480" y1="200" x2="480" y2="520"/>
+<rect class="bezel" x="212" y="210" width="256" height="300" rx="26"/>
+<rect class="btn" x="142" y="248" width="42" height="66" rx="9"/>
+<rect class="btn" x="142" y="406" width="42" height="66" rx="9"/>
+<rect class="btn" x="496" y="248" width="42" height="66" rx="9"/>
+<rect class="btn" x="496" y="406" width="42" height="66" rx="9"/>
+<line class="ridge" x1="150" y1="258" x2="176" y2="258"/>
+<line class="ridge" x1="150" y1="268" x2="176" y2="268"/>
+<line class="ridge" x1="150" y1="278" x2="176" y2="278"/>
+<line class="ridge" x1="150" y1="416" x2="176" y2="416"/>
+<line class="ridge" x1="150" y1="426" x2="176" y2="426"/>
+<line class="ridge" x1="150" y1="436" x2="176" y2="436"/>
+<line class="ridge" x1="504" y1="258" x2="530" y2="258"/>
+<line class="ridge" x1="504" y1="268" x2="530" y2="268"/>
+<line class="ridge" x1="504" y1="278" x2="530" y2="278"/>
+<line class="ridge" x1="504" y1="416" x2="530" y2="416"/>
+<line class="ridge" x1="504" y1="426" x2="530" y2="426"/>
+<line class="ridge" x1="504" y1="436" x2="530" y2="436"/>
+<circle class="screw" cx="228" cy="226" r="9"/>
+<circle class="screw" cx="452" cy="226" r="9"/>
+<circle class="screw" cx="228" cy="494" r="9"/>
+<circle class="screw" cx="452" cy="494" r="9"/>
+<rect class="screen" x="232" y="232" width="216" height="236" rx="10"/>
+<g clip-path="url(#screenClip)">
+<text x="242" y="264" class="lcd" font-size="17">MO  10:24</text>
+<text x="242" y="332" font-size="60" font-weight="bold" class="lcd">6:30</text>
+<text x="242" y="368" class="lcd" font-size="16">DUAL TIME</text>
+</g>
+</svg>
