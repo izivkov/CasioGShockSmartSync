@@ -8,7 +8,7 @@ This document provides a comprehensive technical breakdown of the architecture, 
 
 The application is structured following modern Android architectural standards: **MVVM (Model-View-ViewModel)** with single-direction data flow, **Jetpack Compose** for reactive UI rendering, and **Hilt (Dagger)** for dependency injection.
 
-![System Architecture Diagram](images/system_architecture_diagram.jpg)
+![System Architecture Diagram](../images/system_architecture_diagram.jpg)
 
 ### Core Technology Stack
 - **Language**: 100% Kotlin
@@ -43,7 +43,7 @@ org.avmedia.gshockGoogleSync
 
 The **GShockAPI** (`org.avmedia.gshockapi`) serves as the hardware translation layer between high-level application intents and low-level Bluetooth Low Energy (BLE) GATT attributes.
 
-![GShockAPI Integration Diagram](images/gshock_api_integration.jpg)
+![GShockAPI Integration Diagram](../images/gshock_api_integration.jpg)
 
 ### Dependency Injection & Interface Delegation
 
@@ -98,7 +98,7 @@ Upon completing the BLE handshake, `GShockAPI` queries characteristic `0x0001` t
 
 Connecting to a BLE watch involves two distinct entry points: explicit foreground scanning/pairing and silent background reconnection via Android's `CompanionDeviceManager`.
 
-![BLE Connection Flow Diagram](images/ble_connection_flow.jpg)
+![BLE Connection Flow Diagram](../images/ble_connection_flow.jpg)
 
 ### Foreground Connection (`BluetoothHelper`)
 When opened in the foreground, `BluetoothHelper` verifies runtime permissions (`BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`, `ACCESS_FINE_LOCATION`) and initiates scanning. Upon locating the paired MAC address, `GShockAPI.connect()` establishes the GATT connection.
@@ -117,7 +117,7 @@ To sync time or trigger remote actions when the phone is locked or the app is cl
 
 Casio G-Shock watches provide a small non-volatile RAM region called the **Scratchpad**. Since official Casio firmware does not support custom alarm titles or arbitrary action settings, Smart Sync uses a custom binary packing scheme to persist user configurations directly on the watch hardware.
 
-![Scratchpad Memory Layout Diagram](images/scratchpad_memory_layout.jpg)
+![Scratchpad Memory Layout Diagram](../images/scratchpad_memory_layout.jpg)
 
 ### Fixed-Offset Architecture
 
