@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Smart Sync for Watches</string>
     <string name="events">Events</string>
+    <string name="manual" translatable="false">Manual</string>
     <string name="alarms">Alarms</string>
     <string name="time">Time</string>
     <string name="steps">Steps</string>

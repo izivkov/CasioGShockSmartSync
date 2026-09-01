@@ -28,7 +28,8 @@ class ScratchpadManager @Inject constructor(
     private val orderedClientClasses = listOf(
         "AlarmNameStorage",
         "ActionsStorage",
-        "TimeSettingsStorage"
+        "TimeSettingsStorage",
+        "EventStorage"
     )
 
     fun register(client: ScratchpadClient) {

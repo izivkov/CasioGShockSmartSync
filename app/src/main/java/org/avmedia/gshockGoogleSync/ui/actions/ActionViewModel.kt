@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.ActionsStorage
+import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
@@ -62,7 +63,8 @@ constructor(
         private val actionsStorage: ActionsStorage,
         private val notificationProvider: NotificationProvider,
         private val watchTimeUpdater: WatchTimeUpdater,
-        private val watchFeatureManager: IWatchFeatureManager
+        private val watchFeatureManager: IWatchFeatureManager,
+        private val eventStorage: EventStorage
 ) {
     /** Replaces viewModelScope. Lives as long as the process. */
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -292,9 +294,9 @@ constructor(
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
-                RunEnvironment.NORMAL_CONNECTION -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders")
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders")
-                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders")
+                RunEnvironment.NORMAL_CONNECTION -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
+                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
+                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
             }

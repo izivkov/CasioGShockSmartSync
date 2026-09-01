@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +31,8 @@ fun EventItem(
     onEnabledChange: (Boolean) -> Unit,
     enabledCount: Int,
     modifier: Modifier = Modifier,
-    maxEnabled: Int = 5
+    maxEnabled: Int = 5,
+    onEdit: (() -> Unit)? = null
 ) {
     val maxReminderMessage = stringResource(id = R.string.max_reminders_reached)
 
@@ -57,6 +63,18 @@ fun EventItem(
                             .weight(1f)
                             .padding(end = 0.dp, bottom = 0.dp)
                     )
+                    if (onEdit != null) {
+                        IconButton(
+                            onClick = onEdit,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Event",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                     AppSwitch(
                         checked = enabled,
                         onCheckedChange = { newValue ->

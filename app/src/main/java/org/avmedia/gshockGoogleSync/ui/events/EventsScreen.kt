@@ -1,9 +1,14 @@
 package org.avmedia.gshockGoogleSync.ui.events
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -12,9 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.avmedia.gshockGoogleSync.ui.common.AppSwitchWithText
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -22,7 +32,6 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
-import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.model.Event
@@ -31,6 +40,21 @@ import org.avmedia.gshockapi.model.Event
 fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
 
     GShockSmartSyncTheme {
+        val isManualMode by viewModel.isManualMode.collectAsState()
+        var editingEventIndex by remember { mutableStateOf<Int?>(null) }
+        val events by viewModel.events.collectAsState()
+
+        if (editingEventIndex != null) {
+            ReminderEditDialog(
+                event = events[editingEventIndex!!],
+                onDismiss = { editingEventIndex = null },
+                onSave = { updatedEvent ->
+                    viewModel.updateEvent(editingEventIndex!!, updatedEvent)
+                    editingEventIndex = null
+                }
+            )
+        }
+
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -38,61 +62,88 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
             ConstraintLayout(
                 modifier = Modifier.fillMaxSize()
             ) {
-                val (title, events, buttonsRow) = createRefs()
+                val (title, spacer, eventsList, manualToggle, buttonsRow) = createRefs()
 
                 ScreenTitle(
-                    stringResource(
-                        id = R.string.events
-                    ), Modifier
-                        .constrainAs(title) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(events.top)
-                        })
+                    text = stringResource(id = R.string.events),
+                    modifier = Modifier.constrainAs(title) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(spacer.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                )
 
-                Column(
+                Spacer(
                     modifier = Modifier
-                        .constrainAs(events) {
+                        .height(16.dp)
+                        .constrainAs(spacer) {
                             top.linkTo(title.bottom)
-                            bottom.linkTo(buttonsRow.top)
-                            height = Dimension.fillToConstraints
+                            bottom.linkTo(eventsList.top)
                         }
-                        .verticalScroll(rememberScrollState())  // Make content scrollable
-                        .padding(0.dp)
-                        .fillMaxWidth()
-                        .fillMaxSize()
-                ) {
-                    EventList()
-                }
+                )
 
                 Column(
                     modifier = Modifier
-                        .constrainAs(buttonsRow) {
-                            top.linkTo(events.bottom)  // Link top of buttonsRow to bottom of content
-                            bottom.linkTo(parent.bottom)  // Keep buttons at the bottom
+                        .constrainAs(eventsList) {
+                            top.linkTo(spacer.bottom)
+                            bottom.linkTo(manualToggle.top)
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
+                            height = Dimension.fillToConstraints
                         }
+                        .verticalScroll(rememberScrollState())
                         .fillMaxWidth()
                 ) {
-                    val buttons = arrayListOf(
-                        ButtonData(
-                            text = stringResource(
-                                id = R.string.send_events_to_watch
-                            ),
-                            onClick = {
-                                viewModel.sendEventsToWatch()
-                            }
-                        )
+                    EventList(
+                        onEdit = if (isManualMode) { index -> editingEventIndex = index } else null
                     )
-                    ButtonsRow(buttons = buttons)
                 }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 8.dp)
+                        .constrainAs(manualToggle) {
+                            top.linkTo(eventsList.bottom)
+                            bottom.linkTo(buttonsRow.top)
+                        },
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    AppSwitchWithText(
+                        isChecked = isManualMode,
+                        onCheckedChange = { viewModel.toggleManualMode(it) },
+                        modifier = Modifier,
+                        text = stringResource(id = R.string.manual)
+                    )
+                }
+
+                val buttons = arrayListOf(
+                    ButtonData(
+                        text = stringResource(id = R.string.send_events_to_watch),
+                        onClick = { viewModel.sendEventsToWatch() }
+                    )
+                )
+                
+                ButtonsRow(
+                    buttons = buttons,
+                    modifier = Modifier.constrainAs(buttonsRow) {
+                        top.linkTo(manualToggle.bottom)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
+fun EventList(
+    eventViewModel: EventViewModel = hiltViewModel(),
+    onEdit: ((Int) -> Unit)? = null
+) {
 
     val events by eventViewModel.events.collectAsState()
 
@@ -100,12 +151,11 @@ fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
         eventViewModel.loadEvents()
     }
 
-    @Composable
-    fun createEvent(): List<Any> {
-        val eventItems = mutableListOf<Any>()
-        val enabledCount = events.count { it.enabled } // Count how many items are enabled
-
-        events.forEachIndexed { index: Int, event: Event ->
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        val enabledCount = events.count { it.enabled }
+        events.forEachIndexed { index, event ->
             ItemView {
                 EventItem(
                     title = event.title,
@@ -115,17 +165,10 @@ fun EventList(eventViewModel: EventViewModel = hiltViewModel()) {
                     onEnabledChange = { newValue ->
                         eventViewModel.toggleEvents(index, newValue)
                     },
-                    enabledCount = enabledCount
+                    enabledCount = enabledCount,
+                    onEdit = if (onEdit != null) { { onEdit(index) } } else null
                 )
             }
         }
-
-        return eventItems.toList()
-    }
-
-    Column(
-        modifier = Modifier
-    ) {
-        ItemList(createEvent())
     }
 }

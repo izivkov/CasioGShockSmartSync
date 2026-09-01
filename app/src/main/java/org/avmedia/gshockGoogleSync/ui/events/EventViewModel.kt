@@ -16,6 +16,7 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
+import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -28,29 +29,68 @@ import javax.inject.Inject
 class EventViewModel @Inject constructor(
     private val api: GShockRepository,
     private val calendarEvents: CalendarEvents,
+    private val eventStorage: EventStorage,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     private val _events = MutableStateFlow<List<Event>>(emptyList())
     val events: StateFlow<List<Event>> = _events
 
+    private val _isManualMode = MutableStateFlow(eventStorage.isManualMode())
+    val isManualMode: StateFlow<Boolean> = _isManualMode
+
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     init {
+        refreshState()
         listenForUpdateRequest()
+    }
+
+    private fun refreshState() {
+        viewModelScope.launch {
+            runCatching {
+                eventStorage.load()
+                _isManualMode.value = eventStorage.isManualMode()
+                loadEvents()
+            }.onFailure {
+                Timber.e(it, "Failed to refresh state")
+            }
+        }
     }
 
     fun loadEvents() {
         viewModelScope.launch {
             runCatching {
-                val loadedEvents = calendarEvents.getEventsFromCalendar()
-                _events.value = loadedEvents
-                EventsModel.refresh(loadedEvents)
+                if (_isManualMode.value) {
+                    val loadedEvents = api.getEventsFromWatch()
+                    _events.value = loadedEvents
+                    EventsModel.refresh(ArrayList(loadedEvents))
+                } else {
+                    val loadedEvents = calendarEvents.getEventsFromCalendar()
+                    _events.value = loadedEvents
+                    EventsModel.refresh(loadedEvents)
+                }
             }.onFailure {
                 AppSnackbar("Error: ${it.message}")
             }
         }
+    }
+
+    fun toggleManualMode(enabled: Boolean) {
+        viewModelScope.launch {
+            _isManualMode.value = enabled
+            eventStorage.setManualMode(enabled)
+            eventStorage.save()
+            loadEvents()
+        }
+    }
+
+    fun updateEvent(index: Int, event: Event) {
+        _events.value = _events.value.toMutableList().apply {
+            this[index] = event
+        }
+        EventsModel.refresh(ArrayList(_events.value))
     }
 
     fun toggleEvents(index: Int, isEnabled: Boolean) {
@@ -66,6 +106,12 @@ class EventViewModel @Inject constructor(
                 @Suppress("UNCHECKED_CAST")
                 _events.value = ProgressEvents.getPayload("CalendarUpdated") as List<Event>
             },
+            EventAction("DeviceName") {
+                refreshState()
+            },
+            EventAction("ConnectionSetupComplete") {
+                refreshState()
+            }
         )
 
         ProgressEvents.runEventActions(
