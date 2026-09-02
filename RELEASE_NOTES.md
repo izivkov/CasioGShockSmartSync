@@ -1,3 +1,24 @@
+# Release Notes - Casio G-Shock Smart Sync v58.0 — September 2, 2026
+
+## ✨ Highlights
+
+### 📅 Advanced Manual Reminder Management
+Significant upgrade to the manual event system, giving you total control over your watch's reminders:
+*   **Bulletproof Overwrite Protection**: Introduced a robust "Manual Mode" shield. When active, automatic calendar syncs are explicitly blocked, ensuring your manually entered watch reminders are never overwritten by phone calendar events.
+*   **Smart Title Sanitization**: Implemented real-time input filtering for reminder titles. The app now strictly enforces an **18-character limit** and automatically filters out emojis, accents, and unsupported symbols, guaranteeing 100% compatibility with your watch hardware.
+*   **Optional & Indefinite End Dates**: Added support for indefinite repeating events. You can now choose to leave the "End Date" empty, matching Google Calendar's behavior for ongoing series.
+
+### 🎨 Refined User Experience
+*   **Clickable Event Cards**: The entire reminder card is now interactive. Simply tap anywhere on a reminder to edit it, providing a much smoother workflow than clicking a small icon.
+*   **Intelligent Date Validation**: The date picker now prevents selecting past dates and ensures your "End Date" is always after or equal to the "Start Date," with automatic adjustments for a seamless setup.
+*   **Perfectly Centered Layout**: Refined the Events screen alignment and spacing to match the high standards of the rest of the application.
+
+### 🛡️ Synchronization Stability
+*   **Race Condition Resolution**: Fixed a critical timing issue during watch connection. The app now ensures all settings are loaded from the watch before any synchronization actions are triggered.
+*   **Duplicate Data Prevention**: Serialized all event requests to the watch, eliminating duplicate responses and ensuring your 5-slot reminder list remains perfectly stable and accurate.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v57.0 — August 25, 2026
 
 ## ✨ Highlights
