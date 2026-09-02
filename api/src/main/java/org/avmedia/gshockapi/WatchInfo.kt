@@ -75,7 +75,6 @@ data object WatchInfo {
     val hasTimeFormat:          Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasTimeFormat
     val hasHourlyChime:         Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasHourlyChime
     val hasLongTimerKey:        Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasLongTimerKey
-    val hasAppInfo:             Boolean @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.hasAppInfo
     val settingsSize:           Int     @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.settingsSize
 
     val protocol: WatchProtocol @RequiresApi(Build.VERSION_CODES.O) get() = getState().info.protocol
@@ -126,7 +125,6 @@ data object WatchInfo {
         val hasTimeFormat: Boolean = true,
         val hasHourlyChime: Boolean = true,
         val hasLongTimerKey: Boolean = false,
-        val hasAppInfo: Boolean = true,
         val settingsSize: Int = 17,
         val protocol: WatchProtocol = StandardProtocol
     )
@@ -228,7 +226,6 @@ data object WatchInfo {
             hasStepCounter = true,
             hasDateFormat = false,
             weekLanguageSupported = false,
-            hasAppInfo = true,
         ),
         ModelInfo(model = WatchModel.GA,     hasAutoLight = false, hasReminders = true),
         ModelInfo(model = WatchModel.GB001,  hasAutoLight = true,  hasReminders = false),

@@ -97,9 +97,7 @@ import java.time.ZoneId
 
     override suspend fun init(): Boolean {
         IO.init()
-        if (WatchInfo.hasAppInfo) {
-            getAppInfo()
-        }
+        getAppInfo()
 
         getPressedButton()
         ProgressEvents.onNext("ButtonPressedInfoReceived")

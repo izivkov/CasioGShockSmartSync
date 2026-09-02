@@ -3,10 +3,6 @@ package org.avmedia.gshockGoogleSync.scratchpad
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockapi.IGShockAPI
-import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockapi.utils.Utils
-import org.avmedia.gshockapi.utils.Utils.hexToBytes
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.ceil
@@ -44,12 +40,7 @@ class ScratchpadManager @Inject constructor(
     }
 
     internal suspend fun load() {
-        val masterBuffer = if (WatchInfo.hasAppInfo) {
-            api.getScratchpadData()
-        } else {
-            val hexData = LocalDataStorage.get(appContext, "LOCAL_SCRATCHPAD_DATA", "") ?: ""
-            if (hexData.isEmpty()) ByteArray(0) else hexData.hexToBytes()
-        }
+        val masterBuffer = api.getScratchpadData()
 
         // The watch's scratchpad is either genuinely reset, or still holds data in the
         // old (pre-0x94) magic-number layout — either way the packed bits no longer
@@ -57,7 +48,7 @@ class ScratchpadManager @Inject constructor(
         // its own sensible defaults from construction, so leaving them undecoded is
         // equivalent to resetting all clients to defaults. The user will simply see
         // default settings and can re-set anything they'd customized before.
-        if (WatchInfo.hasAppInfo && api.isScratchpadReset()) {
+        if (api.isScratchpadReset()) {
             return
         }
 
@@ -90,16 +81,7 @@ class ScratchpadManager @Inject constructor(
                 currentBitOffset += bitSize
             }
         }
-
-        if (WatchInfo.hasAppInfo) {
-            api.setScratchpadData(masterBuffer)
-        } else {
-            LocalDataStorage.put(
-                appContext,
-                "LOCAL_SCRATCHPAD_DATA",
-                Utils.fromByteArrayToHexStr(masterBuffer)
-            )
-        }
+        api.setScratchpadData(masterBuffer)
     }
 
     private fun extractBits(source: ByteArray, startBit: Int, bitCount: Int): ByteArray {
