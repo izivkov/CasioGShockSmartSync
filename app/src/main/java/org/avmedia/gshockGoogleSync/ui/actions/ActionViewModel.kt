@@ -14,6 +14,7 @@ import java.time.Clock
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -74,6 +75,8 @@ constructor(
 
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
+
+    private val isDataLoaded = CompletableDeferred<Unit>()
 
     private val actionMap = mutableMapOf<Class<out Action>, Action>()
 
@@ -303,6 +306,10 @@ constructor(
         }
 
         override fun run(context: Context) {
+            if (eventStorage.isManualMode()) {
+                Timber.d("SetEventsAction skipped - Manual Mode is active")
+                return
+            }
             Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(calendarEvents.getEventsFromCalendar())
 
@@ -705,6 +712,7 @@ constructor(
 
     fun runActionsForActionButton(context: Context) {
         viewModelScope.launch {
+            isDataLoaded.await()
             val actions =
                     _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
             ProgressEvents.onNext("ActionNames", actions.map { it.title })
@@ -714,6 +722,7 @@ constructor(
 
     fun runActionForConnection(context: Context) {
         viewModelScope.launch {
+            isDataLoaded.await()
             runFilteredActions(
                     context,
                     _actions.value.filter { it.shouldRun(RunEnvironment.NORMAL_CONNECTION) }
@@ -723,6 +732,7 @@ constructor(
 
     fun runActionForAlwaysConnected(context: Context) {
         viewModelScope.launch {
+            isDataLoaded.await()
             runFilteredActions(
                     context,
                     _actions.value.filter { it.shouldRun(RunEnvironment.ALWAYS_CONNECTED) }
@@ -732,6 +742,7 @@ constructor(
 
     fun runActionsForAutoTimeSetting(context: Context) {
         viewModelScope.launch {
+            isDataLoaded.await()
             val actions =
                     _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
             ProgressEvents.onNext("ActionNames", actions.map { it.title })
@@ -751,8 +762,11 @@ constructor(
     }
 
     fun runActionFindPhone(context: Context) {
-        val actionsToRun = _actions.value.filter { it.shouldRun(RunEnvironment.FIND_PHONE_PRESSED) }
-        runFilteredActions(context, actionsToRun)
+        viewModelScope.launch {
+            isDataLoaded.await()
+            val actionsToRun = _actions.value.filter { it.shouldRun(RunEnvironment.FIND_PHONE_PRESSED) }
+            runFilteredActions(context, actionsToRun)
+        }
     }
 
     private fun showTimeSyncNotification() {
@@ -802,6 +816,10 @@ constructor(
         }
 
         LocalDataStorage.put(context, "ActionsInitialized", "true")
+
+        if (!isDataLoaded.isCompleted) {
+            isDataLoaded.complete(Unit)
+        }
 
         return _actions.value
     }

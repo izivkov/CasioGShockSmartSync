@@ -18,9 +18,12 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockapi.model.Event
+import org.avmedia.gshockapi.model.EventDate
+import org.avmedia.gshockapi.model.RepeatPeriod
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import kotlinx.coroutines.Job
 import java.text.Normalizer
 import java.util.regex.Pattern
 import javax.inject.Inject
@@ -42,6 +45,8 @@ class EventViewModel @Inject constructor(
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
+    private var loadEventsJob: Job? = null
+
     init {
         refreshState()
         listenForUpdateRequest()
@@ -60,19 +65,42 @@ class EventViewModel @Inject constructor(
     }
 
     fun loadEvents() {
-        viewModelScope.launch {
+        loadEventsJob?.cancel()
+        loadEventsJob = viewModelScope.launch {
             runCatching {
                 if (_isManualMode.value) {
                     val loadedEvents = api.getEventsFromWatch()
+                        .take(EventsModel.MAX_REMINDERS)
+                        .toMutableList()
+
+                    while (loadedEvents.size < EventsModel.MAX_REMINDERS) {
+                        loadedEvents.add(
+                            Event(
+                                "",
+                                EventsModel.createEventDate(
+                                    System.currentTimeMillis(),
+                                    java.time.ZoneId.systemDefault()
+                                ),
+                                null,
+                                RepeatPeriod.NEVER,
+                                null,
+                                false,
+                                false
+                            )
+                        )
+                    }
                     _events.value = loadedEvents
                     EventsModel.refresh(ArrayList(loadedEvents))
                 } else {
                     val loadedEvents = calendarEvents.getEventsFromCalendar()
+                        .take(EventsModel.MAX_REMINDERS)
                     _events.value = loadedEvents
-                    EventsModel.refresh(loadedEvents)
+                    EventsModel.refresh(ArrayList(loadedEvents))
                 }
             }.onFailure {
-                AppSnackbar("Error: ${it.message}")
+                if (it !is kotlinx.coroutines.CancellationException) {
+                    AppSnackbar("Error: ${it.message}")
+                }
             }
         }
     }
@@ -97,20 +125,27 @@ class EventViewModel @Inject constructor(
         _events.value = _events.value.toMutableList().apply {
             this[index] = this[index].copy(enabled = isEnabled)
         }
+        EventsModel.refresh(ArrayList(_events.value))
     }
 
     private fun listenForUpdateRequest() {
         val eventActions = arrayOf(
             EventAction("CalendarUpdated") {
-                Timber.d("CalendarUpdated, events: ${EventsModel.events.size}")
-                @Suppress("UNCHECKED_CAST")
-                _events.value = ProgressEvents.getPayload("CalendarUpdated") as List<Event>
+                if (!_isManualMode.value) {
+                    Timber.d("CalendarUpdated, events: ${EventsModel.events.size}")
+                    @Suppress("UNCHECKED_CAST")
+                    val newEvents = ProgressEvents.getPayload("CalendarUpdated") as List<Event>
+                    _events.value = newEvents
+                    EventsModel.refresh(ArrayList(newEvents))
+                }
             },
             EventAction("DeviceName") {
-                refreshState()
+                if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode
+                    refreshState()
             },
             EventAction("ConnectionSetupComplete") {
-                refreshState()
+                if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode
+                    refreshState()
             }
         )
 

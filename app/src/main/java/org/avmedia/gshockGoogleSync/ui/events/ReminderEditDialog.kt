@@ -83,11 +83,7 @@ fun ReminderEditDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { newValue ->
-                        val filtered = newValue.filter { char ->
-                            char in 'A'..'Z' || char in 'a'..'z' || char in '0'..'9' ||
-                                    " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~".contains(char)
-                        }.take(18)
-                        title = filtered
+                        title = EventUtils.sanitizeEventTitle(newValue)
                     },
                     label = { Text("Title") },
                     modifier = Modifier.fillMaxWidth()
