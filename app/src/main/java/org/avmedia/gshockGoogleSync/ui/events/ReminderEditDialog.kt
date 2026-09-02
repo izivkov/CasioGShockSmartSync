@@ -36,6 +36,7 @@ import org.avmedia.gshockapi.model.EventDate
 import org.avmedia.gshockapi.model.RepeatPeriod
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.ZoneId
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +70,12 @@ fun ReminderEditDialog(
         )
     }
 
+    var hasEndDate by remember(event) {
+        mutableStateOf(
+            eEndDate != null && !eEndDate.equals(eStartDate ?: EventDate(0, java.time.Month.JANUARY, 1))
+        )
+    }
+
     val scrollState = rememberScrollState()
 
     AlertDialog(
@@ -94,7 +101,13 @@ fun ReminderEditDialog(
                 Text("Start Date")
                 SimpleDatePicker(
                     date = startDate,
-                    onDateChange = { startDate = it }
+                    minDate = LocalDate.now(),
+                    onDateChange = { 
+                        startDate = it
+                        if (startDate.isAfter(endDate)) {
+                            endDate = startDate
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -152,11 +165,23 @@ fun ReminderEditDialog(
 
                 if (repeatPeriod != RepeatPeriod.NEVER) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("End Date")
-                    SimpleDatePicker(
-                        date = endDate,
-                        onDateChange = { endDate = it }
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = hasEndDate,
+                            onCheckedChange = { hasEndDate = it }
+                        )
+                        Text("Has End Date")
+                    }
+
+                    if (hasEndDate) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("End Date")
+                        SimpleDatePicker(
+                            date = endDate,
+                            minDate = startDate,
+                            onDateChange = { endDate = it }
+                        )
+                    }
                 }
             }
         },
@@ -165,7 +190,7 @@ fun ReminderEditDialog(
                 val updatedEvent = Event(
                     if (title.isBlank()) "No Title" else title,
                     EventDate(startDate.year, startDate.month, startDate.dayOfMonth),
-                    if (repeatPeriod == RepeatPeriod.NEVER) null else EventDate(endDate.year, endDate.month, endDate.dayOfMonth),
+                    if (repeatPeriod == RepeatPeriod.NEVER || !hasEndDate) null else EventDate(endDate.year, endDate.month, endDate.dayOfMonth),
                     repeatPeriod,
                     if (repeatPeriod == RepeatPeriod.WEEKLY) daysOfWeek else null,
                     event.enabled,
@@ -188,6 +213,7 @@ fun ReminderEditDialog(
 @Composable
 fun SimpleDatePicker(
     date: LocalDate,
+    minDate: LocalDate? = null,
     onDateChange: (LocalDate) -> Unit
 ) {
     val context = LocalContext.current
@@ -195,7 +221,7 @@ fun SimpleDatePicker(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                DatePickerDialog(
+                val dialog = DatePickerDialog(
                     context,
                     { _, year, month, dayOfMonth ->
                         onDateChange(LocalDate.of(year, month + 1, dayOfMonth))
@@ -203,7 +229,11 @@ fun SimpleDatePicker(
                     date.year,
                     date.monthValue - 1,
                     date.dayOfMonth
-                ).show()
+                )
+                minDate?.let {
+                    dialog.datePicker.minDate = it.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                }
+                dialog.show()
             }
     ) {
         OutlinedTextField(
