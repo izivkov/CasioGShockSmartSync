@@ -20,6 +20,8 @@ import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockGoogleSync.voice.VoiceCommandManager
+import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
 import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
@@ -38,7 +40,9 @@ data class TimeState(
     val timeZoneOption: TimeSettingsStorage.TimeZoneOption = TimeSettingsStorage.TimeZoneOption.SYSTEM,
     val timeOffset: Long = 0L,
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
-    val selectedStepDataOption: StepDataOption = StepDataOption.TODAY
+    val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
+    val isListening: Boolean = false,
+    val isVoiceCommandSupported: Boolean = false
 )
 
 sealed interface TimeAction {
@@ -48,6 +52,7 @@ sealed interface TimeAction {
     data object RefreshState : TimeAction
     data class SetTimeZoneOption(val option: TimeSettingsStorage.TimeZoneOption) : TimeAction
     data class SetStepDataOption(val option: StepDataOption) : TimeAction
+    data object StartVoiceCommand : TimeAction
 }
 
 sealed class UiEvent {
@@ -60,6 +65,8 @@ class TimeViewModel @Inject constructor(
     private val timeSettingsStorage: TimeSettingsStorage,
     private val watchTimeUpdater: WatchTimeUpdater,
     private val watchFeatureManager: IWatchFeatureManager,
+    private val voiceCommandManager: VoiceCommandManager,
+    private val voiceDispatcher: VoiceDispatcher,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -131,6 +138,24 @@ class TimeViewModel @Inject constructor(
                     saveJob = null
                 }
             }
+
+            TimeAction.StartVoiceCommand -> {
+                if (voiceCommandManager.isRecognitionAvailable()) {
+                    _state.value = _state.value.copy(isListening = true)
+                    voiceCommandManager.startListening(
+                        onResult = { text ->
+                            _state.value = _state.value.copy(isListening = false)
+                            voiceDispatcher.dispatch(text)
+                        },
+                        onError = { error ->
+                            _state.value = _state.value.copy(isListening = false)
+                            AppSnackbar(error)
+                        }
+                    )
+                } else {
+                    AppSnackbar(appContext.getString(R.string.voice_recognition_unavailable))
+                }
+            }
         }
     }
 
@@ -189,7 +214,8 @@ class TimeViewModel @Inject constructor(
                         } else {
                             api.getStepCount()
                         }
-                    } else StepCounterData.unavailable()
+                    } else StepCounterData.unavailable(),
+                    isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable()
                 )
             }.onFailure {
                 AppSnackbar("Api Error")

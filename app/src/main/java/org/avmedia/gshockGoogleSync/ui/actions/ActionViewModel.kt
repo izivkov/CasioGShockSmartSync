@@ -192,11 +192,13 @@ constructor(
             add(
                     SetEventsAction(
                             appContext.getString(R.string.set_reminders),
-                            false,
+                            true,
                             api,
                             calendarEvents
                     )
             )
+            add(SetAlarmAction(appContext.getString(R.string.set_alarm), true))
+            add(SetSettingsAction("Set Settings", true)) // Hidden from UI, only for voice
             add(
                     PhotoAction(
                             appContext.getString(R.string.take_photo),
@@ -218,6 +220,7 @@ constructor(
         ACTION_BUTTON_PRESSED, // Connected by short-pressing the LOWER-RIGHT button
         AUTO_TIME_ADJUSTMENT, // Connected automatically during auto time update
         FIND_PHONE_PRESSED, // The user has activated the "Find Phone" function
+        VOICE_COMMAND, // Triggered by voice command
         ALWAYS_CONNECTED, // Some watches are always connected, but the watch keeps connecting and
         // disconnecting periodically.
     }
@@ -232,6 +235,7 @@ constructor(
         open fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
                 RunEnvironment.FIND_PHONE_PRESSED -> false
@@ -300,6 +304,7 @@ constructor(
                 RunEnvironment.NORMAL_CONNECTION -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
             }
@@ -354,6 +359,7 @@ constructor(
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.find_phone")
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> true
                 RunEnvironment.ALWAYS_CONNECTED -> false
             }
@@ -393,6 +399,7 @@ constructor(
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> true
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
             }
@@ -548,6 +555,7 @@ constructor(
                 RunEnvironment.NORMAL_CONNECTION -> enabled
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
             }
@@ -694,6 +702,84 @@ constructor(
         }
     }
 
+    inner class SetAlarmAction(
+            override var title: String,
+            override var enabled: Boolean,
+            var alarmHour: Int = 8,
+            var alarmMinute: Int = 0
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName} for $alarmHour:$alarmMinute")
+            viewModelScope.launch {
+                runCatching {
+                    val alarms = api.getAlarms()
+                    val alarmCount = watchFeatureManager.getAlarmCount()
+
+                    // Find first disabled alarm or use the first one if all are enabled
+                    val indexToUpdate = alarms.take(alarmCount).indexOfFirst { !it.enabled }.let {
+                        if (it == -1) 0 else it
+                    }
+
+                    val updatedAlarms = ArrayList(alarms)
+                    updatedAlarms[indexToUpdate] = updatedAlarms[indexToUpdate].copy(
+                        hour = alarmHour,
+                        minute = alarmMinute,
+                        enabled = true
+                    )
+
+                    api.setAlarms(updatedAlarms)
+                    AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+                }.onFailure {
+                    Timber.e(it, "Failed to set watch alarm via voice")
+                    AppSnackbar("Failed to set watch alarm")
+                }
+            }
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
+            // Not strictly needed if only triggered by voice, but good for persistence if we add UI later
+            LocalDataStorage.put(context, this.javaClass.simpleName + ".hour", alarmHour.toString())
+            LocalDataStorage.put(context, this.javaClass.simpleName + ".minute", alarmMinute.toString())
+            super.save(context, actionsStorage)
+        }
+
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            alarmHour = LocalDataStorage.get(context, this.javaClass.simpleName + ".hour", "8")!!.toInt()
+            alarmMinute = LocalDataStorage.get(context, this.javaClass.simpleName + ".minute", "0")!!.toInt()
+            super.load(context, actionsStorage)
+        }
+    }
+
+    inner class SetSettingsAction(
+            override var title: String,
+            override var enabled: Boolean,
+            var settingName: String = "",
+            var settingValue: Boolean = false
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName} for $settingName=$settingValue")
+            viewModelScope.launch {
+                runCatching {
+                    val settings = api.getSettings()
+                    val newSettings = when {
+                        settingName.contains("auto light") -> settings.copy(autoLight = settingValue)
+                        settingName.contains("power saving") -> settings.copy(powerSavingMode = settingValue)
+                        else -> settings
+                    }
+                    if (newSettings != settings) {
+                        api.setSettings(newSettings)
+                        AppSnackbar(context.getString(R.string.settings_sent_to_watch))
+                    }
+                }.onFailure {
+                    Timber.e(it, "Failed to set setting via voice")
+                }
+            }
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
+    }
+
     private fun runIt(action: Action, context: Context) {
         runCatching { action.run(context) }.onFailure {
             Timber.e(it, "Action failed: '${action.title}' (${action.javaClass.simpleName})")
@@ -822,6 +908,20 @@ constructor(
         }
 
         return _actions.value
+    }
+
+    fun runFilteredActions(runEnvironment: RunEnvironment) {
+        viewModelScope.launch {
+            isDataLoaded.await()
+            val actionsToRun = _actions.value.filter { it.shouldRun(runEnvironment) }
+            runFilteredActions(appContext, actionsToRun)
+        }
+    }
+
+    fun emitUiEvent(event: UiEvent) {
+        viewModelScope.launch {
+            _uiEvents.emit(event)
+        }
     }
 
     fun save() {

@@ -89,8 +89,15 @@
 
     <string name="no_watch">No Watch</string>
     <string name="set_time">Set Time</string>
+    <string name="set_alarm" translatable="false">Set Alarm</string>
     <string name="find_phone">Find Phone</string>
     <string name="set_reminders">Set Reminders from\nGoogle Calendar</string>
+
+    <string name="voice_command" translatable="false">Tell me what to do</string>
+    <string name="listening" translatable="false">Listening…</string>
+    <string name="voice_recognition_unavailable" translatable="false">Voice recognition unavailable</string>
+    <string name="command_not_understood" translatable="false">Sorry, I didn\'t understand that</string>
+    <string name="action_disabled" translatable="false">Action \"%1$s\" is turned off</string>
 
     <string name="take_photo">Take a photo</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>
