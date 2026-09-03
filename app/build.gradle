@@ -24,8 +24,8 @@ plugins {
         applicationId = "org.avmedia.gshockGoogleSync"
         minSdk = 26
         targetSdk = 37
-        versionCode = 4275
-        versionName = "42.7.5"
+        versionCode = 4276
+        versionName = "42.7.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
