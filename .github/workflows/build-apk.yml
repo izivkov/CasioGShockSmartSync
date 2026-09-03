@@ -40,10 +40,15 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
+      # --- DEBUG STEP: remove after confirming APK output path ---
+      - name: List APK outputs
+        run: find app -type f -name "*.apk"
+      # --- END DEBUG STEP ---
+
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v1
         with:
-          files: app/github/release/app-github-release.apk
+          files: app/build/outputs/apk/**/*.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
