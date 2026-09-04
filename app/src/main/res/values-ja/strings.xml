@@ -187,4 +187,6 @@
         <li><b>地方真太陽時:</b> 太陽の位置（均時差）に基づいて計算されます。正午は太陽が最も高い位置にある時刻です。</li>
         <li><b>恒星時:</b> 恒星に対する地球の自転に基づき計算されます。恒星日は太陽日より約4分短くなります。</li>
     ]]></string>
+    <string name="your_weight">体重</string>
+    <string name="clear_history">履歴を消去</string>
 </resources>

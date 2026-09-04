@@ -184,7 +184,10 @@
     <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button (usually BOTTOM-LEFT) on your watch for 3 seconds to pair.</string>
     <string name="looking_for_a_device">Looking for a device.</string>
     <string name="add_watch">Add Watch</string>
-    
+
+    <string name="your_weight">Your Weight</string>
+    <string name="clear_history">Clear History</string>
+
     <!-- Pairing error messages -->
     <string name="pairing_failed_generic" translatable="false">Pairing failed: %1$s. Please try again.</string>
     <string name="pairing_activity_finishing" translatable="false">Cannot start pairing: Activity is closing. Please try again.</string>

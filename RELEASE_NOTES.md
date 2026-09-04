@@ -1,3 +1,27 @@
+# Release Notes - Casio G-Shock Smart Sync v59.0 — September 4, 2026
+
+## ✨ Highlights
+
+### 👣 High-Precision Step Counter & Fitness Metrics
+A major accuracy and reliability update for the health tracking engine:
+*   **100g Weight Precision**: Weight is now stored internally in **100-gram units** on the watch's scratchpad. This eliminates the "rounding drift" where imperial values like 135 lb would previously revert to 134 lb after a sync.
+*   **Accurate Calorie Estimation**: Implemented a distance-based calorie calculation using the standard **0.76m stride** and your high-precision weight. For 4,500 steps, you'll now see a realistic estimate of ~248 kcal (at 70kg).
+*   **On-Watch Persistence**: Your Step Goal and Weight settings now "travel with the watch." By storing them in the watch's internal scratchpad memory, your settings remain consistent even if you switch phones.
+*   **Transparent Progress**: The central progress ring now displays your total **Distance** (in km or miles) alongside your steps and calories, providing a complete picture of your daily activity.
+
+### 🎨 Professional UI & "Magnetic" Controls
+*   **Sticky Step Goal**: The Goal slider now has a "magnetic" snap at the **10,000 steps** mark. This makes it effortless to select the world's most common daily goal without needing pixel-perfect slider precision.
+*   **Underlined Input Style**: Replaced the boxed weight input with a clean, **underlined text selector** that matches the app's established typography. Tapping your weight now opens a professional selection dialog.
+*   **Instant History Reset**: The "Clear History" button now resets the watch hardware and **instantly refreshes the screen** to show zero. No more waiting or delayed notifications.
+
+### 🛡️ Protocol Efficiency & Stability
+*   **Smart Data Fetching**: Optimized the synchronization engine to only request step counts when the screen is opened or manually refreshed. This significantly reduces Bluetooth traffic and extends your watch's battery life.
+*   **Silent Background Updates**: Removed redundant "Action Saved" snackbars for a smoother, less intrusive configuration experience.
+*   **Enhanced Diagnostics**: Improved internal logging for Bluetooth link losses (disconnection reason 3), making it easier to troubleshoot hardware-heavy memory operations like clearing history.
+*   **Metric Canada Support**: Fixed a regional detection issue to ensure users in **Canada** correctly default to metric (kg/km) units.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v58.0 — September 2, 2026
 
 ## ✨ Highlights

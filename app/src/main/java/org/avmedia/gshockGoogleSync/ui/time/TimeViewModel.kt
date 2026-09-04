@@ -12,18 +12,16 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.scratchpad.ScratchpadSteps
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.StepCounterData
-import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
-import kotlin.random.Random
 
 enum class StepDataOption {
     TODAY, HOURLY, DAILY
@@ -38,7 +36,11 @@ data class TimeState(
     val timeZoneOption: TimeSettingsStorage.TimeZoneOption = TimeSettingsStorage.TimeZoneOption.SYSTEM,
     val timeOffset: Long = 0L,
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
-    val selectedStepDataOption: StepDataOption = StepDataOption.TODAY
+    val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
+    val stepGoal: Int = 10000,
+    val weight: Int = 700, // 100g units
+    val calories: Float = 0f,
+    val distanceKm: Float = 0f
 )
 
 sealed interface TimeAction {
@@ -48,6 +50,9 @@ sealed interface TimeAction {
     data object RefreshState : TimeAction
     data class SetTimeZoneOption(val option: TimeSettingsStorage.TimeZoneOption) : TimeAction
     data class SetStepDataOption(val option: StepDataOption) : TimeAction
+    data class SetStepGoal(val goal: Int) : TimeAction
+    data class SetWeight(val weight: Int) : TimeAction
+    data object ClearStepHistory : TimeAction
 }
 
 sealed class UiEvent {
@@ -58,6 +63,7 @@ sealed class UiEvent {
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
     private val timeSettingsStorage: TimeSettingsStorage,
+    private val scratchpadSteps: ScratchpadSteps,
     private val watchTimeUpdater: WatchTimeUpdater,
     private val watchFeatureManager: IWatchFeatureManager,
     @param:ApplicationContext private val appContext: Context
@@ -70,14 +76,9 @@ class TimeViewModel @Inject constructor(
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     private var saveJob: Job? = null
-    private var stepPollJob: Job? = null
 
     init {
         refreshState()
-
-        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) {
-            startStepCounterPolling()
-        }
     }
 
     fun onAction(action: TimeAction) {
@@ -131,26 +132,60 @@ class TimeViewModel @Inject constructor(
                     saveJob = null
                 }
             }
-        }
-    }
 
-    private fun startStepCounterPolling() {
-        stepPollJob?.cancel()
-        stepPollJob = viewModelScope.launch {
-            while (isActive) {
-                delay(3000) // 3 seconds interval
-                if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
+            is TimeAction.SetStepGoal -> {
+                _state.value = _state.value.copy(stepGoal = action.goal)
+                viewModelScope.launch {
+                    scratchpadSteps.setStepGoal(action.goal)
+                    scratchpadSteps.save()
+                }
+            }
+
+            is TimeAction.SetWeight -> {
+                val (distanceKm, calories) = calculateMetrics(_state.value.stepCounterData.currentDaySteps, action.weight)
+                _state.value = _state.value.copy(
+                    weight = action.weight,
+                    distanceKm = distanceKm,
+                    calories = calories
+                )
+                viewModelScope.launch {
+                    scratchpadSteps.setWeight(action.weight)
+                    scratchpadSteps.save()
+                }
+            }
+
+            TimeAction.ClearStepHistory -> {
+                viewModelScope.launch {
                     runCatching {
-                        val stepData = if (WatchInfo.hasStepCounterMock) {
-                            generateMockStepData()
-                        } else {
-                            api.getStepCount()
-                        }
-                        _state.value = _state.value.copy(stepCounterData = stepData)
+                        // 1. First call with peek = false to finalize transaction and clear the watch history
+                        api.getStepCount(peek = false)
+                        
+                        // 2. Short delay to allow the watch to process the clear command
+                        delay(500)
+
+                        // 3. Second call with peek = true to read the fresh (zeroed) state
+                        val stepData = api.getStepCount(peek = true)
+                        
+                        val (distanceKm, calories) = calculateMetrics(stepData.currentDaySteps, _state.value.weight)
+                        _state.value = _state.value.copy(
+                            stepCounterData = stepData,
+                            distanceKm = distanceKm,
+                            calories = calories
+                        )
+                    }.onFailure { e ->
+                        AppSnackbar(e.message ?: "Api Error")
                     }
                 }
             }
         }
+    }
+
+    private fun calculateMetrics(steps: Int?, weight100g: Int): Pair<Float, Float> {
+        val strideM = 0.76f
+        val distanceKm = ((steps ?: 0) * strideM) / 1000f
+        val weightKg = weight100g / 10f
+        val calories = distanceKm * weightKg * 1.036f
+        return Pair(distanceKm, calories)
     }
 
     private fun calculateOffset(option: TimeSettingsStorage.TimeZoneOption): Long {
@@ -159,7 +194,6 @@ class TimeViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        stepPollJob?.cancel()
         saveJob?.let {
             saveJob?.cancel()
             viewModelScope.launch {
@@ -175,6 +209,13 @@ class TimeViewModel @Inject constructor(
                 val option = timeSettingsStorage.getTimeZoneOption()
                 val offset = calculateOffset(option)
 
+                val stepCounterData = if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
+                    api.getStepCount()
+                } else StepCounterData.unavailable()
+
+                val weight = scratchpadSteps.getWeight()
+                val (distanceKm, calories) = calculateMetrics(stepCounterData.currentDaySteps, weight)
+
                 _state.value = TimeState(
                     timer = api.getTimer(),
                     homeTime = if (watchFeatureManager.isFeatureSupported("time.home_time")) api.getHomeTime() else "",
@@ -183,13 +224,11 @@ class TimeViewModel @Inject constructor(
                     watchName = api.getWatchName(),
                     timeZoneOption = option,
                     timeOffset = offset,
-                    stepCounterData = if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
-                        if (WatchInfo.hasStepCounterMock) {
-                            generateMockStepData()
-                        } else {
-                            api.getStepCount()
-                        }
-                    } else StepCounterData.unavailable()
+                    stepCounterData = stepCounterData,
+                    stepGoal = scratchpadSteps.getStepGoal(),
+                    weight = weight,
+                    distanceKm = distanceKm,
+                    calories = calories
                 )
             }.onFailure {
                 AppSnackbar("Api Error")
@@ -197,27 +236,4 @@ class TimeViewModel @Inject constructor(
         }
     }
 
-    private fun generateMockStepData(): StepCounterData {
-        val hourly = List(144) { index ->
-            val hour = index / 6
-            if (hour in 7..22) {
-                Random.nextInt(20, 350)
-            } else {
-                0
-            }
-        }
-
-        val daily = List(14) {
-            Random.nextInt(4000, 12500)
-        }
-
-        return StepCounterData(
-            dayOfWeek = 6,
-            month = 8,
-            dayOfMonth = 15,
-            hourlySteps = hourly,
-            dailyHistory = daily,
-            currentDaySteps = Random.nextInt(8000, 9500) // Slight variation to show real-time changes if mocked
-        )
-    }
 }

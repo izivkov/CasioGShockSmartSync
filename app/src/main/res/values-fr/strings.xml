@@ -186,4 +186,6 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
         <li><b>Heure Solaire Locale :</b> Calculée en fonction de la position du soleil (Équation du temps). Midi correspond au moment où le soleil est à son point le plus élevé.</li>
         <li><b>Temps sidéral :</b> Calculé sur la base de la rotation de la Terre par rapport aux étoiles. Un jour sidéral est environ 4 minutes plus court qu\'un jour solaire.</li>
     ]]></string>
+    <string name="your_weight">Votre poids</string>
+    <string name="clear_history">Effacer l\'historique</string>
 </resources>

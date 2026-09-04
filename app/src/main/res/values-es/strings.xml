@@ -178,4 +178,6 @@
         <li><b>Hora Solar Local:</b> Calculada según la posición del sol (Ecuación del Tiempo). El mediodía es cuando el sol está en su punto más alto.</li>
         <li><b>Tiempo sidéreo:</b> Calculado basándose en la rotación de la Tierra en relación con las estrellas. Un día sidéreo es aproximadamente 4 minutos más corto que un día solar.</li>
     ]]></string>
+    <string name="your_weight">Tu peso</string>
+    <string name="clear_history">Borrar historial</string>
 </resources>

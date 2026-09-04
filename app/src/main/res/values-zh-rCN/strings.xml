@@ -182,4 +182,6 @@
         <li><b>当地真太阳时：</b> 根据太阳位置计算（均时差）。正午是指太阳到达最高点的时刻。</li>
         <li><b>恒星时:</b> 基于地球相对于恒星的自转计算。恒星日比太阳日短约 4 分钟。</li>
     ]]></string>
+    <string name="your_weight">你的体重</string>
+    <string name="clear_history">清除历史记录</string>
 </resources>

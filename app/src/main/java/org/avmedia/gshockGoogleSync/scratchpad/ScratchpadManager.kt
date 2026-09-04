@@ -25,7 +25,8 @@ class ScratchpadManager @Inject constructor(
         "AlarmNameStorage",
         "ActionsStorage",
         "TimeSettingsStorage",
-        "EventStorage"
+        "EventStorage",
+        "ScratchpadSteps"
     )
 
     fun register(client: ScratchpadClient) {

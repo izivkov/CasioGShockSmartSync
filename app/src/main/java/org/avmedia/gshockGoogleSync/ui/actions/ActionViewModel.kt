@@ -135,9 +135,6 @@ constructor(
                     viewModelScope.launch {
                         delay(0)
                         actionsStorage.save()
-                        _uiEvents.emit(
-                                UiEvent.ShowSnackbar(appContext.getString(R.string.actions_saved))
-                        )
                         saveJob = null
                     }
         }

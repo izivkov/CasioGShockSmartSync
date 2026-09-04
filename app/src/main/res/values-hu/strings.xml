@@ -172,4 +172,6 @@
         <li><b>Helyi valódi szoláris idő:</b> A nap pozíciója alapján számítva (időegyenlet). A dél az a pillanat, amikor a nap a legmagasabb ponton van.</li>
         <li><b>Sziderikus idő:</b> A Föld csillagokhoz viszonyított forgása alapján számítva. Egy sziderikus nap körülbelül 4 perccel rövidebb, mint egy szoláris nap.</li>
     ]]></string>
+    <string name="your_weight">Testsúlyod</string>
+    <string name="clear_history">Előzmények törlése</string>
 </resources>
