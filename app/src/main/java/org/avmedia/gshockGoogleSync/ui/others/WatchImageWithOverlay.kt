@@ -42,7 +42,7 @@ import kotlin.math.sin
 @Composable
 fun WatchImageWithOverlay(
     modifier: Modifier = Modifier,
-    imageResId: Int = R.drawable.ic_generic_watch,
+    imageResId: Int = R.drawable.gw_b5600,
     arrowsVerticalPosition: Float = 0.55f
 ) {
     var isAnimating by remember { mutableStateOf(true) }
@@ -106,7 +106,7 @@ fun WatchImageWithOverlay(
 @Composable
 fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
-    imageResId: Int = R.drawable.ic_generic_watch,
+    imageResId: Int = R.drawable.gw_b5600,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val screenHeightPx = with(LocalDensity.current) { maxHeight.toPx() }

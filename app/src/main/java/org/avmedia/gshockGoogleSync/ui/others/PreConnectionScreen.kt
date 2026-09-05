@@ -257,7 +257,7 @@ fun PreConnectionScreen(
                                         R.drawable.dw_b5600
 
                                     "ECB" in watchName -> R.drawable.ecb_30d
-                                    else -> R.drawable.ic_generic_watch
+                                    else -> R.drawable.gw_b5600
                                 },
                             isAlwaysConnected = "DW-H5600" in watchName || "ECB" in watchName
                         )
