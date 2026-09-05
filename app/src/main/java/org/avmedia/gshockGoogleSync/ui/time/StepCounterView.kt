@@ -5,6 +5,7 @@ import AppTextLarge
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -50,6 +53,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import AppTextLink
+import org.avmedia.gshockapi.model.ActivityPeriod
+import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
 import java.util.Calendar
 import java.util.Locale
@@ -208,7 +213,8 @@ fun StepCounterView(
                 }
 
                 StepDataOption.HOURLY -> {
-                    val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(6)
+                    // Show the last 10 hours of activity
+                    val hourly = state.stepCounterData.hourlyByHour.takeLast(10).map { it ?: 0 }
 
                     if (hourly.isEmpty() || hourly.all { it == 0 }) {
                         EmptyHistory()
@@ -361,7 +367,8 @@ private fun hourlyTimeLabels(count: Int): List<String> {
     val calendar = Calendar.getInstance()
     return List(count) { i ->
         calendar.timeInMillis = System.currentTimeMillis()
-        calendar.add(Calendar.MINUTE, -(count - 1 - i) * 10)
+        // Subtract hours instead of 10-minute intervals
+        calendar.add(Calendar.HOUR_OF_DAY, -(count - 1 - i))
         val hour = calendar.get(Calendar.HOUR)
         val amPm = if (calendar.get(Calendar.AM_PM) == Calendar.AM) "a" else "p"
         val displayHour = if (hour == 0) 12 else hour

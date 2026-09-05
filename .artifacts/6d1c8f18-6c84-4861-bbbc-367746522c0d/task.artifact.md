@@ -1,0 +1,7 @@
+- [ ] Update `StepCounterData.kt` with enriched lifelog fields and `ActivityPeriod`
+- [ ] Implement advanced lifelog parsing in `StepCounterIO.kt`
+    - [ ] Update constants and offsets
+    - [ ] Implement distance stack reconciliation
+    - [ ] Populate intensity buckets and friendly fields
+- [ ] Verify build status
+- [ ] Create walkthrough

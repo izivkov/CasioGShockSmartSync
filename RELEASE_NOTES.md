@@ -1,3 +1,26 @@
+# Release Notes - Casio G-Shock Smart Sync v60.0 — September 4, 2026
+
+## ✨ Highlights
+
+### 👣 Professional Fitness Insights & Precision
+Major accuracy and usability update for the health tracking engine:
+*   **High-Precision Weight Storage**: Weight is now stored in **100-gram units** in the watch's scratchpad. This provides much higher resolution than whole kilograms, ensuring that imperial values like **135 lb** are perfectly preserved and no longer drift due to rounding errors.
+*   **Standard Stride Calibration**: implemented a standard **0.76m stride** logic for calorie estimation, providing realistic burning estimates (e.g., ~248 kcal for 4,500 steps at 70kg).
+*   **Direct Watch Distance**: The app now prioritizes the `distanceMeters` reported directly by your watch hardware for maximum calorie accuracy.
+*   **Simplified Hourly History**: Re-engineered the Hourly view to show one clear bar per hour for the last 10 hours. Fixed a labeling issue to ensure each bar is correctly mapped to its time on the clock.
+
+### 🎨 Refined UI & Interaction
+*   **Professional Weight Selector**: Replaced the text input field with a clean **Selection Dialog**. Tapping your weight now opens a professional wheel picker, matching the look and feel of the app's other settings.
+*   **Clean Underlined Style**: The weight display now uses standard `AppText` with a simple underline, perfectly integrated into the sidebar without bulky boxes or borders.
+*   **Silent Action Updates**: Removed redundant "Action Saved" notifications when toggling actions. Your settings are still saved instantly to the watch, but the experience is now much smoother and less intrusive.
+*   **Instant Reset Feedback**: Tapping "Clear History" now re-reads the watch state immediately after the hardware reset, ensuring your screen updates to zero instantly.
+
+### 🛡️ System & Architecture
+*   **API v1.7.4 Alignment**: synchronized with the latest GShock API, incorporating advanced lifelog parsing, intensity buckets, and distance stack reconciliation for the ABL-100 series.
+*   **SDK 37 Modernization**: Updated the entire application, including the core `:api` module, to target **Android 15**, ensuring full compatibility with the latest system security and background execution standards.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v59.0 — September 4, 2026
 
 ## ✨ Highlights

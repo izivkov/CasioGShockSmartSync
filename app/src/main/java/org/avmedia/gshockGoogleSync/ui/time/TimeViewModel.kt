@@ -142,7 +142,7 @@ class TimeViewModel @Inject constructor(
             }
 
             is TimeAction.SetWeight -> {
-                val (distanceKm, calories) = calculateMetrics(_state.value.stepCounterData.currentDaySteps, action.weight)
+                val (distanceKm, calories) = calculateMetrics(_state.value.stepCounterData, action.weight)
                 _state.value = _state.value.copy(
                     weight = action.weight,
                     distanceKm = distanceKm,
@@ -166,7 +166,7 @@ class TimeViewModel @Inject constructor(
                         // 3. Second call with peek = true to read the fresh (zeroed) state
                         val stepData = api.getStepCount(peek = true)
                         
-                        val (distanceKm, calories) = calculateMetrics(stepData.currentDaySteps, _state.value.weight)
+                        val (distanceKm, calories) = calculateMetrics(stepData, _state.value.weight)
                         _state.value = _state.value.copy(
                             stepCounterData = stepData,
                             distanceKm = distanceKm,
@@ -180,9 +180,18 @@ class TimeViewModel @Inject constructor(
         }
     }
 
-    private fun calculateMetrics(steps: Int?, weight100g: Int): Pair<Float, Float> {
+    private fun calculateMetrics(stepData: StepCounterData, weight100g: Int): Pair<Float, Float> {
         val strideM = 0.76f
-        val distanceKm = ((steps ?: 0) * strideM) / 1000f
+        val steps = stepData.currentDaySteps ?: 0
+        
+        // Use distanceMeters from watch if available, otherwise estimate
+        val dm = stepData.distanceMeters
+        val distanceKm = if (dm != null && dm > 0) {
+            dm.toFloat() / 1000f
+        } else {
+            (steps * strideM) / 1000f
+        }
+        
         val weightKg = weight100g / 10f
         val calories = distanceKm * weightKg * 1.036f
         return Pair(distanceKm, calories)
@@ -214,7 +223,7 @@ class TimeViewModel @Inject constructor(
                 } else StepCounterData.unavailable()
 
                 val weight = scratchpadSteps.getWeight()
-                val (distanceKm, calories) = calculateMetrics(stepCounterData.currentDaySteps, weight)
+                val (distanceKm, calories) = calculateMetrics(stepCounterData, weight)
 
                 _state.value = TimeState(
                     timer = api.getTimer(),
