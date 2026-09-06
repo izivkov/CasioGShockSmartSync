@@ -1,0 +1,3 @@
+- [x] Update `PreConnectionScreen.kt` fallback image
+- [x] Update `WatchImageWithOverlay.kt` default parameters
+- [x] Verify build and behavior
