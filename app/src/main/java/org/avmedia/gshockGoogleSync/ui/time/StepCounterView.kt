@@ -5,7 +5,6 @@ import AppTextLarge
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,8 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
@@ -28,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,8 +49,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import AppTextLink
-import org.avmedia.gshockapi.model.ActivityPeriod
-import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
 import java.util.Calendar
 import java.util.Locale
@@ -214,7 +208,7 @@ fun StepCounterView(
 
                 StepDataOption.HOURLY -> {
                     // Show the last 10 hours of activity
-                    val hourly = state.stepCounterData.hourlyByHour.takeLast(10).map { it ?: 0 }
+                    val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(10)
 
                     if (hourly.isEmpty() || hourly.all { it == 0 }) {
                         EmptyHistory()

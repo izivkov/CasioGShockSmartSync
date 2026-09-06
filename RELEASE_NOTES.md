@@ -1,3 +1,34 @@
+# Release Notes - Casio G-Shock Smart Sync v62.0 — September 6, 2026
+
+## ✨ Highlights
+
+### 👣 Advanced Step Counter Synchronization & Stability
+Refined the health tracking architecture to achieve maximum protocol reliability and performance:
+*   **Concurrency-Aware Caching**: Re-engineered the "peek" logic to detect active app-side transactions. If a step counter refresh is requested while a Bluetooth transfer is already in progress, the app now instantly returns cached data. This eliminates redundant traffic and prevents "already in a transaction" protocol errors.
+*   **Flag-Free Transaction Management**: Transitioned away from manual state flags (`transactionActive`) in favor of a robust, state-based concurrency check. This aligns the Kotlin API with the latest architectural improvements in the Python `gshock_api` core.
+*   **Optimized History Resets**: simplified the "Clear History" handshake. The app now focuses on hardware-level reliability, ensuring that the watch's internal lifelog buffers are wiped and re-read with 100% precision.
+
+### 🎨 UI Stability & Refinement
+*   **Stable Fitness Dashboard**: Reverted experimental UI layouts to ensure a rock-solid user experience. All authorized enhancements, including the **sticky 10,000-step snapping** and the **professional weight selector**, remain fully active and optimized.
+*   **Performance Polish**: Further reduced app-side overhead during background refreshes, resulting in smoother transitions and better battery efficiency for both your phone and watch.
+
+---
+
+# Release Notes - Casio G-Shock Smart Sync v61.0 — September 6, 2026
+
+## ✨ Highlights
+
+### 👣 Step Counter Transaction Mastery & Performance
+Advanced internal architectural update to the fitness tracking engine for maximum reliability and efficiency:
+*   **Intelligent Transaction Caching**: Implemented a smart caching mechanism that tracks active watch sessions. When you're "peeking" at your steps, the app now returns cached data for subsequent refreshes instead of triggering redundant Bluetooth transfers. This results in **near-instant screen updates** and significant battery savings for your watch.
+*   **Robust Session Management**: Re-engineered the "Clear History" logic to explicitly terminate any active peek transactions before starting a destructive read. This ensures that the watch's internal hardware buffers are reset with 100% reliability every time.
+*   **Precision Record Detection**: Refined the variable-length activity record boundary detection to align perfectly with the latest Python `gshock_api` logic, picking the most accurate activity window for your daily stats.
+
+### 🛡️ System & Compatibility
+*   **SDK 37 Finalization**: completed the migration of the entire project—including the core `:api` module—to target **Android 15 (SDK 37)**, guaranteeing full compliance with the latest Google Play security standards.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v60.0 — September 4, 2026
 
 ## ✨ Highlights
