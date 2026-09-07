@@ -22,6 +22,9 @@ import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.voice.VoiceCommandManager
 import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
+import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
+import org.avmedia.gshockGoogleSync.voice.VoiceCommand
+import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
@@ -146,6 +149,12 @@ class TimeViewModel @Inject constructor(
                         onResult = { text ->
                             _state.value = _state.value.copy(isListening = false)
                             voiceDispatcher.dispatch(text)
+                            (ProgressEvents.getPayload("NavigateTo") as? VoiceNavigation)?.command
+                                ?.let { it as? VoiceCommand.SetTimer }
+                                ?.let { cmd ->
+                                    ProgressEvents.addPayload("NavigateTo", null)
+                                    onAction(TimeAction.SetTimer(cmd.hours, cmd.minutes, cmd.seconds))
+                                }
                         },
                         onError = { error ->
                             _state.value = _state.value.copy(isListening = false)

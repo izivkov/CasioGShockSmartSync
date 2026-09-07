@@ -199,6 +199,7 @@ constructor(
             )
             add(SetAlarmAction(appContext.getString(R.string.set_alarm), true))
             add(SetSettingsAction("Set Settings", true)) // Hidden from UI, only for voice
+            add(SetTimerAction("Set Timer", true)) // Hidden from UI, only for voice/Send-to-Watch
             add(
                     PhotoAction(
                             appContext.getString(R.string.take_photo),
@@ -223,6 +224,7 @@ constructor(
         VOICE_COMMAND, // Triggered by voice command
         ALWAYS_CONNECTED, // Some watches are always connected, but the watch keeps connecting and
         // disconnecting periodically.
+        DIRECT_INVOCATION, // Called directly from app code
     }
 
     abstract inner class Action(
@@ -240,6 +242,7 @@ constructor(
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -307,6 +310,7 @@ constructor(
                 RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -362,6 +366,7 @@ constructor(
                 RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> true
                 RunEnvironment.ALWAYS_CONNECTED -> false
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -402,6 +407,7 @@ constructor(
                 RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -558,6 +564,7 @@ constructor(
                 RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -736,6 +743,12 @@ constructor(
             }
         }
 
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+
         override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
             // Not strictly needed if only triggered by voice, but good for persistence if we add UI later
             LocalDataStorage.put(context, this.javaClass.simpleName + ".hour", alarmHour.toString())
@@ -754,26 +767,60 @@ constructor(
             override var title: String,
             override var enabled: Boolean,
             var settingName: String = "",
-            var settingValue: Boolean = false
+            var settingValue: Boolean = false,
+            var fullSettings: org.avmedia.gshockapi.model.Settings? = null,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName} for $settingName=$settingValue")
             viewModelScope.launch {
                 runCatching {
-                    val settings = api.getSettings()
-                    val newSettings = when {
-                        settingName.contains("auto light") -> settings.copy(autoLight = settingValue)
-                        settingName.contains("power saving") -> settings.copy(powerSavingMode = settingValue)
-                        else -> settings
+                    val toSend = fullSettings ?: run {
+                        val current = api.getSettings()
+                        when {
+                            settingName.contains("auto light") -> current.copy(autoLight = settingValue)
+                            settingName.contains("power saving") -> current.copy(powerSavingMode = settingValue)
+                            else -> current
+                        }
                     }
-                    if (newSettings != settings) {
-                        api.setSettings(newSettings)
-                        AppSnackbar(context.getString(R.string.settings_sent_to_watch))
-                    }
+                    api.setSettings(toSend)
+                    AppSnackbar(context.getString(R.string.settings_sent_to_watch))
                 }.onFailure {
-                    Timber.e(it, "Failed to set setting via voice")
+                    Timber.e(it, "Failed to send settings to watch")
+                }
+                fullSettings = null
+            }
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
+    }
+
+    inner class SetTimerAction(
+            override var title: String,
+            override var enabled: Boolean,
+            var timeMs: Int = 0,
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            viewModelScope.launch {
+                runCatching {
+                    api.setTimer(timeMs)
+                    AppSnackbar(context.getString(R.string.timer_set))
+                }.onFailure {
+                    Timber.e(it, "Failed to send timer to watch")
                 }
             }
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
         }
 
         override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}

@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import java.lang.reflect.Proxy
+import kotlinx.coroutines.runBlocking
 
 class AlarmNameStorageTest {
 
@@ -20,7 +21,7 @@ class AlarmNameStorageTest {
             arrayOf(IGShockAPI::class.java)
         ) { _, method, args ->
             when (method.name) {
-                "getScratchpadData" -> ByteArray(args[1] as Int) // Return empty buffer of requested size
+                "getScratchpadData" -> ByteArray(16) // Return empty buffer
                 "setScratchpadData" -> null // Do nothing
                 "toString" -> "FakeIGShockAPI"
                 "hashCode" -> 0
@@ -36,6 +37,7 @@ class AlarmNameStorageTest {
 
         manager = ScratchpadManager(api)
         storage = AlarmNameStorage(manager)
+        runBlocking { manager.load() }
     }
 
     @Test

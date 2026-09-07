@@ -26,6 +26,9 @@ import org.avmedia.gshockapi.model.Settings
 import org.json.JSONObject
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
+import org.avmedia.gshockGoogleSync.voice.VoiceCommand
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 
@@ -54,6 +57,7 @@ class SettingsViewModel
 constructor(
         private val api: GShockRepository,
         private val watchFeatureManager: IWatchFeatureManager,
+        private val actionsViewModel: ActionsViewModel,
         @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -112,6 +116,22 @@ constructor(
             // Convert merged settings to string and update state
             val settingStr = Gson().toJson(settingsJson)
             updateSettingsAndMap(fromJson(settingStr))
+
+            (ProgressEvents.getPayload("NavigateTo") as? VoiceNavigation)?.command
+                ?.let { it as? VoiceCommand.SetSetting }
+                ?.let { cmd ->
+                    ProgressEvents.addPayload("NavigateTo", null)
+                    val currentMap = state.value.settingsMap
+                    if (cmd.name.contains("auto light")) {
+                        (currentMap[Light::class.java] as? Light)?.let {
+                            updateSetting(it.copy(autoLight = cmd.enabled))
+                        }
+                    } else if (cmd.name.contains("power saving")) {
+                        (currentMap[PowerSavingMode::class.java] as? PowerSavingMode)?.let {
+                            updateSetting(it.copy(powerSavingMode = cmd.enabled))
+                        }
+                    }
+                }
         }
     }
 
@@ -490,14 +510,8 @@ constructor(
             settings.font = fontSetting.font.value
         }
 
-        viewModelScope.launch {
-            runCatching {
-                api.setSettings(settings)
-                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
-            }
-                    .onFailure { e ->
-                        AppSnackbar(e.message ?: "Api Error")
-                    }
-        }
+        val action = actionsViewModel.getAction(ActionsViewModel.SetSettingsAction::class.java)
+        action.fullSettings = settings
+        actionsViewModel.runFilteredActions(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)
     }
 }

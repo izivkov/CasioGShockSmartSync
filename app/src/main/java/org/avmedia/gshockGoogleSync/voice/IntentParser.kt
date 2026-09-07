@@ -1,16 +1,10 @@
 package org.avmedia.gshockGoogleSync.voice
 
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import timber.log.Timber
 import javax.inject.Inject
-
-data class ResolvedIntent(
-    val actionClass: Class<out ActionsViewModel.Action>?,
-    val parameters: Map<String, Any> = emptyMap()
-)
 
 class IntentParser @Inject constructor() {
 
@@ -21,11 +15,9 @@ class IntentParser @Inject constructor() {
         Regex("alarm at (.*)", RegexOption.IGNORE_CASE)
     )
 
-    private val reminderPatterns = listOf(
-        Regex("remind me to (.*)", RegexOption.IGNORE_CASE),
-        Regex("remind me (.*)", RegexOption.IGNORE_CASE),
-        Regex("reminder (.*)", RegexOption.IGNORE_CASE),
-        Regex("add reminder (.*)", RegexOption.IGNORE_CASE)
+    private val timerPatterns = listOf(
+        Regex("set a timer for (\\d+)\\s*(hours?|minutes?|seconds?)", RegexOption.IGNORE_CASE),
+        Regex("timer for (\\d+)\\s*(hours?|minutes?|seconds?)", RegexOption.IGNORE_CASE)
     )
 
     private val settingsPatterns = listOf(
@@ -34,46 +26,36 @@ class IntentParser @Inject constructor() {
         Regex("turn (on|off) (.*)", RegexOption.IGNORE_CASE)
     )
 
-    fun parse(text: String): ResolvedIntent? {
+    fun parse(text: String): VoiceCommand? {
         Timber.d("Parsing text: '$text'")
         val cleanedText = text.trim().removeSuffix(".")
 
-        val alarmMatch = alarmPatterns.firstNotNullOfOrNull { it.find(cleanedText) }
-        if (alarmMatch != null) {
-            val timeString = alarmMatch.groupValues[1]
-            Timber.d("Matched Alarm pattern. Extracted time string: '$timeString'")
-            val time = parseTime(timeString)
-            if (time != null) {
-                return ResolvedIntent(
-                    ActionsViewModel.SetAlarmAction::class.java,
-                    mapOf("alarmHour" to time.hour, "alarmMinute" to time.minute)
-                )
-            } else {
-                Timber.w("Failed to parse time string: '$timeString'")
+        alarmPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
+            val timeString = match.groupValues[1]
+            parseTime(timeString)?.let { time ->
+                return VoiceCommand.SetAlarm(time.hour, time.minute)
+            }
+            Timber.w("Failed to parse time string: '$timeString'")
+        }
+
+        timerPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
+            val amount = match.groupValues[1].toIntOrNull()
+            val unit = match.groupValues[2].lowercase()
+            if (amount != null) {
+                return when {
+                    unit.startsWith("hour") -> VoiceCommand.SetTimer(amount, 0, 0)
+                    unit.startsWith("minute") -> VoiceCommand.SetTimer(0, amount, 0)
+                    else -> VoiceCommand.SetTimer(0, 0, amount)
+                }
             }
         }
 
-        val reminderMatch = reminderPatterns.firstNotNullOfOrNull { it.find(cleanedText) }
-        if (reminderMatch != null) {
-            val content = reminderMatch.groupValues[1]
-            Timber.d("Matched Reminder pattern. Extracted content: '$content'")
-            return ResolvedIntent(
-                ActionsViewModel.SetEventsAction::class.java,
-                mapOf("label" to content)
-            )
-        }
-
-        val settingsMatch = settingsPatterns.firstNotNullOfOrNull { it.find(cleanedText) }
-        if (settingsMatch != null) {
-            val target = settingsMatch.groupValues.last().lowercase()
-            Timber.d("Matched Settings pattern. Extracted target: '$target'")
+        settingsPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
+            val target = match.groupValues.last().lowercase()
             if (target.contains("auto light") || target.contains("power saving")) {
-                val actionWord = settingsMatch.groupValues[1].lowercase()
-                val enabled = actionWord == "enable" || actionWord == "on"
-                return ResolvedIntent(
-                    ActionsViewModel.SetSettingsAction::class.java,
-                    mapOf("setting" to target, "enabled" to enabled)
-                )
+                val matchText = match.value.lowercase()
+                val enabled = matchText.startsWith("enable") || matchText.contains(" on")
+                return VoiceCommand.SetSetting(target, enabled)
             }
         }
 

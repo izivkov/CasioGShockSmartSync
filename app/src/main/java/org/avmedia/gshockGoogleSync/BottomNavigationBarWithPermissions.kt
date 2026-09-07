@@ -43,6 +43,9 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
+import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -66,6 +69,15 @@ fun BottomNavigationBarWithPermissions(
             repository.disconnect()
             AppSnackbar(appContext.getString(R.string.disconnected_due_to_inactivity))
         }
+    }
+
+    LaunchedEffect(Unit) {
+        ProgressEvents.runEventActions("BottomNavigationBar-Voice", arrayOf(
+            EventAction("NavigateTo") {
+                val nav = ProgressEvents.getPayload("NavigateTo") as? VoiceNavigation ?: return@EventAction
+                navController.navigate(nav.route)
+            }
+        ))
     }
 
     DisposableEffect(Unit) {
