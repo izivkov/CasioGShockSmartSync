@@ -21,12 +21,30 @@ class IntentParserTest {
 
         val pmResult = intentParser.parse("set alarm for 7:15 pm")
         assertEquals(VoiceCommand.SetAlarm(19, 15), pmResult)
+
+        val atResult = intentParser.parse("set alarm at 6:30am")
+        assertEquals(VoiceCommand.SetAlarm(6, 30), atResult)
+
+        val apTypoResult = intentParser.parse("set alarm at 6:30ap")
+        assertEquals(VoiceCommand.SetAlarm(6, 30), apTypoResult)
+    }
+
+    @Test
+    fun testParseClearAllAlarms() {
+        assertEquals(VoiceCommand.ClearAllAlarms, intentParser.parse("clear all alarms"))
+        assertEquals(VoiceCommand.ClearAllAlarms, intentParser.parse("clear alarms"))
+        assertEquals(VoiceCommand.ClearAllAlarms, intentParser.parse("disable all alarms"))
+        assertEquals(VoiceCommand.ClearAllAlarms, intentParser.parse("disable alarms"))
+        assertEquals(VoiceCommand.ClearAllAlarms, intentParser.parse("turn off all alarms"))
     }
 
     @Test
     fun testParseSetTimer() {
         val minResult = intentParser.parse("set a timer for 5 minutes")
         assertEquals(VoiceCommand.SetTimer(0, 5, 0), minResult)
+
+        val toResult = intentParser.parse("Set timer to 5 minutes")
+        assertEquals(VoiceCommand.SetTimer(0, 5, 0), toResult)
 
         val hourResult = intentParser.parse("timer for 2 hours")
         assertEquals(VoiceCommand.SetTimer(2, 0, 0), hourResult)
@@ -43,11 +61,17 @@ class IntentParserTest {
         val turnOnResult = intentParser.parse("turn on auto light")
         assertEquals(VoiceCommand.SetSetting("auto light", true), turnOnResult)
 
+        val setOnResult = intentParser.parse("Set auto light on")
+        assertEquals(VoiceCommand.SetSetting("auto light", true), setOnResult)
+
         val powerResult = intentParser.parse("disable power saving")
         assertEquals(VoiceCommand.SetSetting("power saving", false), powerResult)
 
-        val turnOffResult = intentParser.parse("turn off power saving")
-        assertEquals(VoiceCommand.SetSetting("power saving", false), turnOffResult)
+        val turnOffResult = intentParser.parse("turn off auto light")
+        assertEquals(VoiceCommand.SetSetting("auto light", false), turnOffResult)
+
+        val setOffResult = intentParser.parse("Set power saving off")
+        assertEquals(VoiceCommand.SetSetting("power saving", false), setOffResult)
     }
 
     @Test

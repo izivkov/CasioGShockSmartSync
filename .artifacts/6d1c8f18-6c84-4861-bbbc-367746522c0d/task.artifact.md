@@ -1,3 +1,4 @@
-- [x] Update `PreConnectionScreen.kt` fallback image
-- [x] Update `WatchImageWithOverlay.kt` default parameters
-- [x] Verify build and behavior
+- [x] Remove `voiceCard` from `TimeScreen.kt`
+- [x] Add voice command trigger to `WatchNameView.kt` (upper-right)
+- [x] Verify build status
+- [x] Create walkthrough

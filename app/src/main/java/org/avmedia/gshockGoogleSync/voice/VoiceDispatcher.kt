@@ -17,7 +17,8 @@ class VoiceDispatcher @Inject constructor(
     private val actionsViewModel: ActionsViewModel,
     private val api: GShockRepository,
     @ApplicationContext private val context: Context,
-    private val intentParser: IntentParser
+    private val intentParser: IntentParser,
+    private val speechFeedback: VoiceSpeechFeedback
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -27,6 +28,7 @@ class VoiceDispatcher @Inject constructor(
         if (command == null) {
             Timber.w("Could not resolve intent for text: '$text'")
             emitSnackbar("Command not understood")
+            speechFeedback.speak("Command not understood")
             return
         }
 
@@ -34,6 +36,7 @@ class VoiceDispatcher @Inject constructor(
         if (spec == null) {
             Timber.w("No routing spec for command: $command")
             emitSnackbar("Command not understood")
+            speechFeedback.speak("Command not understood")
             return
         }
 
@@ -41,6 +44,7 @@ class VoiceDispatcher @Inject constructor(
         if (!action.enabled) {
             Timber.w("Action ${action.javaClass.simpleName} is disabled")
             emitSnackbar("Action disabled")
+            speechFeedback.speak("Action disabled")
             return
         }
 
@@ -48,10 +52,37 @@ class VoiceDispatcher @Inject constructor(
             try {
                 spec.applyParams(action, command, api)
                 ProgressEvents.onNext("NavigateTo", VoiceNavigation(spec.route, command))
-                actionsViewModel.runFilteredActions(VOICE_COMMAND)
+                actionsViewModel.runSingleAction(action)
+                val feedback = getFeedbackText(command)
+                speechFeedback.speak(feedback)
             } catch (e: Exception) {
                 Timber.e(e, "Error executing voice action")
-                emitSnackbar("Command not understood")
+                emitSnackbar("Command failed")
+                speechFeedback.speak("Command failed")
+            }
+        }
+    }
+
+    private fun getFeedbackText(command: VoiceCommand): String {
+        return when (command) {
+            is VoiceCommand.SetAlarm -> {
+                val hour12 = if (command.hour % 12 == 0) 12 else command.hour % 12
+                val amPm = if (command.hour >= 12) "PM" else "AM"
+                val minuteStr = if (command.minute < 10) "0${command.minute}" else "${command.minute}"
+                "Alarm set for $hour12:$minuteStr $amPm"
+            }
+            is VoiceCommand.ClearAllAlarms -> "All alarms cleared"
+            is VoiceCommand.SetTimer -> {
+                val parts = mutableListOf<String>()
+                if (command.hours > 0) parts.add("${command.hours} ${if (command.hours == 1) "hour" else "hours"}")
+                if (command.minutes > 0) parts.add("${command.minutes} ${if (command.minutes == 1) "minute" else "minutes"}")
+                if (command.seconds > 0) parts.add("${command.seconds} ${if (command.seconds == 1) "second" else "seconds"}")
+                val durationStr = if (parts.isEmpty()) "0 seconds" else parts.joinToString(" ")
+                "Timer set for $durationStr"
+            }
+            is VoiceCommand.SetSetting -> {
+                val state = if (command.enabled) "enabled" else "disabled"
+                "${command.name.replaceFirstChar { it.uppercase() }} $state"
             }
         }
     }

@@ -83,6 +83,9 @@ constructor(
             },
             EventAction("ConnectionSetupComplete") {
                 initializeSettings()
+            },
+            EventAction("SettingsUpdated") {
+                initializeSettings()
             }
         ))
     }

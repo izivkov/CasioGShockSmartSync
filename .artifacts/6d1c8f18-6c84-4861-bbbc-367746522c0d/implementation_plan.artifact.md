@@ -1,33 +1,31 @@
-# Implementation Plan - Update StepCounterIO Transaction Management
+# Implementation Plan - Move Voice Command Button to WatchName Card
 
-Update the Kotlin `StepCounterIO` implementation to match the transaction management and caching logic from the Python `gshock_api` project. This ensures efficient data retrieval in "peek" mode and correct behavior when clearing history.
+Relocate the "Tell me what to do" (voice command) trigger from its standalone card in `TimeScreen` into the `WatchNameView` card, positioned in the upper-right corner.
 
 ## Proposed Changes
 
-### [Infrastructure]
+### UI Components
 
-#### [MODIFY] [StepCounterIO.kt](file:///home/izivkov/projects/CasioGShockSmartSync/api/src/main/java/org/avmedia/gshockapi/io/StepCounterIO.kt)
+#### [MODIFY] [TimeScreen.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeScreen.kt)
+- Remove the `voiceCard` `AppCard` implementation.
+- Update the `watchName` constraint to link its bottom to `watchInfo.top` directly.
+- Clean up `createRefs()` by removing `voiceCard`.
 
-- **State Management**:
-    - Add `private var transactionActive: Boolean = false` to the `StepCounterIO` object.
-    - Add `private var lastData: StepCounterData? = null` to cache the latest results.
-- **Request Logic (`getStepCount`)**:
-    - If `peek` is `true`, `transactionActive` is `true`, and `lastData` is not null, return `lastData` immediately.
-    - If `peek` is `false` and `transactionActive` is `true`, send `END_TRANSACTION_CMD` and set `transactionActive = false` before starting the new transaction.
-    - Set `transactionActive = true` after sending `START_TRANSACTION_CMD`.
-- **Response Logic (`onReceived`)**:
-    - When a full payload is reassembled and parsed:
-        - Store the result in `lastData`.
-        - If `!peekMode`, set `transactionActive = false` (the watch closes the transaction after `END_TRANSACTION_CMD`).
-- **Parsing Cleanup**:
-    - Update `readUnsignedShortOrNull` to remove the `0xFFFF` check, matching Python's behavior of only filtering `0xFFFE` at the call site.
-    - Ensure `readUnsignedIntOrNull` is only used where appropriate and handles its own logic for `SENTINEL_DAILY_VALUE` (0xFFFFFFFE).
+#### [MODIFY] [WatchNameView.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/WatchNameView.kt)
+- Add necessary imports for icons and animations (if any).
+- If `isVoiceCommandSupported` is true, add a mic trigger in the `TopEnd` of the card's `Box`.
+- Implement the same logic as the original button:
+    - `clickable` calls `timeModel.onAction(TimeAction.StartVoiceCommand)`.
+    - Show a `CircularProgressIndicator` overlay when `state.isListening` is true.
+    - Use `R.drawable.voice_assist` for the icon.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `:api:assembleDebug` and `:app:assembleDebug` to ensure compilation.
+- Build the app to ensure no compilation errors.
 
 ### Manual Verification
-- **Peek Mode Efficiency**: Verify that consecutive calls to `getStepCount(peek = true)` return cached data without triggering new Bluetooth transactions if the transaction is still active.
-- **Clear History Reliability**: Verify that `getStepCount(peek = false)` correctly closes any active "peek" transaction before starting a new one, ensuring the watch resets its lifelog buffers as expected.
+- Verify the "Tell me what to do" button is no longer a large card at the bottom.
+- Verify a mic icon appears in the upper-right corner of the `WatchName` card.
+- Verify that clicking the mic icon triggers voice recognition (shows listening state with indicator).
+- Verify the listening state works correctly (icon tint changes, indicator appears).

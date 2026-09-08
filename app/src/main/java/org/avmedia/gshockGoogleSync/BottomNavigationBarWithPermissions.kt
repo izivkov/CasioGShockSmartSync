@@ -75,7 +75,13 @@ fun BottomNavigationBarWithPermissions(
         ProgressEvents.runEventActions("BottomNavigationBar-Voice", arrayOf(
             EventAction("NavigateTo") {
                 val nav = ProgressEvents.getPayload("NavigateTo") as? VoiceNavigation ?: return@EventAction
-                navController.navigate(nav.route)
+                navController.navigate(nav.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             }
         ))
     }

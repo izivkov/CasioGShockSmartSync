@@ -66,6 +66,15 @@ class AlarmViewModel @Inject constructor(
 
     init {
         loadAlarms()
+        setupEventSubscription()
+    }
+
+    private fun setupEventSubscription() {
+        ProgressEvents.runEventActions("AlarmViewModel", arrayOf(
+            org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
+                loadAlarms()
+            }
+        ))
     }
 
     private fun loadAlarms() = viewModelScope.launch {
@@ -91,16 +100,6 @@ class AlarmViewModel @Inject constructor(
             }
             _alarms.value = newAlarms
             ProgressEvents.onNext("Alarms Loaded")
-
-            // Apply a pending voice-set alarm, if one is waiting for this screen.
-            (ProgressEvents.getPayload("NavigateTo") as? VoiceNavigation)?.command
-                ?.let { it as? VoiceCommand.SetAlarm }
-                ?.let { cmd ->
-                    ProgressEvents.addPayload("NavigateTo", null)
-                    val index = newAlarms.indexOfFirst { !it.enabled }.let { if (it == -1) 0 else it }
-                    onTimeChanged(index, cmd.hour, cmd.minute)
-                    toggleAlarm(index, true)
-                }
         }.onFailure {
             ProgressEvents.onNext("Error")
         }

@@ -21,6 +21,11 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
             it.alarmMinute = c.minute
         }},
     ),
+    VoiceCommand.ClearAllAlarms::class to VoiceCommandSpec(
+        route = Screens.Alarms.route,
+        actionClass = ActionsViewModel.ClearAllAlarmsAction::class.java,
+        applyParams = { _, _, _ -> },
+    ),
     VoiceCommand.SetTimer::class to VoiceCommandSpec(
         route = Screens.Time.route,
         actionClass = ActionsViewModel.SetTimerAction::class.java,

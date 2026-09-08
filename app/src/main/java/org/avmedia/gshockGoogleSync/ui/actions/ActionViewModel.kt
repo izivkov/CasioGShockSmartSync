@@ -198,6 +198,7 @@ constructor(
                     )
             )
             add(SetAlarmAction(appContext.getString(R.string.set_alarm), true))
+            add(ClearAllAlarmsAction("Clear All Alarms", true)) // Hidden from UI, only for voice
             add(SetSettingsAction("Set Settings", true)) // Hidden from UI, only for voice
             add(SetTimerAction("Set Timer", true)) // Hidden from UI, only for voice/Send-to-Watch
             add(
@@ -721,20 +722,29 @@ constructor(
                 runCatching {
                     val alarms = api.getAlarms()
                     val alarmCount = watchFeatureManager.getAlarmCount()
+                    val alarmList = alarms.take(alarmCount).toMutableList()
 
-                    // Find first disabled alarm or use the first one if all are enabled
-                    val indexToUpdate = alarms.take(alarmCount).indexOfFirst { !it.enabled }.let {
-                        if (it == -1) 0 else it
+                    val existingIndex = alarmList.indexOfFirst { it.hour == alarmHour && it.minute == alarmMinute }
+                    val indexToUpdate = if (existingIndex != -1) {
+                        existingIndex
+                    } else {
+                        val disabledIndex = alarmList.indexOfFirst { !it.enabled }
+                        if (disabledIndex != -1) {
+                            disabledIndex
+                        } else {
+                            0
+                        }
                     }
 
-                    val updatedAlarms = ArrayList(alarms)
-                    updatedAlarms[indexToUpdate] = updatedAlarms[indexToUpdate].copy(
+                    alarmList[indexToUpdate] = alarmList[indexToUpdate].copy(
                         hour = alarmHour,
                         minute = alarmMinute,
-                        enabled = true
+                        enabled = true,
+                        name = ""
                     )
 
-                    api.setAlarms(updatedAlarms)
+                    api.setAlarms(ArrayList(alarmList))
+                    ProgressEvents.onNext("AlarmsUpdated")
                     AppSnackbar(context.getString(R.string.alarms_set_to_watch))
                 }.onFailure {
                     Timber.e(it, "Failed to set watch alarm via voice")
@@ -763,6 +773,37 @@ constructor(
         }
     }
 
+    inner class ClearAllAlarmsAction(
+            override var title: String,
+            override var enabled: Boolean
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            viewModelScope.launch {
+                runCatching {
+                    val alarms = api.getAlarms()
+                    val alarmCount = watchFeatureManager.getAlarmCount()
+                    val updatedAlarms = alarms.take(alarmCount).map {
+                        it.copy(enabled = false)
+                    }
+
+                    api.setAlarms(ArrayList(updatedAlarms))
+                    ProgressEvents.onNext("AlarmsUpdated")
+                    AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+                }.onFailure {
+                    Timber.e(it, "Failed to clear all alarms via voice")
+                    AppSnackbar("Failed to clear alarms")
+                }
+            }
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+    }
+
     inner class SetSettingsAction(
             override var title: String,
             override var enabled: Boolean,
@@ -783,6 +824,7 @@ constructor(
                         }
                     }
                     api.setSettings(toSend)
+                    ProgressEvents.onNext("SettingsUpdated")
                     AppSnackbar(context.getString(R.string.settings_sent_to_watch))
                 }.onFailure {
                     Timber.e(it, "Failed to send settings to watch")
@@ -810,6 +852,7 @@ constructor(
             viewModelScope.launch {
                 runCatching {
                     api.setTimer(timeMs)
+                    ProgressEvents.onNext("TimerUpdated")
                     AppSnackbar(context.getString(R.string.timer_set))
                 }.onFailure {
                     Timber.e(it, "Failed to send timer to watch")
@@ -962,6 +1005,13 @@ constructor(
             isDataLoaded.await()
             val actionsToRun = _actions.value.filter { it.shouldRun(runEnvironment) }
             runFilteredActions(appContext, actionsToRun)
+        }
+    }
+
+    fun runSingleAction(action: Action) {
+        viewModelScope.launch {
+            isDataLoaded.await()
+            runFilteredActions(appContext, listOf(action))
         }
     }
 

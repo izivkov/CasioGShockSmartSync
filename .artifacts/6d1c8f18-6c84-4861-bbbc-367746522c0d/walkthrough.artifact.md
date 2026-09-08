@@ -1,21 +1,26 @@
-# Walkthrough - Default Watch Image Replacement
+# Walkthrough - Voice Command Integration Refined
 
-I have updated the application to use the detailed `gw_b5600.png` image as the default fallback for watch displays. This ensures that even before a specific model is identified, users see a high-quality representation with characteristic physical details (buttons, vents, etc.) instead of a simple icon.
+I have successfully relocated the "Tell me what to do" voice command trigger to a more compact and intuitive location within the `WatchName` card.
 
 ## Changes
 
 ### UI Components
 
-#### [PreConnectionScreen.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/others/PreConnectionScreen.kt)
-- **Fallback Image Update**: Updated the model-based image resolution logic. When the watch name is unknown or doesn't match a specific category, the app now defaults to `R.drawable.gw_b5600`.
+#### [TimeScreen.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeScreen.kt)
+- **Removed Standalone Card**: Deleted the large `voiceCard` from the main layout, freeing up vertical space and simplifying the screen hierarchy.
+- **Cleanup**: Removed unused imports and variables associated with the old voice command card.
 
-#### [WatchImageWithOverlay.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/others/WatchImageWithOverlay.kt)
-- **Default Parameter Alignment**: Changed the default `imageResId` from the generic watch icon to `R.drawable.gw_b5600` in both `WatchImageWithOverlay` and `WatchImageWithOverlayAlwaysConnected` composables.
+#### [WatchNameView.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/WatchNameView.kt)
+- **Integrated Mic Trigger**: Added a compact mic icon (using `R.drawable.voice_assist`) to the upper-right corner of the watch name card.
+- **Interactive Feedback**: Maintained full functionality, including:
+    - **Listening State**: Shows a `CircularProgressIndicator` and changes icon color to error (red) when voice recognition is active.
+    - **Trigger**: Clicking the icon initiates the voice command sequence via `TimeAction.StartVoiceCommand`.
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully built the `github` flavor using `./gradlew app:assembleGithubDebug`.
+- Successfully compiled the project with `app:assembleGithubDebug`.
 
-### Visual Confirmation
-- Verified that the `gw_b5600` resource is present in the `github` resource set and is correctly referenced as the fallback image.
+### Manual Verification
+- verified that the voice command trigger is now a discrete button in the `WatchName` card.
+- verified that clicking it correctly starts voice recognition and shows the appropriate visual feedback.

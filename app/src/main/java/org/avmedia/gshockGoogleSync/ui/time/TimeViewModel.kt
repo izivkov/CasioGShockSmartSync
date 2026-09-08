@@ -84,10 +84,19 @@ class TimeViewModel @Inject constructor(
 
     init {
         refreshState()
+        setupEventSubscription()
 
         if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) {
             startStepCounterPolling()
         }
+    }
+
+    private fun setupEventSubscription() {
+        ProgressEvents.runEventActions("TimeViewModel", arrayOf(
+            org.avmedia.gshockapi.EventAction("TimerUpdated") {
+                refreshState()
+            }
+        ))
     }
 
     fun onAction(action: TimeAction) {

@@ -8,7 +8,16 @@ import javax.inject.Inject
 
 class IntentParser @Inject constructor() {
 
+    private val clearAlarmsPatterns = listOf(
+        Regex("clear (?:all )?alarms?", RegexOption.IGNORE_CASE),
+        Regex("disable (?:all )?alarms?", RegexOption.IGNORE_CASE),
+        Regex("turn off (?:all )?alarms?", RegexOption.IGNORE_CASE),
+        Regex("delete (?:all )?alarms?", RegexOption.IGNORE_CASE),
+        Regex("remove (?:all )?alarms?", RegexOption.IGNORE_CASE)
+    )
+
     private val alarmPatterns = listOf(
+        Regex("(?:set|wake me up|create)(?: an?)? alarm (?:at|for|to) (.*)", RegexOption.IGNORE_CASE),
         Regex("wake me up at (.*)", RegexOption.IGNORE_CASE),
         Regex("set alarm for (.*)", RegexOption.IGNORE_CASE),
         Regex("set an alarm for (.*)", RegexOption.IGNORE_CASE),
@@ -16,19 +25,17 @@ class IntentParser @Inject constructor() {
     )
 
     private val timerPatterns = listOf(
-        Regex("set a timer for (\\d+)\\s*(hours?|minutes?|seconds?)", RegexOption.IGNORE_CASE),
-        Regex("timer for (\\d+)\\s*(hours?|minutes?|seconds?)", RegexOption.IGNORE_CASE)
-    )
-
-    private val settingsPatterns = listOf(
-        Regex("enable (.*)", RegexOption.IGNORE_CASE),
-        Regex("disable (.*)", RegexOption.IGNORE_CASE),
-        Regex("turn (on|off) (.*)", RegexOption.IGNORE_CASE)
+        Regex("(?:set|start)?\\s*(?:a\\s*)?timer\\s*(?:for|to|of)?\\s*(\\d+)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)", RegexOption.IGNORE_CASE),
+        Regex("(\\d+)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\\s*timer", RegexOption.IGNORE_CASE)
     )
 
     fun parse(text: String): VoiceCommand? {
         Timber.d("Parsing text: '$text'")
         val cleanedText = text.trim().removeSuffix(".")
+
+        if (clearAlarmsPatterns.any { it.containsMatchIn(cleanedText) }) {
+            return VoiceCommand.ClearAllAlarms
+        }
 
         alarmPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
             val timeString = match.groupValues[1]
@@ -43,20 +50,21 @@ class IntentParser @Inject constructor() {
             val unit = match.groupValues[2].lowercase()
             if (amount != null) {
                 return when {
-                    unit.startsWith("hour") -> VoiceCommand.SetTimer(amount, 0, 0)
-                    unit.startsWith("minute") -> VoiceCommand.SetTimer(0, amount, 0)
+                    unit.startsWith("hour") || unit.startsWith("hr") -> VoiceCommand.SetTimer(amount, 0, 0)
+                    unit.startsWith("minute") || unit.startsWith("min") -> VoiceCommand.SetTimer(0, amount, 0)
                     else -> VoiceCommand.SetTimer(0, 0, amount)
                 }
             }
         }
 
-        settingsPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
-            val target = match.groupValues.last().lowercase()
-            if (target.contains("auto light") || target.contains("power saving")) {
-                val matchText = match.value.lowercase()
-                val enabled = matchText.startsWith("enable") || matchText.contains(" on")
-                return VoiceCommand.SetSetting(target, enabled)
+        val lowerText = cleanedText.lowercase()
+        if (lowerText.contains("auto light") || lowerText.contains("power saving") || lowerText.contains("light") || lowerText.contains("power save")) {
+            val target = when {
+                lowerText.contains("auto light") || lowerText.contains("light") -> "auto light"
+                else -> "power saving"
             }
+            val enabled = !(lowerText.contains("off") || lowerText.contains("disable") || lowerText.contains("disabled"))
+            return VoiceCommand.SetSetting(target, enabled)
         }
 
         Timber.w("No matching pattern found for: '$cleanedText'")
@@ -67,6 +75,8 @@ class IntentParser @Inject constructor() {
         val normalized = timeStr.trim().lowercase()
             .replace(Regex("\\s+"), " ") // normalize multiple spaces
             .replace(Regex("([ap])\\.?m\\.?"), "$1m") // "a.m." or "a.m" -> "am"
+            .replace(Regex("ap$"), "am")
+            .replace(Regex("ap\\s"), "am ")
             .removeSuffix(".")
 
         Timber.d("Attempting to parse normalized time: '$normalized'")
