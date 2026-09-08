@@ -4,6 +4,7 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -52,7 +53,8 @@ class VoiceDispatcher @Inject constructor(
             try {
                 spec.applyParams(action, command, api)
                 ProgressEvents.onNext("NavigateTo", VoiceNavigation(spec.route, command))
-                actionsViewModel.runSingleAction(action)
+                actionsViewModel.runSingleActionSuspend(action)
+                
                 val feedback = getFeedbackText(command)
                 speechFeedback.speak(feedback)
             } catch (e: Exception) {
@@ -86,6 +88,7 @@ class VoiceDispatcher @Inject constructor(
             }
         }
     }
+
 
     private fun emitSnackbar(message: String) {
         scope.launch {

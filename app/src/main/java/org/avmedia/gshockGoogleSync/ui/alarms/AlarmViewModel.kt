@@ -23,8 +23,6 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.Alarm
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
-import org.avmedia.gshockGoogleSync.voice.VoiceCommand
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -72,7 +70,10 @@ class AlarmViewModel @Inject constructor(
     private fun setupEventSubscription() {
         ProgressEvents.runEventActions("AlarmViewModel", arrayOf(
             org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
-                loadAlarms()
+                viewModelScope.launch {
+                    delay(500)
+                    loadAlarms()
+                }
             }
         ))
     }

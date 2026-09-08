@@ -1,3 +1,21 @@
+# Release Notes - Casio G-Shock Smart Sync v59.0 — September 8, 2026
+
+## ✨ Highlights
+
+### 🎤 Voice-Driven Watch Control
+Introduced a powerful, rule-based voice command layer for hands-free watch management:
+*   **Intuitive Mic Trigger**: Relocated the "Tell me what to do" mic button to the upper-right corner of the **Watch Name** card for a cleaner, more integrated Time screen.
+*   **Intelligent Intent Parsing**: Added a robust, typed parsing engine that translates natural speech into watch actions for **Alarms**, **Timers**, and **Settings** (Auto Light, Power Saving).
+*   **Hardware-First Consistency**: Voice commands now follow a "Navigate -> Write -> Refresh" pattern. The app automatically re-reads values from the watch hardware after every voice command, ensuring your screen is always in 100% sync with the actual watch state.
+*   **Seamless Navigation**: Recognized commands now automatically navigate you to the relevant screen, providing instant visual feedback for your voice actions.
+
+### 🎨 Refined UI & Experience
+*   **Direct Invocation Engine**: Unified manual "Send to Watch" buttons and voice triggers into a shared, reliable execution pipeline.
+*   **Localized Feedback**: Voice recognition and system messages are fully supported across all 11 languages, providing a native experience for users worldwide.
+*   **Visual Polish**: Further decluttered the main interface by moving secondary triggers into high-density information cards.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v58.0 — September 2, 2026
 
 ## ✨ Highlights

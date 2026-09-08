@@ -25,19 +25,21 @@ class IntentParser @Inject constructor() {
     )
 
     private val timerPatterns = listOf(
-        Regex("(?:set|start)?\\s*(?:a\\s*)?timer\\s*(?:for|to|of)?\\s*(\\d+)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)", RegexOption.IGNORE_CASE),
-        Regex("(\\d+)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\\s*timer", RegexOption.IGNORE_CASE)
+        Regex(".*timer.* (\\d+|one|two|three|four|five|six|seven|eight|nine|ten)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)", RegexOption.IGNORE_CASE),
+        Regex("(\\d+|one|two|three|four|five|six|seven|eight|nine|ten)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\\s*timer", RegexOption.IGNORE_CASE)
     )
 
     fun parse(text: String): VoiceCommand? {
         Timber.d("Parsing text: '$text'")
-        val cleanedText = text.trim().removeSuffix(".")
+        val cleanedText = text.trim().removeSuffix(".").lowercase()
 
         if (clearAlarmsPatterns.any { it.containsMatchIn(cleanedText) }) {
+            Timber.d("Matched clear alarms")
             return VoiceCommand.ClearAllAlarms
         }
 
         alarmPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
+            Timber.d("Matched alarm pattern: ${match.value}")
             val timeString = match.groupValues[1]
             parseTime(timeString)?.let { time ->
                 return VoiceCommand.SetAlarm(time.hour, time.minute)
@@ -46,7 +48,9 @@ class IntentParser @Inject constructor() {
         }
 
         timerPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
-            val amount = match.groupValues[1].toIntOrNull()
+            Timber.d("Matched timer pattern: ${match.value}")
+            val amountStr = match.groupValues[1]
+            val amount = amountStr.toIntOrNull() ?: wordToNumber(amountStr)
             val unit = match.groupValues[2].lowercase()
             if (amount != null) {
                 return when {
@@ -57,18 +61,34 @@ class IntentParser @Inject constructor() {
             }
         }
 
-        val lowerText = cleanedText.lowercase()
-        if (lowerText.contains("auto light") || lowerText.contains("power saving") || lowerText.contains("light") || lowerText.contains("power save")) {
+        if (cleanedText.contains("auto light") || cleanedText.contains("power saving") || cleanedText.contains("light") || cleanedText.contains("power save")) {
+            Timber.d("Matched settings pattern")
             val target = when {
-                lowerText.contains("auto light") || lowerText.contains("light") -> "auto light"
+                cleanedText.contains("auto light") || cleanedText.contains("light") -> "auto light"
                 else -> "power saving"
             }
-            val enabled = !(lowerText.contains("off") || lowerText.contains("disable") || lowerText.contains("disabled"))
+            val enabled = !(cleanedText.contains("off") || cleanedText.contains("disable") || cleanedText.contains("disabled"))
             return VoiceCommand.SetSetting(target, enabled)
         }
 
         Timber.w("No matching pattern found for: '$cleanedText'")
         return null
+    }
+
+    private fun wordToNumber(word: String): Int? {
+        return when (word.lowercase()) {
+            "one" -> 1
+            "two" -> 2
+            "three" -> 3
+            "four" -> 4
+            "five" -> 5
+            "six" -> 6
+            "seven" -> 7
+            "eight" -> 8
+            "nine" -> 9
+            "ten" -> 10
+            else -> null
+        }
     }
 
     private fun parseTime(timeStr: String): LocalTime? {

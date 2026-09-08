@@ -14,8 +14,8 @@ An independent voice-command engine, orthogonal to existing screens and
 ViewModels, with minimal modification to any of them. Every recognized
 voice command must, in order:
 1. **Navigate** to the screen that corresponds to the command.
-2. **Update the UI** (that screen's ViewModel) so the user sees the change.
-3. **Run the command on the watch** (the actual BLE write).
+2. **Run the command on the watch** (the actual BLE write).
+3. **Re-read the values from the watch.** This updates the UI.
 
 The mic trigger ("Tell me what to do") lives only on the Time screen
 (`TimeViewModel` already injects `VoiceCommandManager`/`VoiceDispatcher`

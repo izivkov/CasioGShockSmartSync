@@ -225,7 +225,7 @@ constructor(
         VOICE_COMMAND, // Triggered by voice command
         ALWAYS_CONNECTED, // Some watches are always connected, but the watch keeps connecting and
         // disconnecting periodically.
-        DIRECT_INVOCATION, // Called directly from app code
+        DIRECT_INVOCATION, // Called directly from app code (e.g., a "Send to Watch" button)
     }
 
     abstract inner class Action(
@@ -248,6 +248,9 @@ constructor(
         }
 
         abstract fun run(context: Context)
+        open suspend fun runSuspend(context: Context) {
+            run(context)
+        }
 
         open suspend fun save(context: Context, actionsStorage: ActionsStorage) {
             val key = this.javaClass.simpleName + ENABLED
@@ -719,37 +722,41 @@ constructor(
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName} for $alarmHour:$alarmMinute")
             viewModelScope.launch {
-                runCatching {
-                    val alarms = api.getAlarms()
-                    val alarmCount = watchFeatureManager.getAlarmCount()
-                    val alarmList = alarms.take(alarmCount).toMutableList()
+                runSuspend(context)
+            }
+        }
 
-                    val existingIndex = alarmList.indexOfFirst { it.hour == alarmHour && it.minute == alarmMinute }
-                    val indexToUpdate = if (existingIndex != -1) {
-                        existingIndex
+        override suspend fun runSuspend(context: Context) {
+            runCatching {
+                val alarms = api.getAlarms()
+                val alarmCount = watchFeatureManager.getAlarmCount()
+                val alarmList = alarms.take(alarmCount).toMutableList()
+
+                val existingIndex = alarmList.indexOfFirst { it.hour == alarmHour && it.minute == alarmMinute }
+                val indexToUpdate = if (existingIndex != -1) {
+                    existingIndex
+                } else {
+                    val disabledIndex = alarmList.indexOfFirst { !it.enabled }
+                    if (disabledIndex != -1) {
+                        disabledIndex
                     } else {
-                        val disabledIndex = alarmList.indexOfFirst { !it.enabled }
-                        if (disabledIndex != -1) {
-                            disabledIndex
-                        } else {
-                            0
-                        }
+                        0
                     }
-
-                    alarmList[indexToUpdate] = alarmList[indexToUpdate].copy(
-                        hour = alarmHour,
-                        minute = alarmMinute,
-                        enabled = true,
-                        name = ""
-                    )
-
-                    api.setAlarms(ArrayList(alarmList))
-                    ProgressEvents.onNext("AlarmsUpdated")
-                    AppSnackbar(context.getString(R.string.alarms_set_to_watch))
-                }.onFailure {
-                    Timber.e(it, "Failed to set watch alarm via voice")
-                    AppSnackbar("Failed to set watch alarm")
                 }
+
+                alarmList[indexToUpdate] = alarmList[indexToUpdate].copy(
+                    hour = alarmHour,
+                    minute = alarmMinute,
+                    enabled = true,
+                    name = ""
+                )
+
+                api.setAlarms(ArrayList(alarmList))
+                ProgressEvents.onNext("AlarmsUpdated")
+                AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+            }.onFailure {
+                Timber.e(it, "Failed to set watch alarm via voice")
+                AppSnackbar("Failed to set watch alarm")
             }
         }
 
@@ -814,23 +821,27 @@ constructor(
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName} for $settingName=$settingValue")
             viewModelScope.launch {
-                runCatching {
-                    val toSend = fullSettings ?: run {
-                        val current = api.getSettings()
-                        when {
-                            settingName.contains("auto light") -> current.copy(autoLight = settingValue)
-                            settingName.contains("power saving") -> current.copy(powerSavingMode = settingValue)
-                            else -> current
-                        }
-                    }
-                    api.setSettings(toSend)
-                    ProgressEvents.onNext("SettingsUpdated")
-                    AppSnackbar(context.getString(R.string.settings_sent_to_watch))
-                }.onFailure {
-                    Timber.e(it, "Failed to send settings to watch")
-                }
-                fullSettings = null
+                runSuspend(context)
             }
+        }
+
+        override suspend fun runSuspend(context: Context) {
+            runCatching {
+                val toSend = fullSettings ?: run {
+                    val current = api.getSettings()
+                    when {
+                        settingName.contains("auto light") -> current.copy(autoLight = settingValue)
+                        settingName.contains("power saving") -> current.copy(powerSavingMode = settingValue)
+                        else -> current
+                    }
+                }
+                api.setSettings(toSend)
+                ProgressEvents.onNext("SettingsUpdated")
+                AppSnackbar(context.getString(R.string.settings_sent_to_watch))
+            }.onFailure {
+                Timber.e(it, "Failed to send settings to watch")
+            }
+            fullSettings = null
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
@@ -846,17 +857,21 @@ constructor(
     inner class SetTimerAction(
             override var title: String,
             override var enabled: Boolean,
-            var timeMs: Int = 0,
+            var timerValueS: Int = 0,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             viewModelScope.launch {
-                runCatching {
-                    api.setTimer(timeMs)
-                    ProgressEvents.onNext("TimerUpdated")
-                    AppSnackbar(context.getString(R.string.timer_set))
-                }.onFailure {
-                    Timber.e(it, "Failed to send timer to watch")
-                }
+                runSuspend(context)
+            }
+        }
+
+        override suspend fun runSuspend(context: Context) {
+            runCatching {
+                api.setTimer(timerValueS)
+                ProgressEvents.onNext("TimerUpdated")
+                AppSnackbar(context.getString(R.string.timer_set))
+            }.onFailure {
+                Timber.e(it, "Failed to send timer to watch")
             }
         }
 
@@ -1008,10 +1023,14 @@ constructor(
         }
     }
 
+    suspend fun runSingleActionSuspend(action: Action) {
+        isDataLoaded.await()
+        action.runSuspend(appContext)
+    }
+
     fun runSingleAction(action: Action) {
         viewModelScope.launch {
-            isDataLoaded.await()
-            runFilteredActions(appContext, listOf(action))
+            runSingleActionSuspend(action)
         }
     }
 

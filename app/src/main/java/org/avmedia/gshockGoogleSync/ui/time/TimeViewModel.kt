@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
@@ -22,8 +23,8 @@ import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.voice.VoiceCommandManager
 import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
-import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
 import org.avmedia.gshockGoogleSync.voice.VoiceCommand
+import org.avmedia.gshockGoogleSync.voice.VoiceSpeechFeedback
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
@@ -70,6 +71,7 @@ class TimeViewModel @Inject constructor(
     private val watchFeatureManager: IWatchFeatureManager,
     private val voiceCommandManager: VoiceCommandManager,
     private val voiceDispatcher: VoiceDispatcher,
+    private val voiceSpeechFeedback: VoiceSpeechFeedback,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -94,7 +96,11 @@ class TimeViewModel @Inject constructor(
     private fun setupEventSubscription() {
         ProgressEvents.runEventActions("TimeViewModel", arrayOf(
             org.avmedia.gshockapi.EventAction("TimerUpdated") {
-                refreshState()
+                viewModelScope.launch {
+                    delay(500)
+                    val timer = api.getTimer()
+                    _state.update { it.copy(timer = timer) }
+                }
             }
         ))
     }
@@ -154,22 +160,23 @@ class TimeViewModel @Inject constructor(
             TimeAction.StartVoiceCommand -> {
                 if (voiceCommandManager.isRecognitionAvailable()) {
                     _state.value = _state.value.copy(isListening = true)
-                    voiceCommandManager.startListening(
-                        onResult = { text ->
-                            _state.value = _state.value.copy(isListening = false)
-                            voiceDispatcher.dispatch(text)
-                            (ProgressEvents.getPayload("NavigateTo") as? VoiceNavigation)?.command
-                                ?.let { it as? VoiceCommand.SetTimer }
-                                ?.let { cmd ->
-                                    ProgressEvents.addPayload("NavigateTo", null)
-                                    onAction(TimeAction.SetTimer(cmd.hours, cmd.minutes, cmd.seconds))
+                    voiceSpeechFeedback.speak("Tell me what to do") {
+                        // Callback from TTS when it's done speaking
+                        viewModelScope.launch {
+                            // Give a small grace period for the audio system to switch from TTS to Mic
+                            delay(500)
+                            voiceCommandManager.startListening(
+                                onResult = { text ->
+                                    _state.value = _state.value.copy(isListening = false)
+                                    voiceDispatcher.dispatch(text)
+                                },
+                                onError = { error ->
+                                    _state.value = _state.value.copy(isListening = false)
+                                    AppSnackbar(error)
                                 }
-                        },
-                        onError = { error ->
-                            _state.value = _state.value.copy(isListening = false)
-                            AppSnackbar(error)
+                            )
                         }
-                    )
+                    }
                 } else {
                     AppSnackbar(appContext.getString(R.string.voice_recognition_unavailable))
                 }

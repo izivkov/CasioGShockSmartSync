@@ -28,6 +28,8 @@ class VoiceCommandManager @Inject constructor(
 
         stopListening()
 
+        var resultsDelivered = false
+
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {}
@@ -36,6 +38,8 @@ class VoiceCommandManager @Inject constructor(
                 override fun onBufferReceived(buffer: ByteArray?) {}
                 override fun onEndOfSpeech() {}
                 override fun onError(error: Int) {
+                    if (resultsDelivered) return
+
                     val message = when (error) {
                         SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
                         SpeechRecognizer.ERROR_CLIENT -> "Client side error"
@@ -46,12 +50,13 @@ class VoiceCommandManager @Inject constructor(
                         SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognition service busy"
                         SpeechRecognizer.ERROR_SERVER -> "Server error"
                         SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-                        else -> "Unknown error"
+                        else -> "Unknown error (code: $error)"
                     }
                     onError(message)
                 }
 
                 override fun onResults(results: Bundle?) {
+                    resultsDelivered = true
                     val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     if (!matches.isNullOrEmpty()) {
                         onResult(matches[0])

@@ -31,7 +31,7 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
         actionClass = ActionsViewModel.SetTimerAction::class.java,
         applyParams = { action, cmd, _ -> (action as ActionsViewModel.SetTimerAction).let {
             val c = cmd as VoiceCommand.SetTimer
-            it.timeMs = ((c.hours * 3600) + (c.minutes * 60) + c.seconds) * 1000
+            it.timerValueS = (c.hours * 3600) + (c.minutes * 60) + c.seconds
         }},
     ),
     VoiceCommand.SetSetting::class to VoiceCommandSpec(
