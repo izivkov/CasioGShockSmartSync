@@ -9,6 +9,7 @@ import android.speech.SpeechRecognizer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 @Singleton
 class VoiceCommandManager @Inject constructor(
@@ -16,11 +17,30 @@ class VoiceCommandManager @Inject constructor(
 ) {
     private var speechRecognizer: SpeechRecognizer? = null
 
+    // A couple of error codes reported by Android's speech service are
+    // transient rather than real failures - most commonly ERROR_SERVER_DISCONNECTED,
+    // which the on-device recognizer throws sporadically right after starting a
+    // session. Recreating the recognizer and retrying once clears these up
+    // without bothering the user.
+    private val transientErrors = setOf(
+        SpeechRecognizer.ERROR_SERVER_DISCONNECTED,
+        SpeechRecognizer.ERROR_RECOGNIZER_BUSY
+    )
+    private val maxRetries = 1
+
     fun isRecognitionAvailable(): Boolean {
         return SpeechRecognizer.isRecognitionAvailable(context)
     }
 
     fun startListening(onResult: (String) -> Unit, onError: (String) -> Unit) {
+        startListeningInternal(onResult, onError, retryCount = 0)
+    }
+
+    private fun startListeningInternal(
+        onResult: (String) -> Unit,
+        onError: (String) -> Unit,
+        retryCount: Int
+    ) {
         if (!isRecognitionAvailable()) {
             onError("Speech recognition not available")
             return
@@ -40,6 +60,12 @@ class VoiceCommandManager @Inject constructor(
                 override fun onError(error: Int) {
                     if (resultsDelivered) return
 
+                    if (error in transientErrors && retryCount < maxRetries) {
+                        Timber.w("Transient speech recognition error (code: $error), retrying...")
+                        startListeningInternal(onResult, onError, retryCount + 1)
+                        return
+                    }
+
                     val message = when (error) {
                         SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
                         SpeechRecognizer.ERROR_CLIENT -> "Client side error"
@@ -49,9 +75,11 @@ class VoiceCommandManager @Inject constructor(
                         SpeechRecognizer.ERROR_NO_MATCH -> "No match found"
                         SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognition service busy"
                         SpeechRecognizer.ERROR_SERVER -> "Server error"
+                        SpeechRecognizer.ERROR_SERVER_DISCONNECTED -> "Speech service disconnected"
                         SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
                         else -> "Unknown error (code: $error)"
                     }
+                    Timber.w("Speech recognition error: $message (code: $error)")
                     onError(message)
                 }
 

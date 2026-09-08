@@ -24,9 +24,15 @@ class IntentParser @Inject constructor() {
         Regex("alarm at (.*)", RegexOption.IGNORE_CASE)
     )
 
-    private val timerPatterns = listOf(
-        Regex(".*timer.* (\\d+|one|two|three|four|five|six|seven|eight|nine|ten)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)", RegexOption.IGNORE_CASE),
-        Regex("(\\d+|one|two|three|four|five|six|seven|eight|nine|ten)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\\s*timer", RegexOption.IGNORE_CASE)
+    // Gates timer detection: the phrase must mention "timer" somewhere.
+    private val timerKeywordPattern = Regex("timer", RegexOption.IGNORE_CASE)
+
+    // Matches every "<amount> <unit>" pair in the phrase (not just one), so a
+    // duration like "3 minutes 10 seconds" yields two matches instead of the
+    // regex engine skipping ahead to only the last pair.
+    private val timerUnitPattern = Regex(
+        "(\\d+|one|two|three|four|five|six|seven|eight|nine|ten)\\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)",
+        RegexOption.IGNORE_CASE
     )
 
     fun parse(text: String): VoiceCommand? {
@@ -47,16 +53,29 @@ class IntentParser @Inject constructor() {
             Timber.w("Failed to parse time string: '$timeString'")
         }
 
-        timerPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->
-            Timber.d("Matched timer pattern: ${match.value}")
-            val amountStr = match.groupValues[1]
-            val amount = amountStr.toIntOrNull() ?: wordToNumber(amountStr)
-            val unit = match.groupValues[2].lowercase()
-            if (amount != null) {
-                return when {
-                    unit.startsWith("hour") || unit.startsWith("hr") -> VoiceCommand.SetTimer(amount, 0, 0)
-                    unit.startsWith("minute") || unit.startsWith("min") -> VoiceCommand.SetTimer(0, amount, 0)
-                    else -> VoiceCommand.SetTimer(0, 0, amount)
+        if (timerKeywordPattern.containsMatchIn(cleanedText)) {
+            val matches = timerUnitPattern.findAll(cleanedText).toList()
+            if (matches.isNotEmpty()) {
+                var hours = 0
+                var minutes = 0
+                var seconds = 0
+
+                for (match in matches) {
+                    val amountStr = match.groupValues[1]
+                    val amount = amountStr.toIntOrNull() ?: wordToNumber(amountStr)
+                    val unit = match.groupValues[2].lowercase()
+                    if (amount == null) continue
+
+                    when {
+                        unit.startsWith("hour") || unit.startsWith("hr") -> hours += amount
+                        unit.startsWith("minute") || unit.startsWith("min") -> minutes += amount
+                        else -> seconds += amount
+                    }
+                }
+
+                if (hours > 0 || minutes > 0 || seconds > 0) {
+                    Timber.d("Matched timer: ${hours}h ${minutes}m ${seconds}s")
+                    return VoiceCommand.SetTimer(hours, minutes, seconds)
                 }
             }
         }
@@ -102,7 +121,7 @@ class IntentParser @Inject constructor() {
         Timber.d("Attempting to parse normalized time: '$normalized'")
 
         // 1. Try Regex for flexible "3am", "3 am", "3:30pm", etc.
-        
+
         // Pattern for "h:mm am/pm"
         val fullTimeRegex = Regex("(\\d{1,2}):(\\d{2})\\s*(am|pm)?")
         fullTimeRegex.find(normalized)?.let { match ->
@@ -112,7 +131,7 @@ class IntentParser @Inject constructor() {
 
             if (marker == "pm" && hour < 12) hour += 12
             if (marker == "am" && hour == 12) hour = 0
-            
+
             if (hour in 0..23 && minute in 0..59) {
                 return LocalTime.of(hour, minute)
             }
@@ -126,7 +145,7 @@ class IntentParser @Inject constructor() {
 
             if (marker == "pm" && hour < 12) hour += 12
             if (marker == "am" && hour == 12) hour = 0
-            
+
             if (hour in 0..23) {
                 return LocalTime.of(hour, 0)
             }

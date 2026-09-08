@@ -70,15 +70,19 @@ class AlarmViewModel @Inject constructor(
     private fun setupEventSubscription() {
         ProgressEvents.runEventActions("AlarmViewModel", arrayOf(
             org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
+                val written = ProgressEvents.getPayload("AlarmsUpdated") as? org.avmedia.gshockGoogleSync.ui.actions.AlarmsWritten
                 viewModelScope.launch {
-                    delay(500)
-                    loadAlarms()
+                    refreshAlarmsAfterExternalWrite(expected = written?.alarms)
                 }
             }
         ))
     }
 
     private fun loadAlarms() = viewModelScope.launch {
+        fetchAndApplyAlarms()
+    }
+
+    private suspend fun fetchAndApplyAlarms() {
         runCatching {
             alarmNameStorage.load()
 
@@ -103,6 +107,56 @@ class AlarmViewModel @Inject constructor(
             ProgressEvents.onNext("Alarms Loaded")
         }.onFailure {
             ProgressEvents.onNext("Error")
+        }
+    }
+
+    /**
+     * Re-reads alarms from the watch after something outside this ViewModel
+     * wrote to them (e.g. a voice command, or the "Send to Watch" button).
+     *
+     * A single fixed delay before re-reading is a common source of stale
+     * reads over BLE - the watch may not have the new value ready yet at
+     * whatever delay was guessed. Instead, poll a few times with a short
+     * gap between attempts.
+     *
+     * When [expected] is supplied (the exact alarms we just wrote), each
+     * read-back is checked against it directly on the fields the watch
+     * actually stores (hour/minute/enabled/chime) - the most reliable
+     * signal that the write has landed. Without it, we fall back to
+     * "did the read-back change at all" as a looser signal. Either way we
+     * stop as soon as we're satisfied, or once we run out of attempts (in
+     * which case we keep the last read - it's still our best available
+     * answer).
+     */
+    private suspend fun refreshAlarmsAfterExternalWrite(
+        expected: List<Alarm>? = null,
+        maxAttempts: Int = 5,
+        retryDelayMs: Long = 400
+    ) {
+        val before = _alarms.value
+        repeat(maxAttempts) {
+            delay(retryDelayMs)
+            fetchAndApplyAlarms()
+
+            val satisfied = if (expected != null) {
+                alarmsMatch(_alarms.value, expected)
+            } else {
+                _alarms.value != before
+            }
+            if (satisfied) return
+        }
+    }
+
+    /**
+     * Compares only the fields the watch itself stores - hour, minute,
+     * enabled - not the locally-managed [Alarm.name], which the watch
+     * knows nothing about and isn't part of what we're verifying was
+     * written.
+     */
+    private fun alarmsMatch(actual: List<Alarm>, expected: List<Alarm>): Boolean {
+        if (actual.size != expected.size) return false
+        return actual.zip(expected).all { (a, e) ->
+            a.hour == e.hour && a.minute == e.minute && a.enabled == e.enabled
         }
     }
 
@@ -185,7 +239,7 @@ class AlarmViewModel @Inject constructor(
             }
 
             // After successfully sending, reload the alarms state from the watch to ensure UI consistency.
-            loadAlarms() // Reload state from the watch after saving.
+            refreshAlarmsAfterExternalWrite(expected = alarmsToSend) // Retries until the read-back matches what we sent, or gives up.
 
             AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
         }.onFailure {
