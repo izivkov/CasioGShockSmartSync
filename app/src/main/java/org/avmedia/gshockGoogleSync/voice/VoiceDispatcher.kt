@@ -17,7 +17,6 @@ import javax.inject.Inject
 class VoiceDispatcher @Inject constructor(
     private val actionsViewModel: ActionsViewModel,
     private val api: GShockRepository,
-    @ApplicationContext private val context: Context,
     private val intentParser: IntentParser,
     private val speechFeedback: VoiceSpeechFeedback
 ) {
@@ -55,6 +54,8 @@ class VoiceDispatcher @Inject constructor(
                 ProgressEvents.onNext("NavigateTo", VoiceNavigation(spec.route, command))
                 actionsViewModel.runSingleActionSuspend(action)
                 
+                // Increase delay to 1000ms to ensure the "success" beep of the STT is finished
+                delay(1000)
                 val feedback = getFeedbackText(command)
                 speechFeedback.speak(feedback)
             } catch (e: Exception) {

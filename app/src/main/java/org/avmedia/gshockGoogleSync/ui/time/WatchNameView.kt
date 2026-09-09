@@ -3,19 +3,25 @@ package org.avmedia.gshockGoogleSync.ui.time
 import AppText
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,13 +50,30 @@ fun WatchNameView(
             )
 
             if (state.isVoiceCommandSupported) {
-                VoiceCommandTrigger(
+                AppCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(12.dp),
-                    isListening = state.isListening,
-                    onClick = { timeModel.onAction(TimeAction.StartVoiceCommand) }
-                )
+                        .padding(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Verbose",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Switch(
+                            checked = state.isVoiceVerbose,
+                            onCheckedChange = { timeModel.onAction(TimeAction.SetVoiceVerbose(it)) },
+                            modifier = Modifier.scale(0.5f)
+                        )
+                        VoiceCommandTrigger(
+                            isListening = state.isListening,
+                            onClick = { timeModel.onAction(TimeAction.StartVoiceCommand) }
+                        )
+                    }
+                }
             }
         }
     }

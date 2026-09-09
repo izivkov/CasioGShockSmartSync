@@ -1,31 +1,47 @@
-# Implementation Plan - Voice Command Fixes (Error 11 & UI Refresh)
+# Implementation Plan - Refined Voice UI & Verbose Mode
 
-Address the "Unknown error (11)" issue and ensure the UI correctly refreshes after a voice command by optimizing the data reload logic.
+Modify the voice command UI to include a "Verbose" mode toggle and wrap the triggers in a nested card.
 
 ## User Review Required
 
-> [!NOTE]
-> **Error 11 (Server Disconnected)**: This error is often a transient system message from the Google Speech engine after delivering a result. I will implement a guard to ignore errors once a valid voice command has been captured.
+> [!IMPORTANT]
+> **Nested Card UI**: I will implement a small nested `AppCard` in the top-right of the Watch Name card to house both the "Verbose" switch and the mic icon.
 
 ## Proposed Changes
 
-### [Voice Engine]
+### [Persistence]
 
-#### [MODIFY] [VoiceCommandManager.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommandManager.kt)
-- Add a `resultDelivered: Boolean` flag to the `RecognitionListener`.
-- Set the flag to `true` in `onResults`.
-- In `onError`, only call the `onError` callback if `resultDelivered` is `false`. This prevents system-level cleanup errors from showing up as user-facing "Unknown errors."
+#### [MODIFY] [LocalDataStorage.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/utils/LocalDataStorage.kt)
+- Add `getVoiceVerbose(context: Context): Boolean` (defaults to `true`).
+- Add `setVoiceVerbose(context: Context, value: Boolean)` method.
 
-### [UI Components & ViewModels]
+### [Domain Model & Logic]
 
 #### [MODIFY] [TimeViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeViewModel.kt)
-- **Granular Refresh**: Implement a `refreshTimer()` private method that only fetches the timer value from the watch.
-- **Efficient Refresh**: Update the `TimerUpdated` event listener to call `refreshTimer()` instead of the full `refreshState()`. This ensures the timer updates instantly without waiting for battery, temperature, and steps to be fetched.
-- **Event Handling**: Ensure the `ProgressEvents` subscription is robust.
+- Update `TimeState` to include `isVoiceVerbose: Boolean`.
+- Load the verbose setting in `refreshState()`.
+- Add `SetVoiceVerbose(enabled: Boolean)` action to `TimeAction`.
+- Handle `SetVoiceVerbose` in `onAction`: update state and save to `LocalDataStorage`.
+
+#### [MODIFY] [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
+- Update `dispatch()` and other speaking logic to check `LocalDataStorage.getVoiceVerbose()` before calling `speechFeedback.speak()`.
+- Ensure the initial "Tell me what to do" prompt also respects this setting if applicable (though usually, if you pressed the button, you want the prompt. The user said "Verbose" switch, usually implies the *output* feedback).
+
+### [UI Components]
+
+#### [MODIFY] [WatchNameView.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/WatchNameView.kt)
+- Add "Verbose" label and switch.
+- Wrap the Switch and `VoiceCommandTrigger` in a small nested `AppCard`.
+- Position this nested card in the `TopEnd` of the main `WatchNameView`.
 
 ## Verification Plan
 
+### Automated Tests
+- Build `app:assembleGithubDebug` to ensure no UI or logic regressions.
+
 ### Manual Verification
-1.  **Error 11 Suppression**: Use a voice command. Verify that after the command is understood, no "Unknown error (11)" snackbar appears.
-2.  **Timer Refresh**: Say "Set timer for 3 seconds." Verify that the Time screen's timer display updates to 0:03 almost immediately after the watch write completes.
-3.  **Stability**: Verify that other watch info (battery, name) remains visible and doesn't flicker during the timer refresh.
+1.  **UI Layout**: Verify the mic and switch are in a small card in the top-right.
+2.  **Persistence**: Toggle "Verbose" to false, restart app, verify it's still false.
+3.  **Functionality**:
+    *   Verbose ON: App speaks prompt and confirmations.
+    *   Verbose OFF: App remains silent but still executes commands.

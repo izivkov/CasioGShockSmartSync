@@ -98,8 +98,8 @@ object LocalDataStorage {
         return prettyPrintedString
     }
 
-    private fun getBoolean(context: Context, key: String): Boolean {
-        return get(context, key, "false")?.toBoolean() ?: false
+    private fun getBoolean(context: Context, key: String, defaultValue: Boolean = false): Boolean {
+        return get(context, key, defaultValue.toString())?.toBoolean() ?: defaultValue
     }
 
     private suspend fun putBoolean(context: Context, key: String, value: Boolean) {
@@ -112,6 +112,14 @@ object LocalDataStorage {
 
     suspend fun setTimeAdjustmentNotification(context: Context, value: Boolean) {
         putBoolean(context, "timeAdjustmentNotification", value)
+    }
+
+    fun getVoiceVerbose(context: Context): Boolean {
+        return getBoolean(context, "voiceVerbose", true)
+    }
+
+    suspend fun setVoiceVerbose(context: Context, value: Boolean) {
+        putBoolean(context, "voiceVerbose", value)
     }
 
     fun getFineTimeAdjustment(context: Context): Int {

@@ -46,7 +46,8 @@ data class TimeState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val isListening: Boolean = false,
-    val isVoiceCommandSupported: Boolean = false
+    val isVoiceCommandSupported: Boolean = false,
+    val isVoiceVerbose: Boolean = true
 )
 
 sealed interface TimeAction {
@@ -56,6 +57,7 @@ sealed interface TimeAction {
     data object RefreshState : TimeAction
     data class SetTimeZoneOption(val option: TimeSettingsStorage.TimeZoneOption) : TimeAction
     data class SetStepDataOption(val option: StepDataOption) : TimeAction
+    data class SetVoiceVerbose(val enabled: Boolean) : TimeAction
     data object StartVoiceCommand : TimeAction
 }
 
@@ -157,11 +159,18 @@ class TimeViewModel @Inject constructor(
                 }
             }
 
+            is TimeAction.SetVoiceVerbose -> {
+                _state.value = _state.value.copy(isVoiceVerbose = action.enabled)
+                viewModelScope.launch {
+                    org.avmedia.gshockGoogleSync.utils.LocalDataStorage.setVoiceVerbose(appContext, action.enabled)
+                }
+            }
+
             TimeAction.StartVoiceCommand -> {
                 if (voiceCommandManager.isRecognitionAvailable()) {
                     _state.value = _state.value.copy(isListening = true)
-                    voiceSpeechFeedback.speak("Tell me what to do") {
-                        // Callback from TTS when it's done speaking
+
+                    val startListening = {
                         viewModelScope.launch {
                             // Give a small grace period for the audio system to switch from TTS to Mic
                             delay(500)
@@ -176,6 +185,14 @@ class TimeViewModel @Inject constructor(
                                 }
                             )
                         }
+                    }
+
+                    if (_state.value.isVoiceVerbose) {
+                        voiceSpeechFeedback.speak("Tell me what to do, for example 'set alarm for 6 am'") {
+                            startListening()
+                        }
+                    } else {
+                        startListening()
                     }
                 } else {
                     AppSnackbar(appContext.getString(R.string.voice_recognition_unavailable))
@@ -240,7 +257,8 @@ class TimeViewModel @Inject constructor(
                             api.getStepCount()
                         }
                     } else StepCounterData.unavailable(),
-                    isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable()
+                    isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable(),
+                    isVoiceVerbose = org.avmedia.gshockGoogleSync.utils.LocalDataStorage.getVoiceVerbose(appContext)
                 )
             }.onFailure {
                 AppSnackbar("Api Error")
