@@ -139,6 +139,9 @@ class EventViewModel @Inject constructor(
                     EventsModel.refresh(ArrayList(newEvents))
                 }
             },
+            EventAction("EventsUpdated") {
+                loadEvents()
+            },
             EventAction("DeviceName") {
                 if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode
                     refreshState()

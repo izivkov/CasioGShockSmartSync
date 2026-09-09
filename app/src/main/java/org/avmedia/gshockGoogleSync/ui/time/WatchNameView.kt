@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 
 @Composable
 fun WatchNameView(
@@ -59,6 +61,12 @@ fun WatchNameView(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        InfoButton(
+                            infoText = stringResource(id = R.string.voice_command_info),
+                            dialogTitle = stringResource(id = R.string.voice_command_info_title),
+                            iconSize = 20.dp,
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
                         Text(
                             text = "Verbose",
                             style = MaterialTheme.typography.labelSmall

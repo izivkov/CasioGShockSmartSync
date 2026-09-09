@@ -450,7 +450,6 @@ import java.time.ZoneId
      */
 
     override suspend fun getAlarms(): ArrayList<Alarm> {
-        println("Get Alarms...")
         return WatchInfo.protocol.getAlarms()
     }
 

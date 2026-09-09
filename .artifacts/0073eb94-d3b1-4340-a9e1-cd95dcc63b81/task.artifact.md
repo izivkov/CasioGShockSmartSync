@@ -1,5 +1,3 @@
-- [x] Add "Verbose" storage to `LocalDataStorage.kt`
-- [x] Update `TimeViewModel.kt` with verbose state and actions
-- [x] Update `VoiceDispatcher.kt` to respect the verbose setting
-- [x] Modify `WatchNameView.kt` to include the switch and nested card
-- [x] Verify build and functionality
+- [ ] Add implicit timer patterns and improve number parsing in `IntentParser.kt`
+- [ ] Re-enable `TimerUpdated` refresh logic in `TimeViewModel.kt`
+- [ ] Verify build and timer functionality

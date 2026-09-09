@@ -1,47 +1,29 @@
-# Implementation Plan - Refined Voice UI & Verbose Mode
+# Implementation Plan - Forgiving Voice Commands (Leeway & Corrections)
 
-Modify the voice command UI to include a "Verbose" mode toggle and wrap the triggers in a nested card.
-
-## User Review Required
-
-> [!IMPORTANT]
-> **Nested Card UI**: I will implement a small nested `AppCard` in the top-right of the Watch Name card to house both the "Verbose" switch and the mic icon.
+Enhance the voice command system to handle slower responses, hesitations, and self-corrections (e.g., "Monday, I mean Tuesday") for a more natural interaction.
 
 ## Proposed Changes
 
-### [Persistence]
+### [Voice Engine]
 
-#### [MODIFY] [LocalDataStorage.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/utils/LocalDataStorage.kt)
-- Add `getVoiceVerbose(context: Context): Boolean` (defaults to `true`).
-- Add `setVoiceVerbose(context: Context, value: Boolean)` method.
+#### [MODIFY] [VoiceCommandManager.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommandManager.kt)
+- **Increase Silence Timeouts**: Add `RecognizerIntent` extras to the listening intent to give the user more time before the recognizer stops:
+    - `EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS`: Set to 3000ms (standard is usually ~1000-2000ms).
+    - `EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS`: Set to 2000ms.
+    - `EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS`: Set to 2000ms to encourage longer capture.
 
-### [Domain Model & Logic]
-
-#### [MODIFY] [TimeViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeViewModel.kt)
-- Update `TimeState` to include `isVoiceVerbose: Boolean`.
-- Load the verbose setting in `refreshState()`.
-- Add `SetVoiceVerbose(enabled: Boolean)` action to `TimeAction`.
-- Handle `SetVoiceVerbose` in `onAction`: update state and save to `LocalDataStorage`.
-
-#### [MODIFY] [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
-- Update `dispatch()` and other speaking logic to check `LocalDataStorage.getVoiceVerbose()` before calling `speechFeedback.speak()`.
-- Ensure the initial "Tell me what to do" prompt also respects this setting if applicable (though usually, if you pressed the button, you want the prompt. The user said "Verbose" switch, usually implies the *output* feedback).
-
-### [UI Components]
-
-#### [MODIFY] [WatchNameView.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/WatchNameView.kt)
-- Add "Verbose" label and switch.
-- Wrap the Switch and `VoiceCommandTrigger` in a small nested `AppCard`.
-- Position this nested card in the `TopEnd` of the main `WatchNameView`.
+#### [MODIFY] [IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)
+- **Correction Handling**:
+    - Introduce a `handleSelfCorrection(text: String): String` method.
+    - Look for "correction markers" like: "i mean", "actually", "no wait", "sorry".
+    - If a marker is found, discard everything before the *last* occurrence of the marker and parse only the remainder.
+- **Hesitation Filtering**:
+    - Strip common hesitation fillers like "um", "uh", "mm", "ah" from the cleaned text before parsing.
 
 ## Verification Plan
 
-### Automated Tests
-- Build `app:assembleGithubDebug` to ensure no UI or logic regressions.
-
 ### Manual Verification
-1.  **UI Layout**: Verify the mic and switch are in a small card in the top-right.
-2.  **Persistence**: Toggle "Verbose" to false, restart app, verify it's still false.
-3.  **Functionality**:
-    *   Verbose ON: App speaks prompt and confirmations.
-    *   Verbose OFF: App remains silent but still executes commands.
+1.  **Slower Response**: Start a command, pause for 2 seconds, then finish. Verify the recognizer doesn't cut you off prematurely.
+2.  **Self-Correction**: Say *"Set alarm for Monday, I mean Tuesday."* Verify it parses "Tuesday" and sets the alarm correctly.
+3.  **Complex Correction**: Say *"Remind me to buy milk, actually bread, no I mean eggs."* Verify it adds a reminder for "eggs".
+4.  **Hesitation**: Say *"Set timer for... uh... mm... three minutes."* Verify it correctly parses "3 minutes".

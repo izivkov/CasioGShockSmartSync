@@ -30,7 +30,6 @@ fun Font(
 ) {
     val state by settingsViewModel.state.collectAsState()
     if (state.settingsMap[SettingsViewModel.Font::class.java] == null) {
-        print (">>>>>>>>>>>> Font setting is null")
         return
     }
 

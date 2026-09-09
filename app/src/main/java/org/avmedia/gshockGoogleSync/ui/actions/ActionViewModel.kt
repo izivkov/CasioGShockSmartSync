@@ -348,6 +348,7 @@ constructor(
             }
 
             api.setEvents(processedEvents)
+            ProgressEvents.onNext("EventsUpdated")
         }
 
         override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
@@ -824,7 +825,7 @@ constructor(
         override var title: String,
         override var enabled: Boolean,
         var settingName: String = "",
-        var settingValue: Boolean = false,
+        var settingValue: String = "",
         var fullSettings: org.avmedia.gshockapi.model.Settings? = null,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
@@ -838,9 +839,17 @@ constructor(
             runCatching {
                 val toSend = fullSettings ?: run {
                     val current = api.getSettings()
-                    when {
-                        settingName.contains("auto light") -> current.copy(autoLight = settingValue)
-                        settingName.contains("power saving") -> current.copy(powerSavingMode = settingValue)
+                    when (settingName) {
+                        "auto light" -> current.copy(autoLight = settingValue.toBoolean())
+                        "power saving" -> current.copy(powerSavingMode = settingValue.toBoolean())
+                        "language" -> current.copy(language = settingValue)
+                        "time format" -> current.copy(timeFormat = settingValue)
+                        "date format" -> current.copy(dateFormat = settingValue)
+                        "light duration" -> current.copy(lightDuration = settingValue)
+                        "button tone" -> {
+                            val enabled = settingValue.toBoolean()
+                            current.copy(buttonTone = enabled, keyVibration = enabled)
+                        }
                         else -> current
                     }
                 }

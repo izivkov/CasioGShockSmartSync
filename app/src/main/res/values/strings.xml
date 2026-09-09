@@ -98,6 +98,18 @@
     <string name="voice_recognition_unavailable" translatable="false">Voice recognition unavailable</string>
     <string name="command_not_understood" translatable="false">Sorry, I didn\'t understand that</string>
     <string name="action_disabled" translatable="false">Action \"%1$s\" is turned off</string>
+    <string name="voice_command_info_title" translatable="false">Voice Commands</string>
+    <string name="voice_command_info" translatable="false"><![CDATA[
+        Control your watch using natural speech.
+        <p><b>Examples:</b></p>
+        <li>\"Set alarm for 7:30 AM\"</li>
+        <li>\"Wake me up in 8 hours\"</li>
+        <li>\"Set a timer for 10 minutes\"</li>
+        <li>\"Enable auto light\"</li>
+        <li>\"Set language to Spanish\"</li>
+        <li>\"Remind me to buy milk tomorrow\"</li>
+        <p><i>Note: Reminders will automatically switch events to Manual Mode.</i></p>
+    ]]></string>
 
     <string name="take_photo">Take a photo</string>
     <string name="toggle_flashlight">Toggle Flashlight</string>

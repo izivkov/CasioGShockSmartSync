@@ -94,18 +94,31 @@ class TimeViewModel @Inject constructor(
             startStepCounterPolling()
         }
     }
-
     private fun setupEventSubscription() {
         ProgressEvents.runEventActions("TimeViewModel", arrayOf(
             org.avmedia.gshockapi.EventAction("TimerUpdated") {
                 viewModelScope.launch {
-                    delay(500)
-                    val timer = api.getTimer()
-                    _state.update { it.copy(timer = timer) }
+                    refreshTimerAfterExternalWrite()
                 }
             }
         ))
     }
+
+    private suspend fun refreshTimerAfterExternalWrite(
+        maxAttempts: Int = 3,
+        retryDelayMs: Long = 500
+    ) {
+        val before = _state.value.timer
+        repeat(maxAttempts) {
+            delay(retryDelayMs)
+            val timer = api.getTimer()
+            if (timer != before) {
+                _state.update { it.copy(timer = timer) }
+                return
+            }
+        }
+    }
+
 
     fun onAction(action: TimeAction) {
         when (action) {
@@ -173,7 +186,7 @@ class TimeViewModel @Inject constructor(
                     val startListening = {
                         viewModelScope.launch {
                             // Give a small grace period for the audio system to switch from TTS to Mic
-                            delay(500)
+                            delay(100)
                             voiceCommandManager.startListening(
                                 onResult = { text ->
                                     _state.value = _state.value.copy(isListening = false)
@@ -188,7 +201,7 @@ class TimeViewModel @Inject constructor(
                     }
 
                     if (_state.value.isVoiceVerbose) {
-                        voiceSpeechFeedback.speak("Tell me what to do, for example 'set alarm for 6 am'") {
+                        voiceSpeechFeedback.speak("Tell me what to do") {
                             startListening()
                         }
                     } else {

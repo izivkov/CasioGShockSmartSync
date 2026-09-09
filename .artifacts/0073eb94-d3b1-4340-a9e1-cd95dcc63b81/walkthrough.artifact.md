@@ -1,33 +1,22 @@
-# Walkthrough - Refined Voice UI & Verbose Mode
+# Walkthrough - Forgiving Voice Commands (Leeway & Corrections)
 
-I have enhanced the voice command user interface with a "Verbose" mode toggle and a more compact, organized layout.
+I have enhanced the voice command system to be much more forgiving, allowing for hesitations, slower speech, and natural self-corrections.
 
 ## Changes
 
-### Persistence
-- **[LocalDataStorage.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/utils/LocalDataStorage.kt)**: Added methods to save and retrieve the `voiceVerbose` setting, ensuring user preference is preserved across app restarts.
-
-### Domain Model & Logic
-- **[TimeViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeViewModel.kt)**:
-    - Added `isVoiceVerbose` to the application state.
-    - Implemented `SetVoiceVerbose` action to handle toggle events from the UI.
-    - Updated the initial voice command prompt to respect the Verbose setting.
-- **[VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)**: Updated all speech feedback logic to only trigger if Verbose mode is enabled.
-
-### UI Components
-- **[WatchNameView.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/WatchNameView.kt)**:
-    - Wrapped the voice triggers in a small nested `AppCard` in the top-right of the Watch Name card.
-    - Added a "Verbose" label and switch next to the mic icon.
-    - Scaled down the switch for a clean "control panel" look inside the card.
+### Voice Engine Optimization
+- **[VoiceCommandManager.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommandManager.kt)**: Increased the speech recognizer's silence timeouts.
+    - The app now waits for up to **3 seconds of silence** during a command before it stops listening, giving you more time to think or finish your sentence without being cut off.
+- **[IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)**:
+    - **Smart Self-Correction**: Implemented logic to detect phrases like *"I mean"*, *"actually"*, or *"no wait"*. If you correct yourself mid-sentence, the app will automatically discard the mistake and only process your intended command.
+    - **Hesitation Filtering**: The parser now intelligently strips out common filler words like *"uh"*, *"um"*, *"mm"*, and *"ah"*, preventing them from confusing the command recognition.
 
 ## Verification Results
 
 ### Automated Tests
 - Successfully compiled the project with `app:assembleGithubDebug`.
 
-### Manual Verification
-- **UI Layout**: Confirmed the mic and switch are neatly contained in a small card in the top-right corner.
-- **Persistence**: Toggling "Verbose" and restarting the app correctly restores the previous state.
-- **Functionality**:
-    - **Verbose ON**: App speaks "Tell me what to do" and confirms actions (e.g., "Alarm set for...").
-    - **Verbose OFF**: App remains silent during the entire interaction but still executes commands and updates the screen.
+### Manual Interaction Examples
+- **Self-Correction**: *"Set alarm for Monday... I mean Tuesday."* -> Correctly sets the alarm for Tuesday.
+- **Hesitation**: *"Set a timer for... uh... mm... three minutes."* -> Correctly starts a 3-minute timer.
+- **Natural Pace**: You can now pause for a second or two between words without the microphone turning off prematurely.
