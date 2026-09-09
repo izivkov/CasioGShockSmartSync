@@ -99,6 +99,8 @@ class AlarmViewModel @Inject constructor(
         runCatching {
             alarmNameStorage.load()
 
+            println(">>> fetchAndApplyAlarms")
+
             val alarmsFromWatch = api.getAlarms()
                 .take(watchFeatureManager.getAlarmCount())
                 .mapIndexed { index, alarm ->
