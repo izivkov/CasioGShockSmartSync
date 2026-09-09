@@ -145,11 +145,13 @@ object AlarmsIO {
         }
 
     suspend fun request(): ArrayList<Alarm> = CachedIO.request("GET_ALARMS") { key ->
+        println (">>> request for alarms...")
         val deferred = CompletableDeferred<ArrayList<Alarm>>()
         synchronized(this) {
             state = state.copy(deferredResult = deferred, isProcessing = true)
         }
         Alarm.clear()
+        println (">>> Alarms cleared...")
         Connection.sendMessage("{ action: '$key'}")
         deferred.await()
     }
@@ -170,6 +172,8 @@ object AlarmsIO {
         // Use pure function to parse
         val parsedAlarms = AlarmsIOFunctional.parseReceivedAlarms(data)
         Alarm.addSorted(parsedAlarms.toTypedArray())
+
+        println (" >>> onReceived: alarm count: ${Alarm.getAlarms().size}")
 
         // Use pure function to check completion
         if (AlarmsIOFunctional.isAlarmCountComplete(

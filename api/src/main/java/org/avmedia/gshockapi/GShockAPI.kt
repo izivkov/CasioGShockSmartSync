@@ -385,6 +385,7 @@ import java.time.ZoneId
      * @return appInfo string from the watch.
      */
     override suspend fun getAppInfo(): String {
+        println("Get App Info...")
         return AppInfoIO.request()
     }
 
@@ -449,6 +450,7 @@ import java.time.ZoneId
      */
 
     override suspend fun getAlarms(): ArrayList<Alarm> {
+        println("Get Alarms...")
         return WatchInfo.protocol.getAlarms()
     }
 
