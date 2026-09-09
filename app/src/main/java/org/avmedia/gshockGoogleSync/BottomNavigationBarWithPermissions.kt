@@ -45,6 +45,7 @@ import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
 import kotlin.time.Duration.Companion.seconds
 
@@ -71,8 +72,17 @@ fun BottomNavigationBarWithPermissions(
         }
     }
 
+    // ProgressEvents silently drops a second subscription registered under a
+    // name it has already seen - which "BottomNavigationBar-Voice" is, the
+    // moment this composable is ever recreated (e.g. a config change). A
+    // unique name per instance guarantees this instance's subscription
+    // actually registers. See subscribeToProgressEvents() for the full
+    // explanation - this is the reason voice-triggered navigation (e.g. to
+    // Settings) can silently stop working partway through a session.
+    val voiceNavSubscriptionName = remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(Unit) {
-        ProgressEvents.runEventActions("BottomNavigationBar-Voice", arrayOf(
+        voiceNavSubscriptionName.value = subscribeToProgressEvents("BottomNavigationBar-Voice", arrayOf(
             EventAction("NavigateTo") {
                 val nav = ProgressEvents.getPayload("NavigateTo") as? VoiceNavigation ?: return@EventAction
                 navController.navigate(nav.route) {
@@ -90,6 +100,7 @@ fun BottomNavigationBarWithPermissions(
         inactivityHandler.startMonitoring()
         onDispose {
             inactivityHandler.stopMonitoring()
+            voiceNavSubscriptionName.value?.let { ProgressEvents.subscriber.stop(it) }
         }
     }
 

@@ -23,6 +23,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.Alarm
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -62,13 +63,20 @@ class AlarmViewModel @Inject constructor(
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
+    // ProgressEvents silently drops a second subscription registered under a
+    // name it has already seen - which "AlarmViewModel" is, the moment this
+    // ViewModel is ever recreated. A unique name per instance guarantees
+    // this instance's subscription actually registers. See
+    // subscribeToProgressEvents() for the full explanation.
+    private var eventSubscriptionName: String? = null
+
     init {
         loadAlarms()
         setupEventSubscription()
     }
 
     private fun setupEventSubscription() {
-        ProgressEvents.runEventActions("AlarmViewModel", arrayOf(
+        eventSubscriptionName = subscribeToProgressEvents("AlarmViewModel", arrayOf(
             org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
                 val written = ProgressEvents.getPayload("AlarmsUpdated") as? org.avmedia.gshockGoogleSync.ui.actions.AlarmsWritten
                 viewModelScope.launch {
@@ -76,6 +84,11 @@ class AlarmViewModel @Inject constructor(
                 }
             }
         ))
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
     }
 
     private fun loadAlarms() = viewModelScope.launch {
