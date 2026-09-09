@@ -8,7 +8,6 @@ package org.avmedia.gshockapi
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -79,13 +78,7 @@ object ProgressEvents {
     )
 
     private data class State(
-        // Was Set<String>. Now keyed to each subscriber's collector Job so a
-        // re-subscription under the same name (a recreated ViewModel /
-        // Composable calling runEventActions again) can cancel-and-replace
-        // the old collector instead of being silently ignored, and so
-        // stop() has an actual Job to cancel instead of only removing a
-        // name from a set that nothing else reads.
-        val subscribers: Map<String, Job> = emptyMap(),
+        val subscribers: Set<String> = emptySet(),
         val eventMap: Map<String, Events> = emptyMap(),
         val reverseEventMap: Map<Events, String> = emptyMap(),
         val payloadMap: Map<String, Any?> = emptyMap(),
@@ -116,9 +109,9 @@ object ProgressEvents {
         )
     }
 
-    /** Pure: derive a new State with a subscriber's Job recorded. */
-    private fun stateWithSubscriber(current: State, name: String, job: Job): State =
-        current.copy(subscribers = current.subscribers + (name to job))
+    /** Pure: derive a new State with a subscriber added. */
+    private fun stateWithSubscriber(current: State, name: String): State =
+        current.copy(subscribers = current.subscribers + name)
 
     /** Pure: derive a new State with a subscriber removed. */
     private fun stateWithoutSubscriber(current: State, name: String): State =
@@ -136,21 +129,18 @@ object ProgressEvents {
 
     class Subscriber {
         /**
-         * Start listening to [ProgressEvents]. If [name] is already subscribed,
-         * that existing subscription is cancelled and replaced by this one —
-         * safe to call again from a recreated ViewModel/Composable under the
-         * same name; it will no longer be silently ignored.
+         * Start listening to [ProgressEvents]. Only one subscription per [name] is allowed.
          *
-         * @param name    Identifier for this subscription. Re-using an
-         *                in-use name replaces the previous subscription.
+         * @param name    Unique identifier for this subscription.
          * @param eventActions Actions to invoke per event name.
          */
         fun runEventActions(name: String, eventActions: Array<EventAction>) {
-            state.subscribers[name]?.cancel()
+            if (state.subscribers.contains(name)) return
+            state = stateWithSubscriber(state, name)
 
             val actionMap = eventActions.associateBy { it.label }
 
-            val job = CoroutineScope(Dispatchers.Main).launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 eventsFlow.collect { (event, payload) ->
                     try {
                         state.reverseEventMap[event]?.let { eventName ->
@@ -162,13 +152,10 @@ object ProgressEvents {
                     }
                 }
             }
-
-            state = stateWithSubscriber(state, name, job)
         }
 
-        /** Stop listening: cancels the collector and forgets this subscriber. */
+        /** Stop listening. */
         fun stop(name: String) {
-            state.subscribers[name]?.cancel()
             state = stateWithoutSubscriber(state, name)
         }
     }
