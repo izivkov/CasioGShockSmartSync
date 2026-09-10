@@ -35,10 +35,13 @@ class VoiceDispatcher @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.Main)
     private var currentReminder: VoiceCommand.AddReminder? = null
 
+    private val abandonKeywords = listOf("cancel", "stop", "abandon", "abort", "forget it")
+
     fun dispatch(text: String) {
         Timber.d("Voice command received: '$text'")
         
-        if (text.lowercase().contains("cancel")) {
+        val lowerText = text.lowercase()
+        if (abandonKeywords.any { lowerText.contains(it) }) {
             currentReminder = null
             speechFeedback.speak("Canceled")
             return
@@ -57,12 +60,6 @@ class VoiceDispatcher @Inject constructor(
             return
         }
 
-        if (command is VoiceCommand.AddReminder) {
-            currentReminder = command
-            handleReminderConversation("") // Kick off the conversation
-            return
-        }
-
         val spec = voiceCommandTable[command::class]
         if (spec == null) {
             Timber.w("No routing spec for command: $command")
@@ -72,10 +69,15 @@ class VoiceDispatcher @Inject constructor(
         }
 
         if (!spec.isSupported(command)) {
-            val feature = spec.featureName(command).replaceFirstChar { it.uppercase() }
-            val message = "$feature not supported for this watch"
+            val message = "This feature is not supported on the watch"
             emitSnackbar(message)
             speechFeedback.speak(message)
+            return
+        }
+
+        if (command is VoiceCommand.AddReminder) {
+            currentReminder = command
+            handleReminderConversation("") // Kick off the conversation
             return
         }
 

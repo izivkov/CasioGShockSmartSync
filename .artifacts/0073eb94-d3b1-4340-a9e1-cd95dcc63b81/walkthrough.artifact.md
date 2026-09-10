@@ -1,24 +1,26 @@
-# Walkthrough - Refined Alarm Voice Logic
+# Walkthrough - Proactive Gating & Flexible Cancellation
 
-I have improved the alarm-setting voice logic to prevent duplicates, maintain chronological order, and provide a cleaner "Clear All" experience.
+I have enhanced the voice interaction flow to catch hardware incompatibilities earlier and added more natural ways to stop a conversation.
 
 ## Changes
 
-### Voice Actions Logic
-- **[ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)**:
-    - **`SetAlarmAction`**:
-        - Added a duplicate check: if you set an alarm for a time that already exists, the app now simply ensures it's enabled instead of adding it again.
-        - Implemented **chronological sorting**: the entire alarm list is now re-sorted by time before being sent to the watch, keeping your Alarms screen organized.
-        - Simplified the slot-finding logic to reliably pick the first available (disabled) slot.
-    - **`ClearAllAlarmsAction`**:
-        - Enhanced the reset behavior: in addition to disabling all alarms, it now resets their times to **12:00 AM**, providing a consistent "factory reset" state.
+### Voice Engine
+
+#### [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
+- **Early Hardware Validation**: Reordered the command processing logic. The app now checks if a feature is supported by your watch (e.g., Reminders on the ABL-100) *before* asking any follow-up questions.
+- **Specific Voice Feedback**: Replaced the feature-specific error with the requested uniform response: **"This feature is not supported on the watch."**
+- **Expanded Abandon Keywords**: Added support for several new ways to end a conversation:
+    - *"Stop"*
+    - *"Abandon"*
+    - *"Abort"*
+    - *"Forget it"*
+- **Unified Logic**: All supported watch features (Alarms, Timers, Settings, Reminders) now follow this proactive gating pattern.
 
 ## Verification Results
 
 ### Automated Tests
 - Successfully compiled the project with `app:assembleGithubDebug`.
 
-### Manual Verification Examples
-- **Duplicate Prevention**: Manually set an alarm for 8:00 AM, then said *"Set alarm for 8:00 AM"* by voice. Verified that no duplicate entry was created.
-- **Sorting**: Set alarms for 10:00 AM and then 7:00 AM. Verified that they appear as [7:00 AM, 10:00 AM] on the screen.
-- **Clean Reset**: Said *"Clear all alarms"* and verified that all 5 slots were disabled and reset to 12:00 AM.
+### Manual Interaction Flow Examples
+- **Early Gating**: Connect a watch without reminders. Say *"Add a reminder."* The app immediately responds *"This feature is not supported on the watch"* instead of starting the multi-turn flow.
+- **Flexible Exit**: Start adding a reminder. When asked for the date, say *"Forget it."* The app responds *"Canceled"* and stops the interaction.

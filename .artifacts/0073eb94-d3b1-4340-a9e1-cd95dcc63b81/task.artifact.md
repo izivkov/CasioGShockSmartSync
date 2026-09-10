@@ -1,8 +1,4 @@
-- [ ] Update `SetAlarmAction` logic in `ActionViewModel.kt`
-    - [ ] Implement duplicate check
-    - [ ] Implement chronological sorting
-    - [ ] Ensure `AlarmsUpdated` signal is emitted
-- [ ] Update `ClearAllAlarmsAction` logic in `ActionViewModel.kt`
-    - [ ] Reset times to 12:00 AM (0:0)
-    - [ ] Ensure `AlarmsUpdated` signal is emitted
+- [ ] Expand abandon keywords in `VoiceDispatcher.kt`
+- [ ] Move capability gating to the beginning of `dispatch()`
+- [ ] Update unsupported feature voice response
 - [ ] Verify build and functionality

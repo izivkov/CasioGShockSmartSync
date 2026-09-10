@@ -1,41 +1,25 @@
-# Implementation Plan - Refined Alarm Voice Logic
+# Implementation Plan - Early Feature Gating & Expanded Abandon Keywords
 
-Optimize the alarm-setting voice commands to handle duplicates correctly, sort alarms chronologically, and improve the "Clear All" behavior.
+Ensure all voice commands are validated against watch hardware capabilities *before* starting any interaction, and add more ways to terminate a multi-turn conversation.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Clear All Behavior**: In addition to disabling all alarms, I will reset their times to **12:00 AM** to provide a consistent "factory reset" state for the alarm slots.
+> **Proactive Gating**: The app will now check if your watch supports reminders (e.g., ABL-100 doesn't) immediately after you say "Add a reminder", preventing it from asking for details it can never save.
 
 ## Proposed Changes
 
 ### [Voice Engine]
 
-#### [MODIFY] [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
-
-- **`SetAlarmAction`**:
-    - Refactor `runSuspend` logic:
-        1.  Fetch current alarms from the watch.
-        2.  **Check for Duplicates**: If an alarm with the *same hour and minute* already exists, just ensure it is set to `enabled = true`.
-        3.  **Intelligent Updates**: If no match exists, find the first disabled slot to update. If all slots are full, overwrite the first one (standard behavior).
-        4.  **Chronological Sorting**: Before sending to the watch, sort the entire alarm list by time (`hour`, then `minute`).
-    - Emit the `AlarmsUpdated` signal with the sorted list.
-
-- **`ClearAllAlarmsAction`**:
-    - Update logic to not only set `enabled = false` but also reset `hour = 0` and `minute = 0` for all 5 slots.
-    - Emit the `AlarmsUpdated` signal.
+#### [MODIFY] [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
+- **Expanded Exit Keywords**: Add "stop", "abandon", "abort", and "forget it" to the termination check.
+- **Early Validation**:
+    - Reorder logic in `dispatch()` to perform `voiceCommandTable` lookup and `isSupported` check *before* handling any specific command types (including multi-turn Reminders).
+    - If a feature is not supported by the hardware, the app will inform you immediately by voice: **"This feature is not supported on the watch"** and stop execution.
 
 ## Verification Plan
 
 ### Manual Verification
-1.  **Duplicate Handling**:
-    - Set alarm for 7:30 AM manually.
-    - Say *"Set alarm for 7:30 AM."*
-    - Verify no duplicate entry is created; the existing one should just stay enabled.
-2.  **Chronological Sorting**:
-    - Set alarms for 9:00 AM and 6:00 AM.
-    - Verify they appear as [6:00 AM, 9:00 AM] on the watch/app.
-3.  **Clear All**:
-    - Say *"Clear all alarms."*
-    - Verify all alarms are disabled AND their times are reset to 12:00 AM.
-4.  **UI Sync**: Verify the Alarms screen updates immediately after these commands.
+1.  **Gating (Reminders)**: Connect an `ABL-100`. Say *"Add a reminder."* Verify the app immediately responds *"This feature is not supported on the watch"* instead of asking *"What is the reminder for?"*.
+2.  **Gating (Settings)**: Say *"Enable auto light"* on a watch that doesn't support it. Verify the same generic "not supported" voice feedback.
+3.  **Abandonment**: Start a reminder flow. When asked for the date, say *"Forget it."* Verify the conversation ends and the app responds *"Canceled."* (Also test *"Stop"*, *"Abort"*, and *"Abandon"*).
