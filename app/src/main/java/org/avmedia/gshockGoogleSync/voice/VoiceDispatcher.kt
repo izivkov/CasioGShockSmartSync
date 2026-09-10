@@ -168,7 +168,7 @@ class VoiceDispatcher @Inject constructor(
                 }
             }
             return
-        }
+         }
 
         // 4. Finalize
         finalizeReminder(reminder)
