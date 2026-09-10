@@ -28,11 +28,18 @@ class VoiceSpeechFeedback @Inject constructor(
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            val locale = Locale.getDefault()
+            // The feedback strings this speaks (in VoiceDispatcher) are
+            // hardcoded English, so the voice is pinned to English rather
+            // than following the phone's system locale via
+            // Locale.getDefault() - otherwise a non-English-locale phone
+            // would have a non-English voice reading English text aloud,
+            // which mispronounces badly rather than sounding like a real
+            // prompt. Matches the EXTRA_LANGUAGE pin in
+            // VoiceCommandManager for the input side.
+            val locale = Locale.US
             val result = tts?.setLanguage(locale)
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Timber.w("TTS Language $locale not supported, falling back to US")
-                tts?.setLanguage(Locale.US)
+                Timber.w("TTS Language $locale not supported")
             }
 
             // Set modern audio attributes for better routing
@@ -66,7 +73,7 @@ class VoiceSpeechFeedback @Inject constructor(
             })
 
             isInitialized = true
-            
+
             // Log current volume for diagnostics
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
@@ -88,11 +95,11 @@ class VoiceSpeechFeedback @Inject constructor(
         if (isInitialized) {
             val utteranceId = if (onFinished != null) "InitialPrompt" else "VoiceFeedback"
             onFinishedCallback = onFinished
-            
+
             val params = Bundle()
             // Ensure we use the music stream which is most likely to be audible
             params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC)
-            
+
             val result = tts?.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
             if (result == TextToSpeech.ERROR) {
                 Timber.e("TTS speak() returned ERROR")

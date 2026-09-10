@@ -100,7 +100,16 @@ class VoiceCommandManager @Inject constructor(
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
-                
+
+                // IntentParser only understands English text. Without this, the
+                // recognizer follows the phone's system locale - so a phone set
+                // to e.g. Bulgarian would transcribe against a Bulgarian
+                // acoustic/language model even for a user speaking English
+                // commands, degrading recognition accuracy for no benefit
+                // (nothing downstream can act on non-English text anyway).
+                // Pinning this makes behavior predictable regardless of locale.
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
+
                 // Increase silence timeouts for slower/hesitant speakers
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)

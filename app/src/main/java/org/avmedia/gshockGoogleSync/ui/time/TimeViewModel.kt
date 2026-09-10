@@ -26,6 +26,7 @@ import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
 import org.avmedia.gshockGoogleSync.voice.VoiceCommand
 import org.avmedia.gshockGoogleSync.voice.VoiceSpeechFeedback
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
@@ -94,8 +95,15 @@ class TimeViewModel @Inject constructor(
             startStepCounterPolling()
         }
     }
+    // ProgressEvents silently drops a second subscription registered under a
+    // name it has already seen - which "TimeViewModel" was, the moment this
+    // ViewModel is ever recreated. A unique name per instance guarantees
+    // this instance's subscription actually registers - without this, the
+    // retry logic below never even runs, because the event never arrives.
+    private var eventSubscriptionName: String? = null
+
     private fun setupEventSubscription() {
-        ProgressEvents.runEventActions("TimeViewModel", arrayOf(
+        eventSubscriptionName = subscribeToProgressEvents("TimeViewModel", arrayOf(
             org.avmedia.gshockapi.EventAction("TimerUpdated") {
                 viewModelScope.launch {
                     refreshTimerAfterExternalWrite()
@@ -239,6 +247,7 @@ class TimeViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
         stepPollJob?.cancel()
         saveJob?.let {
             saveJob?.cancel()

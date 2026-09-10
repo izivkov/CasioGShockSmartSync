@@ -100,7 +100,7 @@
     <string name="action_disabled" translatable="false">Action \"%1$s\" is turned off</string>
     <string name="voice_command_info_title" translatable="false">Voice Commands</string>
     <string name="voice_command_info" translatable="false"><![CDATA[
-        Control your watch using natural speech.
+        Control your watch using natural speech (English only).
         <p><b>Examples:</b></p>
         <li>\"Set alarm for 7:30 AM\"</li>
         <li>\"Wake me up in 8 hours\"</li>
