@@ -230,7 +230,7 @@ class VoiceDispatcher @Inject constructor(
                 val hour12 = if (command.hour % 12 == 0) 12 else command.hour % 12
                 val amPm = if (command.hour >= 12) "PM" else "AM"
                 val minuteStr = if (command.minute < 10) "0${command.minute}" else "${command.minute}"
-                "Alarm set in watch for $hour12:$minuteStr $amPm"
+                "Alarm set for $hour12:$minuteStr $amPm"
             }
             is VoiceCommand.ClearAllAlarms -> "All alarms cleared"
             is VoiceCommand.SetTimer -> {

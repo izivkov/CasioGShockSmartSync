@@ -114,6 +114,7 @@ class AlarmViewModel @Inject constructor(
             } else {
                 alarmsFromWatch
             }
+
             _alarms.value = newAlarms
             ProgressEvents.onNext("Alarms Loaded")
         }.onFailure {

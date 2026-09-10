@@ -74,7 +74,8 @@ constructor(
     private val notificationProvider: NotificationProvider,
     private val watchTimeUpdater: WatchTimeUpdater,
     private val watchFeatureManager: IWatchFeatureManager,
-    private val eventStorage: EventStorage
+    private val eventStorage: EventStorage,
+    private val alarmNameStorage: org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 ) {
     /** Replaces viewModelScope. Lives as long as the process. */
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -737,28 +738,33 @@ constructor(
 
         override suspend fun runSuspend(context: Context) {
             runCatching {
+                alarmNameStorage.load()
                 val alarms = api.getAlarms()
                 val alarmCount = watchFeatureManager.getAlarmCount()
-                val alarmList = alarms.take(alarmCount).toMutableList()
+                
+                // Map current alarms to their names
+                val alarmList = alarms.take(alarmCount).mapIndexed { index, alarm ->
+                    alarm.copy(name = alarmNameStorage.get(index))
+                }.toMutableList()
 
                 val existingIndex = alarmList.indexOfFirst { it.hour == alarmHour && it.minute == alarmMinute }
-                val indexToUpdate = if (existingIndex != -1) {
-                    existingIndex
+                if (existingIndex != -1) {
+                    alarmList[existingIndex] = alarmList[existingIndex].copy(enabled = true)
                 } else {
-                    val disabledIndex = alarmList.indexOfFirst { !it.enabled }
-                    if (disabledIndex != -1) {
-                        disabledIndex
-                    } else {
-                        0
-                    }
+                    val indexToUpdate = alarmList.indexOfFirst { !it.enabled }.let { if (it == -1) 0 else it }
+                    alarmList[indexToUpdate] = alarmList[indexToUpdate].copy(
+                        hour = alarmHour,
+                        minute = alarmMinute,
+                        enabled = true,
+                        name = ""
+                    )
                 }
 
-                alarmList[indexToUpdate] = alarmList[indexToUpdate].copy(
-                    hour = alarmHour,
-                    minute = alarmMinute,
-                    enabled = true,
-                    name = ""
-                )
+                // Update names in storage (only for the potentially updated slot, or just update all to match list)
+                alarmList.forEachIndexed { index, alarm ->
+                    alarmNameStorage.put(alarm.name ?: "", index)
+                }
+                alarmNameStorage.save()
 
                 api.setAlarms(ArrayList(alarmList))
                 ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(alarmList))
@@ -797,10 +803,13 @@ constructor(
             Timber.d("running ${this.javaClass.simpleName}")
             viewModelScope.launch {
                 runCatching {
+                    alarmNameStorage.clear()
+                    alarmNameStorage.save()
+                    
                     val alarms = api.getAlarms()
                     val alarmCount = watchFeatureManager.getAlarmCount()
                     val updatedAlarms = alarms.take(alarmCount).map {
-                        it.copy(enabled = false)
+                        it.copy(enabled = false, hour = 0, minute = 0)
                     }
 
                     api.setAlarms(ArrayList(updatedAlarms))

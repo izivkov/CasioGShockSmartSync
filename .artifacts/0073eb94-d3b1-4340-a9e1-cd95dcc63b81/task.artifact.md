@@ -1,3 +1,8 @@
-- [ ] Add implicit timer patterns and improve number parsing in `IntentParser.kt`
-- [ ] Re-enable `TimerUpdated` refresh logic in `TimeViewModel.kt`
-- [ ] Verify build and timer functionality
+- [ ] Update `SetAlarmAction` logic in `ActionViewModel.kt`
+    - [ ] Implement duplicate check
+    - [ ] Implement chronological sorting
+    - [ ] Ensure `AlarmsUpdated` signal is emitted
+- [ ] Update `ClearAllAlarmsAction` logic in `ActionViewModel.kt`
+    - [ ] Reset times to 12:00 AM (0:0)
+    - [ ] Ensure `AlarmsUpdated` signal is emitted
+- [ ] Verify build and functionality

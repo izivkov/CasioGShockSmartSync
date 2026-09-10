@@ -2,17 +2,21 @@
 
 ## ✨ Highlights
 
-### 🎤 Voice-Driven Watch Control
-Introduced a powerful, rule-based voice command layer for hands-free watch management:
-*   **Intuitive Mic Trigger**: Relocated the "Tell me what to do" mic button to the upper-right corner of the **Watch Name** card for a cleaner, more integrated Time screen.
-*   **Intelligent Intent Parsing**: Added a robust, typed parsing engine that translates natural speech into watch actions for **Alarms**, **Timers**, and **Settings** (Auto Light, Power Saving).
-*   **Hardware-First Consistency**: Voice commands now follow a "Navigate -> Write -> Refresh" pattern. The app automatically re-reads values from the watch hardware after every voice command, ensuring your screen is always in 100% sync with the actual watch state.
-*   **Seamless Navigation**: Recognized commands now automatically navigate you to the relevant screen, providing instant visual feedback for your voice actions.
+### 🎤 Next-Generation Voice Control
+Introduced a powerful, natural-language voice command layer for comprehensive hands-free watch management:
+*   **Intuitive Interface**: A new, compact control panel in the **Watch Name** card houses the microphone trigger, a **Verbose Mode** toggle, and a dedicated **Help (Info)** button with usage examples.
+*   **Conversational Reminders**: Implemented multi-turn voice logic for creating watch reminders. The app intelligently asks for missing details (Date, Repeat period) and automatically starts the microphone for your response.
+*   **Smart Relative Alarms**: Added support for fuzzy time phrases like *"Wake me up in an hour and a half"* or *"Set alarm for 3 hours from now"*, with automatic clock-time calculation.
+*   **Comprehensive Settings**: Natural language control for **Language**, **Time/Date Format**, **Light Duration**, and **Button Tones** (e.g., *"Set language to Spanish"* or *"Turn off button sound"*).
+*   **Hardware-Aware Gating**: Voice commands are automatically validated against your specific watch model's hardware capabilities. Unsupported features now receive verbal feedback (e.g., *"Auto light not supported for this watch"*).
+*   **Robust Understanding**: Added hyphen-normalization, natural synonym support ("illumination", "period"), and implicit unit detection (*"Set timer at four ten"*).
+*   **Forgiving Interaction**: Implemented **Smart Self-Correction** (*"I mean..."*) and silence detection optimizations to allow for more natural, hesitant speech patterns.
 
-### 🎨 Refined UI & Experience
-*   **Direct Invocation Engine**: Unified manual "Send to Watch" buttons and voice triggers into a shared, reliable execution pipeline.
-*   **Localized Feedback**: Voice recognition and system messages are fully supported across all 11 languages, providing a native experience for users worldwide.
-*   **Visual Polish**: Further decluttered the main interface by moving secondary triggers into high-density information cards.
+### 🎨 Logic & UI Refinements
+*   **Persistent User Preference**: Your **Verbose Mode** choice is now securely saved in local storage and remembered across app restarts.
+*   **Intelligent UI Synchronization**: re-engineered the refresh logic for Alarms and Timers. The app now polls the watch hardware to verify writes, ensuring your screen is always in 100% sync with the actual watch state.
+*   **Optimized Alarm Management**: refined the slot-finding logic to prevent duplicates and added a factory-reset behavior for the *"Clear all alarms"* command (resets slots to 12:00 AM).
+*   **Automatic Protection**: Adding a voice reminder while in "Auto Sync" mode now automatically switches the watch to **"Manual Mode"** to protect your new entries from being overwritten.
 
 ---
 
@@ -26,21 +30,15 @@ Refined the health tracking architecture to achieve maximum protocol reliability
 *   **Flag-Free Transaction Management**: Transitioned away from manual state flags (`transactionActive`) in favor of a robust, state-based concurrency check. This aligns the Kotlin API with the latest architectural improvements in the Python `gshock_api` core.
 *   **Optimized History Resets**: simplified the "Clear History" handshake. The app now focuses on hardware-level reliability, ensuring that the watch's internal lifelog buffers are wiped and re-read with 100% precision.
 
-### 🎨 UI Stability & Refinement
-*   **Stable Fitness Dashboard**: Reverted experimental UI layouts to ensure a rock-solid user experience. All authorized enhancements, including the **sticky 10,000-step snapping** and the **professional weight selector**, remain fully active and optimized.
-*   **Performance Polish**: Further reduced app-side overhead during background refreshes, resulting in smoother transitions and better battery efficiency for both your phone and watch.
-
----
-
-# Release Notes - Casio G-Shock Smart Sync v42.8.1 — September 6, 2026 (cont.)
-
-## ✨ Highlights
-
 ### 👣 Step Counter Transaction Mastery & Performance
 Advanced internal architectural update to the fitness tracking engine for maximum reliability and efficiency:
 *   **Intelligent Transaction Caching**: Implemented a smart caching mechanism that tracks active watch sessions. When you're "peeking" at your steps, the app now returns cached data for subsequent refreshes instead of triggering redundant Bluetooth transfers. This results in **near-instant screen updates** and significant battery savings for your watch.
 *   **Robust Session Management**: Re-engineered the "Clear History" logic to explicitly terminate any active peek transactions before starting a destructive read. This ensures that the watch's internal hardware buffers are reset with 100% reliability every time.
 *   **Precision Record Detection**: Refined the variable-length activity record boundary detection to align perfectly with the latest Python `gshock_api` logic, picking the most accurate activity window for your daily stats.
+
+### 🎨 UI Stability & Refinement
+*   **Stable Fitness Dashboard**: Reverted experimental UI layouts to ensure a rock-solid user experience. All authorized enhancements, including the **sticky 10,000-step snapping** and the **professional weight selector**, remain fully active and optimized.
+*   **Performance Polish**: Further reduced app-side overhead during background refreshes, resulting in smoother transitions and better battery efficiency for both your phone and watch.
 
 ### 🛡️ System & Compatibility
 *   **SDK 37 Finalization**: completed the migration of the entire project—including the core `:api` module—to target **Android 15 (SDK 37)**, guaranteeing full compliance with the latest Google Play security standards.
@@ -58,15 +56,30 @@ Major accuracy and usability update for the health tracking engine:
 *   **Direct Watch Distance**: The app now prioritizes the `distanceMeters` reported directly by your watch hardware for maximum calorie accuracy.
 *   **Simplified Hourly History**: Re-engineered the Hourly view to show one clear bar per hour for the last 10 hours. Fixed a labeling issue to ensure each bar is correctly mapped to its time on the clock.
 
+### 👣 High-Precision Step Counter & Fitness Metrics
+A major accuracy and reliability update for the health tracking engine:
+*   **100g Weight Precision**: Weight is now stored internally in **100-gram units** on the watch's scratchpad. This eliminates the "rounding drift" where imperial values like 135 lb would previously revert to 134 lb after a sync.
+*   **Accurate Calorie Estimation**: Implemented a distance-based calorie calculation using the standard **0.76m stride** and your high-precision weight. For 4,500 steps, you'll now see a realistic estimate of ~248 kcal (at 70kg).
+*   **On-Watch Persistence**: Your Step Goal and Weight settings now "travel with the watch." By storing them in the watch's internal scratchpad memory, your settings remain consistent even if you switch phones.
+*   **Transparent Progress**: The central progress ring now displays your total **Distance** (in km or miles) alongside your steps and calories, providing a complete picture of your daily activity.
+
 ### 🎨 Refined UI & Interaction
 *   **Professional Weight Selector**: Replaced the text input field with a clean **Selection Dialog**. Tapping your weight now opens a professional wheel picker, matching the look and feel of the app's other settings.
 *   **Clean Underlined Style**: The weight display now uses standard `AppText` with a simple underline, perfectly integrated into the sidebar without bulky boxes or borders.
 *   **Silent Action Updates**: Removed redundant "Action Saved" notifications when toggling actions. Your settings are still saved instantly to the watch, but the experience is now much smoother and less intrusive.
 *   **Instant Reset Feedback**: Tapping "Clear History" now re-reads the watch state immediately after the hardware reset, ensuring your screen updates to zero instantly.
 
-### 🛡️ System & Architecture
+### 🎨 Professional UI & "Magnetic" Controls
+*   **Sticky Step Goal**: The Goal slider now has a "magnetic" snap at the **10,000 steps** mark. This makes it effortless to select the world's most common daily goal without needing pixel-perfect slider precision.
+*   **Underlined Input Style**: Replaced the boxed weight input with a clean, **underlined text selector** that matches the app's established typography. Tapping your weight now opens a professional selection dialog.
+*   **Instant History Reset**: The "Clear History" button now resets the watch hardware and **instantly refreshes the screen** to show zero. No more waiting or delayed notifications.
+
+### 🛡️ System & Architecture / Protocol Efficiency
 *   **API v1.7.4 Alignment**: synchronized with the latest GShock API, incorporating advanced lifelog parsing, intensity buckets, and distance stack reconciliation for the ABL-100 series.
 *   **SDK 37 Modernization**: Updated the entire application, including the core `:api` module, to target **Android 15**, ensuring full compatibility with the latest system security and background execution standards.
+*   **Smart Data Fetching**: Optimized the synchronization engine to only request step counts when the screen is opened or manually refreshed. This significantly reduces Bluetooth traffic and extends your watch's battery life.
+*   **Enhanced Diagnostics**: Improved internal logging for Bluetooth link losses (disconnection reason 3), making it easier to troubleshoot hardware-heavy memory operations like clearing history.
+*   **Metric Canada Support**: Fixed a regional detection issue to ensure users in **Canada** correctly default to metric (kg/km) units.
 
 ---
 
