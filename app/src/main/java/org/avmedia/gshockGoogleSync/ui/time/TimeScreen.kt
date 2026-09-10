@@ -22,6 +22,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
 fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
+
     LaunchedEffect(Unit) {
         timeViewModel.uiEvents.collect { event ->
             when (event) {
@@ -38,40 +39,45 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                 val (title, localTime, timer, watchName, watchInfo) = createRefs()
 
                 ScreenTitle(
-                        stringResource(id = R.string.time),
-                        Modifier.constrainAs(title) {
-                            top.linkTo(parent.top)
+                    stringResource(id = R.string.time),
+                    Modifier.constrainAs(title) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                )
+
+                LocalTimeView(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 0.dp) // Adjust padding as needed
+                        .constrainAs(localTime) {
+                            top.linkTo(title.bottom)
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                         }
                 )
 
-                LocalTimeView(
-                        Modifier.fillMaxWidth()
-                                .padding(vertical = 0.dp) // Adjust padding as needed
-                                .constrainAs(localTime) {
-                                    top.linkTo(title.bottom)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                }
-                )
-
                 val watchFeatureManager = LocalWatchFeatureManager.current
-                val isStepCounterSupported = watchFeatureManager.isCardSupported("step_counter_card")
+                val isStepCounterSupported =
+                    watchFeatureManager.isCardSupported("step_counter_card")
 
                 TimerView(
-                        modifier =
-                                Modifier.fillMaxWidth().constrainAs(timer) {
-                                    top.linkTo(localTime.bottom)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                }
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .constrainAs(timer) {
+                                top.linkTo(localTime.bottom)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
                 )
 
                 val stepCounter = createRef()
                 if (isStepCounterSupported) {
                     StepCounterView(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .constrainAs(stepCounter) {
                                 top.linkTo(timer.bottom)
                                 start.linkTo(parent.start)
@@ -81,24 +87,29 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                 }
 
                 WatchNameView(
-                        modifier =
-                                Modifier.fillMaxWidth().constrainAs(watchName) {
-                                    top.linkTo(if (isStepCounterSupported) stepCounter.bottom else timer.bottom)
-                                    bottom.linkTo(watchInfo.top)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                    height = Dimension.fillToConstraints
-                                }
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .constrainAs(watchName) {
+                                top.linkTo(if (isStepCounterSupported) stepCounter.bottom else timer.bottom)
+                                bottom.linkTo(watchInfo.top)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                height = Dimension.fillToConstraints
+                            }
                 )
 
                 WatchInfoView(
-                        modifier =
-                                Modifier.fillMaxWidth().constrainAs(watchInfo) {
-                                    bottom.linkTo(parent.bottom)
-                                    start.linkTo(parent.start)
-                                    end.linkTo(parent.end)
-                                }
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .constrainAs(watchInfo) {
+                                bottom.linkTo(parent.bottom)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
                 )
+
             }
         }
     }

@@ -38,10 +38,19 @@ import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
+import org.avmedia.gshockapi.model.Alarm
 import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+
+/**
+ * Payload for the "AlarmsUpdated" event: the exact alarm list that was just
+ * written to the watch. Lets listeners (e.g. AlarmViewModel) verify a
+ * subsequent read-back genuinely reflects this write, rather than guessing
+ * from "did anything change".
+ */
+data class AlarmsWritten(val alarms: List<Alarm>)
 
 /**
  * Application-scoped so that watch button presses are handled even when no UI is composed.
@@ -57,15 +66,15 @@ import timber.log.Timber
 class ActionsViewModel
 @Inject
 constructor(
-        private val api: GShockRepository,
-        private val prayerAlarmsHelper: PrayerAlarmsHelper,
-        @param:ApplicationContext val appContext: Context, // Inject application context
-        private val calendarEvents: CalendarEvents,
-        private val actionsStorage: ActionsStorage,
-        private val notificationProvider: NotificationProvider,
-        private val watchTimeUpdater: WatchTimeUpdater,
-        private val watchFeatureManager: IWatchFeatureManager,
-        private val eventStorage: EventStorage
+    private val api: GShockRepository,
+    private val prayerAlarmsHelper: PrayerAlarmsHelper,
+    @param:ApplicationContext val appContext: Context, // Inject application context
+    private val calendarEvents: CalendarEvents,
+    private val actionsStorage: ActionsStorage,
+    private val notificationProvider: NotificationProvider,
+    private val watchTimeUpdater: WatchTimeUpdater,
+    private val watchFeatureManager: IWatchFeatureManager,
+    private val eventStorage: EventStorage
 ) {
     /** Replaces viewModelScope. Lives as long as the process. */
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -131,12 +140,14 @@ constructor(
             updatedAction.save(appContext, actionsStorage)
 
             saveJob?.cancel()
-            saveJob =
-                    viewModelScope.launch {
-                        delay(0)
-                        actionsStorage.save()
-                        saveJob = null
-                    }
+            saveJob = viewModelScope.launch {
+                delay(0)
+                actionsStorage.save()
+                _uiEvents.emit(
+                    UiEvent.ShowSnackbar(appContext.getString(R.string.actions_saved))
+                )
+                saveJob = null
+            }
         }
     }
 
@@ -155,9 +166,9 @@ constructor(
     @Suppress("UNCHECKED_CAST")
     fun <T : Action> getAction(type: Class<T>): T {
         return actionMap[type] as? T
-                ?: throw IllegalStateException(
-                        "Action of type ${type.simpleName} not found in actionMap."
-                )
+            ?: throw IllegalStateException(
+                "Action of type ${type.simpleName} not found in actionMap."
+            )
     }
 
     init {
@@ -168,12 +179,12 @@ constructor(
     // Subscribe to watch initialization event to load data after connection
     private fun setupEventSubscription() {
         ProgressEvents.runEventActions(
-                "ActionViewModel",
-                arrayOf(
-                        EventAction("WatchInitializationCompleted") {
-                            viewModelScope.launch { updateActionsAndMap(loadData(appContext)) }
-                        }
-                )
+            "ActionViewModel",
+            arrayOf(
+                EventAction("WatchInitializationCompleted") {
+                    viewModelScope.launch { updateActionsAndMap(loadData(appContext)) }
+                }
+            )
         )
     }
 
@@ -187,19 +198,23 @@ constructor(
             add(FindPhoneAction(appContext.getString(R.string.find_phone), false))
             add(SetTimeAction(appContext.getString(R.string.set_time), true, watchTimeUpdater))
             add(
-                    SetEventsAction(
-                            appContext.getString(R.string.set_reminders),
-                            false,
-                            api,
-                            calendarEvents
-                    )
+                SetEventsAction(
+                    appContext.getString(R.string.set_reminders),
+                    true,
+                    api,
+                    calendarEvents
+                )
             )
+            add(SetAlarmAction(appContext.getString(R.string.set_alarm), true))
+            add(ClearAllAlarmsAction("Clear All Alarms", true)) // Hidden from UI, only for voice
+            add(SetSettingsAction("Set Settings", true)) // Hidden from UI, only for voice
+            add(SetTimerAction("Set Timer", true)) // Hidden from UI, only for voice/Send-to-Watch
             add(
-                    PhotoAction(
-                            appContext.getString(R.string.take_photo),
-                            false,
-                            CameraOrientation.BACK
-                    )
+                PhotoAction(
+                    appContext.getString(R.string.take_photo),
+                    false,
+                    CameraOrientation.BACK
+                )
             )
             add(PrayerAlarmsAction("Set Prayer Alarms", false, api, prayerAlarmsHelper))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
@@ -215,66 +230,73 @@ constructor(
         ACTION_BUTTON_PRESSED, // Connected by short-pressing the LOWER-RIGHT button
         AUTO_TIME_ADJUSTMENT, // Connected automatically during auto time update
         FIND_PHONE_PRESSED, // The user has activated the "Find Phone" function
+        VOICE_COMMAND, // Triggered by voice command
         ALWAYS_CONNECTED, // Some watches are always connected, but the watch keeps connecting and
         // disconnecting periodically.
+        DIRECT_INVOCATION, // Called directly from app code (e.g., a "Send to Watch" button)
     }
 
     abstract inner class Action(
-            open var title: String,
-            open var enabled: Boolean,
-            var runMode: RunMode = RunMode.SYNC,
+        open var title: String,
+        open var enabled: Boolean,
+        var runMode: RunMode = RunMode.SYNC,
     ) {
         val ENABLED: String = ".enabled"
 
         open fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
         abstract fun run(context: Context)
+        open suspend fun runSuspend(context: Context) {
+            run(context)
+        }
 
         open suspend fun save(context: Context, actionsStorage: ActionsStorage) {
             val key = this.javaClass.simpleName + ENABLED
             val value = enabled
 
             val actionEnum =
-                    when (this) {
-                        is SetTimeAction -> ActionsStorage.Action.SET_TIME
-                        is SetEventsAction -> ActionsStorage.Action.REMINDERS
-                        is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
-                        is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
-                        is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
-                        is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
-                        is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
-                        is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
-                        is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
-                        is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
-                        else -> null
-                    }
+                when (this) {
+                    is SetTimeAction -> ActionsStorage.Action.SET_TIME
+                    is SetEventsAction -> ActionsStorage.Action.REMINDERS
+                    is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
+                    is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
+                    is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
+                    is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
+                    is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
+                    is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
+                    is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
+                    is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
+                    else -> null
+                }
 
             actionEnum?.let { actionsStorage.update(it, enabled) }
         }
 
         open suspend fun load(context: Context, actionsStorage: ActionsStorage) {
             val actionEnum =
-                    when (this) {
-                        is SetTimeAction -> ActionsStorage.Action.SET_TIME
-                        is SetEventsAction -> ActionsStorage.Action.REMINDERS
-                        is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
-                        is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
-                        is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
-                        is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
-                        is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
-                        is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
-                        is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
-                        is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
-                        else -> null
-                    }
+                when (this) {
+                    is SetTimeAction -> ActionsStorage.Action.SET_TIME
+                    is SetEventsAction -> ActionsStorage.Action.REMINDERS
+                    is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
+                    is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
+                    is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
+                    is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
+                    is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
+                    is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
+                    is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
+                    is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
+                    else -> null
+                }
 
             actionEnum?.let { enabled = actionsStorage.getAction(it) }
             Timber.d("Load value: ${this.javaClass.simpleName}, $enabled")
@@ -286,10 +308,10 @@ constructor(
     }
 
     inner class SetEventsAction(
-            override var title: String,
-            override var enabled: Boolean,
-            val api: GShockRepository,
-            val calendarEvents: CalendarEvents
+        override var title: String,
+        override var enabled: Boolean,
+        val api: GShockRepository,
+        val calendarEvents: CalendarEvents
     ) : Action(title, enabled, RunMode.ASYNC) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
@@ -297,8 +319,10 @@ constructor(
                 RunEnvironment.NORMAL_CONNECTION -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -323,6 +347,7 @@ constructor(
             }
 
             api.setEvents(processedEvents)
+            ProgressEvents.onNext("EventsUpdated")
         }
 
         override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
@@ -331,7 +356,7 @@ constructor(
     }
 
     inner class ToggleFlashlightAction(override var title: String, override var enabled: Boolean) :
-            Action(title, enabled) {
+        Action(title, enabled) {
 
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -344,15 +369,17 @@ constructor(
     }
 
     inner class FindPhoneAction(override var title: String, override var enabled: Boolean) :
-            Action(title, enabled) {
+        Action(title, enabled) {
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.find_phone")
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> true
                 RunEnvironment.ALWAYS_CONNECTED -> false
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -367,31 +394,33 @@ constructor(
     }
 
     inner class SetTimeAction(
-            override var title: String,
-            override var enabled: Boolean,
-            val watchTimeUpdater: WatchTimeUpdater
+        override var title: String,
+        override var enabled: Boolean,
+        val watchTimeUpdater: WatchTimeUpdater
     ) :
-            Action(
-                    title,
-                    enabled,
-                    RunMode.ASYNC,
-            ) {
+        Action(
+            title,
+            enabled,
+            RunMode.ASYNC,
+        ) {
 
         private var lastSet: Long? = null
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             // update every hour
             val setTimeConditionAlwaysConnected =
-                    (watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
-                            (lastSet == null ||
-                                    System.currentTimeMillis() - lastSet!! > 1000 * 60 * 60))
+                (watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
+                        (lastSet == null ||
+                                System.currentTimeMillis() - lastSet!! > 1000 * 60 * 60))
 
             return when (runEnvironment) {
                 RunEnvironment.NORMAL_CONNECTION -> false
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> true
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -412,43 +441,43 @@ constructor(
     }
 
     inner class SetLocationAction(override var title: String, override var enabled: Boolean) :
-            Action(title, enabled) {
+        Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
         }
     }
 
     inner class StartVoiceAssistAction(
-            override var title: String,
-            override var enabled: Boolean,
+        override var title: String,
+        override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.SYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
             runCatching {
                 val intent =
-                        Intent(Intent.ACTION_VOICE_COMMAND).apply {
-                            flags =
-                                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK or
-                                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                        }
+                    Intent(Intent.ACTION_VOICE_COMMAND).apply {
+                        flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK or
+                                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    }
                 context.startActivity(intent)
             }
-                    .onFailure {
-                        if (it is ActivityNotFoundException) {
-                            AppSnackbar(
-                                    context.getString(
-                                            R.string.voice_assistant_not_available_on_this_device
-                                    )
+                .onFailure {
+                    if (it is ActivityNotFoundException) {
+                        AppSnackbar(
+                            context.getString(
+                                R.string.voice_assistant_not_available_on_this_device
                             )
-                        }
+                        )
                     }
+                }
         }
     }
 
     inner class NextTrack(
-            override var title: String,
-            override var enabled: Boolean,
+        override var title: String,
+        override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -457,36 +486,36 @@ constructor(
                 val eventTime = SystemClock.uptimeMillis()
 
                 val downEvent =
-                        KeyEvent(
-                                eventTime,
-                                eventTime,
-                                KeyEvent.ACTION_DOWN,
-                                KeyEvent.KEYCODE_MEDIA_NEXT,
-                                0
-                        )
+                    KeyEvent(
+                        eventTime,
+                        eventTime,
+                        KeyEvent.ACTION_DOWN,
+                        KeyEvent.KEYCODE_MEDIA_NEXT,
+                        0
+                    )
                 audioManager.dispatchMediaKeyEvent(downEvent)
 
                 val upEvent =
-                        KeyEvent(
-                                eventTime,
-                                eventTime,
-                                KeyEvent.ACTION_UP,
-                                KeyEvent.KEYCODE_MEDIA_NEXT,
-                                0
-                        )
+                    KeyEvent(
+                        eventTime,
+                        eventTime,
+                        KeyEvent.ACTION_UP,
+                        KeyEvent.KEYCODE_MEDIA_NEXT,
+                        0
+                    )
                 audioManager.dispatchMediaKeyEvent(upEvent)
             }
-                    .onFailure {
-                        if (it is ActivityNotFoundException) {
-                            AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
-                        }
+                .onFailure {
+                    if (it is ActivityNotFoundException) {
+                        AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
                     }
+                }
         }
     }
 
     inner class TogglePlayPauseAction(
-            override var title: String,
-            override var enabled: Boolean,
+        override var title: String,
+        override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
@@ -495,28 +524,28 @@ constructor(
                 val eventTime = SystemClock.uptimeMillis()
 
                 val downEvent =
-                        KeyEvent(
-                                eventTime,
-                                eventTime,
-                                KeyEvent.ACTION_DOWN,
-                                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                                0
-                        )
+                    KeyEvent(
+                        eventTime,
+                        eventTime,
+                        KeyEvent.ACTION_DOWN,
+                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                        0
+                    )
                 audioManager.dispatchMediaKeyEvent(downEvent)
 
                 val upEvent =
-                        KeyEvent(
-                                eventTime,
-                                eventTime,
-                                KeyEvent.ACTION_UP,
-                                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                                0
-                        )
+                    KeyEvent(
+                        eventTime,
+                        eventTime,
+                        KeyEvent.ACTION_UP,
+                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                        0
+                    )
                 audioManager.dispatchMediaKeyEvent(upEvent)
             }
-                    .onFailure {
-                        Timber.e(it, "Could not toggle play/pause")
-                    }
+                .onFailure {
+                    Timber.e(it, "Could not toggle play/pause")
+                }
         }
 
         override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
@@ -525,10 +554,10 @@ constructor(
     }
 
     inner class PrayerAlarmsAction(
-            override var title: String,
-            override var enabled: Boolean,
-            val api: GShockRepository,
-            val prayerAlarmsHelper: PrayerAlarmsHelper
+        override var title: String,
+        override var enabled: Boolean,
+        val api: GShockRepository,
+        val prayerAlarmsHelper: PrayerAlarmsHelper
     ) : Action(title, enabled, RunMode.ASYNC) {
 
         private var lastSet: Long? = null
@@ -536,17 +565,19 @@ constructor(
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             // update every 6 hours
             val setTimeConditionAlwaysConnected =
-                    (enabled &&
-                            watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
-                            (lastSet == null ||
-                                    System.currentTimeMillis() - lastSet!! > 6000 * 60 * 60))
+                (enabled &&
+                        watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
+                        (lastSet == null ||
+                                System.currentTimeMillis() - lastSet!! > 6000 * 60 * 60))
 
             return when (runEnvironment) {
                 RunEnvironment.NORMAL_CONNECTION -> enabled
                 RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
                 RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled
+                RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
+                RunEnvironment.DIRECT_INVOCATION -> false
             }
         }
 
@@ -555,23 +586,23 @@ constructor(
             // vvv 4. CALL THE METHOD ON THE INSTANCE vvv
             CoroutineScope(Dispatchers.Main).launch {
                 prayerAlarmsHelper
-                        .createNextPrayerAlarms(watchFeatureManager.getAlarmCount())
-                        .onSuccess { alarms ->
-                            // getAlarms need to be run first, otherwise setAlarms() will not work
-                            api.getAlarms()
-                            api.setAlarms(ArrayList(alarms))
-                            lastSet = System.currentTimeMillis()
-                        }
-                        .onFailure { error ->
-                            Timber.e("Could not set prayer alarms: ${error.message}")
-                            AppSnackbar("Failed to set prayer alarms: ${error.message}")
-                        }
+                    .createNextPrayerAlarms(watchFeatureManager.getAlarmCount())
+                    .onSuccess { alarms ->
+                        // getAlarms need to be run first, otherwise setAlarms() will not work
+                        api.getAlarms()
+                        api.setAlarms(ArrayList(alarms))
+                        lastSet = System.currentTimeMillis()
+                    }
+                    .onFailure { error ->
+                        Timber.e("Could not set prayer alarms: ${error.message}")
+                        AppSnackbar("Failed to set prayer alarms: ${error.message}")
+                    }
             }
         }
     }
 
     inner class Separator(override var title: String, override var enabled: Boolean) :
-            Action(title, enabled) {
+        Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
         }
@@ -582,16 +613,16 @@ constructor(
     }
 
     inner class MapAction(override var title: String, override var enabled: Boolean) :
-            Action(title, enabled) {
+        Action(title, enabled) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName}")
         }
     }
 
     inner class PhoneDialAction(
-            override var title: String,
-            override var enabled: Boolean,
-            var phoneNumber: String
+        override var title: String,
+        override var enabled: Boolean,
+        var phoneNumber: String
     ) : Action(title, enabled) {
         init {
             Timber.d("PhoneDialAction")
@@ -601,12 +632,12 @@ constructor(
             Timber.d("running ${this.javaClass.simpleName}")
 
             val dialIntent =
-                    Intent(Intent.ACTION_CALL)
-                            .setFlags(
-                                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK or
-                                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                            )
+                Intent(Intent.ACTION_CALL)
+                    .setFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                                Intent.FLAG_ACTIVITY_MULTIPLE_TASK or
+                                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    )
             dialIntent.data = "tel:$phoneNumber".toUri()
             context.startActivity(dialIntent)
         }
@@ -639,9 +670,9 @@ constructor(
     }
 
     inner class PhotoAction(
-            override var title: String,
-            override var enabled: Boolean,
-            var cameraOrientation: CameraOrientation,
+        override var title: String,
+        override var enabled: Boolean,
+        var cameraOrientation: CameraOrientation,
     ) : Action(title, enabled, RunMode.ASYNC) {
         init {
             Timber.d("PhotoAction: orientation: $cameraOrientation")
@@ -651,27 +682,27 @@ constructor(
             Timber.d("running ${this.javaClass.simpleName}")
 
             val cameraSelector =
-                    when (cameraOrientation) {
-                        CameraOrientation.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
-                        CameraOrientation.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
-                    }
+                when (cameraOrientation) {
+                    CameraOrientation.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
+                    CameraOrientation.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
+                }
             val cameraHelper = CameraCaptureHelper(context, cameraSelector)
 
             // Launch a coroutine to take the picture
             CoroutineScope(Dispatchers.Main).launch {
                 cameraHelper
-                        .takePicture()
-                        .onSuccess { result ->
-                            AppSnackbar(context.getString(R.string.image_captured, result))
-                        }
-                        .onFailure { error ->
-                            AppSnackbar(
-                                    context.getString(
-                                            R.string.camera_capture_error,
-                                            error.message ?: "Unknown error"
-                                    )
+                    .takePicture()
+                    .onSuccess { result ->
+                        AppSnackbar(context.getString(R.string.image_captured, result))
+                    }
+                    .onFailure { error ->
+                        AppSnackbar(
+                            context.getString(
+                                R.string.camera_capture_error,
+                                error.message ?: "Unknown error"
                             )
-                        }
+                        )
+                    }
             }
         }
 
@@ -685,10 +716,190 @@ constructor(
             super.load(context, actionsStorage)
             val key = this.javaClass.simpleName + ".cameraOrientation"
             cameraOrientation =
-                    if (LocalDataStorage.get(context, key, "BACK").toString() == "BACK")
-                            CameraOrientation.BACK
-                    else CameraOrientation.FRONT
+                if (LocalDataStorage.get(context, key, "BACK").toString() == "BACK")
+                    CameraOrientation.BACK
+                else CameraOrientation.FRONT
         }
+    }
+
+    inner class SetAlarmAction(
+        override var title: String,
+        override var enabled: Boolean,
+        var alarmHour: Int = 8,
+        var alarmMinute: Int = 0
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName} for $alarmHour:$alarmMinute")
+            viewModelScope.launch {
+                runSuspend(context)
+            }
+        }
+
+        override suspend fun runSuspend(context: Context) {
+            runCatching {
+                val alarms = api.getAlarms()
+                val alarmCount = watchFeatureManager.getAlarmCount()
+                val alarmList = alarms.take(alarmCount).toMutableList()
+
+                val existingIndex = alarmList.indexOfFirst { it.hour == alarmHour && it.minute == alarmMinute }
+                val indexToUpdate = if (existingIndex != -1) {
+                    existingIndex
+                } else {
+                    val disabledIndex = alarmList.indexOfFirst { !it.enabled }
+                    if (disabledIndex != -1) {
+                        disabledIndex
+                    } else {
+                        0
+                    }
+                }
+
+                alarmList[indexToUpdate] = alarmList[indexToUpdate].copy(
+                    hour = alarmHour,
+                    minute = alarmMinute,
+                    enabled = true,
+                    name = ""
+                )
+
+                api.setAlarms(ArrayList(alarmList))
+                ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(alarmList))
+                AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+            }.onFailure {
+                Timber.e(it, "Failed to set watch alarm via voice")
+                AppSnackbar("Failed to set watch alarm")
+            }
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
+            // Not strictly needed if only triggered by voice, but good for persistence if we add UI later
+            LocalDataStorage.put(context, this.javaClass.simpleName + ".hour", alarmHour.toString())
+            LocalDataStorage.put(context, this.javaClass.simpleName + ".minute", alarmMinute.toString())
+            super.save(context, actionsStorage)
+        }
+
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            alarmHour = LocalDataStorage.get(context, this.javaClass.simpleName + ".hour", "8")!!.toInt()
+            alarmMinute = LocalDataStorage.get(context, this.javaClass.simpleName + ".minute", "0")!!.toInt()
+            super.load(context, actionsStorage)
+        }
+    }
+
+    inner class ClearAllAlarmsAction(
+        override var title: String,
+        override var enabled: Boolean
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            viewModelScope.launch {
+                runCatching {
+                    val alarms = api.getAlarms()
+                    val alarmCount = watchFeatureManager.getAlarmCount()
+                    val updatedAlarms = alarms.take(alarmCount).map {
+                        it.copy(enabled = false)
+                    }
+
+                    api.setAlarms(ArrayList(updatedAlarms))
+                    ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(updatedAlarms))
+                    AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+                }.onFailure {
+                    Timber.e(it, "Failed to clear all alarms via voice")
+                    AppSnackbar("Failed to clear alarms")
+                }
+            }
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+    }
+
+    inner class SetSettingsAction(
+        override var title: String,
+        override var enabled: Boolean,
+        var settingName: String = "",
+        var settingValue: String = "",
+        var fullSettings: org.avmedia.gshockapi.model.Settings? = null,
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName} for $settingName=$settingValue")
+            viewModelScope.launch {
+                runSuspend(context)
+            }
+        }
+
+        override suspend fun runSuspend(context: Context) {
+            runCatching {
+                val toSend = fullSettings ?: run {
+                    val current = api.getSettings()
+                    when (settingName) {
+                        "auto light" -> current.copy(autoLight = settingValue.toBoolean())
+                        "power saving" -> current.copy(powerSavingMode = settingValue.toBoolean())
+                        "language" -> current.copy(language = settingValue)
+                        "time format" -> current.copy(timeFormat = settingValue)
+                        "date format" -> current.copy(dateFormat = settingValue)
+                        "light duration" -> current.copy(lightDuration = settingValue)
+                        "button tone" -> {
+                            val enabled = settingValue.toBoolean()
+                            current.copy(buttonTone = enabled, keyVibration = enabled)
+                        }
+                        else -> current
+                    }
+                }
+                api.setSettings(toSend)
+                ProgressEvents.onNext("SettingsUpdated")
+                AppSnackbar(context.getString(R.string.settings_sent_to_watch))
+            }.onFailure {
+                Timber.e(it, "Failed to send settings to watch")
+            }
+            fullSettings = null
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
+    }
+
+    inner class SetTimerAction(
+        override var title: String,
+        override var enabled: Boolean,
+        var timerValueS: Int = 0,
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            viewModelScope.launch {
+                runSuspend(context)
+            }
+        }
+
+        override suspend fun runSuspend(context: Context) {
+            runCatching {
+                api.setTimer(timerValueS)
+                ProgressEvents.onNext("TimerUpdated")
+                AppSnackbar(context.getString(R.string.timer_set))
+            }.onFailure {
+                Timber.e(it, "Failed to send timer to watch")
+            }
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
     }
 
     private fun runIt(action: Action, context: Context) {
@@ -696,12 +907,12 @@ constructor(
             Timber.e(it, "Action failed: '${action.title}' (${action.javaClass.simpleName})")
             when (it) {
                 is SecurityException ->
-                        AppSnackbar(
-                                context.getString(
-                                        R.string.you_have_not_given_permission_to_to_run_action,
-                                        action.title
-                                )
+                    AppSnackbar(
+                        context.getString(
+                            R.string.you_have_not_given_permission_to_to_run_action,
+                            action.title
                         )
+                    )
                 else -> AppSnackbar("Could not run action ${action.title}. Reason: $it")
             }
         }
@@ -711,7 +922,7 @@ constructor(
         viewModelScope.launch {
             isDataLoaded.await()
             val actions =
-                    _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
+                _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
             ProgressEvents.onNext("ActionNames", actions.map { it.title })
             runFilteredActions(context, actions)
         }
@@ -721,8 +932,8 @@ constructor(
         viewModelScope.launch {
             isDataLoaded.await()
             runFilteredActions(
-                    context,
-                    _actions.value.filter { it.shouldRun(RunEnvironment.NORMAL_CONNECTION) }
+                context,
+                _actions.value.filter { it.shouldRun(RunEnvironment.NORMAL_CONNECTION) }
             )
         }
     }
@@ -731,8 +942,8 @@ constructor(
         viewModelScope.launch {
             isDataLoaded.await()
             runFilteredActions(
-                    context,
-                    _actions.value.filter { it.shouldRun(RunEnvironment.ALWAYS_CONNECTED) }
+                context,
+                _actions.value.filter { it.shouldRun(RunEnvironment.ALWAYS_CONNECTED) }
             )
         }
     }
@@ -741,17 +952,17 @@ constructor(
         viewModelScope.launch {
             isDataLoaded.await()
             val actions =
-                    _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
+                _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
             ProgressEvents.onNext("ActionNames", actions.map { it.title })
 
             runFilteredActions(
-                    context,
-                    _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
+                context,
+                _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
             )
 
             // show notification if configured
             if (LocalDataStorage.getTimeAdjustmentNotification(context) &&
-                            !watchFeatureManager.isFeatureSupported("time_adjustment.always_connected")
+                !watchFeatureManager.isFeatureSupported("time_adjustment.always_connected")
             ) { // only create notification for not-always connected watches.
                 showTimeSyncNotification()
             }
@@ -768,37 +979,37 @@ constructor(
 
     private fun showTimeSyncNotification() {
         val dateStr =
-                DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
+            DateFormat.getDateTimeInstance().format(Date(Clock.systemDefaultZone().millis()))
         val watchName = watchFeatureManager.getWatchName()
         val text = "Time set at $dateStr for $watchName watch"
 
         notificationProvider.createNotification(
-                NotificationProvider.NotificationContent(title = "G-Shock Smart Sync", text = text)
+            NotificationProvider.NotificationContent(title = "G-Shock Smart Sync", text = text)
         )
     }
 
     private fun runFilteredActions(context: Context, filteredActions: List<Action>) {
 
         filteredActions.sortedWith(compareBy { it.runMode.ordinal }) // run SYNC actions first
-                .forEach {
-                    if (it.runMode == RunMode.ASYNC) {
-                        Timber.d("------------> running ${it.javaClass.simpleName}")
-                        // actions are run on the main lifecycle scope, because the Actions Fragment
-                        // never gets created.
-                        // Using GlobalScope or a custom scope here to ensure it runs even if VM is
-                        // cleared,
-                        // but ideally this should be tied to a service or work manager.
-                        // For now, mirroring previous behavior but avoiding the custom static
-                        // scope.
-                        CoroutineScope(Dispatchers.Main).launch {
-                            println("Running action ASYNC: ${it.title}")
-                            runIt(it, context)
-                        }
-                    } else {
-                        println("Running action SYNC: ${it.title}")
+            .forEach {
+                if (it.runMode == RunMode.ASYNC) {
+                    Timber.d("------------> running ${it.javaClass.simpleName}")
+                    // actions are run on the main lifecycle scope, because the Actions Fragment
+                    // never gets created.
+                    // Using GlobalScope or a custom scope here to ensure it runs even if VM is
+                    // cleared,
+                    // but ideally this should be tied to a service or work manager.
+                    // For now, mirroring previous behavior but avoiding the custom static
+                    // scope.
+                    CoroutineScope(Dispatchers.Main).launch {
+                        println("Running action ASYNC: ${it.title}")
                         runIt(it, context)
                     }
+                } else {
+                    println("Running action SYNC: ${it.title}")
+                    runIt(it, context)
                 }
+            }
     }
 
     private suspend fun loadData(context: Context): List<Action> {
@@ -819,6 +1030,31 @@ constructor(
         }
 
         return _actions.value
+    }
+
+    fun runFilteredActions(runEnvironment: RunEnvironment) {
+        viewModelScope.launch {
+            isDataLoaded.await()
+            val actionsToRun = _actions.value.filter { it.shouldRun(runEnvironment) }
+            runFilteredActions(appContext, actionsToRun)
+        }
+    }
+
+    suspend fun runSingleActionSuspend(action: Action) {
+        isDataLoaded.await()
+        action.runSuspend(appContext)
+    }
+
+    fun runSingleAction(action: Action) {
+        viewModelScope.launch {
+            runSingleActionSuspend(action)
+        }
+    }
+
+    fun emitUiEvent(event: UiEvent) {
+        viewModelScope.launch {
+            _uiEvents.emit(event)
+        }
     }
 
     fun save() {

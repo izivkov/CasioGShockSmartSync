@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.utils.Utils
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
@@ -128,6 +128,22 @@ class EventViewModel @Inject constructor(
         EventsModel.refresh(ArrayList(_events.value))
     }
 
+    // ProgressEvents silently drops a second subscription registered under a
+    // name it has already seen. Utils.AppHashCode() + "listenForUpdateRequest"
+    // looks unique but isn't: AppHashCode() hashes the calling function's
+    // NAME (a compile-time-constant string), not this instance's identity,
+    // so it produces the exact same subscriber name on every call - this
+    // ViewModel had the same silent-drop-on-recreation bug as
+    // AlarmViewModel/TimeViewModel/BottomNavigationBarWithPermissions did
+    // before their fix. A unique name per instance guarantees this
+    // instance's subscription actually registers.
+    private var eventSubscriptionName: String? = null
+
+    override fun onCleared() {
+        super.onCleared()
+        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
+    }
+
     private fun listenForUpdateRequest() {
         val eventActions = arrayOf(
             EventAction("CalendarUpdated") {
@@ -139,6 +155,9 @@ class EventViewModel @Inject constructor(
                     EventsModel.refresh(ArrayList(newEvents))
                 }
             },
+            EventAction("EventsUpdated") {
+                loadEvents()
+            },
             EventAction("DeviceName") {
                 if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode
                     refreshState()
@@ -149,8 +168,8 @@ class EventViewModel @Inject constructor(
             }
         )
 
-        ProgressEvents.runEventActions(
-            Utils.AppHashCode() + "listenForUpdateRequest",
+        eventSubscriptionName = subscribeToProgressEvents(
+            "EventViewModel-listenForUpdateRequest",
             eventActions
         )
     }

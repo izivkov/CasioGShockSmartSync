@@ -1,0 +1,3 @@
+- [ ] Add implicit timer patterns and improve number parsing in `IntentParser.kt`
+- [ ] Re-enable `TimerUpdated` refresh logic in `TimeViewModel.kt`
+- [ ] Verify build and timer functionality

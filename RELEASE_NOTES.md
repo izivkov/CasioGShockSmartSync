@@ -1,4 +1,22 @@
-# Release Notes - Casio G-Shock Smart Sync v62.0 — September 6, 2026
+# Release Notes - Casio G-Shock Smart Sync v42.9.0 — September 9, 2026
+
+## ✨ Highlights
+
+### 🎤 Voice-Driven Watch Control
+Introduced a powerful, rule-based voice command layer for hands-free watch management:
+*   **Intuitive Mic Trigger**: Relocated the "Tell me what to do" mic button to the upper-right corner of the **Watch Name** card for a cleaner, more integrated Time screen.
+*   **Intelligent Intent Parsing**: Added a robust, typed parsing engine that translates natural speech into watch actions for **Alarms**, **Timers**, and **Settings** (Auto Light, Power Saving).
+*   **Hardware-First Consistency**: Voice commands now follow a "Navigate -> Write -> Refresh" pattern. The app automatically re-reads values from the watch hardware after every voice command, ensuring your screen is always in 100% sync with the actual watch state.
+*   **Seamless Navigation**: Recognized commands now automatically navigate you to the relevant screen, providing instant visual feedback for your voice actions.
+
+### 🎨 Refined UI & Experience
+*   **Direct Invocation Engine**: Unified manual "Send to Watch" buttons and voice triggers into a shared, reliable execution pipeline.
+*   **Localized Feedback**: Voice recognition and system messages are fully supported across all 11 languages, providing a native experience for users worldwide.
+*   **Visual Polish**: Further decluttered the main interface by moving secondary triggers into high-density information cards.
+
+---
+
+# Release Notes - Casio G-Shock Smart Sync v42.8.1 — September 6, 2026
 
 ## ✨ Highlights
 
@@ -14,7 +32,7 @@ Refined the health tracking architecture to achieve maximum protocol reliability
 
 ---
 
-# Release Notes - Casio G-Shock Smart Sync v61.0 — September 6, 2026
+# Release Notes - Casio G-Shock Smart Sync v42.8.1 — September 6, 2026 (cont.)
 
 ## ✨ Highlights
 
@@ -29,7 +47,7 @@ Advanced internal architectural update to the fitness tracking engine for maximu
 
 ---
 
-# Release Notes - Casio G-Shock Smart Sync v60.0 — September 4, 2026
+# Release Notes - Casio G-Shock Smart Sync v42.8.0 — September 4, 2026
 
 ## ✨ Highlights
 
@@ -52,7 +70,7 @@ Major accuracy and usability update for the health tracking engine:
 
 ---
 
-# Release Notes - Casio G-Shock Smart Sync v59.0 — September 4, 2026
+# Release Notes - Casio G-Shock Smart Sync v42.7.9 — September 4, 2026
 
 ## ✨ Highlights
 

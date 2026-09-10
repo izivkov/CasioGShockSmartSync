@@ -23,8 +23,10 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.Alarm
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 
 /**
@@ -62,11 +64,36 @@ class AlarmViewModel @Inject constructor(
     private val _uiEvents = MutableSharedFlow<UiEvent>()
     val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
+    // ProgressEvents silently drops a second subscription registered under a
+    // name it has already seen - which "AlarmViewModel" is, the moment this
+    // ViewModel is ever recreated. A unique name per instance guarantees
+    // this instance's subscription actually registers. See
+    // subscribeToProgressEvents() for the full explanation.
+    private var eventSubscriptionName: String? = null
+
     init {
         loadAlarms()
+        setupEventSubscription()
+    }
+
+    private fun setupEventSubscription() {
+        eventSubscriptionName = subscribeToProgressEvents("AlarmViewModel", arrayOf(
+            org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
+                loadAlarms()
+            }
+        ))
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
     }
 
     private fun loadAlarms() = viewModelScope.launch {
+        fetchAndApplyAlarms()
+    }
+
+    private suspend fun fetchAndApplyAlarms() {
         runCatching {
             alarmNameStorage.load()
 
@@ -93,6 +120,8 @@ class AlarmViewModel @Inject constructor(
             ProgressEvents.onNext("Error")
         }
     }
+
+
 
     private fun updateAlarm(index: Int, transform: (Alarm) -> Alarm) {
         _alarms.update { currentAlarms ->
@@ -173,7 +202,7 @@ class AlarmViewModel @Inject constructor(
             }
 
             // After successfully sending, reload the alarms state from the watch to ensure UI consistency.
-            loadAlarms() // Reload state from the watch after saving.
+            loadAlarms()
 
             AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
         }.onFailure {

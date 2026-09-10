@@ -6,6 +6,8 @@
         android:name="com.your.package.RECEIVE_BOOT_COMPLETED"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Location Permissions -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 

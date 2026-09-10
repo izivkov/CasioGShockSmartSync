@@ -26,6 +26,7 @@ import org.avmedia.gshockapi.model.Settings
 import org.json.JSONObject
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 
@@ -54,6 +55,7 @@ class SettingsViewModel
 constructor(
         private val api: GShockRepository,
         private val watchFeatureManager: IWatchFeatureManager,
+        private val actionsViewModel: ActionsViewModel,
         @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -78,6 +80,9 @@ constructor(
                 initializeSettings()
             },
             EventAction("ConnectionSetupComplete") {
+                initializeSettings()
+            },
+            EventAction("SettingsUpdated") {
                 initializeSettings()
             }
         ))
@@ -490,14 +495,8 @@ constructor(
             settings.font = fontSetting.font.value
         }
 
-        viewModelScope.launch {
-            runCatching {
-                api.setSettings(settings)
-                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
-            }
-                    .onFailure { e ->
-                        AppSnackbar(e.message ?: "Api Error")
-                    }
-        }
+        val action = actionsViewModel.getAction(ActionsViewModel.SetSettingsAction::class.java)
+        action.fullSettings = settings
+        actionsViewModel.runFilteredActions(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)
     }
 }

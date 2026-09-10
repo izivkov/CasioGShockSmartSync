@@ -1,149 +1,183 @@
-# Voice Command Layer — Feature Spec
+# Voice Command Layer — Spec
 
-## Overview
+**Audience:** a developer or an AI coding agent working on the `voice`
+branch of `github.com/izivkov/CasioGShockSmartSync`. This describes the
+architecture **as actually implemented**, not a plan to implement — treat
+it as ground truth for what's built, and update it in place as the code
+changes rather than layering a second version alongside it.
 
-Add a voice-driven command layer to CasioGShockSmartSync. First iteration scope:
+---
 
-- A "Tell me what to do" button on the main watch/time screen.
-- On tap, capture speech, parse it into a known intent, and execute the
-  matching action.
-- Supported intent categories for v1:
-  - **Alarms** — e.g. "wake me up at 6am tomorrow"
-  - **Reminders** — e.g. "remind me dentist appointment on Tuesdays"
-  - **Settings** — e.g. "enable auto light"
-- Per-action enable/disable, so specific voice-triggered actions can be
-  turned off independently (e.g. allow alarms, disable photo capture).
+## Goal
 
-## Constraints
+For every recognized voice command:
 
-- **No proprietary/heavy AI libraries.** No bundled LLM. Use native
-  Android speech-to-text and a rule-based (regex / keyword) intent
-  parser — no cloud NLU service.
-- **F-Droid compatibility.** The app must remain buildable and
-  distributable via F-Droid:
-  - `android.speech.SpeechRecognizer` / `RecognizerIntent` are part of
-    AOSP itself — no proprietary code is linked into the APK, so this
-    doesn't block F-Droid inclusion.
-  - The actual recognition service (typically Google's, via Play
-    Services) runs outside the app, on-device. F-Droid doesn't vet what
-    other apps/services are installed — only what's bundled in ours.
-  - Expect F-Droid to tag the app with a `NonFreeNet` (or similar)
-    anti-feature flag, disclosing that it may connect to a non-free
-    network service when that service is present. This is a disclosure,
-    not a rejection, and is common practice for apps with optional
-    Play-Services-backed features.
-  - Must **gracefully degrade**: check
-    `SpeechRecognizer.isRecognitionAvailable()` and show "voice input
-    unavailable" when no recognition service is present (e.g. on
-    de-Googled devices). Do not hard-require Google Play Services.
-  - Optional future path: swap in **Vosk** (Apache 2.0, fully offline,
-    on-device) if strict FOSS/no-non-free-network-dependency is ever
-    required instead of the graceful-degradation approach.
+1. **Navigate** to the screen that corresponds to the command.
+2. **Run the command on the watch** (the actual BLE write).
+3. **Re-read the values from the watch.** This updates the UI.
 
-## Existing codebase — what's already there
+There is deliberately **no optimistic local UI update** anywhere in this
+flow — the UI never patches itself from the parsed command's parameters.
+It only ever shows what a fresh read from the watch reports. This was a
+conscious choice: the watch is always the source of truth, and an
+optimistic patch can drift from what's actually on the watch if a write
+silently fails or partially applies.
 
-Location: `app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/`
+---
 
-The action-registry and enable/disable infrastructure this feature needs
-**already exists** — no new registry should be built.
+## Flow
 
-- **`ActionsViewModel.Action`** (abstract inner class) — base class for
-  every action. Already carries:
-  - `title: String`
-  - `enabled: Boolean`
-  - `run(context: Context)`
-  - `save()` / `load()` — persistence via `ActionsStorage` /
-    `LocalDataStorage`
-  - `shouldRun(runEnvironment: RunEnvironment): Boolean` — gates
-    execution based on how the action was triggered
-- **`RunEnvironment`** (enum) — existing trigger sources:
-  `NORMAL_CONNECTION`, `ACTION_BUTTON_PRESSED`, `AUTO_TIME_ADJUSTMENT`,
-  `FIND_PHONE_PRESSED`, `ALWAYS_CONNECTED`
-- **`ActionItem.kt`** — Compose UI row with a title and an `AppSwitch`
-  bound to `isEnabled` / `onEnabledChange`. This is the existing
-  enable/disable UI; reuse it, don't build a new settings screen for
-  voice actions specifically.
-- **`ActionsViewModel`**:
-  - `getAction(type: Class<T>): T` — look up a registered action by
-    class.
-  - `updateAction(updatedAction: T)` — update + persist an action.
-  - `runFilteredActions()` — existing dispatch pattern, filters
-    `_actions.value` by `shouldRun(environment)` and runs them (SYNC
-    actions first, then ASYNC via coroutine).
-  - Example existing actions: `SetTimeAction`, `SetEventsAction`
-    (reminders — backed by `CalendarEvents` / `api.setEvents()`),
-    `FindPhoneAction`, `PhotoAction`, `ToggleFlashlightAction`,
-    `PrayerAlarmsAction`, `PhoneDialAction`.
-- **`ActionRunner.kt`** — subscribes to app-wide events
-  (`ButtonPressedInfoReceived`, `RunActions`) and calls the matching
-  `actionsViewModel.runActionsFor...()` method. This is the pattern a
-  voice trigger should follow.
+```
+mic tap
+  → VoiceCommandManager.startListening()      (speech → text, auto-retries once on
+                                                a transient SpeechRecognizer error)
+  → IntentParser.parse(text)                  (text → VoiceCommand)
+  → VoiceCommandTable[VoiceCommand::class]    (VoiceCommand → route + Action class + applyParams)
+  → spec.applyParams(action, command, api)    (fills in the Action's fields)
+  → ProgressEvents.onNext("NavigateTo", VoiceNavigation(spec.route, command))
+  → actionsViewModel.runSingleActionSuspend(action)   (awaits the Action's runSuspend())
+  → action's runSuspend() writes to the watch, then emits its own
+    "<X>Updated" event (e.g. "AlarmsUpdated") carrying exactly what
+    was written
+  → the screen's ViewModel, already subscribed, re-reads from the
+    watch and updates its StateFlow
+```
 
-## What to build
+`VoiceDispatcher.kt` runs this whole sequence; `VoiceCommand.kt` and
+`VoiceCommandTable.kt` define the command types and their routing.
 
-### 1. Speech capture
-- `android.speech.SpeechRecognizer` / `RecognizerIntent` for STT.
-- Check `isRecognitionAvailable()` before offering the feature; show a
-  clear "voice input unavailable" state otherwise.
-- New UI: "Tell me what to do" button on the main time screen, launching
-  a listening state and showing the recognized text.
+---
 
-### 2. Intent parser (new)
-- Small, rule-based (regex + keyword matching + `java.time` for
-  date/time parsing — no ML/LLM).
-- Input: recognized text string.
-- Output: a resolved intent — target `Action` class (or a new
-  action-like handler for settings) plus extracted parameters (time,
-  day-of-week, label, etc.).
-- Unmatched/ambiguous phrases should fail gracefully (e.g. "sorry, I
-  didn't understand that").
+## Command → Action → Screen
 
-### 3. New `RunEnvironment.VOICE_COMMAND`
-- Add to the existing `RunEnvironment` enum.
-- Each relevant `Action.shouldRun()` override adds a `VOICE_COMMAND ->
-  enabled` branch (mirroring the existing pattern used for
-  `ACTION_BUTTON_PRESSED`, etc.), so the existing per-action `enabled`
-  flag also gates voice execution — no new enable/disable mechanism
-  needed.
+| VoiceCommand | Route | Action | Refresh event |
+|---|---|---|---|
+| `SetAlarm(hour, minute)` | Alarms | `SetAlarmAction` | `AlarmsUpdated` (carries `AlarmsWritten`) |
+| `ClearAllAlarms` | Alarms | `ClearAllAlarmsAction` | `AlarmsUpdated` (carries `AlarmsWritten`) |
+| `SetTimer(hours, minutes, seconds)` | Time | `SetTimerAction` | `TimerUpdated` (no payload yet — see Open Items) |
+| `SetSetting(name, enabled)` | Settings | `SetSettingsAction` | `SettingsUpdated` (no payload) |
 
-### 4. Voice dispatcher (new, alongside `ActionRunner.kt`)
-- On a resolved intent: `actionsViewModel.getAction(type)`, check
-  `enabled`, and either call `run(context)` directly or route through
-  the existing `runFilteredActions()` pattern with the new
-  `VOICE_COMMAND` environment.
-- If the action is disabled, respond to the user (toast/snackbar/spoken
-  reply) that it's turned off, rather than silently ignoring the
-  command.
+`IntentParser.kt` sums **every** `<amount> <unit>` pair it finds once it's
+confirmed the phrase mentions "timer" (not just the last one), so "3
+minutes 10 seconds" resolves to both parts, not just the trailing one.
 
-### 5. New action types needed
-- **`SetAlarmAction`** (new) — wraps `AlarmManager`. Params: time
-  (and optionally date, for one-off vs. recurring).
-- **Reminders** — largely covered by existing `SetEventsAction` /
-  `CalendarEvents` / `api.setEvents()`. The parser just needs to
-  produce an `Event` (title + recurrence, e.g. "Tuesdays") to feed into
-  the existing flow.
-- **Settings** (e.g. "enable auto light") — likely *not* a new `Action`
-  subclass. More likely a direct toggle against
-  `LocalDataStorage`/`watchFeatureManager`-style settings storage,
-  parsed and applied by the voice dispatcher directly.
+---
 
-## Effort estimate
+## RunEnvironment.DIRECT_INVOCATION
 
-Given the existing action/registry infrastructure is reused rather than
-rebuilt:
+Actions run in more than one context (watch button press, in-app button,
+voice command). `ActionsViewModel.RunEnvironment` includes
+`DIRECT_INVOCATION` specifically for voice/programmatic single-action
+runs. Each voice-reachable Action overrides `shouldRun()` to allow
+`DIRECT_INVOCATION`:
 
-| Piece | Estimate |
-|---|---|
-| STT capture + "Tell me what to do" UI | 2–3 days |
-| Intent parser (alarm, reminder, settings — rule-based) | ~1 week |
-| `VOICE_COMMAND` environment + dispatcher + `SetAlarmAction` | 3–4 days |
-| Integration testing (Hilt/DI singleton pattern, persistence) | a few days |
-| **Total** | **~2–3 weeks**, one developer familiar with the codebase |
+```kotlin
+override fun shouldRun(environment: RunEnvironment): Boolean =
+    environment == RunEnvironment.DIRECT_INVOCATION || super.shouldRun(environment)
+```
 
-## Open items / follow-ups
-- Decide phrasing coverage for v1 (how much date/time fuzziness to
-  support — "Tuesdays" vs "next Tuesday" vs "every Tuesday").
-- Decide user feedback channel for disabled/unmatched commands (visual
-  only, or also spoken via TTS).
-- Confirm whether "settings" voice commands (e.g. auto light) map to
-  existing `watchFeatureManager` toggles or need new storage keys.
+`SetSettingsAction` additionally accepts a `fullSettings: Settings?`
+field so it can be driven either by a single voice-parsed field
+(`settingName`/`settingValue`) or by a complete `Settings` object (used
+by `SettingsViewModel.sendToWatch()`'s manual "send to watch" button,
+which now also routes through this Action under `DIRECT_INVOCATION`
+rather than writing to the watch directly).
+
+---
+
+## Refresh-after-write
+
+Each destination screen's ViewModel subscribes to its Action's
+"`<X>Updated`" event and re-reads from the watch when it fires. Two
+things make this reliable:
+
+**1. Verify against what was actually written, not just "did anything
+change".** `SetAlarmAction` / `ClearAllAlarmsAction` emit an
+`AlarmsWritten(alarms)` payload — the exact list they wrote.
+`AlarmViewModel.refreshAlarmsAfterExternalWrite()` re-reads and compares
+the read-back against that payload on the fields the watch actually
+stores (hour/minute/enabled), retrying briefly (5 attempts, 400ms apart)
+until it matches or it runs out of attempts. `sendAlarmsToWatch()` (the
+manual button) uses the same function, passing the list it just sent as
+`expected`.
+
+**2. Every ProgressEvents subscription needs a unique name.**
+`ProgressEvents.Subscriber.runEventActions(name, actions)` — from the
+external `GShockAPI` library — silently drops a **second** registration
+under a name it has already seen:
+
+```kotlin
+fun runEventActions(name: String, eventActions: Array<EventAction>) {
+    if (state.subscribers.contains(name)) return   // silently ignored
+    ...
+}
+```
+
+`ProgressEvents` is a process-wide singleton, so this state persists for
+the whole app process — it is **not** reset per Activity or ViewModel.
+Every one of our subscribers (`AlarmViewModel`, `TimeViewModel`,
+`BottomNavigationBarWithPermissions`) is tied to a *recreatable* scope: a
+`@HiltViewModel` can be recreated, and the nav-hosting Composable can be
+recreated on a config change (rotation, etc.). The first time any of
+these is ever recreated during a process's lifetime, its new instance's
+subscription call under the old hardcoded name becomes a silent no-op —
+the event it should be receiving (`AlarmsUpdated`, `NavigateTo`, ...)
+goes nowhere for the rest of that process's life, while a stale closure
+from the previous instance (bound to a ViewModel or NavController that's
+no longer the one on screen) is the only thing left registered.
+
+This was confirmed as the actual root cause of two reported symptoms:
+alarms not refreshing on screen after a voice-set write, and voice
+commands never navigating to the Settings screen. Both are explained by
+this single bug, not by any BLE timing or caching issue.
+
+**Fix:** `utils/ProgressEventsExt.kt` adds
+`subscribeToProgressEvents(baseName, actions): String`, which appends a
+UUID to `baseName` before subscribing, so registration always succeeds,
+and returns the generated name so the caller can unsubscribe it via
+`ProgressEvents.subscriber.stop(name)` when its own scope ends
+(`onCleared()` for a ViewModel, `DisposableEffect.onDispose` for a
+Composable).
+
+**Adopted so far:** `AlarmViewModel`, `BottomNavigationBarWithPermissions`.
+**Not yet migrated** (same latent bug, lower observed impact so far):
+`TimeViewModel` (subscribes as `"TimeViewModel"`). `WatchFeatureManager`
+subscribes as `"WatchFeatureManager"` too, but it's an
+`@Singleton` — never recreated — so it isn't at risk the same way and
+doesn't need this.
+
+---
+
+## Open items
+
+- **`TimeViewModel`'s `"TimerUpdated"` handler** re-reads the timer with
+  a single fixed `delay(500)` and no retry — the same shape
+  `AlarmViewModel` used to have before it was hardened. It hasn't been
+  reported as broken, but it's exposed to the same class of BLE
+  write-then-read race and doesn't yet have `SetTimerAction` emitting a
+  payload to verify against. Worth porting both fixes (unique
+  subscription name + payload-verified retry) if timer refresh turns out
+  to be flaky too.
+- **`TimeViewModel` subscription name** isn't migrated to
+  `subscribeToProgressEvents()` yet — same latent risk as the
+  pre-fix `AlarmViewModel`/`BottomNavigationBarWithPermissions`.
+- **`SettingsViewModel`'s `"SettingsUpdated"` handler** re-reads via
+  `initializeSettings()` with no payload verification — lower risk since
+  settings write comparatively simple state, but same general shape.
+
+---
+
+## Manual test plan
+
+- "Set alarm for 7 30" → navigates to Alarms, alarm 1 shows 7:30 within
+  ~2s of the watch confirming.
+- "Clear all alarms" → navigates to Alarms, all alarms show disabled.
+- "Set a timer for 3 minutes 10 seconds" → Time screen shows a
+  3:10 timer, not 0:10.
+- "Turn on auto light" (and variants: "autolight on", "turn off power
+  saving") → navigates to Settings, the corresponding toggle reflects the
+  new state.
+- Rotate the device (or otherwise force an Activity recreation), then
+  repeat all of the above — this is the scenario that used to silently
+  break navigation and refresh before the subscription-name fix.
+- 

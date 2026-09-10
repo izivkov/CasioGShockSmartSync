@@ -14,7 +14,7 @@ import kotlin.math.ceil
  */
 class ScratchpadManager @Inject constructor(
     private val api: IGShockAPI,
-    @ApplicationContext private val appContext: Context
+    @ApplicationContext private val appContext: Context? = null
 ) {
     private val clients = mutableListOf<ScratchpadClient>()
 
