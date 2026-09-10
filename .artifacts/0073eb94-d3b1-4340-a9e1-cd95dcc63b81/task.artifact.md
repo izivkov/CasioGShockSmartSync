@@ -1,5 +1,5 @@
 - [x] Analyze the crash stack trace
 - [x] Identify root cause in `ScratchpadManager.kt`
 - [x] Research obfuscation impact on reflection and persistence
-- [ ] Disable `minifyEnabled` and `shrinkResources` in `app/build.gradle`
-- [ ] Verify release build
+- [x] Disable `minifyEnabled` and `shrinkResources` in `app/build.gradle`
+- [x] Verify release build

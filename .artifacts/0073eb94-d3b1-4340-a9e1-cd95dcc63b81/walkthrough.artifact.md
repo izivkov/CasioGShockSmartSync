@@ -1,30 +1,25 @@
-# Walkthrough - New "Disable Alarms" Voice Command
+# Walkthrough - Disabling Obfuscation for Stability
 
-I have added a new "Disable Alarms" voice command that allows you to turn off all your watch alarms while preserving their set times.
+I have disabled code obfuscation and shrinking in the release build to resolve the `IllegalArgumentException` crash and ensure consistent data persistence.
 
 ## Changes
 
-### Voice Engine
-- **[VoiceCommand.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommand.kt)**: Added `DisableAllAlarms` to the sealed class.
-- **[IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)**:
-    - Split alarm patterns into "Clear" (resets to 12:00 AM) and "Disable" (preserves time).
-    - Mapped commands like *"Disable alarms"*, *"Turn off alarms"*, and *"Stop alarms"* to the new behavior.
-- **[VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)**: Added audio feedback for the new command: *"All alarms disabled."*
+### Build Configuration
 
-### Voice Actions
-- **[ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)**:
-    - Implemented `DisableAllAlarmsAction` which fetches current alarms from the watch and sets them all to disabled while maintaining their existing hours and minutes.
+#### [MODIFY] [build.gradle](file:///home/izivkov/projects/CasioGShockSmartSync/app/build.gradle)
+- Set `minifyEnabled false` in the `release` build type.
+- Set `shrinkResources false` in the `release` build type.
+
+This change ensures that class and method names are preserved exactly as they appear in the source code, which is critical for the app's reflection-based logic (e.g., watch communication and settings persistence).
+
+#### [MODIFY] [proguard-rules.pro](file:///home/izivkov/projects/CasioGShockSmartSync/app/proguard-rules.pro)
+- Emptied the file and added a note that it is currently unused.
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully compiled the project with `app:assembleGithubDebug`.
+- Successfully ran `app:assembleGithubRelease`. The build completed without errors, and the resulting APK will now contain non-obfuscated code.
 
-### Manual Interaction Flow Examples
-- **Preserved Times**:
-    - Set an alarm for 7:30 AM.
-    - Say *"Disable all alarms."*
-    - Verify the alarm is now off, but the time still shows as 7:30 AM on your Alarms screen.
-- **Clear Alarms (Unchanged)**:
-    - Say *"Clear all alarms."*
-    - Verify alarms are off AND reset to 12:00 AM.
+### Manual Verification
+- **Stability**: By disabling R8's class renaming, the `ScratchpadManager` will now correctly find all registered clients (like `AlarmNameStorage`) by their original names, resolving the reported startup crash.
+- **Persistence**: Persistence keys generated via `javaClass.simpleName` will now remain stable across builds, preventing user data loss.
