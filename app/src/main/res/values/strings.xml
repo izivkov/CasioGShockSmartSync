@@ -104,11 +104,12 @@
         <p><b>Examples:</b></p>
         <li>\"Set alarm for 7:30 AM\"</li>
         <li>\"Wake me up in 8 hours\"</li>
-        <li>\"Set a timer for 10 minutes\"</li>
+        <li>\"Set a timer for 4 minutes 10 seconds\"</li>
         <li>\"Enable auto light\"</li>
         <li>\"Set language to Spanish\"</li>
-        <li>\"Remind me to buy milk tomorrow\"</li>
-        <p><i>Note: Reminders will automatically switch events to Manual Mode.</i></p>
+        <li>\"Disable all alarms\"</li>
+        <li>\"Create a reminder\"</li>
+        <p><i>Note: If events are set to Auto (Google calender), they will switch to manual mode when set by voice command.</i></p>
     ]]></string>
 
     <string name="take_photo">Take a photo</string>

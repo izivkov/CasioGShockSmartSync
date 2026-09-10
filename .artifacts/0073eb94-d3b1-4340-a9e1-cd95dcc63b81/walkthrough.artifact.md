@@ -1,20 +1,19 @@
-# Walkthrough - Proactive Gating & Flexible Cancellation
+# Walkthrough - New "Disable Alarms" Voice Command
 
-I have enhanced the voice interaction flow to catch hardware incompatibilities earlier and added more natural ways to stop a conversation.
+I have added a new "Disable Alarms" voice command that allows you to turn off all your watch alarms while preserving their set times.
 
 ## Changes
 
 ### Voice Engine
+- **[VoiceCommand.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommand.kt)**: Added `DisableAllAlarms` to the sealed class.
+- **[IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)**:
+    - Split alarm patterns into "Clear" (resets to 12:00 AM) and "Disable" (preserves time).
+    - Mapped commands like *"Disable alarms"*, *"Turn off alarms"*, and *"Stop alarms"* to the new behavior.
+- **[VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)**: Added audio feedback for the new command: *"All alarms disabled."*
 
-#### [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
-- **Early Hardware Validation**: Reordered the command processing logic. The app now checks if a feature is supported by your watch (e.g., Reminders on the ABL-100) *before* asking any follow-up questions.
-- **Specific Voice Feedback**: Replaced the feature-specific error with the requested uniform response: **"This feature is not supported on the watch."**
-- **Expanded Abandon Keywords**: Added support for several new ways to end a conversation:
-    - *"Stop"*
-    - *"Abandon"*
-    - *"Abort"*
-    - *"Forget it"*
-- **Unified Logic**: All supported watch features (Alarms, Timers, Settings, Reminders) now follow this proactive gating pattern.
+### Voice Actions
+- **[ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)**:
+    - Implemented `DisableAllAlarmsAction` which fetches current alarms from the watch and sets them all to disabled while maintaining their existing hours and minutes.
 
 ## Verification Results
 
@@ -22,5 +21,10 @@ I have enhanced the voice interaction flow to catch hardware incompatibilities e
 - Successfully compiled the project with `app:assembleGithubDebug`.
 
 ### Manual Interaction Flow Examples
-- **Early Gating**: Connect a watch without reminders. Say *"Add a reminder."* The app immediately responds *"This feature is not supported on the watch"* instead of starting the multi-turn flow.
-- **Flexible Exit**: Start adding a reminder. When asked for the date, say *"Forget it."* The app responds *"Canceled"* and stops the interaction.
+- **Preserved Times**:
+    - Set an alarm for 7:30 AM.
+    - Say *"Disable all alarms."*
+    - Verify the alarm is now off, but the time still shows as 7:30 AM on your Alarms screen.
+- **Clear Alarms (Unchanged)**:
+    - Say *"Clear all alarms."*
+    - Verify alarms are off AND reset to 12:00 AM.

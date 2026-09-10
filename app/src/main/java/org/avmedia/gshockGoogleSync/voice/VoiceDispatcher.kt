@@ -1,24 +1,18 @@
 package org.avmedia.gshockGoogleSync.voice
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel.RunEnvironment.VOICE_COMMAND
-import org.avmedia.gshockGoogleSync.ui.events.EventsModel
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.model.EventDate
 import org.avmedia.gshockapi.model.RepeatPeriod
 import timber.log.Timber
 import java.time.LocalDate
-import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -39,7 +33,7 @@ class VoiceDispatcher @Inject constructor(
 
     fun dispatch(text: String) {
         Timber.d("Voice command received: '$text'")
-        
+
         val lowerText = text.lowercase()
         if (abandonKeywords.any { lowerText.contains(it) }) {
             currentReminder = null
@@ -93,7 +87,7 @@ class VoiceDispatcher @Inject constructor(
             try {
                 spec.applyParams(action, command, api)
                 actionsViewModel.runSingleActionSuspend(action)
-                
+
                 // Increase delay to 1000ms to ensure the "success" beep of the STT is finished
                 delay(1000)
                 val feedback = getFeedbackText(command)
@@ -108,7 +102,7 @@ class VoiceDispatcher @Inject constructor(
 
     private fun handleReminderConversation(text: String) {
         var reminder = currentReminder ?: return
-        
+
         // 1. Title is required
         if (reminder.title.isNullOrBlank()) {
             if (text.isNotBlank()) {
@@ -152,7 +146,10 @@ class VoiceDispatcher @Inject constructor(
                     text.contains("week") || text.contains("weekly") -> RepeatPeriod.WEEKLY
                     text.contains("month") || text.contains("monthly") -> RepeatPeriod.MONTHLY
                     text.contains("year") || text.contains("yearly") -> RepeatPeriod.YEARLY
-                    text.contains("no") || text.contains("never") || text.contains("don't") || text.contains("once") -> RepeatPeriod.NEVER
+                    text.contains("no") || text.contains("never") || text.contains("don't") || text.contains(
+                        "once"
+                    ) -> RepeatPeriod.NEVER
+
                     else -> null
                 }
                 if (repeat != null) {
@@ -170,7 +167,7 @@ class VoiceDispatcher @Inject constructor(
                 }
             }
             return
-         }
+        }
 
         // 4. Finalize
         finalizeReminder(reminder)
@@ -198,26 +195,34 @@ class VoiceDispatcher @Inject constructor(
                 }
 
                 val events = api.getEventsFromWatch()
-                val eventIndex = events.indexOfFirst { it.title.isBlank() }.let { if (it == -1) 0 else it }
-                
+                val eventIndex =
+                    events.indexOfFirst { it.title.isBlank() }.let { if (it == -1) 0 else it }
+
                 val date = reminder.startDate!!
                 val newEvent = Event(
                     title = reminder.title!!,
                     startDate = EventDate(date.year, date.month, date.dayOfMonth),
-                    endDate = EventDate(date.year + 10, date.month, date.dayOfMonth), // Set a far future end date for repeats
+                    endDate = EventDate(
+                        date.year + 10,
+                        date.month,
+                        date.dayOfMonth
+                    ), // Set a far future end date for repeats
                     repeatPeriod = reminder.repeatPeriod ?: RepeatPeriod.NEVER,
                     daysOfWeek = if (reminder.repeatPeriod == RepeatPeriod.WEEKLY) arrayListOf(date.dayOfWeek) else null,
                     enabled = true,
                     incompatible = false
                 )
-                
+
                 val updatedEvents = events.toMutableList()
                 updatedEvents[eventIndex] = newEvent
-                
+
                 api.setEvents(ArrayList(updatedEvents))
                 ProgressEvents.onNext("EventsUpdated")
-                
-                val dateFeedback = if (date == LocalDate.now()) "today" else if (date == LocalDate.now().plusDays(1)) "tomorrow" else "for ${date.month.name.lowercase()} ${date.dayOfMonth}"
+
+                val dateFeedback =
+                    if (date == LocalDate.now()) "today" else if (date == LocalDate.now()
+                            .plusDays(1)
+                    ) "tomorrow" else "for ${date.month.name.lowercase()} ${date.dayOfMonth}"
                 speechFeedback.speak("${reminder.title} added $dateFeedback")
             } catch (e: Exception) {
                 Timber.e(e, "Error adding reminder")
@@ -231,10 +236,13 @@ class VoiceDispatcher @Inject constructor(
             is VoiceCommand.SetAlarm -> {
                 val hour12 = if (command.hour % 12 == 0) 12 else command.hour % 12
                 val amPm = if (command.hour >= 12) "PM" else "AM"
-                val minuteStr = if (command.minute < 10) "0${command.minute}" else "${command.minute}"
+                val minuteStr =
+                    if (command.minute < 10) "0${command.minute}" else "${command.minute}"
                 "Alarm set for $hour12:$minuteStr $amPm"
             }
+
             is VoiceCommand.ClearAllAlarms -> "All alarms cleared"
+            is VoiceCommand.DisableAllAlarms -> "All alarms disabled"
             is VoiceCommand.SetTimer -> {
                 val parts = mutableListOf<String>()
                 if (command.hours > 0) parts.add("${command.hours} ${if (command.hours == 1) "hour" else "hours"}")
@@ -243,6 +251,7 @@ class VoiceDispatcher @Inject constructor(
                 val durationStr = if (parts.isEmpty()) "0 seconds" else parts.joinToString(" ")
                 "Timer set for $durationStr"
             }
+
             is VoiceCommand.SetSetting -> {
                 val valueStr = when (command.value) {
                     "true" -> "enabled"
@@ -251,6 +260,7 @@ class VoiceDispatcher @Inject constructor(
                 }
                 "${command.name.replaceFirstChar { it.uppercase() }} $valueStr"
             }
+
             is VoiceCommand.AddReminder -> "" // Handled in handleReminderConversation
         }
     }

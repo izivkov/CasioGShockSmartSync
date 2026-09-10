@@ -1,4 +1,5 @@
-- [ ] Expand abandon keywords in `VoiceDispatcher.kt`
-- [ ] Move capability gating to the beginning of `dispatch()`
-- [ ] Update unsupported feature voice response
+- [ ] Add `DisableAllAlarms` to `VoiceCommand.kt`
+- [ ] Add disable patterns to `IntentParser.kt`
+- [ ] Add mapping to `VoiceCommandTable.kt`
+- [ ] Implement `DisableAllAlarmsAction` in `ActionViewModel.kt`
 - [ ] Verify build and functionality

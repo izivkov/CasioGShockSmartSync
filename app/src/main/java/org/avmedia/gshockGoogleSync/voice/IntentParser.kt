@@ -13,10 +13,14 @@ class IntentParser @Inject constructor() {
 
     private val clearAlarmsPatterns = listOf(
         Regex("clear (?:all )?alarms?", RegexOption.IGNORE_CASE),
-        Regex("disable (?:all )?alarms?", RegexOption.IGNORE_CASE),
-        Regex("turn off (?:all )?alarms?", RegexOption.IGNORE_CASE),
         Regex("delete (?:all )?alarms?", RegexOption.IGNORE_CASE),
         Regex("remove (?:all )?alarms?", RegexOption.IGNORE_CASE)
+    )
+
+    private val disableAlarmsPatterns = listOf(
+        Regex("disable (?:all )?alarms?", RegexOption.IGNORE_CASE),
+        Regex("turn off (?:all )?alarms?", RegexOption.IGNORE_CASE),
+        Regex("stop (?:all )?alarms?", RegexOption.IGNORE_CASE)
     )
 
     private val alarmPatterns = listOf(
@@ -95,6 +99,11 @@ class IntentParser @Inject constructor() {
         if (clearAlarmsPatterns.any { it.containsMatchIn(cleanedText) }) {
             Timber.d("Matched clear alarms")
             return VoiceCommand.ClearAllAlarms
+        }
+
+        if (disableAlarmsPatterns.any { it.containsMatchIn(cleanedText) }) {
+            Timber.d("Matched disable alarms")
+            return VoiceCommand.DisableAllAlarms
         }
 
         alarmPatterns.firstNotNullOfOrNull { it.find(cleanedText) }?.let { match ->

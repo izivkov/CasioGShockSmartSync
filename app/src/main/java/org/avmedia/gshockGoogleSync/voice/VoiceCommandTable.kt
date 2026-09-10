@@ -33,6 +33,13 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
         featureName = { "Alarms" },
         applyParams = { _, _, _ -> },
     ),
+    VoiceCommand.DisableAllAlarms::class to VoiceCommandSpec(
+        route = Screens.Alarms.route,
+        actionClass = ActionsViewModel.DisableAllAlarmsAction::class.java,
+        isSupported = { WatchInfo.alarmCount > 0 },
+        featureName = { "Alarms" },
+        applyParams = { _, _, _ -> },
+    ),
     VoiceCommand.SetTimer::class to VoiceCommandSpec(
         route = Screens.Time.route,
         actionClass = ActionsViewModel.SetTimerAction::class.java,

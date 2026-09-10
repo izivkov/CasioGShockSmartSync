@@ -208,6 +208,7 @@ constructor(
             )
             add(SetAlarmAction(appContext.getString(R.string.set_alarm), true))
             add(ClearAllAlarmsAction("Clear All Alarms", true)) // Hidden from UI, only for voice
+            add(DisableAllAlarmsAction("Disable All Alarms", true)) // Hidden from UI, only for voice
             add(SetSettingsAction("Set Settings", true)) // Hidden from UI, only for voice
             add(SetTimerAction("Set Timer", true)) // Hidden from UI, only for voice/Send-to-Watch
             add(
@@ -818,6 +819,37 @@ constructor(
                 }.onFailure {
                     Timber.e(it, "Failed to clear all alarms via voice")
                     AppSnackbar("Failed to clear alarms")
+                }
+            }
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.DIRECT_INVOCATION -> enabled
+            RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
+        }
+    }
+
+    inner class DisableAllAlarmsAction(
+        override var title: String,
+        override var enabled: Boolean
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            Timber.d("running ${this.javaClass.simpleName}")
+            viewModelScope.launch {
+                runCatching {
+                    val alarms = api.getAlarms()
+                    val alarmCount = watchFeatureManager.getAlarmCount()
+                    val updatedAlarms = alarms.take(alarmCount).map {
+                        it.copy(enabled = false)
+                    }
+
+                    api.setAlarms(ArrayList(updatedAlarms))
+                    ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(updatedAlarms))
+                    AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+                }.onFailure {
+                    Timber.e(it, "Failed to disable all alarms via voice")
+                    AppSnackbar("Failed to disable alarms")
                 }
             }
         }

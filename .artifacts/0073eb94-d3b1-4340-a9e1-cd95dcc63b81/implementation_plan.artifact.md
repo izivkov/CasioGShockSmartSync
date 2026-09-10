@@ -1,25 +1,40 @@
-# Implementation Plan - Early Feature Gating & Expanded Abandon Keywords
+# Implementation Plan - Disable Alarms Voice Command
 
-Ensure all voice commands are validated against watch hardware capabilities *before* starting any interaction, and add more ways to terminate a multi-turn conversation.
-
-## User Review Required
-
-> [!IMPORTANT]
-> **Proactive Gating**: The app will now check if your watch supports reminders (e.g., ABL-100 doesn't) immediately after you say "Add a reminder", preventing it from asking for details it can never save.
+Add a new "Disable Alarms" voice command that disables all alarms on the watch without resetting their times to 12:00 AM.
 
 ## Proposed Changes
 
 ### [Voice Engine]
 
-#### [MODIFY] [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
-- **Expanded Exit Keywords**: Add "stop", "abandon", "abort", and "forget it" to the termination check.
-- **Early Validation**:
-    - Reorder logic in `dispatch()` to perform `voiceCommandTable` lookup and `isSupported` check *before* handling any specific command types (including multi-turn Reminders).
-    - If a feature is not supported by the hardware, the app will inform you immediately by voice: **"This feature is not supported on the watch"** and stop execution.
+#### [NEW] [VoiceCommand.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommand.kt)
+- Add `DisableAllAlarms` to `VoiceCommand`.
+
+#### [MODIFY] [IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)
+- Update `clearAlarmsPatterns` or create a new `disableAlarmsPatterns` to recognize "Disable Alarms".
+- Map "disable alarms", "turn off alarms", "stop alarms" to `VoiceCommand.DisableAllAlarms`.
+
+#### [MODIFY] [VoiceCommandTable.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommandTable.kt)
+- Add a mapping for `VoiceCommand.DisableAllAlarms`.
+- It will route to the same `ClearAllAlarmsAction` but with a flag or separate action class.
+
+### [Actions]
+
+#### [MODIFY] [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
+- **`DisableAllAlarmsAction`**: Create a new inner class `DisableAllAlarmsAction` (or modify `ClearAllAlarmsAction` to accept a parameter).
+- Logic:
+    1. Fetch current alarms.
+    2. Set `enabled = false` for all slots.
+    3. **Crucial**: Keep existing `hour` and `minute` values.
+    4. Write back to watch and emit `AlarmsUpdated`.
 
 ## Verification Plan
 
 ### Manual Verification
-1.  **Gating (Reminders)**: Connect an `ABL-100`. Say *"Add a reminder."* Verify the app immediately responds *"This feature is not supported on the watch"* instead of asking *"What is the reminder for?"*.
-2.  **Gating (Settings)**: Say *"Enable auto light"* on a watch that doesn't support it. Verify the same generic "not supported" voice feedback.
-3.  **Abandonment**: Start a reminder flow. When asked for the date, say *"Forget it."* Verify the conversation ends and the app responds *"Canceled."* (Also test *"Stop"*, *"Abort"*, and *"Abandon"*).
+1.  **Disable Alarms**:
+    - Have some alarms set at non-12:00 times (e.g., 7:30 AM).
+    - Say *"Disable all alarms."*
+    - Verify they are disabled but still show "07:30" on the Alarms screen.
+2.  **Clear Alarms (Regression)**:
+    - Say *"Clear all alarms."*
+    - Verify they are disabled AND reset to 12:00 AM.
+3.  **Voice Feedback**: Verify app says "All alarms disabled" for the new command.
