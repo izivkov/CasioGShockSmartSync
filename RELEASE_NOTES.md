@@ -2,7 +2,7 @@
 
 ## ✨ Highlights
 
-a cou### 🎤 Next-Generation Voice Control
+### 🎤 Next-Generation Voice Control
 Introduced a powerful, natural-language voice command layer for comprehensive hands-free watch management:
 *   **Intuitive Interface**: A new, compact control panel in the **Watch Name** card houses the microphone trigger, a **Verbose Mode** toggle, and a dedicated **Help (Info)** button with usage examples.
 *   **Conversational Reminders**: Implemented multi-turn voice logic for creating watch reminders. The app intelligently asks for missing details (Date, Repeat period) and automatically starts the microphone for your response.
