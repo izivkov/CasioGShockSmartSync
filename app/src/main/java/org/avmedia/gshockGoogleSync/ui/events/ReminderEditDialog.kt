@@ -131,15 +131,17 @@ fun ReminderEditDialog(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        RepeatPeriod.entries.forEach { period ->
-                            DropdownMenuItem(
-                                text = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                                onClick = {
-                                    repeatPeriod = period
-                                    expanded = false
-                                }
-                            )
-                        }
+                        RepeatPeriod.entries
+                            .filter { it != RepeatPeriod.DAILY }
+                            .forEach { period ->
+                                DropdownMenuItem(
+                                    text = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                    onClick = {
+                                        repeatPeriod = period
+                                        expanded = false
+                                    }
+                                )
+                            }
                     }
                 }
 

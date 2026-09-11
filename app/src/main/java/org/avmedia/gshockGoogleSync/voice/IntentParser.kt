@@ -53,9 +53,10 @@ class IntentParser @Inject constructor() {
     private val dateFormatPattern = Regex("(?:set|change)?\\s*(?:the\\s*)?date format\\s*(?:to)?\\s*(month day|day month|month-day|day-month)", RegexOption.IGNORE_CASE)
     private val lightDurationPattern = Regex("(?:set|change)?\\s*(?:the\\s*)?(?:light|illumination) (?:duration|period)\\s*(?:to)?\\s*(1\\.5|2|3|4|5) (?:seconds?|secs?)?", RegexOption.IGNORE_CASE)
     private val buttonTonePattern = Regex("(turn (on|off)|enable|disable|change|set)\\s*(?:the\\s*)?(button sound|button tone|sound)\\s*(?:to)?\\s*(on|off)?", RegexOption.IGNORE_CASE)
+    private val helpPattern = Regex("help", RegexOption.IGNORE_CASE)
 
     private val reminderPatterns = listOf(
-        Regex("(?:remind me|add (?:a |an )?(?:new )?(?:reminder|event)|create (?:a |an )?(?:new )?(?:reminder|event)|new reminder)(?: (?:to )?(.*))?", RegexOption.IGNORE_CASE)
+        Regex("(?:remind me|add (?:a |an )?(?:new )?(?:reminder|event)|create (?:a |an )?(?:new )?(?:reminder|event)|set (?:a |an )?(?:new )?(?:reminder|event)|new reminder)(?: (?:to )?(.*))?", RegexOption.IGNORE_CASE)
     )
 
     private val fillerRegex = Regex("\\b(um|uh|mm|ah|er|like)\\b", RegexOption.IGNORE_CASE)
@@ -99,6 +100,11 @@ class IntentParser @Inject constructor() {
         if (clearAlarmsPatterns.any { it.containsMatchIn(cleanedText) }) {
             Timber.d("Matched clear alarms")
             return VoiceCommand.ClearAllAlarms
+        }
+
+        if (helpPattern.containsMatchIn(cleanedText)) {
+            Timber.d("Matched help command")
+            return VoiceCommand.Help
         }
 
         if (disableAlarmsPatterns.any { it.containsMatchIn(cleanedText) }) {
@@ -221,7 +227,6 @@ class IntentParser @Inject constructor() {
     private fun extractRepeat(payload: String): RepeatPeriod? {
         val lower = payload.lowercase()
         return when {
-            lower.contains("every day") || lower.contains("daily") -> RepeatPeriod.DAILY
             lower.contains("every week") || lower.contains("weekly") -> RepeatPeriod.WEEKLY
             lower.contains("every month") || lower.contains("monthly") -> RepeatPeriod.MONTHLY
             lower.contains("every year") || lower.contains("yearly") -> RepeatPeriod.YEARLY

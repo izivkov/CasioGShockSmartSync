@@ -1,5 +1,6 @@
-- [x] Analyze the crash stack trace
-- [x] Identify root cause in `ScratchpadManager.kt`
-- [x] Research obfuscation impact on reflection and persistence
-- [x] Disable `minifyEnabled` and `shrinkResources` in `app/build.gradle`
-- [x] Verify release build
+- [x] Add `Help` to `VoiceCommand.kt`
+- [x] Add help pattern to `IntentParser.kt`
+- [x] Add `Help` entry to `VoiceCommandTable.kt`
+- [x] Implement help logic in `VoiceDispatcher.kt`
+- [x] Update initial voice prompt in `TimeViewModel.kt`
+- [x] Verify build and functionality

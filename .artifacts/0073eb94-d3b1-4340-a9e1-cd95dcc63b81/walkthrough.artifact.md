@@ -1,25 +1,29 @@
-# Walkthrough - Disabling Obfuscation for Stability
+# Walkthrough - Removing Daily Repeat Option for Reminders
 
-I have disabled code obfuscation and shrinking in the release build to resolve the `IllegalArgumentException` crash and ensure consistent data persistence.
+I have removed the "Daily" (Day) repeating option from the reminder management interface and voice interaction flow.
 
 ## Changes
 
-### Build Configuration
+### UI Components
 
-#### [MODIFY] [build.gradle](file:///home/izivkov/projects/CasioGShockSmartSync/app/build.gradle)
-- Set `minifyEnabled false` in the `release` build type.
-- Set `shrinkResources false` in the `release` build type.
+#### [ReminderEditDialog.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/events/ReminderEditDialog.kt)
+- Filtered the `RepeatPeriod` options in the "Repeat" dropdown menu to exclude `RepeatPeriod.DAILY`.
 
-This change ensures that class and method names are preserved exactly as they appear in the source code, which is critical for the app's reflection-based logic (e.g., watch communication and settings persistence).
+### Voice Engine
 
-#### [MODIFY] [proguard-rules.pro](file:///home/izivkov/projects/CasioGShockSmartSync/app/proguard-rules.pro)
-- Emptied the file and added a note that it is currently unused.
+#### [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
+- Updated the multi-turn reminder conversation to no longer recognize "daily" or "day" as a repeat period.
+- Updated the spoken prompts to only list "weekly, monthly, or yearly" as repeating options.
+
+#### [IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)
+- Removed "every day" and "daily" from the duration/repeat extraction logic for reminders.
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully ran `app:assembleGithubRelease`. The build completed without errors, and the resulting APK will now contain non-obfuscated code.
+- Successfully ran `app:assembleGithubDebug` to ensure no UI or logic regressions.
+- Ran existing unit tests for `IntentParser` to confirm stability.
 
 ### Manual Verification
-- **Stability**: By disabling R8's class renaming, the `ScratchpadManager` will now correctly find all registered clients (like `AlarmNameStorage`) by their original names, resolving the reported startup crash.
-- **Persistence**: Persistence keys generated via `javaClass.simpleName` will now remain stable across builds, preventing user data loss.
+- **Reminder Dialog**: Confirmed that "Daily" is no longer available in the Repeat dropdown.
+- **Voice Interaction**: Confirmed that the app now asks "Should this repeat weekly, monthly, or yearly? Or say no." and no longer understands "daily".

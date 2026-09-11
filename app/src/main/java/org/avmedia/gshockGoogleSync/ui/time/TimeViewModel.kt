@@ -217,7 +217,7 @@ class TimeViewModel @Inject constructor(
                     }
 
                     if (_state.value.isVoiceVerbose) {
-                        voiceSpeechFeedback.speak("Tell me what to do") {
+                        voiceSpeechFeedback.speak("Tell me what to do or say 'Help'") {
                             startListening()
                         }
                     } else {

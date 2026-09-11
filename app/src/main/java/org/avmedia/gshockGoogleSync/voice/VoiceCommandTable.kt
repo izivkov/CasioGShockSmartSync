@@ -77,4 +77,9 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
         featureName = { "Reminders" },
         applyParams = { _, _, _ -> }, // Handled by VoiceDispatcher.handleReminderConversation
     ),
+    VoiceCommand.Help::class to VoiceCommandSpec(
+        route = Screens.Time.route,
+        actionClass = ActionsViewModel.SetTimeAction::class.java,
+        applyParams = { _, _, _ -> }, // Handled by VoiceDispatcher.dispatch
+    ),
 )
