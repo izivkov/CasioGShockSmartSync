@@ -93,6 +93,14 @@ class IntentParserTest {
     }
 
     @Test
+    fun testParseSetSettingsToDefault() {
+        assertEquals(VoiceCommand.SetSettingsToDefault, intentParser.parse("set settings to default"))
+        assertEquals(VoiceCommand.SetSettingsToDefault, intentParser.parse("reset settings to defaults"))
+        assertEquals(VoiceCommand.SetSettingsToDefault, intentParser.parse("settings to default"))
+        assertEquals(VoiceCommand.SetSettingsToDefault, intentParser.parse("reset settings"))
+    }
+
+    @Test
     fun testUnmatchedTextReturnsNull() {
         val result = intentParser.parse("hello world")
         assertNull(result)

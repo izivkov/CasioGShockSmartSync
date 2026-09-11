@@ -82,4 +82,9 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
         actionClass = ActionsViewModel.SetTimeAction::class.java,
         applyParams = { _, _, _ -> }, // Handled by VoiceDispatcher.dispatch
     ),
+    VoiceCommand.SetSettingsToDefault::class to VoiceCommandSpec(
+        route = Screens.Settings.route,
+        actionClass = ActionsViewModel.SetSettingsToDefaultAction::class.java,
+        applyParams = { _, _, _ -> },
+    ),
 )

@@ -1,29 +1,32 @@
-# Walkthrough - Removing Daily Repeat Option for Reminders
+# Walkthrough - New Voice Command: "Set settings to default"
 
-I have removed the "Daily" (Day) repeating option from the reminder management interface and voice interaction flow.
+I have added a new voice command that allows you to reset your watch settings to their smart defaults hands-free.
 
 ## Changes
 
-### UI Components
-
-#### [ReminderEditDialog.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/events/ReminderEditDialog.kt)
-- Filtered the `RepeatPeriod` options in the "Repeat" dropdown menu to exclude `RepeatPeriod.DAILY`.
-
 ### Voice Engine
 
-#### [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
-- Updated the multi-turn reminder conversation to no longer recognize "daily" or "day" as a repeat period.
-- Updated the spoken prompts to only list "weekly, monthly, or yearly" as repeating options.
+#### [VoiceCommand.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommand.kt)
+- **New Command**: Added `SetSettingsToDefault` to the `VoiceCommand` sealed class.
 
 #### [IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)
-- Removed "every day" and "daily" from the duration/repeat extraction logic for reminders.
+- **Pattern Recognition**: Added a regex to recognize phrases like *"Set settings to default"*, *"Reset settings to defaults"*, and *"Settings to default"*.
+
+#### [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
+- **Audio Feedback**: Added spoken confirmation: *"Settings reset to defaults"*.
+- **Help Update**: Added the new command to the "Help" guide so users can discover it.
+
+### Voice Actions
+
+#### [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
+- **New Action**: Implemented `SetSettingsToDefaultAction` which calculates the smart defaults (matching the logic in `SettingsViewModel`) and writes them directly to the watch hardware.
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully ran `app:assembleGithubDebug` to ensure no UI or logic regressions.
-- Ran existing unit tests for `IntentParser` to confirm stability.
+- Successfully ran unit tests in `IntentParserTest.kt` (9 passed, 0 failed).
+- Verified the build with `app:assembleGithubDebug`.
 
-### Manual Verification
-- **Reminder Dialog**: Confirmed that "Daily" is no longer available in the Repeat dropdown.
-- **Voice Interaction**: Confirmed that the app now asks "Should this repeat weekly, monthly, or yearly? Or say no." and no longer understands "daily".
+### Manual Interaction
+- **Reset Flow**: Say *"Set settings to default"*. The app calculates the best settings for your current locale and watch model, sends them to the watch, and speaks *"Settings reset to defaults"*.
+- **UI Sync**: The Settings screen automatically refreshes to show the new default values.

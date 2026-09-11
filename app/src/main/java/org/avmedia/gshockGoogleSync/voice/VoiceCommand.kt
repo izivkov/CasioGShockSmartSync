@@ -16,6 +16,7 @@ sealed class VoiceCommand {
     ) : VoiceCommand()
 
     object Help : VoiceCommand()
+    object SetSettingsToDefault : VoiceCommand()
 }
 
 data class VoiceNavigation(val route: String, val command: VoiceCommand)

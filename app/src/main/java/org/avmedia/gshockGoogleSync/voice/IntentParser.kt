@@ -53,6 +53,7 @@ class IntentParser @Inject constructor() {
     private val dateFormatPattern = Regex("(?:set|change)?\\s*(?:the\\s*)?date format\\s*(?:to)?\\s*(month day|day month|month-day|day-month)", RegexOption.IGNORE_CASE)
     private val lightDurationPattern = Regex("(?:set|change)?\\s*(?:the\\s*)?(?:light|illumination) (?:duration|period)\\s*(?:to)?\\s*(1\\.5|2|3|4|5) (?:seconds?|secs?)?", RegexOption.IGNORE_CASE)
     private val buttonTonePattern = Regex("(turn (on|off)|enable|disable|change|set)\\s*(?:the\\s*)?(button sound|button tone|sound)\\s*(?:to)?\\s*(on|off)?", RegexOption.IGNORE_CASE)
+    private val settingsDefaultPattern = Regex("(?:set|change|reset)?\\s*(?:the\\s*)?settings(?:\\s*(?:to)?\\s*defaults?)?", RegexOption.IGNORE_CASE)
     private val helpPattern = Regex("help", RegexOption.IGNORE_CASE)
 
     private val reminderPatterns = listOf(
@@ -171,6 +172,11 @@ class IntentParser @Inject constructor() {
                 else -> false
             }
             return VoiceCommand.SetSetting("button tone", enabled.toString())
+        }
+
+        if (settingsDefaultPattern.containsMatchIn(cleanedText)) {
+            Timber.d("Matched settings default pattern")
+            return VoiceCommand.SetSettingsToDefault
         }
 
         if (cleanedText.contains("auto light") || cleanedText.contains("power saving") || cleanedText.contains("light") || cleanedText.contains("power save")) {
