@@ -6,7 +6,7 @@
 
 [![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
 [![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
-[![Version](https://img.shields.io/badge/version-25.7-blue)](https://github.com/izivkov/CasioGShockSmartSync/releases)
+[![Version](https://img.shields.io/badge/version-42.9.4-blue)](https://github.com/izivkov/CasioGShockSmartSync/releases)
 [![Connection Speed](https://img.shields.io/badge/Connection-Fast-green)](#)
 
 **G-Shock Smart Sync** is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches. It allows you to control your watch, sync data, and configure settings **without a Casio ID**.
@@ -18,11 +18,13 @@ It offers a faster, privacy-focused, and more powerful alternative to the offici
 ## Key Features
 
 - **No Account Required**: Skip the Casio ID login entirely.
+- **Voice Control**: Manage alarms, timers, settings, and reminders using natural language commands.
 - **Calendar Sync**: Push your calendar events (Google, Samsung, etc.) to your watch as reminders.
 - **Auto Timezone**: Automatically adjusts watch time when you travel.
 - **Remote Control**: Use your watch buttons to take photos, control music, or launch voice assistants.
-- **Alarm Sync**: Configure watch alarms easily from your phone.
+- **Alarm & Timer Sync**: Configure watch alarms and timers easily from your phone.
 - **Phone Finder**: Trigger a loud alarm on your phone to find it.
+- **Health Integration**: View step counts and fitness metrics for supported models.
 
 ---
 
@@ -46,8 +48,6 @@ The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
 | **MT-G / MR-G** | MTG-B1000/B3000/B3100, MRG-B5000/B2100 | Premium metal and carbon models |
 | **Others** | ABL-100WE, GBD-100/200, GBD-H1000/H2000, GPR-B1000 | Step trackers, GPS, and sensors |
 
-> **Note**: While these watches connect, not all specific hardware features (like fitness tracking steps on GBD models) may be fully supported yet.
-
 ---
 
 ## App Walkthrough
@@ -68,16 +68,18 @@ The app communicates directly with the watch via BLE. Connection is typically mu
 
 <br clear="all"/>
 
-### 2. Time Setting
+### 2. Time Setting & Voice Control
 
 <img src="images/TimeScreen.png" width="200" align="right" style="margin-left: 20px;">
 
-Manage your watch's timekeeping effortlessly.
+Manage your watch's timekeeping and control features via voice.
 
+- **Voice Control**: Tap the microphone icon on the watch name card to issue voice commands. 
+    - Say *"Help"* for a full list of supported commands.
+    - Examples: *"Set alarm at 7:30 am"*, *"Set timer for 5 minutes"*, *"Disable all alarms"*, *"Reset settings"*.
 - **Local Time**: Displays the current time from your phone.
 - **Send to Watch**: Tap the button to sync your phone's time, timezone, and DST settings to the watch immediately.
-- **Home Time**: Shows the 'Home' city configured on the watch.
-- **Battery**: Displays the current battery level of the watch (e.g., High, Medium, Low).
+- **Battery & Temp**: Displays the current battery level and temperature reported by the watch.
 
 <br clear="all"/>
 
@@ -95,7 +97,7 @@ Read and configure the alarms stored on your watch.
 
 <br clear="all"/>
 
-### 4. Events (Calendar Sync)
+### 4. Events (Calendar & Reminders)
 
 <img src="images/EventsScreen.png" width="200" align="right" style="margin-left: 20px;">
 
@@ -103,9 +105,8 @@ Sync your Android calendars to your watch!
 
 - **Upcoming Events**: Lists future events from your phone's calendars.
 - **Send to Watch**: Pushes these events to the watch's Reminder feature.
-- **Compatibility**: Supports standard Android calendar events. Complex recurrence rules might show as "Incompatible".
-
-The watch will display these as reminders with the date and title.
+- **Manual Mode**: Switch to manual mode to create reminders directly in the app that won't be overwritten by your phone calendar.
+- **Transliteration**: Automatically converts Cyrillic and other unsupported characters to Latin for watch compatibility.
 
 <br clear="all"/>
 
@@ -119,12 +120,10 @@ Turn your watch into a remote control. Assign actions to button presses on the w
   - **Find Phone**: Make your phone ring loudly.
   - **Take Photo**: Snap a picture with your phone's camera.
   - **Flashlight**: Turn on your phone's flashlight.
-  - **Next Track**: Skip music tracks on your phone.
+  - **Media Control**: Play/Pause and Next Track for music.
   - **Voice Assist**: Launch Google Assistant.
-  - **Set Prayer Alarms**: Set the watch's 5 alarms to Islamic Prayer Times
+  - **Set Prayer Alarms**: Set the watch's 5 alarms to Islamic Prayer Times.
 - **How to use**: Short-press the lower-right button on the watch (when in Time mode) to trigger the selected action.
-
-*Note*: The **Take Photo** action requires the app to be in the foreground. If the app is in the background, the action will not work.
 
 <br clear="all"/>
 
@@ -134,10 +133,22 @@ Turn your watch into a remote control. Assign actions to button presses on the w
 
 Configure app and watch preferences.
 
-- **Watch Settings**: Adjust specific watch configurations (light duration, power saving, etc.).
-- **App Settings**: Configure theme, behavior, and advanced options.
+- **Watch Settings**: Adjust light duration, power saving, date format, language, and more.
+- **App Settings**: Configure theme, connection behavior, and notifications.
+- **Smart Defaults**: Easily reset all settings to optimal defaults based on your phone's locale and watch model.
 
 <br clear="all"/>
+
+---
+
+## Privacy
+
+G-Shock Smart Sync is built with privacy in mind. We do not require an account, and we do not collect your personal data.
+- **No Account Required**: Use all features without a Casio ID.
+- **Local Processing**: All data stays on your device.
+- **Open Source**: The code is transparent and auditable.
+
+Read our full [Privacy Policy](https://izivkov.github.io/CasioGShockSmartSync/) for more details.
 
 ---
 
@@ -156,11 +167,11 @@ We welcome contributions!
 
 | Project | Description |
 |:---|:---|
-| [**GShockAPI**](https://github.com/izivkov/GShockAPI) | The core Android library that **this app is built on**. It encapsulates all low-level Bluetooth communication and watch protocol logic (time sync, alarms, reminders, DST, etc.) into a clean Kotlin API. This project consumes it as a direct dependency via `implementation(libs.gshockapi)`. You can also use it independently to **build your own G-Shock Android app**. |
-| [**G-Shock Time Server**](https://github.com/izivkov/GShockTimeServer) | A Python script that acts as a headless time server, automatically syncing the time on G-Shock watches over Bluetooth — ideal for Raspberry Pi or other always-on Linux devices. |
-| [**G-Shock API for ESP32**](https://github.com/izivkov/gshock-api-esp32) | A MicroPython firmware that turns a low-cost ESP32 microcontroller (with optional touch LCD display) into a standalone, always-on G-Shock time server — no phone or PC required. Watches connect automatically up to four times a day, or on-demand via a button press. |
-| [**G-Shock Smart Sync Webapp**](https://github.com/izivkov/gshock-smart-sync-webapp) | Is an experimental, web-based app that provides G-Shock watch synchronization from a browser, enabling time sync, alarms, reminders, and remote control via Web Bluetooth — no Android required. |
-| [**gshock_api**](https://github.com/izivkov/gshock_api) | A **Python API library** for G-Shock watches, featuring a pure functional architecture. It supports a wide range of models and provides a clean interface for time sync, settings, and notifications via BLE. |
+| [**GShockAPI**](https://github.com/izivkov/GShockAPI) | The core Android library that **this app is built on**. It encapsulates all low-level Bluetooth communication and watch protocol logic into a clean Kotlin API. |
+| [**G-Shock Time Server**](https://github.com/izivkov/GShockTimeServer) | A Python script that acts as a headless time server for Raspberry Pi or other always-on Linux devices. |
+| [**G-Shock API for ESP32**](https://github.com/izivkov/gshock-api-esp32) | Standalone G-Shock time server for ESP32 microcontrollers — no phone or PC required. |
+| [**G-Shock Smart Sync Webapp**](https://github.com/izivkov/gshock-smart-sync-webapp) | Experimental web-based app for watch synchronization from a browser via Web Bluetooth. |
+| [**gshock_api**](https://github.com/izivkov/gshock_api) | A **Python API library** for G-Shock watches, featuring a pure functional architecture. |
 
 ---
 
@@ -185,13 +196,7 @@ Android has a built-in BLE packet logger. Enable it via Developer Options:
 adb bugreport bugreport.zip
 ```
 
-The HCI log is embedded in the bugreport. Alternatively, on many devices it is available directly at:
-
-```bash
-adb pull /sdcard/btsnoop_hci.log
-```
-
-> **Tip**: The exact path may differ. Search inside the bugreport ZIP for a file named `btsnoop_hci.log`.
+The HCI log is embedded in the bugreport. Alternatively, on many devices it is available directly at `/sdcard/btsnoop_hci.log`.
 
 #### 2. Install Wireshark
 
@@ -219,7 +224,6 @@ Or download the installer from [wireshark.org](https://www.wireshark.org/downloa
 | ATT notifications | `btatt.opcode == 0x1b` |
 
 4. Right-click a packet → **Follow → Bluetooth ATT Stream** to trace a full conversation.
-5. The **Packet Bytes** pane at the bottom shows the raw hex payload sent to/from the watch.
 
 ---
 

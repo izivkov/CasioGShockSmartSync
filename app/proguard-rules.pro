@@ -9,14 +9,23 @@
 -keep class org.avmedia.gshockGoogleSync.MainEventHandler { *; }
 -keep class org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor { *; }
 -keep class org.avmedia.gshockGoogleSync.services.DeviceManager { *; }
--keep class org.avmedia.gshockGoogleSync.services.NotificationMonitorService { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel { *; }
+-keep class org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel$* { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.actions.ActionRunner { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.others.PreConnectionViewModel { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.common.WatchFeatureManager { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.actions.PhoneFinder { *; }
+-keep class org.avmedia.gshockGoogleSync.data.repository.GShockRepository { *; }
+-keep class org.avmedia.gshockGoogleSync.utils.Utils { *; }
+-keep class org.avmedia.gshockGoogleSync.utils.Utils$* { *; }
 
 -keep class org.avmedia.gshockGoogleSync.ui.others.ActionNameHandler { *; }
+
+# Keep all Enums as they are often used in 'when' expressions and for serialization
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
 
 -keepclassmembernames class * {
     *** onCreate(...);

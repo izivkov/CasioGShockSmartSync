@@ -1,58 +1,55 @@
-# Implementation Plan - Enable Code Obfuscation and Shrinking
+# Implementation Plan - Fix Obfuscation-Related Action Button Failure
 
-Configure the project to build successfully with R8 minification, obfuscation, and resource shrinking enabled. This involves setting up robust ProGuard rules to protect code that relies on reflection and stack trace analysis.
+Investigate and fix the issue where obfuscation prevents actions from running when the watch's action button is pressed.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Reflection & Stack Trace Fragility**: The application uses several patterns that are vulnerable to obfuscation:
-> 1.  **`javaClass.simpleName`**: Used in `ScratchpadManager` to identify bit-packing order and in `ActionViewModel` for persistence keys.
-> 2.  **`Thread.currentThread().stackTrace`**: Used in `Utils.AppHashCode()` to generate unique event subscription IDs.
-> 3.  **`javaClass.canonicalName`**: Used in `SettingsViewModel` for event subscriptions.
-> 4.  **`GShockAPI` Library**: Internal logic for packet routing and capability detection.
-> 5.  **`Gson`**: Serialization of settings and models.
-
-> [!WARNING]
-> I will add explicit `-keep` rules to protect these areas. Without these rules, the app would crash or lose user settings in a release build.
+> **Root Cause Identified**: The investigation points to two primary obfuscation-related failures:
+> 1.  **Event Bus Collisions**: `Utils.AppHashCode()` relies on the calling function's name from the stack trace. In release builds, R8 mangles these names (e.g., several different setup methods might be renamed to `a`), causing multiple components to share the same event subscription ID. This results in the last component to initialize overwriting the previous ones, silently breaking their event listeners.
+> 2.  **Persistence Key Collisions**: `ActionsViewModel` uses `javaClass.simpleName` to generate keys for saving action states. If multiple action classes are renamed to the same name (e.g., `b`), their enabled states and settings will collide in local storage, leading to incorrect behavior or "disabled" actions.
 
 ## Proposed Changes
 
-### [Build Configuration]
+### [Core Utilities]
 
-#### [MODIFY] [build.gradle](file:///home/izivkov/projects/CasioGShockSmartSync/app/build.gradle)
-- Set `minifyEnabled true` and `shrinkResources true` in the `release` build type.
+#### [MODIFY] [Utils.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/utils/Utils.kt)
+- **Deprecate `AppHashCode()`**: It is too fragile for obfuscated builds.
+- Recommend using `subscribeToProgressEvents()` instead.
+
+### [Event Bus Refactoring]
+
+#### [MODIFY] [ActionRunner.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionRunner.kt)
+- Use `subscribeToProgressEvents()` with unique base names for both the button actions and message-based actions. This ensures subscriptions are unique and never collide.
+
+#### [MODIFY] [MainEventHandler.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/MainEventHandler.kt)
+- Use `subscribeToProgressEvents()` for global event handling.
+
+#### [MODIFY] (Other components)
+- Update `CompanionDevicePresenceMonitor`, `DeviceManager`, and `NotificationMonitorService` to use the same unique-ID-safe subscription method.
+
+### [Persistence Hardening]
+
+#### [MODIFY] [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
+- Add a stable `val id: String` property to the `Action` base class.
+- Initialize each action with a hardcoded, unique ID (e.g., "ToggleFlashlight", "FindPhone").
+- Update `save()` and `load()` to use this `id` instead of `javaClass.simpleName`. This guarantees keys remain consistent and unique regardless of obfuscation.
+
+### [Obfuscation Rules]
 
 #### [MODIFY] [proguard-rules.pro](file:///home/izivkov/projects/CasioGShockSmartSync/app/proguard-rules.pro)
-- Add a comprehensive set of rules:
-    - Preserve `ScratchpadClient` and `Action` implementations to keep their original names.
-    - Preserve `ViewModel` names used for event bus IDs.
-    - Preserve method names of critical classes calling `Utils.AppHashCode()`.
-    - Protect the `GShockAPI` library.
-    - Protect `Gson` and data models.
-
-### [Component Specific Rules]
-
-#### Scratchpad & Actions
-- Keep all classes implementing `ScratchpadClient`.
-- Keep all subclasses of `Action`.
-
-#### Event Bus (`ProgressEvents`)
-- Keep `ViewModel` class names.
-- Keep method names for classes using `AppHashCode`.
-
-#### Library Protection
-- Keep `org.avmedia.gshockapi.**`.
-- Standard rules for `Gson`.
+- Add rules to preserve the names of inner classes and enums within `ActionsViewModel` to ensure `when` expressions and type checks (`is SetTimeAction`) remain reliable.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `app:assembleGithubRelease` (or a similar task) to verify that the build completes successfully with R8 enabled.
+- Run `app:assembleGithubRelease` to verify the build process.
+- Run unit tests for `IntentParser` (already safe).
 
 ### Manual Verification
-- **APK Inspection**: Verify that the generated APK is significantly smaller.
-- **Functionality (Release Build)**: If a release build can be deployed, verify:
-    - Watch connection (ScratchpadManager logic).
-    - Persistence (Action settings).
-    - UI updates (ProgressEvents logic).
-- **Log Verification**: Ensure `simpleName` usage in logs still shows readable names where intended for debugging.
+1.  **Action Button**: Connect a watch, press the lower-right button. Verify the assigned actions (e.g., Flashlight) trigger correctly on the `RunActionsScreen`.
+2.  **Persistence**:
+    - Set a custom phone number in a Dialer action.
+    - Restart the app.
+    - Verify the phone number is preserved, confirming the new stable `id` keys are working.
+3.  **UI Updates**: Verify that snackbars and other UI events still work, confirming the new `ProgressEvents` subscription IDs are stable.
