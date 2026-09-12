@@ -1,6 +1,5 @@
-- [x] Add `Help` to `VoiceCommand.kt`
-- [x] Add help pattern to `IntentParser.kt`
-- [x] Add `Help` entry to `VoiceCommandTable.kt`
-- [x] Implement help logic in `VoiceDispatcher.kt`
-- [x] Update initial voice prompt in `TimeViewModel.kt`
-- [x] Verify build and functionality
+- [x] Enable Code Obfuscation and Shrinking
+    - [x] Research reflection and stack trace dependencies
+    - [x] Configure `app/proguard-rules.pro` with robust keep rules
+    - [x] Update `app/build.gradle` to enable `minifyEnabled`
+    - [x] Verify build success for `githubRelease`

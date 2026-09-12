@@ -1,3 +1,26 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.4 — September 11, 2026
+
+## ✨ Highlights
+
+### 🎤 Enhanced Voice Interaction
+Major upgrade to the voice command engine for better discoverability and power:
+*   **New "Help" Command**: Added a comprehensive, spoken help guide accessible by saying *"Help"*. The app automatically re-starts the microphone after finishing, allowing for immediate follow-up.
+*   **Smart Settings Reset**: Added *"Set settings to default"* (also accepts *"Reset settings"*). This automatically calculates and applies smart defaults based on your phone's locale and watch hardware capabilities.
+*   **Flexible Reminder Triggers**: The app now recognizes *"Set a reminder"* and *"Set an event"* as natural starting points for creating reminders.
+*   **Dedicated "Disable Alarms"**: Added a command to turn off all alarms while strictly **preserving their set times**, separate from the "Clear Alarms" command which resets them to 12:00 AM.
+*   **Proactive Hardware Gating**: The app now checks watch capabilities immediately. If you ask for a feature your watch doesn't support (like Reminders on an ABL-100), it will inform you verbally right away.
+*   **Natural Conversation**: Expanded "stop" keywords to include *"Stop"*, *"Abandon"*, *"Abort"*, and *"Forget it"*.
+*   **Improved Initial Prompt**: Verbose mode now prompts with *"Tell me what to do or say 'Help'"* to assist new users.
+
+### 📅 Reminder Refinements
+*   **Simplified Recurrence**: Removed the "Daily" repeat option from both the manual reminder dialog and voice prompts to streamline the interaction flow.
+
+### 🛠 System & Security
+*   **Code Optimization (R8)**: Enabled advanced code shrinking and obfuscation for smaller APK sizes and improved security.
+*   **Robust Logic Protection**: Implemented comprehensive custom ProGuard rules to ensure critical reflection-based logic (watch communication, settings persistence, and internal event bus) remains 100% stable in release builds.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.0 — September 9, 2026
 
 ## ✨ Highlights

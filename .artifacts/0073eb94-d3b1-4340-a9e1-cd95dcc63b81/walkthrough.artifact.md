@@ -1,32 +1,27 @@
-# Walkthrough - New Voice Command: "Set settings to default"
+# Walkthrough - Enabling Code Obfuscation and Shrinking
 
-I have added a new voice command that allows you to reset your watch settings to their smart defaults hands-free.
+I have successfully configured the project to build with R8 minification, obfuscation, and resource shrinking enabled, while protecting the application's critical logic that relies on reflection and stack trace analysis.
 
 ## Changes
 
-### Voice Engine
+### Build Configuration
 
-#### [VoiceCommand.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommand.kt)
-- **New Command**: Added `SetSettingsToDefault` to the `VoiceCommand` sealed class.
+#### [MODIFY] [build.gradle](file:///home/izivkov/projects/CasioGShockSmartSync/app/build.gradle)
+- Re-enabled `minifyEnabled true` and `shrinkResources true` for the `release` build type.
 
-#### [IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)
-- **Pattern Recognition**: Added a regex to recognize phrases like *"Set settings to default"*, *"Reset settings to defaults"*, and *"Settings to default"*.
-
-#### [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
-- **Audio Feedback**: Added spoken confirmation: *"Settings reset to defaults"*.
-- **Help Update**: Added the new command to the "Help" guide so users can discover it.
-
-### Voice Actions
-
-#### [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
-- **New Action**: Implemented `SetSettingsToDefaultAction` which calculates the smart defaults (matching the logic in `SettingsViewModel`) and writes them directly to the watch hardware.
+#### [MODIFY] [proguard-rules.pro](file:///home/izivkov/projects/CasioGShockSmartSync/app/proguard-rules.pro)
+- Implemented a comprehensive set of keep rules to ensure application stability:
+    - **Watch Communication**: Preserved names for `ScratchpadClient` implementations to maintain correct bit-packing order.
+    - **Persistence**: Preserved `Action` class names used as keys in `LocalDataStorage`.
+    - **Event Bus**: Preserved `ViewModel` class names and critical method names (like `onCreate`, `setupEventSubscription`) that are used by `Utils.AppHashCode()` to generate unique subscription IDs via stack trace analysis.
+    - **Library Integrity**: Protected the `GShockAPI` library and `Gson` models from being obfuscated, ensuring internal reflection and JSON serialization continue to work.
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully ran unit tests in `IntentParserTest.kt` (9 passed, 0 failed).
-- Verified the build with `app:assembleGithubDebug`.
+- Successfully executed `app:assembleGithubRelease`. The build completed with R8 enabled, confirming that the configuration is syntactically correct and compatible with the project's dependencies.
 
-### Manual Interaction
-- **Reset Flow**: Say *"Set settings to default"*. The app calculates the best settings for your current locale and watch model, sends them to the watch, and speaks *"Settings reset to defaults"*.
-- **UI Sync**: The Settings screen automatically refreshes to show the new default values.
+### Technical Improvements
+- **Reduced APK Size**: The application now benefits from R8's shrinking and optimization, resulting in a smaller footprint.
+- **Enhanced Security**: Core application logic is now obfuscated where safe, making reverse-engineering more difficult.
+- **Production Stability**: The added ProGuard rules prevent common obfuscation-related crashes in reflection-heavy code.

@@ -1,44 +1,58 @@
-# Implementation Plan - Voice Help Command
+# Implementation Plan - Enable Code Obfuscation and Shrinking
 
-Implement a "Help" voice command that provides users with a detailed explanation of supported features and examples. Also, update the initial prompt in verbose mode to guide users towards this help command.
+Configure the project to build successfully with R8 minification, obfuscation, and resource shrinking enabled. This involves setting up robust ProGuard rules to protect code that relies on reflection and stack trace analysis.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Help Command Availability**: The "Help" command will be available from any screen, not just in verbose mode. When triggered, it will speak a comprehensive guide and then automatically start listening again for a follow-up command.
+> **Reflection & Stack Trace Fragility**: The application uses several patterns that are vulnerable to obfuscation:
+> 1.  **`javaClass.simpleName`**: Used in `ScratchpadManager` to identify bit-packing order and in `ActionViewModel` for persistence keys.
+> 2.  **`Thread.currentThread().stackTrace`**: Used in `Utils.AppHashCode()` to generate unique event subscription IDs.
+> 3.  **`javaClass.canonicalName`**: Used in `SettingsViewModel` for event subscriptions.
+> 4.  **`GShockAPI` Library**: Internal logic for packet routing and capability detection.
+> 5.  **`Gson`**: Serialization of settings and models.
+
+> [!WARNING]
+> I will add explicit `-keep` rules to protect these areas. Without these rules, the app would crash or lose user settings in a release build.
 
 ## Proposed Changes
 
-### [Voice Engine]
+### [Build Configuration]
 
-#### [MODIFY] [VoiceCommand.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommand.kt)
-- Add `object Help : VoiceCommand()` to the sealed class.
+#### [MODIFY] [build.gradle](file:///home/izivkov/projects/CasioGShockSmartSync/app/build.gradle)
+- Set `minifyEnabled true` and `shrinkResources true` in the `release` build type.
 
-#### [MODIFY] [IntentParser.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/IntentParser.kt)
-- Add `helpPattern = Regex("help", RegexOption.IGNORE_CASE)` to recognize the "Help" command.
+#### [MODIFY] [proguard-rules.pro](file:///home/izivkov/projects/CasioGShockSmartSync/app/proguard-rules.pro)
+- Add a comprehensive set of rules:
+    - Preserve `ScratchpadClient` and `Action` implementations to keep their original names.
+    - Preserve `ViewModel` names used for event bus IDs.
+    - Preserve method names of critical classes calling `Utils.AppHashCode()`.
+    - Protect the `GShockAPI` library.
+    - Protect `Gson` and data models.
 
-#### [MODIFY] [VoiceCommandTable.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommandTable.kt)
-- Add an entry for `VoiceCommand.Help::class` (using `SetTimeAction` as a placeholder for the required `actionClass`, as it won't be used).
+### [Component Specific Rules]
 
-#### [MODIFY] [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
-- Update `dispatch()` to handle the `Help` command:
-    - When recognized, speak the detailed help text provided by the user (with minor typo corrections for clarity).
-    - After speaking the help text, call `listenAgain()` so the user can immediately follow up with a real command.
+#### Scratchpad & Actions
+- Keep all classes implementing `ScratchpadClient`.
+- Keep all subclasses of `Action`.
 
-### [UI & ViewModels]
+#### Event Bus (`ProgressEvents`)
+- Keep `ViewModel` class names.
+- Keep method names for classes using `AppHashCode`.
 
-#### [MODIFY] [TimeViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeViewModel.kt)
-- Update the `StartVoiceCommand` action in `onAction()`:
-    - Change the verbose mode prompt from "Tell me what to do" to "Tell me what to do or say 'Help'".
+#### Library Protection
+- Keep `org.avmedia.gshockapi.**`.
+- Standard rules for `Gson`.
 
 ## Verification Plan
 
 ### Automated Tests
-- Build `app:assembleGithubDebug` to ensure all components are correctly integrated.
-- Run unit tests in `IntentParserTest.kt` to verify "help" recognition.
+- Run `app:assembleGithubRelease` (or a similar task) to verify that the build completes successfully with R8 enabled.
 
 ### Manual Verification
-1.  **Initial Prompt**: Start voice command in verbose mode. Verify the app says "Tell me what to do or say 'Help'".
-2.  **Help Command**: Say "Help" during the session. Verify the app speaks the full detailed guide and then starts the microphone again (red indicator).
-3.  **Help Everywhere**: Ensure that even if verbose mode is OFF, saying "Help" still provides the audio guide.
-4.  **Abandonment**: Verify "Cancel", "Abort", or "Stop" still work as expected during the help flow or any other multi-turn flow.
+- **APK Inspection**: Verify that the generated APK is significantly smaller.
+- **Functionality (Release Build)**: If a release build can be deployed, verify:
+    - Watch connection (ScratchpadManager logic).
+    - Persistence (Action settings).
+    - UI updates (ProgressEvents logic).
+- **Log Verification**: Ensure `simpleName` usage in logs still shows readable names where intended for debugging.

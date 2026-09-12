@@ -88,7 +88,7 @@ class IntentParserTest {
 
     @Test
     fun testParseHelp() {
-        assertEquals(VoiceCommand.Help, intentParser.parse("help"))
+i a        assertEquals(VoiceCommand.Help, intentParser.parse("help"))
         assertEquals(VoiceCommand.Help, intentParser.parse("Help"))
     }
 
