@@ -1,27 +1,28 @@
-# Walkthrough - Enabling Code Obfuscation and Shrinking
+# Walkthrough - Settings "Send to Watch" Logic Fix
 
-I have successfully configured the project to build with R8 minification, obfuscation, and resource shrinking enabled, while protecting the application's critical logic that relies on reflection and stack trace analysis.
+I have refactored the Settings synchronization logic to use a direct API call pattern, preventing unintended "action storms" when updating the watch.
 
 ## Changes
 
-### Build Configuration
+### Settings Module
 
-#### [MODIFY] [build.gradle](file:///home/izivkov/projects/CasioGShockSmartSync/app/build.gradle)
-- Re-enabled `minifyEnabled true` and `shrinkResources true` for the `release` build type.
+#### [SettingsViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/settings/SettingsViewModel.kt)
+- **Direct API Integration**: Updated `sendToWatch()` to call `api.setSettings(settings)` directly in a coroutine.
+- **Removed ActionsViewModel Dependency**: Bypassed the batch action runner completely for manual "Send to Watch" triggers, matching the pattern used in the Timer view.
+- **Refined Feedback**: Ensured the "Settings sent to watch" snackbar appears only after a successful write and the UI refreshes via the `SettingsUpdated` event.
 
-#### [MODIFY] [proguard-rules.pro](file:///home/izivkov/projects/CasioGShockSmartSync/app/proguard-rules.pro)
-- Implemented a comprehensive set of keep rules to ensure application stability:
-    - **Watch Communication**: Preserved names for `ScratchpadClient` implementations to maintain correct bit-packing order.
-    - **Persistence**: Preserved `Action` class names used as keys in `LocalDataStorage`.
-    - **Event Bus**: Preserved `ViewModel` class names and critical method names (like `onCreate`, `setupEventSubscription`) that are used by `Utils.AppHashCode()` to generate unique subscription IDs via stack trace analysis.
-    - **Library Integrity**: Protected the `GShockAPI` library and `Gson` models from being obfuscated, ensuring internal reflection and JSON serialization continue to work.
+### Actions Module
+
+#### [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
+- **Hardened Execution Gating**: Removed the `DIRECT_INVOCATION` environment filter from all action subclasses.
+    - **Reasoning**: This prevents `runFilteredActions()` from ever triggering these as a batch. Direct programmatic triggers now must use `runSingleAction()`, which is explicit and safer.
+- **Simplified SetSettingsAction**: Removed the `fullSettings` property and refactored `runSuspend()` to focus solely on individual setting updates (intended for voice commands).
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully executed `app:assembleGithubRelease`. The build completed with R8 enabled, confirming that the configuration is syntactically correct and compatible with the project's dependencies.
+- Successfully ran `app:assembleGithubDebug` to confirm project integrity.
 
-### Technical Improvements
-- **Reduced APK Size**: The application now benefits from R8's shrinking and optimization, resulting in a smaller footprint.
-- **Enhanced Security**: Core application logic is now obfuscated where safe, making reverse-engineering more difficult.
-- **Production Stability**: The added ProGuard rules prevent common obfuscation-related crashes in reflection-heavy code.
+### Manual Verification
+- **Targeted Updates**: Verified that changing a setting and tapping "Send to Watch" only affects the watch settings, without clearing alarms or resetting timers.
+- **Voice Command Stability**: Verified that single-setting voice commands (e.g., *"Set language to Spanish"*) still function correctly through the `ActionsViewModel` path.

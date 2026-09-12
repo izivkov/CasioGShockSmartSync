@@ -779,7 +779,6 @@ constructor(
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.DIRECT_INVOCATION -> enabled
             RunEnvironment.VOICE_COMMAND -> enabled
             else -> false
         }
@@ -826,7 +825,6 @@ constructor(
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.DIRECT_INVOCATION -> enabled
             RunEnvironment.VOICE_COMMAND -> enabled
             else -> false
         }
@@ -857,7 +855,6 @@ constructor(
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.DIRECT_INVOCATION -> enabled
             RunEnvironment.VOICE_COMMAND -> enabled
             else -> false
         }
@@ -868,7 +865,6 @@ constructor(
         override var enabled: Boolean,
         var settingName: String = "",
         var settingValue: String = "",
-        var fullSettings: org.avmedia.gshockapi.model.Settings? = null,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName} for $settingName=$settingValue")
@@ -879,21 +875,19 @@ constructor(
 
         override suspend fun runSuspend(context: Context) {
             runCatching {
-                val toSend = fullSettings ?: run {
-                    val current = api.getSettings()
-                    when (settingName) {
-                        "auto light" -> current.copy(autoLight = settingValue.toBoolean())
-                        "power saving" -> current.copy(powerSavingMode = settingValue.toBoolean())
-                        "language" -> current.copy(language = settingValue)
-                        "time format" -> current.copy(timeFormat = settingValue)
-                        "date format" -> current.copy(dateFormat = settingValue)
-                        "light duration" -> current.copy(lightDuration = settingValue)
-                        "button tone" -> {
-                            val enabled = settingValue.toBoolean()
-                            current.copy(buttonTone = enabled, keyVibration = enabled)
-                        }
-                        else -> current
+                val current = api.getSettings()
+                val toSend = when (settingName) {
+                    "auto light" -> current.copy(autoLight = settingValue.toBoolean())
+                    "power saving" -> current.copy(powerSavingMode = settingValue.toBoolean())
+                    "language" -> current.copy(language = settingValue)
+                    "time format" -> current.copy(timeFormat = settingValue)
+                    "date format" -> current.copy(dateFormat = settingValue)
+                    "light duration" -> current.copy(lightDuration = settingValue)
+                    "button tone" -> {
+                        val enabled = settingValue.toBoolean()
+                        current.copy(buttonTone = enabled, keyVibration = enabled)
                     }
+                    else -> current
                 }
                 api.setSettings(toSend)
                 ProgressEvents.onNext("SettingsUpdated")
@@ -901,11 +895,9 @@ constructor(
             }.onFailure {
                 Timber.e(it, "Failed to send settings to watch")
             }
-            fullSettings = null
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.DIRECT_INVOCATION -> enabled
             RunEnvironment.VOICE_COMMAND -> enabled
             else -> false
         }
@@ -985,7 +977,6 @@ constructor(
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.DIRECT_INVOCATION -> enabled
             RunEnvironment.VOICE_COMMAND -> enabled
             else -> false
         }
@@ -1013,7 +1004,6 @@ constructor(
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.DIRECT_INVOCATION -> enabled
             RunEnvironment.VOICE_COMMAND -> enabled
             else -> false
         }

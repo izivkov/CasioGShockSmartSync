@@ -1,5 +1,4 @@
-- [x] Enable Code Obfuscation and Shrinking
-    - [x] Research reflection and stack trace dependencies
-    - [x] Configure `app/proguard-rules.pro` with robust keep rules
-    - [x] Update `app/build.gradle` to enable `minifyEnabled`
-    - [x] Verify build success for `githubRelease`
+- [ ] Update `SettingsViewModel.kt` to call `api.setSettings()` directly
+- [ ] Refactor `SetSettingsAction` in `ActionsViewModel.kt`
+- [ ] Remove `DIRECT_INVOCATION` filter from actions in `ActionsViewModel.kt`
+- [ ] Verify build and functionality

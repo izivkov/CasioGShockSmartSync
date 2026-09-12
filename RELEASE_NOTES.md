@@ -1,3 +1,24 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.6 — September 12, 2026
+
+## ✨ Highlights
+
+### 🎨 Architectural Synchronization Mastery
+Major refinement to the settings and action execution pipeline for 100% reliability:
+*   **Direct Sync Engine**: Re-engineered the Settings "Send to Watch" logic to use a surgical, direct API pattern (matching the Timer view). This eliminates "action storms" where background filters previously triggered unintended batch updates across unrelated watch features.
+*   **Hardened Action Gating**: Transitioned all programmatic action triggers from batch environment filters to explicit, single-action invocations. This guarantees that only the specific feature you are modifying is ever written to the watch hardware.
+
+### 🛡️ Obfuscation-Immune Stability
+Finalized the transition to a high-performance, minimized production build:
+*   **"Fortress" ProGuard Configuration**: Implemented comprehensive rules that shield critical application logic from R8 obfuscation.
+*   **Event Bus Integrity**: Protected the internal `ProgressEvents` bus and `Utils.AppHashCode()` from name collisions, ensuring UI updates (like battery level and connection spinners) remain perfectly stable.
+*   **Logic Persistence**: Guaranteed that watch communication order (`ScratchpadManager`) and user-saved action settings remain consistent across all release builds, preventing data loss or protocol errors.
+
+### 🎤 Voice Interaction Polish
+*   **Refined Help Audio**: Optimized the "Help" guide with natural punctuation-based pauses, making the comprehensive guide easier to follow.
+*   **Global Help Access**: The spoken guide is now available from any screen at any time, with an automatic "listen-again" follow-up for a seamless hands-free experience.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.4 — September 11, 2026
 
 ## ✨ Highlights
