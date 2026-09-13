@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PrayerAlarmsView(
-    onUpdate: (ActionsViewModel.PrayerAlarmsAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.PrayerAlarmsAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val prayerAlarmsAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.PrayerAlarmsAction::class.java)
+        actionsViewModel.getAction(ActionContainer.PrayerAlarmsAction::class.java)
     }
 
     var isEnabled by remember { mutableStateOf(prayerAlarmsAction.enabled) }

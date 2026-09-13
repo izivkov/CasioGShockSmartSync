@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun RemindersView(
-    onUpdate: (ActionsViewModel.SetEventsAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.SetEventsAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val setEventsAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.SetEventsAction::class.java)
+        actionsViewModel.getAction(ActionContainer.SetEventsAction::class.java)
     }
 
     var isEnabled by remember { mutableStateOf(setEventsAction.enabled) }

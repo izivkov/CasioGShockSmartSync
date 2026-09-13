@@ -2,25 +2,25 @@ package org.avmedia.gshockGoogleSync.voice
 
 import org.avmedia.gshockGoogleSync.Screens
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
 import org.avmedia.gshockapi.WatchInfo
 import kotlin.reflect.KClass
 
 data class VoiceCommandSpec(
     val route: String,
-    val actionClass: Class<out ActionsViewModel.Action>,
+    val actionClass: Class<out ActionContainer.Action>,
     val isSupported: (VoiceCommand) -> Boolean = { true },
     val featureName: (VoiceCommand) -> String = { "" },
-    val applyParams: suspend (ActionsViewModel.Action, VoiceCommand, GShockRepository) -> Unit,
+    val applyParams: suspend (ActionContainer.Action, VoiceCommand, GShockRepository) -> Unit,
 )
 
 val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
     VoiceCommand.SetAlarm::class to VoiceCommandSpec(
         route = Screens.Alarms.route,
-        actionClass = ActionsViewModel.SetAlarmAction::class.java,
+        actionClass = ActionContainer.SetAlarmAction::class.java,
         isSupported = { WatchInfo.alarmCount > 0 },
         featureName = { "Alarms" },
-        applyParams = { action, cmd, _ -> (action as ActionsViewModel.SetAlarmAction).let {
+        applyParams = { action, cmd, _ -> (action as ActionContainer.SetAlarmAction).let {
             val c = cmd as VoiceCommand.SetAlarm
             it.alarmHour = c.hour
             it.alarmMinute = c.minute
@@ -28,30 +28,30 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
     ),
     VoiceCommand.ClearAllAlarms::class to VoiceCommandSpec(
         route = Screens.Alarms.route,
-        actionClass = ActionsViewModel.ClearAllAlarmsAction::class.java,
+        actionClass = ActionContainer.ClearAllAlarmsAction::class.java,
         isSupported = { WatchInfo.alarmCount > 0 },
         featureName = { "Alarms" },
         applyParams = { _, _, _ -> },
     ),
     VoiceCommand.DisableAllAlarms::class to VoiceCommandSpec(
         route = Screens.Alarms.route,
-        actionClass = ActionsViewModel.DisableAllAlarmsAction::class.java,
+        actionClass = ActionContainer.DisableAllAlarmsAction::class.java,
         isSupported = { WatchInfo.alarmCount > 0 },
         featureName = { "Alarms" },
         applyParams = { _, _, _ -> },
     ),
     VoiceCommand.SetTimer::class to VoiceCommandSpec(
         route = Screens.Time.route,
-        actionClass = ActionsViewModel.SetTimerAction::class.java,
+        actionClass = ActionContainer.SetTimerAction::class.java,
         featureName = { "Timer" },
-        applyParams = { action, cmd, _ -> (action as ActionsViewModel.SetTimerAction).let {
+        applyParams = { action, cmd, _ -> (action as ActionContainer.SetTimerAction).let {
             val c = cmd as VoiceCommand.SetTimer
             it.timerValueS = (c.hours * 3600) + (c.minutes * 60) + c.seconds
         }},
     ),
     VoiceCommand.SetSetting::class to VoiceCommandSpec(
         route = Screens.Settings.route,
-        actionClass = ActionsViewModel.SetSettingsAction::class.java,
+        actionClass = ActionContainer.SetSettingsAction::class.java,
         isSupported = { cmd ->
             val c = cmd as VoiceCommand.SetSetting
             when (c.name) {
@@ -64,7 +64,7 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
             }
         },
         featureName = { (it as VoiceCommand.SetSetting).name },
-        applyParams = { action, cmd, _ -> (action as ActionsViewModel.SetSettingsAction).let {
+        applyParams = { action, cmd, _ -> (action as ActionContainer.SetSettingsAction).let {
             val c = cmd as VoiceCommand.SetSetting
             it.settingName = c.name
             it.settingValue = c.value
@@ -72,19 +72,19 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
     ),
     VoiceCommand.AddReminder::class to VoiceCommandSpec(
         route = Screens.Events.route,
-        actionClass = ActionsViewModel.SetEventsAction::class.java,
+        actionClass = ActionContainer.SetEventsAction::class.java,
         isSupported = { WatchInfo.hasReminders },
         featureName = { "Reminders" },
         applyParams = { _, _, _ -> }, // Handled by VoiceDispatcher.handleReminderConversation
     ),
     VoiceCommand.Help::class to VoiceCommandSpec(
         route = Screens.Time.route,
-        actionClass = ActionsViewModel.SetTimeAction::class.java,
+        actionClass = ActionContainer.SetTimeAction::class.java,
         applyParams = { _, _, _ -> }, // Handled by VoiceDispatcher.dispatch
     ),
     VoiceCommand.SetSettingsToDefault::class to VoiceCommandSpec(
         route = Screens.Settings.route,
-        actionClass = ActionsViewModel.SetSettingsToDefaultAction::class.java,
+        actionClass = ActionContainer.SetSettingsToDefaultAction::class.java,
         applyParams = { _, _, _ -> },
     ),
 )

@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PlayPauseView(
-    onUpdate: (ActionsViewModel.TogglePlayPauseAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.TogglePlayPauseAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val playPauseAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.TogglePlayPauseAction::class.java)
+        actionsViewModel.getAction(ActionContainer.TogglePlayPauseAction::class.java)
     }
 
     var isEnabled by remember { mutableStateOf(playPauseAction.enabled) }

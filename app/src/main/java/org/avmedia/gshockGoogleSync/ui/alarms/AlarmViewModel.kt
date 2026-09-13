@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.Alarm
@@ -48,7 +48,7 @@ sealed class UiEvent {
  * - Loading alarms from the watch via [GShockRepository].
  * - loading and saving alarm names using [AlarmNameStorage].
  * - Maintaining the state of the alarms list.
- * - Sending updated alarms back to the watch (via [ActionsViewModel.SetAlarmAction]).
+ * - Sending updated alarms back to the watch (via [ActionContainer.SetAlarmAction]).
  * - Syncing enabled alarms to the phone's native alarm app.
  */
 @HiltViewModel
@@ -56,7 +56,7 @@ class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
     private val alarmNameStorage: AlarmNameStorage,
     private val watchFeatureManager: IWatchFeatureManager,
-    private val actionsViewModel: ActionsViewModel,
+    private val actionContainer: ActionContainer,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -170,7 +170,7 @@ class AlarmViewModel @Inject constructor(
 
     /**
      * Sends the current state of all alarms to the watch via
-     * [ActionsViewModel.SetAlarmAction.runWithAlarms], under RunEnvironment.DIRECT_INVOCATION.
+     * [ActionContainer.SetAlarmAction.runWithAlarms], under RunEnvironment.DIRECT_INVOCATION.
      *
      * This process involves:
      * 1. Normalizing any manually-edited (null-named) alarms to an empty name.
@@ -185,8 +185,8 @@ class AlarmViewModel @Inject constructor(
             if (alarm.name == null) alarm.copy(name = "") else alarm
         }
 
-        val setAlarmAction = actionsViewModel.getAction(ActionsViewModel.SetAlarmAction::class.java)
-        if (!setAlarmAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+        val setAlarmAction = actionContainer.getAction(ActionContainer.SetAlarmAction::class.java)
+        if (!setAlarmAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
             return@launch
         }
 

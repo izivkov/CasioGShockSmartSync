@@ -32,7 +32,7 @@ import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 import kotlin.random.Random
 
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
 
 enum class StepDataOption {
     TODAY, HOURLY, DAILY
@@ -85,7 +85,7 @@ class TimeViewModel @Inject constructor(
     private val voiceCommandManager: VoiceCommandManager,
     private val voiceDispatcher: VoiceDispatcher,
     private val voiceSpeechFeedback: VoiceSpeechFeedback,
-    private val actionsViewModel: ActionsViewModel,
+    private val actionContainer: ActionContainer,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -149,8 +149,8 @@ class TimeViewModel @Inject constructor(
             is TimeAction.UpdateTimer -> {
                 viewModelScope.launch {
                     val setTimerAction =
-                        actionsViewModel.getAction(ActionsViewModel.SetTimerAction::class.java)
-                    if (setTimerAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+                        actionContainer.getAction(ActionContainer.SetTimerAction::class.java)
+                    if (setTimerAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
                         setTimerAction.runWithTimer(appContext, action.timeMs)
                     }
                 }
@@ -257,8 +257,8 @@ class TimeViewModel @Inject constructor(
             TimeAction.ClearStepHistory -> {
                 viewModelScope.launch {
                     val clearAction =
-                        actionsViewModel.getAction(ActionsViewModel.ClearStepHistoryAction::class.java)
-                    if (!clearAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+                        actionContainer.getAction(ActionContainer.ClearStepHistoryAction::class.java)
+                    if (!clearAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
                         return@launch
                     }
 

@@ -1,8 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
-import PhoneView
-import PhotoView
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +15,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,12 +32,12 @@ import timber.log.Timber
 fun ActionsScreen(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel =
-        rememberActionsViewModel(),
+        hiltViewModel(),
 ) {
     LaunchedEffect(Unit) {
         actionsViewModel.uiEvents.collect { event ->
             when (event) {
-                is ActionsViewModel.UiEvent.ShowSnackbar -> {
+                is ActionContainer.UiEvent.ShowSnackbar -> {
                     AppSnackbar(event.message)
                 }
             }
@@ -102,20 +99,20 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
 
     return listOfNotNull(
         if (watchFeatureManager.isFeatureSupported("actions.find_phone"))
-            PhoneFinderView(actionsViewModel::updateAction, actionsViewModel)
+            PhoneFinderView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
         else null,
-        SetTimeView(actionsViewModel::updateAction, actionsViewModel),
+        SetTimeView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
         if (watchFeatureManager.isFeatureSupported("actions.reminders"))
-            RemindersView(actionsViewModel::updateAction, actionsViewModel)
+            RemindersView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
         else null,
-        PhotoView(actionsViewModel::updateAction, actionsViewModel),
-        FlashlightView(actionsViewModel::updateAction, actionsViewModel),
-        VoiceAssistView(actionsViewModel::updateAction, actionsViewModel),
-        SkipToNextTrackView(actionsViewModel::updateAction, actionsViewModel),
-        PlayPauseView(actionsViewModel::updateAction, actionsViewModel),
-        PrayerAlarmsView(actionsViewModel::updateAction, actionsViewModel),
+        PhotoView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        FlashlightView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        VoiceAssistView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        SkipToNextTrackView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        PlayPauseView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        PrayerAlarmsView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
         SeparatorView(),
-        PhoneView(actionsViewModel::updateAction, actionsViewModel)
+        PhoneView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
     )
 }
 

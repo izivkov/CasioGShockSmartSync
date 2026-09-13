@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun SkipToNextTrackView(
-    onUpdate: (ActionsViewModel.NextTrack) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.NextTrack) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val nextTrackAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.NextTrack::class.java)
+        actionsViewModel.getAction(ActionContainer.NextTrack::class.java)
     }
 
     var isEnabled by remember { mutableStateOf(nextTrackAction.enabled) }

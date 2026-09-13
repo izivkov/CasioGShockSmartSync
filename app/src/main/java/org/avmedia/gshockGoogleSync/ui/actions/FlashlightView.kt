@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun FlashlightView(
-    onUpdate: (ActionsViewModel.ToggleFlashlightAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.ToggleFlashlightAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val flashlightAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.ToggleFlashlightAction::class.java)
+        actionsViewModel.getAction(ActionContainer.ToggleFlashlightAction::class.java)
     }
 
     var isEnabled by remember { mutableStateOf(flashlightAction.enabled) }

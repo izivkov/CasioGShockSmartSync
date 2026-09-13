@@ -14,26 +14,26 @@ import javax.inject.Singleton
 class ActionRunner @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: GShockRepository,
-    private val actionsViewModel: ActionsViewModel
+    private val actionContainer: ActionContainer
 ) {
     fun setupActionSubscriptions() {
         val buttonActions = arrayOf(
             EventAction("ButtonPressedInfoReceived") {
                 when {
                     repository.isActionButtonPressed() ->
-                        actionsViewModel.runActionsForActionButton(context)
+                        actionContainer.runActionsForActionButton(context)
 
                     repository.isAutoTimeStarted() ->
-                        actionsViewModel.runActionsForAutoTimeSetting(context)
+                        actionContainer.runActionsForAutoTimeSetting(context)
 
                     repository.isFindPhoneButtonPressed() ->
-                        actionsViewModel.runActionFindPhone(context)
+                        actionContainer.runActionFindPhone(context)
 
                     repository.isNormalButtonPressed() ->
-                        actionsViewModel.runActionForConnection(context)
+                        actionContainer.runActionForConnection(context)
 
                     repository.isAlwaysConnectedConnectionPressed() ->
-                        actionsViewModel.runActionForAlwaysConnected(context)
+                        actionContainer.runActionForAlwaysConnected(context)
                 }
             }
         )
@@ -42,7 +42,7 @@ class ActionRunner @Inject constructor(
         // Triggered by messages rather than button presses, e.g. "FindPhone" on always-connected watches
         val otherActions = arrayOf(
             EventAction("RunActions") {
-                actionsViewModel.runActionsForActionButton(context)
+                actionContainer.runActionsForActionButton(context)
             }
         )
         ProgressEvents.runEventActions(Utils.AppHashCode(), otherActions)

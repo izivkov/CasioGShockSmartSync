@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.model.Settings
 import org.json.JSONObject
@@ -56,7 +56,7 @@ constructor(
     private val api: GShockRepository,
     private val watchFeatureManager: IWatchFeatureManager,
     @param:ApplicationContext private val appContext: Context,
-    private val actionsViewModel: ActionsViewModel,
+    private val actionContainer: ActionContainer,
 ) : ViewModel() {
 
     fun onSettingUpdated(setting: Setting) {
@@ -460,8 +460,8 @@ constructor(
         }
 
         val settingsAction =
-            actionsViewModel.getAction(ActionsViewModel.SetSettingsAction::class.java)
-        if (!settingsAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+            actionContainer.getAction(ActionContainer.SetSettingsAction::class.java)
+        if (!settingsAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
             return
         }
 

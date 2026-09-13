@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun VoiceAssistView(
-    onUpdate: (ActionsViewModel.StartVoiceAssistAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.StartVoiceAssistAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val voiceAssistAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.StartVoiceAssistAction::class.java)
+        actionsViewModel.getAction(ActionContainer.StartVoiceAssistAction::class.java)
     }
 
     var isEnabled by remember { mutableStateOf(voiceAssistAction.enabled) }

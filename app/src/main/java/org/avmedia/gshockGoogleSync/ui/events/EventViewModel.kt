@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.EventAction
@@ -29,7 +29,7 @@ class EventViewModel @Inject constructor(
     private val api: GShockRepository,
     private val calendarEvents: CalendarEvents,
     private val eventStorage: EventStorage,
-    private val actionsViewModel: ActionsViewModel,
+    private val actionContainer: ActionContainer,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -174,8 +174,8 @@ class EventViewModel @Inject constructor(
     fun sendEventsToWatch() {
         viewModelScope.launch {
             val setEventsAction =
-                actionsViewModel.getAction(ActionsViewModel.SetEventsAction::class.java)
-            if (!setEventsAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+                actionContainer.getAction(ActionContainer.SetEventsAction::class.java)
+            if (!setEventsAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
                 return@launch
             }
             setEventsAction.runWithEvents(appContext, _events.value)

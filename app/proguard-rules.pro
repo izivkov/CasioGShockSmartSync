@@ -1,7 +1,7 @@
 # Preserve names for reflection-based logic in Scratchpad and Actions
 -keep class * implements org.avmedia.gshockGoogleSync.scratchpad.ScratchpadClient { *; }
--keep class org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel$Action { *; }
--keep class * extends org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel$Action { *; }
+-keep class org.avmedia.gshockGoogleSync.ui.actions.ActionContainer$Action { *; }
+-keep class * extends org.avmedia.gshockGoogleSync.ui.actions.ActionContainer$Action { *; }
 
 # Preserve classes and method names for Utils.AppHashCode() (stack trace analysis)
 # and for event subscription IDs (canonicalName / simpleName).
@@ -9,8 +9,8 @@
 -keep class org.avmedia.gshockGoogleSync.MainEventHandler { *; }
 -keep class org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor { *; }
 -keep class org.avmedia.gshockGoogleSync.services.DeviceManager { *; }
--keep class org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel { *; }
--keep class org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel$* { *; }
+-keep class org.avmedia.gshockGoogleSync.ui.actions.ActionContainer { *; }
+-keep class org.avmedia.gshockGoogleSync.ui.actions.ActionContainer$* { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.actions.ActionRunner { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.others.PreConnectionViewModel { *; }
 -keep class org.avmedia.gshockGoogleSync.ui.common.WatchFeatureManager { *; }

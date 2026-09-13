@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.model.Event
@@ -19,7 +18,7 @@ import javax.inject.Singleton
 
 @Singleton
 class VoiceDispatcher @Inject constructor(
-    private val actionsViewModel: ActionsViewModel,
+    private val actionContainer: org.avmedia.gshockGoogleSync.ui.actions.ActionContainer,
     private val api: GShockRepository,
     private val intentParser: IntentParser,
     private val speechFeedback: VoiceSpeechFeedback,
@@ -88,7 +87,7 @@ class VoiceDispatcher @Inject constructor(
             return
         }
 
-        val action = actionsViewModel.getAction(spec.actionClass)
+        val action = actionContainer.getAction(spec.actionClass)
         if (!action.enabled) {
             Timber.w("Action ${action.javaClass.simpleName} is disabled")
             emitSnackbar("Action disabled")
@@ -99,7 +98,7 @@ class VoiceDispatcher @Inject constructor(
         scope.launch {
             try {
                 spec.applyParams(action, command, api)
-                actionsViewModel.runSingleActionSuspend(action)
+                actionContainer.runSingleActionSuspend(action)
 
                 // Increase delay to 1000ms to ensure the "success" beep of the STT is finished
                 delay(1000)

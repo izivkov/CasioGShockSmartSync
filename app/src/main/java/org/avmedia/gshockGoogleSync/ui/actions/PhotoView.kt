@@ -1,4 +1,8 @@
-import org.avmedia.gshockGoogleSync.ui.actions.rememberActionsViewModel
+package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
+
+import AppTextLarge
+import AppSwitch
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,25 +22,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
 import org.avmedia.gshockGoogleSync.utils.Utils
 
 @Composable
 fun PhotoView(
-    onUpdate: (ActionsViewModel.PhotoAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.PhotoAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     data class ViewState(
         val isEnabled: Boolean,
-        val cameraOrientation: ActionsViewModel.CameraOrientation,
-        val action: ActionsViewModel.PhotoAction
+        val cameraOrientation: ActionContainer.CameraOrientation,
+        val action: ActionContainer.PhotoAction
     )
 
     val actions by actionsViewModel.actions.collectAsState()
     val photoAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.PhotoAction::class.java)
+        actionsViewModel.getAction(ActionContainer.PhotoAction::class.java)
     }
 
     var viewState by remember {
@@ -75,10 +78,10 @@ fun PhotoView(
                 Column(horizontalAlignment = Alignment.End) {
                     CameraOrientationOption(
                         text = stringResource(id = R.string.front_cam),
-                        isSelected = viewState.cameraOrientation == ActionsViewModel.CameraOrientation.FRONT,
+                        isSelected = viewState.cameraOrientation == ActionContainer.CameraOrientation.FRONT,
                         onSelect = {
                             val newState = viewState.copy(
-                                cameraOrientation = ActionsViewModel.CameraOrientation.FRONT
+                                cameraOrientation = ActionContainer.CameraOrientation.FRONT
                             )
                             viewState = newState
                             viewState.action.cameraOrientation = newState.cameraOrientation
@@ -88,10 +91,10 @@ fun PhotoView(
 
                     CameraOrientationOption(
                         text = stringResource(id = R.string.back_cam),
-                        isSelected = viewState.cameraOrientation == ActionsViewModel.CameraOrientation.BACK,
+                        isSelected = viewState.cameraOrientation == ActionContainer.CameraOrientation.BACK,
                         onSelect = {
                             val newState = viewState.copy(
-                                cameraOrientation = ActionsViewModel.CameraOrientation.BACK
+                                cameraOrientation = ActionContainer.CameraOrientation.BACK
                             )
                             viewState = newState
                             viewState.action.cameraOrientation = newState.cameraOrientation
@@ -103,7 +106,7 @@ fun PhotoView(
 
             AppSwitch(
                 checked = viewState.isEnabled,
-                onCheckedChange = { newValue ->
+                onCheckedChange = { newValue: Boolean ->
                     val newState = viewState.copy(isEnabled = newValue)
                     viewState = newState
                     viewState.action.enabled = newValue

@@ -1,3 +1,7 @@
-- [ ] Update `EventUtils.kt` to allow Cyrillic characters in event titles
-- [ ] Verify the change with a release build
-- [ ] Create walkthrough artifact
+- [/] Split ActionsViewModel into Container and ViewModel
+    - [x] Research existing usages and architecture
+    - [ ] Update background components (`ActionRunner`, `VoiceDispatcher`, `VoiceCommandTable`)
+    - [ ] Update feature ViewModels (`Alarm`, `Event`, `Settings`, `Time`)
+    - [ ] Update UI components and action views
+    - [ ] Update ProGuard rules
+    - [ ] Verify build

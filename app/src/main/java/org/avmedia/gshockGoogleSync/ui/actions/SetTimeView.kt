@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun SetTimeView(
-    onUpdate: (ActionsViewModel.SetTimeAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.SetTimeAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val setTimeAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.SetTimeAction::class.java)
+        actionsViewModel.getAction(ActionContainer.SetTimeAction::class.java)
     }
 
     // Track enabled state separately

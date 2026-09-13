@@ -1,4 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.actions
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +11,11 @@ import org.avmedia.gshockGoogleSync.R
 
 @Composable
 fun PhoneFinderView(
-    onUpdate: (ActionsViewModel.FindPhoneAction) -> Unit,
-    actionsViewModel: ActionsViewModel = rememberActionsViewModel()
+    onUpdate: (ActionContainer.FindPhoneAction) -> Unit,
+    actionsViewModel: ActionsViewModel = hiltViewModel()
 ) {
     val findPhoneAction = remember {
-        actionsViewModel.getAction(ActionsViewModel.FindPhoneAction::class.java)
+        actionsViewModel.getAction(ActionContainer.FindPhoneAction::class.java)
     }
 
     var isEnabled by remember { mutableStateOf(findPhoneAction.enabled) }
