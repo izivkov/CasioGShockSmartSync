@@ -8,7 +8,8 @@ object EventUtils {
     fun sanitizeEventTitle(input: String): String {
         fun filterAllowedCharacters(s: String): String {
             val allowedSymbols = " !\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}"
-            val regex = "[^A-Za-z0-9${Pattern.quote(allowedSymbols)}]".toRegex()
+            // Allow Latin (A-Z, a-z), Digits (0-9), standard symbols, and Cyrillic (\u0400-\u04FF)
+            val regex = "[^A-Za-z0-9\u0400-\u04FF${Pattern.quote(allowedSymbols)}]".toRegex()
             return s.replace(regex, "")
         }
 

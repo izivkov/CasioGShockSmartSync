@@ -1,28 +1,21 @@
-# Walkthrough - Settings "Send to Watch" Logic Fix
+# Walkthrough - Cyrillic Support in Reminders
 
-I have refactored the Settings synchronization logic to use a direct API call pattern, preventing unintended "action storms" when updating the watch.
+I have updated the event title sanitization logic to allow Cyrillic characters in the reminder edit dialog. This enables users to enter reminders in their native Cyrillic-based languages.
 
 ## Changes
 
-### Settings Module
+### Events Component
 
-#### [SettingsViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/settings/SettingsViewModel.kt)
-- **Direct API Integration**: Updated `sendToWatch()` to call `api.setSettings(settings)` directly in a coroutine.
-- **Removed ActionsViewModel Dependency**: Bypassed the batch action runner completely for manual "Send to Watch" triggers, matching the pattern used in the Timer view.
-- **Refined Feedback**: Ensured the "Settings sent to watch" snackbar appears only after a successful write and the UI refreshes via the `SettingsUpdated` event.
-
-### Actions Module
-
-#### [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
-- **Hardened Execution Gating**: Removed the `DIRECT_INVOCATION` environment filter from all action subclasses.
-    - **Reasoning**: This prevents `runFilteredActions()` from ever triggering these as a batch. Direct programmatic triggers now must use `runSingleAction()`, which is explicit and safer.
-- **Simplified SetSettingsAction**: Removed the `fullSettings` property and refactored `runSuspend()` to focus solely on individual setting updates (intended for voice commands).
+#### [EventUtils.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/events/EventUtils.kt)
+- Updated the `filterAllowedCharacters` function's regular expression to include the Cyrillic Unicode range (`\u0400-\u04FF`).
+- This allows characters from Russian, Bulgarian, Ukrainian, and other Cyrillic alphabets to be preserved during title sanitization.
 
 ## Verification Results
 
 ### Automated Tests
-- Successfully ran `app:assembleGithubDebug` to confirm project integrity.
+- Successfully ran `app:assembleGithubDebug` to verify that the project still compiles correctly with the updated logic.
 
 ### Manual Verification
-- **Targeted Updates**: Verified that changing a setting and tapping "Send to Watch" only affects the watch settings, without clearing alarms or resetting timers.
-- **Voice Command Stability**: Verified that single-setting voice commands (e.g., *"Set language to Spanish"*) still function correctly through the `ActionsViewModel` path.
+- You can now type Cyrillic titles like "Купить молоко" in the Reminder edit dialog.
+- The app will display these titles in its internal list.
+- When "Sending to Watch", the existing `CyrillicToLatin` engine will automatically transliterate these to plain Latin characters for the watch's display.

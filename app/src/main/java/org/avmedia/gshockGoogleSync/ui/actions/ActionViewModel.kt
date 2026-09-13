@@ -43,6 +43,7 @@ import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.model.Settings
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.model.StepCounterData
 import timber.log.Timber
 
 /**
@@ -223,6 +224,7 @@ constructor(
             add(PrayerAlarmsAction("Set Prayer Alarms", false, api, prayerAlarmsHelper))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
+            add(ClearStepHistoryAction("Clear Step History", true)) // Hidden from UI, direct-invocation only
         }
 
         // Populate both _actions and actionMap immediately
@@ -317,7 +319,6 @@ constructor(
         val api: GShockRepository,
         val calendarEvents: CalendarEvents
     ) : Action(title, enabled, RunMode.ASYNC) {
-
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
                 RunEnvironment.NORMAL_CONNECTION -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
@@ -326,7 +327,7 @@ constructor(
                 RunEnvironment.VOICE_COMMAND -> enabled
                 RunEnvironment.FIND_PHONE_PRESSED -> false
                 RunEnvironment.ALWAYS_CONNECTED -> false
-                RunEnvironment.DIRECT_INVOCATION -> false
+                RunEnvironment.DIRECT_INVOCATION -> true
             }
         }
 
@@ -337,21 +338,40 @@ constructor(
             }
             Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(calendarEvents.getEventsFromCalendar())
+            viewModelScope.launch {
+                writeEvents(context, EventsModel.events)
+            }
+        }
 
+        /**
+         * Entry point for callers that already have the exact events list to write
+         * (currently: EventViewModel.sendEventsToWatch(), via RunEnvironment.DIRECT_INVOCATION).
+         * Deliberately bypasses the isManualMode() skip above - manual mode is precisely
+         * the scenario this entry point exists to handle.
+         */
+        suspend fun runWithEvents(context: Context, events: List<Event>) {
+            runCatching {
+                writeEvents(context, events)
+            }.onFailure {
+                Timber.e(it, "Failed to send events to watch")
+                AppSnackbar("Error: ${it.message ?: ""}")
+            }
+        }
+
+        private suspend fun writeEvents(context: Context, events: List<Event>) {
             val eventTransformers: List<(List<Event>) -> List<Event>> = listOf(
-                { events ->
-                    events.map { event ->
+                { evts ->
+                    evts.map { event ->
                         event.copy(title = CyrillicToLatin.transliterate(event.title))
                     }
                 }
             )
-
-            val processedEvents = eventTransformers.fold(EventsModel.events) { currentEvents, transformer ->
-                ArrayList(transformer(currentEvents))
+            val processedEvents = eventTransformers.fold(events) { currentEvents, transformer ->
+                transformer(currentEvents)
             }
-
-            api.setEvents(processedEvents)
+            api.setEvents(ArrayList(processedEvents))
             ProgressEvents.onNext("EventsUpdated")
+            AppSnackbar(context.getString(R.string.reminders_sent_to_watch))
         }
 
         override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
@@ -1056,6 +1076,48 @@ constructor(
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
             RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.DIRECT_INVOCATION -> true
+            else -> false
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
+    }
+
+    inner class ClearStepHistoryAction(
+        override var title: String,
+        override var enabled: Boolean,
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) {
+            viewModelScope.launch {
+                runSuspend(context)
+            }
+        }
+
+        override suspend fun runSuspend(context: Context) {
+            runClear()
+        }
+
+        /**
+         * Clears the watch's step history and returns the fresh (zeroed) reading.
+         * Entry point for RunEnvironment.DIRECT_INVOCATION callers
+         * (currently: TimeViewModel via TimeAction.ClearStepHistory). There is no
+         * voice command for this yet, so shouldRun() only permits DIRECT_INVOCATION.
+         */
+        suspend fun runAndGetFreshData(): Result<StepCounterData> = runClear()
+
+        private suspend fun runClear(): Result<StepCounterData> = runCatching {
+            // First call with peek = false finalizes the transaction and clears watch history.
+            api.getStepCount(peek = false)
+
+            // Short delay to allow the watch to process the clear command.
+            delay(500)
+
+            // Second call with peek = true reads the fresh (zeroed) state.
+            api.getStepCount(peek = true)
+        }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
             RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }

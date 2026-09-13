@@ -1,4 +1,3 @@
-- [ ] Update `SettingsViewModel.kt` to call `api.setSettings()` directly
-- [ ] Refactor `SetSettingsAction` in `ActionsViewModel.kt`
-- [ ] Remove `DIRECT_INVOCATION` filter from actions in `ActionsViewModel.kt`
-- [ ] Verify build and functionality
+- [ ] Update `EventUtils.kt` to allow Cyrillic characters in event titles
+- [ ] Verify the change with a release build
+- [ ] Create walkthrough artifact

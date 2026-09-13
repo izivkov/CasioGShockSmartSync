@@ -256,25 +256,24 @@ class TimeViewModel @Inject constructor(
 
             TimeAction.ClearStepHistory -> {
                 viewModelScope.launch {
-                    runCatching {
-                        // 1. First call with peek = false to finalize transaction and clear the watch history
-                        api.getStepCount(peek = false)
-                        
-                        // 2. Short delay to allow the watch to process the clear command
-                        delay(500)
-
-                        // 3. Second call with peek = true to read the fresh (zeroed) state
-                        val stepData = api.getStepCount(peek = true)
-                        
-                        val (distanceKm, calories) = calculateMetrics(stepData, _state.value.weight)
-                        _state.value = _state.value.copy(
-                            stepCounterData = stepData,
-                            distanceKm = distanceKm,
-                            calories = calories
-                        )
-                    }.onFailure { e ->
-                        AppSnackbar(e.message ?: "Api Error")
+                    val clearAction =
+                        actionsViewModel.getAction(ActionsViewModel.ClearStepHistoryAction::class.java)
+                    if (!clearAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+                        return@launch
                     }
+
+                    clearAction.runAndGetFreshData()
+                        .onSuccess { stepData ->
+                            val (distanceKm, calories) = calculateMetrics(stepData, _state.value.weight)
+                            _state.value = _state.value.copy(
+                                stepCounterData = stepData,
+                                distanceKm = distanceKm,
+                                calories = calories
+                            )
+                        }
+                        .onFailure { e ->
+                            AppSnackbar(e.message ?: "Api Error")
+                        }
                 }
             }
         }

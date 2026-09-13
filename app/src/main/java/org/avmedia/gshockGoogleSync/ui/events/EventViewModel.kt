@@ -5,27 +5,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
-import org.avmedia.gshockapi.model.Event
-import org.avmedia.gshockapi.model.EventDate
-import org.avmedia.gshockapi.model.RepeatPeriod
+import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.model.Event
+import org.avmedia.gshockapi.model.RepeatPeriod
 import timber.log.Timber
-import kotlinx.coroutines.Job
-import java.text.Normalizer
-import java.util.regex.Pattern
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,6 +29,7 @@ class EventViewModel @Inject constructor(
     private val api: GShockRepository,
     private val calendarEvents: CalendarEvents,
     private val eventStorage: EventStorage,
+    private val actionsViewModel: ActionsViewModel,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -176,24 +173,12 @@ class EventViewModel @Inject constructor(
 
     fun sendEventsToWatch() {
         viewModelScope.launch {
-            runCatching {
-                val eventTransformers: List<(List<Event>) -> List<Event>> = listOf(
-                    { events ->
-                        events.map { event ->
-                            event.copy(title = CyrillicToLatin.transliterate(event.title))
-                        }
-                    }
-                )
-
-                val processedEvents = eventTransformers.fold(_events.value) { currentEvents, transformer ->
-                    transformer(currentEvents)
-                }
-
-                api.setEvents(ArrayList(processedEvents))
-                AppSnackbar(appContext.getString(R.string.reminders_sent_to_watch))
-            }.onFailure { e ->
-                AppSnackbar("Error: ${e.message ?: ""}")
+            val setEventsAction =
+                actionsViewModel.getAction(ActionsViewModel.SetEventsAction::class.java)
+            if (!setEventsAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+                return@launch
             }
+            setEventsAction.runWithEvents(appContext, _events.value)
         }
     }
 
