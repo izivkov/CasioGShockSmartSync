@@ -9,7 +9,7 @@ object EventUtils {
         fun filterAllowedCharacters(s: String): String {
             val allowedSymbols = " !\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}"
             // Allow Latin (A-Z, a-z), Digits (0-9), standard symbols, and Cyrillic (\u0400-\u04FF)
-            // Add Cyrillic as well, which will be converted to Latin on the watch.
+            // Allow Cyrillic as well, which will be converted to Latin on the watch.
             val regex = "[^A-Za-z0-9\u0400-\u04FF${Pattern.quote(allowedSymbols)}]".toRegex()
             return s.replace(regex, "")
         }
