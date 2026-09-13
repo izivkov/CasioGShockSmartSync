@@ -24,7 +24,6 @@ import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.voice.VoiceCommandManager
 import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
-import org.avmedia.gshockGoogleSync.voice.VoiceCommand
 import org.avmedia.gshockGoogleSync.voice.VoiceSpeechFeedback
 import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.ProgressEvents
@@ -32,6 +31,8 @@ import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 import kotlin.random.Random
+
+import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 
 enum class StepDataOption {
     TODAY, HOURLY, DAILY
@@ -84,6 +85,7 @@ class TimeViewModel @Inject constructor(
     private val voiceCommandManager: VoiceCommandManager,
     private val voiceDispatcher: VoiceDispatcher,
     private val voiceSpeechFeedback: VoiceSpeechFeedback,
+    private val actionsViewModel: ActionsViewModel,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -146,8 +148,11 @@ class TimeViewModel @Inject constructor(
 
             is TimeAction.UpdateTimer -> {
                 viewModelScope.launch {
-                    api.setTimer(action.timeMs)
-                    AppSnackbar(appContext.getString(R.string.timer_set))
+                    val setTimerAction =
+                        actionsViewModel.getAction(ActionsViewModel.SetTimerAction::class.java)
+                    if (setTimerAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+                        setTimerAction.runWithTimer(appContext, action.timeMs)
+                    }
                 }
             }
 

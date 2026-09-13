@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.model.Settings
 import org.json.JSONObject
@@ -34,8 +35,8 @@ abstract class Setting(val name: String) {
 }
 
 data class SettingsState(
-        val settings: List<Setting> = emptyList(),
-        val settingsMap: Map<Class<out Setting>, Setting> = emptyMap()
+    val settings: List<Setting> = emptyList(),
+    val settingsMap: Map<Class<out Setting>, Setting> = emptyMap()
 )
 
 sealed class SettingsAction {
@@ -52,9 +53,10 @@ sealed class UiEvent {
 class SettingsViewModel
 @Inject
 constructor(
-        private val api: GShockRepository,
-        private val watchFeatureManager: IWatchFeatureManager,
-        @param:ApplicationContext private val appContext: Context
+    private val api: GShockRepository,
+    private val watchFeatureManager: IWatchFeatureManager,
+    @param:ApplicationContext private val appContext: Context,
+    private val actionsViewModel: ActionsViewModel,
 ) : ViewModel() {
 
     fun onSettingUpdated(setting: Setting) {
@@ -88,31 +90,18 @@ constructor(
 
     private fun initializeSettings() {
         val newSettings =
-                arrayListOf(
-                        Locale(),
-                        OperationSound(),
-                        Light(),
-                        PowerSavingMode(),
-                        Font(),
-                        TimeAdjustment(appContext),
-                )
+            arrayListOf(
+                Locale(),
+                OperationSound(),
+                Light(),
+                PowerSavingMode(),
+                Font(),
+                TimeAdjustment(appContext),
+            )
         updateSettingsAndMap(filter(newSettings))
 
-        /**
-         * Launches a coroutine in the ViewModel's scope using the provided dispatcher. The
-         * coroutine is automatically cancelled when the ViewModel is cleared.
-         *
-         * @param dispatcher The dispatcher to run the coroutine on (Dispatchers.Default for
-         * CPU-intensive work)
-         * @param block The coroutine code to execute
-         *
-         * Note: viewModelScope is an extension property provided by the lifecycle-viewmodel-ktx
-         * library that creates a CoroutineScope tied to the ViewModel's lifecycle.
-         */
-        viewModelScope.launch(Dispatchers.Default) { // Convert API settings to JSON object
+        viewModelScope.launch(Dispatchers.Default) {
             val settingsJson = Gson().toJsonTree(api.getSettings()).asJsonObject
-
-            // Convert merged settings to string and update state
             val settingStr = Gson().toJson(settingsJson)
             updateSettingsAndMap(fromJson(settingStr))
         }
@@ -128,21 +117,6 @@ constructor(
         return state.value.settingsMap[type] as T
     }
 
-    /**
-     * Updates a single setting in both the settings list and settings map, then persists the
-     * change.
-     *
-     * @param updatedSetting The new setting instance that will replace the existing one
-     *
-     * The function:
-     * 1. Makes a mutable copy of the current settings list
-     * 2. Finds the matching setting by its class type
-     * 3. Updates both the list and map with the new setting
-     * 4. Updates the state with the new collections
-     * 5. Calls save() on the setting to persist changes
-     *
-     * Note: If no matching setting is found (index == -1), no update occurs
-     */
     private fun updateSetting(updatedSetting: Setting) {
         val currentList = state.value.settings.toMutableList()
         val index = currentList.indexOfFirst { it::class == updatedSetting::class }
@@ -156,9 +130,9 @@ constructor(
     }
 
     data class Locale(
-            var timeFormat: TimeFormat = TimeFormat.TWELVE_HOURS,
-            var dateFormat: DateFormat = DateFormat.MONTH_DAY,
-            var dayOfWeekLanguage: DayOfWeekLanguage = DayOfWeekLanguage.ENGLISH,
+        var timeFormat: TimeFormat = TimeFormat.TWELVE_HOURS,
+        var dateFormat: DateFormat = DateFormat.MONTH_DAY,
+        var dayOfWeekLanguage: DayOfWeekLanguage = DayOfWeekLanguage.ENGLISH,
     ) : Setting("Locale") {
         enum class TimeFormat(val value: String) {
             TWELVE_HOURS("12h"),
@@ -181,11 +155,11 @@ constructor(
     }
 
     data class OperationSound(var sound: Boolean = true, var vibrate: Boolean = false) :
-            Setting("Button Sound")
+        Setting("Button Sound")
 
     data class Light(
-            var autoLight: Boolean = false,
-            var duration: LightDuration = LightDuration.TWO_SECONDS,
+        var autoLight: Boolean = false,
+        var duration: LightDuration = LightDuration.TWO_SECONDS,
     ) : Setting("Light") {
         enum class LightDuration(val value: String) {
             TWO_SECONDS("2s"),
@@ -196,12 +170,12 @@ constructor(
     data class PowerSavingMode(var powerSavingMode: Boolean = false) : Setting("Power Saving Mode")
 
     data class TimeAdjustment(
-            val appContext: Context,
-            var timeAdjustment: Boolean = true,
-            var adjustmentTimeMinutes: Int = 0,
-            var timeAdjustmentNotifications: Boolean =
-                    LocalDataStorage.getTimeAdjustmentNotification(appContext),
-            var fineAdjustment: Int = LocalDataStorage.getFineTimeAdjustment(appContext),
+        val appContext: Context,
+        var timeAdjustment: Boolean = true,
+        var adjustmentTimeMinutes: Int = 0,
+        var timeAdjustmentNotifications: Boolean =
+            LocalDataStorage.getTimeAdjustmentNotification(appContext),
+        var fineAdjustment: Int = LocalDataStorage.getFineTimeAdjustment(appContext),
     ) : Setting("Time Adjustment") {
         override suspend fun save() {
             LocalDataStorage.setTimeAdjustmentNotification(appContext, timeAdjustmentNotifications)
@@ -210,7 +184,7 @@ constructor(
     }
 
     data class DnD(
-            var dnd: Boolean = true,
+        var dnd: Boolean = true,
     ) : Setting("DnD")
 
     data class Font(var font: FontType = FontType.STANDARD) : Setting("Font") {
@@ -302,48 +276,48 @@ constructor(
     private fun handleLightDuration(value: Any, updatedObjects: MutableSet<Setting>) {
         val setting = state.value.settingsMap[Light::class.java] as Light
         setting.duration =
-                if (value == Light.LightDuration.TWO_SECONDS.value) {
-                    Light.LightDuration.TWO_SECONDS
-                } else {
-                    Light.LightDuration.FOUR_SECONDS
-                }
+            if (value == Light.LightDuration.TWO_SECONDS.value) {
+                Light.LightDuration.TWO_SECONDS
+            } else {
+                Light.LightDuration.FOUR_SECONDS
+            }
         updatedObjects.add(setting)
     }
 
     private fun handleTimeFormat(value: Any, updatedObjects: MutableSet<Setting>) {
         val setting = state.value.settingsMap[Locale::class.java] as Locale
         setting.timeFormat =
-                if (value == Locale.TimeFormat.TWELVE_HOURS.value) {
-                    Locale.TimeFormat.TWELVE_HOURS
-                } else {
-                    Locale.TimeFormat.TWENTY_FOUR_HOURS
-                }
+            if (value == Locale.TimeFormat.TWELVE_HOURS.value) {
+                Locale.TimeFormat.TWELVE_HOURS
+            } else {
+                Locale.TimeFormat.TWENTY_FOUR_HOURS
+            }
         updatedObjects.add(setting)
     }
 
     private fun handleDateFormat(value: Any, updatedObjects: MutableSet<Setting>) {
         val setting = state.value.settingsMap[Locale::class.java] as Locale
         setting.dateFormat =
-                if (value == Locale.DateFormat.MONTH_DAY.value) {
-                    Locale.DateFormat.MONTH_DAY
-                } else {
-                    Locale.DateFormat.DAY_MONTH
-                }
+            if (value == Locale.DateFormat.MONTH_DAY.value) {
+                Locale.DateFormat.MONTH_DAY
+            } else {
+                Locale.DateFormat.DAY_MONTH
+            }
         updatedObjects.add(setting)
     }
 
     private fun handleLanguage(value: Any, updatedObjects: MutableSet<Setting>) {
         val setting = state.value.settingsMap[Locale::class.java] as Locale
         setting.dayOfWeekLanguage =
-                when (value) {
-                    Locale.DayOfWeekLanguage.ENGLISH.englishName -> Locale.DayOfWeekLanguage.ENGLISH
-                    Locale.DayOfWeekLanguage.SPANISH.englishName -> Locale.DayOfWeekLanguage.SPANISH
-                    Locale.DayOfWeekLanguage.FRENCH.englishName -> Locale.DayOfWeekLanguage.FRENCH
-                    Locale.DayOfWeekLanguage.GERMAN.englishName -> Locale.DayOfWeekLanguage.GERMAN
-                    Locale.DayOfWeekLanguage.ITALIAN.englishName -> Locale.DayOfWeekLanguage.ITALIAN
-                    Locale.DayOfWeekLanguage.RUSSIAN.englishName -> Locale.DayOfWeekLanguage.RUSSIAN
-                    else -> setting.dayOfWeekLanguage // No change if the language is unknown
-                }
+            when (value) {
+                Locale.DayOfWeekLanguage.ENGLISH.englishName -> Locale.DayOfWeekLanguage.ENGLISH
+                Locale.DayOfWeekLanguage.SPANISH.englishName -> Locale.DayOfWeekLanguage.SPANISH
+                Locale.DayOfWeekLanguage.FRENCH.englishName -> Locale.DayOfWeekLanguage.FRENCH
+                Locale.DayOfWeekLanguage.GERMAN.englishName -> Locale.DayOfWeekLanguage.GERMAN
+                Locale.DayOfWeekLanguage.ITALIAN.englishName -> Locale.DayOfWeekLanguage.ITALIAN
+                Locale.DayOfWeekLanguage.RUSSIAN.englishName -> Locale.DayOfWeekLanguage.RUSSIAN
+                else -> setting.dayOfWeekLanguage
+            }
         updatedObjects.add(setting)
     }
 
@@ -351,11 +325,11 @@ constructor(
         if (watchFeatureManager.isFeatureSupported("settings.multiple_fonts")) {
             val setting = state.value.settingsMap[Font::class.java] as Font
             setting.font =
-                    if (value == Font.FontType.CLASSIC.value) {
-                        Font.FontType.CLASSIC
-                    } else {
-                        Font.FontType.STANDARD
-                    }
+                if (value == Font.FontType.CLASSIC.value) {
+                    Font.FontType.CLASSIC
+                } else {
+                    Font.FontType.STANDARD
+                }
             updatedObjects.add(setting)
         }
     }
@@ -365,61 +339,57 @@ constructor(
         val smartSettings = arrayListOf<Setting>()
         val currentLocale = java.util.Locale.getDefault()
 
-        // Locale
         val language =
-                when (currentLocale.language) {
-                    "en" -> Locale.DayOfWeekLanguage.ENGLISH
-                    "es" -> Locale.DayOfWeekLanguage.SPANISH
-                    "fr" -> Locale.DayOfWeekLanguage.FRENCH
-                    "de" -> Locale.DayOfWeekLanguage.GERMAN
-                    "it" -> Locale.DayOfWeekLanguage.ITALIAN
-                    "ru" -> Locale.DayOfWeekLanguage.RUSSIAN
-                    else -> Locale.DayOfWeekLanguage.ENGLISH
-                }
+            when (currentLocale.language) {
+                "en" -> Locale.DayOfWeekLanguage.ENGLISH
+                "es" -> Locale.DayOfWeekLanguage.SPANISH
+                "fr" -> Locale.DayOfWeekLanguage.FRENCH
+                "de" -> Locale.DayOfWeekLanguage.GERMAN
+                "it" -> Locale.DayOfWeekLanguage.ITALIAN
+                "ru" -> Locale.DayOfWeekLanguage.RUSSIAN
+                else -> Locale.DayOfWeekLanguage.ENGLISH
+            }
 
         val dateTimePattern = SimpleDateFormat().toPattern()
         val datePattern = dateTimePattern.split(" ")[0]
         val timePattern = dateTimePattern.split(" ")[1]
 
         val dateFormat =
-                if (datePattern.lowercase().startsWith("d")) {
-                    Locale.DateFormat.DAY_MONTH
-                } else {
-                    Locale.DateFormat.MONTH_DAY
-                }
+            if (datePattern.lowercase().startsWith("d")) {
+                Locale.DateFormat.DAY_MONTH
+            } else {
+                Locale.DateFormat.MONTH_DAY
+            }
         val timeFormat =
-                if (timePattern[0] == 'h') {
-                    Locale.TimeFormat.TWELVE_HOURS
-                } else {
-                    Locale.TimeFormat.TWENTY_FOUR_HOURS
-                }
+            if (timePattern[0] == 'h') {
+                Locale.TimeFormat.TWELVE_HOURS
+            } else {
+                Locale.TimeFormat.TWENTY_FOUR_HOURS
+            }
         val locale =
-                Locale(
-                        timeFormat = timeFormat,
-                        dateFormat = dateFormat,
-                        dayOfWeekLanguage = language
-                )
+            Locale(
+                timeFormat = timeFormat,
+                dateFormat = dateFormat,
+                dayOfWeekLanguage = language
+            )
         smartSettings.add(locale)
 
-        // Button sounds
         val notificationManager =
-                appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val buttonTone =
-                notificationManager.currentInterruptionFilter ==
-                        NotificationManager.INTERRUPTION_FILTER_ALL
+            notificationManager.currentInterruptionFilter ==
+                    NotificationManager.INTERRUPTION_FILTER_ALL
         val operationSound = OperationSound(buttonTone)
         smartSettings.add(operationSound)
 
-        // Light settings
         val autoLight = false
         val light = Light(autoLight, Light.LightDuration.TWO_SECONDS)
         smartSettings.add(light)
 
-        // Power Save Mode
         if (watchFeatureManager.isFeatureSupported("settings.power_saving")) {
             val batteryLevel = api.getBatteryLevel()
             val currentPowerSavingMode: PowerSavingMode =
-                    state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
+                state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
 
             val enablePowerSetting = batteryLevel <= 15 || currentPowerSavingMode.powerSavingMode
             val powerSavings = PowerSavingMode(enablePowerSetting)
@@ -432,16 +402,15 @@ constructor(
             smartSettings.add(font)
         }
 
-        // Time adjustment
         val notifyMe = LocalDataStorage.getTimeAdjustmentNotification(appContext)
         val timeAdjustment =
-                TimeAdjustment(
-                        appContext = appContext,
-                        timeAdjustment = true,
-                        adjustmentTimeMinutes = 30,
-                        timeAdjustmentNotifications = notifyMe,
-                        fineAdjustment = 0 // Explicitly set to 0
-                )
+            TimeAdjustment(
+                appContext = appContext,
+                timeAdjustment = true,
+                adjustmentTimeMinutes = 30,
+                timeAdjustmentNotifications = notifyMe,
+                fineAdjustment = 0
+            )
         smartSettings.add(timeAdjustment)
 
         return smartSettings
@@ -451,12 +420,9 @@ constructor(
         viewModelScope.launch {
             runCatching {
                 updateSettingsAndMap(getSmartDefaults())
-
-                // Save all local storage settings, in case the user abandons the screen.
-                // Local storage setting are not sent to the watch, but are used by the app.
                 state.value.settings.forEach { it.save() }
             }
-                    .onFailure { e -> AppSnackbar(e.message ?: "Error") }
+                .onFailure { e -> AppSnackbar(e.message ?: "Error") }
         }
     }
 
@@ -474,17 +440,17 @@ constructor(
 
         if (watchFeatureManager.isFeatureSupported("settings.power_saving")) {
             val powerSavingMode: PowerSavingMode =
-                    state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
+                state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
             settings.powerSavingMode = powerSavingMode.powerSavingMode
         }
 
         val buttonTone: OperationSound =
-                state.value.settingsMap[OperationSound::class.java] as OperationSound
+            state.value.settingsMap[OperationSound::class.java] as OperationSound
         settings.buttonTone = buttonTone.sound
         settings.keyVibration = buttonTone.vibrate
 
         val timeAdjustment: TimeAdjustment =
-                state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
+            state.value.settingsMap[TimeAdjustment::class.java] as TimeAdjustment
         settings.timeAdjustment = timeAdjustment.timeAdjustment
         settings.adjustmentTimeMinutes = timeAdjustment.adjustmentTimeMinutes
 
@@ -493,14 +459,14 @@ constructor(
             settings.font = fontSetting.font.value
         }
 
+        val settingsAction =
+            actionsViewModel.getAction(ActionsViewModel.SetSettingsAction::class.java)
+        if (!settingsAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+            return
+        }
+
         viewModelScope.launch {
-            runCatching {
-                api.setSettings(settings)
-                ProgressEvents.onNext("SettingsUpdated")
-                AppSnackbar(appContext.getString(R.string.settings_sent_to_watch))
-            }.onFailure {
-                AppSnackbar(it.message ?: "Failed to send settings")
-            }
+            settingsAction.runWithSettings(appContext, settings)
         }
     }
 }

@@ -744,8 +744,7 @@ constructor(
                 alarmNameStorage.load()
                 val alarms = api.getAlarms()
                 val alarmCount = watchFeatureManager.getAlarmCount()
-                
-                // Map current alarms to their names
+
                 val alarmList = alarms.take(alarmCount).mapIndexed { index, alarm ->
                     alarm.copy(name = alarmNameStorage.get(index))
                 }.toMutableList()
@@ -763,28 +762,46 @@ constructor(
                     )
                 }
 
-                // Update names in storage (only for the potentially updated slot, or just update all to match list)
-                alarmList.forEachIndexed { index, alarm ->
-                    alarmNameStorage.put(alarm.name ?: "", index)
-                }
-                alarmNameStorage.save()
-
-                api.setAlarms(ArrayList(alarmList))
-                ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(alarmList))
-                AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+                writeAlarms(context, alarmList)
             }.onFailure {
                 Timber.e(it, "Failed to set watch alarm via voice")
                 AppSnackbar("Failed to set watch alarm")
             }
         }
 
+        /**
+         * Entry point for callers that already have the exact, full alarm list to write
+         * (currently: AlarmViewModel.sendAlarmsToWatch(), via RunEnvironment.DIRECT_INVOCATION).
+         * Unlike the voice path, this does not upsert a single slot by hour/minute — it writes
+         * the list exactly as given.
+         */
+        suspend fun runWithAlarms(context: Context, alarms: List<Alarm>) {
+            runCatching {
+                writeAlarms(context, alarms)
+            }.onFailure {
+                Timber.e(it, "Failed to send alarms to watch")
+                AppSnackbar("Failed to set watch alarm")
+            }
+        }
+
+        private suspend fun writeAlarms(context: Context, alarms: List<Alarm>) {
+            alarms.forEachIndexed { index, alarm ->
+                alarmNameStorage.put(alarm.name ?: "", index)
+            }
+            alarmNameStorage.save()
+
+            api.setAlarms(ArrayList(alarms))
+            ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(alarms))
+            AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+        }
+
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
             RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }
 
         override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
-            // Not strictly needed if only triggered by voice, but good for persistence if we add UI later
             LocalDataStorage.put(context, this.javaClass.simpleName + ".hour", alarmHour.toString())
             LocalDataStorage.put(context, this.javaClass.simpleName + ".minute", alarmMinute.toString())
             super.save(context, actionsStorage)
@@ -796,7 +813,6 @@ constructor(
             super.load(context, actionsStorage)
         }
     }
-
     inner class ClearAllAlarmsAction(
         override var title: String,
         override var enabled: Boolean
@@ -889,16 +905,35 @@ constructor(
                     }
                     else -> current
                 }
-                api.setSettings(toSend)
-                ProgressEvents.onNext("SettingsUpdated")
-                AppSnackbar(context.getString(R.string.settings_sent_to_watch))
+                sendSettings(context, toSend)
             }.onFailure {
                 Timber.e(it, "Failed to send settings to watch")
             }
         }
 
+        /**
+         * Entry point for callers that already have a fully-built Settings object
+         * (currently: SettingsViewModel.sendToWatch(), via RunEnvironment.DIRECT_INVOCATION).
+         * Bypasses the settingName/settingValue single-field mapping used by voice commands,
+         * since the caller already knows every field it wants to send.
+         */
+        suspend fun runWithSettings(context: Context, settings: Settings) {
+            runCatching {
+                sendSettings(context, settings)
+            }.onFailure {
+                Timber.e(it, "Failed to send settings to watch")
+            }
+        }
+
+        private suspend fun sendSettings(context: Context, settings: Settings) {
+            api.setSettings(settings)
+            ProgressEvents.onNext("SettingsUpdated")
+            AppSnackbar(context.getString(R.string.settings_sent_to_watch))
+        }
+
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
             RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }
 
@@ -995,16 +1030,33 @@ constructor(
 
         override suspend fun runSuspend(context: Context) {
             runCatching {
-                api.setTimer(timerValueS)
-                ProgressEvents.onNext("TimerUpdated")
-                AppSnackbar(context.getString(R.string.timer_set))
+                writeTimer(context, timerValueS)
             }.onFailure {
                 Timber.e(it, "Failed to send timer to watch")
             }
         }
 
+        /**
+         * Entry point for callers that already know the timer value to send
+         * (currently: TimeViewModel.onAction(UpdateTimer), via RunEnvironment.DIRECT_INVOCATION).
+         */
+        suspend fun runWithTimer(context: Context, timerValueSeconds: Int) {
+            runCatching {
+                writeTimer(context, timerValueSeconds)
+            }.onFailure {
+                Timber.e(it, "Failed to send timer to watch")
+            }
+        }
+
+        private suspend fun writeTimer(context: Context, timerValueSeconds: Int) {
+            api.setTimer(timerValueSeconds)
+            ProgressEvents.onNext("TimerUpdated")
+            AppSnackbar(context.getString(R.string.timer_set))
+        }
+
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
             RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }
 

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
+import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.Alarm
@@ -47,7 +48,7 @@ sealed class UiEvent {
  * - Loading alarms from the watch via [GShockRepository].
  * - loading and saving alarm names using [AlarmNameStorage].
  * - Maintaining the state of the alarms list.
- * - Sending updated alarms back to the watch.
+ * - Sending updated alarms back to the watch (via [ActionsViewModel.SetAlarmAction]).
  * - Syncing enabled alarms to the phone's native alarm app.
  */
 @HiltViewModel
@@ -55,6 +56,7 @@ class AlarmViewModel @Inject constructor(
     private val api: GShockRepository,
     private val alarmNameStorage: AlarmNameStorage,
     private val watchFeatureManager: IWatchFeatureManager,
+    private val actionsViewModel: ActionsViewModel,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -167,47 +169,36 @@ class AlarmViewModel @Inject constructor(
         updateAlarm(0) { it.copy(hasHourlyChime = enabled) }
 
     /**
-     * Sends the current state of all alarms to the watch.
+     * Sends the current state of all alarms to the watch via
+     * [ActionsViewModel.SetAlarmAction.runWithAlarms], under RunEnvironment.DIRECT_INVOCATION.
      *
      * This process involves:
-     * 1. Updating the `AlarmNameStorage` with any name changes (clearing names for edited alarms).
-     * 2. Sending the list of alarms to the watch via [api.setAlarms].
+     * 1. Normalizing any manually-edited (null-named) alarms to an empty name.
+     * 2. Handing the exact list to SetAlarmAction, which persists names to
+     *    AlarmNameStorage, writes the list via [api.setAlarms], and emits
+     *    "AlarmsUpdated" (which this ViewModel's own subscription uses to reload).
      * 3. Updating the hourly chime setting if applicable.
-     * 4. Reloading the alarms from the watch to confirm the state.
-     * 5. Emitting a [UiEvent.ShowSnackbar] on success.
      */
     fun sendAlarmsToWatch() = viewModelScope.launch {
         // Before sending, process the alarms to handle null names.
-        val alarmsToSend = _alarms.value.mapIndexed { index, alarm ->
-            if (alarm.name == null) {
-                // This alarm was manually edited. Update its name in storage to be empty.
-                // Using an empty string with `put` will store the NO_NAME_INDEX for that slot.
-                alarmNameStorage.put("", index)
-
-                // Return a clean alarm object to be sent to the watch API.
-                alarm.copy(name = "")
-            } else {
-                alarm
-            }
+        val alarmsToSend = _alarms.value.map { alarm ->
+            if (alarm.name == null) alarm.copy(name = "") else alarm
         }
 
-        // Save any changes made in the loop above to the watch's scratchpad.
-        alarmNameStorage.save()
+        val setAlarmAction = actionsViewModel.getAction(ActionsViewModel.SetAlarmAction::class.java)
+        if (!setAlarmAction.shouldRun(ActionsViewModel.RunEnvironment.DIRECT_INVOCATION)) {
+            return@launch
+        }
 
-        runCatching {
-            api.setAlarms(ArrayList(alarmsToSend))
-            if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
-                // Ensure we get the latest hourly chime setting from the potentially modified list
+        setAlarmAction.runWithAlarms(appContext, alarmsToSend)
+
+        if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
+            runCatching {
                 val chimeSetting = alarmsToSend.getOrNull(0)?.hasHourlyChime ?: false
                 api.setSettings(api.getSettings().copy(hourlyChime = chimeSetting))
+            }.onFailure {
+                ProgressEvents.onNext("Error", it.message ?: "")
             }
-
-            // After successfully sending, reload the alarms state from the watch to ensure UI consistency.
-            loadAlarms()
-
-            AppSnackbar(appContext.getString(R.string.alarms_set_to_watch))
-        }.onFailure {
-            ProgressEvents.onNext("Error", it.message ?: "")
         }
     }
 
