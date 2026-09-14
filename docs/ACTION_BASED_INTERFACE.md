@@ -4,9 +4,9 @@ This document describes the architectural transition from direct `GShockAPI` cal
 
 ## Overview
 
-Previously, UI components (ViewModels) interacted directly with the `GShockRepository` (which delegates to `GShockAPI`) to send commands to the watch. While simple, this approach led to duplicated logic for command validation, threading, and handling different trigger sources (e.g., watch button presses vs. voice commands).
+Previously, UI components (ViewModels) interacted directly with the `GShockRepository` (which delegates to `GShockAPI`) to send commands to the watch. While simple, this approach led to duplicated logic for command validation, threading, and handling different trigger sources.
 
-The new **Action-Based Interface** centralizes all watch interactions into a single coordinator (`ActionContainer`), using a command pattern to encapsulate specific watch operations.
+The **Action-Based Interface** centralizes all watch interactions into a single coordinator (`ActionContainer`), using a command pattern to encapsulate specific watch operations.
 
 ## Key Components
 
@@ -32,45 +32,59 @@ A `@Singleton` component that serves as the "source of truth" for all actions. I
 - Initializing and maintaining the list of available actions.
 - Loading/Saving action states (enabled/disabled) to the watch's scratchpad.
 - Routing events from the watch (via `ActionRunner`) to the appropriate actions.
-- Providing specific entry points for complex writes (e.g., `runWithAlarms`, `runWithSettings`).
 
 ### 4. Actions ViewModel (`ActionsViewModel`)
-A thin, `@HiltViewModel` wrapper around `ActionContainer`. It provides a lifecycle-aware interface for Compose screens to collect action states and UI events (like snackbars) via Hilt.
+A thin, `@HiltViewModel` wrapper around `ActionContainer`. It provides a lifecycle-aware interface for Compose screens.
+
+---
+
+## Usage Patterns
+
+### A. Direct Invocation (UI Buttons)
+When a user manually triggers an update (e.g., tapping "Send to Watch" in the Alarms screen), the app uses `DIRECT_INVOCATION`.
+
+**Implementation:**
+The ViewModel gets the specific action instance from the container and calls a specialized entry point.
+```kotlin
+// Inside AlarmViewModel.kt
+fun sendAlarmsToWatch() {
+    val setAlarmAction = actionContainer.getAction(ActionContainer.SetAlarmAction::class.java)
+    // Direct call bypassing general filters
+    setAlarmAction.runWithAlarms(appContext, alarmsToSend)
+}
+```
+
+### B. Environment Triggers (Watch Buttons)
+When a watch hardware button is pressed, the `ActionRunner` handles the signal and passes it to the container to run all actions compatible with that environment.
+
+**Implementation:**
+1. `ActionRunner` listens for `ButtonPressedInfoReceived`.
+2. It calls `actionContainer.runActionsForActionButton(context)`.
+3. The container filters all actions where `action.shouldRun(ACTION_BUTTON_PRESSED)` is true.
+```kotlin
+// Inside ActionContainer.kt
+fun runActionsForActionButton(context: Context) {
+    val actions = _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
+    runFilteredActions(context, actions)
+}
+```
+
+### C. Voice Commands
+Voice commands are parsed into `VoiceCommand` objects, which are then mapped to specific `Action` classes via the `VoiceCommandTable`.
+
+**Implementation:**
+```kotlin
+// Inside VoiceDispatcher.kt
+val action = actionContainer.getAction(spec.actionClass)
+spec.applyParams(action, command, api)
+actionContainer.runSingleActionSuspend(action)
+```
+
+---
 
 ## Benefits of the Action System
 
-### Centralized Validation
-Instead of checking "is this watch connected?" or "does this model support reminders?" in every ViewModel, the `Action` itself determines if it should run via the `shouldRun()` method and feature gates.
-
-### Decoupling of Intent and Execution
-ViewModels no longer need to know *how* to set a timer or *how* to handle a Bluetooth transaction. They simply provide the intent (e.g., "Run the Timer action with these seconds"), and the `ActionContainer` handles the execution and threading.
-
-### Uniform Trigger Handling
-The same `SetAlarmAction` logic is used whether the user taps a button in the app, speaks a voice command, or presses a button on the watch itself.
-
-### Robust Threading
-Asynchronous operations are managed centrally using Kotlin Coroutines, ensuring that long-running Bluetooth transfers don't block the UI thread and are resilient to process backgrounding.
-
-## Usage in ViewModels
-
-### Old Way (Direct API)
-```kotlin
-// Inside AlarmViewModel
-fun sendToWatch() {
-    viewModelScope.launch {
-        api.setAlarms(currentAlarms)
-    }
-}
-```
-
-### New Way (Action Interface)
-```kotlin
-// Inside AlarmViewModel
-fun sendToWatch() {
-    viewModelScope.launch {
-        val setAlarmAction = actionContainer.getAction(ActionContainer.SetAlarmAction::class.java)
-        // Pass specific data to the action and run it under DIRECT_INVOCATION
-        setAlarmAction.runWithAlarms(appContext, alarmsToSend)
-    }
-}
-```
+- **Centralized Validation**: `Action.shouldRun()` centralizes hardware capability checks.
+- **Decoupling**: ViewModels provide intent; the Container handles execution and threading.
+- **Consistency**: The same logic is used across UI taps, watch buttons, and voice.
+- **Robustness**: Asynchronous operations are managed centrally using Coroutines.

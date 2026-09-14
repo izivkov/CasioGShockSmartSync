@@ -1,7 +1,10 @@
-- [/] Split ActionsViewModel into Container and ViewModel
-    - [x] Research existing usages and architecture
-    - [ ] Update background components (`ActionRunner`, `VoiceDispatcher`, `VoiceCommandTable`)
-    - [ ] Update feature ViewModels (`Alarm`, `Event`, `Settings`, `Time`)
-    - [ ] Update UI components and action views
-    - [ ] Update ProGuard rules
-    - [ ] Verify build
+- [x] Lint and Fix Project Codebase
+    - [x] Clean up `ActionContainer.kt`
+    - [x] Clean up `ActionViewModel.kt`
+    - [x] Clean up `ActionsScreen.kt`
+    - [x] Clean up `VoiceDispatcher.kt`
+    - [x] Clean up `AlarmViewModel.kt`
+    - [x] Clean up `EventViewModel.kt`
+    - [x] Clean up `SettingsViewModel.kt`
+    - [x] Clean up `TimeViewModel.kt`
+    - [x] Verify build and functionality

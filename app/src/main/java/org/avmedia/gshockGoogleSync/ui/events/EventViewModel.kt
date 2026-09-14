@@ -30,7 +30,7 @@ class EventViewModel @Inject constructor(
     private val calendarEvents: CalendarEvents,
     private val eventStorage: EventStorage,
     private val actionContainer: ActionContainer,
-    @param:ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     private val _events = MutableStateFlow<List<Event>>(emptyList())
@@ -79,10 +79,10 @@ class EventViewModel @Inject constructor(
                                     java.time.ZoneId.systemDefault()
                                 ),
                                 null,
-                                RepeatPeriod.NEVER,
-                                null,
-                                false,
-                                false
+                                repeatPeriod = RepeatPeriod.NEVER,
+                                daysOfWeek = null,
+                                enabled = false,
+                                incompatible = false
                             )
                         )
                     }
@@ -137,7 +137,6 @@ class EventViewModel @Inject constructor(
     private var eventSubscriptionName: String? = null
 
     override fun onCleared() {
-        super.onCleared()
         eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
     }
 
@@ -182,10 +181,5 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Represents one-time UI events that should be handled by the UI layer.
-     */
-    sealed class UiEvent {
-        data class ShowSnackbar(val message: String) : UiEvent()
-    }
+    sealed class UiEvent
 }

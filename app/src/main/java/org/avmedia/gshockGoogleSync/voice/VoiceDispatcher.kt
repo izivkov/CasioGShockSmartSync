@@ -23,7 +23,7 @@ class VoiceDispatcher @Inject constructor(
     private val intentParser: IntentParser,
     private val speechFeedback: VoiceSpeechFeedback,
     private val voiceCommandManager: Provider<VoiceCommandManager>,
-    private val eventStorage: org.avmedia.gshockGoogleSync.scratchpad.EventStorage
+    private val eventStorage: org.avmedia.gshockGoogleSync.scratchpad.EventStorage,
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
     private var currentReminder: VoiceCommand.AddReminder? = null
@@ -100,8 +100,8 @@ class VoiceDispatcher @Inject constructor(
                 spec.applyParams(action, command, api)
                 actionContainer.runSingleActionSuspend(action)
 
-                // Increase delay to 1000ms to ensure the "success" beep of the STT is finished
-                delay(1000)
+                // Increase delay to 1 second to ensure the "success" beep of the STT is finished
+                delay(kotlin.time.Duration.parse("1s"))
                 val feedback = getFeedbackText(command)
                 speechFeedback.speak(feedback)
             } catch (e: Exception) {
@@ -200,7 +200,7 @@ class VoiceDispatcher @Inject constructor(
             try {
                 if (!eventStorage.isManualMode()) {
                     speechFeedback.speak("Switching to manual reminders mode")
-                    eventStorage.setManualMode(true)
+                    eventStorage.setManualMode(enabled = true)
                     eventStorage.save()
                     delay(1000)
                 }
@@ -230,10 +230,11 @@ class VoiceDispatcher @Inject constructor(
                 api.setEvents(ArrayList(updatedEvents))
                 ProgressEvents.onNext("EventsUpdated")
 
-                val dateFeedback =
-                    if (date == LocalDate.now()) "today" else if (date == LocalDate.now()
-                            .plusDays(1)
-                    ) "tomorrow" else "for ${date.month.name.lowercase()} ${date.dayOfMonth}"
+                val dateFeedback = when (date) {
+                    LocalDate.now() -> "today"
+                    LocalDate.now().plusDays(1) -> "tomorrow"
+                    else -> "for ${date.month.name.lowercase()} ${date.dayOfMonth}"
+                }
                 speechFeedback.speak("${reminder.title} added $dateFeedback")
             } catch (e: Exception) {
                 Timber.e(e, "Error adding reminder")
@@ -245,10 +246,9 @@ class VoiceDispatcher @Inject constructor(
     private fun getFeedbackText(command: VoiceCommand): String {
         return when (command) {
             is VoiceCommand.SetAlarm -> {
-                val hour12 = if (command.hour % 12 == 0) 12 else command.hour % 12
+                val hour12 = if ((command.hour % 12) == 0) 12 else (command.hour % 12)
                 val amPm = if (command.hour >= 12) "PM" else "AM"
-                val minuteStr =
-                    if (command.minute < 10) "0${command.minute}" else "${command.minute}"
+                val minuteStr = command.minute.toString().padStart(2, '0')
                 "Alarm set for $hour12:$minuteStr $amPm"
             }
 

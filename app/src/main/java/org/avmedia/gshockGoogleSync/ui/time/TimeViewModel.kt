@@ -54,7 +54,7 @@ data class TimeState(
     val distanceKm: Float = 0f,
     val isListening: Boolean = false,
     val isVoiceCommandSupported: Boolean = false,
-    val isVoiceVerbose: Boolean = true
+    val isVoiceVerbose: Boolean = true,
 )
 
 sealed interface TimeAction {
@@ -114,8 +114,10 @@ class TimeViewModel @Inject constructor(
         // ViewModel is ever recreated. A unique name per instance guarantees
         // this instance's subscription actually registers - without this, the
         // retry logic below never even runs, because the event never arrives.
-        eventSubscriptionName = subscribeToProgressEvents("TimeViewModel", arrayOf(
-            org.avmedia.gshockapi.EventAction("TimerUpdated") {
+        eventSubscriptionName = subscribeToProgressEvents(
+            "TimeViewModel",
+            arrayOf(
+                org.avmedia.gshockapi.EventAction("TimerUpdated") {
                 viewModelScope.launch {
                     refreshTimerAfterExternalWrite()
                 }
@@ -129,7 +131,7 @@ class TimeViewModel @Inject constructor(
     ) {
         val before = _state.value.timer
         repeat(maxAttempts) {
-            delay(retryDelayMs)
+            delay(kotlin.time.Duration.parse("${retryDelayMs}ms"))
             val timer = api.getTimer()
             if (timer != before) {
                 _state.update { it.copy(timer = timer) }
@@ -142,7 +144,7 @@ class TimeViewModel @Inject constructor(
         when (action) {
             is TimeAction.SetTimer -> {
                 _state.value = _state.value.copy(
-                    timer = action.hours * 3600 + action.minutes * 60 + action.seconds
+                    timer = (action.hours * 3600) + (action.minutes * 60) + action.seconds
                 )
             }
 
@@ -320,7 +322,6 @@ class TimeViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        super.onCleared()
         eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
         stepPollJob?.cancel()
         saveJob?.let {

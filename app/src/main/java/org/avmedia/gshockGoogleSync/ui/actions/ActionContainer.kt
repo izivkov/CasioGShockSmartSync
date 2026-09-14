@@ -1,5 +1,4 @@
 package org.avmedia.gshockGoogleSync.ui.actions
-import androidx.hilt.navigation.compose.hiltViewModel
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -152,7 +151,7 @@ constructor(
 
             saveJob?.cancel()
             saveJob = containerScope.launch {
-                delay(0)
+                delay(kotlin.time.Duration.ZERO)
                 actionsStorage.save()
                 _uiEvents.emit(
                     UiEvent.ShowSnackbar(appContext.getString(R.string.actions_saved))
@@ -255,7 +254,6 @@ constructor(
         open var enabled: Boolean,
         var runMode: RunMode = RunMode.SYNC,
     ) {
-        val ENABLED: String = ".enabled"
 
         open fun shouldRun(runEnvironment: RunEnvironment): Boolean {
             return when (runEnvironment) {
@@ -275,9 +273,6 @@ constructor(
         }
 
         open suspend fun save(context: Context, actionsStorage: ActionsStorage) {
-            val key = this.javaClass.simpleName + ENABLED
-            val value = enabled
-
             val actionEnum =
                 when (this) {
                     is SetTimeAction -> ActionsStorage.Action.SET_TIME
@@ -473,12 +468,6 @@ constructor(
         }
     }
 
-    inner class SetLocationAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled) {
-        override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
-        }
-    }
 
     inner class StartVoiceAssistAction(
         override var title: String,
@@ -645,12 +634,6 @@ constructor(
         }
     }
 
-    inner class MapAction(override var title: String, override var enabled: Boolean) :
-        Action(title, enabled) {
-        override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
-        }
-    }
 
     inner class PhoneDialAction(
         override var title: String,
@@ -998,7 +981,7 @@ constructor(
                     else -> "English"
                 }
 
-                val dateTimePattern = java.text.SimpleDateFormat().toPattern()
+                val dateTimePattern = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).toPattern()
                 val datePattern = dateTimePattern.split(" ")[0]
                 val timePattern = dateTimePattern.split(" ")[1]
 
@@ -1266,39 +1249,12 @@ constructor(
         return _actions.value
     }
 
-    fun runFilteredActions(runEnvironment: RunEnvironment) {
-        containerScope.launch {
-            isDataLoaded.await()
-            val actionsToRun = _actions.value.filter { it.shouldRun(runEnvironment) }
-            runFilteredActions(appContext, actionsToRun)
-        }
-    }
-
     suspend fun runSingleActionSuspend(action: Action) {
         isDataLoaded.await()
         action.runSuspend(appContext)
     }
 
-    fun runSingleAction(action: Action) {
-        containerScope.launch {
-            runSingleActionSuspend(action)
-        }
-    }
-
-    fun emitUiEvent(event: UiEvent) {
-        containerScope.launch {
-            _uiEvents.emit(event)
-        }
-    }
-
     fun save() {
         containerScope.launch { actionsStorage.save() }
-    }
-
-    fun saveWithMessage(message: String) {
-        containerScope.launch {
-            actionsStorage.save()
-            AppSnackbar(message)
-        }
     }
 }

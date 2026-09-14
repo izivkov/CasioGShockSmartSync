@@ -1,5 +1,4 @@
 package org.avmedia.gshockGoogleSync.ui.actions
-import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +23,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
-    private val container: ActionContainer
+    private val container: ActionContainer,
 ) : ViewModel() {
 
     val actions: StateFlow<List<ActionContainer.Action>> = container.actions

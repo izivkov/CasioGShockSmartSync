@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
@@ -57,7 +56,7 @@ class AlarmViewModel @Inject constructor(
     private val alarmNameStorage: AlarmNameStorage,
     private val watchFeatureManager: IWatchFeatureManager,
     private val actionContainer: ActionContainer,
-    @param:ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
@@ -79,7 +78,9 @@ class AlarmViewModel @Inject constructor(
     }
 
     private fun setupEventSubscription() {
-        eventSubscriptionName = subscribeToProgressEvents("AlarmViewModel", arrayOf(
+        eventSubscriptionName = subscribeToProgressEvents(
+            "AlarmViewModel",
+            arrayOf(
             org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
                 loadAlarms()
             }
@@ -219,7 +220,7 @@ class AlarmViewModel @Inject constructor(
             _alarms.value
                 .withIndex()
                 .filter { it.value.enabled }
-                .forEach { (index, alarm) ->
+                .forEach { (_, alarm) ->
                     val intent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
                         putExtra(AlarmClock.EXTRA_MESSAGE, alarm.name)
                         putExtra(AlarmClock.EXTRA_HOUR, alarm.hour)
@@ -232,7 +233,7 @@ class AlarmViewModel @Inject constructor(
 
                     api.preventReconnection()
                     appContext.startActivity(intent)
-                    delay(1000L) // Wait 1 second before processing the next one
+                    delay(kotlin.time.Duration.parse("1s")) // Wait 1 second before processing the next one
                 }
         }
     }

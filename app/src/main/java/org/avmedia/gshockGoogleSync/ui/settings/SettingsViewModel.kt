@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
@@ -36,14 +35,9 @@ abstract class Setting(val name: String) {
 
 data class SettingsState(
     val settings: List<Setting> = emptyList(),
-    val settingsMap: Map<Class<out Setting>, Setting> = emptyMap()
+    val settingsMap: Map<Class<out Setting>, Setting> = emptyMap(),
 )
 
-sealed class SettingsAction {
-    data class UpdateSetting<T : Setting>(val setting: T) : SettingsAction()
-    data object SetSmartDefaults : SettingsAction()
-    data object SendToWatch : SettingsAction()
-}
 
 sealed class UiEvent {
     data class ShowSnackbar(val message: String) : UiEvent()
@@ -75,7 +69,9 @@ constructor(
     }
 
     private fun setupEventSubscription() {
-        ProgressEvents.runEventActions(this.javaClass.canonicalName ?: "SettingsViewModel", arrayOf(
+        ProgressEvents.runEventActions(
+            this.javaClass.canonicalName ?: "SettingsViewModel",
+            arrayOf(
             EventAction("DeviceName") {
                 initializeSettings()
             },
@@ -183,9 +179,6 @@ constructor(
         }
     }
 
-    data class DnD(
-        var dnd: Boolean = true,
-    ) : Setting("DnD")
 
     data class Font(var font: FontType = FontType.STANDARD) : Setting("Font") {
         enum class FontType(val value: String) {
@@ -213,7 +206,7 @@ constructor(
 
         while (jsonObjKeys.hasNext()) {
             val key: String = jsonObjKeys.next()
-            val value = jsonObj.get(key)
+            val value = jsonObj[key]
 
             when (key) {
                 "powerSavingMode" -> handlePowerSavingMode(value, updatedObjects)
@@ -391,7 +384,7 @@ constructor(
             val currentPowerSavingMode: PowerSavingMode =
                 state.value.settingsMap[PowerSavingMode::class.java] as PowerSavingMode
 
-            val enablePowerSetting = batteryLevel <= 15 || currentPowerSavingMode.powerSavingMode
+            val enablePowerSetting = (batteryLevel <= 15) || currentPowerSavingMode.powerSavingMode
             val powerSavings = PowerSavingMode(enablePowerSetting)
             smartSettings.add(powerSavings)
         }

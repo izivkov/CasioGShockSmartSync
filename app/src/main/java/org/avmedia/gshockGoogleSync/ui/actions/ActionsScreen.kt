@@ -12,7 +12,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,8 +30,7 @@ import timber.log.Timber
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
-    actionsViewModel: ActionsViewModel =
-        hiltViewModel(),
+    actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
     LaunchedEffect(Unit) {
         actionsViewModel.uiEvents.collect { event ->
@@ -93,8 +91,6 @@ private fun ActionsContent(modifier: Modifier = Modifier, actionsViewModel: Acti
 
 @Composable
 private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
-    // We access the actions list to force recomposition when it changes
-    val actions by actionsViewModel.actions.collectAsState()
     val watchFeatureManager = LocalWatchFeatureManager.current
 
     return listOfNotNull(
