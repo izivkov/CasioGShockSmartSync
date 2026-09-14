@@ -1,3 +1,22 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.8 — September 14, 2026
+
+## ✨ Highlights
+
+### 🛡️ Build System & Compliance
+*   **F-Droid Optimization**: Refined the build configuration to resolve compatibility issues with the F-Droid automated build pipeline. 
+*   **Gradle Modernization**: Transitioned to the declarative `optimization` block in `build.gradle` for clearer management of R8/ProGuard settings.
+
+### 🏗️ Advanced Actions Architecture
+Completed the architectural separation of action state from UI lifecycle:
+*   **ActionContainer (Process Singleton)**: All watch-triggered logic and master action states now reside in a dedicated, process-lived singleton. This guarantees that background events from your watch are never missed, even if the app UI is not active.
+*   **ActionsViewModel (Compose Facade)**: Transitioned the UI to use a lightweight wrapper that delegates all operations to the stable `ActionContainer`, following modern Android "Single Source of Truth" patterns.
+
+### 📖 Enhanced Developer Documentation
+*   **Architecture Guide**: Published [Action-Based Interface Architecture](file:///home/izivkov/projects/CasioGShockSmartSync/docs/ACTION_BASED_INTERFACE.md) detailing the shift from direct API calls to the command-based system.
+*   **Updated Technical Map**: Refreshed the `TECHNICAL-OVERVIEW.md` to reflect the new component relationships.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.6 — September 12, 2026
 
 ## ✨ Highlights
