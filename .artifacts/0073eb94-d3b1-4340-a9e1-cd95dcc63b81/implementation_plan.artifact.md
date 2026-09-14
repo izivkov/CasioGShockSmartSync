@@ -1,55 +1,75 @@
-# Implementation Plan - Split ActionsViewModel into Container and ViewModel
+# Implementation Plan - Lint and Fix
 
-Refactor the actions architecture by moving the process-lived state and logic into a `Singleton` `ActionContainer`, while keeping `ActionsViewModel` as a thin, screen-scoped wrapper for Compose.
+Address various lint warnings across the project including unused imports, deprecated API usages, legacy `delay` overloads, and unused variables to improve code quality and maintainability.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Refactoring Strategy**:
-> 1.  **`ActionContainer` (Singleton)**: Will host all `Action` subclasses, the master `actions` flow, and the logic for running/saving/loading actions. It will be injected by background components and other ViewModels.
-> 2.  **`ActionsViewModel` (ViewModel)**: Will stay as the UI entry point for the Actions screen, but it will delegate all its data and operations to the `ActionContainer`.
+> [!NOTE]
+> I will be removing several classes and functions that are marked as "unused" by the analyzer. If any of these are intended for future use, please let me know.
+> - `SetLocationAction`, `MapAction` in `ActionContainer.kt`
+> - `runFilteredActions`, `runSingleAction`, `emitUiEvent`, `saveWithMessage` in `ActionContainer.kt`
+> - `DnD` in `SettingsViewModel.kt`
+> - `UpdateSetting`, `SetSmartDefaults`, `SendToWatch` actions in `SettingsViewModel.kt` (if they are truly unused by any Compose triggers)
 
 ## Proposed Changes
 
-### [Actions Architecture]
+### [Core Actions]
 
 #### [MODIFY] [ActionContainer.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionContainer.kt)
-- Ensure all logic (registration, runFilteredActions, runSingleAction, etc.) is fully moved here from the old `ActionsViewModel`.
-- Ensure all inner `Action` subclasses (like `SetAlarmAction`) are defined inside this class.
+- Remove unused import `androidx.hilt.navigation.compose.hiltViewModel`.
+- Lowercase `ENABLED` to `enabled`.
+- Remove unused variables `key` and `value` inside `save()`.
+- Remove unused action classes: `SetLocationAction`, `MapAction`.
+- Remove unused public functions: `runFilteredActions`, `runSingleAction`, `emitUiEvent`, `saveWithMessage`.
+- Fix `SimpleDateFormat` by adding `Locale.US`.
+- Convert `delay(0)` to `delay(Duration.ZERO)`.
+- Fix lambda argument placement.
 
-#### [MODIFY] [ActionsViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
-- Refactor to inject `ActionContainer`.
-- Expose properties like `actions` and `uiEvents` by delegating to the container.
+#### [MODIFY] [ActionViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionViewModel.kt)
+- Remove unused import `androidx.hilt.navigation.compose.hiltViewModel`.
+- Add missing trailing comma.
 
-### [Dependency Injection Refactoring]
+#### [MODIFY] [ActionsScreen.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionsScreen.kt)
+- Update `hiltViewModel` import to `androidx.hilt.navigation.compose.hiltViewModel`.
+- Remove unused `actions` variable in `createActionItems`.
 
-#### [MODIFY] Background Components
-Update these components to inject `ActionContainer` instead of `ActionsViewModel`:
-- **[ActionRunner.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionRunner.kt)**
-- **[VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)**
-- **[VoiceCommandTable.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceCommandTable.kt)** (Update casting and class references).
+### [Voice Engine]
 
-#### [MODIFY] Feature ViewModels
-Update these ViewModels to inject `ActionContainer`:
-- **[AlarmViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/alarms/AlarmViewModel.kt)**
-- **[EventViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/events/EventViewModel.kt)**
-- **[SettingsViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/settings/SettingsViewModel.kt)**
-- **[TimeViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeViewModel.kt)**
+#### [MODIFY] [VoiceDispatcher.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/voice/VoiceDispatcher.kt)
+- Convert `delay(1000)` to `1.seconds`.
+- Replace cascade `if` with `when` for date feedback.
+- Add clarifying parentheses to `hour12` calculation.
+- Clean up minute string template.
 
-#### [MODIFY] UI Components
-- **[ActionsScreen.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/actions/ActionsScreen.kt)** and individual action views (e.g., `FlashlightView.kt`, `PhoneView.kt`): Update references to inner classes, which are now `ActionContainer.ToggleFlashlightAction` instead of `ActionsViewModel.ToggleFlashlightAction`.
+### [Feature ViewModels]
 
-### [Build & System]
+#### [MODIFY] [AlarmViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/alarms/AlarmViewModel.kt)
+- Remove unused import `org.avmedia.gshockGoogleSync.R`.
+- Convert `delay(1000L)` to `1.seconds`.
+- Remove unused `index` in `forEach` loop.
 
-#### [MODIFY] [proguard-rules.pro](file:///home/izivkov/projects/CasioGShockSmartSync/app/proguard-rules.pro)
-- Update `-keep` rules to target `ActionContainer` and its inner classes.
+#### [MODIFY] [EventViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/events/EventViewModel.kt)
+- Remove redundant `super.onCleared()`.
+- Remove unused `ShowSnackbar` UI event.
+
+#### [MODIFY] [SettingsViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/settings/SettingsViewModel.kt)
+- Remove unused import `org.avmedia.gshockGoogleSync.R`.
+- Remove unused `DnD` class.
+- Remove unused `SettingsAction` subclasses if confirmed.
+- Replace explicit `jsonObj.get(key)` with index access `jsonObj[key]`.
+- Add clarifying parentheses to `enablePowerSetting` logic.
+
+#### [MODIFY] [TimeViewModel.kt](file:///home/izivkov/projects/CasioGShockSmartSync/app/src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeViewModel.kt)
+- Remove redundant `super.onCleared()`.
+- Fix `delay` duration overload.
+- Add clarifying parentheses to timer calculation.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `app:assembleGithubDebug` to ensure all type references and DI injections are correct.
+- Run `app:assembleGithubDebug` to ensure no syntax errors were introduced during cleanup.
+- Run `app:testGithubDebugUnitTest` to verify no regressions in `IntentParser`.
 
 ### Manual Verification
-1.  **Watch Actions**: Verify that pressing the watch action button still triggers the correct action (verifies `ActionRunner` + `ActionContainer` singleton state).
-2.  **Voice Interaction**: Verify voice commands still work (verifies `VoiceDispatcher` + `ActionContainer`).
-3.  **UI Updates**: Verify that the Actions screen still displays the current enabled state of actions and reflects updates immediately.
+- Verify that the app still connects and syncs correctly.
+- Verify that voice commands and action button triggers still function.
