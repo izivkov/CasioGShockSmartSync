@@ -21,8 +21,8 @@ import kotlin.math.sin
 class Utils {
     companion object {
         fun AppHashCode(): String {
-            val callingFunctionName = Thread.currentThread().stackTrace[3].methodName
-            return callingFunctionName.hashCode().toString()
+            val frame = Thread.currentThread().stackTrace[3]
+            return "${frame.className}.${frame.methodName}:${frame.lineNumber}"
         }
 
         fun <T> runApi(apiCall: suspend (Array<out T>) -> Unit, vararg args: T) {
