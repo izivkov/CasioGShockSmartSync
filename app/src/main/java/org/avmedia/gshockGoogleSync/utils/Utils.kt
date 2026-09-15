@@ -22,9 +22,7 @@ class Utils {
     companion object {
         fun AppHashCode(): String {
             val frame = Thread.currentThread().stackTrace[3]
-            val hash = "${frame.className}.${frame.methodName}:${frame.lineNumber}".hashCode().toString()
-            println (">>> hash: $hash")
-            return hash
+            return "${frame.className}.${frame.methodName}:${frame.lineNumber}".hashCode().toString()
         }
 
         fun <T> runApi(apiCall: suspend (Array<out T>) -> Unit, vararg args: T) {
