@@ -105,7 +105,7 @@ an injectable, mockable type instead of constructing `GShockAPI` directly.
 Nearly everything in this app that talks to the watch goes through this
 repository.
 
-<img src="gshock_connection_lifecycle.svg" alt="Connection System" width="300" height="200" />
+<img src="gshock_connection_lifecycle.svg" alt="Connection System" width="500" />
 
 ## App bootstrap
 
@@ -147,7 +147,7 @@ button (`RunEnvironment.DIRECT_INVOCATION`), not just from a watch button
 or voice command — so the same write path is shared by all three triggers
 instead of being duplicated per screen.
 
-<img src="gshock_actions_system.svg" alt="Action System" width="300" height="200" />
+<img src="gshock_actions_system.svg" alt="Action System" width="500" />
 
 ## Voice commands
 
