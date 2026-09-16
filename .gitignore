@@ -18,7 +18,7 @@ out/
 app/keystore/
 app/build
 
-.artifacts
+.artifacts/
 
 # Gradle files
 .gradle/
