@@ -56,6 +56,11 @@ class IntentParser @Inject constructor() {
     private val settingsDefaultPattern = Regex("(?:set|change|reset)?\\s*(?:the\\s*)?settings(?:\\s*(?:to)?\\s*defaults?)?", RegexOption.IGNORE_CASE)
     private val helpPattern = Regex("help", RegexOption.IGNORE_CASE)
 
+    private val weeksFromPattern = Regex(
+        "(\\d+|one|two|three|four|five|six|seven|eight|nine|ten)?\\s*weeks?\\s*(?:from)?\\s*(monday|tuesday|wednesday|thursday|friday|saturday|sunday)",
+        RegexOption.IGNORE_CASE
+    )
+
     private val reminderPatterns = listOf(
         Regex("(?:remind me|add (?:a |an )?(?:new )?(?:reminder|event)|create (?:a |an )?(?:new )?(?:reminder|event)|set (?:a |an )?(?:new )?(?:reminder|event)|new reminder)(?: (?:to )?(.*))?", RegexOption.IGNORE_CASE)
     )
@@ -244,10 +249,10 @@ class IntentParser @Inject constructor() {
     fun parseDate(text: String): LocalDate? {
         val lower = text.lowercase()
         val today = LocalDate.now()
-        
+
         if (lower.contains("tomorrow")) return today.plusDays(1)
         if (lower.contains("today")) return today
-        
+
         val daysOfWeek = mapOf(
             "monday" to java.time.DayOfWeek.MONDAY,
             "tuesday" to java.time.DayOfWeek.TUESDAY,
@@ -257,7 +262,18 @@ class IntentParser @Inject constructor() {
             "saturday" to java.time.DayOfWeek.SATURDAY,
             "sunday" to java.time.DayOfWeek.SUNDAY
         )
-        
+
+        weeksFromPattern.find(lower)?.let { match ->
+            val countStr = match.groupValues[1]
+            val dayName = match.groupValues[2]
+            val count = if (countStr.isBlank()) 1 else countStr.toIntOrNull() ?: wordToNumber(countStr) ?: 1
+            val dayOfWeek = daysOfWeek[dayName]
+            if (dayOfWeek != null) {
+                val nextDay = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(dayOfWeek))
+                return nextDay.plusWeeks(count.toLong())
+            }
+        }
+
         for ((name, day) in daysOfWeek) {
             if (lower.contains(name)) {
                 var target = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(day))

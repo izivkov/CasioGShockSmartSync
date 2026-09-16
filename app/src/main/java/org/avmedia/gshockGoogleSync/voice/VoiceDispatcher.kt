@@ -57,7 +57,7 @@ class VoiceDispatcher @Inject constructor(
             val helpText = "You can send commands to your watch using natural language. " +
                     "For example, 'Set alarm at 7:30 am' or 'Set alarm 3 hours from now', or even 'Wake me up in 2 hours', or, " +
                     "'Disable all alarms'. For reminders, you can say 'Set reminder' and the app will interactively ask you about the details. " +
-                    "When asked when, you can say something like 'Next Tuesday'. " +
+                    "When asked when, you can say something like 'Next Tuesday' or 'A week Monday'. " +
                     "You can also say 'Set timer to 4 minutes and 10 seconds', 'Set auto light', 'Set language to Spanish', 'Set settings to default', and so on. " +
                     "To abort a voice command, just say 'Cancel, abort, or stop'."
             speechFeedback.speak(helpText) {

@@ -1,10 +1,3 @@
-- [x] Lint and Fix Project Codebase
-    - [x] Clean up `ActionContainer.kt`
-    - [x] Clean up `ActionViewModel.kt`
-    - [x] Clean up `ActionsScreen.kt`
-    - [x] Clean up `VoiceDispatcher.kt`
-    - [x] Clean up `AlarmViewModel.kt`
-    - [x] Clean up `EventViewModel.kt`
-    - [x] Clean up `SettingsViewModel.kt`
-    - [x] Clean up `TimeViewModel.kt`
-    - [x] Verify build and functionality
+- [ ] Update `IntentParser.kt` to support "X weeks from [day]"
+- [ ] Add unit tests for week-based relative dates in `IntentParserTest.kt`
+- [ ] Verify tests pass

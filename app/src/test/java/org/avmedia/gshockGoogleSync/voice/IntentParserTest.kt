@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.voice
 
+import java.time.LocalDate
+
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -98,6 +100,25 @@ class IntentParserTest {
         assertEquals(VoiceCommand.SetSettingsToDefault, intentParser.parse("reset settings to defaults"))
         assertEquals(VoiceCommand.SetSettingsToDefault, intentParser.parse("settings to default"))
         assertEquals(VoiceCommand.SetSettingsToDefault, intentParser.parse("reset settings"))
+    }
+
+    @Test
+    fun testParseDateFuzzyWeeks() {
+        val today = LocalDate.now()
+        val nextMonday = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.MONDAY))
+
+        // "week from monday" -> nextMonday + 1 week
+        val result1 = intentParser.parseDate("week from monday")
+        assertEquals(nextMonday.plusWeeks(1), result1)
+
+        val nextTuesday = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.TUESDAY))
+        // "2 weeks from tuesday" -> nextTuesday + 2 weeks
+        val result2 = intentParser.parseDate("2 weeks from tuesday")
+        assertEquals(nextTuesday.plusWeeks(2), result2)
+
+        // "one week monday" -> nextMonday + 1 week
+        val result3 = intentParser.parseDate("one week monday")
+        assertEquals(nextMonday.plusWeeks(1), result3)
     }
 
     @Test
