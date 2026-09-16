@@ -1,4 +1,0 @@
-- [x] Remove `voiceCard` from `TimeScreen.kt`
-- [x] Add voice command trigger to `WatchNameView.kt` (upper-right)
-- [x] Verify build status
-- [x] Create walkthrough

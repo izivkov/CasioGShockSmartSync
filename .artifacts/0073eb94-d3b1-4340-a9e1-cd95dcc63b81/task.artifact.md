@@ -1,3 +1,0 @@
-- [ ] Update `IntentParser.kt` to support "X weeks from [day]"
-- [ ] Add unit tests for week-based relative dates in `IntentParserTest.kt`
-- [ ] Verify tests pass
