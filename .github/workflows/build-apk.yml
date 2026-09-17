@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -29,11 +30,6 @@ jobs:
         run: |
           ls -l app/release.keystore
           file app/release.keystore
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          accept-android-sdk-licenses: true
 
       - name: Build APK
         run: ./gradlew assembleRelease
