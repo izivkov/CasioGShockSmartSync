@@ -156,6 +156,7 @@ Read our full [Privacy Policy](https://izivkov.github.io/CasioGShockSmartSync/) 
 
 - **F-Droid**: [Download here](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
 - **GitHub**: [Download APK from Releases](https://github.com/izivkov/CasioGShockSmartSync/releases/)
+- **Google Playstore**: [Download here](https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync) (Ub-branded version)
 
 ## Contributing
 
