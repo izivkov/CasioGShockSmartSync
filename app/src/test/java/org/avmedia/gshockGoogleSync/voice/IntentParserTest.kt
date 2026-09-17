@@ -119,6 +119,12 @@ class IntentParserTest {
         // "one week monday" -> nextMonday + 1 week
         val result3 = intentParser.parseDate("one week monday")
         assertEquals(nextMonday.plusWeeks(1), result3)
+
+        // Assuming today is Wed Sep 16, 2026 (or just using dynamic calc based on today)
+        val nextThursday = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.THURSDAY))
+        // "a week from next thursday" -> nextThursday + 1 week (from 'next') + 1 week (from 'a week')
+        val result4 = intentParser.parseDate("a week from next thursday")
+        assertEquals(nextThursday.plusWeeks(2), result4)
     }
 
     @Test

@@ -62,17 +62,19 @@ fun ReminderEditDialog(
     }
     var repeatPeriod by remember(event) { mutableStateOf(eRepeatPeriod) }
     var daysOfWeek by remember(event) { mutableStateOf(eDaysOfWeek ?: emptyList()) }
-    var endDate by remember(event) {
-        mutableStateOf(
-            eEndDate?.let {
-                LocalDate.of(it.year, it.month, it.day)
-            } ?: startDate.plusYears(1)
-        )
-    }
-
     var hasEndDate by remember(event) {
         mutableStateOf(
             eEndDate != null && !eEndDate.equals(eStartDate ?: EventDate(0, java.time.Month.JANUARY, 1))
+        )
+    }
+
+    var endDate by remember(event, startDate) {
+        mutableStateOf(
+            if (eEndDate != null && !eEndDate.equals(eStartDate)) {
+                LocalDate.of(eEndDate.year, eEndDate.month, eEndDate.day)
+            } else {
+                startDate.plusMonths(1)
+            }
         )
     }
 
@@ -189,10 +191,17 @@ fun ReminderEditDialog(
         },
         confirmButton = {
             Button(onClick = {
+                val finalStartDate = EventDate(startDate.year, startDate.month, startDate.dayOfMonth)
+                val finalEndDate = if (repeatPeriod == RepeatPeriod.NEVER || !hasEndDate) {
+                    finalStartDate
+                } else {
+                    EventDate(endDate.year, endDate.month, endDate.dayOfMonth)
+                }
+
                 val updatedEvent = Event(
                     if (title.isBlank()) "No Title" else title,
-                    EventDate(startDate.year, startDate.month, startDate.dayOfMonth),
-                    if (repeatPeriod == RepeatPeriod.NEVER || !hasEndDate) null else EventDate(endDate.year, endDate.month, endDate.dayOfMonth),
+                    finalStartDate,
+                    finalEndDate,
                     repeatPeriod,
                     if (repeatPeriod == RepeatPeriod.WEEKLY) daysOfWeek else null,
                     event.enabled,

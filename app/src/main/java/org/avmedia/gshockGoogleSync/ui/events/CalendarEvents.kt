@@ -168,11 +168,10 @@ class CalendarEvents @Inject constructor(
         val organizer = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.ORGANIZER))
 
         Timber.d(
-            "Event: title=$title, " +
+            "%snull", "Event: title=$title, " +
                     "calendarId=$calendarId, " +
                     "appPackage=$appPackage, " +
-                    "description=$description, " +
-                    "organizer=$organizer"
+                    "description=$description, "
         )
 
         val dateStartIndex = cursor.getColumnIndexOrThrow(CalendarContract.Events.DTSTART)

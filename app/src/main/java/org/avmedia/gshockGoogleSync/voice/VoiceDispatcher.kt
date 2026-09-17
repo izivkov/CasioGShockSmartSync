@@ -210,14 +210,11 @@ class VoiceDispatcher @Inject constructor(
                     events.indexOfFirst { it.title.isBlank() }.let { if (it == -1) 0 else it }
 
                 val date = reminder.startDate!!
+                val startDate = EventDate(date.year, date.month, date.dayOfMonth)
                 val newEvent = Event(
                     title = reminder.title!!,
-                    startDate = EventDate(date.year, date.month, date.dayOfMonth),
-                    endDate = EventDate(
-                        date.year + 10,
-                        date.month,
-                        date.dayOfMonth
-                    ), // Set a far future end date for repeats
+                    startDate = startDate,
+                    endDate = startDate, // Default to startDate to match CalendarEvents.kt
                     repeatPeriod = reminder.repeatPeriod ?: RepeatPeriod.NEVER,
                     daysOfWeek = if (reminder.repeatPeriod == RepeatPeriod.WEEKLY) arrayListOf(date.dayOfWeek) else null,
                     enabled = true,

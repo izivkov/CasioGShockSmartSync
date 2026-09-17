@@ -57,7 +57,7 @@ class IntentParser @Inject constructor() {
     private val helpPattern = Regex("help", RegexOption.IGNORE_CASE)
 
     private val weeksFromPattern = Regex(
-        "(\\d+|one|two|three|four|five|six|seven|eight|nine|ten)?\\s*weeks?\\s*(?:from)?\\s*(monday|tuesday|wednesday|thursday|friday|saturday|sunday)",
+        "(an?|\\d+|one|two|three|four|five|six|seven|eight|nine|ten)?\\s*weeks?\\s*(?:from\\s+)?(next\\s+)?(monday|tuesday|wednesday|thursday|friday|saturday|sunday)",
         RegexOption.IGNORE_CASE
     )
 
@@ -265,12 +265,22 @@ class IntentParser @Inject constructor() {
 
         weeksFromPattern.find(lower)?.let { match ->
             val countStr = match.groupValues[1]
-            val dayName = match.groupValues[2]
-            val count = if (countStr.isBlank()) 1 else countStr.toIntOrNull() ?: wordToNumber(countStr) ?: 1
+            val nextStr = match.groupValues[2]
+            val dayName = match.groupValues[3]
+
+            val count = when {
+                countStr.isBlank() -> 1
+                countStr.lowercase().startsWith("a") -> 1
+                else -> countStr.toIntOrNull() ?: wordToNumber(countStr) ?: 1
+            }
+
             val dayOfWeek = daysOfWeek[dayName]
             if (dayOfWeek != null) {
-                val nextDay = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(dayOfWeek))
-                return nextDay.plusWeeks(count.toLong())
+                var target = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(dayOfWeek))
+                if (nextStr.isNotBlank()) {
+                    target = target.plusWeeks(1)
+                }
+                return target.plusWeeks(count.toLong())
             }
         }
 
