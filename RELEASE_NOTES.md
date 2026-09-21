@@ -1,3 +1,24 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.11 — September 21, 2026
+
+## ✨ Highlights
+
+### 🎨 High-Performance API Synchronization
+Major architectural refinement to the watch communication engine for maximum speed and reliability:
+*   **Atomic Transactions**: Consolidated "Write" and "Refresh" operations into single transaction units within the `ActionContainer`. The app now automatically fetches hardware-confirmed state immediately after every update, eliminating redundant Bluetooth traffic.
+*   **Snappy UI Response**: ViewModels now consume fresh data directly from action payloads. This results in near-instant screen updates for Alarms, Timers, and Settings without triggering secondary background requests.
+*   **Universal Hardware Verification**: Moved the hardware-latency retry logic from the UI layer into the core action engine. This ensures that every command—whether from the screen, your voice, or a watch button—is robustly verified against the hardware before the UI is updated.
+
+### 📅 Advanced Reminder Management
+*   **Refined End Date Logic**: Standardized reminder durations to match natural expectations. New reminders default to "Repeat Indefinitely," while enabling an end date now intelligently suggests a one-month window from the start date.
+*   **Cyrillic Alphabet Support**: You can now type reminder titles in the app using **Cyrillic** characters (Russian, Bulgarian, Ukrainian, etc.). The app automatically handles the Latin transliteration required by the watch hardware.
+*   **Natural Fuzzy Dates**: Enhanced the voice parser to support complex relative dates like *"A week from NEXT Thursday"*, accurately calculating dates even across week boundaries.
+
+### 🛡️ System & Stability
+*   **API v1.7.7 Alignment**: Synchronized with the latest core library improvements for even more stable Bluetooth handshakes.
+*   **Code Cleanup & Linting**: Performed a project-wide maintenance pass, removing dead code and modernizing coroutine usage for better long-term maintainability.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.8 — September 14, 2026
 
 ## ✨ Highlights
