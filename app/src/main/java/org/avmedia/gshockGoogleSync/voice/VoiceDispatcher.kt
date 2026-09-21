@@ -6,12 +6,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.model.EventDate
 import org.avmedia.gshockapi.model.RepeatPeriod
 import timber.log.Timber
 import java.time.LocalDate
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -24,6 +25,7 @@ class VoiceDispatcher @Inject constructor(
     private val speechFeedback: VoiceSpeechFeedback,
     private val voiceCommandManager: Provider<VoiceCommandManager>,
     private val eventStorage: org.avmedia.gshockGoogleSync.scratchpad.EventStorage,
+    @ApplicationContext private val appContext: Context,
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
     private var currentReminder: VoiceCommand.AddReminder? = null
@@ -224,8 +226,9 @@ class VoiceDispatcher @Inject constructor(
                 val updatedEvents = events.toMutableList()
                 updatedEvents[eventIndex] = newEvent
 
-                api.setEvents(ArrayList(updatedEvents))
-                ProgressEvents.onNext("EventsUpdated")
+                val setEventsAction =
+                    actionContainer.getAction(org.avmedia.gshockGoogleSync.ui.actions.ActionContainer.SetEventsAction::class.java)
+                setEventsAction.runWithEvents(appContext, updatedEvents)
 
                 val dateFeedback = when (date) {
                     LocalDate.now() -> "today"

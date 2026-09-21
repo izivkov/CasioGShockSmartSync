@@ -2,6 +2,7 @@ package org.avmedia.gshockGoogleSync.ui.others
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.IntentSender
@@ -203,7 +204,7 @@ constructor(
 
                 // Re-sync all associations so CDM presence observers and the BLE
                 // fallback scan are rebuilt for the full, current device list.
-                deviceAssociationManager?.syncAssociations()
+                deviceAssociationManager.syncAssociations()
 
                 loadPairedDevices()
 
@@ -223,7 +224,8 @@ constructor(
                 LocalDataStorage.removeDeviceAddress(context, address)
 
                 // 2. Handle hardware bond safely (no reflection, version-aware)
-                val adapter = BluetoothAdapter.getDefaultAdapter()
+                val bluetoothManager = appContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                val adapter = bluetoothManager.adapter
                 val device: BluetoothDevice? = adapter?.getRemoteDevice(address)
                 device?.let { btDevice ->
                     if (btDevice.bondState != BluetoothDevice.BOND_NONE) {

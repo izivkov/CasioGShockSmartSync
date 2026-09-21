@@ -1001,7 +1001,7 @@ constructor(
                     else -> "English"
                 }
 
-                val dateTimePattern = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).toPattern()
+                val dateTimePattern = java.text.SimpleDateFormat().toPattern()
                 val datePattern = dateTimePattern.split(" ")[0]
                 val timePattern = dateTimePattern.split(" ")[1]
 
@@ -1260,8 +1260,12 @@ constructor(
     }
 
     private suspend fun loadData(context: Context): List<Action> {
+        val start = System.currentTimeMillis()
+
         // Load data from watch
+        val startWatch = System.currentTimeMillis()
         actionsStorage.load()
+        Timber.d("actionsStorage.load() (watch communication) took ${System.currentTimeMillis() - startWatch} ms")
 
         if (api.isScratchpadReset()) {
             _actions.value.forEach { it.save(context, actionsStorage) }
@@ -1275,6 +1279,8 @@ constructor(
         if (!isDataLoaded.isCompleted) {
             isDataLoaded.complete(Unit)
         }
+
+        Timber.d("Total loadData took ${System.currentTimeMillis() - start} ms")
 
         return _actions.value
     }

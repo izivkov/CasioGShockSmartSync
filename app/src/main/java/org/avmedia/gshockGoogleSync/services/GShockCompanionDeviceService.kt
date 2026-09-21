@@ -44,12 +44,14 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDeviceAppeared(associationInfo: android.companion.AssociationInfo) {
         val address = associationInfo.deviceMacAddress?.toString() ?: return
         handleDeviceEvent("DeviceAppeared", address, "Device appeared (API 33+): $address")
     }
 
+    @Deprecated("Deprecated in Java")
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDeviceDisappeared(associationInfo: android.companion.AssociationInfo) {
         val address = associationInfo.deviceMacAddress?.toString() ?: return
