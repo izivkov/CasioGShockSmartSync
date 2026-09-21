@@ -79,12 +79,13 @@ constructor(
                 initializeSettings()
             },
             EventAction("SettingsUpdated") {
-                initializeSettings()
+                val payload = ProgressEvents.getPayload("SettingsUpdated") as? Settings
+                initializeSettings(payload)
             }
         ))
     }
 
-    private fun initializeSettings() {
+    private fun initializeSettings(freshSettings: Settings? = null) {
         val newSettings =
             arrayListOf(
                 Locale(),
@@ -97,7 +98,8 @@ constructor(
         updateSettingsAndMap(filter(newSettings))
 
         viewModelScope.launch(Dispatchers.Default) {
-            val settingsJson = Gson().toJsonTree(api.getSettings()).asJsonObject
+            val settings = freshSettings ?: api.getSettings()
+            val settingsJson = Gson().toJsonTree(settings).asJsonObject
             val settingStr = Gson().toJson(settingsJson)
             updateSettingsAndMap(fromJson(settingStr))
         }

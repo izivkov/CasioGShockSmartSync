@@ -118,27 +118,17 @@ class TimeViewModel @Inject constructor(
             "TimeViewModel",
             arrayOf(
                 org.avmedia.gshockapi.EventAction("TimerUpdated") {
-                viewModelScope.launch {
-                    refreshTimerAfterExternalWrite()
+                    val payload = ProgressEvents.getPayload("TimerUpdated") as? Int
+                    if (payload != null) {
+                        _state.update { it.copy(timer = payload) }
+                    } else {
+                        refreshState()
+                    }
                 }
-            }
-        ))
+            )
+        )
     }
 
-    private suspend fun refreshTimerAfterExternalWrite(
-        maxAttempts: Int = 3,
-        retryDelayMs: Long = 500
-    ) {
-        val before = _state.value.timer
-        repeat(maxAttempts) {
-            delay(kotlin.time.Duration.parse("${retryDelayMs}ms"))
-            val timer = api.getTimer()
-            if (timer != before) {
-                _state.update { it.copy(timer = timer) }
-                return
-            }
-        }
-    }
 
     fun onAction(action: TimeAction) {
         when (action) {

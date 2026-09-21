@@ -374,7 +374,8 @@ constructor(
                 transformer(currentEvents)
             }
             api.setEvents(ArrayList(processedEvents))
-            ProgressEvents.onNext("EventsUpdated")
+            val freshEvents = api.getEventsFromWatch()
+            ProgressEvents.onNext("EventsUpdated", freshEvents)
             AppSnackbar(context.getString(R.string.reminders_sent_to_watch))
         }
 
@@ -803,7 +804,25 @@ constructor(
             alarmNameStorage.save()
 
             api.setAlarms(ArrayList(alarms))
-            ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(alarms))
+
+            val alarmsFromWatch = api.getAlarms()
+                .take(watchFeatureManager.getAlarmCount())
+                .mapIndexed { index, alarm ->
+                    val name = alarmNameStorage.get(index)
+                    alarm.copy(name = name)
+                }
+
+            val finalAlarms = if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
+                val settings = api.getSettings()
+                alarmsFromWatch.mapIndexed { index, alarm ->
+                    if (index == 0) alarm.copy(hasHourlyChime = settings.hourlyChime)
+                    else alarm
+                }
+            } else {
+                alarmsFromWatch
+            }
+
+            ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(finalAlarms))
             AppSnackbar(context.getString(R.string.alarms_set_to_watch))
         }
 
@@ -940,7 +959,8 @@ constructor(
 
         private suspend fun sendSettings(context: Context, settings: Settings) {
             api.setSettings(settings)
-            ProgressEvents.onNext("SettingsUpdated")
+            val freshSettings = api.getSettings()
+            ProgressEvents.onNext("SettingsUpdated", freshSettings)
             AppSnackbar(context.getString(R.string.settings_sent_to_watch))
         }
 
@@ -1062,8 +1082,18 @@ constructor(
         }
 
         private suspend fun writeTimer(context: Context, timerValueSeconds: Int) {
+            val before = api.getTimer()
             api.setTimer(timerValueSeconds)
-            ProgressEvents.onNext("TimerUpdated")
+
+            // Handle watch hardware latency with retries
+            var freshTimer = before
+            repeat(3) {
+                delay(kotlin.time.Duration.parse("500ms"))
+                freshTimer = api.getTimer()
+                if (freshTimer != before) return@repeat
+            }
+
+            ProgressEvents.onNext("TimerUpdated", freshTimer)
             AppSnackbar(context.getString(R.string.timer_set))
         }
 

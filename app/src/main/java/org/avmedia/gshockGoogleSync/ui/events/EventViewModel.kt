@@ -152,7 +152,13 @@ class EventViewModel @Inject constructor(
                 }
             },
             EventAction("EventsUpdated") {
-                loadEvents()
+                val payload = ProgressEvents.getPayload("EventsUpdated") as? List<Event>
+                if (payload != null) {
+                    _events.value = payload
+                    EventsModel.refresh(ArrayList(payload))
+                } else {
+                    loadEvents()
+                }
             },
             EventAction("DeviceName") {
                 if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode

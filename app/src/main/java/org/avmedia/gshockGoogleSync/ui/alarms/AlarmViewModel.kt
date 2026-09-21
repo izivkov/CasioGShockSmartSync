@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
+import org.avmedia.gshockGoogleSync.ui.actions.AlarmsWritten
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.Alarm
@@ -81,10 +82,16 @@ class AlarmViewModel @Inject constructor(
         eventSubscriptionName = subscribeToProgressEvents(
             "AlarmViewModel",
             arrayOf(
-            org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
-                loadAlarms()
-            }
-        ))
+                org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
+                    val payload = ProgressEvents.getPayload("AlarmsUpdated") as? AlarmsWritten
+                    if (payload != null) {
+                        _alarms.value = payload.alarms
+                    } else {
+                        loadAlarms()
+                    }
+                }
+            )
+        )
     }
 
     override fun onCleared() {
