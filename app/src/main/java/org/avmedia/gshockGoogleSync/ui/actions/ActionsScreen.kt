@@ -95,18 +95,45 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
 
     return listOfNotNull(
         if (watchFeatureManager.isFeatureSupported("actions.find_phone"))
-            PhoneFinderView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
+            ToggleActionView(
+                ActionContainer.FindPhoneAction::class.java,
+                R.string.find_phone, R.drawable.find_phone, actionsViewModel
+            )
         else null,
-        SetTimeView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        ToggleActionView(
+            ActionContainer.SetTimeAction::class.java,
+            R.string.set_time, R.drawable.ic_watch_later_black_24dp, actionsViewModel
+        ),
         if (watchFeatureManager.isFeatureSupported("actions.reminders"))
-            RemindersView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
+            ToggleActionView(
+                ActionContainer.SetEventsAction::class.java,
+                R.string.set_reminders, R.drawable.events, actionsViewModel
+            )
         else null,
         PhotoView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        FlashlightView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        VoiceAssistView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        SkipToNextTrackView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        PlayPauseView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        PrayerAlarmsView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        ToggleActionView(
+            ActionContainer.ToggleFlashlightAction::class.java,
+            R.string.toggle_flashlight, R.drawable.flashlight, actionsViewModel
+        ),
+        ToggleActionView(
+            ActionContainer.StartVoiceAssistAction::class.java,
+            R.string.start_voice_assistant, R.drawable.voice_assist, actionsViewModel
+        ),
+        ToggleActionView(
+            ActionContainer.NextTrack::class.java,
+            R.string.next_track, R.drawable.skip_next, actionsViewModel,
+            infoRes = R.string.skip_to_next_track_info
+        ),
+        ToggleActionView(
+            ActionContainer.TogglePlayPauseAction::class.java,
+            R.string.play_pause, R.drawable.play_pause, actionsViewModel,
+            infoRes = R.string.play_pause_info
+        ),
+        ToggleActionView(
+            ActionContainer.PrayerAlarmsAction::class.java,
+            R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
+            infoRes = R.string.prayer_times_info
+        ),
         SeparatorView(),
         PhoneView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
     )
