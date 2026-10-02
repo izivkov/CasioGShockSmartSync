@@ -8,7 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -18,7 +17,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemView
@@ -52,16 +50,6 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 
 @Composable
 fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
-    LaunchedEffect(Unit) {
-        alarmViewModel.uiEvents.collect { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> {
-                    AppSnackbar(event.message)
-                }
-            }
-        }
-    }
-
     Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,

@@ -8,11 +8,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -20,26 +17,12 @@ import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
 import org.avmedia.gshockGoogleSync.ui.actions.AlarmsWritten
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.model.Alarm
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import java.util.Calendar
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-
-
-/**
- * Represents one-time UI events that should be handled by the UI layer.
- */
-sealed class UiEvent {
-    /**
-     * Event to show a Snackbar with a specific message.
-     * @property message The text message to display.
-     */
-    data class ShowSnackbar(val message: String) : UiEvent()
-}
 
 /**
  * ViewModel for managing the Alarms screen.
@@ -62,9 +45,6 @@ class AlarmViewModel @Inject constructor(
 
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms.asStateFlow()
-
-    private val _uiEvents = MutableSharedFlow<UiEvent>()
-    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     // ProgressEvents silently drops a second subscription registered under a
     // name it has already seen - which "AlarmViewModel" is, the moment this
@@ -131,8 +111,6 @@ class AlarmViewModel @Inject constructor(
             ProgressEvents.onNext("Error")
         }
     }
-
-
 
     private fun updateAlarm(index: Int, transform: (Alarm) -> Alarm) {
         _alarms.update { currentAlarms ->
@@ -209,7 +187,6 @@ class AlarmViewModel @Inject constructor(
             }
         }
     }
-
 
     /**
      * Sends the enabled alarms from the app to the phone's native Alarm Clock application.

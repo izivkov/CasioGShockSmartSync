@@ -6,11 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
@@ -38,9 +35,6 @@ class EventViewModel @Inject constructor(
 
     private val _isManualMode = MutableStateFlow(eventStorage.isManualMode())
     val isManualMode: StateFlow<Boolean> = _isManualMode
-
-    private val _uiEvents = MutableSharedFlow<UiEvent>()
-    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     private var loadEventsJob: Job? = null
 
@@ -188,5 +182,4 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    sealed class UiEvent
 }
