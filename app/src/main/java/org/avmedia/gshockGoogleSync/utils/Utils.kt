@@ -3,36 +3,17 @@ package org.avmedia.gshockGoogleSync.utils
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
-import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Handler
 import android.os.Looper
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import timber.log.Timber
-import kotlin.math.sin
 
 class Utils {
     companion object {
         fun AppHashCode(): String {
             val frame = Thread.currentThread().stackTrace[3]
             return "${frame.className}.${frame.methodName}:${frame.lineNumber}".hashCode().toString()
-        }
-
-        fun <T> runApi(apiCall: suspend (Array<out T>) -> Unit, vararg args: T) {
-            CoroutineScope(Dispatchers.IO).launch {
-                runCatching {
-                    apiCall(args)  // Pass the arguments as an array
-                }.onFailure {
-                    it.printStackTrace()
-                }
-            }
         }
 
         fun shortenStringNewLine(

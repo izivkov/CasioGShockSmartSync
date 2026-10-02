@@ -43,7 +43,6 @@ constructor(
         const val EVENT_DEVICE_ADDRESS = "DeviceAddress"
         const val EVENT_NO_PAIRED = "NoPairedDevices"
         const val PREFIX_CASIO = "CASIO"
-        const val METHOD_REMOVE_BOND = "removeBond"
     }
 
     private val noWatchString = appContext.getString(R.string.no_watch)

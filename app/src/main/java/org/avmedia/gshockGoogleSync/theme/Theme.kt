@@ -3,7 +3,6 @@ package org.avmedia.gshockGoogleSync.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -69,14 +68,6 @@ private val DarkColorScheme =
                 onSurfaceVariant = OnSurfaceVariantDark,
                 outline = OutlineDark,
         )
-
-// Composable function to provide the color scheme based on Android version and theme
-@Composable
-fun getCurrentColorScheme(darkTheme: Boolean): ColorScheme {
-    val context = LocalContext.current
-
-    return if (darkTheme) DarkColorScheme else LightColorScheme
-}
 
 @Composable
 fun GShockSmartSyncTheme(

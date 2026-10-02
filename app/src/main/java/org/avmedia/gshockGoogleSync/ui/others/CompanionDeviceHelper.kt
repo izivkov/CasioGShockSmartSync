@@ -6,18 +6,14 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanResult
 import android.companion.AssociationInfo
 import android.companion.CompanionDeviceManager
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresPermission
-import androidx.compose.material3.TimeInput
 import timber.log.Timber
 
 object CompanionDeviceHelper {
     private const val EXTRA_ASSOC = "android.companion.extra.ASSOCIATION_INFO"
     private const val KEY_ADDRESS = "address"
-    private const val KEY_ID = "id"
-    private const val KEY_DISPLAY_NAME = "displayName"
     private const val UNKNOWN_DEVICE = "Unknown"
 
     /**
@@ -62,37 +58,6 @@ object CompanionDeviceHelper {
 
         Timber.i("Extracted device: ${device?.address ?: "null"}")
         return device
-    }
-
-    /**
-     * Queries the OS for a list of all currently associated devices.
-     * Returns a list of dicts containing device metadata.
-     */
-    fun getAssociationsFallback(context: Context): List<Map<String, String>> {
-        val cdm = context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
-        val associationList: MutableList<Map<String, String>> = mutableListOf()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            cdm.myAssociations.forEach { info ->
-                info.deviceMacAddress?.toString()?.let { addr ->
-                    val deviceData: Map<String, String> = mapOf(
-                        KEY_ADDRESS to addr.uppercase(),
-                        KEY_ID to info.id.toString(),
-                        KEY_DISPLAY_NAME to (info.displayName?.toString() ?: UNKNOWN_DEVICE)
-                    )
-                    associationList.add(deviceData)
-                }
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            cdm.associations.forEach { addr ->
-                val deviceData: Map<String, String> = mapOf(
-                    KEY_ADDRESS to addr.uppercase()
-                )
-                associationList.add(deviceData)
-            }
-        }
-        return associationList
     }
 
     /**
