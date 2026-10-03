@@ -20,11 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
@@ -91,37 +88,20 @@ constructor(
     private val _actions = MutableStateFlow<List<Action>>(emptyList())
     val actions: StateFlow<List<Action>> = _actions
 
-    private val _uiEvents = MutableSharedFlow<UiEvent>()
-    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
-
     private val isDataLoaded = CompletableDeferred<Unit>()
 
     private val actionMap = mutableMapOf<Class<out Action>, Action>()
 
     private var saveJob: Job? = null
 
+    private companion object {
+        const val ONE_HOUR_MS = 60 * 60 * 1000L
+        const val SIX_HOURS_MS = 6 * ONE_HOUR_MS
+    }
+
     enum class RunMode {
         SYNC,
         ASYNC,
-    }
-
-    /**
-     * Represents one-time UI events that should be handled by the UI layer (Fragment/Activity).
-     *
-     * These events are transient and are not part of the persistent state of the screen. Examples
-     * include showing a Snackbar, navigation events, or showing a Toast.
-     *
-     * Usage:
-     * - This container emits these events via a [SharedFlow], forwarded unchanged by
-     *   ActionsViewModel.uiEvents for Compose screens to collect.
-     * - The UI observes the flow and performs the corresponding action (e.g., showing a message).
-     */
-    sealed class UiEvent {
-        /**
-         * Event to show a Snackbar with a specific message.
-         * @property message The text message to display in the Snackbar.
-         */
-        data class ShowSnackbar(val message: String) : UiEvent()
     }
 
     private fun updateActionsAndMap(newActions: List<Action>) {
@@ -153,9 +133,7 @@ constructor(
             saveJob = containerScope.launch {
                 delay(kotlin.time.Duration.ZERO)
                 actionsStorage.save()
-                _uiEvents.emit(
-                    UiEvent.ShowSnackbar(appContext.getString(R.string.actions_saved))
-                )
+                AppSnackbar(appContext.getString(R.string.actions_saved))
                 saveJob = null
             }
         }
@@ -255,16 +233,9 @@ constructor(
         var runMode: RunMode = RunMode.SYNC,
     ) {
 
-        open fun shouldRun(runEnvironment: RunEnvironment): Boolean {
-            return when (runEnvironment) {
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
-                RunEnvironment.VOICE_COMMAND -> enabled
-                RunEnvironment.NORMAL_CONNECTION -> false
-                RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
-                RunEnvironment.FIND_PHONE_PRESSED -> false
-                RunEnvironment.ALWAYS_CONNECTED -> false
-                RunEnvironment.DIRECT_INVOCATION -> false
-            }
+        open fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.ACTION_BUTTON_PRESSED, RunEnvironment.VOICE_COMMAND -> enabled
+            else -> false
         }
 
         abstract fun run(context: Context)
@@ -272,42 +243,33 @@ constructor(
             run(context)
         }
 
-        open suspend fun save(context: Context, actionsStorage: ActionsStorage) {
-            val actionEnum =
-                when (this) {
-                    is SetTimeAction -> ActionsStorage.Action.SET_TIME
-                    is SetEventsAction -> ActionsStorage.Action.REMINDERS
-                    is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
-                    is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
-                    is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
-                    is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
-                    is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
-                    is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
-                    is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
-                    is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
-                    else -> null
-                }
+        /** For actions whose real work is [runSuspend]: run it on the container scope. */
+        protected fun launchRunSuspend(context: Context) {
+            containerScope.launch { runSuspend(context) }
+        }
 
-            actionEnum?.let { actionsStorage.update(it, enabled) }
+        /** Key under which [enabled] is persisted; null for actions that are not stored. */
+        private val storageKey: ActionsStorage.Action?
+            get() = when (this) {
+                is SetTimeAction -> ActionsStorage.Action.SET_TIME
+                is SetEventsAction -> ActionsStorage.Action.REMINDERS
+                is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
+                is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
+                is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
+                is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
+                is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
+                is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
+                is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
+                is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
+                else -> null
+            }
+
+        open suspend fun save(context: Context, actionsStorage: ActionsStorage) {
+            storageKey?.let { actionsStorage.update(it, enabled) }
         }
 
         open suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            val actionEnum =
-                when (this) {
-                    is SetTimeAction -> ActionsStorage.Action.SET_TIME
-                    is SetEventsAction -> ActionsStorage.Action.REMINDERS
-                    is FindPhoneAction -> ActionsStorage.Action.PHONE_FINDER
-                    is PhotoAction -> ActionsStorage.Action.TAKE_PHOTO
-                    is ToggleFlashlightAction -> ActionsStorage.Action.FLASHLIGHT
-                    is StartVoiceAssistAction -> ActionsStorage.Action.VOICE_ASSIST
-                    is NextTrack -> ActionsStorage.Action.SKIP_TO_NEXT_TRACK
-                    is TogglePlayPauseAction -> ActionsStorage.Action.TOGGLE_PLAY_PAUSE
-                    is PrayerAlarmsAction -> ActionsStorage.Action.PRAYER_ALARMS
-                    is PhoneDialAction -> ActionsStorage.Action.PHONE_CALL
-                    else -> null
-                }
-
-            actionEnum?.let { enabled = actionsStorage.getAction(it) }
+            storageKey?.let { enabled = actionsStorage.getAction(it) }
             Timber.d("Load value: ${this.javaClass.simpleName}, $enabled")
         }
 
@@ -323,16 +285,15 @@ constructor(
         val calendarEvents: CalendarEvents
     ) : Action(title, enabled, RunMode.ASYNC) {
 
-        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
-            return when (runEnvironment) {
-                RunEnvironment.NORMAL_CONNECTION -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
-                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled && watchFeatureManager.isFeatureSupported("actions.reminders") && !eventStorage.isManualMode()
-                RunEnvironment.VOICE_COMMAND -> enabled
-                RunEnvironment.FIND_PHONE_PRESSED -> false
-                RunEnvironment.ALWAYS_CONNECTED -> false
-                RunEnvironment.DIRECT_INVOCATION -> true
-            }
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.NORMAL_CONNECTION,
+            RunEnvironment.ACTION_BUTTON_PRESSED,
+            RunEnvironment.AUTO_TIME_ADJUSTMENT ->
+                enabled && watchFeatureManager.isFeatureSupported("actions.reminders") &&
+                        !eventStorage.isManualMode()
+            RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.DIRECT_INVOCATION -> true
+            else -> false
         }
 
         override fun run(context: Context) {
@@ -340,7 +301,6 @@ constructor(
                 Timber.d("SetEventsAction skipped - Manual Mode is active")
                 return
             }
-            Timber.d("running ${this.javaClass.simpleName}")
             EventsModel.refresh(calendarEvents.getEventsFromCalendar())
             containerScope.launch {
                 writeEvents(context, EventsModel.events)
@@ -363,24 +323,13 @@ constructor(
         }
 
         private suspend fun writeEvents(context: Context, events: List<Event>) {
-            val eventTransformers: List<(List<Event>) -> List<Event>> = listOf(
-                { evts ->
-                    evts.map { event ->
-                        event.copy(title = CyrillicToLatin.transliterate(event.title))
-                    }
-                }
-            )
-            val processedEvents = eventTransformers.fold(events) { currentEvents, transformer ->
-                transformer(currentEvents)
+            val processedEvents = events.map {
+                it.copy(title = CyrillicToLatin.transliterate(it.title))
             }
             api.setEvents(ArrayList(processedEvents))
             val freshEvents = api.getEventsFromWatch()
             ProgressEvents.onNext("EventsUpdated", freshEvents)
             AppSnackbar(context.getString(R.string.reminders_sent_to_watch))
-        }
-
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            enabled = actionsStorage.getAction(ActionsStorage.Action.REMINDERS)
         }
     }
 
@@ -388,37 +337,23 @@ constructor(
         Action(title, enabled) {
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
             FlashlightHelper.toggle(context)
-        }
-
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            enabled = actionsStorage.getAction(ActionsStorage.Action.FLASHLIGHT)
         }
     }
 
     inner class FindPhoneAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
 
-        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
-            return when (runEnvironment) {
-                RunEnvironment.NORMAL_CONNECTION -> false
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled && watchFeatureManager.isFeatureSupported("actions.find_phone")
-                RunEnvironment.AUTO_TIME_ADJUSTMENT -> false
-                RunEnvironment.VOICE_COMMAND -> enabled
-                RunEnvironment.FIND_PHONE_PRESSED -> true
-                RunEnvironment.ALWAYS_CONNECTED -> false
-                RunEnvironment.DIRECT_INVOCATION -> false
-            }
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.ACTION_BUTTON_PRESSED ->
+                enabled && watchFeatureManager.isFeatureSupported("actions.find_phone")
+            RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.FIND_PHONE_PRESSED -> true
+            else -> false
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
             PhoneFinder.ring(context)
-        }
-
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            enabled = actionsStorage.getAction(ActionsStorage.Action.PHONE_FINDER)
         }
     }
 
@@ -435,26 +370,16 @@ constructor(
 
         private var lastSet: Long? = null
 
-        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
-            // update every hour
-            val setTimeConditionAlwaysConnected =
-                (watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
-                        (lastSet == null ||
-                                System.currentTimeMillis() - lastSet!! > 1000 * 60 * 60))
-
-            return when (runEnvironment) {
-                RunEnvironment.NORMAL_CONNECTION -> false
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
-                RunEnvironment.AUTO_TIME_ADJUSTMENT -> true
-                RunEnvironment.VOICE_COMMAND -> enabled
-                RunEnvironment.FIND_PHONE_PRESSED -> false
-                RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
-                RunEnvironment.DIRECT_INVOCATION -> false
-            }
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.ACTION_BUTTON_PRESSED, RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.AUTO_TIME_ADJUSTMENT -> true
+            RunEnvironment.ALWAYS_CONNECTED ->
+                watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
+                        isOlderThan(lastSet, ONE_HOUR_MS)
+            else -> false
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
 
             // actions are sun on the main lifecycle scope, because the Actions Fragment never gets
             // created.
@@ -462,10 +387,6 @@ constructor(
                 watchTimeUpdater.updateTime()
                 lastSet = System.currentTimeMillis()
             }
-        }
-
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            enabled = actionsStorage.getAction(ActionsStorage.Action.SET_TIME)
         }
     }
 
@@ -475,7 +396,6 @@ constructor(
         override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.SYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
             runCatching {
                 val intent =
                     Intent(Intent.ACTION_VOICE_COMMAND).apply {
@@ -503,36 +423,11 @@ constructor(
         override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
-            runCatching {
-                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                val eventTime = SystemClock.uptimeMillis()
-
-                val downEvent =
-                    KeyEvent(
-                        eventTime,
-                        eventTime,
-                        KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_MEDIA_NEXT,
-                        0
-                    )
-                audioManager.dispatchMediaKeyEvent(downEvent)
-
-                val upEvent =
-                    KeyEvent(
-                        eventTime,
-                        eventTime,
-                        KeyEvent.ACTION_UP,
-                        KeyEvent.KEYCODE_MEDIA_NEXT,
-                        0
-                    )
-                audioManager.dispatchMediaKeyEvent(upEvent)
-            }
-                .onFailure {
-                    if (it is ActivityNotFoundException) {
-                        AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
-                    }
+            sendMediaKey(context, KeyEvent.KEYCODE_MEDIA_NEXT).onFailure {
+                if (it is ActivityNotFoundException) {
+                    AppSnackbar(context.getString(R.string.cannot_go_to_next_track))
                 }
+            }
         }
     }
 
@@ -541,38 +436,18 @@ constructor(
         override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
-            runCatching {
-                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                val eventTime = SystemClock.uptimeMillis()
-
-                val downEvent =
-                    KeyEvent(
-                        eventTime,
-                        eventTime,
-                        KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                        0
-                    )
-                audioManager.dispatchMediaKeyEvent(downEvent)
-
-                val upEvent =
-                    KeyEvent(
-                        eventTime,
-                        eventTime,
-                        KeyEvent.ACTION_UP,
-                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                        0
-                    )
-                audioManager.dispatchMediaKeyEvent(upEvent)
+            sendMediaKey(context, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE).onFailure {
+                Timber.e(it, "Could not toggle play/pause")
             }
-                .onFailure {
-                    Timber.e(it, "Could not toggle play/pause")
-                }
         }
+    }
 
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            enabled = actionsStorage.getAction(ActionsStorage.Action.TOGGLE_PLAY_PAUSE)
+    /** Dispatches a media key press (down + up) to the active media session. */
+    private fun sendMediaKey(context: Context, keyCode: Int): Result<Unit> = runCatching {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val eventTime = SystemClock.uptimeMillis()
+        listOf(KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP).forEach { keyAction ->
+            audioManager.dispatchMediaKeyEvent(KeyEvent(eventTime, eventTime, keyAction, keyCode, 0))
         }
     }
 
@@ -585,27 +460,19 @@ constructor(
 
         private var lastSet: Long? = null
 
-        override fun shouldRun(runEnvironment: RunEnvironment): Boolean {
-            // update every 6 hours
-            val setTimeConditionAlwaysConnected =
-                (enabled &&
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.NORMAL_CONNECTION,
+            RunEnvironment.ACTION_BUTTON_PRESSED,
+            RunEnvironment.AUTO_TIME_ADJUSTMENT,
+            RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.ALWAYS_CONNECTED ->
+                enabled &&
                         watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
-                        (lastSet == null ||
-                                System.currentTimeMillis() - lastSet!! > 6000 * 60 * 60))
-
-            return when (runEnvironment) {
-                RunEnvironment.NORMAL_CONNECTION -> enabled
-                RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
-                RunEnvironment.AUTO_TIME_ADJUSTMENT -> enabled
-                RunEnvironment.VOICE_COMMAND -> enabled
-                RunEnvironment.FIND_PHONE_PRESSED -> false
-                RunEnvironment.ALWAYS_CONNECTED -> setTimeConditionAlwaysConnected
-                RunEnvironment.DIRECT_INVOCATION -> false
-            }
+                        isOlderThan(lastSet, SIX_HOURS_MS)
+            else -> false
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
             // vvv 4. CALL THE METHOD ON THE INSTANCE vvv
             CoroutineScope(Dispatchers.Main).launch {
                 prayerAlarmsHelper
@@ -627,11 +494,6 @@ constructor(
     inner class Separator(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
-        }
-
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            // Do nothing.
         }
     }
 
@@ -646,7 +508,6 @@ constructor(
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
 
             val dialIntent =
                 Intent(Intent.ACTION_CALL)
@@ -696,7 +557,6 @@ constructor(
         }
 
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
 
             val cameraSelector =
                 when (cameraOrientation) {
@@ -747,9 +607,7 @@ constructor(
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName} for $alarmHour:$alarmMinute")
-            containerScope.launch {
-                runSuspend(context)
-            }
+            launchRunSuspend(context)
         }
 
         override suspend fun runSuspend(context: Context) {
@@ -850,7 +708,6 @@ constructor(
         override var enabled: Boolean
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
             containerScope.launch {
                 runCatching {
                     alarmNameStorage.clear()
@@ -883,7 +740,6 @@ constructor(
         override var enabled: Boolean
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
-            Timber.d("running ${this.javaClass.simpleName}")
             containerScope.launch {
                 runCatching {
                     val alarms = api.getAlarms()
@@ -916,9 +772,7 @@ constructor(
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) {
             Timber.d("running ${this.javaClass.simpleName} for $settingName=$settingValue")
-            containerScope.launch {
-                runSuspend(context)
-            }
+            launchRunSuspend(context)
         }
 
         override suspend fun runSuspend(context: Context) {
@@ -969,9 +823,6 @@ constructor(
             RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }
-
-        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
     }
 
     inner class SetSettingsToDefaultAction(
@@ -979,11 +830,7 @@ constructor(
         override var enabled: Boolean
     ) : Action(title, enabled, RunMode.ASYNC) {
 
-        override fun run(context: Context) {
-            containerScope.launch {
-                runSuspend(context)
-            }
-        }
+        override fun run(context: Context) = launchRunSuspend(context)
 
         override suspend fun runSuspend(context: Context) {
             runCatching {
@@ -1055,19 +902,9 @@ constructor(
         override var enabled: Boolean,
         var timerValueS: Int = 0,
     ) : Action(title, enabled, RunMode.ASYNC) {
-        override fun run(context: Context) {
-            containerScope.launch {
-                runSuspend(context)
-            }
-        }
+        override fun run(context: Context) = launchRunSuspend(context)
 
-        override suspend fun runSuspend(context: Context) {
-            runCatching {
-                writeTimer(context, timerValueS)
-            }.onFailure {
-                Timber.e(it, "Failed to send timer to watch")
-            }
-        }
+        override suspend fun runSuspend(context: Context) = runWithTimer(context, timerValueS)
 
         /**
          * Entry point for callers that already know the timer value to send
@@ -1102,20 +939,13 @@ constructor(
             RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }
-
-        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
     }
 
     inner class ClearStepHistoryAction(
         override var title: String,
         override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
-        override fun run(context: Context) {
-            containerScope.launch {
-                runSuspend(context)
-            }
-        }
+        override fun run(context: Context) = launchRunSuspend(context)
 
         override suspend fun runSuspend(context: Context) {
             runClear()
@@ -1144,12 +974,13 @@ constructor(
             RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }
-
-        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {}
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {}
     }
 
+    private fun isOlderThan(timestampMs: Long?, ageMs: Long): Boolean =
+        timestampMs == null || System.currentTimeMillis() - timestampMs > ageMs
+
     private fun runIt(action: Action, context: Context) {
+        Timber.d("running ${action.javaClass.simpleName}")
         runCatching { action.run(context) }.onFailure {
             Timber.e(it, "Action failed: '${action.title}' (${action.javaClass.simpleName})")
             when (it) {
@@ -1165,64 +996,46 @@ constructor(
         }
     }
 
-    fun runActionsForActionButton(context: Context) {
+    /**
+     * Runs every action that opts in to [environment]. When [announce] is set, the titles of the
+     * actions about to run are published as "ActionNames" for the RunActions screen.
+     */
+    private fun runFor(
+        environment: RunEnvironment,
+        context: Context,
+        announce: Boolean = false,
+        afterRun: () -> Unit = {},
+    ) {
         containerScope.launch {
             isDataLoaded.await()
-            val actions =
-                _actions.value.filter { it.shouldRun(RunEnvironment.ACTION_BUTTON_PRESSED) }
-            ProgressEvents.onNext("ActionNames", actions.map { it.title })
+            val actions = _actions.value.filter { it.shouldRun(environment) }
+            if (announce) ProgressEvents.onNext("ActionNames", actions.map { it.title })
             runFilteredActions(context, actions)
+            afterRun()
         }
     }
 
-    fun runActionForConnection(context: Context) {
-        containerScope.launch {
-            isDataLoaded.await()
-            runFilteredActions(
-                context,
-                _actions.value.filter { it.shouldRun(RunEnvironment.NORMAL_CONNECTION) }
-            )
-        }
-    }
+    fun runActionsForActionButton(context: Context) =
+        runFor(RunEnvironment.ACTION_BUTTON_PRESSED, context, announce = true)
 
-    fun runActionForAlwaysConnected(context: Context) {
-        containerScope.launch {
-            isDataLoaded.await()
-            runFilteredActions(
-                context,
-                _actions.value.filter { it.shouldRun(RunEnvironment.ALWAYS_CONNECTED) }
-            )
-        }
-    }
+    fun runActionForConnection(context: Context) =
+        runFor(RunEnvironment.NORMAL_CONNECTION, context)
 
-    fun runActionsForAutoTimeSetting(context: Context) {
-        containerScope.launch {
-            isDataLoaded.await()
-            val actions =
-                _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
-            ProgressEvents.onNext("ActionNames", actions.map { it.title })
+    fun runActionForAlwaysConnected(context: Context) =
+        runFor(RunEnvironment.ALWAYS_CONNECTED, context)
 
-            runFilteredActions(
-                context,
-                _actions.value.filter { it.shouldRun(RunEnvironment.AUTO_TIME_ADJUSTMENT) }
-            )
+    fun runActionFindPhone(context: Context) =
+        runFor(RunEnvironment.FIND_PHONE_PRESSED, context)
 
-            // show notification if configured
+    fun runActionsForAutoTimeSetting(context: Context) =
+        runFor(RunEnvironment.AUTO_TIME_ADJUSTMENT, context, announce = true) {
+            // Only notify for watches that are not always connected.
             if (LocalDataStorage.getTimeAdjustmentNotification(context) &&
                 !watchFeatureManager.isFeatureSupported("time_adjustment.always_connected")
-            ) { // only create notification for not-always connected watches.
+            ) {
                 showTimeSyncNotification()
             }
         }
-    }
-
-    fun runActionFindPhone(context: Context) {
-        containerScope.launch {
-            isDataLoaded.await()
-            val actionsToRun = _actions.value.filter { it.shouldRun(RunEnvironment.FIND_PHONE_PRESSED) }
-            runFilteredActions(context, actionsToRun)
-        }
-    }
 
     private fun showTimeSyncNotification() {
         val dateStr =
