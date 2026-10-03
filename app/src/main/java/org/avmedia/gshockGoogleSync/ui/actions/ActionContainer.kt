@@ -924,10 +924,10 @@ constructor(
 
             // Handle watch hardware latency with retries
             var freshTimer = before
-            repeat(3) {
-                delay(kotlin.time.Duration.parse("500ms"))
+            for (attempt in 1..3) {
+                delay(500)
                 freshTimer = api.getTimer()
-                if (freshTimer != before) return@repeat
+                if (freshTimer != before) break
             }
 
             ProgressEvents.onNext("TimerUpdated", freshTimer)
