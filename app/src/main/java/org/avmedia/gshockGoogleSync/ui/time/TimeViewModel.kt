@@ -32,7 +32,7 @@ import org.avmedia.gshockapi.WatchInfo
 import javax.inject.Inject
 import kotlin.random.Random
 
-import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
+import org.avmedia.gshockGoogleSync.ActionContainer
 
 enum class StepDataOption {
     TODAY, HOURLY, DAILY

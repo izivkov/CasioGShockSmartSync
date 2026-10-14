@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
-import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
+import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.EventAction

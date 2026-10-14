@@ -2,7 +2,7 @@ package org.avmedia.gshockGoogleSync.voice
 
 import org.avmedia.gshockGoogleSync.Screens
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.ui.actions.ActionContainer
+import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockapi.WatchInfo
 import kotlin.reflect.KClass
 

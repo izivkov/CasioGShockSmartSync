@@ -1,5 +1,6 @@
-package org.avmedia.gshockGoogleSync.ui.actions
+package org.avmedia.gshockGoogleSync
 
+import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -27,11 +28,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.ActionsStorage
+import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
+import org.avmedia.gshockGoogleSync.ui.actions.CameraCaptureHelper
+import org.avmedia.gshockGoogleSync.ui.actions.FlashlightHelper
+import org.avmedia.gshockGoogleSync.ui.actions.PhoneFinder
+import org.avmedia.gshockGoogleSync.ui.actions.PrayerAlarmsHelper
+import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
@@ -45,6 +51,9 @@ import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlin.time.Duration
 
 /**
  * Payload for the "AlarmsUpdated" event: the exact alarm list that was just
@@ -83,7 +92,7 @@ constructor(
     private val watchTimeUpdater: WatchTimeUpdater,
     private val watchFeatureManager: IWatchFeatureManager,
     private val eventStorage: EventStorage,
-    private val alarmNameStorage: org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
+    private val alarmNameStorage: AlarmNameStorage
 ) {
     /** Manually-created scope, since this class has no ViewModel/Activity lifecycle to tie one to. Lives as long as the process. */
     private val containerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -151,7 +160,7 @@ constructor(
 
             saveJob?.cancel()
             saveJob = containerScope.launch {
-                delay(kotlin.time.Duration.ZERO)
+                delay(Duration.ZERO)
                 actionsStorage.save()
                 _uiEvents.emit(
                     UiEvent.ShowSnackbar(appContext.getString(R.string.actions_saved))
@@ -989,7 +998,7 @@ constructor(
             runCatching {
                 // Calculation of smart defaults using the same logic as SettingsViewModel
                 val settings = Settings()
-                val currentLocale = java.util.Locale.getDefault()
+                val currentLocale = Locale.getDefault()
 
                 // Language
                 settings.language = when (currentLocale.language) {
@@ -1001,15 +1010,15 @@ constructor(
                     else -> "English"
                 }
 
-                val dateTimePattern = java.text.SimpleDateFormat().toPattern()
+                val dateTimePattern = SimpleDateFormat().toPattern()
                 val datePattern = dateTimePattern.split(" ")[0]
                 val timePattern = dateTimePattern.split(" ")[1]
 
                 settings.dateFormat = if (datePattern.lowercase().startsWith("d")) "DD:MM" else "MM:DD"
                 settings.timeFormat = if (timePattern[0] == 'h') "12h" else "24h"
 
-                val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
-                val buttonTone = notificationManager.currentInterruptionFilter == android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val buttonTone = notificationManager.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL
                 settings.buttonTone = buttonTone
                 settings.keyVibration = buttonTone
 
@@ -1088,7 +1097,7 @@ constructor(
             // Handle watch hardware latency with retries
             var freshTimer = before
             repeat(3) {
-                delay(kotlin.time.Duration.parse("500ms"))
+                delay(Duration.parse("500ms"))
                 freshTimer = api.getTimer()
                 if (freshTimer != before) return@repeat
             }

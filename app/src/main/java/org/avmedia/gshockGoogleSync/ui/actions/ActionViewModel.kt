@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.avmedia.gshockGoogleSync.ActionContainer
 import javax.inject.Inject
 
 /**
- * Thin, screen-scoped facade over [ActionContainer] for Compose screens.
+ * Thin, screen-scoped facade over [org.avmedia.gshockGoogleSync.ActionContainer] for Compose screens.
  *
  * All actual action state, dispatch logic, and Action subclasses live in
- * [ActionContainer], a @Singleton with no Android lifecycle - it has to survive
+ * [org.avmedia.gshockGoogleSync.ActionContainer], a @Singleton with no Android lifecycle - it has to survive
  * background watch button presses even when no UI is composed. This class exists
  * only so Compose screens can obtain it the normal way, via hiltViewModel(),
  * instead of the @EntryPoint workaround that was needed while this name was

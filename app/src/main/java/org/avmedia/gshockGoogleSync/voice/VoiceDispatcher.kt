@@ -13,13 +13,14 @@ import timber.log.Timber
 import java.time.LocalDate
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.avmedia.gshockGoogleSync.ActionContainer
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 class VoiceDispatcher @Inject constructor(
-    private val actionContainer: org.avmedia.gshockGoogleSync.ui.actions.ActionContainer,
+    private val actionContainer: ActionContainer,
     private val api: GShockRepository,
     private val intentParser: IntentParser,
     private val speechFeedback: VoiceSpeechFeedback,
@@ -227,7 +228,7 @@ class VoiceDispatcher @Inject constructor(
                 updatedEvents[eventIndex] = newEvent
 
                 val setEventsAction =
-                    actionContainer.getAction(org.avmedia.gshockGoogleSync.ui.actions.ActionContainer.SetEventsAction::class.java)
+                    actionContainer.getAction(ActionContainer.SetEventsAction::class.java)
                 setEventsAction.runWithEvents(appContext, updatedEvents)
 
                 val dateFeedback = when (date) {
