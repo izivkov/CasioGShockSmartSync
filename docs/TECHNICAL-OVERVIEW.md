@@ -121,6 +121,9 @@ repository.
 
 ## The Actions system
 
+For the detailed explanation of Actions as app-level units of work, including
+the alarm workflow, see [ACTIONS.md](ACTIONS.md).
+
 "Actions" are the things a watch button press, a voice command, or an
 explicit "Send to Watch" UI button can trigger — set the time, push
 reminders, toggle the flashlight, take a photo, set an alarm, and so on.
