@@ -62,7 +62,7 @@ fun WatchInfoCard1(
             verticalArrangement = Arrangement.Center
         ) {
             Row(
-                modifier = Modifier.padding(bottom = 4.dp),
+                modifier = Modifier.padding(bottom = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppText(
@@ -75,7 +75,7 @@ fun WatchInfoCard1(
             }
 
             HomeTime(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 10.dp)
             )
         }
     }

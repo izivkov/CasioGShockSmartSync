@@ -268,7 +268,7 @@ fun PreConnectionScreen(
                             modifier =
                                 Modifier
                                     .align(Alignment.BottomStart)
-                                    .padding(start = 16.dp, bottom = 16.dp)
+                                    .padding(start = 0.dp, bottom = 16.dp)
                                     .fillMaxWidth(0.5f)
                                     .fillMaxHeight(1f - GUIDELINE_LIST_TOP)
                         ) {
