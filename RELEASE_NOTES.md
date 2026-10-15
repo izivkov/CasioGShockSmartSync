@@ -1,3 +1,22 @@
+# Unreleased — optimize branch
+
+## Highlights
+
+### More reliable watch connections
+* Recreate the Bluetooth manager after it is released, so a later connection attempt does not reuse a closed manager.
+* Require valid button information before choosing the post-connection screen, and report initialization timeouts instead of silently navigating with missing data.
+* Add diagnostics around connection setup, button-info requests, and watch responses to make intermittent failures easier to investigate.
+
+### Time screen and pairing refinements
+* Rebuilt the battery indicator in Compose and restored its horizontal layout and original stripe appearance.
+* Tightened and aligned the Home Time, city, battery, and temperature layout.
+* Refined the paired-watch list spacing and delete-button touch target.
+
+### UI reliability
+* Improve progress-event subscriptions so screen refreshes continue working when ViewModels are recreated.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.11 — September 21, 2026
 
 ## ✨ Highlights

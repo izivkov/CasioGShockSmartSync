@@ -148,7 +148,7 @@ class EventViewModel @Inject constructor(
             EventAction("EventsUpdated") {
                 @Suppress("UNCHECKED_CAST")
                 val payload = ProgressEvents.getPayload("EventsUpdated") as? List<Event>
-                if (payload != null) {
+                if (_isManualMode.value && payload != null) {
                     _events.value = payload
                     EventsModel.refresh(ArrayList(payload))
                 } else {

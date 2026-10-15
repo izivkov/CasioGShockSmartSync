@@ -15,7 +15,6 @@ import com.batoulapps.adhan2.data.DateComponents
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.services.LocationProvider
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockapi.model.Alarm
 import java.time.Instant
 import java.time.LocalDate
@@ -29,7 +28,6 @@ import kotlin.time.Instant as AdhanInstant
 
 @Singleton
 class PrayerAlarmsHelper @Inject constructor(
-    private val alarmNameStorage: AlarmNameStorage,
     @param:ApplicationContext private val context: Context
 ) {
 
@@ -91,12 +89,6 @@ class PrayerAlarmsHelper @Inject constructor(
             }
             .take(n)
             .toList()
-            .also { alarms ->
-                alarms.forEachIndexed { index, alarm ->
-                    alarmNameStorage.put(alarm.name ?: "", index = index)
-                }
-                alarmNameStorage.save()
-            }
     }.onFailure { e ->
         AppSnackbar("Failed to create next prayer alarms: ${e.message}")
     }

@@ -216,7 +216,7 @@ constructor(
                     CameraOrientation.BACK
                 )
             )
-            add(PrayerAlarmsAction("Set Prayer Alarms", false, api, prayerAlarmsHelper))
+            add(PrayerAlarmsAction("Set Prayer Alarms", false, prayerAlarmsHelper))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
@@ -460,10 +460,49 @@ constructor(
         }
     }
 
+    private suspend fun writeAlarmsToWatch(
+        context: Context,
+        alarms: List<Alarm>,
+        clearNames: Boolean = false,
+        updateHourlyChime: Boolean = false,
+    ) {
+        if (clearNames) {
+            alarmNameStorage.clear()
+        } else {
+            alarms.forEachIndexed { index, alarm ->
+                alarmNameStorage.put(alarm.name ?: "", index)
+            }
+        }
+        alarmNameStorage.save()
+
+        api.setAlarms(ArrayList(alarms))
+
+        val hasHourlyChime = watchFeatureManager.isFeatureSupported("alarms.chime")
+        if (hasHourlyChime && updateHourlyChime) {
+            val chimeEnabled = alarms.firstOrNull()?.hasHourlyChime ?: false
+            api.setSettings(api.getSettings().copy(hourlyChime = chimeEnabled))
+        }
+        val settings = if (hasHourlyChime) api.getSettings() else null
+
+        val alarmsFromWatch = api.getAlarms()
+            .take(watchFeatureManager.getAlarmCount())
+            .mapIndexed { index, alarm ->
+                val name = alarmNameStorage.get(index)
+                alarm.copy(
+                    name = name,
+                    hasHourlyChime = if (index == 0 && settings != null) {
+                        settings.hourlyChime
+                    } else alarm.hasHourlyChime
+                )
+            }
+
+        ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(alarmsFromWatch))
+        AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+    }
+
     inner class PrayerAlarmsAction(
         override var title: String,
         override var enabled: Boolean,
-        val api: GShockRepository,
         val prayerAlarmsHelper: PrayerAlarmsHelper
     ) : Action(title, enabled, RunMode.ASYNC) {
 
@@ -482,15 +521,14 @@ constructor(
         }
 
         override fun run(context: Context) {
-            // vvv 4. CALL THE METHOD ON THE INSTANCE vvv
-            CoroutineScope(Dispatchers.Main).launch {
+            containerScope.launch {
                 prayerAlarmsHelper
                     .createNextPrayerAlarms(watchFeatureManager.getAlarmCount())
                     .onSuccess { alarms ->
-                        // getAlarms need to be run first, otherwise setAlarms() will not work
-                        api.getAlarms()
-                        api.setAlarms(ArrayList(alarms))
-                        lastSet = System.currentTimeMillis()
+                        val setAlarmAction = getAction(SetAlarmAction::class.java)
+                        if (setAlarmAction.runWithAlarms(context, alarms)) {
+                            lastSet = System.currentTimeMillis()
+                        }
                     }
                     .onFailure { error ->
                         Timber.e("Could not set prayer alarms: ${error.message}")
@@ -642,7 +680,7 @@ constructor(
                     )
                 }
 
-                writeAlarms(context, alarmList)
+                writeAlarmsToWatch(context, alarmList)
             }.onFailure {
                 Timber.e(it, "Failed to set watch alarm via voice")
                 AppSnackbar("Failed to set watch alarm")
@@ -655,42 +693,18 @@ constructor(
          * Unlike the voice path, this does not upsert a single slot by hour/minute - it writes
          * the list exactly as given.
          */
-        suspend fun runWithAlarms(context: Context, alarms: List<Alarm>) {
-            runCatching {
-                writeAlarms(context, alarms)
+        suspend fun runWithAlarms(
+            context: Context,
+            alarms: List<Alarm>,
+            updateHourlyChime: Boolean = false,
+        ): Boolean {
+            return runCatching {
+                writeAlarmsToWatch(context, alarms, updateHourlyChime = updateHourlyChime)
+                true
             }.onFailure {
                 Timber.e(it, "Failed to send alarms to watch")
                 AppSnackbar("Failed to set watch alarm")
-            }
-        }
-
-        private suspend fun writeAlarms(context: Context, alarms: List<Alarm>) {
-            alarms.forEachIndexed { index, alarm ->
-                alarmNameStorage.put(alarm.name ?: "", index)
-            }
-            alarmNameStorage.save()
-
-            api.setAlarms(ArrayList(alarms))
-
-            val alarmsFromWatch = api.getAlarms()
-                .take(watchFeatureManager.getAlarmCount())
-                .mapIndexed { index, alarm ->
-                    val name = alarmNameStorage.get(index)
-                    alarm.copy(name = name)
-                }
-
-            val finalAlarms = if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
-                val settings = api.getSettings()
-                alarmsFromWatch.mapIndexed { index, alarm ->
-                    if (index == 0) alarm.copy(hasHourlyChime = settings.hourlyChime)
-                    else alarm
-                }
-            } else {
-                alarmsFromWatch
-            }
-
-            ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(finalAlarms))
-            AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+            }.getOrDefault(false)
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
@@ -719,18 +733,13 @@ constructor(
         override fun run(context: Context) {
             containerScope.launch {
                 runCatching {
-                    alarmNameStorage.clear()
-                    alarmNameStorage.save()
-
                     val alarms = api.getAlarms()
                     val alarmCount = watchFeatureManager.getAlarmCount()
                     val updatedAlarms = alarms.take(alarmCount).map {
                         it.copy(enabled = false, hour = 0, minute = 0)
                     }
 
-                    api.setAlarms(ArrayList(updatedAlarms))
-                    ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(updatedAlarms))
-                    AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+                    writeAlarmsToWatch(context, updatedAlarms, clearNames = true)
                 }.onFailure {
                     Timber.e(it, "Failed to clear all alarms via voice")
                     AppSnackbar("Failed to clear alarms")
@@ -757,9 +766,7 @@ constructor(
                         it.copy(enabled = false)
                     }
 
-                    api.setAlarms(ArrayList(updatedAlarms))
-                    ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(updatedAlarms))
-                    AppSnackbar(context.getString(R.string.alarms_set_to_watch))
+                    writeAlarmsToWatch(context, updatedAlarms)
                 }.onFailure {
                     Timber.e(it, "Failed to disable all alarms via voice")
                     AppSnackbar("Failed to disable alarms")
@@ -812,12 +819,13 @@ constructor(
          * Bypasses the settingName/settingValue single-field mapping used by voice commands,
          * since the caller already knows every field it wants to send.
          */
-        suspend fun runWithSettings(context: Context, settings: Settings) {
-            runCatching {
+        suspend fun runWithSettings(context: Context, settings: Settings): Boolean {
+            return runCatching {
                 sendSettings(context, settings)
+                true
             }.onFailure {
                 Timber.e(it, "Failed to send settings to watch")
-            }
+            }.getOrDefault(false)
         }
 
         private suspend fun sendSettings(context: Context, settings: Settings) {
@@ -885,9 +893,10 @@ constructor(
                 settings.timeAdjustment = true
                 settings.adjustmentTimeMinutes = 30
 
-                api.setSettings(settings)
-                ProgressEvents.onNext("SettingsUpdated")
-                AppSnackbar(context.getString(R.string.settings_sent_to_watch))
+                val setSettingsAction = getAction(SetSettingsAction::class.java)
+                if (!setSettingsAction.runWithSettings(context, settings)) {
+                    return@runCatching
+                }
 
                 // Also update local storage for time adjustment notifications if needed
                 val notifyMe = LocalDataStorage.getTimeAdjustmentNotification(appContext)

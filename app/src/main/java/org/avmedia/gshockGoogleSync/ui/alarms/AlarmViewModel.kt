@@ -161,9 +161,8 @@ class AlarmViewModel @Inject constructor(
      * This process involves:
      * 1. Normalizing any manually-edited (null-named) alarms to an empty name.
      * 2. Handing the exact list to SetAlarmAction, which persists names to
-     *    AlarmNameStorage, writes the list via [api.setAlarms], and emits
-     *    "AlarmsUpdated" (which this ViewModel's own subscription uses to reload).
-     * 3. Updating the hourly chime setting if applicable.
+        *    AlarmNameStorage, writes alarms and the hourly chime setting when supported,
+        *    reads back confirmed state, and emits "AlarmsUpdated".
      */
     fun sendAlarmsToWatch() = viewModelScope.launch {
         // Before sending, process the alarms to handle null names.
@@ -176,16 +175,11 @@ class AlarmViewModel @Inject constructor(
             return@launch
         }
 
-        setAlarmAction.runWithAlarms(appContext, alarmsToSend)
-
-        if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
-            runCatching {
-                val chimeSetting = alarmsToSend.getOrNull(0)?.hasHourlyChime ?: false
-                api.setSettings(api.getSettings().copy(hourlyChime = chimeSetting))
-            }.onFailure {
-                ProgressEvents.onNext("Error", it.message ?: "")
-            }
-        }
+        setAlarmAction.runWithAlarms(
+            appContext,
+            alarmsToSend,
+            updateHourlyChime = watchFeatureManager.isFeatureSupported("alarms.chime")
+        )
     }
 
     /**
