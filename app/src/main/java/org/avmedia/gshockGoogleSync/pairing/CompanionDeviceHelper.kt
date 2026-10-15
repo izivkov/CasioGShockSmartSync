@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.ui.others
+package org.avmedia.gshockGoogleSync.pairing
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter

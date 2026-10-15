@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.receivers
+package org.avmedia.gshockGoogleSync.pairing
 
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanResult
@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockGoogleSync.utils.DeviceEventGate
 import timber.log.Timber
 
 class BleScanReceiver : BroadcastReceiver() {
@@ -29,7 +28,7 @@ class BleScanReceiver : BroadcastReceiver() {
         scanResults?.forEach { result ->
             result.device?.address?.let { address ->
                 val upperAddress = address.uppercase()
-                if (!DeviceEventGate.recordBleEvent(upperAddress, "DeviceAppeared")) {
+                if (!CompanionDeviceEventGate.recordBleEvent(upperAddress, "DeviceAppeared")) {
                     Timber.d("BleScanReceiver: suppressing DeviceAppeared for $upperAddress")
                     return@let
                 }

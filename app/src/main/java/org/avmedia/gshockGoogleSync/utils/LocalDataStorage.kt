@@ -30,10 +30,14 @@ object LocalDataStorage {
 
     fun put(context: Context, key: String, value: String) {
         scope.launch {
-            mutex.withLock {
-                context.dataStore.edit { preferences ->
-                    preferences[stringPreferencesKey(key)] = value
-                }
+            putAndWait(context, key, value)
+        }
+    }
+
+    suspend fun putAndWait(context: Context, key: String, value: String) {
+        mutex.withLock {
+            context.dataStore.edit { preferences ->
+                preferences[stringPreferencesKey(key)] = value
             }
         }
     }
@@ -125,18 +129,34 @@ object LocalDataStorage {
     }
 
     suspend fun addDeviceAddress(context: Context, address: String) {
-        val addresses = getDeviceAddresses(context).toMutableList()
-        if (!addresses.contains(address)) {
-            addresses.add(address)
-            put(context, "DeviceAddresses", addresses.joinToString(","))
+        mutex.withLock {
+            val key = stringPreferencesKey("DeviceAddresses")
+            val addresses = context.dataStore.data.first()[key]
+                ?.takeIf { it.isNotEmpty() }
+                ?.split(",")
+                ?.toMutableList() ?: mutableListOf()
+            if (address !in addresses) {
+                addresses.add(address)
+                context.dataStore.edit { preferences ->
+                    preferences[key] = addresses.joinToString(",")
+                }
+            }
         }
     }
 
     suspend fun removeDeviceAddress(context: Context, address: String) {
-        val addresses = getDeviceAddresses(context).toMutableList()
-        if (addresses.remove(address)) {
-            put(context, "DeviceAddresses", addresses.joinToString(","))
-            deleteAsync(context, "DeviceName_$address")
+        mutex.withLock {
+            val addressesKey = stringPreferencesKey("DeviceAddresses")
+            val addresses = context.dataStore.data.first()[addressesKey]
+                ?.takeIf { it.isNotEmpty() }
+                ?.split(",")
+                ?.toMutableList() ?: mutableListOf()
+            if (addresses.remove(address)) {
+                context.dataStore.edit { preferences ->
+                    preferences[addressesKey] = addresses.joinToString(",")
+                    preferences.remove(stringPreferencesKey("DeviceName_$address"))
+                }
+            }
         }
     }
 
@@ -145,6 +165,6 @@ object LocalDataStorage {
     }
 
     suspend fun setDeviceName(context: Context, address: String, name: String) {
-        put(context, "DeviceName_$address", name)
+        putAndWait(context, "DeviceName_$address", name)
     }
 }

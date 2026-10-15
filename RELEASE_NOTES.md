@@ -2,18 +2,28 @@
 
 ## Highlights
 
-### More reliable watch connections
-* Recreate the Bluetooth manager after it is released, so a later connection attempt does not reuse a closed manager.
-* Require valid button information before choosing the post-connection screen, and report initialization timeouts instead of silently navigating with missing data.
-* Add diagnostics around connection setup, button-info requests, and watch responses to make intermittent failures easier to investigate.
+### 📶 Bluetooth Connectivity & Companion Device Architecture
+* **GShockAPI 1.7.8 Upgrade**: Upgraded to core library `gshockapi:1.7.8` and streamlined project dependencies by transitioning from the embedded `:api` module to the library release artifact.
+* **Unified Companion Device Coordinator**: Consolidated companion device pairing, scan receivers, and presence management into a dedicated `pairing` package (`CompanionDeviceCoordinator`, `BleScanReceiver`, `CompanionDeviceHelper`, `GShockCompanionDeviceService`).
+* **More Reliable Watch Connections**:
+  * Recreates the Bluetooth manager after release so subsequent connection attempts never reuse a closed manager instance.
+  * Validates button information before selecting post-connection screens, reporting initialization timeouts instead of silently navigating with incomplete watch data.
+  * Added detailed connection setup and handshake diagnostics to simplify investigating intermittent Bluetooth failures.
 
-### Time screen and pairing refinements
-* Rebuilt the battery indicator in Compose and restored its horizontal layout and original stripe appearance.
-* Tightened and aligned the Home Time, city, battery, and temperature layout.
-* Refined the paired-watch list spacing and delete-button touch target.
+### 🎨 Modular Actions Subsystem & UI Refactoring
+* **Unified `ToggleActionView`**: Replaced eight separate toggle composables (`FlashlightView`, `PhoneFinderView`, `PlayPauseView`, `PrayerAlarmsView`, `RemindersView`, `SetTimeView`, `SkipToNextTrackView`, `VoiceAssistView`) with a single, highly reusable `ToggleActionView`.
+* **Streamlined Action Engine**: Reduced `ActionContainer` boilerplate and optimized timer polling in `SetTimerAction` to stop immediately once the watch reports the updated timer.
+* **Voice Command Layer**: Refined voice action dispatching, command table mapping, and voice feedback integration.
 
-### UI reliability
-* Improve progress-event subscriptions so screen refreshes continue working when ViewModels are recreated.
+### 📐 UI Polish & Navigation Refinements
+* **Rebuilt Battery Indicator**: Re-implemented the battery level visual in Compose, restoring its horizontal layout and signature striped battery graphic.
+* **Layout Alignment**: Tightened and aligned Home Time, city name, battery level, and temperature cards on the Time screen.
+* **Paired Watch List**: Refined item spacing and increased delete button touch targets on the pre-connection paired devices list.
+* **Clean Navigation Architecture**: Streamlined app navigation with `AppScreenState` and `AppNavigationViewModel`.
+
+### 🧹 UI Reliability & Codebase Optimization
+* **Resilient Event Subscriptions**: Fixed ViewModel progress-event subscription drops by using unique instance subscriber names, ensuring screen refreshes continue working seamlessly across ViewModel recreations.
+* **Codebase Pruning**: Removed obsolete UI event plumbing, unused string resources (`voice_command`, `listening`, etc.), and slimmed down `AppTextLink` and `AppTextVeryLarge` composables.
 
 ---
 

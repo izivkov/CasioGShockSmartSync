@@ -16,8 +16,6 @@ import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class MainEventHandler(
     private val context: GShockApplication,
@@ -42,11 +40,17 @@ class MainEventHandler(
     }
 
     private fun handleWatchInitialization() {
-        Timber.i("Received WatchInitializationCompleted; routing to content selector")
+        Timber.i("Received WatchInitializationCompleted")
         if (repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
         }
-        screenManager.showContentSelector(repository)
+        if (repository.isNormalButtonPressed()) {
+            Timber.i("Normal watch connection; opening Time navigation")
+            screenManager.showMainNavigation()
+        } else {
+            Timber.i("Special watch button connection; resolving content selector")
+            screenManager.showContentSelector(repository)
+        }
     }
 
     private fun handleAppNotification() {
@@ -88,15 +92,13 @@ class MainEventHandler(
         ProgressEvents.getPayload("Disconnect")?.let { device ->
             repository.teardownConnection(device as BluetoothDevice)
         }
-
-        Executors.newSingleThreadScheduledExecutor().schedule({
-            screenManager.showInitialScreen()
-        }, 0L, TimeUnit.SECONDS)
+        Timber.i("Watch disconnected; returning to pre-connection screen")
+        screenManager.showInitialScreen()
     }
 
     private fun handleWaitForConnection() {
         CoroutineScope(Dispatchers.Default).launch {
-            context.deviceAssociationManager.checkPairedDevicesOrNotify()
+            context.companionDeviceCoordinator.checkPairedDevicesOrNotify()
         }
     }
 
@@ -118,4 +120,5 @@ class MainEventHandler(
                 .show()
         }
     }
+
 }

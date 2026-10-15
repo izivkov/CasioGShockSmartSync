@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.services
+package org.avmedia.gshockGoogleSync.pairing
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -12,7 +12,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.utils.DeviceEventGate
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -93,8 +92,8 @@ class GShockCompanionDeviceService : CompanionDeviceService() {
 
     private fun handleDeviceEvent(type: String, address: String, logMessage: String) {
         val sanitized = sanitizeAddress(address)
-        // CDM source: deduplicated via the shared DeviceEventGate (cross-source, CDM-priority)
-        if (!DeviceEventGate.recordCdmEvent(sanitized, type)) return
+        // CDM source: deduplicated by the shared cross-source gate, with CDM priority.
+        if (!CompanionDeviceEventGate.recordCdmEvent(sanitized, type)) return
 
         Timber.i(logMessage)
 

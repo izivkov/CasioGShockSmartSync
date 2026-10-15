@@ -1,6 +1,7 @@
 {
     "java.configuration.updateBuildConfiguration": "disabled",
     "chat.tools.terminal.autoApprove": {
-        "./gradlew": true
+        "./gradlew": true,
+        "git mv": true
     }
 }

@@ -32,6 +32,9 @@ fun CheckPermissions(onPermissionsGranted: @Composable () -> Unit) {
     fun getRequiredPermissions(): Array<String> {
         return mutableListOf<String>().apply {
             add(Manifest.permission.ACCESS_COARSE_LOCATION)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 addAll(
                     listOf(

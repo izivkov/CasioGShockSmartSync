@@ -31,6 +31,10 @@ class AppScreenState @Inject constructor() : IScreenManager {
         updateScreen(AppScreen.CONTENT_SELECTOR)
     }
 
+    override fun showMainNavigation() {
+        updateScreen(AppScreen.MAIN_NAVIGATION)
+    }
+
     override fun showRunActionsScreen() {
         updateScreen(AppScreen.RUN_ACTIONS)
     }
@@ -45,10 +49,6 @@ class AppScreenState @Inject constructor() : IScreenManager {
 
     override fun showError(message: String) {
         mutableState.update { it.copy(screen = AppScreen.ERROR, errorMessage = message) }
-    }
-
-    fun showMainNavigation() {
-        updateScreen(AppScreen.MAIN_NAVIGATION)
     }
 
     private fun updateScreen(screen: AppScreen) {

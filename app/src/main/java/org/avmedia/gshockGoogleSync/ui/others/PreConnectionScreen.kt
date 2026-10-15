@@ -75,6 +75,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceHelper
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
@@ -113,9 +114,6 @@ fun PreConnectionScreen(
         Timber.i("Pairing success detected: $deviceLog")
 
         val name = device.name ?: ""
-        scope.launch(Dispatchers.IO) {
-            LocalDataStorage.setDeviceName(context, device.address, name)
-        }
         ptrConnectionViewModel.setDevice(device.address, name)
     }
 
@@ -181,12 +179,18 @@ fun PreConnectionScreen(
             val device = CompanionDeviceHelper.extractDevice(result.data)
 
             if (device != null) {
+                // CDM has already created the association. Persist it now rather
+                // than waiting for Android's bond broadcast, which is not
+                // consistently delivered on older Android/OEM builds.
+                handleSuccessfulPairing(device)
+
                 // 2. Check if we need to bond
                 if (device.bondState != BluetoothDevice.BOND_BONDED) {
                     Timber.i("Starting OS pairing (createBond) for ${device.address}")
 
                     // 3. Trigger the actual system pairing dialog
-                    device.createBond()
+                    val bondStarted = device.createBond()
+                    Timber.i("OS pairing request for ${device.address} accepted=$bondStarted")
 
                     // Start a timeout job to catch if the user cancels the dialog
                     timeoutJob.value?.cancel()
@@ -195,9 +199,6 @@ fun PreConnectionScreen(
                         Timber.w("Pairing timed out")
                         // Handle UI timeout state here if needed
                     }
-                } else {
-                    // Already paired, go straight to success logic
-                    handleSuccessfulPairing(device)
                 }
             }
         } else {

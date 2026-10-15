@@ -7,13 +7,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.pairing.CompanionDevicePresenceMonitor
-import org.avmedia.gshockGoogleSync.pairing.DeviceAssociationManager
+import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
 import org.avmedia.gshockGoogleSync.services.DeviceManager
 import org.avmedia.gshockGoogleSync.ui.actions.ActionRunner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
-import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -28,10 +26,7 @@ class GShockApplication : Application(), IScreenManager {
     lateinit var repository: GShockRepository
 
     @Inject
-    lateinit var companionDevicePresenceMonitor: CompanionDevicePresenceMonitor
-
-    @Inject
-    lateinit var deviceAssociationManager: DeviceAssociationManager
+    lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
 
     @Inject
     lateinit var actionRunner: ActionRunner
@@ -42,7 +37,7 @@ class GShockApplication : Application(), IScreenManager {
     fun init() {
         Timber.i("Initializing GShockApplication")
         CoroutineScope(Dispatchers.IO).launch {
-            deviceAssociationManager.init()
+            companionDeviceCoordinator.init()
         }
     }
 
@@ -54,7 +49,6 @@ class GShockApplication : Application(), IScreenManager {
             Timber.d("Timber planted for Debug")
         }
 
-        CrashReportHelper.installGlobalHandler(this)
         ActivityProvider.initialize(this)
         eventHandler = MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
@@ -67,6 +61,10 @@ class GShockApplication : Application(), IScreenManager {
 
     override fun showContentSelector(repository: GShockRepository) {
         appScreenState.showContentSelector(repository)
+    }
+
+    override fun showMainNavigation() {
+        appScreenState.showMainNavigation()
     }
 
     override fun showRunActionsScreen() {

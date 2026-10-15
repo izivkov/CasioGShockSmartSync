@@ -26,7 +26,6 @@ import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.PopupMessageReceiver
 import org.avmedia.gshockGoogleSync.utils.BluetoothHelper
 import org.avmedia.gshockGoogleSync.utils.CheckPermissions
-import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
 import timber.log.Timber
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -108,13 +107,9 @@ class MainActivity : ComponentActivity() {
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             try {
                 Timber.e(throwable, "Uncaught exception on thread: ${thread.name}")
-                CrashReportHelper.logCrash(
-                    this,
-                    throwable,
-                    "Uncaught exception on thread: ${thread.name}"
-                )
+                Timber.e(throwable, "Uncaught exception on thread: ${thread.name}")
             } catch (e: Exception) {
-                Timber.e(e, "Failed to log crash")
+                Timber.e(e, "Failed to log uncaught exception")
             } finally {
                 defaultHandler?.uncaughtException(thread, throwable)
             }

@@ -18,8 +18,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.GShockApplication
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.pairing.DeviceAssociationManager
-import org.avmedia.gshockGoogleSync.utils.CrashReportHelper
+import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
@@ -54,7 +53,7 @@ constructor(
 
     data class DeviceItem(val name: String, val address: String, val isLastUsed: Boolean)
 
-    @Inject lateinit var deviceAssociationManager: DeviceAssociationManager
+    @Inject lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
 
     private val _pairedDevices = MutableStateFlow<List<DeviceItem>>(emptyList())
     val pairedDevices: StateFlow<List<DeviceItem>> = _pairedDevices
@@ -115,18 +114,17 @@ constructor(
         val associations = api.getAssociationsWithNames(appContext)
         val lastAddress = LocalDataStorage.get(appContext, KEY_LAST_DEVICE_ADDRESS, "")
 
-        val items = associations
-            .distinctBy { it.address.lowercase() }
-            .map { association ->
-                val isLastUsed = association.address.equals(lastAddress, ignoreCase = true)
-                val name = association.name
+        val associationsByAddress = associations.associateBy { it.address.uppercase() }
+        val allAddresses = (associations.map { it.address } + LocalDataStorage.getDeviceAddresses(appContext))
+            .distinctBy { it.uppercase() }
 
-                if (!name.isNullOrBlank()) {
-                    DeviceItem(name, association.address, isLastUsed)
-                } else {
-                    val storedName = LocalDataStorage.getDeviceName(appContext, association.address)
-                    DeviceItem(storedName ?: noWatchString, association.address, isLastUsed)
-                }
+        val items = allAddresses.map { address ->
+            val association = associationsByAddress[address.uppercase()]
+            val isLastUsed = address.equals(lastAddress, ignoreCase = true)
+            val name = association?.name?.takeIf { it.isNotBlank() }
+                ?: LocalDataStorage.getDeviceName(appContext, address)
+                ?: noWatchString
+            DeviceItem(name, address, isLastUsed)
             }
 
         _pairedDevices.value = formatDeviceNames(items)
@@ -194,20 +192,19 @@ constructor(
                 )
                 Timber.i("Updating local storage: $logDetails")
 
-                LocalDataStorage.put(appContext, KEY_LAST_DEVICE_ADDRESS, address)
+                LocalDataStorage.putAndWait(appContext, KEY_LAST_DEVICE_ADDRESS, address)
                 LocalDataStorage.addDeviceAddress(appContext, address)
-                LocalDataStorage.put(appContext, KEY_LAST_DEVICE_NAME, name)
+                LocalDataStorage.putAndWait(appContext, KEY_LAST_DEVICE_NAME, name)
                 LocalDataStorage.setDeviceName(appContext, address, name)
 
                 _watchName.value = name
 
                 // Re-sync all associations so CDM presence observers and the BLE
                 // fallback scan are rebuilt for the full, current device list.
-                deviceAssociationManager.syncAssociations()
+                companionDeviceCoordinator.syncAssociations()
 
                 loadPairedDevices()
 
-                CrashReportHelper.clearPairingCrashFlag(appContext)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to set device")
             }
@@ -244,7 +241,7 @@ constructor(
 
                 // Re-sync all associations so the BLE fallback scan and CDM presence
                 // observers are rebuilt without the removed device.
-                deviceAssociationManager.syncAssociations()
+                companionDeviceCoordinator.syncAssociations()
 
                 // Refresh UI and log
                 loadPairedDevices()

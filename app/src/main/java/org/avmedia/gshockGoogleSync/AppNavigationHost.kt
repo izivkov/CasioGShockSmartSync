@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.avmedia.gshockGoogleSync.ui.common.CrashLogDialog
 import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
@@ -22,19 +21,12 @@ fun AppNavigationHost(
     viewModel: AppNavigationViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val deviceAssociationManager = viewModel.deviceAssociationManager
+    val companionDeviceCoordinator = viewModel.companionDeviceCoordinator
 
     LaunchedEffect(state.screen) {
         if (state.screen == AppScreen.INITIAL) {
-            deviceAssociationManager.checkPairedDevicesOrNotify()
+            companionDeviceCoordinator.checkPairedDevicesOrNotify()
         }
-    }
-
-    deviceAssociationManager.pendingCrashLog?.let { log ->
-        CrashLogDialog(
-            crashLog = log,
-            onDismiss = { deviceAssociationManager.pendingCrashLog = null }
-        )
     }
 
     Box(
