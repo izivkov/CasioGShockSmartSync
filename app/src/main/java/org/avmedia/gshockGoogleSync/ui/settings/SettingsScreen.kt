@@ -19,8 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -39,51 +37,18 @@ fun SettingsScreen() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val (title, settingsLayout, buttonsRow) = createRefs()
-
-                ScreenTitle(
-                    stringResource(id = R.string.settings),
-                    Modifier.constrainAs(title) {
-                        top.linkTo(
-                            parent.top
-                        ) // Link top of content to parent top
-                        bottom.linkTo(
-                            settingsLayout.top
-                        ) // Link bottom of content to top of buttonsRow
-                    }
-                )
-
+            Column(modifier = Modifier.fillMaxSize()) {
+                ScreenTitle(stringResource(id = R.string.settings), Modifier)
                 Column(
-                    modifier =
-                    Modifier
-                        .constrainAs(settingsLayout) {
-                            top.linkTo(title.bottom)
-                            bottom.linkTo(buttonsRow.top)
-                            height = Dimension.fillToConstraints
-                        }
-                        .verticalScroll(
-                            rememberScrollState()
-                        ) // Make content scrollable
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
                         .padding(0.dp)
                         .fillMaxWidth()
-                        .fillMaxSize()
-                ) { SettingsList() }
-
-                BottomRow(
-                    modifier =
-                    Modifier.constrainAs(buttonsRow) {
-                        top.linkTo(
-                            settingsLayout.bottom
-                        ) // Link top of buttonsRow to bottom of
-                        // content
-                        bottom.linkTo(
-                            parent.bottom
-                        ) // Keep buttons at the bottom
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                )
+                ) {
+                    SettingsList()
+                }
+                BottomRow(modifier = Modifier.fillMaxWidth())
             }
         }
     }
@@ -93,7 +58,7 @@ fun SettingsScreen() {
 fun SettingsList() {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
-    Column(modifier = Modifier) {
+    Column {
         WatchFeature(id = "locale_card") {
             Locale(settingsViewModel::onSettingUpdated)
         }
@@ -103,7 +68,6 @@ fun SettingsList() {
         WatchFeature(id = "light_card") {
             Light(settingsViewModel::onSettingUpdated)
         }
-
         WatchFeature(id = "power_saving_card") {
             PowerSavings(settingsViewModel::onSettingUpdated)
         }
@@ -124,43 +88,34 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically, // Center vertically
-            horizontalArrangement =
-            Arrangement.SpaceEvenly, // Arrange horizontally, starting from the
-            // left
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .padding(end = 0.dp),
-                contentAlignment =
-                Alignment.CenterEnd // Aligns content to the right
-            ) { InfoButton(infoText = stringResource(id = R.string.auto_fill_help)) }
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                InfoButton(infoText = stringResource(id = R.string.auto_fill_help))
+            }
 
-            val buttons =
-                arrayListOf(
-                    ButtonData(
-                        text =
-                        Utils.shortenStringNewLine(
-                            stringResource(
-                                id =
-                                R.string
-                                    .auto_configure_settings
-                            ),
-                            15,
-                            "AUTO"
-                        ),
-                        onClick = { settingsViewModel.setSmartDefaults() }
+            val buttons = listOf(
+                ButtonData(
+                    text = Utils.shortenStringNewLine(
+                        stringResource(id = R.string.auto_configure_settings),
+                        15,
+                        "AUTO"
                     ),
-                    ButtonData(
-                        text = stringResource(id = R.string.send_to_watch),
-                        onClick = { settingsViewModel.sendToWatch() }
-                    )
+                    onClick = settingsViewModel::setSmartDefaults
+                ),
+                ButtonData(
+                    text = stringResource(id = R.string.send_to_watch),
+                    onClick = settingsViewModel::sendToWatch
                 )
+            )
 
             ButtonsRow(buttons = buttons, modifier = Modifier.weight(2.5f))
-
             Spacer(modifier = Modifier.weight(.5f))
         }
     }

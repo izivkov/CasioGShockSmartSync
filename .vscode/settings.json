@@ -1,3 +1,6 @@
 {
-    "java.configuration.updateBuildConfiguration": "disabled"
+    "java.configuration.updateBuildConfiguration": "disabled",
+    "chat.tools.terminal.autoApprove": {
+        "./gradlew": true
+    }
 }

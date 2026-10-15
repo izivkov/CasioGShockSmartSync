@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -75,29 +74,19 @@ fun EventItem(
                         modifier = Modifier.align(Alignment.Top)
                     )
                 }
-                ConstraintLayout(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp)
+                        .padding(0.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
                 ) {
-                    val (periodRef, frequencyRef) = createRefs()
-
                     AppText(
                         text = period,
-                        modifier = Modifier
-                            .padding(start = 0.dp)
-                            .constrainAs(periodRef) {
-                                start.linkTo(parent.start)
-                                top.linkTo(parent.top)
-                            }
+                        modifier = Modifier.padding(start = 0.dp)
                     )
 
                     AppText(
                         text = frequency,
-                        modifier = Modifier.constrainAs(frequencyRef) {
-                            end.linkTo(parent.end)
-                            top.linkTo(parent.top)
-                        }
                     )
                 }
             }

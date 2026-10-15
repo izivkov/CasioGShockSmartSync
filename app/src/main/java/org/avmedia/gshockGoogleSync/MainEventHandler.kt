@@ -42,6 +42,7 @@ class MainEventHandler(
     }
 
     private fun handleWatchInitialization() {
+        Timber.i("Received WatchInitializationCompleted; routing to content selector")
         if (repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
         }

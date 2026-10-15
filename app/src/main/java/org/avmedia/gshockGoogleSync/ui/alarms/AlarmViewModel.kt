@@ -24,18 +24,6 @@ import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import java.util.Calendar
 import javax.inject.Inject
 
-
-/**
- * Represents one-time UI events that should be handled by the UI layer.
- */
-sealed class UiEvent {
-    /**
-     * Event to show a Snackbar with a specific message.
-     * @property message The text message to display.
-     */
-    data class ShowSnackbar(val message: String) : UiEvent()
-}
-
 /**
  * ViewModel for managing the Alarms screen.
  *

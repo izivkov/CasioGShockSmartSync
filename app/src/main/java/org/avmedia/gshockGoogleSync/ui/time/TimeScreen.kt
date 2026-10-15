@@ -2,6 +2,7 @@ package org.avmedia.gshockGoogleSync.ui.time
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -10,8 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -23,27 +22,16 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
 
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            ConstraintLayout {
-                val (title, localTime, timer, watchName, watchInfo) = createRefs()
-
+            Column(modifier = Modifier.fillMaxSize()) {
                 ScreenTitle(
                     stringResource(id = R.string.time),
-                    Modifier.constrainAs(title) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
+                    Modifier
                 )
 
                 LocalTimeView(
                     Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 0.dp) // Adjust padding as needed
-                        .constrainAs(localTime) {
-                            top.linkTo(title.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
+                        .padding(vertical = 0.dp)
                 )
 
                 val watchFeatureManager = LocalWatchFeatureManager.current
@@ -54,23 +42,12 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .constrainAs(timer) {
-                                top.linkTo(localTime.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }
                 )
 
-                val stepCounter = createRef()
                 if (isStepCounterSupported) {
                     StepCounterView(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .constrainAs(stepCounter) {
-                                top.linkTo(timer.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }
                     )
                 }
 
@@ -78,24 +55,13 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .constrainAs(watchName) {
-                                top.linkTo(if (isStepCounterSupported) stepCounter.bottom else timer.bottom)
-                                bottom.linkTo(watchInfo.top)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                                height = Dimension.fillToConstraints
-                            }
+                            .weight(1f)
                 )
 
                 WatchInfoView(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .constrainAs(watchInfo) {
-                                bottom.linkTo(parent.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }
                 )
 
             }

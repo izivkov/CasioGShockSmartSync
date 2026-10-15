@@ -16,8 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -40,25 +38,14 @@ fun ActionsScreen(
 
     GShockSmartSyncTheme {
         Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val (title, actions) = createRefs()
-
+            Column(modifier = Modifier.fillMaxSize()) {
                 ScreenTitle(
                     text = stringResource(id = R.string.actions),
-                    modifier =
-                        Modifier.constrainAs(title) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(actions.top)
-                        }
+                    modifier = Modifier
                 )
 
                 ActionsContent(
-                    modifier =
-                        Modifier.constrainAs(actions) {
-                            top.linkTo(title.bottom)
-                            bottom.linkTo(parent.bottom)
-                            height = Dimension.fillToConstraints
-                        },
+                    modifier = Modifier.weight(1f),
                     actionsViewModel = actionsViewModel
                 )
             }
@@ -74,7 +61,6 @@ private fun ActionsContent(modifier: Modifier = Modifier, actionsViewModel: Acti
                 .verticalScroll(rememberScrollState())
                 .padding(0.dp)
                 .fillMaxWidth()
-                .fillMaxSize()
     ) { ItemList(items = createActionItems(actionsViewModel)) }
 }
 

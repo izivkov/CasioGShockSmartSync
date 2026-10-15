@@ -3,6 +3,7 @@ package org.avmedia.gshockGoogleSync.ui.common
 import android.text.Html
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
@@ -36,15 +37,13 @@ fun InfoButton(
 
     IconButton(
         onClick = { showDialog = !showDialog },
-        modifier = modifier.size(iconSize)
+        modifier = modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
     ) {
         Icon(
             imageVector = Icons.Outlined.Info,
-            contentDescription = "Info Icon",
+            contentDescription = "Info",
             tint = iconTint,
-            modifier = Modifier
-                .size(iconSize)
-                .clickable { showDialog = true }
+            modifier = Modifier.size(iconSize.coerceAtMost(24.dp))
         )
 
         if (showDialog) {

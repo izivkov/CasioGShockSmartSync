@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -67,8 +68,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -236,10 +235,9 @@ fun PreConnectionScreen(
                 AppCard(modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()) {
-                    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                        val (connectionSpinner, infoButton, pairButton, deviceList) = createRefs()
-
+                    Box(modifier = Modifier.fillMaxSize()) {
                         WatchScreen(
+                            modifier = Modifier.fillMaxSize(),
                             imageResId =
                                 when {
                                     // Before the GA/GW checks: "ABL-100WE" contains neither, but
@@ -263,25 +261,16 @@ fun PreConnectionScreen(
                         )
 
                         AppConnectionSpinner(
-                            modifier =
-                                Modifier.constrainAs(connectionSpinner) { centerTo(parent) }
+                            modifier = Modifier.align(Alignment.Center)
                         )
-
-                        val topGuideline = createGuidelineFromTop(GUIDELINE_LIST_TOP)
 
                         AppCard(
                             modifier =
                                 Modifier
+                                    .align(Alignment.BottomStart)
                                     .padding(start = 16.dp, bottom = 16.dp)
-                                    .constrainAs(
-                                        deviceList
-                                    ) {
-                                        bottom.linkTo(parent.bottom)
-                                        start.linkTo(parent.start)
-                                        top.linkTo(topGuideline)
-                                        width = Dimension.percent(0.5f)
-                                        height = Dimension.fillToConstraints
-                                    }
+                                    .fillMaxWidth(0.5f)
+                                    .fillMaxHeight(1f - GUIDELINE_LIST_TOP)
                         ) {
                             PairedDeviceList(
                                 devices = pairedDevices,
@@ -312,13 +301,8 @@ fun PreConnectionScreen(
                         Box(
                             modifier =
                                 Modifier
+                                    .align(Alignment.TopEnd)
                                     .padding(top = 30.dp, end = 30.dp)
-                                    .constrainAs(
-                                        infoButton
-                                    ) {
-                                        top.linkTo(parent.top)
-                                        end.linkTo(parent.end)
-                                    }
                         ) {
                             InfoButton(
                                 infoText =
@@ -331,13 +315,8 @@ fun PreConnectionScreen(
                         PairButton(
                             modifier =
                                 Modifier
-                                    .padding(bottom = 30.dp, end = 30.dp)
-                                    .constrainAs(
-                                        pairButton
-                                    ) {
-                                        bottom.linkTo(parent.bottom)
-                                        end.linkTo(parent.end)
-                                    },
+                                    .align(Alignment.BottomEnd)
+                                    .padding(bottom = 30.dp, end = 30.dp),
                             isFlashing = pairedDevices.isEmpty(),
                             onClick = {
                                 ptrConnectionViewModel.associateWithUi(
@@ -390,7 +369,7 @@ fun PairedDeviceList(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RemoveButton(onClick = { onDisassociate(device) })
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
                         text = device.name,
@@ -426,12 +405,20 @@ fun RemoveButton(onClick: () -> Unit) {
     Box(
         modifier =
             Modifier
-                .size(18.dp)
-                .border(0.5.dp, Color.White.copy(alpha = 0.5f), CircleShape)
-                .background(Color.Black, CircleShape)
+                .sizeIn(minWidth = 48.dp, minHeight = 24.dp)
                 .clickable(onClick = onClick, role = Role.Button),
         contentAlignment = Alignment.Center
-    ) { Icon(Icons.Default.Remove, "Remove", modifier = Modifier.size(12.dp), tint = Color.White) }
+    ) {
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .border(0.5.dp, Color.White.copy(alpha = 0.5f), CircleShape)
+                .background(Color.Black, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Remove, "Remove paired watch", modifier = Modifier.size(12.dp), tint = Color.White)
+        }
+    }
 }
 
 @Composable
@@ -474,8 +461,8 @@ fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: B
 }
 
 @Composable
-fun WatchScreen(imageResId: Int, isAlwaysConnected: Boolean) {
-    Box {
+fun WatchScreen(imageResId: Int, isAlwaysConnected: Boolean, modifier: Modifier = Modifier) {
+    Box(modifier = modifier) {
         if (isAlwaysConnected) {
             WatchImageWithOverlayAlwaysConnected(Modifier, imageResId)
         } else {

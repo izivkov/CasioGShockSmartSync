@@ -6,10 +6,8 @@ junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 appcompat = "1.7.1"
-constraintlayout = "2.2.2"
 lifecycleLivedataKtx = "2.11.0"
 lifecycleViewmodelKtx = "2.11.0"
-materialIconsCore = "1.7.8"
 navigationFragmentKtx = "2.9.8"
 navigationUiKtx = "2.9.8"
 
@@ -24,11 +22,10 @@ sunrisesunset = "1.2"
 hiltNavigationCompose = "1.4.0"
 gshockapi = "1.7.6"
 lifecycle = "2.11.0"
-material3 = "1.4.0"
-compose-ui = "1.11.4"
-constraintlayout-compose = "1.1.2"
 datastore = "1.2.1"
 splashscreen = "1.2.0"
+
+composeBom = "2026.09.00"
 
 # just for api
 ble = "2.11.0"
@@ -38,14 +35,13 @@ transportApi = "4.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsCore" }
+androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
@@ -70,10 +66,10 @@ androidx-hilt-navigation-fragment = { group = "androidx.hilt", name = "hilt-navi
 gshockapi = { module = "com.github.izivkov:GShockAPI", version.ref = "gshockapi" }
 adhan2 = { module = "com.batoulapps.adhan:adhan2", version.ref = "adhan2" }
 rrule = { module = "com.github.PhilJay:RRule", version.ref = "rrule" }
-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose-ui" }
-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "compose-ui" }
-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose-ui" }
-constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayout-compose" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }

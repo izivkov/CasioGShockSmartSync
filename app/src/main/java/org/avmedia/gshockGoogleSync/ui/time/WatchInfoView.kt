@@ -96,13 +96,8 @@ fun WatchInfoCard2(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Row(
-                modifier = Modifier.padding(bottom = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Battery()
-            }
-
+            Battery()
+            Spacer(modifier = Modifier.height(12.dp))
             WatchTemperature(
                 hasTemperature = watchFeatureManager.isFeatureSupported("time.temperature"),
                 isNormalButtonPressed = true,

@@ -13,8 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
@@ -54,25 +52,15 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (title, alarms, buttonsRow) = createRefs()
-
+        Column(modifier = Modifier.fillMaxSize()) {
             ScreenTitle(
                     text = stringResource(id = R.string.watch_alarms),
-                    modifier =
-                            Modifier.constrainAs(title) {
-                                top.linkTo(parent.top)
-                                bottom.linkTo(alarms.top)
-                            }
+                modifier = Modifier
             )
 
             Column(
                     modifier =
-                            Modifier.constrainAs(alarms) {
-                                        top.linkTo(title.bottom)
-                                        bottom.linkTo(buttonsRow.top)
-                                        height = Dimension.fillToConstraints
-                                    }
+                    Modifier.weight(1f)
                                     .verticalScroll(rememberScrollState())
                                     .fillMaxWidth()
             ) {
@@ -96,14 +84,7 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 
             ButtonsRow(
                     buttons = buttons,
-                    modifier =
-                            Modifier.constrainAs(buttonsRow) {
-                                        top.linkTo(alarms.bottom)
-                                        bottom.linkTo(parent.bottom)
-                                        start.linkTo(parent.start)
-                                        end.linkTo(parent.end)
-                                    }
-                                    .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
             )
         }
     }
