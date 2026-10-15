@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,7 +21,6 @@ import androidx.constraintlayout.compose.Dimension
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
@@ -31,16 +31,6 @@ fun ActionsScreen(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
-    LaunchedEffect(Unit) {
-        actionsViewModel.uiEvents.collect { event ->
-            when (event) {
-                is ActionContainer.UiEvent.ShowSnackbar -> {
-                    AppSnackbar(event.message)
-                }
-            }
-        }
-    }
-
     DisposableEffect(Unit) {
         onDispose {
             Timber.i("Screen is now out of view. Saving state...")
@@ -94,18 +84,45 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
 
     return listOfNotNull(
         if (watchFeatureManager.isFeatureSupported("actions.find_phone"))
-            PhoneFinderView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
+            ToggleActionView(
+                ActionContainer.FindPhoneAction::class.java,
+                R.string.find_phone, R.drawable.find_phone, actionsViewModel
+            )
         else null,
-        SetTimeView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        ToggleActionView(
+            ActionContainer.SetTimeAction::class.java,
+            R.string.set_time, R.drawable.ic_watch_later_black_24dp, actionsViewModel
+        ),
         if (watchFeatureManager.isFeatureSupported("actions.reminders"))
-            RemindersView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
+            ToggleActionView(
+                ActionContainer.SetEventsAction::class.java,
+                R.string.set_reminders, R.drawable.events, actionsViewModel
+            )
         else null,
         PhotoView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        FlashlightView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        VoiceAssistView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        SkipToNextTrackView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        PlayPauseView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
-        PrayerAlarmsView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        ToggleActionView(
+            ActionContainer.ToggleFlashlightAction::class.java,
+            R.string.toggle_flashlight, R.drawable.flashlight, actionsViewModel
+        ),
+        ToggleActionView(
+            ActionContainer.StartVoiceAssistAction::class.java,
+            R.string.start_voice_assistant, R.drawable.voice_assist, actionsViewModel
+        ),
+        ToggleActionView(
+            ActionContainer.NextTrack::class.java,
+            R.string.next_track, R.drawable.skip_next, actionsViewModel,
+            infoRes = R.string.skip_to_next_track_info
+        ),
+        ToggleActionView(
+            ActionContainer.TogglePlayPauseAction::class.java,
+            R.string.play_pause, R.drawable.play_pause, actionsViewModel,
+            infoRes = R.string.play_pause_info
+        ),
+        ToggleActionView(
+            ActionContainer.PrayerAlarmsAction::class.java,
+            R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
+            infoRes = R.string.prayer_times_info
+        ),
         SeparatorView(),
         PhoneView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
     )

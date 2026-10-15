@@ -51,6 +51,4 @@ object FlashlightHelper {
         Timber.e("Failed to toggle flashlight: ${e.message}")
         AppSnackbar(context.getString(R.string.flashlight_not_available))
     }
-
-    fun isOn(): Boolean = currentState
 }

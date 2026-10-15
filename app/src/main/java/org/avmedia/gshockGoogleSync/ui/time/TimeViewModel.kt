@@ -7,9 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -71,10 +68,6 @@ sealed interface TimeAction {
     data object StartVoiceCommand : TimeAction
 }
 
-sealed class UiEvent {
-    data class ShowSnackbar(val message: String) : UiEvent()
-}
-
 @HiltViewModel
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
@@ -91,9 +84,6 @@ class TimeViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TimeState())
     val state = _state.asStateFlow()
-
-    private val _uiEvents = MutableSharedFlow<UiEvent>()
-    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     private var eventSubscriptionName: String? = null
     private var saveJob: Job? = null
@@ -128,7 +118,6 @@ class TimeViewModel @Inject constructor(
             )
         )
     }
-
 
     fun onAction(action: TimeAction) {
         when (action) {

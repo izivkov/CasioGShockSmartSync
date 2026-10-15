@@ -2,96 +2,54 @@ package org.avmedia.gshockGoogleSync.services
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Persists the last connected device's name and address as the API reports them. */
 @Singleton
 class DeviceManager @Inject constructor(
     private val repository: GShockRepository,
     @param:ApplicationContext private val appContext: Context
 ) {
-    private data class DeviceInfo(
-        val name: String,
-        val address: String
-    )
-
     init {
-        initializeEventListener()
+        ProgressEvents.runEventActions(
+            Utils.AppHashCode(),
+            arrayOf(
+                EventAction("DeviceName") { handleDeviceNameEvent() },
+                EventAction("DeviceAddress") { handleDeviceAddressEvent() }
+            )
+        )
     }
-
-    private fun initializeEventListener() {
-        val eventActions = createEventActions()
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
-    }
-
-    private fun createEventActions(): Array<EventAction> = arrayOf(
-        EventAction("DeviceName") { handleDeviceNameEvent() },
-        EventAction("DeviceAddress") { handleDeviceAddressEvent() }
-    )
 
     private fun handleDeviceNameEvent() {
         ProgressEvents.getPayload("DeviceName").toString()
-            .takeIf { it.isNotEmpty() }
-            ?.let { deviceName ->
-                when {
-                    deviceName.isEmpty() -> LocalDataStorage.delete(appContext, "LastDeviceName")
-                    isValidDeviceName(deviceName) -> updateDeviceName(deviceName)
-                }
-            }
-    }
-
-    private fun isValidDeviceName(deviceName: String): Boolean =
-        deviceName.contains("CASIO") &&
-                LocalDataStorage.get(appContext, "LastDeviceName", "") != deviceName
-
-    private fun updateDeviceName(deviceName: String) {
-        LocalDataStorage.put(appContext, "LastDeviceName", deviceName)
+            .takeIf { it.isNotEmpty() && isNewCasioName(it) }
+            ?.let { LocalDataStorage.put(appContext, "LastDeviceName", it) }
     }
 
     private fun handleDeviceAddressEvent() {
         ProgressEvents.getPayload("DeviceAddress").toString()
-            .takeIf { it.isNotEmpty() }
-            ?.let { deviceAddress ->
-                when {
-                    deviceAddress.isEmpty() -> LocalDataStorage.delete(
-                        appContext,
-                        "LastDeviceAddress"
-                    )
-
-                    isValidDeviceAddress(deviceAddress) -> updateDeviceAddress(deviceAddress)
+            .takeIf { it.isNotEmpty() && isNewValidAddress(it) }
+            ?.let { address ->
+                LocalDataStorage.put(appContext, "LastDeviceAddress", address)
+                CoroutineScope(Dispatchers.IO).launch {
+                    LocalDataStorage.addDeviceAddress(appContext, address)
                 }
             }
     }
 
-    private fun isValidDeviceAddress(address: String): Boolean =
+    private fun isNewCasioName(name: String): Boolean =
+        name.contains("CASIO") && LocalDataStorage.get(appContext, "LastDeviceName", "") != name
+
+    private fun isNewValidAddress(address: String): Boolean =
         LocalDataStorage.get(appContext, "LastDeviceAddress", "") != address &&
                 repository.validateBluetoothAddress(address)
-
-    private fun updateDeviceAddress(address: String) {
-        LocalDataStorage.put(appContext, "LastDeviceAddress", address)
-        CoroutineScope(Dispatchers.IO).launch {
-            LocalDataStorage.addDeviceAddress(appContext, address)
-        }
-    }
-
-    fun saveLastConnectedDevice(name: String, address: String) {
-        DeviceInfo(name, address).let { deviceInfo ->
-            LocalDataStorage.put(appContext, "LastDeviceName", deviceInfo.name)
-            LocalDataStorage.put(appContext, "LastDeviceAddress", deviceInfo.address)
-        }
-    }
-
-    fun clearLastConnectedDevice() {
-        listOf("LastDeviceName", "LastDeviceAddress").forEach { key ->
-            LocalDataStorage.delete(appContext, key)
-        }
-    }
 }

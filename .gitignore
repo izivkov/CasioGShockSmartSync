@@ -85,3 +85,9 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# IDE / assistant generated
+.idea/copilot.data.migration.*.xml
+.idea/studiobot.xml
+.idea/planningMode.xml
+.idea/appInsightsSettings.xml

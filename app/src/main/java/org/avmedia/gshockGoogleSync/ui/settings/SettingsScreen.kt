@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,11 +24,9 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
-import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 import org.avmedia.gshockGoogleSync.utils.Utils
@@ -95,16 +92,6 @@ fun SettingsScreen() {
 @Composable
 fun SettingsList() {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
-
-    LaunchedEffect(Unit) {
-        settingsViewModel.uiEvents.collect { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> {
-                    AppSnackbar(event.message)
-                }
-            }
-        }
-    }
 
     Column(modifier = Modifier) {
         WatchFeature(id = "locale_card") {

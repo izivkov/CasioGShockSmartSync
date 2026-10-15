@@ -2,7 +2,6 @@ package org.avmedia.gshockGoogleSync.ui.actions
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.avmedia.gshockGoogleSync.ActionContainer
 import javax.inject.Inject
@@ -28,7 +27,6 @@ class ActionsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val actions: StateFlow<List<ActionContainer.Action>> = container.actions
-    val uiEvents: SharedFlow<ActionContainer.UiEvent> = container.uiEvents
 
     fun <T : ActionContainer.Action> getAction(type: Class<T>): T = container.getAction(type)
 

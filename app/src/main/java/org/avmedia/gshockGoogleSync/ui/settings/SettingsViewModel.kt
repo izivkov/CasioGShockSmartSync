@@ -11,11 +11,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -38,11 +35,6 @@ data class SettingsState(
     val settingsMap: Map<Class<out Setting>, Setting> = emptyMap(),
 )
 
-
-sealed class UiEvent {
-    data class ShowSnackbar(val message: String) : UiEvent()
-}
-
 @HiltViewModel
 class SettingsViewModel
 @Inject
@@ -59,9 +51,6 @@ constructor(
 
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state.asStateFlow()
-
-    private val _uiEvents = MutableSharedFlow<UiEvent>()
-    val uiEvents: SharedFlow<UiEvent> = _uiEvents.asSharedFlow()
 
     init {
         initializeSettings()
@@ -180,7 +169,6 @@ constructor(
             LocalDataStorage.setFineTimeAdjustment(appContext, fineAdjustment)
         }
     }
-
 
     data class Font(var font: FontType = FontType.STANDARD) : Setting("Font") {
         enum class FontType(val value: String) {
