@@ -1,220 +1,90 @@
 # Technical Overview
 
-This document is a map, not a reference. It explains how the pieces of the
-app fit together and why they're shaped the way they are, so you can find
-your way to the right file quickly. For details on any one piece, read that
-file's own comments — they're kept up to date; this document intentionally
-isn't a duplicate of them.
+This is the starting map for understanding how Casio G-Shock Smart Sync works. The diagram comes first; the sections below explain the main paths through it and point to the deeper docs.
 
-## What this app is
+## Component Map
 
-G-Shock Smart Sync talks to Casio's Bluetooth-enabled watches (G-Shock,
-Edifice, Pro Trek) directly over BLE, without the official Casio app or a
-Casio account. It syncs time, alarms, reminders (from your phone's
-calendar), and settings; it also lets the watch's own buttons trigger
-actions on the phone (flashlight, camera, find-phone, media controls,
-voice commands) even when the app has no screen open.
+<img src="gshock_smart_sync_block_diagram.svg" alt="G-Shock Smart Sync component block diagram" width="680" />
 
-That last point — "even when the app has no screen open" — shapes a lot of
-the architecture. A watch button press can happen at any time, including
-while the phone is asleep and no Activity exists. The app has to be able
-to react to that, which is why several pieces here are **singletons that
-outlive any screen**, not the ViewModels you'd expect in a typical Compose
-app.
+The diagram shows the major app blocks and how they connect. `ProgressEvents` carries events between components; the storage block distinguishes phone preferences from data stored in the watch scratchpad. `GShockAPI` owns the BLE link and watch protocol.
 
-## Two repositories, not one
+## The Main Idea
 
-This app depends on a separate library, **[GShockAPI](https://github.com/izivkov/GShockAPI)**,
-published via JitPack (`implementation(libs.gshockapi)` in `app/build.gradle`).
-The split is by concern:
+The app has two kinds of work:
 
-- **`GShockAPI`** — owns the Bluetooth connection itself: pairing, GATT,
-  characteristic reads/writes, the Casio wire protocol, and a small
-  pub/sub event bus (`ProgressEvents`) that this app listens to. It knows
-  nothing about Android UI, calendars, or notifications.
-- **`CasioGShockSmartSync`** (this repo) — owns everything user-facing:
-  screens, calendar/notification integration, local storage, voice
-  commands, and the logic for *which* watch action should run *when*.
+- **Watch and phone operations.** `ActionContainer` owns reusable actions such as setting alarms, sending reminders, changing watch settings, and controlling phone features. Different triggers can invoke the same action, so each feature's orchestration is not duplicated across screens, voice, and watch buttons.
+- **State and coordination.** `ProgressEvents` announces important events such as connection changes and completed writes. Long-lived handlers and screen ViewModels subscribe to the events they need. ViewModels expose screen state to Compose, while `MainEventHandler` handles app-level connection and navigation decisions.
 
-You can't fully understand a connection bug by reading only this repo —
-things like BLE retry logic, MTU negotiation, and the notification-based
-watch protocol live in `GShockAPI`. When you need to look there, the
-library is small enough to clone and grep directly.
+The app is built to respond even when no screen is visible. `GShockApplication` wires up process-scoped handlers, `ActionRunner`, and the shared action container; these are not created by a Composable. Android background services and watch events can therefore reconnect or trigger work independently of the UI.
 
-## The mental model: one shared event bus
+## Four Common Paths
 
-Almost nothing in this app calls another part of the app directly. Instead,
-nearly everything communicates through `ProgressEvents` (defined in
-`GShockAPI`): a global, string-keyed pub/sub bus. Some component calls
-`ProgressEvents.onNext("SomeEvent", payload)`, and every part of the app
-that previously called `ProgressEvents.runEventActions(name, actions)`
-with a handler for `"SomeEvent"` gets it.
+### 1. A watch button triggers an action
 
-This is *the* thing to understand before reading any individual file,
-because it explains why so many classes look self-contained despite the
-app clearly being one connected system — they're connected through the
-bus, not through direct references. A few event names worth knowing
-because they show up everywhere: `"ConnectionSetupComplete"`,
-`"WatchInitializationCompleted"`, `"Disconnect"`, `"DeviceAppeared"` /
-`"DeviceDisappeared"`, `"SettingsUpdated"`, `"AlarmsUpdated"`,
-`"EventsUpdated"`.
+1. The watch communicates through `GShockAPI`, which emits a button-information event on `ProgressEvents`.
+2. The process-scoped `ActionRunner` interprets the event using `GShockRepository` and asks `ActionContainer` to run the eligible action or actions.
+3. An action may operate on the phone, the watch, or both. Watch reads and writes go through `GShockRepository` to `GShockAPI`.
+4. When useful, the action publishes a result event such as `AlarmsUpdated`; a subscribed ViewModel refreshes its state.
 
-**One subtlety worth knowing up front:** each subscription needs a unique
-name, or a second registration under a name that's already taken is
-silently dropped. Use `subscribeToProgressEvents()`
-(`utils/ProgressEventsExt.kt`) rather than inventing your own name scheme —
-it exists specifically to avoid this failure mode.
+`ActionContainer` checks each action's `RunEnvironment` policy. A watch-button trigger does not automatically run every action.
 
-## How a connection actually happens
+### 2. A voice command changes the watch
 
-This is the most complex flow in the app, because a watch can connect
-through several different Android mechanisms depending on *why* it's
-connecting:
+1. The Time screen starts `VoiceCommandManager`, which uses Android speech recognition to produce text.
+2. `IntentParser` turns the text into a typed `VoiceCommand`.
+3. `VoiceDispatcher` consults `voiceCommandTable`, checks support and enabled state, fills in the shared action's parameters, and asks `ActionContainer` to run it.
+4. The action performs the operation and may publish a feature event. `VoiceDispatcher` provides spoken success or error feedback.
 
-1. **Foreground BLE scan** (`receivers/BleScanReceiver.kt`) — used while
-   the app is actively looking for a watch (e.g. first pairing, or the
-   connection screen is open).
-2. **Companion Device Manager presence observation**
-   (`services/GShockCompanionDeviceService.kt`) — an Android system service
-   that can wake the app in the background when a *previously paired*
-   watch comes into range, without the app needing to keep scanning
-   itself. This is what lets a watch button press reconnect the app from
-   a fully backgrounded state.
-3. **Bluetooth adapter state changes** (`receivers/BluetoothStateReceiver.kt`)
-   — reacts to the phone's Bluetooth being toggled on/off.
+Voice is another entry point into the Actions system, not a separate watch-writing implementation. Reminders use a multi-turn voice conversation to collect their details before invoking the reminder action. The current dispatcher does **not** automatically navigate to the screen named in a voice command's route metadata.
 
-All three paths converge on the same signal: a `"DeviceAppeared"` /
-`"DeviceDisappeared"` event, filtered through
-`utils/DeviceEventGate.kt` first. The gate's job is narrow but important:
-BLE scan results and CDM callbacks can both fire rapidly and repeatedly
-for the same physical device, so the gate rate-limits duplicate
-`"DeviceAppeared"` signals for the same address before they reach the rest
-of the app. If you ever see logs full of `"suppressing duplicate BLE
-DeviceAppeared"`, this is where that's coming from — it's usually working
-as intended, not evidence of a problem by itself.
+### 3. A user edits a feature screen
 
-The class that actually *acts* on a `"DeviceAppeared"` event is
-`pairing/CompanionDevicePresenceMonitor.kt` — a `@Singleton` that calls
-`GShockRepository.waitForConnection(address)`. It's deliberately not tied
-to any screen, for the "no UI exists yet" reason above.
+1. A screen's ViewModel loads watch state and exposes it to Compose, usually through a `StateFlow`.
+2. A simple read or operation can go through `GShockRepository`; operations shared with other triggers go through the corresponding `ActionContainer` action.
+3. After a write, an action can publish an update event. The ViewModel handles that event and refreshes screen state from the watch, rather than assuming the requested values were applied.
 
-`GShockRepository` (`data/repository/GShockRepository.kt`) is a thin Hilt
-wrapper — `class GShockRepository @Inject constructor(api: GShockAPI) :
-IGShockAPI by api` — that exists purely so the rest of the app depends on
-an injectable, mockable type instead of constructing `GShockAPI` directly.
-Nearly everything in this app that talks to the watch goes through this
-repository.
+This is why the same alarm-writing behavior can be used by the Alarms screen and a voice command while each entry point keeps its own input handling.
 
-<img src="gshock_connection_lifecycle.svg" alt="Connection System" width="800" />
+### 4. A paired watch reconnects in the background
 
-## App bootstrap
+Android's Bluetooth scan, companion-device presence callbacks, or adapter state changes can indicate that a watch is available. The pairing/presence components coordinate the connection through `GShockRepository`; the connection and initialization events then reach app-level handlers through `ProgressEvents`. The process-scoped design lets this work begin without first opening an Activity.
 
-- **`GShockApplication.kt`** (`@HiltAndroidApp`) is where the
-  always-alive singletons get wired up: `MainEventHandler` (subscribes to
-  the app-level events above and drives which screen is showing) and
-  `ActionRunner` (see below) are both set up in `onCreate()`, *not* from a
-  Composable — again, so they work before any screen exists.
-- **`MainActivity.kt`** hosts the Compose UI and screen navigation.
-- **`Screens.kt`** / `BottomNavigationBarWithPermissions.kt` define the
-  actual navigable screens once a connection is established: Alarms,
-  Events (reminders), Time, Settings, Actions.
+## Responsibilities and Code Landmarks
 
-## The Actions system
+| Component | Responsibility | Main location |
+|---|---|---|
+| `GShockAPI` | BLE connection, pairing, GATT, and Casio watch protocol | External JitPack dependency, declared in `app/build.gradle` |
+| `GShockRepository` | Injectable app-facing wrapper delegating to `GShockAPI` | `data/repository/GShockRepository.kt` |
+| `ProgressEvents` | Shared event bus used by the library and app | Defined by `GShockAPI`; app subscriptions use `utils/ProgressEventsExt.kt` where applicable |
+| `MainEventHandler` | App-level reactions to connection, error, and notification events | `MainEventHandler.kt` |
+| `ActionRunner` | Maps watch events to action triggers | `ui/actions/ActionRunner.kt` |
+| `ActionContainer` | Process-scoped action registry, eligibility, persistence, and operation workflows | `ActionContainer.kt` |
+| `Voice` | Speech recognition, parsing, command routing, and feedback | `voice/` |
+| Feature ViewModels | Load and expose feature state; respond to relevant events | `ui/alarms/`, `ui/events/`, `ui/settings/`, `ui/time/` |
+| Pairing and Android services | Background device presence, notifications, boot handling, and related integration | `pairing/`, `services/`, `receivers/` |
+| Local storage | Small app-side settings and state such as action configuration and alarm labels | `scratchpad/` |
 
-For the detailed explanation of Actions as app-level units of work, including
-the alarm workflow, see [ACTIONS.md](ACTIONS.md).
+## Events: Useful Details
 
-"Actions" are the things a watch button press, a voice command, or an
-explicit "Send to Watch" UI button can trigger — set the time, push
-reminders, toggle the flashlight, take a photo, set an alarm, and so on.
-This subsystem lives in `ui/actions/` and is split into two classes on
-purpose:
+`ProgressEvents` is a process-wide, string-keyed publish/subscribe bus. A producer publishes a named event and optional payload; subscribers register handlers for names they care about. Examples include `WatchInitializationCompleted`, `Disconnect`, `ButtonPressedInfoReceived`, `AlarmsUpdated`, `EventsUpdated`, and `SettingsUpdated`.
 
-- **`ActionContainer.kt`** — a `@Singleton`, not a ViewModel. It owns the
-  actual list of `Action` objects, persists their enabled/config state,
-  and decides *whether* a given action should run for a given trigger
-  (`RunEnvironment`: `ACTION_BUTTON_PRESSED`, `VOICE_COMMAND`,
-  `NORMAL_CONNECTION`, `AUTO_TIME_ADJUSTMENT`, `DIRECT_INVOCATION`, etc.).
-  Same "must survive without a screen" reasoning as above.
-- **`ActionsViewModel.kt`** — a real, screen-scoped `@HiltViewModel` that
-  just forwards to `ActionContainer` for the Compose Actions screen. This
-  is what lets that screen use the normal `hiltViewModel()` mechanism
-  instead of reaching into a singleton by hand.
+Use `subscribeToProgressEvents()` for subscriptions owned by recreatable ViewModels or Composables. It gives each registration a unique name and returns that name for cleanup. The underlying library silently ignores duplicate subscription names, so a fixed name can leave a recreated screen listening through an old instance instead of its current one. Process-scoped subscribers that are created once have different lifecycle needs.
 
-Each concrete action (`SetAlarmAction`, `SetEventsAction`,
-`SetSettingsAction`, `SetTimerAction`, `PhotoAction`, `ToggleFlashlightAction`,
-...) is an inner class of `ActionContainer`, which gives it free access to
-shared dependencies without its own constructor boilerplate. Several of
-these are also invoked directly from a feature screen's "Send to Watch"
-button (`RunEnvironment.DIRECT_INVOCATION`), not just from a watch button
-or voice command — so the same write path is shared by all three triggers
-instead of being duplicated per screen.
+An event announces a fact or result; it does not replace the underlying operation. For example, an action writes alarms through the repository, then may publish `AlarmsUpdated`. The alarm screen independently receives that event and refreshes its view of the watch.
 
-<img src="gshock_actions_system.svg" alt="Action System" width="800" />
+## Lifetime and State
 
-## Voice commands
+- `GShockApplication.onCreate()` registers `MainEventHandler` and `ActionRunner` subscriptions at process startup.
+- `ActionContainer` is a singleton because actions can be requested while the app has no visible screen. `ActionsViewModel` is a screen-scoped facade for the Actions UI; it is not the owner of the shared actions.
+- `MainActivity` and the Compose navigation host present screens. Feature ViewModels own screen state and should not be confused with the process-scoped event/action layer.
+- App-side preferences and small persisted values live in `scratchpad/`. This is distinct from watch storage and from the Bluetooth protocol managed by `GShockAPI`.
 
-`voice/` is a self-contained pipeline: `VoiceCommandManager` wraps Android
-speech recognition, `IntentParser` turns recognized text into a typed
-`VoiceCommand`, and `VoiceDispatcher` maps that command onto the
-corresponding `ActionContainer` action (via `RunEnvironment.VOICE_COMMAND`
-or `DIRECT_INVOCATION`) and runs it. `VoiceCommandTable.kt` is the static
-list of what phrases map to what actions. The UI's job (mic button on the
-Time screen) is only to start listening and hand the recognized text to
-`VoiceDispatcher` — it doesn't know anything about what the command does.
+## Where to Read Next
 
-## Feature screens and their ViewModels
+- [Actions](ACTIONS.md) explains action ownership, trigger policies, and the alarm workflow.
+- [UI Screen Management](UI_SCREEN_MANAGEMENT.md) explains how watch capabilities control which UI features are shown.
+- [Scratchpad Buffer Layout](SCRATCHPAD_LAYOUT.md) documents the fixed-offset scratchpad clients and their persisted values.
+- [Voice and Actions Subsystem](voice-actions-subsystem.md) walks through the voice-to-action flow and its event feedback. Some class-ownership names in that document predate the move to `ActionContainer`; use [Actions](ACTIONS.md) and current source for ownership details.
+- [Voice Command Feature Spec](voice-command-feature-spec.md) contains additional voice-command design and test details. Its described `NavigateTo` flow is older than the current implementation: voice route metadata remains, but `VoiceDispatcher` does not currently publish a navigation event.
 
-Each main screen has an ordinary `@HiltViewModel` in its own package
-under `ui/` (`AlarmViewModel`, `EventViewModel`, `SettingsViewModel`,
-`TimeViewModel`). These follow a consistent shape:
-
-1. Load current state from the watch (`GShockRepository`) on init, and
-   again on relevant `ProgressEvents` (e.g. reload alarms on
-   `"AlarmsUpdated"`).
-2. Hold that state in a `StateFlow` for Compose to observe.
-3. On a "send to watch" action, either call the repository directly for
-   simple reads, or go through the matching `ActionContainer` action
-   (`DIRECT_INVOCATION`) when the write needs to stay consistent with what
-   a voice command or watch button would do for the same feature.
-
-## Local storage
-
-`scratchpad/` holds everything persisted on the phone that isn't stored
-on the watch itself: alarm names (the watch only stores times, not
-labels), calendar-vs-manual reminder mode, per-user time-zone
-preferences, and which Actions are enabled. Most of these are small
-key/value wrappers around `SharedPreferences` via a shared
-`ScratchpadManager`/`ScratchpadClient`; none of it is a database, and none
-of it needs to be — the amount of state is small and mostly mirrors what's
-already on the watch.
-
-## System integration
-
-- **`services/GShockCompanionDeviceService.kt`** — the CDM presence
-  listener described above (Android 12+).
-- **`services/NotificationMonitorService.kt`** — reads the phone's own
-  notifications (when the user grants notification-listener access) and
-  forwards selected ones to the watch as `AppNotification`s.
-- **`services/BootReceiver.kt`** — re-arms background watch monitoring
-  after a phone reboot.
-- **`services/LocationProvider.kt`** — used for automatic timezone
-  detection so the watch's time stays correct while traveling.
-
-## Where to actually go next
-
-Reading order for getting oriented, roughly in the order you'll need it:
-
-1. `GShockApplication.kt` — what gets wired up at startup, and why.
-2. `MainEventHandler.kt` — the app-level reaction to `ProgressEvents`.
-3. `pairing/CompanionDevicePresenceMonitor.kt` +
-   `receivers/BleScanReceiver.kt` — how a connection actually starts.
-4. `ui/actions/ActionContainer.kt` — the biggest single file in the app,
-   and the one most other features route through.
-5. Whichever feature ViewModel matches what you're changing
-   (`ui/alarms`, `ui/events`, `ui/settings`, `ui/time`).
-
-For anything involving the Bluetooth link itself (pairing failures, GATT
-errors, protocol details, stale-connection detection), the answer is
-usually in the `GShockAPI` repo, not here — start with
-`ble/Connection.kt` and `ble/IGShockManager.kt` there.
+For BLE connection or protocol behavior, inspect the separate `GShockAPI` project. This app repository contains the user-facing behavior and the orchestration around that library, not the underlying GATT implementation.

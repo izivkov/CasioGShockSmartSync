@@ -47,7 +47,7 @@ class AppScreenState @Inject constructor() : IScreenManager {
         updateScreen(AppScreen.INITIAL)
     }
 
-    override fun showError(message: String) {
+    override fun  showError(message: String) {
         mutableState.update { it.copy(screen = AppScreen.ERROR, errorMessage = message) }
     }
 

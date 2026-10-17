@@ -1,7 +1,11 @@
 # Scratchpad Buffer Layout
 
 ## Overview
-The scratchpad buffer uses a **fixed layout** where each client has a predetermined position in the buffer. This ensures data consistency across app restarts, regardless of client registration order.
+The scratchpad buffer is stored on the **watch**, not as one shared app-wide settings file on the phone. Each watch has its own scratchpad, so values are associated with the watch currently connected. When you switch watches, the app loads that watch's stored values.
+
+For example, one watch can have the "Set Reminders" action enabled and timezone set to "Solar Time", while another watch can have that action disabled and timezone set to "America/Toronto". The app reads and writes each watch's values through the watch API. This is separate from phone-side preferences stored in `LocalDataStorage`.
+
+The buffer uses a **fixed layout** where each client has a predetermined position. This keeps data consistent across app restarts and independent of client registration order.
 
 ## Buffer Layout
 
