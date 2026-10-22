@@ -7,19 +7,27 @@ import android.os.Build
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.DeviceInfo
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ICDPDelegate
 import org.avmedia.gshockapi.IGShockAPI
 import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockapi.ble.Connection
+import org.avmedia.gshockapi.ble.GetSetMode
+import org.avmedia.gshockapi.ble.IDataReceived
+import org.avmedia.gshockapi.casio.MessageDispatcher
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.TimeAdjustmentInfo
 import org.avmedia.gshockapi.model.Alarm
 import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.model.Settings
 import org.avmedia.gshockapi.model.StepCounterData
+import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 import javax.inject.Inject
@@ -31,6 +39,16 @@ import javax.inject.Singleton
  * Delegates BLE, scanning, CDM association, connection management, and scratchpad read/write to the standard GShockAPI,
  * while proxying watch command and protocol interactions to the Python server via BleProxy over WebSocket.
  */
+/** Maps the handles the Python server writes to (see gshock_api Connection.handles_map) onto the library's GATT modes. */
+private val handleToMode: Map<Int, GetSetMode> = mapOf(
+    0x0C to GetSetMode.GET,            // read request for all features
+    0x0D to GetSetMode.NOTIFY,         // notification characteristic
+    0x0E to GetSetMode.SET,            // all features (set)
+    0x11 to GetSetMode.DATA_REQUEST,
+    0x17 to GetSetMode.SP_REQUEST,
+    0x19 to GetSetMode.SP_DATA,
+)
+
 @Singleton
 class RemoteGShockApi @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -39,10 +57,35 @@ class RemoteGShockApi @Inject constructor(
 
     private val localBleApi = GShockAPI(context)
     private val gson = Gson()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         Timber.i("Initializing RemoteGShockApi (Flavor: Remote)")
+        bleProxy.onWriteReceived = { handle, data -> writeToWatch(handle, data) }
         bleProxy.connect()
+    }
+
+    /** Performs a GATT write the Python server asked for, using the phone's BLE link. */
+    private fun writeToWatch(handle: Int, data: ByteArray) {
+        val mode = handleToMode[handle]
+        if (mode == null) {
+            Timber.w("No GATT mode for handle 0x%02X; dropping write", handle)
+            return
+        }
+        Connection.write(mode, data)
+    }
+
+    /**
+     * Forwards every watch notification to the server while still passing it to the library's
+     * dispatcher, so the library's own handling keeps working.
+     */
+    private fun installNotificationTap() {
+        Connection.setDataCallback(IDataReceived { data ->
+            if (data == null) return@IDataReceived
+            val hex = data.removePrefix("0x").replace(" ", "")
+            bleProxy.onNotification(hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray())
+            MessageDispatcher.onReceived(data, WatchInfo.protocol)
+        })
     }
 
     override suspend fun waitForConnection(deviceId: String?): Unit {
@@ -68,29 +111,40 @@ class RemoteGShockApi @Inject constructor(
         return localBleApi.init()
     }
 
+    private var reportedWatchState: Boolean? = null
+
     override fun isConnected(): Boolean {
-        return localBleApi.isConnected()
+        val connected = localBleApi.isConnected()
+        reportWatchState(connected)
+        return connected
+    }
+
+    /** Tells the Python server whether the phone holds a watch link; sent only on change. */
+    private fun reportWatchState(connected: Boolean) {
+        if (reportedWatchState == connected) return
+        reportedWatchState = connected
+        if (connected) {
+            installNotificationTap()
+            bleProxy.onWatchConnected(name = WatchInfo.name)
+        } else {
+            bleProxy.onWatchDisconnected()
+        }
     }
 
     override fun teardownConnection(device: BluetoothDevice) {
         localBleApi.teardownConnection(device)
     }
 
-    override suspend fun getPressedButton(): IO.WatchButton {
-        val res = bleProxy.sendCommand("get_pressed_button")
-        val buttonName = res?.toString() ?: "NO_BUTTON"
-        return try {
-            IO.WatchButton.valueOf(buttonName)
-        } catch (_: Exception) {
-            IO.WatchButton.NO_BUTTON
-        }
-    }
+    // Button state describes how the phone's own BLE link was started, so it is answered from the
+    // local library. A fresh read through the server returns the watch's idle code (0), which both
+    // libraries map to LOWER_LEFT, so it cannot tell a lower-right press apart.
+    override suspend fun getPressedButton(): IO.WatchButton = localBleApi.getPressedButton()
 
-    override fun isActionButtonPressed(): Boolean = false
-    override fun isAlwaysConnectedConnectionPressed(): Boolean = false
-    override fun isNormalButtonPressed(): Boolean = false
-    override fun isAutoTimeStarted(): Boolean = false
-    override fun isFindPhoneButtonPressed(): Boolean = false
+    override fun isActionButtonPressed(): Boolean = localBleApi.isActionButtonPressed()
+    override fun isAlwaysConnectedConnectionPressed(): Boolean = localBleApi.isAlwaysConnectedConnectionPressed()
+    override fun isNormalButtonPressed(): Boolean = localBleApi.isNormalButtonPressed()
+    override fun isAutoTimeStarted(): Boolean = localBleApi.isAutoTimeStarted()
+    override fun isFindPhoneButtonPressed(): Boolean = localBleApi.isFindPhoneButtonPressed()
 
     override suspend fun getWatchName(): String {
         val res = bleProxy.sendCommand("get_watch_name")
@@ -120,13 +174,15 @@ class RemoteGShockApi @Inject constructor(
     }
 
     override suspend fun getBatteryLevel(): Int {
-        bleProxy.sendCommand("get_watch_condition")
-        return 100
+        return watchCondition()?.optInt("battery_level_percent", 0) ?: 0
     }
 
     override suspend fun getWatchTemperature(): Int {
-        bleProxy.sendCommand("get_watch_condition")
-        return 20
+        return watchCondition()?.optInt("temperature", 0) ?: 0
+    }
+
+    private suspend fun watchCondition(): JSONObject? {
+        return bleProxy.sendCommand("get_watch_condition") as? JSONObject
     }
 
     override suspend fun getStepCount(peek: Boolean): StepCounterData {
@@ -142,8 +198,8 @@ class RemoteGShockApi @Inject constructor(
     }
 
     override fun setTimer(timerValue: Int) {
-        runBlocking {
-            bleProxy.sendCommand("set_timer", mapOf("timer" to timerValue))
+        scope.launch {
+            bleProxy.sendCommand("set_timer", mapOf("timer_value" to timerValue))
         }
     }
 
@@ -153,7 +209,7 @@ class RemoteGShockApi @Inject constructor(
     }
 
     override suspend fun setTime(timeZone: String, timeMs: Long?, offsetFormSystemTime: Long?) {
-        val args = mutableMapOf<String, Any>("time_zone" to timeZone)
+        val args = mutableMapOf<String, Any>("timezone" to timeZone)
         if (timeMs != null) args["time_ms"] = timeMs
         if (offsetFormSystemTime != null) args["offset"] = offsetFormSystemTime
         bleProxy.sendCommand("set_time", args)
@@ -165,7 +221,7 @@ class RemoteGShockApi @Inject constructor(
     }
 
     override fun setAlarms(alarms: ArrayList<Alarm>) {
-        runBlocking {
+        scope.launch {
             bleProxy.sendCommand("set_alarms", mapOf("alarms" to alarms))
         }
     }
@@ -189,7 +245,7 @@ class RemoteGShockApi @Inject constructor(
     }
 
     override fun setEvents(events: ArrayList<Event>) {
-        runBlocking {
+        scope.launch {
             bleProxy.sendCommand("set_reminders", mapOf("reminders" to events))
         }
     }
@@ -214,7 +270,7 @@ class RemoteGShockApi @Inject constructor(
     }
 
     override fun setSettings(settings: Settings) {
-        runBlocking {
+        scope.launch {
             bleProxy.sendCommand("set_settings", mapOf("settings" to settings))
         }
     }
@@ -232,7 +288,7 @@ class RemoteGShockApi @Inject constructor(
     }
 
     override fun sendAppNotification(notification: AppNotification) {
-        runBlocking {
+        scope.launch {
             bleProxy.sendCommand("send_app_notification", mapOf("notification" to notification))
         }
     }
@@ -307,16 +363,16 @@ class RemoteGShockApi @Inject constructor(
         return localBleApi.isConnectedTo(address)
     }
 
+    private fun toJsonString(result: Any?): String = when (result) {
+        is String -> result
+        is JSONObject -> result.toString()
+        is JSONArray -> result.toString()
+        else -> gson.toJson(result)
+    }
+
     private fun <T> parseJsonResult(result: Any?, clazz: Class<T>): T? {
         return try {
-            when (result) {
-                is String -> gson.fromJson(result, clazz)
-                is JSONObject -> gson.fromJson(result.toString(), clazz)
-                else -> {
-                    val jsonStr = gson.toJson(result)
-                    gson.fromJson(jsonStr, clazz)
-                }
-            }
+            gson.fromJson(toJsonString(result), clazz)
         } catch (e: Exception) {
             Timber.e(e, "Failed to parse result for ${clazz.simpleName}")
             null
@@ -325,10 +381,7 @@ class RemoteGShockApi @Inject constructor(
 
     private fun parseAlarms(result: Any?): ArrayList<Alarm> {
         return try {
-            val jsonStr = when (result) {
-                is String -> result
-                else -> gson.toJson(result)
-            }
+            val jsonStr = toJsonString(result)
             val type = object : TypeToken<ArrayList<Alarm>>() {}.type
             gson.fromJson(jsonStr, type) ?: arrayListOf()
         } catch (e: Exception) {
@@ -339,10 +392,7 @@ class RemoteGShockApi @Inject constructor(
 
     private fun parseEvents(result: Any?): ArrayList<Event> {
         return try {
-            val jsonStr = when (result) {
-                is String -> result
-                else -> gson.toJson(result)
-            }
+            val jsonStr = toJsonString(result)
             val type = object : TypeToken<ArrayList<Event>>() {}.type
             gson.fromJson(jsonStr, type) ?: arrayListOf()
         } catch (e: Exception) {

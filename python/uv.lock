@@ -321,7 +321,7 @@ wheels = [
 [[package]]
 name = "gshock-api"
 version = "2.0.47"
-source = { git = "https://github.com/izivkov/gshock_api.git#ae817310dd9551d5e6e53ee61d89af4e8d954767" }
+source = { git = "https://github.com/izivkov/gshock_api.git#87044682e6f23f75c08cd59e7c07e8a88171af45" }
 dependencies = [
     { name = "bleak" },
     { name = "pydantic" },

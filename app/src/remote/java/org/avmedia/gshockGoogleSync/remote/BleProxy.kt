@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
+import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -37,6 +38,10 @@ import javax.inject.Singleton
 @Singleton
 class BleProxy @Inject constructor() {
 
+    // Args may hold Kotlin data classes (Alarm, Event, Settings). JSONObject(Map) can only wrap
+    // JDK types and turns anything else into null, so the args are serialized with Gson instead.
+    private val gson = Gson()
+
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .build()
@@ -51,6 +56,15 @@ class BleProxy @Inject constructor() {
     private val reconnectDelayMs = 5_000L
 
     private val pendingRequests = ConcurrentHashMap<String, CompletableDeferred<Any?>>()
+
+    @Volatile
+    private var watchReady = false
+
+    @Volatile
+    private var watchAddress = ""
+
+    @Volatile
+    private var watchName = ""
 
     var onWriteReceived: ((handle: Int, data: ByteArray) -> Unit)? = null
     var onDisconnectRequested: (() -> Unit)? = null
@@ -67,6 +81,7 @@ class BleProxy @Inject constructor() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Timber.i("WebSocket bridge established")
                 ProgressEvents.onNext("BridgeConnected")
+                if (watchReady) sendConnected()
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -125,10 +140,14 @@ class BleProxy @Inject constructor() {
             put("type", "command")
             put("id", id)
             put("command", command)
-            put("args", JSONObject(args))
+            put("args", JSONObject(gson.toJson(args)))
         }
 
-        sendJson(json)
+        if (!sendJson(json)) {
+            pendingRequests.remove(id)
+            Timber.w("Command $command not sent: bridge not connected")
+            return null
+        }
 
         return try {
             withTimeout(15_000L) {
@@ -141,12 +160,26 @@ class BleProxy @Inject constructor() {
         }
     }
 
-    fun onWatchConnected(watchAddress: String) {
+    fun onWatchConnected(address: String = "", name: String = "") {
+        watchReady = true
+        watchAddress = address
+        watchName = name
+        sendConnected()
+        Timber.i("Sent 'connected' signal for watch: ${address.ifEmpty { name }}")
+    }
+
+    fun onWatchDisconnected() {
+        watchReady = false
+        sendJson(JSONObject().apply { put("type", "disconnected") })
+        Timber.i("Sent 'disconnected' signal to bridge")
+    }
+
+    private fun sendConnected() {
         sendJson(JSONObject().apply {
             put("type", "connected")
             put("address", watchAddress)
+            if (watchName.isNotEmpty()) put("name", watchName)
         })
-        Timber.i("Sent 'connected' signal for watch: $watchAddress")
     }
 
     fun onNotification(data: ByteArray) {
@@ -233,12 +266,12 @@ class BleProxy @Inject constructor() {
         }
     }
 
-    private fun sendJson(obj: JSONObject) {
+    private fun sendJson(obj: JSONObject): Boolean {
         val ws = webSocket ?: run {
             Timber.w("sendJson: WebSocket not connected")
-            return
+            return false
         }
-        ws.send(obj.toString())
+        return ws.send(obj.toString())
     }
 
     private fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
