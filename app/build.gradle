@@ -14,9 +14,33 @@ plugins {
         productFlavors {
             github {
                 dimension "distribution"
+                buildConfigField "boolean", "REMOTE_MODE", "false"
+                buildConfigField "String", "BRIDGE_HOST", "\"\""
+                buildConfigField "int", "BRIDGE_PORT", "0"
             }
             playStore {
                 dimension "distribution"
+                buildConfigField "boolean", "REMOTE_MODE", "false"
+                buildConfigField "String", "BRIDGE_HOST", "\"\""
+                buildConfigField "int", "BRIDGE_PORT", "0"
+            }
+            remote {
+                dimension "distribution"
+                buildConfigField "boolean", "REMOTE_MODE", "true"
+                buildConfigField "String", "BRIDGE_HOST", "\"127.0.0.1\""
+                buildConfigField "int", "BRIDGE_PORT", "9999"
+            }
+        }
+
+        sourceSets {
+            github {
+                java.srcDirs = ['src/local/java']
+            }
+            playStore {
+                java.srcDirs = ['src/local/java']
+            }
+            remote {
+                java.srcDirs = ['src/remote/java']
             }
         }
 
@@ -119,6 +143,8 @@ dependencies {
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
+
+    remoteImplementation(libs.okhttp)
 }
 
 // Allow references to generated code

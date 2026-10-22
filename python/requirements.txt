@@ -1,0 +1,2 @@
+websockets>=10.0,<12.0
+gshock-api @ git+https://github.com/izivkov/gshock_api.git

@@ -24,6 +24,7 @@ gshockapi = "1.7.8"
 lifecycle = "2.11.0"
 datastore = "1.2.1"
 splashscreen = "1.2.0"
+okhttp = "4.12.0"
 
 composeBom = "2026.09.00"
 
@@ -80,6 +81,7 @@ client = { module = "no.nordicsemi.android.kotlin.ble:client", version.ref = "cl
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 transport-api = { group = "com.google.android.datatransport", name = "transport-api", version.ref = "transportApi" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 
 
 [plugins]
