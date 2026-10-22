@@ -30,6 +30,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 import org.avmedia.gshockGoogleSync.ActionContainer
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class StepDataOption {
     TODAY, HOURLY, DAILY
@@ -281,7 +282,6 @@ class TimeViewModel @Inject constructor(
         stepPollJob?.cancel()
         stepPollJob = viewModelScope.launch {
             while (isActive) {
-                delay(3000) // 3 seconds interval
                 if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
                     runCatching {
                         val stepData = if (WatchInfo.hasStepCounterMock) {
@@ -292,6 +292,7 @@ class TimeViewModel @Inject constructor(
                         _state.value = _state.value.copy(stepCounterData = stepData)
                     }
                 }
+                delay((1000 * 60 * 5).milliseconds) // 5 minute interval
             }
         }
     }
