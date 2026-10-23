@@ -153,13 +153,9 @@ class BleProxy @Inject constructor() {
             withTimeout(15_000L) {
                 deferred.await()
             }
-        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-            pendingRequests.remove(id)
-            Timber.e(e, "Command $command timed out after 15s")
-            null
         } catch (e: Exception) {
             pendingRequests.remove(id)
-            Timber.w(e, "Command $command failed: ${e.message}")
+            Timber.e(e, "Command $command timed out or failed")
             null
         }
     }
@@ -186,10 +182,11 @@ class BleProxy @Inject constructor() {
         })
     }
 
-    fun onNotification(data: ByteArray) {
+    fun onNotification(data: ByteArray, characteristicUuid: String? = null) {
         sendJson(JSONObject().apply {
             put("type", "notification")
             put("payload", data.toHex())
+            if (characteristicUuid != null) put("uuid", characteristicUuid)
         })
     }
 

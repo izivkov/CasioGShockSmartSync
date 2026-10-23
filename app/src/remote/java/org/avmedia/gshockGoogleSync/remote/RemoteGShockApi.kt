@@ -12,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.AppNotification
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.DeviceInfo
 import org.avmedia.gshockapi.GShockAPI
 import org.avmedia.gshockapi.ICDPDelegate
@@ -80,12 +82,18 @@ class RemoteGShockApi @Inject constructor(
      * dispatcher, so the library's own handling keeps working.
      */
     private fun installNotificationTap() {
-        Connection.setDataCallback(IDataReceived { data ->
-            if (data == null) return@IDataReceived
-            val hex = data.removePrefix("0x").replace(" ", "")
-            bleProxy.onNotification(hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray())
-            MessageDispatcher.onReceived(data, WatchInfo.protocol)
+        Connection.setDataCallback(object : IDataReceived {
+            override fun dataReceived(data: String?) = forwardNotification(null, data)
+            override fun dataReceived(characteristicUuid: String, data: String?) =
+                forwardNotification(characteristicUuid, data)
         })
+    }
+
+    private fun forwardNotification(characteristicUuid: String?, data: String?) {
+        if (data == null) return
+        val hex = data.removePrefix("0x").replace(" ", "")
+        bleProxy.onNotification(hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray(), characteristicUuid)
+        MessageDispatcher.onReceived(data, WatchInfo.protocol)
     }
 
     override suspend fun waitForConnection(deviceId: String?): Unit {
@@ -130,6 +138,16 @@ class RemoteGShockApi @Inject constructor(
             bleProxy.onWatchDisconnected()
         }
     }
+
+    // Report link changes as the library observes them, instead of waiting for someone to poll
+    // isConnected(). Without this the server keeps sending commands to a watch that has dropped.
+    private val watchStateSubscription = subscribeToProgressEvents(
+        "remote-watch-state",
+        arrayOf(
+            EventAction("ConnectionSetupComplete") { reportWatchState(true) },
+            EventAction("Disconnect") { reportWatchState(false) },
+        ),
+    )
 
     override fun teardownConnection(device: BluetoothDevice) {
         localBleApi.teardownConnection(device)

@@ -321,7 +321,7 @@ wheels = [
 [[package]]
 name = "gshock-api"
 version = "2.0.48"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../../gshock_api" }
 dependencies = [
     { name = "bleak" },
     { name = "pydantic" },
@@ -332,10 +332,28 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "tzlocal" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/67/83/665dd7ca4bc2a7c987a4172dd8d4ba53cb46be7bb03c91966b1e658e76cf/gshock_api-2.0.48.tar.gz", hash = "sha256:f8c8c9c37bc05d82384deb4c4dd64c4a8d37fdaa168aedac0a3a2d1b8b06f373", size = 67569, upload-time = "2026-10-22T21:48:09.015Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/70/c1057239236c731d8b638aad4b215f9e5f35132e28165a1cba33276b88a4/gshock_api-2.0.48-py3-none-any.whl", hash = "sha256:638ec9d56d5f80f4e86b09d7a507e21f852052c83a3474e31e4283141e5794e2", size = 79678, upload-time = "2026-10-22T21:48:07.754Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "basedpyright", marker = "extra == 'dev'", specifier = ">=1.31.7" },
+    { name = "bleak", specifier = ">=3.0.2" },
+    { name = "gitingest", marker = "extra == 'dev'" },
+    { name = "poethepoet", marker = "extra == 'dev'" },
+    { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "pytest", marker = "extra == 'testing'" },
+    { name = "pytest-cov", marker = "extra == 'testing'" },
+    { name = "python-dotenv" },
+    { name = "pytz", specifier = ">=2026.3.post1" },
+    { name = "radon", marker = "extra == 'dev'" },
+    { name = "ruff", marker = "extra == 'dev'" },
+    { name = "setuptools", marker = "extra == 'testing'" },
+    { name = "twine", specifier = ">=6.2.0" },
+    { name = "types-requests" },
+    { name = "typing-extensions", specifier = ">=4.12" },
+    { name = "tzlocal", specifier = ">=5.4.1" },
+    { name = "vulture", marker = "extra == 'dev'" },
 ]
+provides-extras = ["dev", "testing"]
 
 [[package]]
 name = "gshock-remote-server"
@@ -348,7 +366,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "gshock-api", specifier = "==2.0.48" },
+    { name = "gshock-api", editable = "../../gshock_api" },
     { name = "websockets", specifier = ">=10.0,<12.0" },
 ]
 

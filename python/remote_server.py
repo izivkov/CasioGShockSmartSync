@@ -20,13 +20,14 @@ from typing import Any
 
 import websockets
 
+from gshock_api.casio_constants import CasioConstants
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.iolib.dst_watch_state_io import DtsState
 from gshock_api.iolib.home_time_io import HomeTimeIO, HomeTimeIOFunctional
 from gshock_api.iolib.alarms_io import AlarmsIO
 from gshock_api.iolib.events_io import EventsIO
 from gshock_api.iolib.settings_io import SettingsIO
-from gshock_api.iolib.step_counter_io import DRSP_CATEGORY_EXERCISE, StepCounterIO
+from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.iolib.time_adjustment_io import TimeAdjustmentIO
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
 from gshock_api.message_dispatcher import MessageDispatcher
@@ -182,15 +183,19 @@ class ProxyConnection:
         await MessageDispatcher.send_to_watch(message)
 
     @staticmethod
-    def on_notification(data: bytes) -> None:
-        if StepCounterIO.result is not None:
-            print (f"Data from step counter: {data}")
-            if len(data) >= 5 and data[0] == 0x00 and data[1] == DRSP_CATEGORY_EXERCISE:
-                StepCounterIO.on_drsp_received(data)
-            else:
-                StepCounterIO.on_received(data)
-        else:
+    def on_notification(data: bytes, characteristic_uuid: str | None = None) -> None:
+        # Mirrors gshock_api's Connection.notification_handler: step-counter fragments arrive on
+        # the DRSP and Convoy characteristics and carry no key byte, so they need the UUID.
+        if characteristic_uuid == CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID:
+            StepCounterIO.on_drsp_received(data)
+        if characteristic_uuid == CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID:
+            StepCounterIO.on_received(data)
+        try:
             MessageDispatcher.on_received(data)
+        except RuntimeError as error:
+            # The watch sends unsolicited frames (button presses, app info). gshock_api raises when
+            # no request is waiting for one; that must not close the app's connection.
+            LOGGER.debug("Ignoring unsolicited watch notification: %s", error)
 
 
 class RemoteServer:
@@ -221,6 +226,13 @@ class RemoteServer:
             LOGGER.info("App disconnected")
 
     def handle_message(self, websocket: Any, raw_message: str) -> None:
+        try:
+            self._dispatch_message(websocket, raw_message)
+        except Exception:
+            # One bad message must not close the connection to the app.
+            LOGGER.exception("Failed to handle message from app")
+
+    def _dispatch_message(self, websocket: Any, raw_message: str) -> None:
         """Dispatches one message. Commands run as tasks so the receive loop keeps reading
         notifications while a command waits for its watch response."""
         LOGGER.debug("App -> server: %s", raw_message)
@@ -244,7 +256,7 @@ class RemoteServer:
         elif message_type == "notification":
             payload = message.get("payload", "")
             if isinstance(payload, str) and payload:
-                self.connection.on_notification(bytes.fromhex(payload))
+                self.connection.on_notification(bytes.fromhex(payload), message.get("uuid"))
         elif message_type == "log":
             LOGGER.info("App: %s", message.get("msg", message.get("message", "")))
 
@@ -383,8 +395,8 @@ async def serve(host: str, port: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", default="localhost")
-    parser.add_argument("--port", type=int, default=9998)
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=9999)
     options = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
