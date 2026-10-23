@@ -28,7 +28,7 @@ plugins {
                 dimension "distribution"
                 buildConfigField "boolean", "REMOTE_MODE", "true"
                 buildConfigField "String", "BRIDGE_HOST", "\"127.0.0.1\""
-                buildConfigField "int", "BRIDGE_PORT", "9999"
+                buildConfigField "int", "BRIDGE_PORT", "9998"
             }
         }
 

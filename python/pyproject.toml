@@ -5,11 +5,8 @@ description = "WebSocket command server backed by gshock_api"
 requires-python = ">=3.12"
 dependencies = [
     "websockets>=10.0,<12.0",
-    "gshock-api",
+    "gshock-api==2.0.48",
 ]
 
 [tool.uv]
 package = false
-
-[tool.uv.sources]
-gshock-api = { git = "https://github.com/izivkov/gshock_api.git" }

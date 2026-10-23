@@ -320,8 +320,8 @@ wheels = [
 
 [[package]]
 name = "gshock-api"
-version = "2.0.47"
-source = { git = "https://github.com/izivkov/gshock_api.git#87044682e6f23f75c08cd59e7c07e8a88171af45" }
+version = "2.0.48"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bleak" },
     { name = "pydantic" },
@@ -331,6 +331,10 @@ dependencies = [
     { name = "types-requests" },
     { name = "typing-extensions" },
     { name = "tzlocal" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/67/83/665dd7ca4bc2a7c987a4172dd8d4ba53cb46be7bb03c91966b1e658e76cf/gshock_api-2.0.48.tar.gz", hash = "sha256:f8c8c9c37bc05d82384deb4c4dd64c4a8d37fdaa168aedac0a3a2d1b8b06f373", size = 67569, upload-time = "2026-10-22T21:48:09.015Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f8/70/c1057239236c731d8b638aad4b215f9e5f35132e28165a1cba33276b88a4/gshock_api-2.0.48-py3-none-any.whl", hash = "sha256:638ec9d56d5f80f4e86b09d7a507e21f852052c83a3474e31e4283141e5794e2", size = 79678, upload-time = "2026-10-22T21:48:07.754Z" },
 ]
 
 [[package]]
@@ -344,7 +348,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "gshock-api", git = "https://github.com/izivkov/gshock_api.git" },
+    { name = "gshock-api", specifier = "==2.0.48" },
     { name = "websockets", specifier = ">=10.0,<12.0" },
 ]
 

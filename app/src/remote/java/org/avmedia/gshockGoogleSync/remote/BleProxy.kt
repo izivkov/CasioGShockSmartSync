@@ -153,9 +153,13 @@ class BleProxy @Inject constructor() {
             withTimeout(15_000L) {
                 deferred.await()
             }
+        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+            pendingRequests.remove(id)
+            Timber.e(e, "Command $command timed out after 15s")
+            null
         } catch (e: Exception) {
             pendingRequests.remove(id)
-            Timber.e(e, "Command $command timed out or failed")
+            Timber.w(e, "Command $command failed: ${e.message}")
             null
         }
     }

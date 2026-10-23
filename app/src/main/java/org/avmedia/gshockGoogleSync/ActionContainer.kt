@@ -978,6 +978,9 @@ constructor(
         suspend fun runAndGetFreshData(): Result<StepCounterData> = runClear()
 
         private suspend fun runClear(): Result<StepCounterData> = runCatching {
+            // Watches without a step counter never answer, so fail here instead of timing out.
+            check(org.avmedia.gshockapi.WatchInfo.hasStepCounter) { "This watch has no step counter" }
+
             // First call with peek = false finalizes the transaction and clears watch history.
             api.getStepCount(peek = false)
 

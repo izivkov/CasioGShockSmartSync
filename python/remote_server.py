@@ -26,6 +26,7 @@ from gshock_api.iolib.home_time_io import HomeTimeIO, HomeTimeIOFunctional
 from gshock_api.iolib.alarms_io import AlarmsIO
 from gshock_api.iolib.events_io import EventsIO
 from gshock_api.iolib.settings_io import SettingsIO
+from gshock_api.iolib.step_counter_io import DRSP_CATEGORY_EXERCISE, StepCounterIO
 from gshock_api.iolib.time_adjustment_io import TimeAdjustmentIO
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
 from gshock_api.message_dispatcher import MessageDispatcher
@@ -182,7 +183,14 @@ class ProxyConnection:
 
     @staticmethod
     def on_notification(data: bytes) -> None:
-        MessageDispatcher.on_received(data)
+        if StepCounterIO.result is not None:
+            print (f"Data from step counter: {data}")
+            if len(data) >= 5 and data[0] == 0x00 and data[1] == DRSP_CATEGORY_EXERCISE:
+                StepCounterIO.on_drsp_received(data)
+            else:
+                StepCounterIO.on_received(data)
+        else:
+            MessageDispatcher.on_received(data)
 
 
 class RemoteServer:
@@ -277,6 +285,17 @@ class RemoteServer:
 
     async def run_command(self, command: str, args: dict[str, Any]) -> Any:
         async with self.lock:
+            if not watch_info.name:
+                # The model decides which protocol and features gshock_api uses, so read it once.
+                name = await asyncio.wait_for(self.api.get_watch_name(), timeout=COMMAND_TIMEOUT_SECONDS)
+                if name:
+                    watch_info.set_name_and_model(name)
+                    LOGGER.info("Watch identified as %s", name)
+
+            if command == "get_step_count" and not watch_info.hasStepCounter:
+                # Fail now instead of waiting out the timeout for a reply that never comes.
+                raise NotImplementedError(f"{watch_info.name} has no step counter")
+
             if command == "get_home_time":
                 # gshock_api's standard protocol returns the raw frame here; HomeTimeIO decodes it.
                 awaitable = HomeTimeIO.request(self.connection, int(args.get("slot", 0)))
@@ -364,8 +383,8 @@ async def serve(host: str, port: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=9999)
+    parser.add_argument("--host", default="localhost")
+    parser.add_argument("--port", type=int, default=9998)
     options = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
