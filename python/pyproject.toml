@@ -1,0 +1,15 @@
+[project]
+name = "gshock-remote-server"
+version = "0.1.0"
+description = "WebSocket command server backed by gshock_api"
+requires-python = ">=3.12"
+dependencies = [
+    "websockets>=10.0,<12.0",
+    "gshock-api",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+gshock-api = { path = "../../gshock_api", editable = true }
