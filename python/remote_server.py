@@ -184,18 +184,40 @@ class ProxyConnection:
 
     @staticmethod
     def on_notification(data: bytes, characteristic_uuid: str | None = None) -> None:
-        # Mirrors gshock_api's Connection.notification_handler: step-counter fragments arrive on
-        # the DRSP and Convoy characteristics and carry no key byte, so they need the UUID.
-        if characteristic_uuid == CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID:
-            StepCounterIO.on_drsp_received(data)
-        if characteristic_uuid == CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID:
-            StepCounterIO.on_received(data)
+        if not data:
+            return
+        if _is_drsp_frame(data, characteristic_uuid):
+            StepCounterIO.on_drsp_received(data)  # step-read length announcement
+            return
+        if _is_step_fragment(data, characteristic_uuid):
+            StepCounterIO.on_received(data)  # continuation fragment: no key byte, handled here
+            return
         try:
-            MessageDispatcher.on_received(data)
+            MessageDispatcher.on_received(data)  # keyed frames, including the first step fragment
         except RuntimeError as error:
             # The watch sends unsolicited frames (button presses, app info). gshock_api raises when
             # no request is waiting for one; that must not close the app's connection.
             LOGGER.debug("Ignoring unsolicited watch notification: %s", error)
+
+
+def _step_read_pending() -> bool:
+    return StepCounterIO.result is not None
+
+
+def _is_drsp_frame(data: bytes, characteristic_uuid: str | None) -> bool:
+    if characteristic_uuid is not None:
+        return characteristic_uuid == CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID
+    return data[:2] == b"\x00\x11"
+
+
+def _is_step_fragment(data: bytes, characteristic_uuid: str | None) -> bool:
+    """Continuation fragments of a step read start with 0x00 and carry no key byte. Without the
+    characteristic UUID they are recognized by that and by a step read being pending."""
+    if not _step_read_pending() or data[0] != 0x00:
+        return False
+    if characteristic_uuid is None:
+        return True
+    return characteristic_uuid == CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID
 
 
 class RemoteServer:
@@ -388,7 +410,8 @@ class RemoteServer:
 
 async def serve(host: str, port: int) -> None:
     server = RemoteServer()
-    async with websockets.serve(server.handle, host, port, ping_interval=None):
+    # Pings keep the connection open through Cloudflare, which drops idle WebSockets.
+    async with websockets.serve(server.handle, host, port, ping_interval=20):
         LOGGER.info("Remote command server listening on ws://%s:%d", host, port)
         await asyncio.Future()
 

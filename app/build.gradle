@@ -6,45 +6,55 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-    android {
-        namespace = 'org.avmedia.gshockGoogleSync'
-        compileSdk = 37
+// Remote flavor settings come from the repo-root .env (gitignored), overridable with -P properties.
+def remoteEnv = new Properties()
+def remoteEnvFile = rootProject.file(".env")
+if (remoteEnvFile.exists()) { remoteEnvFile.withInputStream { remoteEnv.load(it) } }
+def envValue = { String key, String fallback -> (project.findProperty(key) ?: remoteEnv.getProperty(key) ?: fallback).toString() }
 
-        flavorDimensions "distribution"
-        productFlavors {
-            github {
-                dimension "distribution"
-                buildConfigField "boolean", "REMOTE_MODE", "false"
-                buildConfigField "String", "BRIDGE_HOST", "\"\""
-                buildConfigField "int", "BRIDGE_PORT", "0"
-            }
-            playStore {
-                dimension "distribution"
-                buildConfigField "boolean", "REMOTE_MODE", "false"
-                buildConfigField "String", "BRIDGE_HOST", "\"\""
-                buildConfigField "int", "BRIDGE_PORT", "0"
-            }
-            remote {
-                dimension "distribution"
-                buildConfigField "boolean", "REMOTE_MODE", "true"
-                buildConfigField "String", "BRIDGE_HOST", "\"127.0.0.1\""
-                buildConfigField "int", "BRIDGE_PORT", "9998"
-            }
+android {
+    namespace = 'org.avmedia.gshockGoogleSync'
+    compileSdk = 37
+
+    flavorDimensions "distribution"
+    productFlavors {
+        github {
+            dimension "distribution"
+            buildConfigField "boolean", "REMOTE_MODE", "false"
+            buildConfigField "String", "BRIDGE_HOST", "\"\""
+            buildConfigField "int", "BRIDGE_PORT", "0"
         }
-
-        sourceSets {
-            github {
-                java.srcDirs = ['src/local/java']
-            }
-            playStore {
-                java.srcDirs = ['src/local/java']
-            }
-            remote {
-                java.srcDirs = ['src/remote/java']
-            }
+        playStore {
+            dimension "distribution"
+            buildConfigField "boolean", "REMOTE_MODE", "false"
+            buildConfigField "String", "BRIDGE_HOST", "\"\""
+            buildConfigField "int", "BRIDGE_PORT", "0"
         }
+        remote {
+            dimension "distribution"
+            buildConfigField "boolean", "REMOTE_MODE", "true"
+            // BRIDGE_URL (e.g. wss://gshock-remote.avmedia.org) takes precedence over host and port.
+            buildConfigField "String", "BRIDGE_URL", "\"" + envValue("BRIDGE_URL", "") + "\""
+            buildConfigField "String", "BRIDGE_HOST", "\"" + envValue("bridgeHost", "127.0.0.1") + "\""
+            buildConfigField "int", "BRIDGE_PORT", envValue("bridgePort", "9999")
+            buildConfigField "String", "CF_ACCESS_CLIENT_ID", "\"" + envValue("CF_ACCESS_CLIENT_ID", "") + "\""
+            buildConfigField "String", "CF_ACCESS_CLIENT_SECRET", "\"" + envValue("CF_ACCESS_CLIENT_SECRET", "") + "\""
+        }
+    }
 
-        defaultConfig {
+    sourceSets {
+        github {
+            java.srcDirs = ['src/local/java']
+        }
+        playStore {
+            java.srcDirs = ['src/local/java']
+        }
+        remote {
+            java.srcDirs = ['src/remote/java']
+        }
+    }
+
+    defaultConfig {
         applicationId = "org.avmedia.gshockGoogleSync"
         minSdk = 26
         targetSdk = 37
@@ -100,8 +110,8 @@ plugins {
 }
 
 dependencies {
-    // implementation(libs.gshockapi)
-    implementation project(':api')
+    implementation(libs.gshockapi)
+    // implementation project(':api')
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

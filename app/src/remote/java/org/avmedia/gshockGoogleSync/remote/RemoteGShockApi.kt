@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.remote
 
+import android.R.attr.host
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -64,7 +65,7 @@ class RemoteGShockApi @Inject constructor(
     init {
         Timber.i("Initializing RemoteGShockApi (Flavor: Remote)")
         bleProxy.onWriteReceived = { handle, data -> writeToWatch(handle, data) }
-        bleProxy.connect()
+        bleProxy.connect(host="192.168.1.100", port = 9998)
     }
 
     /** Performs a GATT write the Python server asked for, using the phone's BLE link. */
@@ -82,17 +83,13 @@ class RemoteGShockApi @Inject constructor(
      * dispatcher, so the library's own handling keeps working.
      */
     private fun installNotificationTap() {
-        Connection.setDataCallback(object : IDataReceived {
-            override fun dataReceived(data: String?) = forwardNotification(null, data)
-            override fun dataReceived(characteristicUuid: String, data: String?) =
-                forwardNotification(characteristicUuid, data)
-        })
+        Connection.setDataCallback(IDataReceived { data -> forwardNotification(data) })
     }
 
-    private fun forwardNotification(characteristicUuid: String?, data: String?) {
+    private fun forwardNotification(data: String?) {
         if (data == null) return
         val hex = data.removePrefix("0x").replace(" ", "")
-        bleProxy.onNotification(hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray(), characteristicUuid)
+        bleProxy.onNotification(hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray())
         MessageDispatcher.onReceived(data, WatchInfo.protocol)
     }
 

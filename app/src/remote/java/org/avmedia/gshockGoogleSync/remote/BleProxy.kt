@@ -72,10 +72,16 @@ class BleProxy @Inject constructor() {
     fun connect(host: String = BuildConfig.BRIDGE_HOST, port: Int = BuildConfig.BRIDGE_PORT) {
         if (!running) return
         val resolvedHost = if ((host == "127.0.0.1" || host.isEmpty()) && isEmulator()) "10.0.2.2" else if (host.isEmpty()) "127.0.0.1" else host
-        val url = "ws://$resolvedHost:$port"
+        val url = BuildConfig.BRIDGE_URL.ifEmpty { "ws://$resolvedHost:$port" }
         Timber.i("Connecting to bridge WebSocket $url …")
 
-        val request = Request.Builder().url(url).build()
+        val request = Request.Builder().url(url).apply {
+            // Cloudflare Access service token, when configured. The secret is never logged.
+            if (BuildConfig.CF_ACCESS_CLIENT_ID.isNotEmpty() && BuildConfig.CF_ACCESS_CLIENT_SECRET.isNotEmpty()) {
+                addHeader("CF-Access-Client-Id", BuildConfig.CF_ACCESS_CLIENT_ID)
+                addHeader("CF-Access-Client-Secret", BuildConfig.CF_ACCESS_CLIENT_SECRET)
+            }
+        }.build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
