@@ -1,1 +1,5 @@
-New release 42.9.12
+GShockAPI 1.7.8 & Companion Device Coordinator
+Unified ToggleActionView composables
+Rebuilt Compose battery indicator & layout alignments
+Resilient ViewModel event subscriptions
+Improved Bluetooth connection retry & button validation

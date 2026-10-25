@@ -1,4 +1,19 @@
-# Unreleased — optimize branch
+# Unreleased
+
+## Highlights
+
+### 👣 Step Counter & Performance
+* **Step Counter Polling Rate**: Reduced polling frequency on the step counter to optimize Bluetooth traffic and extend watch battery life.
+
+### 📚 Documentation & Architecture
+* **System Diagrams & Architecture Specs**: Updated technical documentation, block diagrams (`gshock_smart_sync_block_diagram.svg`), and scratchpad layout specifications (`SCRATCHPAD_LAYOUT.md`, `TECHNICAL-OVERVIEW.md`).
+
+### 🛠 Dependency Upgrades
+* **Core Library Modernization**: Upgraded dependencies including `gshockapi:1.7.9`, `androidx.core:core-ktx:1.19.1`, `androidx.appcompat:appcompat:1.8.0`, `navigation:2.10.2`, `camerax:1.6.2`, `gson:2.15.0`, `datastore:1.3.0`, and `transport-api:5.0.0`.
+
+---
+
+# Release Notes - Casio G-Shock Smart Sync v42.9.12 — October 15, 2026
 
 ## Highlights
 
