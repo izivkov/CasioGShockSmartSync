@@ -1,15 +1,20 @@
-# Unreleased
+# Release Notes - Casio G-Shock Smart Sync v42.9.16 — November 1, 2026
 
 ## Highlights
 
-### 👣 Step Counter & Performance
-* **Step Counter Polling Rate**: Reduced polling frequency on the step counter to optimize Bluetooth traffic and extend watch battery life.
+### 🏃 Exercise Profile & Health Tracking
+* **Exercise Profile Management**: Added an Exercise Profile dialog in `StepCounterView` to configure Step Goal, Height, and Weight in one place.
+* **Locale-Aware Units**: Automatically detects device locale to present height and weight inputs in Imperial (in / lb) or Metric (cm / kg) units.
+* **Smart Input Validation**: Enforces valid range limits for step goal (1,000–30,000 steps), height, and weight to prevent invalid watch hardware data transfers.
+* **Metrics Synchronization**: Persists updated exercise profile values directly to watch storage and local scratchpad, dynamically updating calorie and distance calculations.
 
-### 📚 Documentation & Architecture
-* **System Diagrams & Architecture Specs**: Updated technical documentation, block diagrams (`gshock_smart_sync_block_diagram.svg`), and scratchpad layout specifications (`SCRATCHPAD_LAYOUT.md`, `TECHNICAL-OVERVIEW.md`).
+### 📅 Reminders & Events
+* **Weekly Recurrence Pre-fill**: Selecting a weekly repeat pattern in `ReminderEditDialog` automatically pre-fills the start date's day of the week.
+* **End Date Auto-Validation**: Automatically calculates and validates end dates when enabling repeating calendar events.
 
-### 🛠 Dependency Upgrades
-* **Core Library Modernization**: Upgraded dependencies including `gshockapi:1.7.9`, `androidx.core:core-ktx:1.19.1`, `androidx.appcompat:appcompat:1.8.0`, `navigation:2.10.2`, `camerax:1.6.2`, `gson:2.15.0`, `datastore:1.3.0`, and `transport-api:5.0.0`.
+### ⚡ Dependencies & System Optimization
+* **GShockAPI 1.8.1 Upgrade**: Upgraded `gshockapi` core library dependency from `1.8.0` to `1.8.1`.
+* **Baseline Profiles**: Included updated baseline profile definitions for optimized app startup performance on Android 9+.
 
 ---
 
