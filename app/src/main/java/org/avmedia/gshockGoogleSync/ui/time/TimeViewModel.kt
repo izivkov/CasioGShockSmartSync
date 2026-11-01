@@ -24,8 +24,10 @@ import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
 import org.avmedia.gshockGoogleSync.voice.VoiceSpeechFeedback
 import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.model.ExerciseProfile
 import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.WatchInfo
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -119,6 +121,32 @@ class TimeViewModel @Inject constructor(
             )
         )
     }
+
+    private fun defaultExerciseProfile(): ExerciseProfile {
+        val country = Locale.getDefault().country.uppercase()
+        val isImperial = country in setOf("US", "LR", "MM", "CA")
+        return ExerciseProfile(
+            stepGoal = 10000,
+            height = 170,
+            weight = if (isImperial) 70 else 65
+        )
+    }
+
+    suspend fun getExerciseProfileOrDefault(): ExerciseProfile =
+        runCatching { api.getExerciseProfile() }
+            .getOrElse { defaultExerciseProfile() }
+
+    suspend fun saveExerciseProfile(profile: ExerciseProfile): Boolean =
+        runCatching {
+            api.setExerciseProfile(profile)
+            val weight100g = profile.weight * 10
+            scratchpadSteps.setStepGoal(profile.stepGoal)
+            scratchpadSteps.setWeight(weight100g)
+            scratchpadSteps.save()
+
+            val (distanceKm, calories) = calculateMetrics(_state.value.stepCounterData, weight100g)
+            _state.update { it.copy(stepGoal = profile.stepGoal, weight = weight100g, distanceKm = distanceKm, calories = calories) }
+        }.isSuccess
 
     fun onAction(action: TimeAction) {
         when (action) {

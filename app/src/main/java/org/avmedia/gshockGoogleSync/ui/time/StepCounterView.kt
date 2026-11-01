@@ -16,19 +16,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,16 +45,17 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import AppTextLink
-import org.avmedia.gshockGoogleSync.ui.common.ValueSelectionDialog
+import org.avmedia.gshockGoogleSync.ui.common.AppButton
+import org.avmedia.gshockapi.model.ExerciseProfile
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -61,6 +67,32 @@ fun StepCounterView(
 ) {
     val state by timeViewModel.state.collectAsState()
     var expanded by remember { mutableStateOf(false) }
+    var showProfileDialog by remember { mutableStateOf(false) }
+    var profileDraft by remember { mutableStateOf(ExerciseProfile()) }
+    var profileStepGoalText by remember { mutableStateOf("") }
+    var profileHeightText by remember { mutableStateOf("") }
+    var profileWeightText by remember { mutableStateOf("") }
+    var profileError by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val imperialLocale = remember { isImperialLocale() }
+
+    LaunchedEffect(showProfileDialog) {
+        if (showProfileDialog) {
+            profileDraft = timeViewModel.getExerciseProfileOrDefault()
+            profileStepGoalText = profileDraft.stepGoal.toString()
+            profileHeightText = if (imperialLocale) {
+                (profileDraft.height / 2.54f).roundToInt().toString()
+            } else {
+                profileDraft.height.toString()
+            }
+            profileWeightText = if (imperialLocale) {
+                (profileDraft.weight * 2.20462f).roundToInt().toString()
+            } else {
+                profileDraft.weight.toString()
+            }
+            profileError = null
+        }
+    }
 
     AppCard(
         modifier = modifier.fillMaxWidth()
@@ -77,6 +109,12 @@ fun StepCounterView(
                 AppTextLarge(
                     text = stringResource(id = R.string.steps),
                     modifier = Modifier.weight(1f)
+                )
+
+                AppButton(
+                    text = stringResource(id = R.string.profile),
+                    onClick = { showProfileDialog = true },
+                    modifier = Modifier.padding(end = 8.dp)
                 )
 
                 Text(
@@ -122,11 +160,6 @@ fun StepCounterView(
                 StepDataOption.TODAY -> {
                     val currentSteps = state.stepCounterData.currentDaySteps ?: 0
 
-                    val currentLocale = LocalConfiguration.current.locales[0]
-                    val isImperial = currentLocale.country == "US" ||
-                            currentLocale.country == "LR" ||
-                            currentLocale.country == "MM"
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -157,41 +190,6 @@ fun StepCounterView(
                                 valueRange = 0f..12000f,
                                 modifier = Modifier.fillMaxWidth()
                             )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            val weightUnit = if (isImperial) "lb" else "kg"
-                            AppText(
-                                text = stringResource(id = R.string.your_weight) + " ($weightUnit)",
-                                fontSize = 12.sp
-                            )
-
-                            val displayWeight = if (isImperial) (state.weight * 2.20462f / 10f).roundToInt() else (state.weight / 10f).roundToInt()
-                            var showWeightDialog by remember { mutableStateOf(false) }
-
-                            AppTextLink(
-                                text = "$displayWeight",
-                                modifier = Modifier
-                                    .clickable { showWeightDialog = true }
-                                    .padding(vertical = 4.dp)
-                            )
-
-                            if (showWeightDialog) {
-                                val range = if (isImperial) 70..550 else 30..250
-                                ValueSelectionDialog(
-                                    initialValue = displayWeight,
-                                    range = range,
-                                    onDismiss = { showWeightDialog = false },
-                                    onConfirm = { newValue ->
-                                        val weight100g = if (isImperial) (newValue / 2.20462f * 10f).roundToInt() else newValue * 10
-                                        timeViewModel.onAction(TimeAction.SetWeight(weight100g))
-                                        showWeightDialog = false
-                                    },
-                                    title = stringResource(id = R.string.your_weight),
-                                    label = stringResource(id = R.string.your_weight),
-                                    unit = " $weightUnit"
-                                )
-                            }
                         }
 
                         StepsProgressRing(
@@ -202,6 +200,19 @@ fun StepCounterView(
                             goal = state.stepGoal,
                             distanceKm = state.distanceKm,
                             calories = state.calories
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        AppButton(
+                            text = stringResource(id = R.string.profile),
+                            onClick = { showProfileDialog = true },
+                            modifier = Modifier
                         )
                     }
                 }
@@ -230,6 +241,105 @@ fun StepCounterView(
             }
         }
     }
+
+    if (showProfileDialog) {
+        val labelHeight = if (imperialLocale) "Height (in)" else "Height (cm)"
+        val labelWeight = if (imperialLocale) "Weight (lb)" else "Weight (kg)"
+
+        AlertDialog(
+            onDismissRequest = { showProfileDialog = false },
+            title = { Text(text = stringResource(id = R.string.exercise_profile)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = profileStepGoalText,
+                        onValueChange = { profileStepGoalText = it; profileError = null },
+                        label = { Text(stringResource(id = R.string.step_goal)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = profileError != null && profileStepGoalText.toIntOrNull() == null
+                    )
+
+                    OutlinedTextField(
+                        value = profileHeightText,
+                        onValueChange = { profileHeightText = it; profileError = null },
+                        label = { Text(labelHeight) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = profileError != null && profileHeightText.toIntOrNull() == null
+                    )
+
+                    OutlinedTextField(
+                        value = profileWeightText,
+                        onValueChange = { profileWeightText = it; profileError = null },
+                        label = { Text(labelWeight) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = profileError != null && profileWeightText.toIntOrNull() == null
+                    )
+
+                    if (profileError != null) {
+                        Text(
+                            text = profileError ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                AppButton(
+                    text = stringResource(id = R.string.save),
+                    onClick = {
+                        val parsedStepGoal = profileStepGoalText.toIntOrNull()
+                        val parsedHeight = profileHeightText.toIntOrNull()
+                        val parsedWeight = profileWeightText.toIntOrNull()
+
+                        when {
+                            parsedStepGoal == null ->
+                                profileError = "Step goal must be a number."
+                            parsedHeight == null ->
+                                profileError = "Height must be a number."
+                            parsedWeight == null ->
+                                profileError = "Weight must be a number."
+                            parsedStepGoal !in 1000..30000 ->
+                                profileError = "Step goal must be between 1000 and 30000."
+                            parsedHeight !in 20..120 ->
+                                profileError = if (imperialLocale) "Height must be between 20 and 120 in." else "Height must be between 50 and 250 cm."
+                            parsedWeight !in 20..500 ->
+                                profileError = if (imperialLocale) "Weight must be between 20 and 500 lb." else "Weight must be between 20 and 300 kg."
+                            else -> {
+                                val metricHeight = if (imperialLocale) (parsedHeight * 2.54f).roundToInt() else parsedHeight
+                                val metricWeight = if (imperialLocale) (parsedWeight / 2.20462f).roundToInt() else parsedWeight
+                                scope.launch {
+                                    val saved = timeViewModel.saveExerciseProfile(
+                                        ExerciseProfile(
+                                            stepGoal = parsedStepGoal,
+                                            height = metricHeight,
+                                            weight = metricWeight
+                                        )
+                                    )
+                                    if (saved) {
+                                        showProfileDialog = false
+                                    } else {
+                                        profileError = "Unable to save exercise profile."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                )
+            },
+            dismissButton = {
+                AppButton(
+                    text = stringResource(id = R.string.cancel),
+                    onClick = { showProfileDialog = false }
+                )
+            }
+        )
+    }
+}
+
+private fun isImperialLocale(): Boolean {
+    val country = Locale.getDefault().country.uppercase(Locale.US)
+    return country in setOf("US", "LR", "MM", "CA")
 }
 
 @Composable

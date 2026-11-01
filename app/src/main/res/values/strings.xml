@@ -203,6 +203,12 @@
     <string name="add_watch">Add Watch</string>
 
     <string name="your_weight">Your Weight</string>
+    <string name="profile">Profile</string>
+    <string name="exercise_profile">Exercise Profile</string>
+    <string name="step_goal">Step Goal</string>
+    <string name="height_cm">Height (cm)</string>
+    <string name="weight_kg">Weight (kg)</string>
+    <string name="save">Save</string>
     <string name="clear_history">Clear History</string>
 
     <!-- Pairing error messages -->

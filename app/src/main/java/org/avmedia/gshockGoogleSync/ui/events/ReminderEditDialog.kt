@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +78,15 @@ fun ReminderEditDialog(
                 startDate.plusMonths(1)
             }
         )
+    }
+
+    LaunchedEffect(repeatPeriod, startDate) {
+        if (repeatPeriod == RepeatPeriod.WEEKLY && daysOfWeek.isEmpty()) {
+            daysOfWeek = listOf(startDate.dayOfWeek)
+        }
+        if (repeatPeriod != RepeatPeriod.NEVER && endDate.isBefore(startDate)) {
+            endDate = startDate
+        }
     }
 
     val scrollState = rememberScrollState()
@@ -141,6 +151,13 @@ fun ReminderEditDialog(
                                     text = { Text(period.name.lowercase().replaceFirstChar { it.uppercase() }) },
                                     onClick = {
                                         repeatPeriod = period
+                                        if (period == RepeatPeriod.WEEKLY && daysOfWeek.isEmpty()) {
+                                            daysOfWeek = listOf(startDate.dayOfWeek)
+                                        }
+                                        if (period != RepeatPeriod.NEVER && !hasEndDate) {
+                                            hasEndDate = true
+                                            endDate = startDate.plusDays(1)
+                                        }
                                         expanded = false
                                     }
                                 )

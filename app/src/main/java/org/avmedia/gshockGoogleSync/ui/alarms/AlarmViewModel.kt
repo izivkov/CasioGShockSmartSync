@@ -46,6 +46,9 @@ class AlarmViewModel @Inject constructor(
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms.asStateFlow()
 
+    companion object {
+    }
+
     // ProgressEvents silently drops a second subscription registered under a
     // name it has already seen - which "AlarmViewModel" is, the moment this
     // ViewModel is ever recreated. A unique name per instance guarantees

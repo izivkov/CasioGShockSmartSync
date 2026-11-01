@@ -29,16 +29,16 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
             key(index) {
                 ItemView {
                     AlarmItem(
-                            hours = alarm.hour,
-                            minutes = alarm.minute,
-                            isAlarmEnabled = alarm.enabled,
-                            name = alarm.name,
-                            onToggleAlarm = { isEnabled ->
-                                alarmViewModel.toggleAlarm(index, isEnabled)
-                            },
-                            onTimeChanged = { hours, minutes ->
-                                alarmViewModel.onTimeChanged(index, hours, minutes)
-                            }
+                        hours = alarm.hour,
+                        minutes = alarm.minute,
+                        isAlarmEnabled = alarm.enabled,
+                        name = alarm.name,
+                        onToggleAlarm = { isEnabled ->
+                            alarmViewModel.toggleAlarm(index, isEnabled)
+                        },
+                        onTimeChanged = { hours, minutes ->
+                            alarmViewModel.onTimeChanged(index, hours, minutes)
+                        }
                     )
                 }
             }
@@ -49,42 +49,42 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 @Composable
 fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
     Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             ScreenTitle(
-                    text = stringResource(id = R.string.watch_alarms),
+                text = stringResource(id = R.string.watch_alarms),
                 modifier = Modifier
             )
 
             Column(
-                    modifier =
-                    Modifier.weight(1f)
-                                    .verticalScroll(rememberScrollState())
-                                    .fillMaxWidth()
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth()
             ) {
                 AlarmList()
                 AlarmChimeSwitch(
-                        onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }
+                    onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }
                 )
             }
 
             val buttons =
-                    listOf(
-                            ButtonData(
-                                    text = stringResource(id = R.string.send_alarms_to_phone),
-                                    onClick = { alarmViewModel.sendAlarmsToPhone() }
-                            ),
-                            ButtonData(
-                                    text = stringResource(id = R.string.send_alarms_to_watch),
-                                    onClick = { alarmViewModel.sendAlarmsToWatch() }
-                            )
+                listOf(
+                    ButtonData(
+                        text = stringResource(id = R.string.send_alarms_to_phone),
+                        onClick = { alarmViewModel.sendAlarmsToPhone() }
+                    ),
+                    ButtonData(
+                        text = stringResource(id = R.string.send_alarms_to_watch),
+                        onClick = { alarmViewModel.sendAlarmsToWatch() }
                     )
+                )
 
             ButtonsRow(
-                    buttons = buttons,
-                    modifier = Modifier.fillMaxWidth()
+                buttons = buttons,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

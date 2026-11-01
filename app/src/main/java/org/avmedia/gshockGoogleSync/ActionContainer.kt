@@ -699,7 +699,11 @@ constructor(
             updateHourlyChime: Boolean = false,
         ): Boolean {
             return runCatching {
-                writeAlarmsToWatch(context, alarms, updateHourlyChime = updateHourlyChime)
+                writeAlarmsToWatch(
+                    context,
+                    alarms,
+                    updateHourlyChime = updateHourlyChime
+                )
                 true
             }.onFailure {
                 Timber.e(it, "Failed to send alarms to watch")
