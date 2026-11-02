@@ -38,6 +38,21 @@ enum class StepDataOption {
     TODAY, HOURLY, DAILY
 }
 
+internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.76f): Float {
+    val steps = stepData.currentDaySteps ?: 0
+    val rawDistanceMeters = stepData.distanceMeters ?: stepData.totalDistanceMeters
+
+    if (rawDistanceMeters != null && rawDistanceMeters > 0) {
+        val minReasonableMeters = (steps * 0.4f).toInt()
+        val maxReasonableMeters = (steps * 1.5f).toInt()
+        if (rawDistanceMeters in minReasonableMeters..maxReasonableMeters) {
+            return rawDistanceMeters.toFloat() / 1000f
+        }
+    }
+
+    return (steps * strideMeters) / 1000f
+}
+
 data class TimeState(
     val timer: Int = 0,
     val homeTime: String = "",
@@ -144,7 +159,18 @@ class TimeViewModel @Inject constructor(
             scratchpadSteps.setWeight(weight100g)
             scratchpadSteps.save()
 
-            val (distanceKm, calories) = calculateMetrics(_state.value.stepCounterData, weight100g)
+            val current = _state.value
+            val data = current.stepCounterData
+            val (distanceKm, calories) = if (
+                data.currentDaySteps == null &&
+                data.distanceMeters == null &&
+                data.totalDistanceMeters == null
+            ) {
+                current.distanceKm to current.calories
+            } else {
+                calculateMetrics(data, weight100g)
+            }
+
             _state.update { it.copy(stepGoal = profile.stepGoal, weight = weight100g, distanceKm = distanceKm, calories = calories) }
         }.isSuccess
 
@@ -290,17 +316,7 @@ class TimeViewModel @Inject constructor(
     }
 
     private fun calculateMetrics(stepData: StepCounterData, weight100g: Int): Pair<Float, Float> {
-        val strideM = 0.76f
-        val steps = stepData.currentDaySteps ?: 0
-        
-        // Use distanceMeters from watch if available, otherwise estimate
-        val dm = stepData.distanceMeters
-        val distanceKm = if (dm != null && dm > 0) {
-            dm.toFloat() / 1000f
-        } else {
-            (steps * strideM) / 1000f
-        }
-        
+        val distanceKm = resolveDistanceKm(stepData)
         val weightKg = weight100g / 10f
         val calories = distanceKm * weightKg * 1.036f
         return Pair(distanceKm, calories)
@@ -317,7 +333,12 @@ class TimeViewModel @Inject constructor(
                         } else {
                             api.getStepCount()
                         }
-                        _state.value = _state.value.copy(stepCounterData = stepData)
+                        val (distanceKm, calories) = calculateMetrics(stepData, _state.value.weight)
+                        _state.value = _state.value.copy(
+                            stepCounterData = stepData,
+                            distanceKm = distanceKm,
+                            calories = calories
+                        )
                     }
                 }
                 delay((1000 * 60 * 5).milliseconds) // 5 minute interval
@@ -356,7 +377,15 @@ class TimeViewModel @Inject constructor(
                     }
                 } else StepCounterData.unavailable()
 
-                val (distanceKm, calories) = calculateMetrics(stepCounterData, weight)
+                val (distanceKm, calories) = if (
+                    stepCounterData.currentDaySteps == null &&
+                    stepCounterData.distanceMeters == null &&
+                    stepCounterData.totalDistanceMeters == null
+                ) {
+                    _state.value.distanceKm to _state.value.calories
+                } else {
+                    calculateMetrics(stepCounterData, weight)
+                }
 
                 _state.value = TimeState(
                     timer = api.getTimer(),

@@ -1,6 +1,9 @@
 package org.avmedia.gshockGoogleSync
 
+import org.avmedia.gshockGoogleSync.ui.time.resolveDistanceKm
+import org.avmedia.gshockapi.model.StepCounterData
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AppScreenStateTest {
@@ -31,5 +34,23 @@ class AppScreenStateTest {
 
         assertEquals(AppScreen.ERROR, screenState.state.value.screen)
         assertEquals("Connection failed", screenState.state.value.errorMessage)
+    }
+
+    @Test
+    fun rejectsImplausibleWatchDistanceForCurrentSteps() {
+        val stepData = StepCounterData(
+            hourlySteps = emptyList(),
+            dailyHistory = emptyList(),
+            currentDaySteps = 5306,
+            distanceMeters = 1900,
+        )
+
+        val actual = resolveDistanceKm(stepData)
+        val expected = (5306f * 0.76f) / 1000f
+
+        assertTrue(
+            "Distance should fall back to stride estimate when raw watch distance is implausible: actual=$actual expected≈$expected",
+            kotlin.math.abs(actual - expected) < 0.05f
+        )
     }
 }

@@ -1,3 +1,14 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.17 — November 2, 2026
+
+## Highlights
+
+### 👣 Step Counter Reliability Fixes
+* **First-Connect Stability**: Fixed the startup bug where the first watch connection after an app restart could temporarily zero out Steps, Distance, and Calories even though the watch was reporting valid values.
+* **Profile Sync Safety**: Preserved the last valid metrics during Exercise Profile updates when the watch has not yet produced fresh step data, preventing the card from being reset to zero.
+* **Distance Sanity Check**: Rejects implausible watch-reported distances and falls back to the normal stride-based estimate instead of showing obviously incorrect values.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.16 — November 1, 2026
 
 ## Highlights
