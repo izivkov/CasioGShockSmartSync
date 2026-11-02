@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -111,12 +112,6 @@ fun StepCounterView(
                     modifier = Modifier.weight(1f)
                 )
 
-                AppButton(
-                    text = stringResource(id = R.string.profile),
-                    onClick = { showProfileDialog = true },
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-
                 Text(
                     text = stringResource(id = R.string.clear_history),
                     style = MaterialTheme.typography.labelSmall,
@@ -163,7 +158,7 @@ fun StepCounterView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(140.dp),
+                            .height(120.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(
@@ -190,6 +185,12 @@ fun StepCounterView(
                                 valueRange = 0f..12000f,
                                 modifier = Modifier.fillMaxWidth()
                             )
+
+                            AppButton(
+                                text = stringResource(id = R.string.profile),
+                                onClick = { showProfileDialog = true },
+                                modifier = Modifier.offset(y = (-4).dp)
+                            )
                         }
 
                         StepsProgressRing(
@@ -200,19 +201,6 @@ fun StepCounterView(
                             goal = state.stepGoal,
                             distanceKm = state.distanceKm,
                             calories = state.calories
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        AppButton(
-                            text = stringResource(id = R.string.profile),
-                            onClick = { showProfileDialog = true },
-                            modifier = Modifier
                         )
                     }
                 }
