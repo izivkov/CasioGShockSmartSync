@@ -167,13 +167,14 @@ We welcome contributions!
 
 ## Related Projects
 
-| Project | Description |
-|:---|:---|
-| [**GShockAPI**](https://github.com/izivkov/GShockAPI) | The core Android library that **this app is built on**. It encapsulates all low-level Bluetooth communication and watch protocol logic into a clean Kotlin API. |
-| [**G-Shock Time Server**](https://github.com/izivkov/GShockTimeServer) | A Python script that acts as a headless time server for Raspberry Pi or other always-on Linux devices. |
-| [**G-Shock API for ESP32**](https://github.com/izivkov/gshock-api-esp32) | Standalone G-Shock time server for ESP32 microcontrollers — no phone or PC required. |
+| Project                                                                              | Description |
+|:-------------------------------------------------------------------------------------|:---|
+| [**GShockAPI**](https://github.com/izivkov/GShockAPI)                                | The core Android library that **this app is built on**. It encapsulates all low-level Bluetooth communication and watch protocol logic into a clean Kotlin API. |
+| [**G-Shock Time Server**](https://github.com/izivkov/GShockTimeServer)               | A Python script that acts as a headless time server for Raspberry Pi or other always-on Linux devices. |
+| [**G-Shock API for ESP32**](https://github.com/izivkov/gshock-api-esp32)             | Standalone G-Shock time server for ESP32 microcontrollers — no phone or PC required. |
 | [**G-Shock Smart Sync Webapp**](https://github.com/izivkov/gshock-smart-sync-webapp) | Experimental web-based app for watch synchronization from a browser via Web Bluetooth. |
-| [**gshock_api**](https://github.com/izivkov/gshock_api) | A **Python API library** for G-Shock watches, featuring a pure functional architecture. |
+| [**gshock_api**](https://github.com/izivkov/gshock_api)                              | A **Python API library** for G-Shock watches, featuring a pure functional architecture. |
+| [**TRRRST Watch**](https://github.com/taxmeifyoucan/trrrst-watch)                      | An alternative FOSS android companion app for the new Casio F-B100W |
 
 ---
 
