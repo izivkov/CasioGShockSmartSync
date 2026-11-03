@@ -38,13 +38,13 @@ enum class StepDataOption {
     TODAY, HOURLY, DAILY
 }
 
-internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.76f): Float {
+internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.73f): Float {
     val steps = stepData.currentDaySteps ?: 0
-    val rawDistanceMeters = stepData.distanceMeters ?: stepData.totalDistanceMeters
+    val rawDistanceMeters = stepData.distanceMeters
 
     if (rawDistanceMeters != null && rawDistanceMeters > 0) {
         val minReasonableMeters = (steps * 0.4f).toInt()
-        val maxReasonableMeters = (steps * 1.5f).toInt()
+        val maxReasonableMeters = (steps * 0.85f).toInt()
         if (rawDistanceMeters in minReasonableMeters..maxReasonableMeters) {
             return rawDistanceMeters.toFloat() / 1000f
         }
@@ -86,6 +86,38 @@ sealed interface TimeAction {
     data object StartVoiceCommand : TimeAction
 }
 
+internal fun applyExerciseProfileState(
+    current: TimeState,
+    profile: ExerciseProfile,
+    weight100g: Int = profile.weight * 10,
+    stepData: StepCounterData = current.stepCounterData
+): TimeState {
+    val (distanceKm, calories) = if (
+        stepData.currentDaySteps == null &&
+        stepData.distanceMeters == null &&
+        stepData.totalDistanceMeters == null
+    ) {
+        current.distanceKm to current.calories
+    } else {
+        val metrics = resolveDistanceKm(stepData)
+        val weightKg = weight100g / 10f
+        val calculatedCalories = metrics * weightKg * 1.036f
+        metrics to calculatedCalories
+    }
+
+    return current.copy(
+        stepGoal = profile.stepGoal,
+        weight = weight100g,
+        distanceKm = distanceKm,
+        calories = calories
+    )
+}
+
+internal fun resolveConfirmedExerciseProfile(
+    written: ExerciseProfile,
+    fresh: ExerciseProfile?
+): ExerciseProfile = fresh ?: written
+
 @HiltViewModel
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
@@ -106,6 +138,8 @@ class TimeViewModel @Inject constructor(
     private var eventSubscriptionName: String? = null
     private var saveJob: Job? = null
     private var stepPollJob: Job? = null
+    private var exerciseProfileCache: ExerciseProfile = defaultExerciseProfile()
+    private var exerciseProfileInitialized = false
 
     init {
         refreshState()
@@ -132,6 +166,14 @@ class TimeViewModel @Inject constructor(
                     } else {
                         refreshState()
                     }
+                },
+                org.avmedia.gshockapi.EventAction("ExerciseProfileUpdated") {
+                    val payload = ProgressEvents.getPayload("ExerciseProfileUpdated") as? ExerciseProfile
+                    if (payload != null) {
+                        _state.update { applyExerciseProfileState(it, payload) }
+                    } else {
+                        refreshState()
+                    }
                 }
             )
         )
@@ -147,32 +189,37 @@ class TimeViewModel @Inject constructor(
         )
     }
 
-    suspend fun getExerciseProfileOrDefault(): ExerciseProfile =
-        runCatching { api.getExerciseProfile() }
-            .getOrElse { defaultExerciseProfile() }
+    suspend fun getExerciseProfileOrDefault(): ExerciseProfile {
+        if (exerciseProfileInitialized) {
+            return exerciseProfileCache
+        }
+
+        val freshProfile = runCatching { api.getExerciseProfile() }.getOrNull()
+        val profile = freshProfile ?: exerciseProfileCache
+        exerciseProfileCache = profile
+        exerciseProfileInitialized = true
+        return profile
+    }
 
     suspend fun saveExerciseProfile(profile: ExerciseProfile): Boolean =
         runCatching {
-            api.setExerciseProfile(profile)
-            val weight100g = profile.weight * 10
-            scratchpadSteps.setStepGoal(profile.stepGoal)
+            val setProfileAction =
+                actionContainer.getAction(ActionContainer.SetExerciseProfileAction::class.java)
+            if (!setProfileAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
+                return false
+            }
+
+            val confirmedProfile = setProfileAction.runWithProfile(appContext, profile).getOrThrow()
+            exerciseProfileCache = confirmedProfile
+            exerciseProfileInitialized = true
+            val weight100g = confirmedProfile.weight * 10
+            scratchpadSteps.setStepGoal(confirmedProfile.stepGoal)
             scratchpadSteps.setWeight(weight100g)
             scratchpadSteps.save()
 
-            val current = _state.value
-            val data = current.stepCounterData
-            val (distanceKm, calories) = if (
-                data.currentDaySteps == null &&
-                data.distanceMeters == null &&
-                data.totalDistanceMeters == null
-            ) {
-                current.distanceKm to current.calories
-            } else {
-                calculateMetrics(data, weight100g)
-            }
-
-            _state.update { it.copy(stepGoal = profile.stepGoal, weight = weight100g, distanceKm = distanceKm, calories = calories) }
-        }.isSuccess
+            _state.update { applyExerciseProfileState(it, confirmedProfile, weight100g) }
+            true
+        }.getOrDefault(false)
 
     fun onAction(action: TimeAction) {
         when (action) {
@@ -387,6 +434,8 @@ class TimeViewModel @Inject constructor(
                     calculateMetrics(stepCounterData, weight)
                 }
 
+                val lastProfile = getExerciseProfileOrDefault()
+                exerciseProfileCache = lastProfile
                 _state.value = TimeState(
                     timer = api.getTimer(),
                     homeTime = if (watchFeatureManager.isFeatureSupported("time.home_time")) api.getHomeTime() else "",
@@ -396,7 +445,7 @@ class TimeViewModel @Inject constructor(
                     timeZoneOption = option,
                     timeOffset = offset,
                     stepCounterData = stepCounterData,
-                    stepGoal = scratchpadSteps.getStepGoal(),
+                    stepGoal = lastProfile.stepGoal,
                     weight = weight,
                     distanceKm = distanceKm,
                     calories = calories,

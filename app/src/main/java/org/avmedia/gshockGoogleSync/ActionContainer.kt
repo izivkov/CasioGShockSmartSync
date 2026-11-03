@@ -980,7 +980,7 @@ constructor(
                 api.setExerciseProfile(profile)
 
                 // Give the watch time to process the write before reading back the value.
-                delay(750)
+                delay(500)
                 val freshProfile = runCatching { api.getExerciseProfile() }.getOrNull()
                 val confirmedProfile = org.avmedia.gshockGoogleSync.ui.time.resolveConfirmedExerciseProfile(
                     profile,
