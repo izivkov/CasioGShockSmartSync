@@ -163,39 +163,41 @@ fun StepCounterView(
                     ) {
                         Column(
                             modifier = Modifier
-                                .weight(0.35f)
+                                .weight(0.4f)
                                 .fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.SpaceBetween,
+                            horizontalAlignment = Alignment.Start
                         ) {
-                            Text(
-                                text = "Goal: ${state.stepGoal}",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Slider(
-                                value = state.stepGoal.toFloat(),
-                                onValueChange = { 
-                                    var newValue = it.toInt()
-                                    // Make 10,000 steps "sticky"
-                                    if (newValue in 9800..10200) {
-                                        newValue = 10000
-                                    }
-                                    timeViewModel.onAction(TimeAction.SetStepGoal(newValue)) 
-                                },
-                                valueRange = 0f..12000f,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Column(horizontalAlignment = Alignment.Start) {
+                                Text(
+                                    text = "Goal: ${state.stepGoal}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Slider(
+                                    value = state.stepGoal.toFloat(),
+                                    onValueChange = { 
+                                        var newValue = it.toInt()
+                                        // Make 10,000 steps "sticky"
+                                        if (newValue in 9800..10200) {
+                                            newValue = 10000
+                                        }
+                                        timeViewModel.onAction(TimeAction.SetStepGoal(newValue)) 
+                                    },
+                                    valueRange = 0f..12000f,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
 
                             AppButton(
                                 text = stringResource(id = R.string.profile),
-                                onClick = { showProfileDialog = true },
-                                modifier = Modifier.offset(y = (-4).dp)
+                                onClick = { showProfileDialog = true }
                             )
                         }
 
                         StepsProgressRing(
                             modifier = Modifier
-                                .weight(0.65f)
+                                .weight(0.6f)
                                 .size(110.dp),
                             currentSteps = currentSteps,
                             goal = state.stepGoal,

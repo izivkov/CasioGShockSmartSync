@@ -43,6 +43,7 @@ import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockapi.model.Alarm
 import org.avmedia.gshockapi.model.Event
+import org.avmedia.gshockapi.model.ExerciseProfile
 import org.avmedia.gshockapi.model.Settings
 import org.avmedia.gshockapi.model.StepCounterData
 import org.avmedia.gshockapi.EventAction
@@ -208,6 +209,7 @@ constructor(
             add(SetSettingsToDefaultAction("Set Settings to Default", true)) // Hidden from UI, only for voice
             add(SetSettingsAction("Set Settings", true)) // Hidden from UI, only for voice
             add(SetTimerAction("Set Timer", true)) // Hidden from UI, only for voice/Send-to-Watch
+            add(SetExerciseProfileAction("Set Exercise Profile", true)) // Hidden from UI, direct-invocation only
             add(ClearStepHistoryAction("Clear Step History", true)) // Hidden from UI, direct-invocation only
             add(
                 PhotoAction(
@@ -958,6 +960,39 @@ constructor(
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
             RunEnvironment.VOICE_COMMAND -> enabled
+            RunEnvironment.DIRECT_INVOCATION -> true
+            else -> false
+        }
+    }
+
+    inner class SetExerciseProfileAction(
+        override var title: String,
+        override var enabled: Boolean,
+    ) : Action(title, enabled, RunMode.ASYNC) {
+        override fun run(context: Context) = launchRunSuspend(context)
+
+        override suspend fun runSuspend(context: Context) {
+            // The write/read sequence is invoked from callers that already know the profile.
+        }
+
+        suspend fun runWithProfile(context: Context, profile: ExerciseProfile): Result<ExerciseProfile> =
+            runCatching {
+                api.setExerciseProfile(profile)
+
+                // Give the watch time to process the write before reading back the value.
+                delay(750)
+                val freshProfile = runCatching { api.getExerciseProfile() }.getOrNull()
+                val confirmedProfile = org.avmedia.gshockGoogleSync.ui.time.resolveConfirmedExerciseProfile(
+                    profile,
+                    freshProfile
+                )
+                ProgressEvents.onNext("ExerciseProfileUpdated", confirmedProfile)
+                confirmedProfile
+            }.onFailure {
+                Timber.e(it, "Failed to send exercise profile to watch")
+            }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
             RunEnvironment.DIRECT_INVOCATION -> true
             else -> false
         }
