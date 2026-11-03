@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -174,13 +173,13 @@ fun StepCounterView(
                             )
                             Slider(
                                 value = state.stepGoal.toFloat(),
-                                onValueChange = { 
+                                onValueChange = {
                                     var newValue = it.toInt()
                                     // Make 10,000 steps "sticky"
                                     if (newValue in 9800..10200) {
                                         newValue = 10000
                                     }
-                                    timeViewModel.onAction(TimeAction.SetStepGoal(newValue)) 
+                                    timeViewModel.onAction(TimeAction.SetStepGoal(newValue))
                                 },
                                 valueRange = 0f..12000f,
                                 modifier = Modifier.fillMaxWidth()
