@@ -12,31 +12,39 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.ScratchpadSteps
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockGoogleSync.voice.VoiceCommandManager
 import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
 import org.avmedia.gshockGoogleSync.voice.VoiceSpeechFeedback
-import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
+import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.model.ExerciseProfile
 import org.avmedia.gshockapi.model.StepCounterData
-import org.avmedia.gshockapi.WatchInfo
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
-
-import org.avmedia.gshockGoogleSync.ActionContainer
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 enum class StepDataOption {
     TODAY, HOURLY, DAILY
 }
+
+private const val FEATURE_STEP_COUNTER = "time.step_counter"
+private const val FEATURE_HOME_TIME = "time.home_time"
+private val STEP_POLL_INTERVAL = 5.minutes
+private val STEP_FETCH_TIMEOUT = 8.seconds
 
 internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.73f): Float {
     val steps = stepData.currentDaySteps ?: 0
@@ -51,6 +59,23 @@ internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 
     }
 
     return (steps * strideMeters) / 1000f
+}
+
+internal fun hasNoStepData(stepData: StepCounterData): Boolean =
+    stepData.currentDaySteps == null &&
+            stepData.distanceMeters == null &&
+            stepData.totalDistanceMeters == null
+
+internal fun calculateStepMetrics(stepData: StepCounterData, weight100g: Int): Pair<Float, Float> {
+    val distanceKm = resolveDistanceKm(stepData)
+    val weightKg = weight100g / 10f
+    return distanceKm to distanceKm * weightKg * 1.036f
+}
+
+/** Recomputes distance and calories from step data. Weight defaults to the state's current weight. */
+internal fun TimeState.withStepMetrics(stepData: StepCounterData, weight100g: Int = weight): TimeState {
+    val (distanceKm, calories) = calculateStepMetrics(stepData, weight100g)
+    return copy(distanceKm = distanceKm, calories = calories)
 }
 
 data class TimeState(
@@ -92,25 +117,8 @@ internal fun applyExerciseProfileState(
     weight100g: Int = profile.weight * 10,
     stepData: StepCounterData = current.stepCounterData
 ): TimeState {
-    val (distanceKm, calories) = if (
-        stepData.currentDaySteps == null &&
-        stepData.distanceMeters == null &&
-        stepData.totalDistanceMeters == null
-    ) {
-        current.distanceKm to current.calories
-    } else {
-        val metrics = resolveDistanceKm(stepData)
-        val weightKg = weight100g / 10f
-        val calculatedCalories = metrics * weightKg * 1.036f
-        metrics to calculatedCalories
-    }
-
-    return current.copy(
-        stepGoal = profile.stepGoal,
-        weight = weight100g,
-        distanceKm = distanceKm,
-        calories = calories
-    )
+    val updated = current.copy(stepGoal = profile.stepGoal, weight = weight100g)
+    return if (hasNoStepData(stepData)) updated else updated.withStepMetrics(stepData, weight100g)
 }
 
 internal fun resolveConfirmedExerciseProfile(
@@ -138,6 +146,8 @@ class TimeViewModel @Inject constructor(
     private var eventSubscriptionName: String? = null
     private var saveJob: Job? = null
     private var stepPollJob: Job? = null
+    private var stepFetchJob: Job? = null
+    private var stepFetchPending = false
     private var exerciseProfileCache: ExerciseProfile = defaultExerciseProfile()
     private var exerciseProfileInitialized = false
 
@@ -151,15 +161,12 @@ class TimeViewModel @Inject constructor(
     }
 
     private fun setupEventSubscription() {
-        // ProgressEvents silently drops a second subscription registered under a
-        // name it has already seen - which "TimeViewModel" was, the moment this
-        // ViewModel is ever recreated. A unique name per instance guarantees
-        // this instance's subscription actually registers - without this, the
-        // retry logic below never even runs, because the event never arrives.
+        // ProgressEvents drops a second subscription registered under a name it has
+        // already seen, so each instance uses a unique name.
         eventSubscriptionName = subscribeToProgressEvents(
             "TimeViewModel",
             arrayOf(
-                org.avmedia.gshockapi.EventAction("TimerUpdated") {
+                EventAction("TimerUpdated") {
                     val payload = ProgressEvents.getPayload("TimerUpdated") as? Int
                     if (payload != null) {
                         _state.update { it.copy(timer = payload) }
@@ -167,7 +174,7 @@ class TimeViewModel @Inject constructor(
                         refreshState()
                     }
                 },
-                org.avmedia.gshockapi.EventAction("ExerciseProfileUpdated") {
+                EventAction("ExerciseProfileUpdated") {
                     val payload = ProgressEvents.getPayload("ExerciseProfileUpdated") as? ExerciseProfile
                     if (payload != null) {
                         _state.update { applyExerciseProfileState(it, payload) }
@@ -223,49 +230,38 @@ class TimeViewModel @Inject constructor(
 
     fun onAction(action: TimeAction) {
         when (action) {
-            is TimeAction.SetTimer -> {
-                _state.value = _state.value.copy(
-                    timer = (action.hours * 3600) + (action.minutes * 60) + action.seconds
-                )
+            is TimeAction.SetTimer -> _state.update {
+                it.copy(timer = action.hours * 3600 + action.minutes * 60 + action.seconds)
             }
 
-            is TimeAction.UpdateTimer -> {
-                viewModelScope.launch {
-                    val setTimerAction =
-                        actionContainer.getAction(ActionContainer.SetTimerAction::class.java)
-                    if (setTimerAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
-                        setTimerAction.runWithTimer(appContext, action.timeMs)
-                    }
+            is TimeAction.UpdateTimer -> viewModelScope.launch {
+                val setTimerAction =
+                    actionContainer.getAction(ActionContainer.SetTimerAction::class.java)
+                if (setTimerAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
+                    setTimerAction.runWithTimer(appContext, action.timeMs)
                 }
             }
 
-            TimeAction.SendTimeToWatch -> {
-                viewModelScope.launch {
-                    runCatching {
-                        AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
-                        watchTimeUpdater.updateTime()
-                        AppSnackbar(appContext.getString(R.string.time_set))
-                        refreshState()
-                    }.onFailure { e ->
-                        AppSnackbar(e.message ?: "Api Error")
-                    }
+            TimeAction.SendTimeToWatch -> viewModelScope.launch {
+                runCatching {
+                    AppSnackbar(appContext.getString(R.string.sending_time_to_watch))
+                    watchTimeUpdater.updateTime()
+                    AppSnackbar(appContext.getString(R.string.time_set))
+                    refreshState()
+                }.onFailure { e ->
+                    AppSnackbar(e.message ?: "Api Error")
                 }
             }
 
             TimeAction.RefreshState -> refreshState()
 
-            is TimeAction.SetStepDataOption -> {
-                _state.value = _state.value.copy(
-                    selectedStepDataOption = action.option
-                )
+            is TimeAction.SetStepDataOption -> _state.update {
+                it.copy(selectedStepDataOption = action.option)
             }
 
             is TimeAction.SetTimeZoneOption -> {
                 val offset = calculateOffset(action.option)
-                _state.value = _state.value.copy(
-                    timeZoneOption = action.option,
-                    timeOffset = offset
-                )
+                _state.update { it.copy(timeZoneOption = action.option, timeOffset = offset) }
                 timeSettingsStorage.setTimeZoneOption(action.option)
 
                 saveJob?.cancel()
@@ -277,125 +273,133 @@ class TimeViewModel @Inject constructor(
             }
 
             is TimeAction.SetVoiceVerbose -> {
-                _state.value = _state.value.copy(isVoiceVerbose = action.enabled)
+                _state.update { it.copy(isVoiceVerbose = action.enabled) }
                 viewModelScope.launch {
-                    org.avmedia.gshockGoogleSync.utils.LocalDataStorage.setVoiceVerbose(appContext, action.enabled)
+                    LocalDataStorage.setVoiceVerbose(appContext, action.enabled)
                 }
             }
 
-            TimeAction.StartVoiceCommand -> {
-                if (voiceCommandManager.isRecognitionAvailable()) {
-                    _state.value = _state.value.copy(isListening = true)
-
-                    val startListening = {
-                        viewModelScope.launch {
-                            // Give a small grace period for the audio system to switch from TTS to Mic
-                            delay(100)
-                            voiceCommandManager.startListening(
-                                onResult = { text ->
-                                    _state.value = _state.value.copy(isListening = false)
-                                    voiceDispatcher.dispatch(text)
-                                },
-                                onError = { error ->
-                                    _state.value = _state.value.copy(isListening = false)
-                                    AppSnackbar(error)
-                                }
-                            )
-                        }
-                    }
-
-                    if (_state.value.isVoiceVerbose) {
-                        voiceSpeechFeedback.speak("Tell me what to do or say 'Help'") {
-                            startListening()
-                        }
-                    } else {
-                        startListening()
-                    }
-                } else {
-                    AppSnackbar(appContext.getString(R.string.voice_recognition_unavailable))
-                }
-            }
+            TimeAction.StartVoiceCommand -> startVoiceCommand()
 
             is TimeAction.SetStepGoal -> {
-                _state.value = _state.value.copy(stepGoal = action.goal)
-                viewModelScope.launch {
-                    scratchpadSteps.setStepGoal(action.goal)
-                    scratchpadSteps.save()
-                }
+                _state.update { it.copy(stepGoal = action.goal) }
+                persistScratchpad { setStepGoal(action.goal) }
             }
 
             is TimeAction.SetWeight -> {
-                val (distanceKm, calories) = calculateMetrics(_state.value.stepCounterData, action.weight)
-                _state.value = _state.value.copy(
-                    weight = action.weight,
-                    distanceKm = distanceKm,
-                    calories = calories
-                )
-                viewModelScope.launch {
-                    scratchpadSteps.setWeight(action.weight)
-                    scratchpadSteps.save()
+                _state.update {
+                    it.copy(weight = action.weight).withStepMetrics(it.stepCounterData, action.weight)
                 }
+                persistScratchpad { setWeight(action.weight) }
             }
 
-            TimeAction.ClearStepHistory -> {
-                viewModelScope.launch {
-                    val clearAction =
-                        actionContainer.getAction(ActionContainer.ClearStepHistoryAction::class.java)
-                    if (!clearAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
-                        return@launch
-                    }
-
-                    clearAction.runAndGetFreshData()
-                        .onSuccess { stepData ->
-                            val (distanceKm, calories) = calculateMetrics(stepData, _state.value.weight)
-                            _state.value = _state.value.copy(
-                                stepCounterData = stepData,
-                                distanceKm = distanceKm,
-                                calories = calories
-                            )
-                        }
-                        .onFailure { e ->
-                            AppSnackbar(e.message ?: "Api Error")
-                        }
+            TimeAction.ClearStepHistory -> viewModelScope.launch {
+                val clearAction =
+                    actionContainer.getAction(ActionContainer.ClearStepHistoryAction::class.java)
+                if (!clearAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
+                    return@launch
                 }
+
+                clearAction.runAndGetFreshData()
+                    .onSuccess { stepData ->
+                        _state.update { it.copy(stepCounterData = stepData).withStepMetrics(stepData) }
+                    }
+                    .onFailure { e ->
+                        AppSnackbar(e.message ?: "Api Error")
+                    }
             }
         }
     }
 
-    private fun calculateMetrics(stepData: StepCounterData, weight100g: Int): Pair<Float, Float> {
-        val distanceKm = resolveDistanceKm(stepData)
-        val weightKg = weight100g / 10f
-        val calories = distanceKm * weightKg * 1.036f
-        return Pair(distanceKm, calories)
+    private fun startVoiceCommand() {
+        if (!voiceCommandManager.isRecognitionAvailable()) {
+            AppSnackbar(appContext.getString(R.string.voice_recognition_unavailable))
+            return
+        }
+
+        _state.update { it.copy(isListening = true) }
+
+        val startListening = {
+            viewModelScope.launch {
+                // Grace period for the audio system to switch from TTS to mic
+                delay(100)
+                voiceCommandManager.startListening(
+                    onResult = { text ->
+                        _state.update { it.copy(isListening = false) }
+                        voiceDispatcher.dispatch(text)
+                    },
+                    onError = { error ->
+                        _state.update { it.copy(isListening = false) }
+                        AppSnackbar(error)
+                    }
+                )
+            }
+        }
+
+        if (_state.value.isVoiceVerbose) {
+            voiceSpeechFeedback.speak("Tell me what to do or say 'Help'") { startListening() }
+        } else {
+            startListening()
+        }
+    }
+
+    /** Runs a ScratchpadSteps write in the background, then persists it. */
+    private fun persistScratchpad(write: suspend ScratchpadSteps.() -> Unit) {
+        viewModelScope.launch {
+            scratchpadSteps.write()
+            scratchpadSteps.save()
+        }
+    }
+
+    private suspend fun fetchStepCounter(): StepCounterData =
+        if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
+
+    /**
+     * Starts a step fetch unless one is already running. A request that arrives
+     * mid-fetch sets a flag, and the running coroutine fetches once more afterward,
+     * so the final state always reflects the latest request.
+     */
+    private fun requestStepRefresh() {
+        if (stepFetchJob?.isActive == true) {
+            stepFetchPending = true
+            return
+        }
+        stepFetchJob = viewModelScope.launch {
+            do {
+                stepFetchPending = false
+                runCatching {
+                    val profile = getExerciseProfileOrDefault()
+                    val weight = scratchpadSteps.getWeight()
+                    val stepData = withTimeoutOrNull(STEP_FETCH_TIMEOUT) { fetchStepCounter() }
+                        ?: return@runCatching
+
+                    _state.update { current ->
+                        applyExerciseProfileState(
+                            current.copy(stepCounterData = stepData),
+                            profile,
+                            weight,
+                            stepData
+                        )
+                    }
+                }
+            } while (stepFetchPending)
+        }
     }
 
     private fun startStepCounterPolling() {
         stepPollJob?.cancel()
         stepPollJob = viewModelScope.launch {
             while (isActive) {
-                if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
-                    runCatching {
-                        val stepData = if (WatchInfo.hasStepCounterMock) {
-                            generateMockStepData()
-                        } else {
-                            api.getStepCount()
-                        }
-                        val (distanceKm, calories) = calculateMetrics(stepData, _state.value.weight)
-                        _state.value = _state.value.copy(
-                            stepCounterData = stepData,
-                            distanceKm = distanceKm,
-                            calories = calories
-                        )
-                    }
+                delay(STEP_POLL_INTERVAL)
+                if (watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)) {
+                    requestStepRefresh()
                 }
-                delay((1000 * 60 * 5).milliseconds) // 5 minute interval
             }
         }
     }
 
-    private fun calculateOffset(option: TimeSettingsStorage.TimeZoneOption): Long {
-        return SolarTimeHelper.calculateTimeOffset(appContext, option)
-    }
+    private fun calculateOffset(option: TimeSettingsStorage.TimeZoneOption): Long =
+        SolarTimeHelper.calculateTimeOffset(appContext, option)
 
     override fun onCleared() {
         eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
@@ -408,76 +412,55 @@ class TimeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Publishes the fast fields first. Step data is requested separately, so a
+     * slow step read no longer holds up the rest of the screen.
+     */
     private fun refreshState() {
         viewModelScope.launch {
             runCatching {
                 timeSettingsStorage.load()
                 val option = timeSettingsStorage.getTimeZoneOption()
                 val offset = calculateOffset(option)
-                val hasStepCounter = WatchInfo.hasStepCounter
 
-                val current = _state.value
-                val updated = current.copy(
-                    timer = api.getTimer(),
-                    homeTime = if (watchFeatureManager.isFeatureSupported("time.home_time")) api.getHomeTime() else "",
-                    batteryLevel = api.getBatteryLevel(),
-                    temperature = api.getWatchTemperature(),
-                    watchName = api.getWatchName(),
-                    timeZoneOption = option,
-                    timeOffset = offset,
-                    isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable(),
-                    isVoiceVerbose = org.avmedia.gshockGoogleSync.utils.LocalDataStorage.getVoiceVerbose(appContext)
-                )
+                val timer = api.getTimer()
+                val homeTime = if (watchFeatureManager.isFeatureSupported(FEATURE_HOME_TIME)) api.getHomeTime() else ""
+                val batteryLevel = api.getBatteryLevel()
+                val temperature = api.getWatchTemperature()
+                val watchName = api.getWatchName()
+                val isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable()
+                val isVoiceVerbose = LocalDataStorage.getVoiceVerbose(appContext)
 
-                _state.value = if (hasStepCounter) {
-                    val weight = scratchpadSteps.getWeight()
-                    val stepCounterData = if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
-                        if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
-                    } else {
-                        StepCounterData.unavailable()
-                    }
-
-                    val (distanceKm, calories) = if (
-                        stepCounterData.currentDaySteps == null &&
-                        stepCounterData.distanceMeters == null &&
-                        stepCounterData.totalDistanceMeters == null
-                    ) {
-                        current.distanceKm to current.calories
-                    } else {
-                        calculateMetrics(stepCounterData, weight)
-                    }
-
-                    val lastProfile = getExerciseProfileOrDefault()
-                    exerciseProfileCache = lastProfile
-
-                    updated.copy(
-                        stepCounterData = stepCounterData,
-                        stepGoal = lastProfile.stepGoal,
-                        weight = weight,
-                        distanceKm = distanceKm,
-                        calories = calories
+                _state.update {
+                    it.copy(
+                        timer = timer,
+                        homeTime = homeTime,
+                        batteryLevel = batteryLevel,
+                        temperature = temperature,
+                        watchName = watchName,
+                        timeZoneOption = option,
+                        timeOffset = offset,
+                        isVoiceCommandSupported = isVoiceCommandSupported,
+                        isVoiceVerbose = isVoiceVerbose
                     )
-                } else {
-                    updated
                 }
             }.onFailure {
                 AppSnackbar("Api Error")
             }
+
+            if (WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)) {
+                requestStepRefresh()
+            }
         }
     }
+
     private fun generateMockStepData(): StepCounterData {
         val hourly = List(144) { index ->
             val hour = index / 6
-            if (hour in 7..22) {
-                Random.nextInt(20, 350)
-            } else {
-                0
-            }
+            if (hour in 7..22) Random.nextInt(20, 350) else 0
         }
 
-        val daily = List(14) {
-            Random.nextInt(4000, 12500)
-        }
+        val daily = List(14) { Random.nextInt(4000, 12500) }
 
         return StepCounterData(
             dayOfWeek = 6,
