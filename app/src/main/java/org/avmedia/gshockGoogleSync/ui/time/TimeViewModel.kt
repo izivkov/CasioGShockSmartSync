@@ -16,7 +16,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.scratchpad.ScratchpadSteps
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -130,7 +129,6 @@ internal fun resolveConfirmedExerciseProfile(
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
     private val timeSettingsStorage: TimeSettingsStorage,
-    private val scratchpadSteps: ScratchpadSteps,
     private val watchTimeUpdater: WatchTimeUpdater,
     private val watchFeatureManager: IWatchFeatureManager,
     private val voiceCommandManager: VoiceCommandManager,
@@ -219,12 +217,8 @@ class TimeViewModel @Inject constructor(
             val confirmedProfile = setProfileAction.runWithProfile(appContext, profile).getOrThrow()
             exerciseProfileCache = confirmedProfile
             exerciseProfileInitialized = true
-            val weight100g = confirmedProfile.weight * 10
-            scratchpadSteps.setStepGoal(confirmedProfile.stepGoal)
-            scratchpadSteps.setWeight(weight100g)
-            scratchpadSteps.save()
 
-            _state.update { applyExerciseProfileState(it, confirmedProfile, weight100g) }
+            _state.update { applyExerciseProfileState(it, confirmedProfile) }
             true
         }.getOrDefault(false)
 
@@ -281,17 +275,9 @@ class TimeViewModel @Inject constructor(
 
             TimeAction.StartVoiceCommand -> startVoiceCommand()
 
-            is TimeAction.SetStepGoal -> {
-                _state.update { it.copy(stepGoal = action.goal) }
-                persistScratchpad { setStepGoal(action.goal) }
-            }
+            is TimeAction.SetStepGoal -> saveProfileChange { it.copy(stepGoal = action.goal) }
 
-            is TimeAction.SetWeight -> {
-                _state.update {
-                    it.copy(weight = action.weight).withStepMetrics(it.stepCounterData, action.weight)
-                }
-                persistScratchpad { setWeight(action.weight) }
-            }
+            is TimeAction.SetWeight -> saveProfileChange { it.copy(weight = action.weight / 10) }
 
             TimeAction.ClearStepHistory -> viewModelScope.launch {
                 val clearAction =
@@ -308,6 +294,13 @@ class TimeViewModel @Inject constructor(
                         AppSnackbar(e.message ?: "Api Error")
                     }
             }
+        }
+    }
+
+    /** Applies a change to the exercise profile and saves it to the watch. */
+    private fun saveProfileChange(change: (ExerciseProfile) -> ExerciseProfile) {
+        viewModelScope.launch {
+            saveExerciseProfile(change(getExerciseProfileOrDefault()))
         }
     }
 
@@ -343,14 +336,6 @@ class TimeViewModel @Inject constructor(
         }
     }
 
-    /** Runs a ScratchpadSteps write in the background, then persists it. */
-    private fun persistScratchpad(write: suspend ScratchpadSteps.() -> Unit) {
-        viewModelScope.launch {
-            scratchpadSteps.write()
-            scratchpadSteps.save()
-        }
-    }
-
     private suspend fun fetchStepCounter(): StepCounterData =
         if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
 
@@ -369,7 +354,6 @@ class TimeViewModel @Inject constructor(
                 stepFetchPending = false
                 runCatching {
                     val profile = getExerciseProfileOrDefault()
-                    val weight = scratchpadSteps.getWeight()
                     val stepData = withTimeoutOrNull(STEP_FETCH_TIMEOUT) { fetchStepCounter() }
                         ?: return@runCatching
 
@@ -377,8 +361,7 @@ class TimeViewModel @Inject constructor(
                         applyExerciseProfileState(
                             current.copy(stepCounterData = stepData),
                             profile,
-                            weight,
-                            stepData
+                            stepData = stepData
                         )
                     }
                 }
