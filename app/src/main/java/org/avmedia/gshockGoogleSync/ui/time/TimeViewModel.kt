@@ -414,29 +414,10 @@ class TimeViewModel @Inject constructor(
                 timeSettingsStorage.load()
                 val option = timeSettingsStorage.getTimeZoneOption()
                 val offset = calculateOffset(option)
+                val hasStepCounter = WatchInfo.hasStepCounter
 
-                val weight = scratchpadSteps.getWeight()
-                val stepCounterData = if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
-                    if (WatchInfo.hasStepCounterMock) {
-                        generateMockStepData()
-                    } else {
-                        api.getStepCount()
-                    }
-                } else StepCounterData.unavailable()
-
-                val (distanceKm, calories) = if (
-                    stepCounterData.currentDaySteps == null &&
-                    stepCounterData.distanceMeters == null &&
-                    stepCounterData.totalDistanceMeters == null
-                ) {
-                    _state.value.distanceKm to _state.value.calories
-                } else {
-                    calculateMetrics(stepCounterData, weight)
-                }
-
-                val lastProfile = getExerciseProfileOrDefault()
-                exerciseProfileCache = lastProfile
-                _state.value = TimeState(
+                val current = _state.value
+                val updated = current.copy(
                     timer = api.getTimer(),
                     homeTime = if (watchFeatureManager.isFeatureSupported("time.home_time")) api.getHomeTime() else "",
                     batteryLevel = api.getBatteryLevel(),
@@ -444,20 +425,46 @@ class TimeViewModel @Inject constructor(
                     watchName = api.getWatchName(),
                     timeZoneOption = option,
                     timeOffset = offset,
-                    stepCounterData = stepCounterData,
-                    stepGoal = lastProfile.stepGoal,
-                    weight = weight,
-                    distanceKm = distanceKm,
-                    calories = calories,
                     isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable(),
                     isVoiceVerbose = org.avmedia.gshockGoogleSync.utils.LocalDataStorage.getVoiceVerbose(appContext)
                 )
+
+                _state.value = if (hasStepCounter) {
+                    val weight = scratchpadSteps.getWeight()
+                    val stepCounterData = if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
+                        if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
+                    } else {
+                        StepCounterData.unavailable()
+                    }
+
+                    val (distanceKm, calories) = if (
+                        stepCounterData.currentDaySteps == null &&
+                        stepCounterData.distanceMeters == null &&
+                        stepCounterData.totalDistanceMeters == null
+                    ) {
+                        current.distanceKm to current.calories
+                    } else {
+                        calculateMetrics(stepCounterData, weight)
+                    }
+
+                    val lastProfile = getExerciseProfileOrDefault()
+                    exerciseProfileCache = lastProfile
+
+                    updated.copy(
+                        stepCounterData = stepCounterData,
+                        stepGoal = lastProfile.stepGoal,
+                        weight = weight,
+                        distanceKm = distanceKm,
+                        calories = calories
+                    )
+                } else {
+                    updated
+                }
             }.onFailure {
                 AppSnackbar("Api Error")
             }
         }
     }
-
     private fun generateMockStepData(): StepCounterData {
         val hourly = List(144) { index ->
             val hour = index / 6
