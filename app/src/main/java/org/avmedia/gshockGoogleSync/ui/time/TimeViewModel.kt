@@ -146,7 +146,12 @@ class TimeViewModel @Inject constructor(
     private var stepPollJob: Job? = null
     private var stepFetchJob: Job? = null
     private var stepFetchPending = false
-    private var exerciseProfileCache: ExerciseProfile = defaultExerciseProfile()
+
+    private var exerciseProfileCache: ExerciseProfile = ExerciseProfile(
+        stepGoal = 10000,
+        height = 170,
+        weight = 65
+    )
     private var exerciseProfileInitialized = false
 
     init {
@@ -181,16 +186,6 @@ class TimeViewModel @Inject constructor(
                     }
                 }
             )
-        )
-    }
-
-    private fun defaultExerciseProfile(): ExerciseProfile {
-        val country = Locale.getDefault().country.uppercase()
-        val isImperial = country in setOf("US", "LR", "MM", "CA")
-        return ExerciseProfile(
-            stepGoal = 10000,
-            height = 170,
-            weight = if (isImperial) 70 else 65
         )
     }
 
