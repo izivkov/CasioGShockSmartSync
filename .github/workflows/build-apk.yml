@@ -3,14 +3,20 @@ name: Build and Release APK
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout code
@@ -23,16 +29,12 @@ jobs:
           java-version: '21'
 
       - name: Decode and save keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
-
-      - name: Check keystore file
-        run: |
-          ls -l app/release.keystore
-          file app/release.keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 -d > app/release.keystore
 
       - name: Build APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleGithubRelease
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -46,5 +48,3 @@ jobs:
         with:
           files: app/build/outputs/apk/github/release/app-release.apk
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
