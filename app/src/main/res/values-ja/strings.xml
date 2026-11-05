@@ -189,4 +189,5 @@
     ]]></string>
     <string name="your_weight">体重</string>
     <string name="clear_history">履歴を消去</string>
+    <string name="exercise_profile_read_failed">時計のエクササイズプロファイルを読み込めませんでした。変更は保存されていません。</string>
 </resources>

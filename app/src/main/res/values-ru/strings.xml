@@ -178,4 +178,5 @@
     ]]></string>
     <string name="your_weight">Ваш вес</string>
     <string name="clear_history">Очистить историю</string>
+    <string name="exercise_profile_read_failed">Не удалось прочитать профиль упражнений часов. Изменение не сохранено.</string>
 </resources>

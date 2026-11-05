@@ -1,1 +1,1 @@
-New release 42.9.20
+Safe Exercise Profile Read: Safely pre-fetches exercise profile before editing to prevent overwriting watch data on read failures. Failure Feedback: Provides user notification on read errors. Full Multilingual Localization: Localized across all 11 supported languages. GShockAPI 1.8.3: Core API upgrade for enhanced profile communication and stability.

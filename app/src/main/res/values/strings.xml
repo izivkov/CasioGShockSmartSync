@@ -215,5 +215,5 @@
     <string name="pairing_failed_generic" translatable="false">Pairing failed: %1$s. Please try again.</string>
     <string name="pairing_activity_finishing" translatable="false">Cannot start pairing: Activity is closing. Please try again.</string>
 
-    <string name="exercise_profile_read_failed" translatable="false">Couldn\'t read the watch\'s exercise profile. Change not saved.</string>
+    <string name="exercise_profile_read_failed">Couldn\'t read the watch\'s exercise profile. Change not saved.</string>
 </resources>

@@ -178,4 +178,5 @@
         <li><b>Hora Solar Local:</b> Calculada segons la posició del sol (Equació del Temps). El migdia és quan el sol es troba en el seu punt més alt.</li>
         <li><b>Temps sideral:</b> Calculat basat en la rotació de la Terra respecte a les estrelles. Un dia sideral és aproximadament 4 minuts més curt que un dia solar.</li>
     ]]></string>
+    <string name="exercise_profile_read_failed">No s\'ha pogut llegir el perfil d\'exercici del rellotge. Canvi no desat.</string>
 </resources>

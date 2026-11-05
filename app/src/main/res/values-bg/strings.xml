@@ -181,4 +181,5 @@
     ]]></string>
     <string name="your_weight">Вашето тегло</string>
     <string name="clear_history">Изчисти историята</string>
+    <string name="exercise_profile_read_failed">Не можа да се прочете профилът за упражнения на часовника. Промяната не е запазена.</string>
 </resources>

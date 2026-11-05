@@ -177,4 +177,5 @@
     ]]></string>
     <string name="your_weight">وزنك</string>
     <string name="clear_history">مسح السجل</string>
+    <string name="exercise_profile_read_failed">تعذر قراءة ملف تعريف التمرين الخاص بالساعة. لم يتم حفظ التغيير.</string>
 </resources>
