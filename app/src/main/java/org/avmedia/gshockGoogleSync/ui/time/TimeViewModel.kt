@@ -32,6 +32,7 @@ import org.avmedia.gshockapi.model.ExerciseProfile
 import org.avmedia.gshockapi.model.StepCounterData
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -44,6 +45,7 @@ private const val FEATURE_STEP_COUNTER = "time.step_counter"
 private const val FEATURE_HOME_TIME = "time.home_time"
 private val STEP_POLL_INTERVAL = 5.minutes
 private val STEP_FETCH_TIMEOUT = 8.seconds
+private val IMPERIAL_COUNTRIES = setOf("US", "CA")
 
 internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.73f): Float {
     val steps = stepData.currentDaySteps ?: 0
@@ -65,15 +67,14 @@ internal fun hasNoStepData(stepData: StepCounterData): Boolean =
             stepData.distanceMeters == null &&
             stepData.totalDistanceMeters == null
 
-internal fun calculateStepMetrics(stepData: StepCounterData, weight100g: Int): Pair<Float, Float> {
+internal fun calculateStepMetrics(stepData: StepCounterData, weightKg: Int): Pair<Float, Float> {
     val distanceKm = resolveDistanceKm(stepData)
-    val weightKg = weight100g / 10f
     return distanceKm to distanceKm * weightKg * 1.036f
 }
 
 /** Recomputes distance and calories from step data. Weight defaults to the state's current weight. */
-internal fun TimeState.withStepMetrics(stepData: StepCounterData, weight100g: Int = weight): TimeState {
-    val (distanceKm, calories) = calculateStepMetrics(stepData, weight100g)
+internal fun TimeState.withStepMetrics(stepData: StepCounterData, weightKg: Int = weight): TimeState {
+    val (distanceKm, calories) = calculateStepMetrics(stepData, weightKg)
     return copy(distanceKm = distanceKm, calories = calories)
 }
 
@@ -88,7 +89,7 @@ data class TimeState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val stepGoal: Int = 10000,
-    val weight: Int = 700, // 100g units
+    val weight: Int = 70, // kg, whole units as the watch stores it
     val height: Int = 170, // cm
     val calories: Float = 0f,
     val distanceKm: Float = 0f,
@@ -105,8 +106,10 @@ sealed interface TimeAction {
     data class SetTimeZoneOption(val option: TimeSettingsStorage.TimeZoneOption) : TimeAction
     data class SetStepDataOption(val option: StepDataOption) : TimeAction
     data class SetStepGoal(val goal: Int) : TimeAction
-    data class SetWeight(val weight: Int) : TimeAction
+    data class SetWeight(val kg: Int) : TimeAction
+    data class SetWeightPounds(val pounds: Double) : TimeAction
     data class SetHeight(val heightCm: Int) : TimeAction
+    data class SetHeightInches(val inches: Double) : TimeAction
     data object ClearStepHistory : TimeAction
     data class SetVoiceVerbose(val enabled: Boolean) : TimeAction
     data object StartVoiceCommand : TimeAction
@@ -115,15 +118,14 @@ sealed interface TimeAction {
 internal fun applyExerciseProfileState(
     current: TimeState,
     profile: ExerciseProfile,
-    weight100g: Int = profile.weight * 10,
     stepData: StepCounterData = current.stepCounterData
 ): TimeState {
     val updated = current.copy(
         stepGoal = profile.stepGoal,
-        weight = weight100g,
+        weight = profile.weight,
         height = profile.height
     )
-    return if (hasNoStepData(stepData)) updated else updated.withStepMetrics(stepData, weight100g)
+    return if (hasNoStepData(stepData)) updated else updated.withStepMetrics(stepData, profile.weight)
 }
 
 @HiltViewModel
@@ -141,6 +143,10 @@ class TimeViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TimeState())
     val state = _state.asStateFlow()
+
+    /** Imperial units are used only for the US and Canada. */
+    val usesImperialUnits: Boolean =
+        Locale.getDefault().country.uppercase(Locale.US) in IMPERIAL_COUNTRIES
 
     private var eventSubscriptionName: String? = null
     private var saveJob: Job? = null
@@ -200,6 +206,27 @@ class TimeViewModel @Inject constructor(
             true
         }.getOrDefault(false)
 
+    /** Text shown in the height field, in the user's units. */
+    fun heightInputText(cm: Int): String =
+        if (usesImperialUnits) String.format(Locale.US, "%.1f", ExerciseProfile(height = cm).heightInches)
+        else cm.toString()
+
+    /** Text shown in the weight field. Shows the value the watch will actually hold. */
+    fun weightInputText(kg: Int): String =
+        if (usesImperialUnits) String.format(Locale.US, "%.1f", ExerciseProfile(weight = kg).weightPounds)
+        else kg.toString()
+
+    /** Saves dialog input, converting from imperial only when the locale uses it. */
+    suspend fun saveExerciseProfileInput(stepGoal: Int, height: Double, weight: Double): Boolean {
+        val base = ExerciseProfile(stepGoal = stepGoal)
+        val profile = if (usesImperialUnits) {
+            base.withHeightInches(height).withWeightPounds(weight)
+        } else {
+            base.copy(height = height.roundToInt(), weight = weight.roundToInt())
+        }
+        return saveExerciseProfile(profile)
+    }
+
     fun onAction(action: TimeAction) {
         when (action) {
             is TimeAction.SetTimer -> _state.update {
@@ -255,9 +282,13 @@ class TimeViewModel @Inject constructor(
 
             is TimeAction.SetStepGoal -> saveProfileChange { it.copy(stepGoal = action.goal) }
 
-            is TimeAction.SetWeight -> saveProfileChange { it.copy(weight = action.weight / 10) }
+            is TimeAction.SetWeight -> saveProfileChange { it.copy(weight = action.kg) }
+
+            is TimeAction.SetWeightPounds -> saveProfileChange { it.withWeightPounds(action.pounds) }
 
             is TimeAction.SetHeight -> saveProfileChange { it.copy(height = action.heightCm) }
+
+            is TimeAction.SetHeightInches -> saveProfileChange { it.withHeightInches(action.inches) }
 
             TimeAction.ClearStepHistory -> viewModelScope.launch {
                 val clearAction =
