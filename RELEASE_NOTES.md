@@ -1,3 +1,17 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.20 — November 5, 2026
+
+## Highlights
+
+### 🏃 Exercise Profile Safety & Localization
+* **Safe Exercise Profile Read**: Safely pre-fetches the exercise profile from watch hardware before opening the profile editor, ensuring default or uninitialized values are never saved.
+* **Failure Feedback**: Provides immediate user notification if reading the exercise profile fails, protecting existing watch settings.
+* **Full Multilingual Localization**: Fully translated error feedback across all 11 supported languages (English, Arabic, Bulgarian, Catalan, German, Spanish, French, Hungarian, Japanese, Russian, and Simplified Chinese).
+
+### ⚡ Dependencies & Engine Optimization
+* **GShockAPI 1.8.3 Upgrade**: Upgraded core `gshockapi` library dependency to `1.8.3` for improved hardware profile communication and protocol reliability.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.17 — November 3, 2026
 
 ## Highlights
