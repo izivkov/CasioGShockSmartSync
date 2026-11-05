@@ -25,7 +25,7 @@ plugins {
         minSdk = 26
         targetSdk = 37
         versionCode = 42922
-        versionName = "42.9.22"
+        versionName = "42.9.23"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
