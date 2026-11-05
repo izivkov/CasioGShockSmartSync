@@ -969,33 +969,26 @@ constructor(
         override var title: String,
         override var enabled: Boolean,
     ) : Action(title, enabled, RunMode.ASYNC) {
+
         override fun run(context: Context) = launchRunSuspend(context)
 
         override suspend fun runSuspend(context: Context) {
-            // The write/read sequence is invoked from callers that already know the profile.
+            // Callers use runWithProfile directly, since they already have the profile.
         }
+
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean =
+            runEnvironment == RunEnvironment.DIRECT_INVOCATION
 
         suspend fun runWithProfile(context: Context, profile: ExerciseProfile): Result<ExerciseProfile> =
             runCatching {
                 api.setExerciseProfile(profile)
-
-                // Give the watch time to process the write before reading back the value.
-                delay(500)
-                val freshProfile = runCatching { api.getExerciseProfile() }.getOrNull()
-                val confirmedProfile = org.avmedia.gshockGoogleSync.ui.time.resolveConfirmedExerciseProfile(
-                    profile,
-                    freshProfile
-                )
-                ProgressEvents.onNext("ExerciseProfileUpdated", confirmedProfile)
-                confirmedProfile
+                delay(500) // Give the watch time to process the write before reading back.
+                val confirmed = runCatching { api.getExerciseProfile() }.getOrNull() ?: profile
+                ProgressEvents.onNext("ExerciseProfileUpdated", confirmed)
+                confirmed
             }.onFailure {
                 Timber.e(it, "Failed to send exercise profile to watch")
             }
-
-        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.DIRECT_INVOCATION -> true
-            else -> false
-        }
     }
 
     inner class ClearStepHistoryAction(

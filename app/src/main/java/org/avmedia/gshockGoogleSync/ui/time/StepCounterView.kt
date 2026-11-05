@@ -28,7 +28,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +44,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,6 +55,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.model.ExerciseProfile
 import java.util.Calendar
 import java.util.Locale
@@ -68,31 +69,13 @@ fun StepCounterView(
     val state by timeViewModel.state.collectAsState()
     var expanded by remember { mutableStateOf(false) }
     var showProfileDialog by remember { mutableStateOf(false) }
-    var profileDraft by remember { mutableStateOf(ExerciseProfile()) }
     var profileStepGoalText by remember { mutableStateOf("") }
     var profileHeightText by remember { mutableStateOf("") }
     var profileWeightText by remember { mutableStateOf("") }
     var profileError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val imperialLocale = remember { isImperialLocale() }
-
-    LaunchedEffect(showProfileDialog) {
-        if (showProfileDialog) {
-            profileDraft = timeViewModel.getExerciseProfileOrDefault()
-            profileStepGoalText = profileDraft.stepGoal.toString()
-            profileHeightText = if (imperialLocale) {
-                (profileDraft.height / 2.54f).roundToInt().toString()
-            } else {
-                profileDraft.height.toString()
-            }
-            profileWeightText = if (imperialLocale) {
-                (profileDraft.weight * 2.20462f).roundToInt().toString()
-            } else {
-                profileDraft.weight.toString()
-            }
-            profileError = null
-        }
-    }
 
     AppCard(
         modifier = modifier.fillMaxWidth()
@@ -187,7 +170,30 @@ fun StepCounterView(
 
                             AppButton(
                                 text = stringResource(id = R.string.profile),
-                                onClick = { showProfileDialog = true },
+                                onClick = {
+                                    // Read the profile before opening the dialog. If the read
+                                    // fails, don't open it, so the user never edits made-up values.
+                                    scope.launch {
+                                        val profile = timeViewModel.readExerciseProfile()
+                                        if (profile == null) {
+                                            AppSnackbar(context.getString(R.string.exercise_profile_read_failed))
+                                        } else {
+                                            profileStepGoalText = profile.stepGoal.toString()
+                                            profileHeightText = if (imperialLocale) {
+                                                (profile.height / 2.54f).roundToInt().toString()
+                                            } else {
+                                                profile.height.toString()
+                                            }
+                                            profileWeightText = if (imperialLocale) {
+                                                (profile.weight * 2.20462f).roundToInt().toString()
+                                            } else {
+                                                profile.weight.toString()
+                                            }
+                                            profileError = null
+                                            showProfileDialog = true
+                                        }
+                                    }
+                                },
                                 modifier = Modifier.offset(y = (-4).dp)
                             )
                         }

@@ -89,6 +89,7 @@ data class TimeState(
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val stepGoal: Int = 10000,
     val weight: Int = 700, // 100g units
+    val height: Int = 170, // cm
     val calories: Float = 0f,
     val distanceKm: Float = 0f,
     val isListening: Boolean = false,
@@ -105,6 +106,7 @@ sealed interface TimeAction {
     data class SetStepDataOption(val option: StepDataOption) : TimeAction
     data class SetStepGoal(val goal: Int) : TimeAction
     data class SetWeight(val weight: Int) : TimeAction
+    data class SetHeight(val heightCm: Int) : TimeAction
     data object ClearStepHistory : TimeAction
     data class SetVoiceVerbose(val enabled: Boolean) : TimeAction
     data object StartVoiceCommand : TimeAction
@@ -116,14 +118,13 @@ internal fun applyExerciseProfileState(
     weight100g: Int = profile.weight * 10,
     stepData: StepCounterData = current.stepCounterData
 ): TimeState {
-    val updated = current.copy(stepGoal = profile.stepGoal, weight = weight100g)
+    val updated = current.copy(
+        stepGoal = profile.stepGoal,
+        weight = weight100g,
+        height = profile.height
+    )
     return if (hasNoStepData(stepData)) updated else updated.withStepMetrics(stepData, weight100g)
 }
-
-internal fun resolveConfirmedExerciseProfile(
-    written: ExerciseProfile,
-    fresh: ExerciseProfile?
-): ExerciseProfile = fresh ?: written
 
 @HiltViewModel
 class TimeViewModel @Inject constructor(
@@ -146,13 +147,6 @@ class TimeViewModel @Inject constructor(
     private var stepPollJob: Job? = null
     private var stepFetchJob: Job? = null
     private var stepFetchPending = false
-
-    private var exerciseProfileCache: ExerciseProfile = ExerciseProfile(
-        stepGoal = 10000,
-        height = 170,
-        weight = 65
-    )
-    private var exerciseProfileInitialized = false
 
     init {
         refreshState()
@@ -189,17 +183,9 @@ class TimeViewModel @Inject constructor(
         )
     }
 
-    suspend fun getExerciseProfileOrDefault(): ExerciseProfile {
-        if (exerciseProfileInitialized) {
-            return exerciseProfileCache
-        }
-
-        val freshProfile = runCatching { api.getExerciseProfile() }.getOrNull()
-        val profile = freshProfile ?: exerciseProfileCache
-        exerciseProfileCache = profile
-        exerciseProfileInitialized = true
-        return profile
-    }
+    /** Reads the current profile from the watch. Returns null if the read fails. */
+    suspend fun readExerciseProfile(): ExerciseProfile? =
+        runCatching { api.getExerciseProfile() }.getOrNull()
 
     suspend fun saveExerciseProfile(profile: ExerciseProfile): Boolean =
         runCatching {
@@ -210,9 +196,6 @@ class TimeViewModel @Inject constructor(
             }
 
             val confirmedProfile = setProfileAction.runWithProfile(appContext, profile).getOrThrow()
-            exerciseProfileCache = confirmedProfile
-            exerciseProfileInitialized = true
-
             _state.update { applyExerciseProfileState(it, confirmedProfile) }
             true
         }.getOrDefault(false)
@@ -274,6 +257,8 @@ class TimeViewModel @Inject constructor(
 
             is TimeAction.SetWeight -> saveProfileChange { it.copy(weight = action.weight / 10) }
 
+            is TimeAction.SetHeight -> saveProfileChange { it.copy(height = action.heightCm) }
+
             TimeAction.ClearStepHistory -> viewModelScope.launch {
                 val clearAction =
                     actionContainer.getAction(ActionContainer.ClearStepHistoryAction::class.java)
@@ -292,10 +277,18 @@ class TimeViewModel @Inject constructor(
         }
     }
 
-    /** Applies a change to the exercise profile and saves it to the watch. */
+    /**
+     * Reads the current profile from the watch, applies the change, and saves it.
+     * Never writes a profile it couldn't read, so fields like height are not overwritten.
+     */
     private fun saveProfileChange(change: (ExerciseProfile) -> ExerciseProfile) {
         viewModelScope.launch {
-            saveExerciseProfile(change(getExerciseProfileOrDefault()))
+            val current = readExerciseProfile()
+            if (current == null) {
+                AppSnackbar(appContext.getString(R.string.exercise_profile_read_failed))
+                return@launch
+            }
+            saveExerciseProfile(change(current))
         }
     }
 
@@ -348,16 +341,17 @@ class TimeViewModel @Inject constructor(
             do {
                 stepFetchPending = false
                 runCatching {
-                    val profile = getExerciseProfileOrDefault()
                     val stepData = withTimeoutOrNull(STEP_FETCH_TIMEOUT) { fetchStepCounter() }
                         ?: return@runCatching
+                    val profile = readExerciseProfile()
 
                     _state.update { current ->
-                        applyExerciseProfileState(
-                            current.copy(stepCounterData = stepData),
-                            profile,
-                            stepData = stepData
-                        )
+                        val withSteps = current.copy(stepCounterData = stepData)
+                        if (profile != null) {
+                            applyExerciseProfileState(withSteps, profile, stepData = stepData)
+                        } else {
+                            withSteps.withStepMetrics(stepData)
+                        }
                     }
                 }
             } while (stepFetchPending)
