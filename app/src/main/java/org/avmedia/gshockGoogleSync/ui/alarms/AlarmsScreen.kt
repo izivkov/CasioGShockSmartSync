@@ -3,14 +3,19 @@ package org.avmedia.gshockGoogleSync.ui.alarms
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -48,11 +53,25 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 
 @Composable
 fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
-    Surface(
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Show each one-time message from the ViewModel (save succeeded or failed).
+    LaunchedEffect(alarmViewModel) {
+        alarmViewModel.events.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             ScreenTitle(
                 text = stringResource(id = R.string.watch_alarms),
                 modifier = Modifier

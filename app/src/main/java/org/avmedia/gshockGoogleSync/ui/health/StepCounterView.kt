@@ -3,7 +3,6 @@ package org.avmedia.gshockGoogleSync.ui.health
 import AppText
 import AppTextLarge
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,19 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -53,7 +46,6 @@ fun StepCounterView(
     healthViewModel: HealthViewModel = hiltViewModel()
 ) {
     val state by healthViewModel.state.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
 
     AppCard(
         modifier = modifier.fillMaxWidth()
@@ -61,99 +53,88 @@ fun StepCounterView(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            // Card title
+            AppTextLarge(
+                text = stringResource(id = R.string.steps),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── TODAY section ──────────────────────────────────────────
+            SectionLabel(text = stringResource(id = R.string.today))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val currentSteps = state.stepCounterData.currentDaySteps ?: 0
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
             ) {
-                AppTextLarge(
-                    text = stringResource(id = R.string.steps),
-                    modifier = Modifier.weight(1f)
+                StepsProgressRing(
+                    modifier = Modifier.size(160.dp),
+                    currentSteps = currentSteps,
+                    goal = state.stepGoal,
+                    distanceKm = state.distanceKm,
+                    calories = state.calories
                 )
-
-                Text(
-                    text = stringResource(id = R.string.clear_history),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .clickable { healthViewModel.onAction(HealthAction.ClearStepHistory) }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-
-                Box {
-                    Row(
-                        modifier = Modifier
-                            .clickable { expanded = true }
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = state.selectedStepDataOption.name)
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        StepDataOption.entries.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option.name) },
-                                onClick = {
-                                    healthViewModel.onAction(HealthAction.SetStepDataOption(option))
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionDivider()
+            Spacer(modifier = Modifier.height(16.dp))
 
-            when (state.selectedStepDataOption) {
-                StepDataOption.TODAY -> {
-                    val currentSteps = state.stepCounterData.currentDaySteps ?: 0
+            // ── HOURLY section ─────────────────────────────────────────
+            SectionLabel(text = stringResource(id = R.string.hourly))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        StepsProgressRing(
-                            modifier = Modifier.size(150.dp),
-                            currentSteps = currentSteps,
-                            goal = state.stepGoal,
-                            distanceKm = state.distanceKm,
-                            calories = state.calories
-                        )
-                    }
-                }
+            val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(10)
+            if (hourly.isEmpty() || hourly.all { it == 0 }) {
+                EmptyHistory()
+            } else {
+                StepsBarChart(values = hourly, labels = hourlyTimeLabels(hourly.size))
+            }
 
-                StepDataOption.HOURLY -> {
-                    val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(10)
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionDivider()
+            Spacer(modifier = Modifier.height(16.dp))
 
-                    if (hourly.isEmpty() || hourly.all { it == 0 }) {
-                        EmptyHistory()
-                    } else {
-                        StepsBarChart(values = hourly, labels = hourlyTimeLabels(hourly.size))
-                    }
-                }
+            // ── DAILY section ──────────────────────────────────────────
+            SectionLabel(text = stringResource(id = R.string.daily))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                StepDataOption.DAILY -> {
-                    val dailyHistory = state.stepCounterData.dailyHistory.filterNotNull().takeLast(6)
-                    val daily = dailyHistory + (state.stepCounterData.currentDaySteps ?: 0)
-
-                    if (daily.isEmpty()) {
-                        EmptyHistory()
-                    } else {
-                        StepsBarChart(values = daily, labels = dailyLabels(daily.size))
-                    }
-                }
+            val dailyHistory = state.stepCounterData.dailyHistory.filterNotNull().takeLast(6)
+            val daily = dailyHistory + (state.stepCounterData.currentDaySteps ?: 0)
+            if (daily.isEmpty()) {
+                EmptyHistory()
+            } else {
+                StepsBarChart(values = daily, labels = dailyLabels(daily.size))
             }
         }
     }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun SectionDivider() {
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.outlineVariant,
+        thickness = 0.5.dp
+    )
 }
 
 @Composable
@@ -282,7 +263,7 @@ private fun EmptyHistory() {
             .height(140.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text("No history")
+        Text("No history", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

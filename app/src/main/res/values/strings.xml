@@ -27,6 +27,8 @@
 
     <string name="info">Info</string>
     <string name="daily">Daily</string>
+    <string name="today">Today</string>
+    <string name="hourly">Hourly</string>
 
     <string name="watch_alarms">Watch Alarms</string>
     <string name="signal_chime">Signal (chime)</string>
@@ -217,4 +219,5 @@
 
     <string name="exercise_profile_read_failed">Couldn\'t read the watch\'s exercise profile. Change not saved.</string>
     <string name="health">Health</string>
+    <string name="alarm_send_failed" translatable="false">Couldn\'t save alarms to the watch.</string>
 </resources>

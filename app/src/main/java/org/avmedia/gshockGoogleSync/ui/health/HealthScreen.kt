@@ -12,16 +12,23 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
 fun HealthScreen() {
+    var showProfileDialog by remember { mutableStateOf(false) }
+
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -38,18 +45,31 @@ fun HealthScreen() {
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Steps card — shows Today, Hourly, and Daily panels all at once
                     StepCounterView(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    ExerciseProfileCard(
-                        modifier = Modifier.fillMaxWidth()
+                    // Profile button — opens exercise profile dialog
+                    AppButton(
+                        text = stringResource(id = R.string.profile),
+                        onClick = { showProfileDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
+    }
+
+    // Exercise profile dialog — shown when user taps the Profile button
+    if (showProfileDialog) {
+        ProfileDialog(
+            onDismiss = { showProfileDialog = false }
+        )
     }
 }
 

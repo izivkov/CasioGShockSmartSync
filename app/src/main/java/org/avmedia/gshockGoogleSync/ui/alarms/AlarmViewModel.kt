@@ -8,19 +8,24 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.AlarmsWritten
+import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
-import org.avmedia.gshockapi.model.Alarm
-import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
+import org.avmedia.gshockapi.EventAction
+import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.model.Alarm
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -29,9 +34,10 @@ import javax.inject.Inject
  *
  * This ViewModel handles:
  * - Loading alarms from the watch via [GShockRepository].
- * - loading and saving alarm names using [AlarmNameStorage].
+ * - Loading and saving alarm names using [AlarmNameStorage].
  * - Maintaining the state of the alarms list.
  * - Sending updated alarms back to the watch (via [ActionContainer.SetAlarmAction]).
+ * - Emitting one-time messages ([events]) for the screen to show as feedback.
  * - Syncing enabled alarms to the phone's native alarm app.
  */
 @HiltViewModel
@@ -46,8 +52,10 @@ class AlarmViewModel @Inject constructor(
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms.asStateFlow()
 
-    companion object {
-    }
+    // One-time messages for the screen to show as a snackbar. A SharedFlow fires once
+    // per save, unlike a StateFlow, which would replay the last message on recomposition.
+    private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val events: SharedFlow<String> = _events.asSharedFlow()
 
     // ProgressEvents silently drops a second subscription registered under a
     // name it has already seen - which "AlarmViewModel" is, the moment this
@@ -65,7 +73,7 @@ class AlarmViewModel @Inject constructor(
         eventSubscriptionName = subscribeToProgressEvents(
             "AlarmViewModel",
             arrayOf(
-                org.avmedia.gshockapi.EventAction("AlarmsUpdated") {
+                EventAction("AlarmsUpdated") {
                     val payload = ProgressEvents.getPayload("AlarmsUpdated") as? AlarmsWritten
                     if (payload != null) {
                         _alarms.value = payload.alarms
@@ -164,25 +172,34 @@ class AlarmViewModel @Inject constructor(
      * This process involves:
      * 1. Normalizing any manually-edited (null-named) alarms to an empty name.
      * 2. Handing the exact list to SetAlarmAction, which persists names to
-        *    AlarmNameStorage, writes alarms and the hourly chime setting when supported,
-        *    reads back confirmed state, and emits "AlarmsUpdated".
+     *    AlarmNameStorage, writes alarms and the hourly chime setting when supported,
+     *    reads back confirmed state, and emits "AlarmsUpdated".
+     * 3. Emitting a result message on [events] for the screen to show.
      */
-    fun sendAlarmsToWatch() = viewModelScope.launch {
-        // Before sending, process the alarms to handle null names.
-        val alarmsToSend = _alarms.value.map { alarm ->
-            if (alarm.name == null) alarm.copy(name = "") else alarm
-        }
+    fun sendAlarmsToWatch() {
+        viewModelScope.launch {
+            // Before sending, process the alarms to handle null names.
+            val alarmsToSend = _alarms.value.map { alarm ->
+                if (alarm.name == null) alarm.copy(name = "") else alarm
+            }
 
-        val setAlarmAction = actionContainer.getAction(ActionContainer.SetAlarmAction::class.java)
-        if (!setAlarmAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
-            return@launch
-        }
+            val setAlarmAction = actionContainer.getAction(ActionContainer.SetAlarmAction::class.java)
+            if (!setAlarmAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
+                _events.emit(appContext.getString(R.string.alarm_send_failed))
+                return@launch
+            }
 
-        setAlarmAction.runWithAlarms(
-            appContext,
-            alarmsToSend,
-            updateHourlyChime = watchFeatureManager.isFeatureSupported("alarms.chime")
-        )
+            val saved = setAlarmAction.runWithAlarms(
+                appContext,
+                alarmsToSend,
+                updateHourlyChime = watchFeatureManager.isFeatureSupported("alarms.chime"),
+            )
+
+            _events.emit(
+                if (saved) appContext.getString(R.string.alarms_set_to_watch)
+                else appContext.getString(R.string.alarm_send_failed)
+            )
+        }
     }
 
     /**

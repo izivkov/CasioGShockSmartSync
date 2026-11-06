@@ -499,7 +499,6 @@ constructor(
             }
 
         ProgressEvents.onNext("AlarmsUpdated", AlarmsWritten(alarmsFromWatch))
-        AppSnackbar(context.getString(R.string.alarms_set_to_watch))
     }
 
     inner class PrayerAlarmsAction(
@@ -658,6 +657,7 @@ constructor(
             Timber.d("running ${this.javaClass.simpleName} for $alarmHour:$alarmMinute")
             launchRunSuspend(context)
         }
+
 
         override suspend fun runSuspend(context: Context) {
             runCatching {
