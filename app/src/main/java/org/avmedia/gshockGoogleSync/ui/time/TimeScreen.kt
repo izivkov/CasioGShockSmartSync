@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
-import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
@@ -34,22 +33,11 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                         .padding(vertical = 0.dp)
                 )
 
-                val watchFeatureManager = LocalWatchFeatureManager.current
-                val isStepCounterSupported =
-                    watchFeatureManager.isCardSupported("step_counter_card")
-
                 TimerView(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                 )
-
-                if (isStepCounterSupported) {
-                    StepCounterView(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
 
                 WatchNameView(
                     modifier =

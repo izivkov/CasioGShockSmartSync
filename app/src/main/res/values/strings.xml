@@ -216,4 +216,5 @@
     <string name="pairing_activity_finishing" translatable="false">Cannot start pairing: Activity is closing. Please try again.</string>
 
     <string name="exercise_profile_read_failed">Couldn\'t read the watch\'s exercise profile. Change not saved.</string>
+    <string name="health">Health</string>
 </resources>

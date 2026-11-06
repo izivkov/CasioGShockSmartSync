@@ -181,4 +181,5 @@
         <li><b>Sternzeit:</b> Berechnet auf der Grundlage der Erdrotation relativ zu den Sternen. Ein Sterntag ist etwa 4 Minuten kürzer als ein Sonnentag.</li>
     ]]></string>
     <string name="exercise_profile_read_failed">Das Trainingsprofil der Uhr konnte nicht gelesen werden. Änderung nicht gespeichert.</string>
+    <string name="health">Gesundheit</string>
 </resources>

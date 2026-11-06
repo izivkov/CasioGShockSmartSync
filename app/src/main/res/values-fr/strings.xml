@@ -189,4 +189,5 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="your_weight">Votre poids</string>
     <string name="clear_history">Effacer l\'historique</string>
     <string name="exercise_profile_read_failed">Impossible de lire le profil d\'exercice de la montre. Modification non enregistrée.</string>
+    <string name="health">Santé</string>
 </resources>

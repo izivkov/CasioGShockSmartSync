@@ -181,4 +181,5 @@
     <string name="your_weight">Tu peso</string>
     <string name="clear_history">Borrar historial</string>
     <string name="exercise_profile_read_failed">No se pudo leer el perfil de ejercicio del reloj. Cambio no guardado.</string>
+    <string name="health">Salud</string>
 </resources>

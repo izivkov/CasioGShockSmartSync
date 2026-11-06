@@ -1,3 +1,19 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.24 — November 6, 2026
+
+## Highlights
+
+### ❤️ Dedicated Health Screen & Navigation
+* **New Health Screen**: Extracted the step counter and exercise profile settings out of the Time screen into a dedicated, full-screen **Health** tab.
+* **Heart Icon Navigation**: Added a Health tab featuring a heart icon in the bottom navigation bar, positioned directly alongside Time, Alarms, Events, Actions, and Settings.
+* **Hardware-Gated Tab**: The Health screen tab is dynamically displayed only when connected to a watch model equipped with a step counter (`WatchInfo.hasStepCounter`).
+
+### 🏃 Enhanced Fitness & Exercise Profile Dashboard
+* **Inline Exercise Profile Card**: Replaced the popup dialog with a first-class, inline Exercise Profile card on the Health screen for configuring Step Goal, Height, and Weight with automatic locale unit detection (`cm`/`in`, `kg`/`lb`).
+* **Expanded Activity Display**: Removed the step goal slider to give full focus to the step progress ring, distance (km/mi), calorie estimates, and hourly/daily activity charts.
+* **Decoupled Architecture**: Introduced a dedicated `HealthViewModel` to independently handle step polling, activity metrics, and profile reads/writes, keeping the Time screen lightweight.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.20 — November 5, 2026
 
 ## Highlights

@@ -41,6 +41,7 @@ import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
 import org.avmedia.gshockGoogleSync.ui.alarms.AlarmsScreen
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
+import org.avmedia.gshockGoogleSync.ui.health.HealthScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
 import org.avmedia.gshockapi.ProgressEvents
@@ -158,6 +159,9 @@ fun BottomNavigationBarWithPermissions(
         ) {
             composable(Screens.Time.route) {
                 TimeScreen()
+            }
+            composable(Screens.Health.route) {
+                HealthScreen()
             }
             composable(Screens.Alarms.route) {
                 AlarmsScreen()

@@ -184,5 +184,6 @@
     ]]></string>
     <string name="your_weight">你的体重</string>
     <string name="clear_history">清除历史记录</string>
-    <string name="exercise_profile_read_failed">无法读取手表的运动配置文件。更改未保存。</string>
+    <string name="exercise_profile_read_failed">无法读取手方的运动配置文件。更改未保存。</string>
+    <string name="health">健康</string>
 </resources>

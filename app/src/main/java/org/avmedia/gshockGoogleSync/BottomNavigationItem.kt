@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,14 +26,29 @@ data class BottomNavigationItem(
                 ),
                 icon = ImageVector.vectorResource(id = R.drawable.time),
                 route = Screens.Time.route
-            ),
+            )
+        )
+
+        if (watchFeatureManager.isFeatureSupported("time.step_counter")) {
+            baseItems.add(
+                BottomNavigationItem(
+                    label = Utils.shortenString(
+                        stringResource(R.string.health), 7
+                    ),
+                    icon = Icons.Filled.Favorite,
+                    route = Screens.Health.route
+                )
+            )
+        }
+
+        baseItems.add(
             BottomNavigationItem(
                 label = Utils.shortenString(
                     stringResource(R.string.alarms), 7
                 ),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_alarm_black_24dp),
                 route = Screens.Alarms.route,
-            ),
+            )
         )
 
         if (watchFeatureManager.isFeatureSupported("actions.reminders")) {
