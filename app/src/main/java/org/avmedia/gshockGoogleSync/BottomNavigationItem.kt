@@ -1,8 +1,9 @@
 package org.avmedia.gshockGoogleSync
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -35,7 +36,7 @@ data class BottomNavigationItem(
                     label = Utils.shortenString(
                         stringResource(R.string.health), 7
                     ),
-                    icon = Icons.Filled.Favorite,
+                    icon = Icons.Outlined.FavoriteBorder,
                     route = Screens.Health.route
                 )
             )
