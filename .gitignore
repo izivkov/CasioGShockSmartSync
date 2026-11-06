@@ -5,6 +5,9 @@
 *.ap_
 *.aab
 
+.vscode
+.idea
+
 # Files for the ART/Dalvik VM
 *.dex
 
