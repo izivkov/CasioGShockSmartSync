@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.events
 
 import android.content.Context
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockGoogleSync.ActionContainer
+import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.EventAction
@@ -179,7 +181,7 @@ class EventViewModel @Inject constructor(
                 return@launch
             }
             setEventsAction.runWithEvents(appContext, _events.value)
+            AppSnackbar(appContext.getString(R.string.reminders_sent_to_watch))
         }
     }
-
 }

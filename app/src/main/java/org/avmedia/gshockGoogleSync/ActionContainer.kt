@@ -340,7 +340,6 @@ constructor(
             api.setEvents(ArrayList(processedEvents))
             val freshEvents = api.getEventsFromWatch()
             ProgressEvents.onNext("EventsUpdated", freshEvents)
-            AppSnackbar(context.getString(R.string.reminders_sent_to_watch))
         }
     }
 
@@ -523,11 +522,27 @@ constructor(
 
         override fun run(context: Context) {
             containerScope.launch {
+                val currentChime = runCatching {
+                    if (watchFeatureManager.isFeatureSupported("alarms.chime")) {
+                        api.getSettings().hourlyChime
+                    } else {
+                        api.getAlarms().firstOrNull()?.hasHourlyChime ?: false
+                    }
+                }.getOrDefault(false)
+
                 prayerAlarmsHelper
-                    .createNextPrayerAlarms(watchFeatureManager.getAlarmCount())
+                    .createNextPrayerAlarms(
+                        watchFeatureManager.getAlarmCount(),
+                        hasHourlyChime = currentChime
+                    )
                     .onSuccess { alarms ->
                         val setAlarmAction = getAction(SetAlarmAction::class.java)
-                        if (setAlarmAction.runWithAlarms(context, alarms)) {
+                        if (setAlarmAction.runWithAlarms(
+                                context,
+                                alarms,
+                                updateHourlyChime = watchFeatureManager.isFeatureSupported("alarms.chime")
+                            )
+                        ) {
                             lastSet = System.currentTimeMillis()
                         }
                     }

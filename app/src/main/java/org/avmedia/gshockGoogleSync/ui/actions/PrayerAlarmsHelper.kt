@@ -43,7 +43,8 @@ class PrayerAlarmsHelper @Inject constructor(
 
     @OptIn(ExperimentalTime::class)
     suspend fun createNextPrayerAlarms(
-        n: Int
+        n: Int,
+        hasHourlyChime: Boolean = false,
     ): Result<List<Alarm>> = runCatching<List<Alarm>> {
         require(n in 1..5) { "Number of alarms must be between 1 and 5" }
 
@@ -84,8 +85,12 @@ class PrayerAlarmsHelper @Inject constructor(
                     ZoneId.systemDefault()
                 ) > LocalDateTime.now()
             }
-            .map { (name, prayerTime) ->
-                prayerTimeToAlarm(prayerTime, name)
+            .mapIndexed { index, (name, prayerTime) ->
+                prayerTimeToAlarm(
+                    prayerTime,
+                    name,
+                    hasHourlyChime = if (index == 0) hasHourlyChime else false
+                )
             }
             .take(n)
             .toList()
@@ -181,9 +186,13 @@ class PrayerAlarmsHelper @Inject constructor(
         ).contains(countryCode)
 
     @OptIn(ExperimentalTime::class)
-    private fun prayerTimeToAlarm(prayerTime: AdhanInstant, name: String): Alarm =
+    private fun prayerTimeToAlarm(
+        prayerTime: AdhanInstant,
+        name: String,
+        hasHourlyChime: Boolean = false,
+    ): Alarm =
         getHoursAndMinutesFromEpochMilliseconds(prayerTime.toEpochMilliseconds()).let { (hours, minutes) ->
-            Alarm(hours, minutes, enabled = true, hasHourlyChime = false, name = name)
+            Alarm(hours, minutes, enabled = true, hasHourlyChime = hasHourlyChime, name = name)
         }
 
     private fun getHoursAndMinutesFromEpochMilliseconds(epochMilliseconds: Long): Pair<Int, Int> =
