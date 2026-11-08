@@ -28,6 +28,9 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Run lint check
+        run: ./gradlew app:lint
+
       - name: Decode and save keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}

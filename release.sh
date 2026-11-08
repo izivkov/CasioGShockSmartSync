@@ -85,6 +85,13 @@ VERSION_CODE=$(echo $VERSION_NAME | sed 's/\.//g')
 
 echo "🚀 Preparing release for version $VERSION_NAME (Code: $VERSION_CODE)..."
 
+# 0. Run mandatory lint check
+echo "🔍 Running mandatory lint check before release..."
+if ! ./gradlew app:lint; then
+    echo "❌ Error: Lint checks failed. Please fix lint errors before releasing."
+    exit 1
+fi
+
 # 1. Update app/build.gradle
 echo "📝 Updating app/build.gradle..."
 sed -i "s/versionCode = .*/versionCode = $VERSION_CODE/" app/build.gradle

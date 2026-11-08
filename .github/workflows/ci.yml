@@ -1,6 +1,10 @@
 name: CI
 
 on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
 
 permissions:
@@ -19,5 +23,5 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Run unit tests and assemble debug APK
-        run: ./gradlew testGithubDebugUnitTest assembleDebug
+      - name: Run lint, unit tests, and assemble debug APK
+        run: ./gradlew app:lint testGithubDebugUnitTest assembleDebug
