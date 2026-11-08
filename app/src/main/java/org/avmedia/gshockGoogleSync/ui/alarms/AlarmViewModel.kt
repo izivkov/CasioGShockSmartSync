@@ -86,7 +86,6 @@ class AlarmViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        super.onCleared()
         eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
     }
 

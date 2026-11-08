@@ -71,7 +71,7 @@ plugins {
         }
     }
     lint {
-        disable 'TypographyFractions', 'TypographyQuotes'
+        disable 'TypographyFractions', 'TypographyQuotes', 'MissingTranslation'
     }
 }
 

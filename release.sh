@@ -143,6 +143,10 @@ if [ "$GH_AVAILABLE" = true ]; then
     echo "🎁 Creating GitHub release v$VERSION_NAME..."
     gh release create "v$VERSION_NAME" --title "Release v$VERSION_NAME" --notes-file "$GITHUB_NOTES_FILE"
     rm "$GITHUB_NOTES_FILE"
+    REPO=$(gh repo view --json url -q .url 2>/dev/null || echo "")
+    if [ -n "$REPO" ]; then
+        echo "🔗 Release: $REPO/releases/tag/v$VERSION_NAME"
+    fi
 fi
 
 # 4. Update master branch for F-Droid

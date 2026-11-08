@@ -22,10 +22,12 @@ class VoiceCommandManager @Inject constructor(
     // which the on-device recognizer throws sporadically right after starting a
     // session. Recreating the recognizer and retrying once clears these up
     // without bothering the user.
-    private val transientErrors = setOf(
-        SpeechRecognizer.ERROR_SERVER_DISCONNECTED,
-        SpeechRecognizer.ERROR_RECOGNIZER_BUSY
-    )
+    private val transientErrors = buildSet {
+        add(SpeechRecognizer.ERROR_RECOGNIZER_BUSY)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            add(SpeechRecognizer.ERROR_SERVER_DISCONNECTED)
+        }
+    }
     private val maxRetries = 1
 
     fun isRecognitionAvailable(): Boolean {

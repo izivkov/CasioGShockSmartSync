@@ -886,7 +886,7 @@ constructor(
                     else -> "English"
                 }
 
-                val dateTimePattern = SimpleDateFormat().toPattern()
+                val dateTimePattern = SimpleDateFormat("", Locale.getDefault()).toPattern()
                 val datePattern = dateTimePattern.split(" ")[0]
                 val timePattern = dateTimePattern.split(" ")[1]
 
