@@ -107,6 +107,7 @@ class HealthViewModel @Inject constructor(
     private val api: GShockRepository,
     private val watchFeatureManager: IWatchFeatureManager,
     private val actionContainer: ActionContainer,
+    private val sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -159,6 +160,7 @@ class HealthViewModel @Inject constructor(
 
             val confirmedProfile = setProfileAction.runWithProfile(appContext, profile).getOrThrow()
             _state.update { applyExerciseProfileState(it, confirmedProfile) }
+            sessionManager.clearPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.HEALTH_PROFILE)
             true
         }.getOrDefault(false)
 

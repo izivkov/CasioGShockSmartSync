@@ -34,6 +34,12 @@ class GShockApplication : Application(), IScreenManager {
     @Inject
     lateinit var appScreenState: AppScreenState
 
+    @Inject
+    lateinit var sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager
+
+    @Inject
+    lateinit var sessionEventBridge: org.avmedia.gshockGoogleSync.session.SessionEventBridge
+
     fun init() {
         Timber.i("Initializing GShockApplication")
         CoroutineScope(Dispatchers.IO).launch {
@@ -53,6 +59,7 @@ class GShockApplication : Application(), IScreenManager {
         eventHandler = MainEventHandler(context = this, repository = repository, screenManager = this)
         eventHandler.setupEventSubscription()
         actionRunner.setupActionSubscriptions()
+        sessionEventBridge.setupEventBridge()
     }
 
     override fun onTerminate() {

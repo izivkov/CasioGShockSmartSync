@@ -43,10 +43,12 @@ constructor(
     private val watchFeatureManager: IWatchFeatureManager,
     @param:ApplicationContext private val appContext: Context,
     private val actionContainer: ActionContainer,
+    private val sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager,
 ) : ViewModel() {
 
     fun onSettingUpdated(setting: Setting) {
         updateSetting(setting)
+        sessionManager.markPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.SETTINGS)
     }
 
     private val _state = MutableStateFlow(SettingsState())
@@ -449,7 +451,10 @@ constructor(
         }
 
         viewModelScope.launch {
-            settingsAction.runWithSettings(appContext, settings)
+            val saved = settingsAction.runWithSettings(appContext, settings)
+            if (saved) {
+                sessionManager.clearPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.SETTINGS)
+            }
         }
     }
 }

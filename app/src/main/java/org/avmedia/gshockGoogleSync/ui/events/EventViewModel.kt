@@ -29,6 +29,7 @@ class EventViewModel @Inject constructor(
     private val calendarEvents: CalendarEvents,
     private val eventStorage: EventStorage,
     private val actionContainer: ActionContainer,
+    private val sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager,
     @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
@@ -181,6 +182,7 @@ class EventViewModel @Inject constructor(
                 return@launch
             }
             setEventsAction.runWithEvents(appContext, _events.value)
+            sessionManager.clearPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.EVENTS)
             AppSnackbar(appContext.getString(R.string.reminders_sent_to_watch))
         }
     }

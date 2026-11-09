@@ -46,6 +46,7 @@ class AlarmViewModel @Inject constructor(
     private val alarmNameStorage: AlarmNameStorage,
     private val watchFeatureManager: IWatchFeatureManager,
     private val actionContainer: ActionContainer,
+    private val sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager,
     @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
@@ -128,6 +129,7 @@ class AlarmViewModel @Inject constructor(
                 if (i == index) transform(alarm) else alarm
             }
         }
+        sessionManager.markPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.ALARMS)
     }
 
     /**
@@ -193,6 +195,10 @@ class AlarmViewModel @Inject constructor(
                 alarmsToSend,
                 updateHourlyChime = watchFeatureManager.isFeatureSupported("alarms.chime"),
             )
+
+            if (saved) {
+                sessionManager.clearPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.ALARMS)
+            }
 
             _events.emit(
                 if (saved) appContext.getString(R.string.alarms_set_to_watch)
