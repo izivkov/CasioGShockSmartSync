@@ -2,23 +2,23 @@ package org.avmedia.gshockGoogleSync.utils
 
 import android.content.Context
 import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
+import java.util.concurrent.atomic.AtomicBoolean
 
 object LocalDataStorage {
 
     private const val STORAGE_NAME = "CASIO_GOOGLE_SYNC_STORAGE"
-    private val scope = CoroutineScope(Dispatchers.IO)
-    private val mutex = Mutex()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // Use a DataStore delegate in context
     private val Context.dataStore by preferencesDataStore(
@@ -28,6 +28,34 @@ object LocalDataStorage {
         }
     )
 
+    // In-memory copy of the stored preferences, so synchronous reads never block on I/O or locks.
+    @Volatile
+    private var cache: Preferences? = null
+    private val observing = AtomicBoolean(false)
+
+    /** Call from Application.onCreate so the first synchronous read finds the cache ready. */
+    fun preload(context: Context) {
+        startObserving(context.applicationContext)
+    }
+
+    private fun startObserving(appContext: Context) {
+        if (observing.compareAndSet(false, true)) {
+            scope.launch {
+                appContext.dataStore.data.collect { cache = it }
+            }
+        }
+    }
+
+    private fun snapshot(context: Context): Preferences {
+        cache?.let { return it }
+        val appContext = context.applicationContext
+        startObserving(appContext)
+        // Only reached if nothing has loaded the cache yet: one-time read.
+        val loaded = runBlocking(Dispatchers.IO) { appContext.dataStore.data.first() }
+        if (cache == null) cache = loaded
+        return cache ?: loaded
+    }
+
     fun put(context: Context, key: String, value: String) {
         scope.launch {
             putAndWait(context, key, value)
@@ -35,34 +63,22 @@ object LocalDataStorage {
     }
 
     suspend fun putAndWait(context: Context, key: String, value: String) {
-        mutex.withLock {
-            context.dataStore.edit { preferences ->
-                preferences[stringPreferencesKey(key)] = value
-            }
+        cache = context.dataStore.edit { preferences ->
+            preferences[stringPreferencesKey(key)] = value
         }
     }
 
-    fun get(context: Context, key: String, defaultValue: String? = null): String? {
-        var value: String?
-        runBlocking {
-            mutex.withLock {
-                val preferences = context.dataStore.data.first()
-                value = preferences[stringPreferencesKey(key)] ?: defaultValue
-            }
-        }
-        return value
-    }
+    fun get(context: Context, key: String, defaultValue: String? = null): String? =
+        snapshot(context)[stringPreferencesKey(key)] ?: defaultValue
 
     fun delete(context: Context, key: String) {
         scope.launch {
-            mutex.withLock {
-                deleteAsync(context, key)
-            }
+            deleteAsync(context, key)
         }
     }
 
     suspend fun deleteAsync(context: Context, key: String) {
-        context.dataStore.edit { preferences ->
+        cache = context.dataStore.edit { preferences ->
             preferences.remove(stringPreferencesKey(key))
         }
     }
@@ -76,16 +92,11 @@ object LocalDataStorage {
      */
     fun toJsonObject(context: Context): JSONObject {
         val jsonObject = JSONObject()
-        runBlocking {
-            mutex.withLock {
-                val preferences = context.dataStore.data.first()
-                preferences.asMap().forEach { (key, value) ->
-                    // We only store strings and string-representations of other types,
-                    // so we can safely cast the value.
-                    if (value is String) {
-                        jsonObject.put(key.name, value)
-                    }
-                }
+        snapshot(context).asMap().forEach { (key, value) ->
+            // We only store strings and string-representations of other types,
+            // so we can safely cast the value.
+            if (value is String) {
+                jsonObject.put(key.name, value)
             }
         }
         return jsonObject
@@ -96,7 +107,7 @@ object LocalDataStorage {
     }
 
     private suspend fun putBoolean(context: Context, key: String, value: Boolean) {
-        put(context, key, value.toString())
+        putAndWait(context, key, value.toString())
     }
 
     fun getTimeAdjustmentNotification(context: Context): Boolean {
@@ -116,11 +127,11 @@ object LocalDataStorage {
     }
 
     fun getFineTimeAdjustment(context: Context): Int {
-        return get(context, "fineTimeAdjustment", "0")?.toInt() ?: 0
+        return get(context, "fineTimeAdjustment", "0")?.toIntOrNull() ?: 0
     }
 
     suspend fun setFineTimeAdjustment(context: Context, fineTimeAdjustment: Int) {
-        put(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
+        putAndWait(context, "fineTimeAdjustment", fineTimeAdjustment.toString())
     }
 
     fun getDeviceAddresses(context: Context): List<String> {
@@ -128,34 +139,31 @@ object LocalDataStorage {
         return if (addresses.isEmpty()) emptyList() else addresses.split(",").distinct()
     }
 
+    // The read-modify-write happens inside a single edit {}, which DataStore runs atomically.
     suspend fun addDeviceAddress(context: Context, address: String) {
-        mutex.withLock {
-            val key = stringPreferencesKey("DeviceAddresses")
-            val addresses = context.dataStore.data.first()[key]
+        val key = stringPreferencesKey("DeviceAddresses")
+        cache = context.dataStore.edit { preferences ->
+            val addresses = preferences[key]
                 ?.takeIf { it.isNotEmpty() }
                 ?.split(",")
                 ?.toMutableList() ?: mutableListOf()
             if (address !in addresses) {
                 addresses.add(address)
-                context.dataStore.edit { preferences ->
-                    preferences[key] = addresses.joinToString(",")
-                }
+                preferences[key] = addresses.joinToString(",")
             }
         }
     }
 
     suspend fun removeDeviceAddress(context: Context, address: String) {
-        mutex.withLock {
-            val addressesKey = stringPreferencesKey("DeviceAddresses")
-            val addresses = context.dataStore.data.first()[addressesKey]
+        val addressesKey = stringPreferencesKey("DeviceAddresses")
+        cache = context.dataStore.edit { preferences ->
+            val addresses = preferences[addressesKey]
                 ?.takeIf { it.isNotEmpty() }
                 ?.split(",")
                 ?.toMutableList() ?: mutableListOf()
             if (addresses.remove(address)) {
-                context.dataStore.edit { preferences ->
-                    preferences[addressesKey] = addresses.joinToString(",")
-                    preferences.remove(stringPreferencesKey("DeviceName_$address"))
-                }
+                preferences[addressesKey] = addresses.joinToString(",")
+                preferences.remove(stringPreferencesKey("DeviceName_$address"))
             }
         }
     }
