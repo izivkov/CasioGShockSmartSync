@@ -3,7 +3,13 @@ package org.avmedia.gshockGoogleSync.session
 enum class EntryReason {
     NORMAL,
     CONTENT_SELECTOR,
-    RUN_ACTIONS
+    RUN_ACTIONS;
+
+    companion object {
+        /** A normal connection opens the Time screen; every other button resolves a content screen. */
+        fun forButton(button: ConnectionButton): EntryReason =
+            if (button == ConnectionButton.NORMAL) NORMAL else CONTENT_SELECTOR
+    }
 }
 
 sealed interface SessionPhase {
@@ -21,16 +27,17 @@ data class WatchSnapshot(
 
 data class SessionState(
     val phase: SessionPhase = SessionPhase.Disconnected,
-    val trigger: ConnectionTrigger = ConnectionTrigger.NORMAL,
+    /** Null until the session is Ready. Kept after the session closes. */
+    val button: ConnectionButton? = null,
     val watch: WatchSnapshot = WatchSnapshot(),
     val pendingSaves: Set<ComponentId> = emptySet(),
     val errorMessage: String? = null
 ) {
-    val isNormalConnection: Boolean get() = trigger == ConnectionTrigger.NORMAL
-    val isActionButton: Boolean get() = trigger == ConnectionTrigger.ACTION_BUTTON
-    val isAutoTime: Boolean get() = trigger == ConnectionTrigger.AUTO_TIME
-    val isFindPhone: Boolean get() = trigger == ConnectionTrigger.FIND_PHONE
-    val isAlwaysConnected: Boolean get() = trigger == ConnectionTrigger.ALWAYS_CONNECTED
+    val isNormal: Boolean get() = button == ConnectionButton.NORMAL
+    val isFromAction: Boolean get() = button == ConnectionButton.FROM_ACTION
+    val isAutomaticSync: Boolean get() = button == ConnectionButton.AUTOMATIC_SYNC
+    val isFind: Boolean get() = button == ConnectionButton.FIND
+    val isAlwaysConnected: Boolean get() = button == ConnectionButton.ALWAYS_CONNECTED
 
     fun isPendingSave(component: ComponentId): Boolean = component in pendingSaves
     fun hasPendingSaves(): Boolean = pendingSaves.isNotEmpty()

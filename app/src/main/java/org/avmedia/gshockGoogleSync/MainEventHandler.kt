@@ -10,6 +10,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
+import org.avmedia.gshockGoogleSync.session.ConnectionButton
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.AppNotification
@@ -20,7 +22,8 @@ import timber.log.Timber
 class MainEventHandler(
     private val context: GShockApplication,
     private val repository: GShockRepository,
-    private val screenManager: IScreenManager
+    private val screenManager: IScreenManager,
+    private val sessionManager: SessionManager
 ) {
     fun setupEventSubscription() {
         val eventActions = arrayOf(
@@ -44,7 +47,10 @@ class MainEventHandler(
         if (repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
         }
-        if (repository.isNormalButtonPressed()) {
+        // onConnected() is idempotent: it returns the same Session whether this handler or the
+        // SessionEventBridge runs first. Navigation should later be derived from the Session.
+        val button = sessionManager.onConnected().button
+        if (button == ConnectionButton.NORMAL) {
             Timber.i("Normal watch connection; opening Time navigation")
             screenManager.showMainNavigation()
         } else {

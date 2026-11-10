@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.avmedia.gshockGoogleSync.session.ConnectionButton
 import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
@@ -48,16 +49,17 @@ fun AppNavigationHost(
 @Composable
 private fun ContentSelector(viewModel: AppNavigationViewModel) {
     val repository = viewModel.repository
-    when {
-        repository.isAlwaysConnectedConnectionPressed() -> {
+    val sessionState by viewModel.sessionState.collectAsState()
+    when (sessionState.button) {
+        ConnectionButton.ALWAYS_CONNECTED -> {
             CoverScreen(
                 onUnlock = viewModel::showMainNavigation,
                 isConnected = repository.isConnected()
             )
         }
 
-        repository.isActionButtonPressed() || repository.isAutoTimeStarted() -> RunActionsScreen()
-        repository.isFindPhoneButtonPressed() -> RunFindPhoneScreen()
-        else -> BottomNavigationBarWithPermissions(repository = repository)
+        ConnectionButton.FROM_ACTION, ConnectionButton.AUTOMATIC_SYNC -> RunActionsScreen()
+        ConnectionButton.FIND -> RunFindPhoneScreen()
+        ConnectionButton.NORMAL, null -> BottomNavigationBarWithPermissions(repository = repository)
     }
 }

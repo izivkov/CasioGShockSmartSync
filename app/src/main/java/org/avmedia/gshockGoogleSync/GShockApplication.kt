@@ -56,7 +56,12 @@ class GShockApplication : Application(), IScreenManager {
         }
 
         ActivityProvider.initialize(this)
-        eventHandler = MainEventHandler(context = this, repository = repository, screenManager = this)
+        eventHandler = MainEventHandler(
+            context = this,
+            repository = repository,
+            screenManager = this,
+            sessionManager = sessionManager
+        )
         eventHandler.setupEventSubscription()
         actionRunner.setupActionSubscriptions()
         sessionEventBridge.setupEventBridge()

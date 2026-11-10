@@ -20,7 +20,7 @@ class SessionEventBridge @Inject constructor(
         Timber.i("Setting up SessionEventBridge")
         val eventActions = arrayOf(
             EventAction("WatchInitializationCompleted") {
-                sessionManager.onConnected(EntryReason.NORMAL)
+                sessionManager.onConnected()
             },
             EventAction("Disconnect") {
                 val device = ProgressEvents.getPayload("Disconnect") as? BluetoothDevice
