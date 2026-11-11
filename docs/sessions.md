@@ -1,4 +1,4 @@
-# Session Architecture & Connection Management (`docs/sessions.md`)
+# Session Architecture & Connection Management
 
 This document details the **Session Architecture** in Casio G-Shock Smart Sync. The Session system provides a high-level, connection-scoped facade for active watch connections, pending save state management, and connection lifecycle handling.
 
@@ -6,10 +6,11 @@ This document details the **Session Architecture** in Casio G-Shock Smart Sync. 
 
 ## 1. Overview & Motivation
 
-Previously, components and ViewModels across the application directly subscribed to raw string-based `ProgressEvents` (`"ConnectionSetupComplete"`, `"WatchInitializationCompleted"`, `"Disconnect"`, `"Error"`, etc.). This approach caused several architectural issues:
+Previously, components and ViewModels across the application directly subscribed to raw string-based `ProgressEvents` (`"ConnectionSetupComplete"`, `"WatchInitializationCompleted"`, `"Disconnect"`, `"Error"`, etc.) and queried low-level repository button flags (`isNormalButtonPressed()`, `isActionButtonPressed()`, etc.). This approach caused several architectural issues:
 
 - **State Fragmentation**: No single source of truth existed for whether a watch was currently connected or what state the connection was in.
-- **Subscriber Leaks & Race Conditions**: Multiple components subscribing to raw events led to duplicate listeners, payload overwrite races, and stale callbacks from prior connections.
+- **Subscriber Leaks & Stale Callbacks**: Multiple components subscribing to raw events led to duplicate listeners, payload overwrite races, and stale callbacks from prior connections.
+- **Scattered Button Logic**: UI components directly evaluated low-level hardware button flags to decide which screens or actions to run.
 - **Untracked Local Edits**: Edits made on UI screens (Alarms, Settings, Events, Health Profile) were held in local ViewModel state with no central tracking of whether changes were still pending save to watch hardware.
 
 The **Session Architecture** addresses these problems by introducing a connection-scoped `Session` object managed by a `@Singleton SessionManager`.
@@ -24,21 +25,21 @@ The **Session Architecture** addresses these problems by introducing a connectio
 |                                                                          |
 |   +-----------------------+              +---------------------------+   |
 |   |   SessionEventBridge  | ------------>|      SessionManager       |   |
-|   | (Single Event Listener|              |        (@Singleton)       |   |
+|   | (Process Event Bridge)|              |        (@Singleton)       |   |
 |   +-----------------------+              +---------------------------+   |
 |               ^                                        |                 |
 |               | (ProgressEvents)                       v                 |
 |       +---------------+                   +------------------------+     |
-|       |   GShockAPI   |                   |    Active Session      |     |
-|       +---------------+                   | (Connection Scope)     |     |
+|       |   GShockAPI   |                   |     Current Session    |     |
+|       +---------------+                   |   (Connection Scope)   |     |
 |                                           +------------------------+     |
 +--------------------------------------------------------|-----------------+
                                                          |
                    StateFlow<SessionState> & PendingSaves|
                                                          v
                        +-----------------------------------+
-                       | ViewModels & Compose UI Components|
-                       | (Alarms, Settings, Events, Health)|
+                       | ViewModels & Subsystems           |
+                       | (Navigation, Actions, Services)   |
                        +-----------------------------------+
 ```
 
@@ -58,32 +59,64 @@ enum class ComponentId {
 }
 ```
 
-### `SessionPhase` & `EntryReason`
-Sealed interface representing the lifecycle phase of a watch connection:
+### `ConnectionButton`
+Enum representing the physical watch button or trigger that initiated the current connection. Known as soon as the session is `SessionPhase.Ready`:
+```kotlin
+enum class ConnectionButton {
+    NORMAL,             // LOWER-LEFT long-press
+    FROM_ACTION,        // LOWER-RIGHT short-press (action button)
+    AUTOMATIC_SYNC,     // Watch connected by itself (Auto-Time), no button pressed
+    FIND,               // Find Phone pressed on the watch
+    ALWAYS_CONNECTED    // Always-connected watches (e.g. DW-H5600, ECB)
+}
+```
+
+### `EntryReason`
+Maps a physical `ConnectionButton` to the initial screen destination:
 ```kotlin
 enum class EntryReason {
     NORMAL,
     CONTENT_SELECTOR,
-    RUN_ACTIONS
-}
+    RUN_ACTIONS;
 
+    companion object {
+        fun forButton(button: ConnectionButton): EntryReason = when (button) {
+            ConnectionButton.NORMAL -> NORMAL
+            ConnectionButton.FROM_ACTION, ConnectionButton.AUTOMATIC_SYNC -> RUN_ACTIONS
+            ConnectionButton.FIND, ConnectionButton.ALWAYS_CONNECTED -> CONTENT_SELECTOR
+        }
+    }
+}
+```
+
+### `SessionPhase`
+Sealed interface representing the lifecycle phase of a watch connection:
+```kotlin
 sealed interface SessionPhase {
     data object Disconnected : SessionPhase
     data object Connecting : SessionPhase
     data class Ready(val entryReason: EntryReason = EntryReason.NORMAL) : SessionPhase
-    data class Closed(val reason: String = "") : SessionPhase
+    data class Closed(val reason: String = "", val isError: Boolean = false) : SessionPhase
 }
 ```
 
 ### `SessionState`
-Immutable snapshot of the current session:
+Immutable snapshot of the current session state:
 ```kotlin
 data class SessionState(
     val phase: SessionPhase = SessionPhase.Disconnected,
+    val button: ConnectionButton? = null,
     val watch: WatchSnapshot = WatchSnapshot(),
-    val pendingSaves: Set<ComponentId> = emptySet(),
-    val errorMessage: String? = null
+    val isSetupComplete: Boolean = false,
+    val isRunningActions: Boolean = false,
+    val pendingSaves: Set<ComponentId> = emptySet()
 ) {
+    val isNormal: Boolean get() = button == ConnectionButton.NORMAL
+    val isFromAction: Boolean get() = button == ConnectionButton.FROM_ACTION
+    val isAutomaticSync: Boolean get() = button == ConnectionButton.AUTOMATIC_SYNC
+    val isFind: Boolean get() = button == ConnectionButton.FIND
+    val isAlwaysConnected: Boolean get() = button == ConnectionButton.ALWAYS_CONNECTED
+
     fun isPendingSave(component: ComponentId): Boolean = component in pendingSaves
     fun hasPendingSaves(): Boolean = pendingSaves.isNotEmpty()
 }
@@ -91,80 +124,52 @@ data class SessionState(
 
 ---
 
-## 4. Key Classes
+## 4. Key Classes in `org.avmedia.gshockGoogleSync.session`
 
 ### 1. `Session.kt`
-A connection-scoped instance representing a single active watch connection lifetime:
+A single-use, connection-scoped instance representing an active watch connection attempt/session:
 - **`sessionScope`**: A `CoroutineScope` tied specifically to the connection lifecycle (`SupervisorJob() + Dispatchers.Main.immediate`).
+- **Single-Use Guarantee**: Once `close()` is called, a session transitions to `SessionPhase.Closed` and becomes inactive. Any subsequent mutators are no-ops, preventing late callbacks from resurrecting closed sessions.
+- **`registerCloseHook(hook)`**: Allows components to attach cleanup hooks that run deterministically when the session closes.
 - **`pendingSaves`**: Tracks component-level pending saves (`ComponentId`).
-- **`close(reason)`**: Cancels the `sessionScope`, triggers registered close hooks, and calls `repository.teardownConnection(device)` to safely release BLE resources.
 
 ### 2. `SessionManager.kt` (`@Singleton`)
-The application-wide manager and single source of truth for watch connection sessions:
-- Exposes `sessionState: StateFlow<SessionState>` and `currentSession: StateFlow<Session?>`.
+The application-wide manager providing the single source of truth for watch connection sessions:
+- Exposes `sessionState: StateFlow<SessionState>`, `currentSession: StateFlow<Session?>`, and state queries (`isReady`, `activeSession`).
 - **`createSession(device)`**: Creates a new `Session` and cleanly closes any existing stale session.
-- **`onConnected(entryReason)`**: Transitions current session phase to `SessionPhase.Ready`.
-- **`onDisconnected(device, reason)`**: Closes the active session and resets state to `SessionPhase.Disconnected`.
-- **Pending Save API**:
-  - `markPendingSave(component: ComponentId)`
-  - `clearPendingSave(component: ComponentId)`
-  - `isPendingSave(component: ComponentId): Boolean`
-  - `isPendingSaveFlow(component: ComponentId): Flow<Boolean>`
+- **`onConnecting(device)`**: Ensures an active session in `SessionPhase.Connecting`.
+- **`onConnected(entryReason, device)`**: Transitions the session to `SessionPhase.Ready` and fixes its `ConnectionButton`.
+- **`onSetupComplete(device)`**: Marks `isSetupComplete = true` when BLE link setup completes ("ConnectionSetupComplete").
+- **`onDisconnected(device, reason, isError)`**: Closes the active session cleanly.
+- **Pending Save API**: `markPendingSave`, `clearPendingSave`, `isPendingSave`, `isPendingSaveFlow`.
 
 ### 3. `SessionEventBridge.kt` (`@Singleton`)
 A single, process-scoped bridge registered ONCE during `GShockApplication.onCreate()`:
-- Subscribes to low-level `ProgressEvents` callbacks (`WatchInitializationCompleted`, `Disconnect`, `ConnectionFailed`, `Error`).
-- Translates string-based library events into type-safe calls on `SessionManager`.
+- Subscribes to low-level `ProgressEvents` callbacks (`"ConnectionStarted"`, `"ConnectionSetupComplete"`, `"WatchInitializationCompleted"`, `"Disconnect"`, `"Error"`, `"ApiError"`, `"RunActions"`).
+- Translates string-based library events into type-safe calls on `SessionManager`. Uses `ProgressEvents.subscribe()` for safe lifecycle management.
 
 ---
 
-## 5. Usage in ViewModels & UI
+## 5. How Sessions Fit with the Rest of the App
 
-ViewModels inject `SessionManager` to report local edits and clear pending saves when data is successfully written to the watch hardware:
+### Navigation Subsystem (`AppNavigationHost`, `MainEventHandler`, `AppNavigationViewModel`)
+- Instead of checking raw repository flags (`repository.isActionButtonPressed()`, etc.), navigation screens observe `sessionState.trigger` / `sessionState.button`.
+- `ContentSelector` uses `sessionState.button` to decide whether to show `CoverScreen`, `RunActionsScreen`, `RunFindPhoneScreen`, or `BottomNavigationBarWithPermissions`.
+- `MainEventHandler` checks `sessionManager.sessionState.value.isNormal` upon watch initialization to route to main navigation or content selector.
 
-### Example: `AlarmViewModel.kt`
-```kotlin
-// When user edits an alarm locally:
-private fun updateAlarm(index: Int, transform: (Alarm) -> Alarm) {
-    _alarms.update { ... }
-    sessionManager.markPendingSave(ComponentId.ALARMS)
-}
+### Actions Subsystem (`ActionRunner`, `ActionContainer`)
+- **`ActionRunner`**: Process-scoped component that observes `sessionManager.currentSession`. Once a session becomes `Ready`, it runs the connection actions associated with the session's `button` trigger (`runActionsWhenReady`).
+- **Always-Connected Watches**: Listens to `session.state` for `isRunningActions` flag changes (`runActionsOnRequest`), executing actions when requested by the watch and clearing the flag upon completion.
+- **`ActionContainer`**: Waits for session `Ready` before updating persistent action maps and running actions.
 
-// When alarms are written to the watch:
-fun sendAlarmsToWatch() {
-    viewModelScope.launch {
-        val saved = setAlarmAction.runWithAlarms(...)
-        if (saved) {
-            sessionManager.clearPendingSave(ComponentId.ALARMS)
-        }
-    }
-}
-```
+### Background Services & Integrations (`NotificationMonitorService`, `PhoneFinder`)
+- **`NotificationMonitorService`**: Queries `sessionManager.isReady` directly when a notification is posted to verify an active session exists before forwarding notifications to the watch.
+- **`PhoneFinder`**: Registers a session close hook (`session.registerCloseHook { stopRinging() }`) so ringing automatically stops if the watch disconnects.
 
-### Example: `SettingsViewModel.kt`
-```kotlin
-// When user modifies a setting:
-fun onSettingUpdated(setting: Setting) {
-    updateSetting(setting)
-    sessionManager.markPendingSave(ComponentId.SETTINGS)
-}
+### Feature ViewModels (`AlarmViewModel`, `EventViewModel`, `SettingsViewModel`, `HealthViewModel`)
+- **Pending Save Tracking**: ViewModels inject `SessionManager` to call `markPendingSave(ComponentId)` when user edits occur, and `clearPendingSave(ComponentId)` when writes succeed.
+- **Data Reloading**: ViewModels collect `sessionState.isSetupComplete` to automatically reload watch state when a connection completes setup.
 
-// When settings are sent to watch:
-fun sendToWatch() {
-    viewModelScope.launch {
-        val saved = settingsAction.runWithSettings(...)
-        if (saved) {
-            sessionManager.clearPendingSave(ComponentId.SETTINGS)
-        }
-    }
-}
-```
+### Feature Visibility (`WatchFeatureManager`)
+- Reacts to changes in `sessionState` (`watch.name` and `isSetupComplete`) to trigger UI feature updates across the app.
 
----
-
-## 6. Benefits
-
-1. **Clean Separation of Concerns**: Low-level `ProgressEvents` string callbacks are isolated inside `SessionEventBridge`. Higher-level ViewModels consume clean `StateFlow` streams.
-2. **Leak-Free Connection Scopes**: Session closure automatically cancels all coroutines associated with that specific connection attempt.
-3. **Pending Save Transparency**: ViewModels and UI screens have a unified, reactive mechanism to display "Unsaved Changes" or "Pending Save" indicators to users.
-4. **Persistent Local Data Safeguard**: Watch disconnection tears down BLE in-memory caches without touching persistent local user storage (`ActionsStorage`, `AlarmNameStorage`, `EventStorage`, `TimeSettingsStorage`).

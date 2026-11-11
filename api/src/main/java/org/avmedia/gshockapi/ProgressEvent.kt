@@ -154,7 +154,8 @@ object ProgressEvents {
             name: String,
             eventActions: Array<EventAction>,
         ) {
-            if (state.subscribers.contains(name)) return
+            if (state.subscribers.contains(name))
+                return
             state = stateWithSubscriber(state, name)
 
             collectActions(name, eventActions)
