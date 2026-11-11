@@ -23,6 +23,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -30,6 +32,8 @@ import org.avmedia.gshockGoogleSync.scratchpad.ActionsStorage
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockGoogleSync.services.NotificationProvider
+import org.avmedia.gshockGoogleSync.session.SessionManager
+import org.avmedia.gshockGoogleSync.session.SessionPhase
 import org.avmedia.gshockGoogleSync.ui.actions.CameraCaptureHelper
 import org.avmedia.gshockGoogleSync.ui.actions.FlashlightHelper
 import org.avmedia.gshockGoogleSync.ui.actions.PhoneFinder
@@ -46,7 +50,6 @@ import org.avmedia.gshockapi.model.Event
 import org.avmedia.gshockapi.model.ExerciseProfile
 import org.avmedia.gshockapi.model.Settings
 import org.avmedia.gshockapi.model.StepCounterData
-import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -90,7 +93,8 @@ constructor(
     private val watchTimeUpdater: WatchTimeUpdater,
     private val watchFeatureManager: IWatchFeatureManager,
     private val eventStorage: EventStorage,
-    private val alarmNameStorage: AlarmNameStorage
+    private val alarmNameStorage: AlarmNameStorage,
+    private val sessionManager: SessionManager
 ) {
     /** Manually-created scope, since this class has no ViewModel/Activity lifecycle to tie one to. Lives as long as the process. */
     private val containerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -143,7 +147,7 @@ constructor(
             saveJob = containerScope.launch {
                 delay(Duration.ZERO)
                 actionsStorage.save()
-                AppSnackbar(appContext.getString(R.string.actions_saved))
+                // AppSnackbar(appContext.getString(R.string.actions_saved))
                 saveJob = null
             }
         }
@@ -171,19 +175,22 @@ constructor(
 
     init {
         loadInitialActions()
-        setupEventSubscription()
+        observeSessions()
     }
 
-    // Subscribe to watch initialization event to load data after connection
-    private fun setupEventSubscription() {
-        ProgressEvents.runEventActions(
-            "ActionContainer",
-            arrayOf(
-                EventAction("WatchInitializationCompleted") {
-                    containerScope.launch { updateActionsAndMap(loadData(appContext)) }
+    // Loads the persisted action data once per watch session, as soon as the session is Ready.
+    // runFor() waits on isDataLoaded, so actions never run before this has finished.
+    private fun observeSessions() {
+        containerScope.launch {
+            sessionManager.currentSession.filterNotNull().collect { session ->
+                launch {
+                    val state = session.state.first { it.phase !is SessionPhase.Connecting }
+                    if (state.phase is SessionPhase.Ready) {
+                        updateActionsAndMap(loadData(appContext))
+                    }
                 }
-            )
-        )
+            }
+        }
     }
 
     // Method to load the initial list of actions
@@ -363,7 +370,7 @@ constructor(
         }
 
         override fun run(context: Context) {
-            PhoneFinder.ring(context)
+            PhoneFinder.ring(context, sessionManager.activeSession)
         }
     }
 
@@ -1080,8 +1087,8 @@ constructor(
         }
     }
 
-    fun runActionsForActionButton(context: Context) =
-        runFor(RunEnvironment.ACTION_BUTTON_PRESSED, context, announce = true)
+    fun runActionsForActionButton(context: Context, afterRun: () -> Unit = {}) =
+        runFor(RunEnvironment.ACTION_BUTTON_PRESSED, context, announce = true, afterRun = afterRun)
 
     fun runActionForConnection(context: Context) =
         runFor(RunEnvironment.NORMAL_CONNECTION, context)

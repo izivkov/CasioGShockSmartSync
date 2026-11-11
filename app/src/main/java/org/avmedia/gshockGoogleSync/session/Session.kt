@@ -38,9 +38,14 @@ internal fun GShockRepository.currentConnectionButton(): ConnectionButton = when
 class Session(
     val id: String,
     private val repository: GShockRepository,
-    val device: BluetoothDevice? = null,
+    device: BluetoothDevice? = null,
     initialWatch: WatchSnapshot = WatchSnapshot()
 ) {
+    /** The connected device. May be attached after creation, once the library reports it. */
+    @Volatile
+    var device: BluetoothDevice? = device
+        private set
+
     val sessionScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val _state = MutableStateFlow(
@@ -89,8 +94,36 @@ class Session(
         return transitioned
     }
 
-    fun updateWatch(watch: WatchSnapshot) {
-        updateIfActive { it.copy(watch = watch) }
+    fun updateWatch(transform: (WatchSnapshot) -> WatchSnapshot) {
+        updateIfActive { it.copy(watch = transform(it.watch)) }
+    }
+
+    /** Records the connected device, used to tear the connection down and to match disconnects. */
+    fun attachDevice(device: BluetoothDevice) {
+        if (isActive) this.device = device
+    }
+
+    /** The user moved on from the entry screen (e.g. unlocked the cover) to the main navigation. */
+    fun enterMainNavigation() {
+        updateIfActive {
+            if (it.phase is SessionPhase.Ready) it.copy(phase = SessionPhase.Ready(EntryReason.NORMAL))
+            else it
+        }
+    }
+
+    /** The watch asked the app to run its actions ("RunActions"). Only meaningful while Ready. */
+    fun beginRunActions() {
+        updateIfActive {
+            if (it.phase is SessionPhase.Ready) it.copy(isRunningActions = true) else it
+        }
+    }
+
+    fun endRunActions() {
+        updateIfActive { it.copy(isRunningActions = false) }
+    }
+
+    fun markSetupComplete() {
+        updateIfActive { it.copy(isSetupComplete = true) }
     }
 
     fun markPendingSave(component: ComponentId) {
@@ -105,17 +138,24 @@ class Session(
         _state.value.isPendingSave(component)
 
     /**
-     * Registers [hook] to run once when the session closes. If the session has already closed,
-     * the hook runs immediately.
+     * Registers [hook] to run once when the session closes, and returns a handle whose `close()`
+     * unregisters it (idempotent; a no-op once the hook has run). If the session has already
+     * closed, the hook runs immediately and the returned handle does nothing.
      */
-    fun registerCloseHook(hook: () -> Unit) {
+    fun registerCloseHook(hook: () -> Unit): AutoCloseable {
         val runNow = synchronized(hookLock) {
             if (hooksRan) true else {
                 closeHooks.add(hook)
                 false
             }
         }
-        if (runNow) runHook(hook)
+        if (runNow) {
+            runHook(hook)
+            return AutoCloseable { }
+        }
+        return AutoCloseable {
+            synchronized(hookLock) { closeHooks.remove(hook) }
+        }
     }
 
     /**
@@ -125,7 +165,11 @@ class Session(
      * @param deviceHint device to tear down when the session was created without one, e.g. the
      * payload of the "Disconnect" event.
      */
-    fun close(reason: String = "Disconnected", deviceHint: BluetoothDevice? = null) {
+    fun close(
+        reason: String = "Disconnected",
+        deviceHint: BluetoothDevice? = null,
+        isError: Boolean = false
+    ) {
         var alreadyClosed = false
         _state.update {
             if (it.phase is SessionPhase.Closed) {
@@ -134,8 +178,9 @@ class Session(
             } else {
                 alreadyClosed = false
                 it.copy(
-                    phase = SessionPhase.Closed(reason),
-                    pendingSaves = emptySet()
+                    phase = SessionPhase.Closed(reason, isError),
+                    pendingSaves = emptySet(),
+                    isRunningActions = false
                 )
             }
         }
@@ -149,6 +194,11 @@ class Session(
         }
         hooks.forEach { runHook(it) }
 
+        if (isError) {
+            // An error close has no device payload: release the connection itself.
+            runCatching { repository.disconnect() }
+                .onFailure { e -> Timber.e(e, "Error disconnecting GShockAPI in Session") }
+        }
         (device ?: deviceHint)?.let {
             runCatching {
                 repository.teardownConnection(it)

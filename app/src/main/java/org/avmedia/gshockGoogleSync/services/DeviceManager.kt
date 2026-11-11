@@ -6,12 +6,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.Utils
-import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.ProgressEvents
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,6 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class DeviceManager @Inject constructor(
     private val repository: GShockRepository,
+    private val sessionManager: SessionManager,
     @param:ApplicationContext private val appContext: Context
 ) {
     // Serial, off-main scope: storage access may block, and events must be handled in order.
@@ -26,36 +27,28 @@ class DeviceManager @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
 
     init {
-        ProgressEvents.runEventActions(
-            Utils.AppHashCode(),
-            arrayOf(
-                EventAction("DeviceName") { handleDeviceNameEvent() },
-                EventAction("DeviceAddress") { handleDeviceAddressEvent() }
-            )
-        )
-    }
-
-    private fun handleDeviceNameEvent() {
-        // Read the payload now; it may be overwritten before the coroutine runs.
-        val name = ProgressEvents.getPayload("DeviceName").toString()
-        if (name.isEmpty()) return
-
+        // Collected serially on the storage scope, so updates are handled in order.
         scope.launch {
-            if (isNewCasioName(name)) {
-                LocalDataStorage.put(appContext, "LastDeviceName", name)
-            }
+            sessionManager.sessionState
+                .map { it.watch }
+                .distinctUntilChanged()
+                .collect { watch ->
+                    persistName(watch.name)
+                    persistAddress(watch.address)
+                }
         }
     }
 
-    private fun handleDeviceAddressEvent() {
-        val address = ProgressEvents.getPayload("DeviceAddress").toString()
-        if (address.isEmpty()) return
+    private suspend fun persistName(name: String) {
+        if (name.isNotEmpty() && isNewCasioName(name)) {
+            LocalDataStorage.put(appContext, "LastDeviceName", name)
+        }
+    }
 
-        scope.launch {
-            if (isNewValidAddress(address)) {
-                LocalDataStorage.put(appContext, "LastDeviceAddress", address)
-                LocalDataStorage.addDeviceAddress(appContext, address)
-            }
+    private suspend fun persistAddress(address: String) {
+        if (address.isNotEmpty() && isNewValidAddress(address)) {
+            LocalDataStorage.put(appContext, "LastDeviceAddress", address)
+            LocalDataStorage.addDeviceAddress(appContext, address)
         }
     }
 

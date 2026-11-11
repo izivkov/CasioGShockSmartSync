@@ -15,7 +15,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
@@ -31,8 +30,7 @@ class CompanionDeviceCoordinator @Inject constructor(
     private var activeScanAddresses: Set<String>? = null
 
     init {
-        ProgressEvents.runEventActions(
-            Utils.AppHashCode(),
+        ProgressEvents.subscribe(
             arrayOf(
                 EventAction("DeviceAppeared") {
                     val address = ProgressEvents.getPayload("DeviceAppeared") as? String
@@ -117,8 +115,8 @@ class CompanionDeviceCoordinator @Inject constructor(
         // CDM is authoritative for newly paired devices; local storage updates may
         // still be in flight when this synchronization runs.
         val activeAddresses = (
-            LocalDataStorage.getDeviceAddresses(context) + systemAssociations.map { it.address }
-        ).map { it.uppercase() }.toSet()
+                LocalDataStorage.getDeviceAddresses(context) + systemAssociations.map { it.address }
+                ).map { it.uppercase() }.toSet()
 
         if (!isLocationEnabled()) {
             Timber.w("Location Services disabled — notifying user.")

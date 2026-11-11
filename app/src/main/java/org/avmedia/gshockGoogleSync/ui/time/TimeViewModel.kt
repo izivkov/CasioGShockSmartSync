@@ -19,7 +19,6 @@ import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockGoogleSync.voice.VoiceCommandManager
 import org.avmedia.gshockGoogleSync.voice.VoiceDispatcher
 import org.avmedia.gshockGoogleSync.voice.VoiceSpeechFeedback
@@ -68,7 +67,7 @@ class TimeViewModel @Inject constructor(
     private val _state = MutableStateFlow(TimeState())
     val state = _state.asStateFlow()
 
-    private var eventSubscriptionName: String? = null
+    private var eventSubscription: AutoCloseable? = null
     private var saveJob: Job? = null
 
     init {
@@ -77,10 +76,7 @@ class TimeViewModel @Inject constructor(
     }
 
     private fun setupEventSubscription() {
-        // ProgressEvents drops a second subscription registered under a name it has
-        // already seen, so each instance uses a unique name.
-        eventSubscriptionName = subscribeToProgressEvents(
-            "TimeViewModel",
+        eventSubscription = ProgressEvents.subscribe(
             arrayOf(
                 EventAction("TimerUpdated") {
                     val payload = ProgressEvents.getPayload("TimerUpdated") as? Int
@@ -181,7 +177,7 @@ class TimeViewModel @Inject constructor(
         SolarTimeHelper.calculateTimeOffset(appContext, option)
 
     override fun onCleared() {
-        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
+        eventSubscription?.close()
         saveJob?.let {
             saveJob?.cancel()
             viewModelScope.launch {

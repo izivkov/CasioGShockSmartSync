@@ -16,7 +16,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
-import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
@@ -117,7 +116,7 @@ class HealthViewModel @Inject constructor(
     val usesImperialUnits: Boolean =
         Locale.getDefault().country.uppercase(Locale.US) in IMPERIAL_COUNTRIES
 
-    private var eventSubscriptionName: String? = null
+    private var eventSubscription: AutoCloseable? = null
     private var stepPollJob: Job? = null
     private var stepFetchJob: Job? = null
     private var stepFetchPending = false
@@ -132,8 +131,7 @@ class HealthViewModel @Inject constructor(
     }
 
     private fun setupEventSubscription() {
-        eventSubscriptionName = subscribeToProgressEvents(
-            "HealthViewModel",
+        eventSubscription = ProgressEvents.subscribe(
             arrayOf(
                 EventAction("ExerciseProfileUpdated") {
                     val payload = ProgressEvents.getPayload("ExerciseProfileUpdated") as? ExerciseProfile
@@ -283,7 +281,7 @@ class HealthViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
+        eventSubscription?.close()
         stepPollJob?.cancel()
     }
 }

@@ -15,11 +15,9 @@ import android.media.RingtoneManager
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.session.Session
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import timber.log.Timber
-import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.ProgressEvents
-import org.avmedia.gshockGoogleSync.utils.Utils
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -36,17 +34,24 @@ object PhoneFinder {
         val sensorHandler: SensorHandler? = null,
         val wakeLock: PowerManager.WakeLock? = null,
         val audioFocusRequest: AudioFocusRequest? = null,
-        val resetVolume: () -> Unit = {}
+        val resetVolume: () -> Unit = {},
+        val sessionHook: AutoCloseable? = null
     )
 
     private var state = State()
 
-    fun ring(context: Context): Result<Unit> = runCatching {
+    /**
+     * Rings the phone until it is lifted, 30 seconds pass, or [session] closes.
+     *
+     * @param session the live watch connection to tie the ring to, or null when the watch is not
+     * connected (e.g. started by voice), in which case only lifting and the timeout stop it.
+     */
+    fun ring(context: Context, session: Session? = null): Result<Unit> = runCatching {
         Timber.d("PhoneFinder: ring() called")
         acquireWakeLock(context)
         getAlarmUri(context)?.let { uri ->
             startAudio(context, uri)
-            detectPhoneLifting(context)
+            detectPhoneLifting(context, session)
         } ?: throw IllegalStateException("No playable alarm or ringtone available")
     }.onFailure { e ->
         Timber.e(e, "Failed to ring phone")
@@ -58,9 +63,9 @@ object PhoneFinder {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         @Suppress("DEPRECATION")
         val wakeLock = powerManager.newWakeLock(
-            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or 
-            PowerManager.ACQUIRE_CAUSES_WAKEUP or 
-            PowerManager.ON_AFTER_RELEASE,
+            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or
+                    PowerManager.ACQUIRE_CAUSES_WAKEUP or
+                    PowerManager.ON_AFTER_RELEASE,
             WAKE_LOCK_TAG
         ).apply {
             setReferenceCounted(false)
@@ -73,7 +78,7 @@ object PhoneFinder {
     private fun startAudio(context: Context, alarmUri: android.net.Uri) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
-        
+
         audioManager.setStreamVolume(
             AudioManager.STREAM_ALARM,
             audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
@@ -110,8 +115,8 @@ object PhoneFinder {
         }
 
         state = state.copy(
-            mediaPlayer = mediaPlayer, 
-            audioFocusRequest = focusRequest, 
+            mediaPlayer = mediaPlayer,
+            audioFocusRequest = focusRequest,
             resetVolume = resetVolume
         )
         Timber.d("PhoneFinder: MediaPlayer started. isPlaying=${mediaPlayer.isPlaying}")
@@ -150,7 +155,7 @@ object PhoneFinder {
         }
     }
 
-    private fun detectPhoneLifting(context: Context) {
+    private fun detectPhoneLifting(context: Context, session: Session?) {
         state = state.copy(sensorHandler = SensorHandler(context) { stopRing(context, "Phone lifted") })
         state.sensorHandler?.startListening()
 
@@ -159,20 +164,19 @@ object PhoneFinder {
             stopRing(context, "30s timeout reached")
         }
 
-        setupDisconnectListener(context)
+        bindToSession(context, session)
     }
 
-    private fun setupDisconnectListener(context: Context) {
-        val eventActions = arrayOf(
-            EventAction("Disconnect") {
-                stopRing(context, "Watch disconnected")
-            }
-        )
-        ProgressEvents.runEventActions(Utils.AppHashCode() + "PhoneFinder", eventActions)
+    /** Stops the ring when [session] closes. Replaces any hook left by an earlier ring. */
+    private fun bindToSession(context: Context, session: Session?) {
+        state.sessionHook?.close()
+        val hook = session?.registerCloseHook { stopRing(context, "Watch disconnected") }
+        state = state.copy(sessionHook = hook)
     }
 
     private fun stopRing(context: Context, reason: String = "Unknown") {
         Timber.d("PhoneFinder: stopRing() called. Reason: $reason")
+        state.sessionHook?.close()
         state.mediaPlayer?.let {
             try {
                 if (it.isPlaying) it.stop()
@@ -189,11 +193,11 @@ object PhoneFinder {
                 Timber.d("PhoneFinder: wake lock released")
             }
         }
-        
+
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(NOTIFICATION_ID)
-        
+
         state = State() // Reset state
         Timber.d("PhoneFinder: Ringing stopped and state reset")
     }

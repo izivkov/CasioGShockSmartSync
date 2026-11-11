@@ -14,6 +14,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
@@ -57,23 +61,35 @@ constructor(
     init {
         initializeSettings()
         setupEventSubscription()
+        reloadOnSetupComplete()
+    }
+
+    /** Reloads when a connection finishes setup after this ViewModel was created. */
+    private fun reloadOnSetupComplete() {
+        viewModelScope.launch {
+            sessionManager.sessionState
+                .map { it.isSetupComplete }
+                .distinctUntilChanged()
+                .drop(1)
+                .filter { it }
+                .collect { initializeSettings() }
+        }
+    }
+
+    private var eventSubscription: AutoCloseable? = null
+
+    override fun onCleared() {
+        eventSubscription?.close()
     }
 
     private fun setupEventSubscription() {
-        ProgressEvents.runEventActions(
-            this.javaClass.canonicalName ?: "SettingsViewModel",
+        eventSubscription = ProgressEvents.subscribe(
             arrayOf(
-            EventAction("DeviceName") {
-                initializeSettings()
-            },
-            EventAction("ConnectionSetupComplete") {
-                initializeSettings()
-            },
-            EventAction("SettingsUpdated") {
-                val payload = ProgressEvents.getPayload("SettingsUpdated") as? Settings
-                initializeSettings(payload)
-            }
-        ))
+                EventAction("SettingsUpdated") {
+                    val payload = ProgressEvents.getPayload("SettingsUpdated") as? Settings
+                    initializeSettings(payload)
+                }
+            ))
     }
 
     private fun initializeSettings(freshSettings: Settings? = null) {

@@ -9,13 +9,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
-import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.model.Event
@@ -44,6 +47,22 @@ class EventViewModel @Inject constructor(
     init {
         refreshState()
         listenForUpdateRequest()
+        refreshOnSetupComplete()
+    }
+
+    /** Reloads when a connection finishes setup after this ViewModel was created. */
+    private fun refreshOnSetupComplete() {
+        viewModelScope.launch {
+            sessionManager.sessionState
+                .map { it.isSetupComplete }
+                .distinctUntilChanged()
+                .drop(1)
+                .filter { it }
+                .collect {
+                    if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode
+                        refreshState()
+                }
+        }
     }
 
     private fun refreshState() {
@@ -122,19 +141,10 @@ class EventViewModel @Inject constructor(
         EventsModel.refresh(ArrayList(_events.value))
     }
 
-    // ProgressEvents silently drops a second subscription registered under a
-    // name it has already seen. Utils.AppHashCode() + "listenForUpdateRequest"
-    // looks unique but isn't: AppHashCode() hashes the calling function's
-    // NAME (a compile-time-constant string), not this instance's identity,
-    // so it produces the exact same subscriber name on every call - this
-    // ViewModel had the same silent-drop-on-recreation bug as
-    // AlarmViewModel/TimeViewModel/BottomNavigationBarWithPermissions did
-    // before their fix. A unique name per instance guarantees this
-    // instance's subscription actually registers.
-    private var eventSubscriptionName: String? = null
+    private var eventSubscription: AutoCloseable? = null
 
     override fun onCleared() {
-        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
+        eventSubscription?.close()
     }
 
     private fun listenForUpdateRequest() {
@@ -157,21 +167,10 @@ class EventViewModel @Inject constructor(
                 } else {
                     loadEvents()
                 }
-            },
-            EventAction("DeviceName") {
-                if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode
-                    refreshState()
-            },
-            EventAction("ConnectionSetupComplete") {
-                if (!_isManualMode.value) // We are refreshing on new Calendar Events only, not in Manual mode
-                    refreshState()
             }
         )
 
-        eventSubscriptionName = subscribeToProgressEvents(
-            "EventViewModel-listenForUpdateRequest",
-            eventActions
-        )
+        eventSubscription = ProgressEvents.subscribe(eventActions)
     }
 
     fun sendEventsToWatch() {

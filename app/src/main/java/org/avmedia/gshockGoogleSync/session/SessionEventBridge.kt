@@ -1,7 +1,6 @@
 package org.avmedia.gshockGoogleSync.session
 
 import android.bluetooth.BluetoothDevice
-import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
@@ -16,9 +15,29 @@ import javax.inject.Singleton
 class SessionEventBridge @Inject constructor(
     private val sessionManager: SessionManager
 ) {
+    private var subscription: AutoCloseable? = null
+
     fun setupEventBridge() {
+        if (subscription != null) return
         Timber.i("Setting up SessionEventBridge")
         val eventActions = arrayOf(
+            EventAction("ConnectionStarted") {
+                sessionManager.onConnecting()
+            },
+            EventAction("DeviceName") {
+                (ProgressEvents.getPayload("DeviceName") as? String)
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let(sessionManager::onDeviceName)
+            },
+            EventAction("DeviceAddress") {
+                (ProgressEvents.getPayload("DeviceAddress") as? String)
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let(sessionManager::onDeviceAddress)
+            },
+            EventAction("ConnectionSetupComplete") {
+                val device = ProgressEvents.getPayload("ConnectionSetupComplete") as? BluetoothDevice
+                sessionManager.onSetupComplete(device)
+            },
             EventAction("WatchInitializationCompleted") {
                 sessionManager.onConnected()
             },
@@ -29,12 +48,20 @@ class SessionEventBridge @Inject constructor(
             EventAction("ConnectionFailed") {
                 sessionManager.onDisconnected(reason = "Connection Failed")
             },
+            EventAction("ApiError") {
+                val errorMsg = ProgressEvents.getPayload("ApiError")?.toString() ?: "API Error"
+                sessionManager.onApiError(errorMsg)
+            },
+            EventAction("RunActions") {
+                sessionManager.onRunActionsRequested()
+            },
             EventAction("Error") {
-                val errorMsg = ProgressEvents.getPayload("Error") as? String ?: "Connection Error"
-                sessionManager.onDisconnected(reason = errorMsg)
+                // A blank reason means "use the default message"; the UI layer owns that text.
+                val errorMsg = ProgressEvents.getPayload("Error") as? String ?: ""
+                sessionManager.onError(errorMsg)
             }
         )
 
-        ProgressEvents.runEventActions(Utils.AppHashCode() + "_SessionBridge", eventActions)
+        subscription = ProgressEvents.subscribe(eventActions)
     }
 }

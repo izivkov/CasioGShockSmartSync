@@ -5,17 +5,18 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.session.ConnectionButton
 import org.avmedia.gshockGoogleSync.session.Session
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
-import org.avmedia.gshockGoogleSync.utils.Utils
-import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,22 +30,15 @@ class ActionRunner @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     fun setupActionSubscriptions() {
-        // Runs the actions for the connection button once per Session, as soon as it is Ready.
-        // The button comes from the Session, so there is no ordering dependency on other
+        // Everything here is driven by the Session: actions run once per Session when it is Ready,
+        // and again whenever the watch asks for them. There is no ordering dependency on other
         // subscribers of the connection events.
         scope.launch {
             sessionManager.currentSession.filterNotNull().collect { session ->
                 launch { runActionsWhenReady(session) }
+                launch { runActionsOnRequest(session) }
             }
         }
-
-        // Triggered by messages rather than button presses, e.g. "FindPhone" on always-connected watches
-        val otherActions = arrayOf(
-            EventAction("RunActions") {
-                actionContainer.runActionsForActionButton(context)
-            }
-        )
-        ProgressEvents.runEventActions(Utils.AppHashCode(), otherActions)
         Timber.i("Action subscriptions registered at process scope (no UI required)")
     }
 
@@ -60,5 +54,21 @@ class ActionRunner @Inject constructor(
             ConnectionButton.ALWAYS_CONNECTED -> actionContainer.runActionForAlwaysConnected(context)
             null -> Unit
         }
+    }
+
+    /**
+     * Runs the actions each time an always-connected watch requests it (the session's
+     * `isRunningActions` turns on), and clears the flag when they have been started. Ends with the
+     * session.
+     */
+    private suspend fun runActionsOnRequest(session: Session) {
+        session.state
+            .takeWhile { it.phase !is SessionPhase.Closed }
+            .map { it.isRunningActions }
+            .distinctUntilChanged()
+            .filter { it }
+            .collect {
+                actionContainer.runActionsForActionButton(context) { session.endRunActions() }
+            }
     }
 }

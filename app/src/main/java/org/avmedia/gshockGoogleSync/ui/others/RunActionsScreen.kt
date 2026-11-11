@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 
-import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 
@@ -55,7 +54,7 @@ object ActionNameHandler {
             }
         )
 
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+        ProgressEvents.subscribe(eventActions)
     }
 }
 
@@ -137,4 +136,3 @@ fun RunFindPhoneScreen() {
         )
     }
 }
-

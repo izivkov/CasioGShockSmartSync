@@ -22,7 +22,6 @@ import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
-import org.avmedia.gshockGoogleSync.utils.subscribeToProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.model.Alarm
@@ -58,12 +57,7 @@ class AlarmViewModel @Inject constructor(
     private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val events: SharedFlow<String> = _events.asSharedFlow()
 
-    // ProgressEvents silently drops a second subscription registered under a
-    // name it has already seen - which "AlarmViewModel" is, the moment this
-    // ViewModel is ever recreated. A unique name per instance guarantees
-    // this instance's subscription actually registers. See
-    // subscribeToProgressEvents() for the full explanation.
-    private var eventSubscriptionName: String? = null
+    private var eventSubscription: AutoCloseable? = null
 
     init {
         loadAlarms()
@@ -71,8 +65,7 @@ class AlarmViewModel @Inject constructor(
     }
 
     private fun setupEventSubscription() {
-        eventSubscriptionName = subscribeToProgressEvents(
-            "AlarmViewModel",
+        eventSubscription = ProgressEvents.subscribe(
             arrayOf(
                 EventAction("AlarmsUpdated") {
                     val payload = ProgressEvents.getPayload("AlarmsUpdated") as? AlarmsWritten
@@ -87,7 +80,7 @@ class AlarmViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        eventSubscriptionName?.let { ProgressEvents.subscriber.stop(it) }
+        eventSubscription?.close()
     }
 
     private fun loadAlarms() = viewModelScope.launch {
@@ -119,7 +112,7 @@ class AlarmViewModel @Inject constructor(
             _alarms.value = newAlarms
             ProgressEvents.onNext("Alarms Loaded")
         }.onFailure {
-            ProgressEvents.onNext("Error")
+            sessionManager.onError()
         }
     }
 

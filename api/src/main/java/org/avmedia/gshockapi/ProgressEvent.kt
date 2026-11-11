@@ -9,6 +9,7 @@ package org.avmedia.gshockapi
 import androidx.annotation.Keep
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -156,25 +157,46 @@ object ProgressEvents {
             if (state.subscribers.contains(name)) return
             state = stateWithSubscriber(state, name)
 
-            val actionMap = eventActions.associateBy { it.label }
-
-            CoroutineScope(Dispatchers.Main).launch {
-                eventsFlow.collect { (event, payload) ->
-                    try {
-                        state.reverseEventMap[event]?.let { eventName ->
-                            actionMap[eventName]?.action?.invoke()
-                        }
-                    } catch (throwable: Throwable) {
-                        Timber.d("Error in subscriber '$name': $throwable")
-                        throwable.printStackTrace()
-                    }
-                }
-            }
+            collectActions(name, eventActions)
         }
 
         /** Stop listening. */
         fun stop(name: String) {
             state = stateWithoutSubscriber(state, name)
+        }
+    }
+
+    /**
+     * Start listening to [ProgressEvents] without a name, and return a handle: `close()` cancels
+     * the subscription. Any number of subscribers can be registered and none is ever dropped, so
+     * recreatable owners (a ViewModel, a Composable) just close their handle when they end.
+     *
+     * Like [runEventActions], events recently broadcast (up to the replay size) are delivered to a
+     * new subscriber, and an action reads its payload with [getPayload].
+     *
+     * @param eventActions Actions to invoke per event name.
+     */
+    fun subscribe(eventActions: Array<EventAction>): AutoCloseable {
+        val job = collectActions("subscription", eventActions)
+        return AutoCloseable { job.cancel() }
+    }
+
+    private fun collectActions(
+        label: String,
+        eventActions: Array<EventAction>,
+    ): Job {
+        val actionMap = eventActions.associateBy { it.label }
+        return CoroutineScope(Dispatchers.Main).launch {
+            eventsFlow.collect { (event, _) ->
+                try {
+                    state.reverseEventMap[event]?.let { eventName ->
+                        actionMap[eventName]?.action?.invoke()
+                    }
+                } catch (throwable: Throwable) {
+                    Timber.d("Error in subscriber '$label': $throwable")
+                    throwable.printStackTrace()
+                }
+            }
         }
     }
 

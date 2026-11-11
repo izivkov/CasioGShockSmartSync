@@ -1,8 +1,13 @@
 package org.avmedia.gshockGoogleSync.ui.common
 
 import androidx.compose.runtime.mutableIntStateOf
-import org.avmedia.gshockapi.EventAction
-import org.avmedia.gshockapi.ProgressEvents
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import javax.inject.Inject
@@ -17,19 +22,22 @@ interface IWatchFeatureManager {
 }
 
 @Singleton
-class WatchFeatureManager @Inject constructor() : IWatchFeatureManager {
+class WatchFeatureManager @Inject constructor(
+    sessionManager: SessionManager
+) : IWatchFeatureManager {
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val refreshCounter = mutableIntStateOf(0)
 
     init {
-        ProgressEvents.runEventActions("WatchFeatureManager", arrayOf(
-            EventAction("DeviceName") {
-                refreshCounter.intValue++
-            },
-            EventAction("ConnectionSetupComplete") {
-                refreshCounter.intValue++
-            }
-        ))
+        // WatchInfo is a global the library fills in as the watch reports itself. Bump the counter
+        // whenever the session learns the watch name or finishes setup so observers re-read it.
+        scope.launch {
+            sessionManager.sessionState
+                .map { it.watch.name to it.isSetupComplete }
+                .distinctUntilChanged()
+                .collect { refreshCounter.intValue++ }
+        }
     }
 
     // To support a new WatchInfo feature: add one line here.

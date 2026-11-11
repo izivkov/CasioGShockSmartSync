@@ -1,62 +1,75 @@
 package org.avmedia.gshockGoogleSync
 
-import android.bluetooth.BluetoothDevice
+import android.app.AlertDialog
 import android.content.Intent
 import android.provider.Settings
-import android.app.AlertDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.services.NotificationMonitorService
-import org.avmedia.gshockGoogleSync.session.ConnectionButton
+import org.avmedia.gshockGoogleSync.session.Session
 import org.avmedia.gshockGoogleSync.session.SessionManager
+import org.avmedia.gshockGoogleSync.session.SessionPhase
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.utils.ActivityProvider
-import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
+/**
+ * App-level side effects of connection events. Navigation is not handled here: it is derived from
+ * the watch Session by [AppScreenState].
+ */
 class MainEventHandler(
     private val context: GShockApplication,
     private val repository: GShockRepository,
-    private val screenManager: IScreenManager,
     private val sessionManager: SessionManager
 ) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     fun setupEventSubscription() {
         val eventActions = arrayOf(
-            EventAction("ConnectionSetupComplete") {},
-            EventAction("WatchInitializationCompleted") { handleWatchInitialization() },
-            EventAction("ConnectionFailed") { handleConnectionFailure() },
-            EventAction("Error") { handleError() },
             EventAction("WaitForConnection") { handleWaitForConnection() },
-            EventAction("Disconnect") { handleDisconnect() },
             EventAction("HomeTimeUpdated") {},
-            EventAction("RunActions") { handleRunAction() },
             EventAction("AppNotification") { handleAppNotification() },
             EventAction("LocationServicesDisabled") { handleLocationServicesDisabled() }
         )
 
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
+        ProgressEvents.subscribe(eventActions)
+        observeSessions()
     }
 
-    private fun handleWatchInitialization() {
-        Timber.i("Received WatchInitializationCompleted")
-        if (repository.supportsAppNotifications()) {
+    private fun observeSessions() {
+        scope.launch {
+            sessionManager.currentSession.filterNotNull().collect { session ->
+                launch { startNotificationServiceWhenReady(session) }
+                launch { reportErrorWhenClosed(session) }
+            }
+        }
+    }
+
+    private suspend fun startNotificationServiceWhenReady(session: Session) {
+        val state = session.state.first { it.phase !is SessionPhase.Connecting }
+        if (state.phase is SessionPhase.Ready && repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
         }
-        // onConnected() is idempotent: it returns the same Session whether this handler or the
-        // SessionEventBridge runs first. Navigation should later be derived from the Session.
-        val button = sessionManager.onConnected().button
-        if (button == ConnectionButton.NORMAL) {
-            Timber.i("Normal watch connection; opening Time navigation")
-            screenManager.showMainNavigation()
-        } else {
-            Timber.i("Special watch button connection; resolving content selector")
-            screenManager.showContentSelector(repository)
+    }
+
+    private suspend fun reportErrorWhenClosed(session: Session) {
+        val closed = session.state.first { it.phase is SessionPhase.Closed }.phase
+                as SessionPhase.Closed
+        if (!closed.isError) return
+
+        val message = closed.reason.ifBlank {
+            context.getString(R.string.apierror_ensure_the_official_g_shock_app_is_not_running)
         }
+        Timber.e("Session closed with an error: $message")
+        AppSnackbar(message)
     }
 
     private fun handleAppNotification() {
@@ -66,40 +79,6 @@ class MainEventHandler(
                 repository.sendAppNotification(appNotification)
             }
         }
-    }
-
-    private fun handleConnectionFailure() {
-        Timber.e("Failed to connect to the watch")
-    }
-
-    private fun handleRunAction() {
-        screenManager.showRunActionsScreen()
-
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(3000)
-            screenManager.showContentSelector(repository)
-        }
-    }
-
-    private fun handleError() {
-        val payload = ProgressEvents.getPayload("Error") as String?
-        val message = payload
-            ?: context.getString(
-                R.string.apierror_ensure_the_official_g_shock_app_is_not_running
-            )
-        Timber.e("API Error event. payload=${payload ?: "<none, using default message>"}")
-
-        repository.disconnect()
-        screenManager.showError(message)
-        screenManager.showPreConnectionScreen()
-    }
-
-    private fun handleDisconnect() {
-        ProgressEvents.getPayload("Disconnect")?.let { device ->
-            repository.teardownConnection(device as BluetoothDevice)
-        }
-        Timber.i("Watch disconnected; returning to pre-connection screen")
-        screenManager.showInitialScreen()
     }
 
     private fun handleWaitForConnection() {

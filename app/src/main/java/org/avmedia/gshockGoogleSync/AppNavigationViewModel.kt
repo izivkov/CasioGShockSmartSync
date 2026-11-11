@@ -9,15 +9,16 @@ import org.avmedia.gshockGoogleSync.session.SessionManager
 
 @HiltViewModel
 class AppNavigationViewModel @Inject constructor(
-    private val screenState: AppScreenState,
+    screenState: AppScreenState,
+    private val sessionManager: SessionManager,
     val repository: GShockRepository,
-    val companionDeviceCoordinator: CompanionDeviceCoordinator,
-    sessionManager: SessionManager
+    val companionDeviceCoordinator: CompanionDeviceCoordinator
 ) : ViewModel() {
     val state = screenState.state
     val sessionState = sessionManager.sessionState
 
+    /** The user left the entry screen (e.g. unlocked the cover). */
     fun showMainNavigation() {
-        screenState.showMainNavigation()
+        sessionManager.activeSession?.enterMainNavigation()
     }
 }

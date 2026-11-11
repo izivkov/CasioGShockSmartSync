@@ -11,11 +11,6 @@ import timber.log.Timber
 
 class Utils {
     companion object {
-        fun AppHashCode(): String {
-            val frame = Thread.currentThread().stackTrace[3]
-            return "${frame.className}.${frame.methodName}:${frame.lineNumber}".hashCode().toString()
-        }
-
         fun shortenStringNewLine(
             input: String,
             wordMaxLength: Int,

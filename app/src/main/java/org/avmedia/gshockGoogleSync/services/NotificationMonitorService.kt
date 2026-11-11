@@ -8,15 +8,13 @@ import android.content.pm.PackageManager
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import org.avmedia.gshockGoogleSync.utils.Utils
+import dagger.hilt.android.AndroidEntryPoint
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockapi.AppNotification
-import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.NotificationType
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
+import javax.inject.Inject
 
 data class NotificationInfo(
     val packageName: String,
@@ -28,35 +26,11 @@ data class NotificationInfo(
     val timestamp: Long
 )
 
+@AndroidEntryPoint
 class NotificationMonitorService : NotificationListenerService() {
-    private data class ServiceState(
-        val isRunning: Boolean = false,
-        val eventActions: List<EventAction> = emptyList()
-    )
 
-    private val _state = MutableStateFlow(ServiceState())
-    private val state: StateFlow<ServiceState> = _state.asStateFlow()
-
-    init {
-        initializeEventActions()
-    }
-
-    private fun initializeEventActions() {
-        val actions = listOf(
-            EventAction("WatchInitializationCompleted") { updateRunningState(true) },
-            EventAction("Disconnect") { updateRunningState(false) }
-        )
-        _state.value = _state.value.copy(eventActions = actions)
-        subscribeToEvents()
-    }
-
-    private fun subscribeToEvents() {
-        ProgressEvents.runEventActions(Utils.AppHashCode(), state.value.eventActions.toTypedArray())
-    }
-
-    private fun updateRunningState(running: Boolean) {
-        _state.value = _state.value.copy(isRunning = running)
-    }
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     override fun onListenerConnected() {
         super.onListenerConnected()
@@ -71,7 +45,9 @@ class NotificationMonitorService : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        if (!state.value.isRunning) return
+        // Forward notifications only while a watch session is Ready. Read from the Session at the
+        // moment of use, so a recreated service instance cannot miss a connection event.
+        if (!sessionManager.isReady) return
 
         processNotification(sbn)
             .onSuccess { notificationInfo ->

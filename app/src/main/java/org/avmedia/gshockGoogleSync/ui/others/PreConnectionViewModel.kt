@@ -14,16 +14,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.GShockApplication
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.Utils
-import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ICDPDelegate
-import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
 @HiltViewModel
@@ -31,6 +32,7 @@ class PreConnectionViewModel
 @Inject
 constructor(
     private val api: GShockRepository,
+    private val sessionManager: SessionManager,
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
@@ -38,9 +40,6 @@ constructor(
     private companion object {
         const val KEY_LAST_DEVICE_NAME = "LastDeviceName"
         const val KEY_LAST_DEVICE_ADDRESS = "LastDeviceAddress"
-        const val EVENT_DEVICE_NAME = "DeviceName"
-        const val EVENT_DEVICE_ADDRESS = "DeviceAddress"
-        const val EVENT_NO_PAIRED = "NoPairedDevices"
         const val PREFIX_CASIO = "CASIO"
     }
 
@@ -67,7 +66,35 @@ constructor(
             _watchName.value = savedName
             loadPairedDevices()
         }
-        createSubscription()
+        observeConnectedWatch()
+    }
+
+    /**
+     * Follows the watch of the current connection. Only changes after this ViewModel was created are
+     * handled; the last known name and address are loaded from storage in [init].
+     */
+    private fun observeConnectedWatch() {
+        viewModelScope.launch {
+            sessionManager.sessionState
+                .map { it.watch.name }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { name ->
+                    if (name.isNotBlank()) _watchName.value = name
+                }
+        }
+        viewModelScope.launch {
+            sessionManager.sessionState
+                .map { it.watch.address }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { address ->
+                    if (address.isNotBlank()) {
+                        LocalDataStorage.put(appContext, KEY_LAST_DEVICE_ADDRESS, address)
+                        loadPairedDevices()
+                    }
+                }
+        }
     }
 
     fun hidePreparing() {
@@ -125,7 +152,7 @@ constructor(
                 ?: LocalDataStorage.getDeviceName(appContext, address)
                 ?: noWatchString
             DeviceItem(name, address, isLastUsed)
-            }
+        }
 
         _pairedDevices.value = formatDeviceNames(items)
     }
@@ -153,29 +180,6 @@ constructor(
             result.add(item.copy(name = formattedName))
         }
         return result
-    }
-
-    private fun createSubscription() {
-        val eventActions = arrayOf(
-            EventAction(EVENT_DEVICE_NAME) {
-                val deviceName = (ProgressEvents.getPayload(EVENT_DEVICE_NAME) as? String)
-                    ?.takeIf { it.isNotBlank() } ?: noWatchString
-                _watchName.value = deviceName
-            },
-            EventAction(EVENT_DEVICE_ADDRESS) {
-                val address = ProgressEvents.getPayload(EVENT_DEVICE_ADDRESS) as? String
-                if (!address.isNullOrBlank()) {
-                    viewModelScope.launch {
-                        LocalDataStorage.put(appContext, KEY_LAST_DEVICE_ADDRESS, address)
-                        loadPairedDevices()
-                    }
-                }
-            },
-            EventAction(EVENT_NO_PAIRED) {
-                // Handle no devices if necessary
-            }
-        )
-        ProgressEvents.runEventActions(Utils.AppHashCode(), eventActions)
     }
 
     fun associate(context: Context, delegate: ICDPDelegate) {
