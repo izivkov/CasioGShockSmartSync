@@ -1,10 +1,6 @@
 # Casio G-Shock Smart Sync
 
 <p align="center">
-  <img src="images/gshock-smart-sync.jpg" alt="G-Shock Smart Sync Logo" width="600">
-</p>
-
-<p align="center">
   <a href="https://ko-fi.com/ivozivkov">
     <img src="https://img.shields.io/badge/Support%20Development-Buy%20Me%20a%20Coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support development on Ko-fi">
   </a>
