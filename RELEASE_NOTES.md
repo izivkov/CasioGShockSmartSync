@@ -1,3 +1,32 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.25 — November 11, 2026
+
+## Highlights
+
+### 🔌 Unified Watch Connection Session
+* **One Source of Truth**: Introduced a connection `Session` that represents each watch connection from the first connection attempt until it ends. Screens, actions, and background services now read the connection state from the session instead of each listening to low-level Bluetooth events.
+* **Fresh Session per Connection**: Every connection gets its own session, and a closed session is never reused, so a reconnect can no longer pick up state left over from the previous connection. Late or duplicate disconnect events for a different watch are ignored, and the first reason a session closes is the one that is kept.
+* **Connection Button in the Session**: The button or trigger that started the connection (Normal, From Action, Automatic Sync, Find Phone, or Always Connected) is now read once, kept for the whole session, and used to choose which actions to run and which screen to open.
+* **Connection Phases**: A session moves through Connecting, Ready, and Closed, and remembers why it closed, including whether it ended in an error.
+
+### 🧭 Navigation Driven by the Session
+* **Derived Screens**: The screen to show is now derived from the session state: the pre-connection screen while connecting, the Time, content selector, or run-actions screen once ready, and back to the start screen after a disconnect. The imperative navigation handlers were removed from `MainEventHandler`, and `IScreenManager` is gone.
+* **Run Actions Without a Timer**: The Run Actions screen is now driven by the session and closes when the actions have been started, replacing the fixed 3-second delay. Unlocking the cover screen is also tracked in the session.
+* **Unified Error Handling**: Errors close the session, release the connection, and show the message in a snackbar. Alarm loading failures now report through the same path instead of broadcasting an event.
+* **Connection Spinner**: The spinner now shows whenever the session is connecting, so it is correct even when the screen opens in the middle of a connection attempt. The workaround for replayed events is gone.
+
+### 📱 Reliability Fixes
+* **Phone Finder**: Ringing now stops when the watch session ends. Fixed a bug where only the first ring registered its disconnect listener, which kept a stale context and reacted to unrelated disconnects.
+* **Notification Forwarding**: The notification listener checks the session state at the moment a notification arrives, so it no longer depends on the service instance having seen the connection event.
+* **Per-Connection Reloads**: The Settings and Events screens now reload once when a connection finishes setup, instead of twice. The watch name and address now flow through the session to the connection screen and local storage.
+* **Actions Data**: `ActionContainer` loads its stored data once per session, as soon as the session is ready.
+
+### 🧹 Event System Cleanup
+* **Handle-Based Subscriptions**: Added `ProgressEvents.subscribe`, which returns a handle that cancels the subscription. It replaces named subscriptions, the `subscribeToProgressEvents` wrapper, and `Utils.AppHashCode()`. This also fixes the Settings screen never unsubscribing, and the snackbar host keeping a stale subscription after the screen was recreated.
+* **Testable Seams**: The session layer now depends on small `ConnectionGateway` and `EventSource` interfaces, so it can be tested without the Bluetooth API.
+* **Unit Tests**: Added about 60 JVM tests covering the session lifecycle, the connection button for every trigger, stale disconnects, pending-save clearing, close hooks, the event bridge, and the screen derived from the session. New test dependencies: `kotlinx-coroutines-test` and `mockk`.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.24 — November 6, 2026
 
 ## Highlights
@@ -68,9 +97,9 @@
 * **GShockAPI 1.7.8 Upgrade**: Upgraded to core library `gshockapi:1.7.8` and streamlined project dependencies by transitioning from the embedded `:api` module to the library release artifact.
 * **Unified Companion Device Coordinator**: Consolidated companion device pairing, scan receivers, and presence management into a dedicated `pairing` package (`CompanionDeviceCoordinator`, `BleScanReceiver`, `CompanionDeviceHelper`, `GShockCompanionDeviceService`).
 * **More Reliable Watch Connections**:
-  * Recreates the Bluetooth manager after release so subsequent connection attempts never reuse a closed manager instance.
-  * Validates button information before selecting post-connection screens, reporting initialization timeouts instead of silently navigating with incomplete watch data.
-  * Added detailed connection setup and handshake diagnostics to simplify investigating intermittent Bluetooth failures.
+    * Recreates the Bluetooth manager after release so subsequent connection attempts never reuse a closed manager instance.
+    * Validates button information before selecting post-connection screens, reporting initialization timeouts instead of silently navigating with incomplete watch data.
+    * Added detailed connection setup and handshake diagnostics to simplify investigating intermittent Bluetooth failures.
 
 ### 🎨 Modular Actions Subsystem & UI Refactoring
 * **Unified `ToggleActionView`**: Replaced eight separate toggle composables (`FlashlightView`, `PhoneFinderView`, `PlayPauseView`, `PrayerAlarmsView`, `RemindersView`, `SetTimeView`, `SkipToNextTrackView`, `VoiceAssistView`) with a single, highly reusable `ToggleActionView`.
@@ -115,7 +144,7 @@ Major architectural refinement to the watch communication engine for maximum spe
 ## ✨ Highlights
 
 ### 🛡️ Build System & Compliance
-*   **F-Droid Optimization**: Refined the build configuration to resolve compatibility issues with the F-Droid automated build pipeline. 
+*   **F-Droid Optimization**: Refined the build configuration to resolve compatibility issues with the F-Droid automated build pipeline.
 *   **Gradle Modernization**: Transitioned to the declarative `optimization` block in `build.gradle` for clearer management of R8/ProGuard settings.
 
 ### 🏗️ Advanced Actions Architecture
@@ -330,7 +359,7 @@ Ensured that users of all G-Shock models can enjoy personalized features, even t
 ### 👣 Enhanced Step Counter & Historical Insights
 Major upgrade to the fitness tracking capabilities for pedometer-equipped watches (like the **ABL-100WE**):
 *   **Interactive Data Views**: Introduced a new dropdown menu allowing you to switch between **Today**, **Hourly**, and **Daily** history views.
-*   **Rich Historical Charts**: 
+*   **Rich Historical Charts**:
     *   **Hourly View**: Displays a bar chart of the last hour of activity (six 10-minute intervals) with dynamic time labels.
     *   **Daily View**: Shows a 7-day rolling history. The rightmost bar now intelligently integrates your **live current-day steps**, providing a complete weekly picture at a glance.
 *   **Technical Documentation**: Added exhaustive KDoc documentation for the ABL-100WE activity record protocol, detailing the 400-byte payload layout and multi-packet reassembly logic.
@@ -342,7 +371,7 @@ Major upgrade to the fitness tracking capabilities for pedometer-equipped watche
 *   **Restored Visual Hierarchy**: Fixed an issue where the **Watch Name** card would disappear when bottom features were missing. The layout now correctly re-anchors to ensure your watch model name is always visible.
 
 ### 🎵 Media Action Refinements
-*   **"Play/Pause" Simplification**: Renamed the "Toggle Play/Pause" action to just **"Play/Pause"** for a cleaner look. 
+*   **"Play/Pause" Simplification**: Renamed the "Toggle Play/Pause" action to just **"Play/Pause"** for a cleaner look.
 *   **Global Localization**: Updated the labels across all 11 supported languages (Arabic, German, Spanish, Hungarian, Japanese, Chinese, etc.) to ensure consistent naming conventions.
 
 ### 🧹 System & Maintenance
@@ -809,7 +838,7 @@ Full compatibility and improved reliability for GrapheneOS. We've overhauled how
 ## 🐛 Bug Fixes
 
 ### Prayer Alarm Names Misalignment (Critical)
-Fixed a critical bug where prayer alarm names were incorrectly assigned to alarm slots on the watch. 
+Fixed a critical bug where prayer alarm names were incorrectly assigned to alarm slots on the watch.
 
 **Root cause:** The app selects the next upcoming prayers based on the current time of day, which means the first alarm may not be Fajr — it could be any prayer (e.g., Maghrib at 3 PM). However, the watch displays alarms sorted by time of day (hour:minute), while the names were stored by slot index in the order they were generated. This caused a mismatch between displayed times and prayer names.
 
