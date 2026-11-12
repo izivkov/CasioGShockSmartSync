@@ -4,12 +4,19 @@
   <img src="images/gshock-smart-sync.jpg" alt="G-Shock Smart Sync Logo" width="600">
 </p>
 
-[![F-Droid](https://img.shields.io/badge/F--Droid-Available-brightgreen)](https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/)
-[![Google Play](https://img.shields.io/badge/Google%20Play-Get%20it%20on-blue?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync)
-[![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
-[![Version](https://img.shields.io/badge/version-42.9.11-blue)](https://github.com/izivkov/CasioGShockSmartSync/releases)
-[![Connection Speed](https://img.shields.io/badge/Connection-Fast-green)](#)
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ivozivkov)
+<p align="center">
+  <a href="https://ko-fi.com/ivozivkov">
+    <img src="https://img.shields.io/badge/Support%20Development-Buy%20Me%20a%20Coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support development on Ko-fi">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/"><img src="https://img.shields.io/badge/F--Droid-Available-brightgreen" alt="F-Droid"></a>
+  <a href="https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"><img src="https://img.shields.io/badge/Google%20Play-Get%20it%20on-blue?logo=google-play&logoColor=white" alt="Google Play"></a>
+  <a href="https://github.com/izivkov/CasioGShockSmartSync"><img src="https://img.shields.io/badge/GitHub-Source-blue" alt="GitHub"></a>
+  <a href="https://github.com/izivkov/CasioGShockSmartSync/releases"><img src="https://img.shields.io/badge/version-42.9.11-blue" alt="Version"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Connection-Fast-green" alt="Connection Speed"></a>
+</p>
 
 **G-Shock Smart Sync** is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches. It allows you to control your watch, sync data, and configure settings **without a Casio ID**.
 
