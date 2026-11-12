@@ -1,10 +1,11 @@
 # Casio G-Shock Smart Sync
 
-<p align="center">
+<div align="right">
+  <b>Support this Project</b><br>
   <a href="https://ko-fi.com/ivozivkov">
-    <img src="https://img.shields.io/badge/Support%20Development-Buy%20Me%20a%20Coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support development on Ko-fi">
+    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Buy Me a Coffee">
   </a>
-</p>
+</div>
 
 <p align="center">
   <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/"><img src="https://img.shields.io/badge/F--Droid-Available-brightgreen" alt="F-Droid"></a>
