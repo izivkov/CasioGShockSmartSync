@@ -9,6 +9,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-Source-blue)](https://github.com/izivkov/CasioGShockSmartSync)
 [![Version](https://img.shields.io/badge/version-42.9.11-blue)](https://github.com/izivkov/CasioGShockSmartSync/releases)
 [![Connection Speed](https://img.shields.io/badge/Connection-Fast-green)](#)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Me-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ivozivkov)
 
 **G-Shock Smart Sync** is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches. It allows you to control your watch, sync data, and configure settings **without a Casio ID**.
 
