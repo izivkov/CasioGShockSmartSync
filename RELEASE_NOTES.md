@@ -1,3 +1,25 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.28 — November 13, 2026
+
+## Highlights
+
+### 💾 Smart Baseline Change Tracking (`ChangeTracker`)
+* **Accurate Pending Save Detection**: Introduced `ChangeTracker<T>` across feature ViewModels (`Alarms`, `Settings`, `Events`, `Timer`, `Actions`). Instead of marking a screen modified permanently on any click, the app now compares current values against a baseline (the values last read from, or sent to, the watch).
+* **Revert-to-Baseline Auto-Clear**: Changing a value (e.g. an alarm time or a setting toggle) and changing it back to its original state automatically clears the pending save mark and disables the "Send to Watch" button.
+* **Failure Safety**: Sending values to the watch temporarily updates the baseline. If a transmission fails, the previous baseline is restored so the "Send to Watch" button remains enabled for retry.
+
+### ⚙️ Settings State & Immutability Hardening
+* **Immutable State Updates**: Refactored `SettingsViewModel` and setting models (`Light`, `OperationSound`, `Locale`, `TimeAdjustment`, `Font`, `PowerSavingMode`) to use immutable property updates (`.copy(...)`).
+* **State Preservation**: Fixed a bug where toggling Auto-Light or Operational Tone and pressing "Send to Watch" caused values to revert to default states. Setting values are now preserved and updated atomically.
+
+### ⚡ Actions Screen Draft Management
+* **In-Memory Drafts (`ActionsDraft`)**: Refactored `ActionViewModel`, `PhoneView`, and `PhotoView` to maintain a clean draft state of pending action changes.
+* **Smart Action Buttons**: The "Send to Watch" button on the Actions screen now activates only when draft modifications differ from the persisted action configuration.
+
+### 📅 Calendar & Reminders Persistence
+* **Enabled Flag Preservation**: `EventViewModel` now preserves user-selected enabled/disabled toggle states for existing reminders when re-reading calendar events (`keepEnabledFlags`), preventing background calendar refreshes from resetting user preferences.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.25 — November 11, 2026
 
 ## Highlights
