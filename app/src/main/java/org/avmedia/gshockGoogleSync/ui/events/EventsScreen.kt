@@ -36,6 +36,7 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
         val isManualMode by viewModel.isManualMode.collectAsState()
         var editingEventIndex by remember { mutableStateOf<Int?>(null) }
         val events by viewModel.events.collectAsState()
+        val isModified by viewModel.isModified.collectAsState()
 
         if (editingEventIndex != null) {
             ReminderEditDialog(
@@ -85,7 +86,8 @@ fun EventsScreen(viewModel: EventViewModel = hiltViewModel()) {
                     buttons = listOf(
                         ButtonData(
                             text = stringResource(id = R.string.send_events_to_watch),
-                            onClick = viewModel::sendEventsToWatch
+                            onClick = viewModel::sendEventsToWatch,
+                            enabled = isModified
                         )
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -103,7 +105,7 @@ fun EventList(
     val events by eventViewModel.events.collectAsState()
 
     LaunchedEffect(Unit) {
-        eventViewModel.loadEvents()
+        eventViewModel.loadEventsUnlessModified()
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {

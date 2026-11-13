@@ -64,7 +64,7 @@ fun ActionItem(
 
 /**
  * An [ActionItem] bound to the enabled flag of the action registered under [actionClass].
- * Toggling the switch updates the action and persists it via [ActionsViewModel.updateAction].
+ * Toggling the switch only records a pending change; it is applied by [ActionsViewModel.save].
  */
 @Composable
 fun <T : ActionContainer.Action> ToggleActionView(
@@ -74,8 +74,7 @@ fun <T : ActionContainer.Action> ToggleActionView(
     actionsViewModel: ActionsViewModel,
     infoRes: Int? = null,
 ) {
-    val action = remember { actionsViewModel.getAction(actionClass) }
-    var isEnabled by remember { mutableStateOf(action.enabled) }
+    var isEnabled by remember { mutableStateOf(actionsViewModel.isEnabled(actionClass)) }
 
     ActionItem(
         title = stringResource(id = titleRes),
@@ -84,8 +83,7 @@ fun <T : ActionContainer.Action> ToggleActionView(
         isEnabled = isEnabled,
         onEnabledChange = { newValue ->
             isEnabled = newValue
-            action.enabled = newValue
-            actionsViewModel.updateAction(action)
+            actionsViewModel.setEnabled(actionClass, newValue)
         }
     )
 }

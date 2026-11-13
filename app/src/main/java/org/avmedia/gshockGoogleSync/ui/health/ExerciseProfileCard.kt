@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.model.ExerciseProfile
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -48,6 +47,10 @@ fun ExerciseProfileCard(
     var profileHeightText by remember { mutableStateOf("") }
     var profileWeightText by remember { mutableStateOf("") }
     var profileError by remember { mutableStateOf<String?>(null) }
+    // The field values as last read from the watch; Save is enabled only once they differ.
+    var loadedProfileTexts by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    val isModified = loadedProfileTexts != null &&
+        Triple(profileStepGoalText, profileHeightText, profileWeightText) != loadedProfileTexts
     val scope = rememberCoroutineScope()
     val imperialLocale = remember { isImperialLocale() }
 
@@ -79,6 +82,7 @@ fun ExerciseProfileCard(
                 state.weight.toString()
             }
         }
+        loadedProfileTexts = Triple(profileStepGoalText, profileHeightText, profileWeightText)
         isLoading = false
     }
 
@@ -165,6 +169,7 @@ fun ExerciseProfileCard(
 
                 AppButton(
                     text = stringResource(id = R.string.save),
+                    enabled = isModified && !isSaving,
                     onClick = {
                         val parsedStepGoal = profileStepGoalText.toIntOrNull()
                         val parsedHeight = profileHeightText.toIntOrNull()
@@ -199,7 +204,7 @@ fun ExerciseProfileCard(
                                     isSaving = false
                                     if (saved) {
                                         profileError = null
-                                        AppSnackbar("Exercise profile saved to watch.")
+                                        loadedProfileTexts = Triple(profileStepGoalText, profileHeightText, profileWeightText)
                                     } else {
                                         profileError = "Unable to save exercise profile to watch."
                                     }

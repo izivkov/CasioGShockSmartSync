@@ -147,7 +147,6 @@ constructor(
             saveJob = containerScope.launch {
                 delay(Duration.ZERO)
                 actionsStorage.save()
-                // AppSnackbar(appContext.getString(R.string.actions_saved))
                 saveJob = null
             }
         }
@@ -331,14 +330,14 @@ constructor(
          * Deliberately bypasses the isManualMode() skip above - manual mode is precisely
          * the scenario this entry point exists to handle.
          */
-        suspend fun runWithEvents(context: Context, events: List<Event>) {
+        suspend fun runWithEvents(context: Context, events: List<Event>): Boolean =
             runCatching {
                 writeEvents(context, events)
+                true
             }.onFailure {
                 Timber.e(it, "Failed to send events to watch")
                 AppSnackbar("Error: ${it.message ?: ""}")
-            }
-        }
+            }.getOrDefault(false)
 
         private suspend fun writeEvents(context: Context, events: List<Event>) {
             val processedEvents = events.map {
@@ -639,9 +638,6 @@ constructor(
             CoroutineScope(Dispatchers.Main).launch {
                 cameraHelper
                     .takePicture()
-                    .onSuccess { result ->
-                        AppSnackbar(context.getString(R.string.image_captured, result))
-                    }
                     .onFailure { error ->
                         AppSnackbar(
                             context.getString(
@@ -860,7 +856,6 @@ constructor(
             api.setSettings(settings)
             val freshSettings = api.getSettings()
             ProgressEvents.onNext("SettingsUpdated", freshSettings)
-            AppSnackbar(context.getString(R.string.settings_sent_to_watch))
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
@@ -950,19 +945,21 @@ constructor(
     ) : Action(title, enabled, RunMode.ASYNC) {
         override fun run(context: Context) = launchRunSuspend(context)
 
-        override suspend fun runSuspend(context: Context) = runWithTimer(context, timerValueS)
+        override suspend fun runSuspend(context: Context) {
+            runWithTimer(context, timerValueS)
+        }
 
         /**
          * Entry point for callers that already know the timer value to send
          * (currently: TimeViewModel.onAction(UpdateTimer), via RunEnvironment.DIRECT_INVOCATION).
          */
-        suspend fun runWithTimer(context: Context, timerValueSeconds: Int) {
+        suspend fun runWithTimer(context: Context, timerValueSeconds: Int): Boolean =
             runCatching {
                 writeTimer(context, timerValueSeconds)
+                true
             }.onFailure {
                 Timber.e(it, "Failed to send timer to watch")
-            }
-        }
+            }.getOrDefault(false)
 
         private suspend fun writeTimer(context: Context, timerValueSeconds: Int) {
             val before = api.getTimer()
@@ -977,7 +974,6 @@ constructor(
             }
 
             ProgressEvents.onNext("TimerUpdated", freshTimer)
-            AppSnackbar(context.getString(R.string.timer_set))
         }
 
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {

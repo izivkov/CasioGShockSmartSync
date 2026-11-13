@@ -35,6 +35,7 @@ fun TimerView(
     timeModel: TimeViewModel = hiltViewModel()
 ) {
     val state by timeModel.state.collectAsState()
+    val isTimerModified by timeModel.isTimerModified.collectAsState()
     var showTimerDialog by remember { mutableStateOf(false) }
 
     fun makeLongString(inSeconds: Int): String {
@@ -97,7 +98,8 @@ fun TimerView(
                     modifier = Modifier.padding(0.dp),
                     onClick = {
                         timeModel.onAction(TimeAction.UpdateTimer(state.timer))
-                    }
+                    },
+                    enabled = isTimerModified
                 )
             }
         }
@@ -133,7 +135,7 @@ fun TimerTimeView(modifier: Modifier = Modifier, timeText: String) {
 
 @Composable
 fun SendTimerButton(
-    modifier: Modifier = Modifier, onClick: () -> Unit,
+    modifier: Modifier = Modifier, onClick: () -> Unit, enabled: Boolean = true,
 ) {
     AppButton(
         text = stringResource(
@@ -141,6 +143,7 @@ fun SendTimerButton(
         ),
         onClick = onClick,
         modifier = modifier,
+        enabled = enabled,
     )
 }
 

@@ -99,7 +99,8 @@ fun LocalTimeView(
                     ),
                     onClick = {
                         timeModel.onAction(TimeAction.SendTimeToWatch)
-                    }
+                    },
+                    enabled = !state.isSendingTime
                 )
             }
         }
@@ -232,12 +233,13 @@ fun TimeZoneTextView(
 }
 
 @Composable
-fun SendTimeButton(text: String, onClick: () -> Unit) {
+fun SendTimeButton(text: String, onClick: () -> Unit, enabled: Boolean = true) {
     AppButton(
         onClick = {
             onClick()
         },
-        text = text
+        text = text,
+        enabled = enabled
     )
 }
 

@@ -8,16 +8,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockGoogleSync.ActionContainer
-import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.session.ComponentId
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -32,12 +35,16 @@ class EventViewModel @Inject constructor(
     private val calendarEvents: CalendarEvents,
     private val eventStorage: EventStorage,
     private val actionContainer: ActionContainer,
-    private val sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager,
+    private val sessionManager: SessionManager,
     @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     private val _events = MutableStateFlow<List<Event>>(emptyList())
     val events: StateFlow<List<Event>> = _events
+
+    /** True while the reminders were changed in the app and not yet sent to the watch. */
+    val isModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.EVENTS)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.EVENTS))
 
     private val _isManualMode = MutableStateFlow(eventStorage.isManualMode())
     val isManualMode: StateFlow<Boolean> = _isManualMode
@@ -77,6 +84,11 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    /** Re-reads the events, unless the user has edits that are not yet sent to the watch. */
+    fun loadEventsUnlessModified() {
+        if (!sessionManager.isPendingSave(ComponentId.EVENTS)) loadEvents()
+    }
+
     fun loadEvents() {
         loadEventsJob?.cancel()
         loadEventsJob = viewModelScope.launch {
@@ -104,11 +116,13 @@ class EventViewModel @Inject constructor(
                     }
                     _events.value = loadedEvents
                     EventsModel.refresh(ArrayList(loadedEvents))
+                    sessionManager.clearPendingSave(ComponentId.EVENTS)
                 } else {
                     val loadedEvents = calendarEvents.getEventsFromCalendar()
                         .take(EventsModel.MAX_REMINDERS)
                     _events.value = loadedEvents
                     EventsModel.refresh(ArrayList(loadedEvents))
+                    sessionManager.clearPendingSave(ComponentId.EVENTS)
                 }
             }.onFailure {
                 if (it !is kotlinx.coroutines.CancellationException) {
@@ -132,6 +146,7 @@ class EventViewModel @Inject constructor(
             this[index] = event
         }
         EventsModel.refresh(ArrayList(_events.value))
+        sessionManager.markPendingSave(ComponentId.EVENTS)
     }
 
     fun toggleEvents(index: Int, isEnabled: Boolean) {
@@ -139,6 +154,7 @@ class EventViewModel @Inject constructor(
             this[index] = this[index].copy(enabled = isEnabled)
         }
         EventsModel.refresh(ArrayList(_events.value))
+        sessionManager.markPendingSave(ComponentId.EVENTS)
     }
 
     private var eventSubscription: AutoCloseable? = null
@@ -156,6 +172,7 @@ class EventViewModel @Inject constructor(
                     val newEvents = ProgressEvents.getPayload("CalendarUpdated") as List<Event>
                     _events.value = newEvents
                     EventsModel.refresh(ArrayList(newEvents))
+                    sessionManager.clearPendingSave(ComponentId.EVENTS)
                 }
             },
             EventAction("EventsUpdated") {
@@ -164,6 +181,7 @@ class EventViewModel @Inject constructor(
                 if (_isManualMode.value && payload != null) {
                     _events.value = payload
                     EventsModel.refresh(ArrayList(payload))
+                    sessionManager.clearPendingSave(ComponentId.EVENTS)
                 } else {
                     loadEvents()
                 }
@@ -180,9 +198,11 @@ class EventViewModel @Inject constructor(
             if (!setEventsAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
                 return@launch
             }
-            setEventsAction.runWithEvents(appContext, _events.value)
-            sessionManager.clearPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.EVENTS)
-            AppSnackbar(appContext.getString(R.string.reminders_sent_to_watch))
+            // Disable the Send button right away; it is re-enabled below only if the send fails.
+            sessionManager.clearPendingSave(ComponentId.EVENTS)
+            if (!setEventsAction.runWithEvents(appContext, _events.value)) {
+                sessionManager.markPendingSave(ComponentId.EVENTS)
+            }
         }
     }
 }

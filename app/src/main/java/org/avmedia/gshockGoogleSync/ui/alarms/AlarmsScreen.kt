@@ -54,8 +54,9 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 @Composable
 fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val isModified by alarmViewModel.isModified.collectAsState()
 
-    // Show each one-time message from the ViewModel (save succeeded or failed).
+    // Show each one-time error message from the ViewModel (the send failed).
     LaunchedEffect(alarmViewModel) {
         alarmViewModel.events.collect { message ->
             snackbarHostState.showSnackbar(message)
@@ -97,7 +98,8 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                     ),
                     ButtonData(
                         text = stringResource(id = R.string.send_alarms_to_watch),
-                        onClick = { alarmViewModel.sendAlarmsToWatch() }
+                        onClick = { alarmViewModel.sendAlarmsToWatch() },
+                        enabled = isModified
                     )
                 )
 

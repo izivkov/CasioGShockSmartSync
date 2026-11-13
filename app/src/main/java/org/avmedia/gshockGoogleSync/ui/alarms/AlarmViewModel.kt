@@ -11,9 +11,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.ActionContainer
@@ -21,6 +23,8 @@ import org.avmedia.gshockGoogleSync.AlarmsWritten
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
+import org.avmedia.gshockGoogleSync.session.ComponentId
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -45,15 +49,19 @@ class AlarmViewModel @Inject constructor(
     private val alarmNameStorage: AlarmNameStorage,
     private val watchFeatureManager: IWatchFeatureManager,
     private val actionContainer: ActionContainer,
-    private val sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager,
+    private val sessionManager: SessionManager,
     @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms.asStateFlow()
 
-    // One-time messages for the screen to show as a snackbar. A SharedFlow fires once
-    // per save, unlike a StateFlow, which would replay the last message on recomposition.
+    /** True while the alarms were changed in the app and not yet sent to the watch. */
+    val isModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.ALARMS)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.ALARMS))
+
+    // One-time error messages for the screen to show as a snackbar. A SharedFlow fires once
+    // per failure, unlike a StateFlow, which would replay the last message on recomposition.
     private val _events = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val events: SharedFlow<String> = _events.asSharedFlow()
 
@@ -71,6 +79,7 @@ class AlarmViewModel @Inject constructor(
                     val payload = ProgressEvents.getPayload("AlarmsUpdated") as? AlarmsWritten
                     if (payload != null) {
                         _alarms.value = payload.alarms
+                        sessionManager.clearPendingSave(ComponentId.ALARMS)
                     } else {
                         loadAlarms()
                     }
@@ -110,6 +119,7 @@ class AlarmViewModel @Inject constructor(
             }
 
             _alarms.value = newAlarms
+            sessionManager.clearPendingSave(ComponentId.ALARMS)
             ProgressEvents.onNext("Alarms Loaded")
         }.onFailure {
             sessionManager.onError()
@@ -122,7 +132,7 @@ class AlarmViewModel @Inject constructor(
                 if (i == index) transform(alarm) else alarm
             }
         }
-        sessionManager.markPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.ALARMS)
+        sessionManager.markPendingSave(ComponentId.ALARMS)
     }
 
     /**
@@ -168,9 +178,12 @@ class AlarmViewModel @Inject constructor(
      * 2. Handing the exact list to SetAlarmAction, which persists names to
      *    AlarmNameStorage, writes alarms and the hourly chime setting when supported,
      *    reads back confirmed state, and emits "AlarmsUpdated".
-     * 3. Emitting a result message on [events] for the screen to show.
+     * 3. Emitting an error message on [events] if the send failed. Success is silent: the Send
+     *    button simply becomes disabled again.
      */
     fun sendAlarmsToWatch() {
+        // Disable the Send button right away; it is re-enabled below only if the send fails.
+        sessionManager.clearPendingSave(ComponentId.ALARMS)
         viewModelScope.launch {
             // Before sending, process the alarms to handle null names.
             val alarmsToSend = _alarms.value.map { alarm ->
@@ -179,6 +192,7 @@ class AlarmViewModel @Inject constructor(
 
             val setAlarmAction = actionContainer.getAction(ActionContainer.SetAlarmAction::class.java)
             if (!setAlarmAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
+                sessionManager.markPendingSave(ComponentId.ALARMS)
                 _events.emit(appContext.getString(R.string.alarm_send_failed))
                 return@launch
             }
@@ -189,14 +203,10 @@ class AlarmViewModel @Inject constructor(
                 updateHourlyChime = watchFeatureManager.isFeatureSupported("alarms.chime"),
             )
 
-            if (saved) {
-                sessionManager.clearPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.ALARMS)
+            if (!saved) {
+                sessionManager.markPendingSave(ComponentId.ALARMS)
+                _events.emit(appContext.getString(R.string.alarm_send_failed))
             }
-
-            _events.emit(
-                if (saved) appContext.getString(R.string.alarms_set_to_watch)
-                else appContext.getString(R.string.alarm_send_failed)
-            )
         }
     }
 

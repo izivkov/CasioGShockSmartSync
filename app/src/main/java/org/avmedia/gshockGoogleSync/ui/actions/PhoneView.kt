@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,40 +27,19 @@ import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
 import org.avmedia.gshockGoogleSync.ui.common.AppPhoneInputDialog
 
 @Composable
-fun PhoneView(
-    onUpdate: (ActionContainer.PhoneDialAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel(),
-) {
-    data class ViewState(
-        val isEnabled: Boolean,
-        val phoneNumber: String,
-        val showDialog: Boolean,
-        val action: ActionContainer.PhoneDialAction
-    )
-
-    val actions by actionsViewModel.actions.collectAsState()
-    val phoneDialAction =
-        actions.filterIsInstance<ActionContainer.PhoneDialAction>().firstOrNull()
-            ?: actionsViewModel.getAction(ActionContainer.PhoneDialAction::class.java)
-
+fun PhoneView(actionsViewModel: ActionsViewModel = hiltViewModel()) {
     val defaultPhone = "000-000-0000"
 
-    var viewState by
-    remember(actions, phoneDialAction) {
+    // Seeded from the session's draft, so edits survive switching screens.
+    var isEnabled by remember {
+        mutableStateOf(actionsViewModel.isEnabled(ActionContainer.PhoneDialAction::class.java))
+    }
+    var phoneNumber by remember {
         mutableStateOf(
-            ViewState(
-                isEnabled = phoneDialAction.enabled,
-                phoneNumber =
-                phoneDialAction
-                    .phoneNumber
-                    .takeIf { it.isNotBlank() }
-                    ?.trim()
-                    ?: defaultPhone,
-                showDialog = false,
-                action = phoneDialAction
-            )
+            actionsViewModel.phoneNumber().takeIf { it.isNotBlank() }?.trim() ?: defaultPhone
         )
     }
+    var showDialog by remember { mutableStateOf(false) }
 
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -74,36 +52,31 @@ fun PhoneView(
                 AppTextLarge(text = stringResource(id = R.string.make_phonecall))
 
                 AppTextLink(
-                    text = viewState.phoneNumber,
-                    modifier =
-                    Modifier.clickable {
-                        viewState = viewState.copy(showDialog = true)
-                    },
+                    text = phoneNumber,
+                    modifier = Modifier.clickable { showDialog = true },
                     textAlign = TextAlign.Start,
                     fontSize = 20.sp
                 )
 
-                if (viewState.showDialog) {
+                if (showDialog) {
                     AppPhoneInputDialog(
-                        initialPhoneNumber = viewState.phoneNumber,
-                        onDismiss = { viewState = viewState.copy(showDialog = false) },
+                        initialPhoneNumber = phoneNumber,
+                        onDismiss = { showDialog = false },
                         onPhoneNumberValidated = { newValue ->
                             val newPhone = newValue.ifEmpty { defaultPhone }
-                            viewState =
-                                viewState.copy(phoneNumber = newPhone, showDialog = false)
-                            viewState.action.phoneNumber = newPhone
-                            onUpdate(viewState.action)
+                            phoneNumber = newPhone
+                            showDialog = false
+                            actionsViewModel.setPhoneNumber(newPhone)
                         }
                     )
                 }
             }
 
             AppSwitch(
-                checked = viewState.isEnabled,
+                checked = isEnabled,
                 onCheckedChange = { newValue: Boolean ->
-                    viewState = viewState.copy(isEnabled = newValue)
-                    viewState.action.enabled = newValue
-                    onUpdate(viewState.action)
+                    isEnabled = newValue
+                    actionsViewModel.setEnabled(ActionContainer.PhoneDialAction::class.java, newValue)
                 }
             )
         }

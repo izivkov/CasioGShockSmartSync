@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 
-data class ButtonData(val text: String, val onClick: () -> Unit)
+data class ButtonData(val text: String, val onClick: () -> Unit, val enabled: Boolean = true)
 
 @Composable
 fun ButtonsRow(
@@ -34,6 +34,7 @@ fun ButtonsRow(
             AppButton(
                 text = buttonData.text,
                 onClick = buttonData.onClick,
+                enabled = buttonData.enabled,
                 modifier = Modifier
                     .padding(vertical = buttonSpacing.dp)
             )

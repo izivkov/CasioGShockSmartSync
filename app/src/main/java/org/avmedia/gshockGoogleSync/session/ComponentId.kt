@@ -5,5 +5,6 @@ enum class ComponentId {
     SETTINGS,
     EVENTS,
     ACTIONS,
-    HEALTH_PROFILE
+    HEALTH_PROFILE,
+    TIMER
 }

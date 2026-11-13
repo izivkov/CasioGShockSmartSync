@@ -14,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -82,6 +84,7 @@ fun SettingsList() {
 
 @Composable
 fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltViewModel()) {
+    val isModified by settingsViewModel.isModified.collectAsState()
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Bottom,
@@ -111,7 +114,8 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
                 ),
                 ButtonData(
                     text = stringResource(id = R.string.send_to_watch),
-                    onClick = settingsViewModel::sendToWatch
+                    onClick = settingsViewModel::sendToWatch,
+                    enabled = isModified
                 )
             )
 

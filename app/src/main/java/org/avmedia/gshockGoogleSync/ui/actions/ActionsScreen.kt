@@ -9,8 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,22 +18,18 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.ui.common.ButtonData
+import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import timber.log.Timber
 
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
-    DisposableEffect(Unit) {
-        onDispose {
-            Timber.i("Screen is now out of view. Saving state...")
-            actionsViewModel.save()
-        }
-    }
+    val isModified by actionsViewModel.isModified.collectAsState()
 
     GShockSmartSyncTheme {
         Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -47,6 +42,17 @@ fun ActionsScreen(
                 ActionsContent(
                     modifier = Modifier.weight(1f),
                     actionsViewModel = actionsViewModel
+                )
+
+                ButtonsRow(
+                    buttons = listOf(
+                        ButtonData(
+                            text = stringResource(id = R.string.save),
+                            onClick = actionsViewModel::save,
+                            enabled = isModified
+                        )
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -85,7 +91,7 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
                 R.string.set_reminders, R.drawable.events, actionsViewModel
             )
         else null,
-        PhotoView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel),
+        PhotoView(actionsViewModel),
         ToggleActionView(
             ActionContainer.ToggleFlashlightAction::class.java,
             R.string.toggle_flashlight, R.drawable.flashlight, actionsViewModel
@@ -110,7 +116,7 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
             infoRes = R.string.prayer_times_info
         ),
         SeparatorView(),
-        PhoneView(onUpdate = { actionsViewModel.updateAction(it) }, actionsViewModel)
+        PhoneView(actionsViewModel)
     )
 }
 

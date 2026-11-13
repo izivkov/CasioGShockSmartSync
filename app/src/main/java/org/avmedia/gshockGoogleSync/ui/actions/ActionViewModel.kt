@@ -2,8 +2,13 @@ package org.avmedia.gshockGoogleSync.ui.actions
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import org.avmedia.gshockGoogleSync.ActionContainer
+import org.avmedia.gshockGoogleSync.session.ComponentId
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import javax.inject.Inject
 
 /**
@@ -24,16 +29,31 @@ import javax.inject.Inject
 @HiltViewModel
 class ActionsViewModel @Inject constructor(
     private val container: ActionContainer,
+    private val draft: ActionsDraft,
+    sessionManager: SessionManager,
 ) : ViewModel() {
 
     val actions: StateFlow<List<ActionContainer.Action>> = container.actions
 
+    /** True while the user changed something that is not yet saved. */
+    val isModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.ACTIONS)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.ACTIONS))
+
     fun <T : ActionContainer.Action> getAction(type: Class<T>): T = container.getAction(type)
 
-    fun <T : ActionContainer.Action> updateAction(updatedAction: T) =
-        container.updateAction(updatedAction)
+    // Edits go to the session's draft; nothing is applied until save().
+    fun <T : ActionContainer.Action> isEnabled(type: Class<T>): Boolean = draft.isEnabled(type)
+    fun <T : ActionContainer.Action> setEnabled(type: Class<T>, enabled: Boolean) =
+        draft.setEnabled(type, enabled)
 
-    fun save() = container.onCleared()
+    fun cameraOrientation() = draft.cameraOrientation()
+    fun setCameraOrientation(orientation: ActionContainer.CameraOrientation) =
+        draft.setCameraOrientation(orientation)
+
+    fun phoneNumber() = draft.phoneNumber()
+    fun setPhoneNumber(number: String) = draft.setPhoneNumber(number)
+
+    fun save() = draft.save()
 
     override fun onCleared() = container.onCleared()
 }

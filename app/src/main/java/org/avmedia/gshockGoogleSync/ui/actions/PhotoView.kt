@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,30 +27,12 @@ import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
 import org.avmedia.gshockGoogleSync.utils.Utils
 
 @Composable
-fun PhotoView(
-    onUpdate: (ActionContainer.PhotoAction) -> Unit,
-    actionsViewModel: ActionsViewModel = hiltViewModel()
-) {
-    data class ViewState(
-        val isEnabled: Boolean,
-        val cameraOrientation: ActionContainer.CameraOrientation,
-        val action: ActionContainer.PhotoAction
-    )
-
-    val actions by actionsViewModel.actions.collectAsState()
-    val photoAction = remember {
-        actionsViewModel.getAction(ActionContainer.PhotoAction::class.java)
+fun PhotoView(actionsViewModel: ActionsViewModel = hiltViewModel()) {
+    // Seeded from the session's draft, so edits survive switching screens.
+    var isEnabled by remember {
+        mutableStateOf(actionsViewModel.isEnabled(ActionContainer.PhotoAction::class.java))
     }
-
-    var viewState by remember {
-        mutableStateOf(
-            ViewState(
-                isEnabled = photoAction.enabled,
-                cameraOrientation = photoAction.cameraOrientation,
-                action = photoAction
-            )
-        )
-    }
+    var cameraOrientation by remember { mutableStateOf(actionsViewModel.cameraOrientation()) }
 
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -79,39 +60,29 @@ fun PhotoView(
                 Column(horizontalAlignment = Alignment.End) {
                     CameraOrientationOption(
                         text = stringResource(id = R.string.front_cam),
-                        isSelected = viewState.cameraOrientation == ActionContainer.CameraOrientation.FRONT,
+                        isSelected = cameraOrientation == ActionContainer.CameraOrientation.FRONT,
                         onSelect = {
-                            val newState = viewState.copy(
-                                cameraOrientation = ActionContainer.CameraOrientation.FRONT
-                            )
-                            viewState = newState
-                            viewState.action.cameraOrientation = newState.cameraOrientation
-                            onUpdate(viewState.action)
+                            cameraOrientation = ActionContainer.CameraOrientation.FRONT
+                            actionsViewModel.setCameraOrientation(cameraOrientation)
                         }
                     )
 
                     CameraOrientationOption(
                         text = stringResource(id = R.string.back_cam),
-                        isSelected = viewState.cameraOrientation == ActionContainer.CameraOrientation.BACK,
+                        isSelected = cameraOrientation == ActionContainer.CameraOrientation.BACK,
                         onSelect = {
-                            val newState = viewState.copy(
-                                cameraOrientation = ActionContainer.CameraOrientation.BACK
-                            )
-                            viewState = newState
-                            viewState.action.cameraOrientation = newState.cameraOrientation
-                            onUpdate(viewState.action)
+                            cameraOrientation = ActionContainer.CameraOrientation.BACK
+                            actionsViewModel.setCameraOrientation(cameraOrientation)
                         }
                     )
                 }
             }
 
             AppSwitch(
-                checked = viewState.isEnabled,
+                checked = isEnabled,
                 onCheckedChange = { newValue: Boolean ->
-                    val newState = viewState.copy(isEnabled = newValue)
-                    viewState = newState
-                    viewState.action.enabled = newValue
-                    onUpdate(viewState.action)
+                    isEnabled = newValue
+                    actionsViewModel.setEnabled(ActionContainer.PhotoAction::class.java, newValue)
                 },
                 modifier = Modifier.padding(8.dp)
             )

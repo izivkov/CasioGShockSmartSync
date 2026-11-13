@@ -12,16 +12,20 @@ import java.text.SimpleDateFormat
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ActionContainer
+import org.avmedia.gshockGoogleSync.session.ComponentId
+import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.model.Settings
 import org.json.JSONObject
@@ -47,12 +51,16 @@ constructor(
     private val watchFeatureManager: IWatchFeatureManager,
     @param:ApplicationContext private val appContext: Context,
     private val actionContainer: ActionContainer,
-    private val sessionManager: org.avmedia.gshockGoogleSync.session.SessionManager,
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
+
+    /** True while the settings were changed in the app and not yet sent to the watch. */
+    val isModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.SETTINGS)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.SETTINGS))
 
     fun onSettingUpdated(setting: Setting) {
         updateSetting(setting)
-        sessionManager.markPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.SETTINGS)
+        sessionManager.markPendingSave(ComponentId.SETTINGS)
     }
 
     private val _state = MutableStateFlow(SettingsState())
@@ -109,6 +117,8 @@ constructor(
             val settingsJson = Gson().toJsonTree(settings).asJsonObject
             val settingStr = Gson().toJson(settingsJson)
             updateSettingsAndMap(fromJson(settingStr))
+            // The values were just re-read from the watch, so nothing is pending.
+            sessionManager.clearPendingSave(ComponentId.SETTINGS)
         }
     }
 
@@ -422,6 +432,7 @@ constructor(
             runCatching {
                 updateSettingsAndMap(getSmartDefaults())
                 state.value.settings.forEach { it.save() }
+                sessionManager.markPendingSave(ComponentId.SETTINGS)
             }
                 .onFailure { e -> AppSnackbar(e.message ?: "Error") }
         }
@@ -466,10 +477,12 @@ constructor(
             return
         }
 
+        // Disable the Send button right away; it is re-enabled below only if the send fails.
+        sessionManager.clearPendingSave(ComponentId.SETTINGS)
         viewModelScope.launch {
             val saved = settingsAction.runWithSettings(appContext, settings)
-            if (saved) {
-                sessionManager.clearPendingSave(org.avmedia.gshockGoogleSync.session.ComponentId.SETTINGS)
+            if (!saved) {
+                sessionManager.markPendingSave(ComponentId.SETTINGS)
             }
         }
     }
