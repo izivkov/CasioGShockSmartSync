@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ActionContainer
+import org.avmedia.gshockGoogleSync.session.ChangeTracker
 import org.avmedia.gshockGoogleSync.session.ComponentId
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
@@ -33,6 +34,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import timber.log.Timber
 
 abstract class Setting(val name: String) {
     open suspend fun save() {} // Default empty implementation
@@ -54,13 +56,16 @@ constructor(
     private val sessionManager: SessionManager,
 ) : ViewModel() {
 
-    /** True while the settings were changed in the app and not yet sent to the watch. */
+    // Compares what would be sent with what was last read from, or sent to, the watch.
+    private val changes = ChangeTracker<String>(ComponentId.SETTINGS, sessionManager)
+
+    /** True while the settings differ from what is on the watch. */
     val isModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.SETTINGS)
         .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.SETTINGS))
 
     fun onSettingUpdated(setting: Setting) {
         updateSetting(setting)
-        sessionManager.markPendingSave(ComponentId.SETTINGS)
+        changes.update(snapshot())
     }
 
     private val _state = MutableStateFlow(SettingsState())
@@ -80,7 +85,7 @@ constructor(
                 .distinctUntilChanged()
                 .drop(1)
                 .filter { it }
-                .collect { initializeSettings() }
+                .collect { initializeSettings(reason = "setup complete") }
         }
     }
 
@@ -95,12 +100,13 @@ constructor(
             arrayOf(
                 EventAction("SettingsUpdated") {
                     val payload = ProgressEvents.getPayload("SettingsUpdated") as? Settings
-                    initializeSettings(payload)
+                    initializeSettings(payload, reason = "SettingsUpdated event")
                 }
             ))
     }
 
-    private fun initializeSettings(freshSettings: Settings? = null) {
+    private fun initializeSettings(freshSettings: Settings? = null, reason: String = "init") {
+        Timber.i("Settings re-read from watch, reason=%s, fromPayload=%s", reason, freshSettings != null)
         val newSettings =
             arrayListOf(
                 Locale(),
@@ -114,11 +120,12 @@ constructor(
 
         viewModelScope.launch(Dispatchers.Default) {
             val settings = freshSettings ?: api.getSettings()
+            Timber.i("Settings from watch: autoLight=%s, lightDuration=%s", settings.autoLight, settings.lightDuration)
             val settingsJson = Gson().toJsonTree(settings).asJsonObject
             val settingStr = Gson().toJson(settingsJson)
             updateSettingsAndMap(fromJson(settingStr))
-            // The values were just re-read from the watch, so nothing is pending.
-            sessionManager.clearPendingSave(ComponentId.SETTINGS)
+            // The values were just re-read from the watch: this is the new baseline.
+            snapshot().let { changes.setBaseline(it, it) }
         }
     }
 
@@ -432,13 +439,14 @@ constructor(
             runCatching {
                 updateSettingsAndMap(getSmartDefaults())
                 state.value.settings.forEach { it.save() }
-                sessionManager.markPendingSave(ComponentId.SETTINGS)
+                changes.update(snapshot())
             }
                 .onFailure { e -> AppSnackbar(e.message ?: "Error") }
         }
     }
 
-    fun sendToWatch() {
+    /** The values the watch would get if the user tapped Send now. */
+    private fun buildSettings(): Settings {
         val settings = Settings()
 
         val localeSetting: Locale = state.value.settingsMap[Locale::class.java] as Locale
@@ -471,6 +479,14 @@ constructor(
             settings.font = fontSetting.font.value
         }
 
+        return settings
+    }
+
+    private fun snapshot(settings: Settings = buildSettings()): String = Gson().toJson(settings)
+
+    fun sendToWatch() {
+        val settings = buildSettings()
+
         val settingsAction =
             actionContainer.getAction(ActionContainer.SetSettingsAction::class.java)
         if (!settingsAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
@@ -478,11 +494,13 @@ constructor(
         }
 
         // Disable the Send button right away; it is re-enabled below only if the send fails.
-        sessionManager.clearPendingSave(ComponentId.SETTINGS)
+        val sent = snapshot(settings)
+        val previousBaseline = changes.baseline()
+        changes.setBaseline(sent, sent)
         viewModelScope.launch {
             val saved = settingsAction.runWithSettings(appContext, settings)
             if (!saved) {
-                sessionManager.markPendingSave(ComponentId.SETTINGS)
+                changes.setBaseline(previousBaseline, snapshot())
             }
         }
     }

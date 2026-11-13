@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.EventStorage
 import org.avmedia.gshockGoogleSync.ActionContainer
+import org.avmedia.gshockGoogleSync.session.ChangeTracker
 import org.avmedia.gshockGoogleSync.session.ComponentId
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -42,7 +43,10 @@ class EventViewModel @Inject constructor(
     private val _events = MutableStateFlow<List<Event>>(emptyList())
     val events: StateFlow<List<Event>> = _events
 
-    /** True while the reminders were changed in the app and not yet sent to the watch. */
+    // Compares the reminders with the ones last read from, or sent to, the watch.
+    private val changes = ChangeTracker<List<Event>>(ComponentId.EVENTS, sessionManager)
+
+    /** True while the reminders differ from what is on the watch. */
     val isModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.EVENTS)
         .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.EVENTS))
 
@@ -89,6 +93,18 @@ class EventViewModel @Inject constructor(
         if (!sessionManager.isPendingSave(ComponentId.EVENTS)) loadEvents()
     }
 
+    /**
+     * Events read from the calendar always come back with their default enabled flag. For events
+     * we already have, keep the flag as it currently is, so a re-read doesn't undo the user's
+     * choices.
+     */
+    private fun keepEnabledFlags(fresh: List<Event>): List<Event> {
+        val known = _events.value.associate { it.copy(enabled = false) to it.enabled }
+        return fresh.map { event ->
+            known[event.copy(enabled = false)]?.let { event.copy(enabled = it) } ?: event
+        }
+    }
+
     fun loadEvents() {
         loadEventsJob?.cancel()
         loadEventsJob = viewModelScope.launch {
@@ -116,13 +132,13 @@ class EventViewModel @Inject constructor(
                     }
                     _events.value = loadedEvents
                     EventsModel.refresh(ArrayList(loadedEvents))
-                    sessionManager.clearPendingSave(ComponentId.EVENTS)
+                    changes.setBaseline(loadedEvents.toList(), loadedEvents)
                 } else {
-                    val loadedEvents = calendarEvents.getEventsFromCalendar()
+                    val loadedEvents = keepEnabledFlags(calendarEvents.getEventsFromCalendar())
                         .take(EventsModel.MAX_REMINDERS)
                     _events.value = loadedEvents
                     EventsModel.refresh(ArrayList(loadedEvents))
-                    sessionManager.clearPendingSave(ComponentId.EVENTS)
+                    changes.setBaseline(loadedEvents.toList(), loadedEvents)
                 }
             }.onFailure {
                 if (it !is kotlinx.coroutines.CancellationException) {
@@ -146,7 +162,7 @@ class EventViewModel @Inject constructor(
             this[index] = event
         }
         EventsModel.refresh(ArrayList(_events.value))
-        sessionManager.markPendingSave(ComponentId.EVENTS)
+        changes.update(_events.value)
     }
 
     fun toggleEvents(index: Int, isEnabled: Boolean) {
@@ -154,7 +170,7 @@ class EventViewModel @Inject constructor(
             this[index] = this[index].copy(enabled = isEnabled)
         }
         EventsModel.refresh(ArrayList(_events.value))
-        sessionManager.markPendingSave(ComponentId.EVENTS)
+        changes.update(_events.value)
     }
 
     private var eventSubscription: AutoCloseable? = null
@@ -169,10 +185,12 @@ class EventViewModel @Inject constructor(
                 if (!_isManualMode.value) {
                     Timber.d("CalendarUpdated, events: ${EventsModel.events.size}")
                     @Suppress("UNCHECKED_CAST")
-                    val newEvents = ProgressEvents.getPayload("CalendarUpdated") as List<Event>
+                    val newEvents =
+                        keepEnabledFlags(ProgressEvents.getPayload("CalendarUpdated") as List<Event>)
                     _events.value = newEvents
                     EventsModel.refresh(ArrayList(newEvents))
-                    sessionManager.clearPendingSave(ComponentId.EVENTS)
+                    // Unsent edits were carried over, so compare with the old baseline.
+                    changes.update(newEvents)
                 }
             },
             EventAction("EventsUpdated") {
@@ -181,7 +199,7 @@ class EventViewModel @Inject constructor(
                 if (_isManualMode.value && payload != null) {
                     _events.value = payload
                     EventsModel.refresh(ArrayList(payload))
-                    sessionManager.clearPendingSave(ComponentId.EVENTS)
+                    changes.setBaseline(payload.toList(), payload)
                 } else {
                     loadEvents()
                 }
@@ -199,9 +217,11 @@ class EventViewModel @Inject constructor(
                 return@launch
             }
             // Disable the Send button right away; it is re-enabled below only if the send fails.
-            sessionManager.clearPendingSave(ComponentId.EVENTS)
-            if (!setEventsAction.runWithEvents(appContext, _events.value)) {
-                sessionManager.markPendingSave(ComponentId.EVENTS)
+            val sent = _events.value
+            val previousBaseline = changes.baseline()
+            changes.setBaseline(sent, sent)
+            if (!setEventsAction.runWithEvents(appContext, sent)) {
+                changes.setBaseline(previousBaseline, _events.value)
             }
         }
     }

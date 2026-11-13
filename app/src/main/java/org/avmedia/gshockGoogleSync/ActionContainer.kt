@@ -855,6 +855,7 @@ constructor(
         private suspend fun sendSettings(context: Context, settings: Settings) {
             api.setSettings(settings)
             val freshSettings = api.getSettings()
+            Timber.i("Settings sent autoLight=%s, watch reports autoLight=%s", settings.autoLight, freshSettings.autoLight)
             ProgressEvents.onNext("SettingsUpdated", freshSettings)
         }
 

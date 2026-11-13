@@ -23,6 +23,7 @@ import org.avmedia.gshockGoogleSync.AlarmsWritten
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.AlarmNameStorage
+import org.avmedia.gshockGoogleSync.session.ChangeTracker
 import org.avmedia.gshockGoogleSync.session.ComponentId
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
@@ -56,7 +57,10 @@ class AlarmViewModel @Inject constructor(
     private val _alarms = MutableStateFlow<List<Alarm>>(emptyList())
     val alarms: StateFlow<List<Alarm>> = _alarms.asStateFlow()
 
-    /** True while the alarms were changed in the app and not yet sent to the watch. */
+    // Compares the alarms with the ones last read from, or sent to, the watch.
+    private val changes = ChangeTracker<List<Alarm>>(ComponentId.ALARMS, sessionManager)
+
+    /** True while the alarms differ from what is on the watch. */
     val isModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.ALARMS)
         .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.ALARMS))
 
@@ -79,7 +83,7 @@ class AlarmViewModel @Inject constructor(
                     val payload = ProgressEvents.getPayload("AlarmsUpdated") as? AlarmsWritten
                     if (payload != null) {
                         _alarms.value = payload.alarms
-                        sessionManager.clearPendingSave(ComponentId.ALARMS)
+                        changes.setBaseline(payload.alarms.toList(), payload.alarms)
                     } else {
                         loadAlarms()
                     }
@@ -119,7 +123,7 @@ class AlarmViewModel @Inject constructor(
             }
 
             _alarms.value = newAlarms
-            sessionManager.clearPendingSave(ComponentId.ALARMS)
+            changes.setBaseline(newAlarms.toList(), newAlarms)
             ProgressEvents.onNext("Alarms Loaded")
         }.onFailure {
             sessionManager.onError()
@@ -132,7 +136,7 @@ class AlarmViewModel @Inject constructor(
                 if (i == index) transform(alarm) else alarm
             }
         }
-        sessionManager.markPendingSave(ComponentId.ALARMS)
+        changes.update(_alarms.value)
     }
 
     /**
@@ -183,7 +187,8 @@ class AlarmViewModel @Inject constructor(
      */
     fun sendAlarmsToWatch() {
         // Disable the Send button right away; it is re-enabled below only if the send fails.
-        sessionManager.clearPendingSave(ComponentId.ALARMS)
+        val previousBaseline = changes.baseline()
+        changes.setBaseline(_alarms.value, _alarms.value)
         viewModelScope.launch {
             // Before sending, process the alarms to handle null names.
             val alarmsToSend = _alarms.value.map { alarm ->
@@ -192,7 +197,7 @@ class AlarmViewModel @Inject constructor(
 
             val setAlarmAction = actionContainer.getAction(ActionContainer.SetAlarmAction::class.java)
             if (!setAlarmAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
-                sessionManager.markPendingSave(ComponentId.ALARMS)
+                changes.setBaseline(previousBaseline, _alarms.value)
                 _events.emit(appContext.getString(R.string.alarm_send_failed))
                 return@launch
             }
@@ -204,7 +209,7 @@ class AlarmViewModel @Inject constructor(
             )
 
             if (!saved) {
-                sessionManager.markPendingSave(ComponentId.ALARMS)
+                changes.setBaseline(previousBaseline, _alarms.value)
                 _events.emit(appContext.getString(R.string.alarm_send_failed))
             }
         }

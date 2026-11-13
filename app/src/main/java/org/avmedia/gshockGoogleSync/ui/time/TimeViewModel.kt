@@ -18,6 +18,7 @@ import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
+import org.avmedia.gshockGoogleSync.session.ChangeTracker
 import org.avmedia.gshockGoogleSync.session.ComponentId
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.ui.actions.WatchTimeUpdater
@@ -74,7 +75,10 @@ class TimeViewModel @Inject constructor(
     private val _state = MutableStateFlow(TimeState())
     val state = _state.asStateFlow()
 
-    /** True while the timer was changed in the app and not yet sent to the watch. */
+    // Compares the timer with the value last read from, or sent to, the watch.
+    private val timerChanges = ChangeTracker<Int>(ComponentId.TIMER, sessionManager)
+
+    /** True while the timer differs from what is on the watch. */
     val isTimerModified: StateFlow<Boolean> = sessionManager.isPendingSaveFlow(ComponentId.TIMER)
         .stateIn(viewModelScope, SharingStarted.Eagerly, sessionManager.isPendingSave(ComponentId.TIMER))
 
@@ -93,7 +97,7 @@ class TimeViewModel @Inject constructor(
                     val payload = ProgressEvents.getPayload("TimerUpdated") as? Int
                     if (payload != null) {
                         _state.update { it.copy(timer = payload) }
-                        sessionManager.clearPendingSave(ComponentId.TIMER)
+                        timerChanges.setBaseline(payload, payload)
                     } else {
                         refreshState()
                     }
@@ -106,10 +110,8 @@ class TimeViewModel @Inject constructor(
         when (action) {
             is TimeAction.SetTimer -> {
                 val newTimer = action.hours * 3600 + action.minutes * 60 + action.seconds
-                if (newTimer != _state.value.timer) {
-                    _state.update { it.copy(timer = newTimer) }
-                    sessionManager.markPendingSave(ComponentId.TIMER)
-                }
+                _state.update { it.copy(timer = newTimer) }
+                timerChanges.update(newTimer)
             }
 
             is TimeAction.UpdateTimer -> viewModelScope.launch {
@@ -117,9 +119,11 @@ class TimeViewModel @Inject constructor(
                     actionContainer.getAction(ActionContainer.SetTimerAction::class.java)
                 if (setTimerAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
                     // Disable the Send button right away; it is re-enabled only if the send fails.
-                    sessionManager.clearPendingSave(ComponentId.TIMER)
+                    val sent = _state.value.timer
+                    val previousBaseline = timerChanges.baseline()
+                    timerChanges.setBaseline(sent, sent)
                     if (!setTimerAction.runWithTimer(appContext, action.timeMs)) {
-                        sessionManager.markPendingSave(ComponentId.TIMER)
+                        timerChanges.setBaseline(previousBaseline, _state.value.timer)
                     }
                 }
             }
@@ -221,7 +225,7 @@ class TimeViewModel @Inject constructor(
             val offset = calculateOffset(option)
 
             val timer = api.getTimer()
-            sessionManager.clearPendingSave(ComponentId.TIMER)
+            timerChanges.setBaseline(timer, timer)
             val homeTime = if (watchFeatureManager.isFeatureSupported(FEATURE_HOME_TIME)) api.getHomeTime() else ""
             val batteryLevel = api.getBatteryLevel()
             val temperature = api.getWatchTemperature()
