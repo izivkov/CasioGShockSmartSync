@@ -137,7 +137,7 @@ fun formatTime(hours: Int, minutes: Int, appContext: Context): String {
     val sdf = SimpleDateFormat("H:mm", Locale.getDefault())
     val dateObj: Date = sdf.parse("${hours}:${minutes}")
 
-    val is24HourFormat = DateFormat.is24HourFormat(appContext)
+    val is24HourFormat = org.avmedia.gshockGoogleSync.utils.AppTimeFormat.current()
     val timeFormat = if (is24HourFormat) {
         "H:mm"
     } else {

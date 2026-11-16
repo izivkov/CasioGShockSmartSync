@@ -81,7 +81,8 @@ fun WatchTemperatureContent(
                 }
 
                 launch(Dispatchers.Main) {
-                    temperatureText = fmt.format(measure)
+                    // The watch's internal sensor (mostly body heat while worn), not outdoor weather.
+                    temperatureText = "Watch sensor " + fmt.format(measure)
                 }
             }
         } else if (!hasTemperature) {

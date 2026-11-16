@@ -25,7 +25,8 @@ import javax.inject.Singleton
 class ActionRunner @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sessionManager: SessionManager,
-    private val actionContainer: ActionContainer
+    private val actionContainer: ActionContainer,
+    private val h5600ScheduleRunner: org.avmedia.gshockGoogleSync.h5600.H5600ScheduleRunner,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -37,6 +38,7 @@ class ActionRunner @Inject constructor(
             sessionManager.currentSession.filterNotNull().collect { session ->
                 launch { runActionsWhenReady(session) }
                 launch { runActionsOnRequest(session) }
+                launch { h5600ScheduleRunner.applyAtBoundariesWhileConnected(session) }
             }
         }
         Timber.i("Action subscriptions registered at process scope (no UI required)")
@@ -45,6 +47,13 @@ class ActionRunner @Inject constructor(
     private suspend fun runActionsWhenReady(session: Session) {
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
         if (state.phase !is SessionPhase.Ready) return
+
+        // DW-H5600: 0x39 keep-connected handshake, then per-alarm days / sound. Runs first, because
+        // the regular actions may end the connection (e.g. after an automatic time sync).
+        // No-op for other watches.
+        h5600ScheduleRunner.onConnected(
+            applySchedule = state.button != null && state.button != ConnectionButton.FIND,
+        )
 
         when (state.button) {
             ConnectionButton.FROM_ACTION -> actionContainer.runActionsForActionButton(context)

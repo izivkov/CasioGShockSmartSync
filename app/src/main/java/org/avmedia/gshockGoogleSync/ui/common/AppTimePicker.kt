@@ -30,7 +30,7 @@ fun AppTimePicker(
     onDismiss: () -> Unit,
     initialHour: Int = 0,
     initialMinute: Int = 0,
-    is24Hour: Boolean = DateFormat.is24HourFormat(LocalContext.current),
+    is24Hour: Boolean = org.avmedia.gshockGoogleSync.utils.AppTimeFormat.current(),
     backgroundColor: Color = MaterialTheme.colorScheme.background
 ) {
     val validInitialHour = remember(initialHour) {

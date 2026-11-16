@@ -186,6 +186,9 @@ fun BottomNavigationBarWithPermissions(
                     ),
                 )
             }
+            composable(Screens.Custom.route) {
+                org.avmedia.gshockGoogleSync.h5600.CustomScreen()
+            }
             composable(Screens.Settings.route) {
                 SettingsScreen()
             }

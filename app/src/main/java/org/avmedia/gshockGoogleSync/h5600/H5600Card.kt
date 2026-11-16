@@ -1,0 +1,221 @@
+package org.avmedia.gshockGoogleSync.h5600
+
+import AppSwitch
+import AppText
+import AppTextLarge
+import android.app.AlertDialog
+import android.app.TimePickerDialog
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.avmedia.gshockGoogleSync.ui.common.AppButton
+import org.avmedia.gshockGoogleSync.ui.common.AppChoiceButton
+import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockapi.model.SoundMode
+import org.avmedia.gshockapi.model.WatchFaceItem
+
+
+/** Custom tab content for the DW-H5600: two cards, watch face first, then sound & notifications. */
+@Composable
+fun H5600Card(vm: H5600ViewModel = hiltViewModel()) {
+    val s by vm.state.collectAsState()
+    if (!s.supported) return
+    Column {
+        WatchFaceCard(vm)
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
+        SoundNotificationsCard(vm)
+    }
+}
+
+/** Watch face: Sun data / Steps, dynamic sunset-step toggle, weather instead of sunrise, loc/time. */
+@Composable
+private fun WatchFaceCard(vm: H5600ViewModel) {
+    val s by vm.state.collectAsState()
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            AppTextLarge(text = "Watch face")
+            // Watch face item
+            AppText(
+                text = "Watch face: " + when (s.watchFace) {
+                    WatchFaceItem.STEPS -> "Steps"
+                    WatchFaceItem.SUNRISE_SUNSET -> "Sun data"
+                    null -> s.watchFaceCode?.let { "unknown (code 0x%02X)".format(it) } ?: "unknown"
+                },
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            if (s.watchFace == null && s.watchFaceCode == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
+            else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Current face highlighted; greyed while syncing or while the dynamic toggle controls it.
+                AppChoiceButton(
+                    text = "Sun data",
+                    selected = s.watchFace == WatchFaceItem.SUNRISE_SUNSET,
+                    enabled = !s.busy && !s.dynamicFace,
+                    onClick = { vm.setWatchFace(WatchFaceItem.SUNRISE_SUNSET) },
+                )
+                AppChoiceButton(
+                    text = "Steps",
+                    selected = s.watchFace == WatchFaceItem.STEPS,
+                    enabled = !s.busy && !s.dynamicFace,
+                    onClick = { vm.setWatchFace(WatchFaceItem.STEPS) },
+                )
+                AppChoiceButton(text = "Weekday (?)", selected = false, enabled = false, onClick = {}) // code not captured yet
+            }
+            if (s.dynamicFace) {
+                AppText(text = "Controlled by the dynamic sunset-step toggle below.", fontSize = 13.sp)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Dynamic sunset-step toggle")
+                AppSwitch(checked = s.dynamicFace, enabled = !s.busy, onCheckedChange = { vm.setDynamicFace(it) })
+            }
+            AppText(
+                text = "Steps all day; Sun data from ${SunFace.LEAD_HOURS} h before sunset until " +
+                    "${SunFace.TRAIL_MIN} min after. Today: ${s.sunsetText}",
+                fontSize = 13.sp,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Weather instead of sunrise")
+                AppSwitch(checked = s.tempSun, enabled = !s.busy, onCheckedChange = { vm.setTempSun(it) })
+            }
+            AppText(
+                text = "Sun screen top line shows W:TT — W = 1 sunny, 2 cloudy, 3 rain/snow, 4 extreme (heavy rain, storm, gusts ≥ 60 km/h); TT = °C (0–59). " +
+                    "E.g. 1:18 = sunny 18 °C, 3:10 = rain 10 °C. Sunset stays real. " +
+                    "Updates every ${TempSun.REFRESH_MIN} min while connected. ${s.tempText}",
+                fontSize = 13.sp,
+            )
+            if (s.tempSun) {
+                // Fine-tune for the watch's own sun formula (measured: top +2, sunset -3)
+                listOf(
+                    Triple("Top line fine-tune", s.riseCorr, true),
+                    Triple("Sunset fine-tune", s.setCorr, false),
+                ).forEach { (label, value, isRise) ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AppText(text = "$label: %+d min".format(value), fontSize = 13.sp)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            AppButton(text = "−", enabled = !s.busy, onClick = {
+                                if (isRise) vm.adjustTempSun(-1, 0) else vm.adjustTempSun(0, -1)
+                            })
+                            AppButton(text = "+", enabled = !s.busy, onClick = {
+                                if (isRise) vm.adjustTempSun(1, 0) else vm.adjustTempSun(0, 1)
+                            })
+                        }
+                    }
+                }
+                AppText(
+                    text = "If the watch shows the top line 1 min too low, press + on top; if sunset is 1 min late, press − on sunset.",
+                    fontSize = 12.sp,
+                )
+            }
+            AppButton(
+                text = "Send loc/time",
+                enabled = !s.busy,
+                onClick = { vm.sendLocation() },
+            )
+        }
+    }
+}
+
+/** Sound mode (+ raw packet), per-alarm note, last applied, and the notification app filter. */
+@Composable
+private fun SoundNotificationsCard(vm: H5600ViewModel) {
+    val s by vm.state.collectAsState()
+    val context = LocalContext.current
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            AppTextLarge(text = "Sound & notifications")
+            // Sound mode
+            AppText(
+                text = "Sound mode: " + (s.soundMode?.name?.replace('_', ' ') ?: if (s.busy) "reading…" else "unknown"),
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            // All five modes; the current one is greyed out. Two rows so they fit on a phone.
+            val modes = listOf(
+                SoundMode.ALL_ON to "Sound + vibe", SoundMode.SOUND_ONLY to "Sound only", SoundMode.VIBE_ONLY to "Vibe only",
+                SoundMode.ALL_OFF to "Off", SoundMode.CUSTOM to "Custom",
+            )
+            if (s.soundMode == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner() // never read
+            else modes.chunked(3).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    row.forEach { (mode, label) ->
+                        AppChoiceButton(
+                            text = label,
+                            selected = s.soundMode == mode,
+                            enabled = !s.busy,
+                            onClick = { vm.setSoundMode(mode) },
+                        )
+                    }
+                }
+            }
+
+            // Raw sound packet + re-read (used to map the per-function CUSTOM bits)
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "0x42: " + s.soundHex.ifEmpty { "…" }, fontSize = 13.sp)
+                AppButton(text = "Re-read", enabled = !s.busy, onClick = { vm.refresh() })
+            }
+            AppText(text = "Alarm days and Vibe only / Sound are set per alarm in the Alarms tab.", fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
+            s.lastApplied?.let { AppText(text = "Last applied: $it", fontSize = 13.sp) }
+            // Notification app filter
+            var filter by remember { mutableStateOf(NotificationFilter.load(context)) }
+            fun saveFilter(cfg: NotificationFilter.Config) {
+                NotificationFilter.save(context, cfg)
+                filter = cfg
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Notifications only from chosen apps")
+                AppSwitch(checked = filter.enabled, onCheckedChange = { saveFilter(filter.copy(enabled = it)) })
+            }
+            AppButton(
+                text = "Choose apps (${filter.packages.size})",
+                onClick = {
+                    val apps = NotificationFilter.launchableApps(context)
+                    val checked = BooleanArray(apps.size) { apps[it].packageName in filter.packages }
+                    AlertDialog.Builder(context)
+                        .setTitle("Forward notifications from")
+                        .setMultiChoiceItems(apps.map { it.label }.toTypedArray(), checked) { _, i, on -> checked[i] = on }
+                        .setPositiveButton("Save") { _, _ ->
+                            saveFilter(filter.copy(packages = apps.filterIndexed { i, _ -> checked[i] }.map { it.packageName }.toSet()))
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                },
+            )
+            AppText(
+                text = if (filter.enabled) "Only checked apps reach the watch." else "Off: every app's notifications reach the watch.",
+                fontSize = 13.sp,
+            )
+        }
+    }
+}

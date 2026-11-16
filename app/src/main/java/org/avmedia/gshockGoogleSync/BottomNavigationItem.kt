@@ -64,16 +64,21 @@ data class BottomNavigationItem(
             )
         }
 
-        // Add remaining items
+        // Add remaining items. The Actions tab is hidden in this fork (not useful on the DW-H5600);
+        // the background connection actions it configures (e.g. set time on auto-sync) still run
+        // with their saved settings, and the route still exists.
+        // "Custom" tab (fork): DW-H5600 additions, shown only for that watch family.
+        if (org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600) {
+            baseItems.add(
+                BottomNavigationItem(
+                    label = "Custom",
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_tune_24),
+                    route = Screens.Custom.route
+                )
+            )
+        }
         baseItems.addAll(
             listOf(
-                BottomNavigationItem(
-                    label = Utils.shortenString(
-                        stringResource(R.string.actions), 7
-                    ),
-                    icon = ImageVector.vectorResource(id = R.drawable.generic_action_item),
-                    route = Screens.Actions.route
-                ),
                 BottomNavigationItem(
                     label = Utils.shortenString(
                         stringResource(R.string.settings), 7

@@ -35,6 +35,8 @@ import javax.inject.Inject
 private const val FEATURE_HOME_TIME = "time.home_time"
 
 data class TimeState(
+    /** True once values were read from the watch (or restored from the last known values). */
+    val loaded: Boolean = false,
     val timer: Int = 0,
     val homeTime: String = "",
     val batteryLevel: Int = 0,
@@ -53,6 +55,7 @@ sealed interface TimeAction {
     data class UpdateTimer(val timeMs: Int) : TimeAction
     data object SendTimeToWatch : TimeAction
     data object RefreshState : TimeAction
+    data object PullRefresh : TimeAction // swipe down: clear the cache and re-read from the watch
     data class SetTimeZoneOption(val option: TimeSettingsStorage.TimeZoneOption) : TimeAction
     data class SetVoiceVerbose(val enabled: Boolean) : TimeAction
     data object StartVoiceCommand : TimeAction
@@ -86,6 +89,19 @@ class TimeViewModel @Inject constructor(
     private var saveJob: Job? = null
 
     init {
+        // Show the last values read from the watch right away; spinners only if never read.
+        org.avmedia.gshockGoogleSync.utils.LastKnown.int(appContext, "timer")?.let { t ->
+            _state.update {
+                it.copy(
+                    loaded = true,
+                    timer = t,
+                    homeTime = org.avmedia.gshockGoogleSync.utils.LastKnown.string(appContext, "home_time") ?: "",
+                    batteryLevel = org.avmedia.gshockGoogleSync.utils.LastKnown.int(appContext, "battery") ?: 0,
+                    temperature = org.avmedia.gshockGoogleSync.utils.LastKnown.int(appContext, "temperature") ?: 0,
+                    watchName = org.avmedia.gshockGoogleSync.utils.LastKnown.string(appContext, "watch_name") ?: "",
+                )
+            }
+        }
         refreshState()
         setupEventSubscription()
     }
@@ -144,6 +160,7 @@ class TimeViewModel @Inject constructor(
             }
 
             TimeAction.RefreshState -> refreshState()
+            TimeAction.PullRefresh -> pullRefresh()
 
             is TimeAction.SetTimeZoneOption -> {
                 val offset = calculateOffset(action.option)
@@ -218,6 +235,23 @@ class TimeViewModel @Inject constructor(
         viewModelScope.launch { readState() }
     }
 
+    /** Drives the pull-to-refresh indicator. */
+    private val _isRefreshing = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    private fun pullRefresh() {
+        if (_isRefreshing.value) return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                api.clearCache()
+                readState()
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+    }
+
     private suspend fun readState() {
         runCatching {
             timeSettingsStorage.load()
@@ -233,8 +267,14 @@ class TimeViewModel @Inject constructor(
             val isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable()
             val isVoiceVerbose = LocalDataStorage.getVoiceVerbose(appContext)
 
+            org.avmedia.gshockGoogleSync.utils.LastKnown.put(appContext, "timer", timer)
+            org.avmedia.gshockGoogleSync.utils.LastKnown.put(appContext, "home_time", homeTime)
+            org.avmedia.gshockGoogleSync.utils.LastKnown.put(appContext, "battery", batteryLevel)
+            org.avmedia.gshockGoogleSync.utils.LastKnown.put(appContext, "temperature", temperature)
+            org.avmedia.gshockGoogleSync.utils.LastKnown.put(appContext, "watch_name", watchName)
             _state.update {
                 it.copy(
+                    loaded = true,
                     timer = timer,
                     homeTime = homeTime,
                     batteryLevel = batteryLevel,

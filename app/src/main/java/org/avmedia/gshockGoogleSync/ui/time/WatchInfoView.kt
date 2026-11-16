@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -74,7 +75,10 @@ fun WatchInfoCard1(
                 )
             }
 
-            HomeTime(
+            val loaded = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel<TimeViewModel>().state
+                .collectAsState().value.loaded
+            if (!loaded) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner(Modifier.padding(bottom = 10.dp))
+            else HomeTime(
                 modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 10.dp)
             )
         }
@@ -96,13 +100,19 @@ fun WatchInfoCard2(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Battery()
-            Spacer(modifier = Modifier.height(12.dp))
-            WatchTemperature(
-                hasTemperature = watchFeatureManager.isFeatureSupported("time.temperature"),
-                isNormalButtonPressed = true,
-                isConnected = true,
-            )
+            val loaded = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel<TimeViewModel>().state
+                .collectAsState().value.loaded
+            if (!loaded) {
+                org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
+            } else {
+                Battery()
+                Spacer(modifier = Modifier.height(12.dp))
+                WatchTemperature(
+                    hasTemperature = watchFeatureManager.isFeatureSupported("time.temperature"),
+                    isNormalButtonPressed = true,
+                    isConnected = true,
+                )
+            }
         }
     }
 }

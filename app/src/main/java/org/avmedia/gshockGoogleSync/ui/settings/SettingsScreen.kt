@@ -61,9 +61,8 @@ fun SettingsList() {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     Column {
-        WatchFeature(id = "locale_card") {
-            Locale(settingsViewModel::onSettingUpdated)
-        }
+        // DW-H5600 card moved to its own "Custom" tab.
+        // Locale card removed: on the DW-H5600 it only held the time format, now on the Time tab.
         WatchFeature(id = "operation_tone_card") {
             OperationalTone(settingsViewModel::onSettingUpdated)
         }
@@ -100,18 +99,11 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
                     .fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                InfoButton(infoText = stringResource(id = R.string.auto_fill_help))
+                // auto-fill help removed together with the AUTO button
             }
 
+            // "AUTO" (auto-configure settings) button removed in this fork.
             val buttons = listOf(
-                ButtonData(
-                    text = Utils.shortenStringNewLine(
-                        stringResource(id = R.string.auto_configure_settings),
-                        15,
-                        "AUTO"
-                    ),
-                    onClick = settingsViewModel::setSmartDefaults
-                ),
                 ButtonData(
                     text = stringResource(id = R.string.send_to_watch),
                     onClick = settingsViewModel::sendToWatch,

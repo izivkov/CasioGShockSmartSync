@@ -80,6 +80,14 @@
         android:name="android.hardware.sensor.proximity"
         android:required="true" />
 
+    <!-- Lets the notification filter list launchable apps (Android 11+ package visibility). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".GShockApplication"
         android:allowBackup="true"

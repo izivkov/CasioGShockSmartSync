@@ -78,7 +78,10 @@ fun TimerView(
                     text = stringResource(R.string.timer),
                     modifier = Modifier.padding(start = 6.dp)
                 )
-                TimerTimeView(
+                if (!state.loaded) {
+                    // never read from the watch yet
+                    org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner(Modifier.padding(start = 6.dp, top = 12.dp))
+                } else TimerTimeView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)

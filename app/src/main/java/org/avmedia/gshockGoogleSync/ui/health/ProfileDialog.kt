@@ -247,7 +247,5 @@ fun ProfileDialog(
     }
 }
 
-private fun isImperialLocale(): Boolean {
-    val country = Locale.getDefault().country.uppercase(Locale.US)
-    return country in setOf("US", "LR", "MM", "CA")
-}
+// This fork always uses metric (cm / kg), whatever the phone's region.
+private fun isImperialLocale(): Boolean = false

@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        org.avmedia.gshockGoogleSync.utils.AppTimeFormat.init(applicationContext) // app-wide 12/24h, mirrors the watch
         setupGlobalExceptionHandler()
         enableEdgeToEdge()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

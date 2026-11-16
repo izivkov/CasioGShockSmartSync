@@ -42,6 +42,12 @@ fun getCurrentTime(format: TimeFormat, offsetMs: Long = 0L): String {
 }
 
 fun getSystemTimeFormat(): TimeFormat {
+    // Follow the watch's format (app-wide setting), not the phone's.
+    return if (org.avmedia.gshockGoogleSync.utils.AppTimeFormat.current()) TimeFormat.TwentyFourHour else TimeFormat.TwelveHour
+}
+
+@Suppress("unused")
+private fun phoneTimeFormat(): TimeFormat {
     // Get the short time format pattern from the system's DateFormat
     val pattern = (DateFormat.getTimeInstance(DateFormat.SHORT) as SimpleDateFormat).toPattern()
 

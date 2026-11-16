@@ -52,7 +52,7 @@ fun WatchNameView(
                 text = state.watchName
             )
 
-            if (state.isVoiceCommandSupported) {
+            if (false && state.isVoiceCommandSupported) { // voice command removed in this fork
                 AppCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

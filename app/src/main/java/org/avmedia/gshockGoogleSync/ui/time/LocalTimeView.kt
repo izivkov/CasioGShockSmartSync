@@ -75,6 +75,12 @@ fun LocalTimeView(
                     timeOffset = state.timeOffset
                 )
 
+                // Date (weekday, day, month)
+                AppText(
+                    text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM yyyy")),
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+
                 Box {
                     TimeZoneTextView(
                         modifier = Modifier

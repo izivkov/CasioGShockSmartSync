@@ -69,6 +69,8 @@ internal fun HealthState.withStepMetrics(stepData: StepCounterData, weightKg: In
 
 data class HealthState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
+    /** When the shown step data was read from the watch (for the "Synced at" line). */
+    val syncedAt: java.time.LocalDateTime? = null,
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val stepGoal: Int = 10000,
     val weight: Int = 70, // kg
@@ -86,6 +88,7 @@ sealed interface HealthAction {
     data class SetHeightInches(val inches: Double) : HealthAction
     data object ClearStepHistory : HealthAction
     data object RefreshState : HealthAction
+    data object PullRefresh : HealthAction // swipe down: force a fresh sync (bypass the cache)
 }
 
 internal fun applyExerciseProfileState(
@@ -113,8 +116,12 @@ class HealthViewModel @Inject constructor(
     private val _state = MutableStateFlow(HealthState())
     val state = _state.asStateFlow()
 
-    val usesImperialUnits: Boolean =
-        Locale.getDefault().country.uppercase(Locale.US) in IMPERIAL_COUNTRIES
+    /** True while a step fetch is running; drives the pull-to-refresh indicator. */
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    // This fork always uses metric (cm / kg / km), whatever the phone's region.
+    val usesImperialUnits: Boolean = false
 
     private var eventSubscription: AutoCloseable? = null
     private var stepPollJob: Job? = null
@@ -145,8 +152,10 @@ class HealthViewModel @Inject constructor(
         )
     }
 
+    // The DW-H5600 never answers the exercise-profile request (0x2D); without a timeout the Health
+    // screen waited forever after fetching steps and kept showing 0.
     suspend fun readExerciseProfile(): ExerciseProfile? =
-        runCatching { api.getExerciseProfile() }.getOrNull()
+        runCatching { withTimeoutOrNull(5.seconds) { api.getExerciseProfile() } }.getOrNull()
 
     suspend fun saveExerciseProfile(profile: ExerciseProfile): Boolean =
         runCatching {
@@ -172,6 +181,11 @@ class HealthViewModel @Inject constructor(
 
     fun onAction(action: HealthAction) {
         when (action) {
+            HealthAction.PullRefresh -> {
+                org.avmedia.gshockGoogleSync.h5600.H5600Steps.invalidate()
+                requestStepRefresh()
+            }
+
             is HealthAction.SetStepDataOption -> _state.update {
                 it.copy(selectedStepDataOption = action.option)
             }
@@ -214,7 +228,20 @@ class HealthViewModel @Inject constructor(
     }
 
     private suspend fun fetchStepCounter(): StepCounterData =
-        if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
+        when {
+            WatchInfo.hasStepCounterMock -> generateMockStepData()
+            api.isH5600SettingsSupported() -> fetchH5600Steps()
+            else -> api.getStepCount()
+        }
+
+    /** DW-H5600: LifeLog sync (slow), cached for 15 min so the 5-min poll does not re-sync each time. */
+    private suspend fun fetchH5600Steps(): StepCounterData {
+        org.avmedia.gshockGoogleSync.h5600.H5600Steps.cached()?.let { return it }
+        val result = api.getH5600LifeLog() ?: return StepCounterData.unavailable()
+        return org.avmedia.gshockGoogleSync.h5600.H5600Steps
+            .toStepCounterData(result, java.time.ZoneId.systemDefault())
+            .also { org.avmedia.gshockGoogleSync.h5600.H5600Steps.store(it) }
+    }
 
     private fun requestStepRefresh() {
         if (stepFetchJob?.isActive == true) {
@@ -222,15 +249,22 @@ class HealthViewModel @Inject constructor(
             return
         }
         stepFetchJob = viewModelScope.launch {
-            do {
+            _isRefreshing.value = true
+            try { do {
                 stepFetchPending = false
                 runCatching {
-                    val stepData = withTimeoutOrNull(STEP_FETCH_TIMEOUT) { fetchStepCounter() }
+                    val timeout = if (api.isH5600SettingsSupported()) 200.seconds else STEP_FETCH_TIMEOUT
+                    val stepData = withTimeoutOrNull(timeout) { fetchStepCounter() }
                         ?: return@runCatching
                     val profile = readExerciseProfile()
 
                     _state.update { current ->
-                        val withSteps = current.copy(stepCounterData = stepData)
+                        // DW-H5600 data may come from the 15-min cache: show the real sync time.
+                        val syncedAt = org.avmedia.gshockGoogleSync.h5600.H5600Steps.syncedAtMillis()
+                            ?.takeIf { api.isH5600SettingsSupported() }
+                            ?.let { java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(it), java.time.ZoneId.systemDefault()) }
+                            ?: java.time.LocalDateTime.now()
+                        val withSteps = current.copy(stepCounterData = stepData, syncedAt = syncedAt)
                         if (profile != null) {
                             applyExerciseProfileState(withSteps, profile, stepData = stepData)
                         } else {
@@ -238,7 +272,7 @@ class HealthViewModel @Inject constructor(
                         }
                     }
                 }
-            } while (stepFetchPending)
+            } while (stepFetchPending) } finally { _isRefreshing.value = false }
         }
     }
 

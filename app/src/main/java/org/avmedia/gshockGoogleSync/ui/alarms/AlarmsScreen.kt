@@ -54,6 +54,9 @@ fun AlarmList(alarmViewModel: AlarmViewModel = hiltViewModel()) {
 @Composable
 fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
+    // DW-H5600: the phone-side alarm list (any number of alarms) replaces the 4-slot editor.
+    val h5600Vm: org.avmedia.gshockGoogleSync.h5600.H5600AlarmPoolViewModel = hiltViewModel()
+    val h5600 by h5600Vm.state.collectAsState()
     val isModified by alarmViewModel.isModified.collectAsState()
 
     // Show each one-time error message from the ViewModel (the send failed).
@@ -84,11 +87,17 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
             ) {
-                AlarmList()
-                AlarmChimeSwitch(
-                    onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }
-                )
+                if (h5600.supported) {
+                    org.avmedia.gshockGoogleSync.h5600.H5600AlarmPoolList(h5600Vm)
+                } else {
+                    AlarmList()
+                    AlarmChimeSwitch(
+                        onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }
+                    )
+                }
             }
+
+            if (h5600.supported) return@Column // stock send buttons would overwrite the planned slots
 
             val buttons =
                 listOf(

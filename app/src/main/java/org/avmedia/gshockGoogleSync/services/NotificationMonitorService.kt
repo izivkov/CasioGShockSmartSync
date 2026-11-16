@@ -48,6 +48,8 @@ class NotificationMonitorService : NotificationListenerService() {
         // Forward notifications only while a watch session is Ready. Read from the Session at the
         // moment of use, so a recreated service instance cannot miss a connection event.
         if (!sessionManager.isReady) return
+        // Per-app allowlist (set in Settings > DW-H5600 card). Disabled = forward everything.
+        if (!org.avmedia.gshockGoogleSync.h5600.NotificationFilter.allows(applicationContext, sbn.packageName)) return
 
         processNotification(sbn)
             .onSuccess { notificationInfo ->
