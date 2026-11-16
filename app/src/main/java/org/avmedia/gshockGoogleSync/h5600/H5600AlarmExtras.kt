@@ -193,6 +193,7 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
                     }
                     // All options in one wrapping row of compact buttons
                     androidx.compose.foundation.layout.FlowRow(
+                        modifier = Modifier.padding(top = 6.dp), // a little air below the label
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {

@@ -16,10 +16,12 @@ fun AppButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
+    val (source, pressMod) = rememberPressScale()
     androidx.compose.material3.OutlinedButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.then(pressMod),
         enabled = enabled,
+        interactionSource = source,
         shape = androidx.compose.foundation.shape.CircleShape // Capsule shape
     ) {
         AppText(

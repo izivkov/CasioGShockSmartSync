@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.common
 
+import androidx.compose.animation.animateContentSize
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -22,7 +24,7 @@ fun AppCard(
     content: @Composable () -> Unit,
 ) {
     Card(
-        modifier = modifier.padding(padding),
+        modifier = modifier.padding(padding).animateContentSize(), // smooth resize when content changes
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(elevation),

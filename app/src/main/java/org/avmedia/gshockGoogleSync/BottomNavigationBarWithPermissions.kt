@@ -145,7 +145,12 @@ fun BottomNavigationBarWithPermissions(
         NavHost(
             navController = navController,
             startDestination = Screens.Time.route,
-            modifier = Modifier.padding(paddingValues = paddingValues)
+            modifier = Modifier.padding(paddingValues = paddingValues),
+            // Slide + fade towards the tab's side of the bottom bar
+            enterTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabEnter() } },
+            exitTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabExit() } },
+            popEnterTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabEnter() } },
+            popExitTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabExit() } },
         ) {
             composable(Screens.Time.route) {
                 TimeScreen()
