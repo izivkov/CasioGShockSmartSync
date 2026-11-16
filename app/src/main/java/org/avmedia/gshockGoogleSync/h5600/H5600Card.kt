@@ -203,17 +203,6 @@ private fun SoundNotificationsCard(vm: H5600ViewModel) {
             }
             AppText(text = "Alarm days and Vibe only / Sound are set per alarm in the Alarms tab.", fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
             s.lastApplied?.let { AppText(text = "Last applied: $it", fontSize = 13.sp) }
-            // Hourly time signal (0x13 byte 12 bit 0x20); not settable on the watch itself.
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AppText(text = "Hourly time signal")
-                if (s.hourlyChime == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
-                else AppSwitch(checked = s.hourlyChime == true, enabled = !s.busy, onCheckedChange = { vm.setHourlyChime(it) })
-            }
-
             // Notification app filter
             var filter by remember { mutableStateOf(NotificationFilter.load(context)) }
             fun saveFilter(cfg: NotificationFilter.Config) {

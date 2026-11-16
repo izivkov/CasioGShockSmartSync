@@ -133,7 +133,7 @@ class H5600ViewModel @Inject constructor(
             val mode = if (hex != null) read { api.getSoundMode() } else null
             val code = read { api.getWatchFaceCode() }
             val faceNo = read { api.getH5600WatchFaceNumber() }
-            val chime = read { api.getHourlyChime() }
+            val chime: Boolean? = null // hourly signal now lives on the Time tab
             Timber.i("H5600 re-read: 0x42=$hex mode=$mode face=$code")
             _state.update {
                 it.copy(
