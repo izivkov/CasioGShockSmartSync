@@ -182,8 +182,8 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
                                 },
                             )
                         }
-                        if (a.id in s.onWatch) AppText(text = "on watch", fontSize = 13.sp)
-                        if (a.id == s.onWatchSmart) AppText(text = "on watch (smart)", fontSize = 13.sp)
+                        if (a.id in s.onWatch) AppText(text = "on watch", fontSize = 13.sp, modifier = Modifier.padding(end = 16.dp))
+                        if (a.id == s.onWatchSmart) AppText(text = "on watch (smart)", fontSize = 13.sp, modifier = Modifier.padding(end = 16.dp))
                         AppSwitch(
                             checked = a.enabled,
                             enabled = !s.busy,
