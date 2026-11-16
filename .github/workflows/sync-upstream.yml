@@ -1,0 +1,68 @@
+# Weekly: merge izivkov/CasioGShockSmartSync main into h5600-sound-mode, build against our
+# GShockAPI fork (checked out next to it, as settings.gradle expects ../GShockAPI), run all
+# unit tests, and push the merge only if everything passes. The APK is attached to the run.
+# Runs an hour after the GShockAPI fork's own sync job.
+name: Sync with upstream + test
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'   # Mondays 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: h5600-sound-mode
+          fetch-depth: 0
+          path: CasioGShockSmartSync
+      - uses: actions/checkout@v4
+        with:
+          repository: flyboy14/GShockAPI
+          ref: h5600-sound-mode
+          path: GShockAPI
+
+      - name: Merge izivkov/CasioGShockSmartSync main
+        id: merge
+        working-directory: CasioGShockSmartSync
+        run: |
+          git config user.name "flyboy14"
+          git config user.email "7253326+flyboy14@users.noreply.github.com"
+          git remote add upstream https://github.com/izivkov/CasioGShockSmartSync.git
+          git fetch upstream main
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git log --oneline HEAD..upstream/main
+            git merge --no-edit upstream/main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Android SDK packages
+        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0" > /dev/null
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests + debug build
+        working-directory: CasioGShockSmartSync
+        run: ./gradlew --no-daemon testGithubDebugUnitTest assembleGithubDebug
+
+      - name: Push the merge
+        if: steps.merge.outputs.changed == 'true'
+        working-directory: CasioGShockSmartSync
+        run: git push origin HEAD:h5600-sound-mode
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-github-debug
+          path: CasioGShockSmartSync/app/build/outputs/apk/github/debug/*.apk
+          retention-days: 14
