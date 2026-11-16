@@ -75,9 +75,7 @@ fun SettingsList() {
         WatchFeature(id = "font_card") {
             Font(settingsViewModel::onSettingUpdated)
         }
-        WatchFeature(id = "time_adjustment_card") {
-            TimeAdjustment(settingsViewModel::onSettingUpdated)
-        }
+        // Time adjustment card removed: on the DW-H5600 it only held Fine Adjustment, now on the Time tab.
     }
 }
 

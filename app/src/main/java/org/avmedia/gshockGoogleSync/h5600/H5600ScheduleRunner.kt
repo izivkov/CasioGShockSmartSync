@@ -35,6 +35,12 @@ class H5600ScheduleRunner @Inject constructor(
 ) {
     private val mutex = Mutex()
 
+    init {
+        // Any time sync (from any screen, any moment) is followed by this location: see
+        // H5600SettingsIO.resendHomeLocation. Fresh each time, real or weather coordinates.
+        api.setH5600HomeLocationProvider { effectiveLocation() }
+    }
+
     /**
      * Coordinates to send in 0x24: the phone's location, or, with "Temperature instead of sunrise"
      * on and a temperature known, fake coordinates whose sunrise reads 0:TT (see [TempSun]).

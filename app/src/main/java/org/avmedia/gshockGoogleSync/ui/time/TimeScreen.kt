@@ -62,6 +62,9 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                                 .padding(vertical = 0.dp)
                         )
 
+                        // Fine Adjustment (moved here from Settings)
+                        FineAdjustmentCard(modifier = Modifier.fillMaxWidth())
+
                         // Minsk and Los Angeles clocks (phone-side)
                         WorldClocksView(modifier = Modifier.fillMaxWidth())
 
