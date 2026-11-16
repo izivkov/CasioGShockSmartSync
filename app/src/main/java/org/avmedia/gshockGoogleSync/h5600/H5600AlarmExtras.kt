@@ -148,6 +148,7 @@ private fun pickDays(context: Context, a: PhoneAlarm, onPicked: (Set<DayOfWeek>)
 }
 
 /** Replaces the stock 4-slot alarm list for DW-H5600 watches. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
     val s by vm.state.collectAsState()
@@ -190,20 +191,22 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
                             onCheckedChange = { vm.update(a.copy(enabled = it)) },
                         )
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AppButton(
+                    // All options in one wrapping row of compact buttons
+                    androidx.compose.foundation.layout.FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                             text = AlarmDayRules.label(a.days),
                             enabled = !s.busy,
                             onClick = { pickDays(context, a) { d -> vm.update(a.copy(days = d)) } },
                         )
-                        AppButton(
+                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                             text = if (a.vibeOnly) "Vibe only" else "Sound + vibe",
                             enabled = !s.busy,
                             onClick = { vm.update(a.copy(vibeOnly = !a.vibeOnly)) },
                         )
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AppButton(
+                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                             text = if (a.isSmart) "Smart −${a.smartWindowMin} min" else "Smart off",
                             enabled = !s.busy,
                             onClick = {
@@ -218,12 +221,12 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
                                     .show()
                             },
                         )
-                        AppButton(
+                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                             text = if (a.snooze) "Snooze on" else "Snooze off",
                             enabled = !s.busy,
                             onClick = { vm.update(a.copy(snooze = !a.snooze)) },
                         )
-                        AppButton(
+                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                             text = "Delete",
                             enabled = !s.busy,
                             onClick = {
