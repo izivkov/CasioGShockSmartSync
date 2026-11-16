@@ -166,8 +166,8 @@ class H5600ViewModel @Inject constructor(
         val previous = _state.value.hourlyChime
         _state.update { it.copy(hourlyChime = on) }
         run("hourly time signal", onError = { _state.update { it.copy(hourlyChime = previous) } }) {
-            api.setHourlyChime(on)
-            val v = api.getHourlyChime()
+            kotlinx.coroutines.withTimeout(20_000) { api.setHourlyChime(on) }
+            val v = kotlinx.coroutines.withTimeoutOrNull(10_000) { api.getHourlyChime() }
             _state.update { it.copy(hourlyChime = v) }
             v?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", it) }
         }

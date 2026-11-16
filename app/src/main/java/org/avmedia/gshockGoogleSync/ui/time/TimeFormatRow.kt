@@ -55,7 +55,10 @@ class TimeFormatViewModel @Inject constructor(
     fun set(is24h: Boolean) {
         viewModelScope.launch {
             _state.value = State(is24h = is24h, busy = true) // move the UI immediately
-            runCatching { api.setTimeFormat24h(is24h); api.getTimeFormat24h() }
+            runCatching {
+                kotlinx.coroutines.withTimeout(20_000) { api.setTimeFormat24h(is24h) }
+                kotlinx.coroutines.withTimeoutOrNull(10_000) { api.getTimeFormat24h() }
+            }
                 .onSuccess {
                     _state.value = State(is24h = it)
                     it?.let { v ->
