@@ -110,6 +110,26 @@ class H5600ScheduleRunner @Inject constructor(
         }.getOrElse { "failed: ${it.message}" }.also { Timber.i("H5600 location: $it") }
     }
 
+    @Volatile private var lastSunResend: LocalDateTime? = null
+
+    /**
+     * The watch sometimes drops its sun location on its own (seen 2026-11-16: dashes with no write
+     * from us). With the weather option off nothing else re-sends it, so do a loc/time sync every
+     * quarter hour (the weather option does the same via its 15-min fetch).
+     */
+    private suspend fun resendSunIfDue(): String? {
+        if (TempSun.isEnabled(context) || !api.isH5600SettingsSupported()) return null
+        val now = LocalDateTime.now()
+        val last = lastSunResend
+        if (last != null && now.isBefore(TempSun.nextFetch(last))) return null
+        lastSunResend = now
+        return runCatching {
+            sendLocation(force = true)
+            watchTimeUpdater.updateTime() // the watch recalculates sun data only on a time/city write
+            "sun data re-sent"
+        }.getOrElse { "sun re-send failed (${it.message})" }
+    }
+
     /** Called once per connection when the session is Ready. */
     suspend fun onConnected(applySchedule: Boolean) {
         if (!api.isH5600SettingsSupported()) return
@@ -157,6 +177,7 @@ class H5600ScheduleRunner @Inject constructor(
         }.onFailure { Timber.e(it, "H5600 alarm schedule failed"); notes += "failed (${it.message})" }
 
         refreshTempSun(force = false)?.let { notes += it }
+        resendSunIfDue()?.let { notes += it }
 
         // Dynamic sunset-step toggle: Sun data from 4 h before sunset to 10 min after, Steps otherwise.
         if (SunFace.isEnabled(context)) runCatching {
@@ -192,8 +213,9 @@ class H5600ScheduleRunner @Inject constructor(
                 SunFace.nextSwitch(now, it.latitude, it.longitude, java.time.ZoneId.systemDefault())
             }
         } else null
-        val temp = if (TempSun.isEnabled(context)) TempSun.nextFetch(now) else null
-        return (alarmTimes + listOfNotNull(sun, temp)).minOrNull()
+        // Quarter-hourly: weather fetch (option on) or plain sun-data re-send (option off).
+        val temp = TempSun.nextFetch(now)
+        return (alarmTimes + listOfNotNull(sun) + temp).minOrNull()
     }
 
     /** For a Ready session: re-apply at every relevant time until the session closes. */
