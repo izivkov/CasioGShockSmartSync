@@ -52,6 +52,7 @@ class H5600AlarmPoolViewModel @Inject constructor(
         val busy: Boolean = false,
         val alarms: List<PhoneAlarm> = emptyList(),
         val onWatch: Set<String> = emptySet(),
+        val onWatchSmart: String? = null,
         val lastApplied: String? = null,
     )
 
@@ -69,6 +70,7 @@ class H5600AlarmPoolViewModel @Inject constructor(
         it.copy(
             alarms = AlarmPool.load(context).orEmpty().sortedBy { a -> a.minuteOfDay },
             onWatch = AlarmPool.loadedIds(context).filterNotNull().toSet(),
+            onWatchSmart = AlarmPool.loadedSmartId(context),
             lastApplied = H5600Schedule.lastApplied(context),
         )
     }
@@ -181,6 +183,7 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
                             )
                         }
                         if (a.id in s.onWatch) AppText(text = "on watch", fontSize = 13.sp)
+                        if (a.id == s.onWatchSmart) AppText(text = "on watch (smart)", fontSize = 13.sp)
                         AppSwitch(
                             checked = a.enabled,
                             enabled = !s.busy,
@@ -200,6 +203,21 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
                         )
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        AppButton(
+                            text = if (a.isSmart) "Smart −${a.smartWindowMin} min" else "Smart off",
+                            enabled = !s.busy,
+                            onClick = {
+                                val options = listOf(0, 15, 30, 45, 60)
+                                val labels = options.map { if (it == 0) "Off (normal alarm)" else "Up to $it min before" }
+                                AlertDialog.Builder(context)
+                                    .setTitle("Smart alarm: wake in light sleep")
+                                    .setSingleChoiceItems(labels.toTypedArray(), options.indexOf(a.smartWindowMin).coerceAtLeast(0)) { d, i ->
+                                        vm.update(a.copy(smartWindowMin = options[i])); d.dismiss()
+                                    }
+                                    .setNegativeButton("Cancel", null)
+                                    .show()
+                            },
+                        )
                         AppButton(
                             text = if (a.snooze) "Snooze on" else "Snooze off",
                             enabled = !s.busy,

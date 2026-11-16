@@ -48,31 +48,51 @@ private fun WatchFaceCard(vm: H5600ViewModel) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
             AppTextLarge(text = "Watch face")
+            // Real values to compare with the watch (phone location, Open-Meteo)
+            AppText(text = "Real today: ${s.realSun}", fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+            AppText(text = "Weather now: ${s.realWeather}", fontSize = 13.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Watch should show: ${s.watchShould}", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                AppButton(text = "Refresh weather", enabled = !s.busy, onClick = { vm.refreshWeatherOnly() })
+            }
             // Watch face item
+            // Face 1 = simple face with the weekday; face 2 = customisable face showing the item below.
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
+                if (s.faceNumber == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
+                else {
+                    AppChoiceButton(text = "Face 1 (weekday)", selected = s.faceNumber == 1, enabled = !s.busy,
+                        onClick = { vm.setFaceNumber(1) })
+                    AppChoiceButton(text = "Face 2 (custom)", selected = s.faceNumber == 2, enabled = !s.busy,
+                        onClick = { vm.setFaceNumber(2) })
+                }
+            }
+            val faceLabels = listOf(
+                WatchFaceItem.SUNRISE_SUNSET to "Sun", WatchFaceItem.STEPS to "Steps", WatchFaceItem.MOON to "Moon",
+                WatchFaceItem.HEART_RATE to "Heart rate", WatchFaceItem.SLEEP to "Sleep",
+            )
             AppText(
-                text = "Watch face: " + when (s.watchFace) {
-                    WatchFaceItem.STEPS -> "Steps"
-                    WatchFaceItem.SUNRISE_SUNSET -> "Sun data"
-                    null -> s.watchFaceCode?.let { "unknown (code 0x%02X)".format(it) } ?: "unknown"
-                },
+                text = (if (s.faceNumber == 1) "Face 2 item (not shown on face 1): " else "Face 2 item: ") + (faceLabels.firstOrNull { it.first == s.watchFace }?.second
+                    ?: s.watchFace?.name?.lowercase()?.replace('_', ' ')
+                    ?: s.watchFaceCode?.let { "unknown (code 0x%02X)".format(it) } ?: "unknown"),
                 modifier = Modifier.padding(top = 8.dp),
             )
+            // Current item highlighted; greyed while syncing or while the dynamic toggle controls it.
             if (s.watchFace == null && s.watchFaceCode == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
-            else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Current face highlighted; greyed while syncing or while the dynamic toggle controls it.
-                AppChoiceButton(
-                    text = "Sun data",
-                    selected = s.watchFace == WatchFaceItem.SUNRISE_SUNSET,
-                    enabled = !s.busy && !s.dynamicFace,
-                    onClick = { vm.setWatchFace(WatchFaceItem.SUNRISE_SUNSET) },
-                )
-                AppChoiceButton(
-                    text = "Steps",
-                    selected = s.watchFace == WatchFaceItem.STEPS,
-                    enabled = !s.busy && !s.dynamicFace,
-                    onClick = { vm.setWatchFace(WatchFaceItem.STEPS) },
-                )
-                AppChoiceButton(text = "Weekday (?)", selected = false, enabled = false, onClick = {}) // code not captured yet
+            else faceLabels.chunked(3).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    row.forEach { (item, label) ->
+                        AppChoiceButton(
+                            text = label,
+                            selected = s.watchFace == item,
+                            enabled = !s.busy && !s.dynamicFace,
+                            onClick = { vm.setWatchFace(item) },
+                        )
+                    }
+                }
             }
             if (s.dynamicFace) {
                 AppText(text = "Controlled by the dynamic sunset-step toggle below.", fontSize = 13.sp)
@@ -183,6 +203,17 @@ private fun SoundNotificationsCard(vm: H5600ViewModel) {
             }
             AppText(text = "Alarm days and Vibe only / Sound are set per alarm in the Alarms tab.", fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
             s.lastApplied?.let { AppText(text = "Last applied: $it", fontSize = 13.sp) }
+            // Hourly time signal (0x13 byte 12 bit 0x20); not settable on the watch itself.
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Hourly time signal")
+                if (s.hourlyChime == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
+                else AppSwitch(checked = s.hourlyChime == true, enabled = !s.busy, onCheckedChange = { vm.setHourlyChime(it) })
+            }
+
             // Notification app filter
             var filter by remember { mutableStateOf(NotificationFilter.load(context)) }
             fun saveFilter(cfg: NotificationFilter.Config) {

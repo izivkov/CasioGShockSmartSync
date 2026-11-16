@@ -114,6 +114,15 @@ object TempSun {
     }
 
     private const val KEY_CAT = "temp_sun_last_cat"
+    private const val KEY_RAW = "temp_sun_last_raw"
+
+    /** Raw values behind the last category (for the "Real today" block). */
+    fun lastRaw(context: Context): String? =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_RAW, null)
+
+    fun categoryName(cat: Int?): String = when (cat) {
+        1 -> "sunny"; 2 -> "cloudy"; 3 -> "rain"; 4 -> "extreme"; else -> "?"
+    }
 
     fun lastCategory(context: Context): Int? =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_CAT, -1).takeIf { it in 1..4 }
@@ -172,7 +181,11 @@ object TempSun {
             )
             Timber.i("TempSun: code=${cur.optInt("weather_code")} precip=${cur.optDouble("precipitation")} " +
                 "clouds=${cur.optInt("cloud_cover")} wind=${cur.optDouble("wind_speed_10m")} gusts=${cur.optDouble("wind_gusts_10m")} -> $cat")
-            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putInt(KEY_CAT, cat).apply()
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putInt(KEY_CAT, cat)
+                .putString(KEY_RAW, "code %d, %.1f mm, clouds %d %%, wind %.0f km/h, gusts %.0f km/h".format(
+                    cur.optInt("weather_code"), cur.optDouble("precipitation", 0.0), cur.optInt("cloud_cover"),
+                    cur.optDouble("wind_speed_10m", 0.0), cur.optDouble("wind_gusts_10m", 0.0),
+                )).apply()
             return cur.getDouble("temperature_2m")
         } finally {
             conn.disconnect()

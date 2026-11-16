@@ -55,7 +55,12 @@ class H5600ScheduleRunner @Inject constructor(
                     java.time.LocalDate.now(zone), loc.latitude, loc.longitude, zone, Math.round(temp).toInt(),
                     TempSun.riseCorrection(context), TempSun.setCorrection(context),
                     riseHour = TempSun.lastCategory(context) ?: 0, // W:TT, W = 1 sunny / 2 cloudy / 3 rain
-                )
+                )?.also {
+                    context.getSharedPreferences("h5600_prefs", Context.MODE_PRIVATE).edit()
+                        .putString("last_sent_top", "%d:%02d".format(TempSun.lastCategory(context) ?: 0,
+                            Math.round(temp).toInt().coerceIn(0, TempSun.MAX_TEMP)))
+                        .putLong("last_sent_at", System.currentTimeMillis()).apply()
+                }
                     ?.let { return it }
             }
         }
@@ -168,6 +173,23 @@ class H5600ScheduleRunner @Inject constructor(
                 }
                 AlarmPool.saveLoadedIds(context, plan)
 
+                // Smart-alarm slot (0x50): the next smart alarm within 24 h, or off.
+                val smartId = AlarmPool.planSmart(pool, AlarmPool.loadedSmartId(context), now)
+                val smart = pool.firstOrNull { it.id == smartId }
+                val current = runCatching { withTimeout(8_000) { api.getH5600SmartAlarm() } }.getOrNull()
+                if (current != null) {
+                    val wantedSmart = smart?.let {
+                        org.avmedia.gshockapi.model.SmartAlarm(it.hour, it.minute, true, it.snooze, it.smartWindowMin)
+                    } ?: current.copy(enabled = false)
+                    if (wantedSmart != current) {
+                        api.setH5600SmartAlarm(wantedSmart)
+                        notes += "smart alarm: " + (smart?.let {
+                            org.avmedia.gshockGoogleSync.utils.AppTimeFormat.hm(it.hour, it.minute) + " (−${it.smartWindowMin} min)"
+                        } ?: "off")
+                    }
+                    AlarmPool.saveLoadedSmartId(context, smartId)
+                }
+
                 AlarmPool.desiredSoundMode(pool, now)?.let { desired ->
                     val before = api.getSoundMode()
                     api.setSoundMode(desired) // no write if already equal
@@ -203,7 +225,11 @@ class H5600ScheduleRunner @Inject constructor(
      */
     private fun nextWakeUp(now: LocalDateTime): LocalDateTime? {
         val pool = AlarmPool.load(context)?.filter { it.enabled }.orEmpty()
-        val alarmTimes = pool.flatMap { a -> listOf(a.minuteOfDay + 1, a.minuteOfDay + AlarmDayRules.SNOOZE_HOLD_MIN.toInt()) }
+        val alarmTimes = pool.flatMap { a ->
+            listOf(a.minuteOfDay + 1, a.minuteOfDay + AlarmDayRules.SNOOZE_HOLD_MIN.toInt()) +
+                // smart alarm: also switch the sound mode just before its window opens
+                (if (a.isSmart) listOf((a.minuteOfDay - a.smartWindowMin - 1 + 24 * 60) % (24 * 60)) else emptyList())
+        }
             .map { m ->
                 val t = m % (24 * 60)
                 H5600Schedule.nextBoundary(H5600Schedule.Config(true, t, t), now)

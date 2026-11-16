@@ -73,4 +73,26 @@ class AlarmPoolTest {
         assertEquals(SoundMode.VIBE_ONLY, AlarmPool.desiredSoundMode(pool, at(15, 22, 0)))
         assertEquals(SoundMode.CUSTOM, AlarmPool.desiredSoundMode(pool, at(16, 8, 51)))
     }
+
+    // Smart alarms: a smart 08:10 Mon-Fri (window 30) plus normal alarms.
+    private val smartWake = wake.copy(id = "smartWake", smartWindowMin = 30)
+    private val smartPool = listOf(smartWake, cats1, cats2)
+
+    @Test fun smartAlarmNeverInNormalSlots() =
+        assertTrue("smartWake" !in AlarmPool.plan(smartPool, empty(), at(16, 7, 0)))
+
+    @Test fun smartSlotTakesNextSmartWithin24h() =
+        assertEquals("smartWake", AlarmPool.planSmart(smartPool, null, at(15, 22, 0))) // Sun 22:00 -> Mon 08:10
+
+    @Test fun smartSlotEmptyOnFridayNight() =
+        assertEquals(null, AlarmPool.planSmart(smartPool, null, at(20, 22, 0)))
+
+    @Test fun smartSlotKeptDuringSnoozeHold() =
+        assertEquals("smartWake", AlarmPool.planSmart(smartPool, "smartWake", at(16, 8, 30)))
+
+    @Test fun soundModeSwitchesBeforeSmartWindow() {
+        val vibeSmart = smartWake.copy(vibeOnly = true)
+        // 07:45 is inside the 30-min window before 08:10 -> must already be vibe-only
+        assertEquals(SoundMode.VIBE_ONLY, AlarmPool.desiredSoundMode(listOf(vibeSmart, cats1), at(16, 7, 45)))
+    }
 }

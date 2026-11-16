@@ -32,7 +32,12 @@ class H5600ViewModel @Inject constructor(
         val watchFace: WatchFaceItem? = null,
         val watchFaceCode: Int? = null,
         val soundHex: String = "",
+        val faceNumber: Int? = null, // 1 = simple (weekday), 2 = customisable
+        val hourlyChime: Boolean? = null,
         val dynamicFace: Boolean = false,
+        val realSun: String = "",
+        val realWeather: String = "",
+        val watchShould: String = "",
         val tempSun: Boolean = false,
         val tempText: String = "",
         val riseCorr: Int = 0,
@@ -51,6 +56,8 @@ class H5600ViewModel @Inject constructor(
             soundMode = org.avmedia.gshockGoogleSync.utils.LastKnown.int(context, "sound_mode")?.let(SoundMode::fromCode),
             soundHex = org.avmedia.gshockGoogleSync.utils.LastKnown.string(context, "sound_hex") ?: "",
             watchFaceCode = org.avmedia.gshockGoogleSync.utils.LastKnown.int(context, "watch_face"),
+            faceNumber = org.avmedia.gshockGoogleSync.utils.LastKnown.int(context, "face_number"),
+            hourlyChime = org.avmedia.gshockGoogleSync.utils.LastKnown.bool(context, "hourly_chime"),
             watchFace = org.avmedia.gshockGoogleSync.utils.LastKnown.int(context, "watch_face")?.let(WatchFaceItem::fromCode),
         ),
     )
@@ -64,7 +71,31 @@ class H5600ViewModel @Inject constructor(
         val loc = org.avmedia.gshockGoogleSync.services.LocationProvider.getLocation(context)
         val zone = java.time.ZoneId.systemDefault()
         val set = loc?.let { l -> SunFace.sunset(java.time.LocalDate.now(), l.latitude, l.longitude, zone) }
+        val today = java.time.LocalDate.now(zone)
+        val realRs = loc?.let { l -> TempSun.riseSetUtcMin(today, l.latitude, l.longitude) }
+        val fmt = { m: Double -> org.avmedia.gshockGoogleSync.utils.AppTimeFormat.format(TempSun.toLocal(today, m, zone).toLocalTime()) }
+        val p = context.getSharedPreferences("h5600_prefs", Context.MODE_PRIVATE)
         it.copy(
+            realSun = realRs?.let { (r, st) -> "sunrise ${fmt(r)} · sunset ${fmt(st)}" } ?: "no location yet",
+            realWeather = TempSun.last(context)?.let { (c, at) ->
+                "%.1f °C, %s (%s) at %s".format(c, TempSun.categoryName(TempSun.lastCategory(context)),
+                    TempSun.lastRaw(context) ?: "-",
+                    org.avmedia.gshockGoogleSync.utils.AppTimeFormat.format(
+                        java.time.LocalTime.ofInstant(java.time.Instant.ofEpochMilli(at), zone)))
+            } ?: "not fetched yet",
+            watchShould = realRs?.let { (r, st) ->
+                val sunset = fmt(st)
+                if (TempSun.isEnabled(context)) {
+                    val top = TempSun.last(context)?.let { (c, _) ->
+                        "%d:%02d".format(TempSun.lastCategory(context) ?: 0, Math.round(c).toInt().coerceIn(0, TempSun.MAX_TEMP))
+                    } ?: "?"
+                    val sent = p.getString("last_sent_top", null)?.let { t ->
+                        " (last sent $t at " + org.avmedia.gshockGoogleSync.utils.AppTimeFormat.format(
+                            java.time.LocalTime.ofInstant(java.time.Instant.ofEpochMilli(p.getLong("last_sent_at", 0)), zone)) + ")"
+                    } ?: ""
+                    "$top / $sunset$sent"
+                } else "${fmt(r)} / $sunset"
+            } ?: "",
             tempSun = TempSun.isEnabled(context),
             riseCorr = TempSun.riseCorrection(context),
             setCorr = TempSun.setCorrection(context),
@@ -101,6 +132,8 @@ class H5600ViewModel @Inject constructor(
             val hex = read { api.getH5600SoundPacketHex() }
             val mode = if (hex != null) read { api.getSoundMode() } else null
             val code = read { api.getWatchFaceCode() }
+            val faceNo = read { api.getH5600WatchFaceNumber() }
+            val chime = read { api.getHourlyChime() }
             Timber.i("H5600 re-read: 0x42=$hex mode=$mode face=$code")
             _state.update {
                 it.copy(
@@ -108,11 +141,15 @@ class H5600ViewModel @Inject constructor(
                     soundHex = hex ?: it.soundHex,
                     watchFaceCode = code ?: it.watchFaceCode,
                     watchFace = (code ?: it.watchFaceCode)?.let(WatchFaceItem::fromCode),
+                    faceNumber = faceNo ?: it.faceNumber,
+                    hourlyChime = chime ?: it.hourlyChime,
                 )
             }
             mode?.let { m -> org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "sound_mode", m.code) }
             hex?.let { h -> org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "sound_hex", h) }
             code?.let { c -> org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "watch_face", c) }
+            faceNo?.let { f -> org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "face_number", f) }
+            chime?.let { c -> org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", c) }
         }
     }
 
@@ -122,6 +159,28 @@ class H5600ViewModel @Inject constructor(
         run("set sound mode", onError = { _state.update { it.copy(soundMode = previous) } }) {
             api.setSoundMode(mode)
             _state.update { it.copy(soundMode = api.getSoundMode()) } // confirm from the watch
+        }
+    }
+
+    fun setHourlyChime(on: Boolean) {
+        val previous = _state.value.hourlyChime
+        _state.update { it.copy(hourlyChime = on) }
+        run("hourly time signal", onError = { _state.update { it.copy(hourlyChime = previous) } }) {
+            api.setHourlyChime(on)
+            val v = api.getHourlyChime()
+            _state.update { it.copy(hourlyChime = v) }
+            v?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", it) }
+        }
+    }
+
+    fun setFaceNumber(face: Int) {
+        val previous = _state.value.faceNumber
+        _state.update { it.copy(faceNumber = face) }
+        run("switch watch face", onError = { _state.update { it.copy(faceNumber = previous) } }) {
+            api.setH5600WatchFaceNumber(face)
+            val f = api.getH5600WatchFaceNumber()
+            _state.update { it.copy(faceNumber = f) }
+            f?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "face_number", it) }
         }
     }
 
@@ -174,6 +233,15 @@ class H5600ViewModel @Inject constructor(
             runner.sendLocation(force = true)
             watchTimeUpdater.updateTime()
         }
+    }
+
+    /** Fetch the weather for display only (nothing is written to the watch). */
+    fun refreshWeatherOnly() = run("refresh weather") {
+        val loc = org.avmedia.gshockGoogleSync.services.LocationProvider.getLocation(context) ?: error("no location")
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            TempSun.fetchTemperature(context, loc.latitude, loc.longitude)
+        }
+        reloadPrefs()
     }
 
     fun setDynamicFace(on: Boolean) {
