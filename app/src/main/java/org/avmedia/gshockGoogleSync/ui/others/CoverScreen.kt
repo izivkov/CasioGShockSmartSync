@@ -97,7 +97,7 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
                                 leftPull = (leftPull - dx).coerceAtLeast(0f)
                             } else {
                                 leftPull = 0f
-                                scope.launch { offset.snapTo((offset.value + dx).coerceIn(0f, rideDistancePx * 1.5f)) }
+                                scope.launch { offset.snapTo((offset.value + dx).coerceAtLeast(0f)) } // no upper limit: rides off the screen edge
                             }
                         },
                         onDragEnd = {
