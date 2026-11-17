@@ -23,7 +23,11 @@ import org.avmedia.gshockGoogleSync.Screens
 
 /** Shared motion: press "squish" for buttons and directional tab transitions. */
 object Motion {
-    private const val TAB_MS = 260
+    // Material 3 "emphasized" curves: decelerating enter, quick accelerating exit.
+    private const val ENTER_MS = 380
+    private const val EXIT_MS = 180
+    private val EMPHASIZED_DECELERATE = androidx.compose.animation.core.CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
+    private val EMPHASIZED_ACCELERATE = androidx.compose.animation.core.CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
 
     private val TAB_ORDER = listOf(
         Screens.Time, Screens.Health, Screens.Alarms, Screens.Events, Screens.Actions, Screens.Custom, Screens.Settings,
@@ -38,12 +42,14 @@ object Motion {
 
     fun AnimatedContentTransitionScope<NavBackStackEntry>.tabEnter(): EnterTransition {
         val d = direction()
-        return slideInHorizontally(tween(TAB_MS)) { full -> d * full / 6 } + fadeIn(tween(TAB_MS))
+        return slideInHorizontally(tween(ENTER_MS, easing = EMPHASIZED_DECELERATE)) { full -> d * full / 8 } +
+            fadeIn(tween(ENTER_MS - 80, delayMillis = 40, easing = EMPHASIZED_DECELERATE))
     }
 
     fun AnimatedContentTransitionScope<NavBackStackEntry>.tabExit(): ExitTransition {
         val d = direction()
-        return slideOutHorizontally(tween(TAB_MS)) { full -> -d * full / 6 } + fadeOut(tween(TAB_MS - 60))
+        return slideOutHorizontally(tween(EXIT_MS, easing = EMPHASIZED_ACCELERATE)) { full -> -d * full / 12 } +
+            fadeOut(tween(EXIT_MS, easing = EMPHASIZED_ACCELERATE))
     }
 }
 

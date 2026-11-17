@@ -111,35 +111,22 @@ fun BottomNavigationBarWithPermissions(
             .fillMaxSize()
             .detectInactivity(inactivityHandler),
         bottomBar = {
-            NavigationBar(
-                modifier = Modifier.padding(0.dp)
-            ) {
-                BottomNavigationItem().bottomNavigationItems()
-                    .forEachIndexed { _, navigationItem ->
-                        NavigationBarItem(
-                            selected = navigationItem.route == currentDestination?.route,
-                            label = {
-                                Text(navigationItem.label)
-                            },
-                            icon = {
-                                Icon(
-                                    navigationItem.icon,
-                                    contentDescription = navigationItem.label
-                                )
-                            },
-                            onClick = {
-                                navController.navigate(navigationItem.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            alwaysShowLabel = false,
-                        )
+            // Custom bar: pill highlight glides between tabs (see ui/common/AnimatedBottomBar.kt)
+            org.avmedia.gshockGoogleSync.ui.common.AnimatedBottomBar(
+                tabs = BottomNavigationItem().bottomNavigationItems().map {
+                    org.avmedia.gshockGoogleSync.ui.common.BottomTab(it.route, it.label, it.icon)
+                },
+                selectedRoute = currentDestination?.route,
+                onSelect = { tab ->
+                    navController.navigate(tab.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-            }
+                },
+            )
         }
     ) { paddingValues ->
         NavHost(

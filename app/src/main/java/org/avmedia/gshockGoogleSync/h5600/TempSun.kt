@@ -120,6 +120,21 @@ object TempSun {
     fun lastRaw(context: Context): String? =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_RAW, null)
 
+    /** WMO weather interpretation code (as used by Open-Meteo) -> plain words. */
+    fun describe(wmo: Int): String = when (wmo) {
+        0 -> "clear sky"; 1 -> "mainly clear"; 2 -> "partly cloudy"; 3 -> "overcast"
+        45 -> "fog"; 48 -> "freezing fog"
+        51 -> "light drizzle"; 53 -> "drizzle"; 55 -> "dense drizzle"
+        56 -> "light freezing drizzle"; 57 -> "freezing drizzle"
+        61 -> "light rain"; 63 -> "rain"; 65 -> "heavy rain"
+        66 -> "light freezing rain"; 67 -> "freezing rain"
+        71 -> "light snow"; 73 -> "snow"; 75 -> "heavy snow"; 77 -> "snow grains"
+        80 -> "light showers"; 81 -> "showers"; 82 -> "violent showers"
+        85 -> "light snow showers"; 86 -> "snow showers"
+        95 -> "thunderstorm"; 96 -> "thunderstorm, light hail"; 99 -> "thunderstorm, heavy hail"
+        else -> "code $wmo"
+    }
+
     fun categoryName(cat: Int?): String = when (cat) {
         1 -> "sunny"; 2 -> "cloudy"; 3 -> "rain"; 4 -> "extreme"; else -> "?"
     }
@@ -182,8 +197,8 @@ object TempSun {
             Timber.i("TempSun: code=${cur.optInt("weather_code")} precip=${cur.optDouble("precipitation")} " +
                 "clouds=${cur.optInt("cloud_cover")} wind=${cur.optDouble("wind_speed_10m")} gusts=${cur.optDouble("wind_gusts_10m")} -> $cat")
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putInt(KEY_CAT, cat)
-                .putString(KEY_RAW, "code %d, clouds %d %%, wind %.0f km/h, gusts %.0f km/h".format(
-                    cur.optInt("weather_code"), cur.optInt("cloud_cover"),
+                .putString(KEY_RAW, "%s, clouds %d %%, wind %.0f km/h, gusts %.0f km/h".format(
+                    describe(cur.optInt("weather_code")), cur.optInt("cloud_cover"),
                     cur.optDouble("wind_speed_10m", 0.0), cur.optDouble("wind_gusts_10m", 0.0),
                 )).apply()
             return cur.getDouble("temperature_2m")
