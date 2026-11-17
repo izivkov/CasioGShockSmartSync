@@ -40,6 +40,8 @@ data class TimeState(
     val timer: Int = 0,
     val homeTime: String = "",
     val batteryLevel: Int = 0,
+    /** Raw 0x28 level step (DW-H5600 shows it as bars, see BatteryBars); null if unknown. */
+    val batteryRaw: Int? = null,
     val temperature: Int = 0,
     val watchName: String = "",
     val timeZoneOption: TimeSettingsStorage.TimeZoneOption = TimeSettingsStorage.TimeZoneOption.SYSTEM,
@@ -97,6 +99,7 @@ class TimeViewModel @Inject constructor(
                     timer = t,
                     homeTime = org.avmedia.gshockGoogleSync.utils.LastKnown.string(appContext, "home_time") ?: "",
                     batteryLevel = org.avmedia.gshockGoogleSync.utils.LastKnown.int(appContext, "battery") ?: 0,
+                    batteryRaw = org.avmedia.gshockGoogleSync.utils.LastKnown.int(appContext, "battery_raw"),
                     temperature = org.avmedia.gshockGoogleSync.utils.LastKnown.int(appContext, "temperature") ?: 0,
                     watchName = org.avmedia.gshockGoogleSync.utils.LastKnown.string(appContext, "watch_name") ?: "",
                 )
@@ -262,6 +265,8 @@ class TimeViewModel @Inject constructor(
             timerChanges.setBaseline(timer, timer)
             val homeTime = if (watchFeatureManager.isFeatureSupported(FEATURE_HOME_TIME)) api.getHomeTime() else ""
             val batteryLevel = api.getBatteryLevel()
+            val batteryRaw = api.getBatteryRawLevel()
+            batteryRaw?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(appContext, "battery_raw", it) }
             val temperature = api.getWatchTemperature()
             val watchName = api.getWatchName()
             val isVoiceCommandSupported = voiceCommandManager.isRecognitionAvailable()
@@ -278,6 +283,7 @@ class TimeViewModel @Inject constructor(
                     timer = timer,
                     homeTime = homeTime,
                     batteryLevel = batteryLevel,
+                    batteryRaw = batteryRaw,
                     temperature = temperature,
                     watchName = watchName,
                     timeZoneOption = option,

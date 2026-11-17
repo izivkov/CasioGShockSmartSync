@@ -36,6 +36,11 @@ fun Battery(timeModel: TimeViewModel = hiltViewModel()) {
     val batteryLevel = state.batteryLevel.coerceIn(0, 100)
     val watchFeatureManager = LocalWatchFeatureManager.current
     if (!watchFeatureManager.isFeatureSupported("time.battery")) return
+    // DW-H5600: bars like the watch (its raw level is not a percentage).
+    if (org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600) {
+        state.batteryRaw?.let { BatteryBarsView(it) }
+        return
+    }
     val description = stringResource(R.string.battery_level)
     val stripes = ImageBitmap.imageResource(R.drawable.stripes)
 
