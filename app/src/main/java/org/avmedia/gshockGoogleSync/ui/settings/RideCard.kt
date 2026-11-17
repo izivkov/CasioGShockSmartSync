@@ -68,7 +68,6 @@ fun RideCard() {
                     if (chosen.isNotBlank()) RideEmoji.set(context, chosen)
                 },
                 singleLine = true,
-                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 28.sp),
                 supportingText = { Text("${RideEmoji.graphemes(chosen).size}/${RideEmoji.MAX}") },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
@@ -83,6 +82,12 @@ fun RideCard() {
                     AppSmallButton(text = "Default", onClick = { chosen = RideEmoji.DEFAULT; RideEmoji.set(context, RideEmoji.DEFAULT) })
                 }
             }
+            // Shows the cover screen right away, to try the ride.
+            AppSmallButton(
+                text = "Lock",
+                onClick = { org.avmedia.gshockGoogleSync.ui.others.CoverLock.lock() },
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
     }
     if (picking) {

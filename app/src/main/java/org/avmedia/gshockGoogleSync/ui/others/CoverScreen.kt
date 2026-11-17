@@ -134,6 +134,13 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
     }
 }
 
+/** "Lock" from the Settings tab: shows the cover screen until it is unlocked again. */
+object CoverLock {
+    val locked = kotlinx.coroutines.flow.MutableStateFlow(false)
+    fun lock() { locked.value = true }
+    fun unlock() { locked.value = false }
+}
+
 @Composable
 fun CoverScreen(
     onUnlock: () -> Unit,

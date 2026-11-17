@@ -35,7 +35,13 @@ fun AppNavigationHost(
             .fillMaxSize()
             .padding(contentPadding)
     ) {
-        when (state.screen) {
+        val coverLocked by org.avmedia.gshockGoogleSync.ui.others.CoverLock.locked.collectAsState()
+        if (coverLocked) {
+            CoverScreen(
+                onUnlock = { org.avmedia.gshockGoogleSync.ui.others.CoverLock.unlock(); viewModel.showMainNavigation() },
+                isConnected = viewModel.repository.isConnected(),
+            )
+        } else when (state.screen) {
             AppScreen.INITIAL, AppScreen.PRE_CONNECTION -> PreConnectionScreen()
             AppScreen.CONTENT_SELECTOR -> ContentSelector(viewModel)
             AppScreen.MAIN_NAVIGATION ->
