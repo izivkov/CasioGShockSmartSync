@@ -120,25 +120,7 @@ fun WatchImageWithOverlayAlwaysConnected(
             contentScale = ContentScale.Fit
         )
 
-        // Centered text overlay
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .padding(top = with(LocalDensity.current) { textOffsetPx.toDp() }),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Text(
-                text = stringResource(
-                    R.string.find_phone_instruction
-                ),
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                lineHeight = 24.sp,
-                textAlign = TextAlign.Center
-            )
-        }
+        // (The "To run actions, start Find Phone on the watch" hint was removed in this fork.)
     }
 }
 
