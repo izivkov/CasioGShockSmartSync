@@ -7,8 +7,6 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Snooze card floating over other apps (DW-H5600 alarms) -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- Exact wake-ups for the DW-H5600 alarm scheduler, also while the phone dozes -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission

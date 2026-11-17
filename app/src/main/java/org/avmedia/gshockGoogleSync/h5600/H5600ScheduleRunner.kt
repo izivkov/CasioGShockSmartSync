@@ -113,14 +113,8 @@ class H5600ScheduleRunner @Inject constructor(
         }
     }
 
-    /** Notification (bar + lock screen) and the floating card over other apps, for each snoozing alarm. */
-    private fun showSnoozing(alarms: List<AlarmPool.PhoneAlarm>) {
-        SnoozeNotifier.update(context, alarms)
-        SnoozeOverlay.update(context, alarms) { id ->
-            SnoozeNotifier.cancel(context, id)
-            requestStopSnooze(id)
-        }
-    }
+    /** The "may be snoozing · Stop snooze" notification for each snoozing alarm. */
+    private fun showSnoozing(alarms: List<AlarmPool.PhoneAlarm>) = SnoozeNotifier.update(context, alarms)
 
     /** Stop snooze from a screen or the notification, in the background. */
     fun requestStopSnooze(id: String) = background("stop snooze") { stopSnooze(id) }

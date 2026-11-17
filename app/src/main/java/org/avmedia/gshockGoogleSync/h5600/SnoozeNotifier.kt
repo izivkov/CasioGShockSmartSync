@@ -70,7 +70,6 @@ object SnoozeNotifier {
     }
 
     fun cancel(context: Context, alarmId: String) {
-        SnoozeOverlay.dismiss(context, alarmId)
         context.getSystemService(NotificationManager::class.java)?.cancel(notificationId(alarmId))
         synchronized(this) { shown -= alarmId }
     }

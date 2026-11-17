@@ -106,7 +106,7 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
         AppButton(
             text = "+ Add alarm",
             enabled = !s.busy, // only while the alarms are first imported from the watch
-            onClick = { isNew = true; editing = PhoneAlarm(hour = 7, minute = 0) },
+            onClick = { isNew = true; editing = PhoneAlarm(hour = 7, minute = 0, once = true) },
             modifier = Modifier.padding(8.dp),
         )
         AppText(
@@ -117,24 +117,6 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
             fontSize = 13.sp,
             modifier = Modifier.padding(8.dp),
         )
-        // The floating snooze card needs "Display over other apps"; re-checked when the app resumes.
-        var overlayAllowed by remember { mutableStateOf(SnoozeOverlay.canShow(context)) }
-        val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
-        androidx.compose.runtime.DisposableEffect(lifecycle) {
-            val observer = androidx.lifecycle.LifecycleEventObserver { _, e ->
-                if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) overlayAllowed = SnoozeOverlay.canShow(context)
-            }
-            lifecycle.addObserver(observer)
-            onDispose { lifecycle.removeObserver(observer) }
-        }
-        if (!overlayAllowed && s.alarms.any { it.snooze && it.enabled }) {
-            AppText(
-                text = "To show the Stop snooze card on top of other apps, allow \"Display over other apps\".",
-                fontSize = 13.sp,
-                modifier = Modifier.padding(horizontal = 8.dp),
-            )
-            AppSmallButton(text = "Allow snooze pop-up", onClick = { SnoozeOverlay.requestPermission(context) }, modifier = Modifier.padding(horizontal = 8.dp))
-        }
         when {
             s.syncing -> AppText(text = "Sending to watch…", fontSize = 13.sp, modifier = Modifier.padding(horizontal = 8.dp))
             s.pending -> AppText(
