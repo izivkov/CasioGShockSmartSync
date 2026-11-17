@@ -76,6 +76,7 @@ fun SettingsList() {
             Font(settingsViewModel::onSettingUpdated)
         }
         // Time adjustment card removed: on the DW-H5600 it only held Fine Adjustment, now on the Time tab.
+        GreetingCard()
     }
 }
 

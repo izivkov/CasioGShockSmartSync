@@ -121,7 +121,11 @@ fun WatchImageWithOverlayAlwaysConnected(
         )
 
         // Greeting where upstream showed "To run actions, start Find Phone on the watch".
-        Box(
+        // Editable on the Settings tab: null = default text, "" = no greeting.
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val greeting = remember { org.avmedia.gshockGoogleSync.ui.settings.StartGreeting.custom(context) }
+            ?: stringResource(R.string.start_greeting)
+        if (greeting.isNotBlank()) Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
@@ -129,7 +133,7 @@ fun WatchImageWithOverlayAlwaysConnected(
             contentAlignment = Alignment.TopStart
         ) {
             Text(
-                text = stringResource(R.string.start_greeting),
+                text = greeting,
                 color = Color.Red,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
