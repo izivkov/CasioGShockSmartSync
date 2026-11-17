@@ -38,10 +38,14 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val rideDistancePx = with(density) { RIDE_DISTANCE.toPx() }
     val offset = remember { androidx.compose.animation.core.Animatable(0f) }
+    val ride = remember { org.avmedia.gshockGoogleSync.ui.settings.RideEmoji.get(context) }
     // Dragging the wrong way (left): the bicycle spins, faster the further it is pulled, with a
     // short buzz per full turn; on release it finishes the turn and stops upright.
     val spin = remember { androidx.compose.animation.core.Animatable(0f) }
     var leftPull by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    // Finger distance to the right; the content moves further than the finger (see accelerated()).
+    var finger by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    val accelPx = with(density) { ACCEL.toPx() }
     var held by remember { androidx.compose.runtime.mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         var last = 0L
@@ -74,8 +78,11 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
         val counter = Modifier.offset { androidx.compose.ui.unit.IntOffset(-offset.value.toInt(), 0) }
         AppTextVeryLarge(text = stringResource(R.string.cover_ride_to_unlock), modifier = counter)
         androidx.compose.material3.Text(
-            text = "🚲",
-            fontSize = 48.sp,
+            text = ride, // chosen on the Settings tab ("What are we riding?")
+            // One emoji at full size; longer text shrinks so up to 14 characters fit on one line.
+            fontSize = rideFontSize(ride),
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier
                 // Visually equal gaps above and below the bicycle (measured on screen: the fonts' own
                 // line spacing differs, so the bottom needs more than the top).
@@ -97,11 +104,13 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
                                 leftPull = (leftPull - dx).coerceAtLeast(0f)
                             } else {
                                 leftPull = 0f
-                                scope.launch { offset.snapTo((offset.value + dx).coerceAtLeast(0f)) } // no upper limit: rides off the screen edge
+                                finger = (finger + dx).coerceAtLeast(0f)
+                                // No upper limit, and accelerated: past the screen edge before the finger is.
+                                scope.launch { offset.snapTo(accelerated(finger, accelPx)) }
                             }
                         },
                         onDragEnd = {
-                            held = false; leftPull = 0f // let the spin finish its turn
+                            held = false; leftPull = 0f; finger = 0f // let the spin finish its turn
                             if (offset.value >= rideDistancePx && !unlocked) {
                                 unlocked = true
                                 unlockBuzz(context) // no beep: a short vibration confirms the unlock
@@ -109,7 +118,7 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
                             }
                             scope.launch { offset.animateTo(0f) }
                         },
-                        onDragCancel = { held = false; leftPull = 0f; scope.launch { offset.animateTo(0f) } },
+                        onDragCancel = { held = false; leftPull = 0f; finger = 0f; scope.launch { offset.animateTo(0f) } },
                     )
                 },
         )
@@ -174,6 +183,15 @@ private fun unlockBuzz(context: android.content.Context) {
     }
 }
 
+/**
+ * Drag acceleration: content distance = finger + finger² / ACCEL. With ACCEL = 400 dp, a finger
+ * that has moved from the middle to the screen edge (~205 dp on a phone) has moved the content
+ * ~310 dp: about a quarter of a screen past the edge.
+ */
+private val ACCEL = 400.dp
+
+private fun accelerated(finger: Float, accelPx: Float): Float = finger + finger * finger / accelPx
+
 /** The left pull (dp) after which the bicycle starts spinning. */
 private const val SPIN_START_DP = 12f
 
@@ -188,4 +206,9 @@ private fun turnTick(context: android.content.Context) {
         }
         vibrator.vibrate(android.os.VibrationEffect.createOneShot(25, 255))
     }
+}
+
+private fun rideFontSize(ride: String): androidx.compose.ui.unit.TextUnit {
+    val n = org.avmedia.gshockGoogleSync.ui.settings.RideEmoji.graphemes(ride).size
+    return if (n <= 2) 48.sp else (48f * 2.5f / n).coerceAtLeast(18f).sp
 }

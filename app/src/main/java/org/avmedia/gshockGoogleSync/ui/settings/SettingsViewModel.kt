@@ -180,7 +180,14 @@ constructor(
         updateSettingsAndMap(filter(newSettings))
 
         viewModelScope.launch(Dispatchers.Default) {
-            val settings = freshSettings ?: api.getSettings()
+            // A failed read must not crash the app: keep the values on screen and try next time.
+            val settings = freshSettings ?: try {
+                api.getSettings()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.w(e, "Settings read failed (%s)", reason); return@launch
+            }
             Timber.i("Settings from watch: autoLight=%s, lightDuration=%s", settings.autoLight, settings.lightDuration)
             val settingsJson = Gson().toJsonTree(settings).asJsonObject
             val settingStr = Gson().toJson(settingsJson)

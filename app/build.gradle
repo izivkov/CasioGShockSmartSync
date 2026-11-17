@@ -80,6 +80,7 @@ dependencies {
     // implementation project(':api')
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.emoji2.emojipicker) // full emoji picker for "What are we riding?"
     implementation(libs.androidx.appcompat)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.material3)

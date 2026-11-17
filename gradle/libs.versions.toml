@@ -1,4 +1,5 @@
 [versions]
+emoji2 = "1.7.0"
 agp = "9.3.3"
 kotlin = "2.4.10"
 coreKtx = "1.19.1"
@@ -36,6 +37,7 @@ exifinterface = "1.4.2"
 transportApi = "5.0.0"
 
 [libraries]
+androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
