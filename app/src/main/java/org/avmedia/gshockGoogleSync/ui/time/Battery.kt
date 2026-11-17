@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
+import AppText
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -37,6 +39,7 @@ fun Battery(timeModel: TimeViewModel = hiltViewModel()) {
     val description = stringResource(R.string.battery_level)
     val stripes = ImageBitmap.imageResource(R.drawable.stripes)
 
+    androidx.compose.foundation.layout.Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
     Canvas(
         modifier = Modifier
             .width(60.dp)
@@ -89,5 +92,8 @@ fun Battery(timeModel: TimeViewModel = hiltViewModel()) {
                 )
             )
         }
+    }
+    androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
+    AppText(text = "$batteryLevel%")
     }
 }
