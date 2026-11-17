@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -65,6 +66,10 @@ class H5600ViewModel @Inject constructor(
 
     init {
         refresh()
+        // Times on this tab are formatted when built: rebuild them when the 12h/24h choice changes.
+        viewModelScope.launch {
+            org.avmedia.gshockGoogleSync.utils.AppTimeFormat.is24h.drop(1).collect { reloadPrefs() }
+        }
     }
 
     private fun reloadPrefs() = _state.update {

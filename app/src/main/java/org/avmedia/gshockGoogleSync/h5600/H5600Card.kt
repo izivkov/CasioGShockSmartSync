@@ -25,6 +25,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppChoiceButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.model.SoundMode
 import org.avmedia.gshockapi.model.WatchFaceItem
 
@@ -47,7 +48,15 @@ fun H5600Card(vm: H5600ViewModel = hiltViewModel()) {
 @Composable
 private fun FindPhoneCard() {
     val context = LocalContext.current
-    var title by remember { mutableStateOf(org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.soundTitle(context)) }
+    // The sound's name comes from a content-provider query: load it off the main thread.
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var title by remember { mutableStateOf("…") }
+    fun loadTitle() = scope.launch {
+        title = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.soundTitle(context)
+        }
+    }
+    androidx.compose.runtime.LaunchedEffect(Unit) { loadTitle() }
     var volume by remember { mutableStateOf(org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.volumePct(context).toFloat()) }
     val picker = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
@@ -59,7 +68,7 @@ private fun FindPhoneCard() {
         // "Default" in the picker (or nothing picked) = the phone's default alarm sound.
         val isDefault = picked == null || picked == android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
         org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.setSoundUri(context, if (isDefault) null else picked)
-        title = org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.soundTitle(context)
+        loadTitle()
     }
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -296,6 +305,7 @@ private fun SoundNotificationsCard(vm: H5600ViewModel) {
             s.lastApplied?.let { AppText(text = "Last applied: $it", fontSize = 13.sp) }
             // Notification app filter
             var filter by remember { mutableStateOf(NotificationFilter.load(context)) }
+            val appsScope = androidx.compose.runtime.rememberCoroutineScope()
             fun saveFilter(cfg: NotificationFilter.Config) {
                 NotificationFilter.save(context, cfg)
                 filter = cfg
@@ -310,8 +320,9 @@ private fun SoundNotificationsCard(vm: H5600ViewModel) {
             }
             org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                 text = "Choose apps (${filter.packages.size})",
-                onClick = {
-                    val apps = NotificationFilter.launchableApps(context)
+                onClick = { appsScope.launch {
+                    // Listing and labelling every launcher app is slow: do it off the main thread.
+                    val apps = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { NotificationFilter.launchableApps(context) }
                     val checked = BooleanArray(apps.size) { apps[it].packageName in filter.packages }
                     AlertDialog.Builder(context)
                         .setTitle("Forward notifications from")
@@ -321,7 +332,7 @@ private fun SoundNotificationsCard(vm: H5600ViewModel) {
                         }
                         .setNegativeButton("Cancel", null)
                         .show()
-                },
+                } },
             )
             AppText(
                 text = if (filter.enabled) "Only checked apps reach the watch." else "Off: every app's notifications reach the watch.",

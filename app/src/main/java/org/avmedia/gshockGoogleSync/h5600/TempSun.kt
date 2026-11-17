@@ -154,7 +154,8 @@ object TempSun {
      * Blocking HTTPS call to Open-Meteo (call off the main thread). Sends only the coarse location
      * (2 decimals). Two attempts; on failure returns the last value if it is less than 3 h old.
      */
-    fun fetchTemperature(context: Context, lat: Double, lon: Double): Double {
+    /** Network call: run it off the main thread (callers use Dispatchers.IO). Cancellable between tries. */
+    suspend fun fetchTemperature(context: Context, lat: Double, lon: Double): Double {
         var lastError: Exception? = null
         repeat(2) { attempt ->
             try {
@@ -162,7 +163,7 @@ object TempSun {
             } catch (e: Exception) {
                 lastError = e
                 Timber.w("TempSun: attempt ${attempt + 1} failed: ${e.message}")
-                Thread.sleep(2_000)
+                kotlinx.coroutines.delay(2_000) // was Thread.sleep: blocked the thread and ignored cancellation
             }
         }
         last(context)?.takeIf { System.currentTimeMillis() - it.second < 3 * 3600_000L }?.let {

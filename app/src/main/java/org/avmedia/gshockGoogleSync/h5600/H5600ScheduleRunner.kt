@@ -226,7 +226,18 @@ class H5600ScheduleRunner @Inject constructor(
         // the watch drop its sun location -> dashes. One loc/time sync per connection fixes it, and
         // also counts as this quarter's sun re-send — unless an alarm may be snoozing (see above).
         if (snoozeActive()) Timber.i("H5600: loc/time sync on connect postponed (alarm may be snoozing)")
-        else watchCall("loc/time sync on connect") { syncTimeAndLocation() }
+        else {
+            // Weather due as well? Fetch it first, so this one sync carries it — instead of a second
+            // full time sync from the weather refresh a few seconds later.
+            if (TempSun.isEnabled(context) && TempSun.isStale(context)) {
+                LocationProvider.getLocation(context)?.let { loc ->
+                    watchCall("weather on connect") {
+                        withContext(Dispatchers.IO) { TempSun.fetchTemperature(context, loc.latitude, loc.longitude) }
+                    }
+                }
+            }
+            watchCall("loc/time sync on connect") { syncTimeAndLocation() }
+        }
         if (applySchedule) applyIfEnabled()
     }
 
