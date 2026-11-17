@@ -57,6 +57,12 @@ class H5600ViewModel @Inject constructor(
     )
     val state: StateFlow<UiState> = _state
 
+    // Declared before init: refresh() below already uses them (was a crash on opening the tab).
+    // Watch actions run one after another in tap order, without blocking the UI: each change is
+    // shown at once (optimistic), [busy] only drives the pull-to-refresh spinner.
+    private val queue = kotlinx.coroutines.sync.Mutex()
+    private val running = java.util.concurrent.atomic.AtomicInteger(0)
+
     init {
         refresh()
     }
@@ -243,11 +249,6 @@ class H5600ViewModel @Inject constructor(
         runner.syncLocationAndTime()
         AppSnackbar("Sunrise/sunset: location sent, time synced")
     }
-
-    // Watch actions run one after another in tap order, without blocking the UI: each change is
-    // shown at once (optimistic), [busy] only drives the pull-to-refresh spinner.
-    private val queue = kotlinx.coroutines.sync.Mutex()
-    private val running = java.util.concurrent.atomic.AtomicInteger(0)
 
     private fun run(what: String, onError: () -> Unit = {}, block: suspend () -> Unit) {
         _state.update { it.copy(busy = running.incrementAndGet() > 0) }
