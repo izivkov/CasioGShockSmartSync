@@ -111,33 +111,46 @@ fun BottomNavigationBarWithPermissions(
             .fillMaxSize()
             .detectInactivity(inactivityHandler),
         bottomBar = {
-            // Custom bar: pill highlight glides between tabs (see ui/common/AnimatedBottomBar.kt)
-            org.avmedia.gshockGoogleSync.ui.common.AnimatedBottomBar(
-                tabs = BottomNavigationItem().bottomNavigationItems().map {
-                    org.avmedia.gshockGoogleSync.ui.common.BottomTab(it.route, it.label, it.icon)
-                },
-                selectedRoute = currentDestination?.route,
-                onSelect = { tab ->
-                    navController.navigate(tab.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
+            NavigationBar(
+                modifier = Modifier.padding(0.dp)
+            ) {
+                BottomNavigationItem().bottomNavigationItems()
+                    .forEachIndexed { _, navigationItem ->
+                        NavigationBarItem(
+                            selected = navigationItem.route == currentDestination?.route,
+                            label = {
+                                Text(navigationItem.label)
+                            },
+                            icon = {
+                                Icon(
+                                    navigationItem.icon,
+                                    contentDescription = navigationItem.label
+                                )
+                            },
+                            onClick = {
+                                navController.navigate(navigationItem.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            alwaysShowLabel = false,
+                        )
                     }
-                },
-            )
+            }
         }
     ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = Screens.Time.route,
             modifier = Modifier.padding(paddingValues = paddingValues),
-            // Slide + fade towards the tab's side of the bottom bar
-            enterTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabEnter() } },
-            exitTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabExit() } },
-            popEnterTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabEnter() } },
-            popExitTransition = { with(org.avmedia.gshockGoogleSync.ui.common.Motion) { tabExit() } },
+            // No tab animations (not even the navigation library's default fade).
+            enterTransition = { androidx.compose.animation.EnterTransition.None },
+            exitTransition = { androidx.compose.animation.ExitTransition.None },
+            popEnterTransition = { androidx.compose.animation.EnterTransition.None },
+            popExitTransition = { androidx.compose.animation.ExitTransition.None },
         ) {
             composable(Screens.Time.route) {
                 TimeScreen()

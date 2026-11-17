@@ -14,12 +14,10 @@ import androidx.compose.ui.unit.sp
 /** Compact outlined button for dense rows (e.g. the per-alarm options). */
 @Composable
 fun AppSmallButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
-    val (source, pressMod) = rememberPressScale()
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier.height(32.dp).then(pressMod),
+        modifier = modifier.height(32.dp),
         enabled = enabled,
-        interactionSource = source,
         shape = CircleShape,
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
     ) {
