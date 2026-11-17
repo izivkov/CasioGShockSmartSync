@@ -41,12 +41,16 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
     var unlocked by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     androidx.compose.foundation.layout.Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        AppTextVeryLarge(text = stringResource(R.string.cover_ride_to_unlock))
+        // Both texts move left exactly as far as the bicycle moves right (and spring back with it).
+        val counter = Modifier.offset { androidx.compose.ui.unit.IntOffset(-offset.value.toInt(), 0) }
+        AppTextVeryLarge(text = stringResource(R.string.cover_ride_to_unlock), modifier = counter)
         androidx.compose.material3.Text(
             text = "🚲",
             fontSize = 48.sp,
             modifier = Modifier
-                .padding(top = 8.dp)
+                // Visually equal gaps above and below the bicycle (measured on screen: the fonts' own
+                // line spacing differs, so the bottom needs more than the top).
+                .padding(top = 8.dp, bottom = 22.5.dp)
                 .offset { androidx.compose.ui.unit.IntOffset(offset.value.toInt(), 0) }
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
@@ -73,6 +77,7 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
             fontSize = 20.sp,
             lineHeight = 24.sp,
+            modifier = counter,
         )
     }
 }
