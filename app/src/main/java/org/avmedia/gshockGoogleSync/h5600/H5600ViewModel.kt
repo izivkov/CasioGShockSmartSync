@@ -153,12 +153,30 @@ class H5600ViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Read back after a write until the watch reports [expected]: it applies writes a moment
+     * later, so an immediate read can still return the old value (seen: 70 ms after writing 0x51).
+     * Returns the last value read (or [expected] if every read failed).
+     */
+    private suspend fun <T> confirm(expected: T, read: suspend () -> T?): T {
+        var last: T? = null
+        repeat(3) {
+            val v = runCatching { kotlinx.coroutines.withTimeoutOrNull(5_000) { read() } }.getOrNull()
+            if (v != null) last = v
+            if (v == expected) return v
+            kotlinx.coroutines.delay(1_200)
+        }
+        return last ?: expected
+    }
+
     fun setSoundMode(mode: SoundMode) {
         val previous = _state.value.soundMode
         _state.update { it.copy(soundMode = mode) } // move the UI immediately
         run("set sound mode", onError = { _state.update { it.copy(soundMode = previous) } }) {
             api.setSoundMode(mode)
-            _state.update { it.copy(soundMode = api.getSoundMode()) } // confirm from the watch
+            val v = confirm(mode) { api.getSoundMode() } // confirm from the watch
+            _state.update { it.copy(soundMode = v) }
+            org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "sound_mode", v.code)
         }
     }
 
@@ -178,7 +196,7 @@ class H5600ViewModel @Inject constructor(
         _state.update { it.copy(faceNumber = face) }
         run("switch watch face", onError = { _state.update { it.copy(faceNumber = previous) } }) {
             api.setH5600WatchFaceNumber(face)
-            val f = api.getH5600WatchFaceNumber()
+            val f: Int? = confirm(face) { api.getH5600WatchFaceNumber() }
             _state.update { it.copy(faceNumber = f) }
             f?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "face_number", it) }
         }
@@ -189,8 +207,9 @@ class H5600ViewModel @Inject constructor(
         _state.update { it.copy(watchFace = item) }
         run("set watch face", onError = { _state.update { it.copy(watchFace = previous) } }) {
             api.setWatchFaceItem(item)
-            val code = api.getWatchFaceCode()
-            _state.update { it.copy(watchFaceCode = code, watchFace = code?.let(WatchFaceItem::fromCode)) }
+            val code = confirm(item.code) { api.getWatchFaceCode() }
+            _state.update { it.copy(watchFaceCode = code, watchFace = WatchFaceItem.fromCode(code)) }
+            org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "watch_face", code)
         }
     }
 
