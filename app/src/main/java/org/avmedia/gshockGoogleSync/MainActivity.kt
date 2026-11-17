@@ -93,6 +93,11 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     AppNavigationHost(contentPadding)
                                     PopupMessageReceiver()
+                                    // DW-H5600: ask for the floating snooze card permission at launch. The watch
+                                    // is usually not connected yet, so "uses the DW-H5600 alarm list" decides.
+                                    if (org.avmedia.gshockGoogleSync.h5600.AlarmPool.load(this@MainActivity) != null ||
+                                        org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600
+                                    ) org.avmedia.gshockGoogleSync.h5600.OverlayPermissionPrompt()
                                 }
                             }
                         }

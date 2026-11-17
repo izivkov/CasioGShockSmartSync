@@ -19,7 +19,10 @@ import javax.inject.Inject
  * ([AlarmPool.snoozing]) and disappear when it ends or the snooze is stopped.
  */
 object SnoozeNotifier {
-    private const val CHANNEL_ID = "h5600_snooze"
+    // High importance = shown on screen as a banner (heads-up), not only in the bar. A channel's
+    // importance cannot be raised after creation, hence a new id; the old channel is deleted.
+    private const val CHANNEL_ID = "h5600_snooze_onscreen"
+    private const val OLD_CHANNEL_ID = "h5600_snooze"
     const val ACTION_STOP = "org.avmedia.gshockGoogleSync.h5600.STOP_SNOOZE"
     const val EXTRA_ID = "alarm_id"
 
@@ -31,9 +34,14 @@ object SnoozeNotifier {
     @Synchronized
     fun update(context: Context, snoozing: List<PhoneAlarm>) {
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
+        nm.deleteNotificationChannel(OLD_CHANNEL_ID)
         nm.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Alarm snooze (watch)", NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = "Shown while a watch alarm may be snoozing; lets you stop the snooze" },
+            NotificationChannel(CHANNEL_ID, "Alarm snooze (watch)", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Pops up while a watch alarm may be snoozing; lets you stop the snooze"
+                setSound(null, null) // the watch is the alarm; the phone only shows the banner
+                enableVibration(false)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            },
         )
         val ids = snoozing.map { it.id }.toSet()
         (shown - ids).forEach { nm.cancel(notificationId(it)) }
@@ -49,8 +57,10 @@ object SnoozeNotifier {
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle(title)
                 .setContentText("Stop it here if you are already up (repeats every 5 min otherwise)")
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // heads-up on older Android versions
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOnlyAlertOnce(true)
-                .setSilent(true)
                 .setOngoing(false)
                 .addAction(0, "Stop snooze", stop)
                 .build()
@@ -60,6 +70,7 @@ object SnoozeNotifier {
     }
 
     fun cancel(context: Context, alarmId: String) {
+        SnoozeOverlay.dismiss(context, alarmId)
         context.getSystemService(NotificationManager::class.java)?.cancel(notificationId(alarmId))
         synchronized(this) { shown -= alarmId }
     }

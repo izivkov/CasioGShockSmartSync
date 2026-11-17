@@ -113,6 +113,15 @@ class H5600ScheduleRunner @Inject constructor(
         }
     }
 
+    /** Notification (bar + lock screen) and the floating card over other apps, for each snoozing alarm. */
+    private fun showSnoozing(alarms: List<AlarmPool.PhoneAlarm>) {
+        SnoozeNotifier.update(context, alarms)
+        SnoozeOverlay.update(context, alarms) { id ->
+            SnoozeNotifier.cancel(context, id)
+            requestStopSnooze(id)
+        }
+    }
+
     /** Stop snooze from a screen or the notification, in the background. */
     fun requestStopSnooze(id: String) = background("stop snooze") { stopSnooze(id) }
 
@@ -234,7 +243,7 @@ class H5600ScheduleRunner @Inject constructor(
         if (watchCall("stop snooze", notes) { syncTimeAndLocation() } == null) {
             // Not stopped: bring the button and the notification back so it can be tried again.
             record(notes)
-            SnoozeNotifier.update(context, AlarmPool.snoozing(pool, now).map { it.first })
+            showSnoozing(AlarmPool.snoozing(pool, now).map { it.first })
             onPoolChanged?.invoke()
             org.avmedia.gshockGoogleSync.ui.common.AppSnackbar("Stop snooze did not reach the watch — try again")
             return@withLock
@@ -343,7 +352,7 @@ class H5600ScheduleRunner @Inject constructor(
                 }
             }
         }
-        SnoozeNotifier.update(context, AlarmPool.snoozing(pool, now).map { it.first })
+        showSnoozing(AlarmPool.snoozing(pool, now).map { it.first })
         onPoolChanged?.invoke() // Alarms tab: on-watch tags, snooze buttons, one-time alarms switched off
         return ok != null
     }
