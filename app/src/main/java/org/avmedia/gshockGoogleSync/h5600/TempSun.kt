@@ -182,8 +182,8 @@ object TempSun {
             Timber.i("TempSun: code=${cur.optInt("weather_code")} precip=${cur.optDouble("precipitation")} " +
                 "clouds=${cur.optInt("cloud_cover")} wind=${cur.optDouble("wind_speed_10m")} gusts=${cur.optDouble("wind_gusts_10m")} -> $cat")
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putInt(KEY_CAT, cat)
-                .putString(KEY_RAW, "code %d, %.1f mm, clouds %d %%, wind %.0f km/h, gusts %.0f km/h".format(
-                    cur.optInt("weather_code"), cur.optDouble("precipitation", 0.0), cur.optInt("cloud_cover"),
+                .putString(KEY_RAW, "code %d, clouds %d %%, wind %.0f km/h, gusts %.0f km/h".format(
+                    cur.optInt("weather_code"), cur.optInt("cloud_cover"),
                     cur.optDouble("wind_speed_10m", 0.0), cur.optDouble("wind_gusts_10m", 0.0),
                 )).apply()
             return cur.getDouble("temperature_2m")
