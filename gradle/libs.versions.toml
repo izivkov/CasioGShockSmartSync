@@ -67,7 +67,7 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 sunrisesunsetcalculator = { group = "com.luckycatlabs", name = "SunriseSunsetCalculator", version.ref = "sunrisesunset" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-hilt-navigation-fragment = { group = "androidx.hilt", name = "hilt-navigation-fragment", version.ref = "hiltCompiler" }
-gshockapi = { module = "com.github.izivkov:GShockAPI", version.ref = "gshockapi" }
+gshockapi = { module = "com.github.flyboy14:GShockAPI", version = "h5600-sound-mode-SNAPSHOT" }
 adhan2 = { module = "com.batoulapps.adhan:adhan2", version.ref = "adhan2" }
 rrule = { module = "com.github.PhilJay:RRule", version.ref = "rrule" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }

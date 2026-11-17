@@ -20,9 +20,10 @@ rootProject.name = "Casio GShock Smart Sync"
 include ':app'
 
 // Build GShockAPI from local source (../GShockAPI, branch h5600-sound-mode) instead of JitPack.
-// Remove this block to go back to the published com.github.izivkov:GShockAPI artifact.
+// Remove this block to go back to the published com.github.flyboy14:GShockAPI artifact.
 includeBuild('../GShockAPI') {
     dependencySubstitution {
+        substitute(module('com.github.flyboy14:GShockAPI')).using(project(':api'))
         substitute(module('com.github.izivkov:GShockAPI')).using(project(':api'))
     }
 }
