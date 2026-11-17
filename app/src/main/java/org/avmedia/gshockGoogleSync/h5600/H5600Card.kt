@@ -100,6 +100,18 @@ private fun FindPhoneCard() {
                 valueRange = 10f..100f,
                 steps = 8, // 10 % steps
             )
+            var vibrate by remember { mutableStateOf(org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.vibrate(context)) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Vibrate too")
+                AppSwitch(checked = vibrate, onCheckedChange = {
+                    vibrate = it
+                    org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.setVibrate(context, it)
+                })
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                     text = "Test 5 s",

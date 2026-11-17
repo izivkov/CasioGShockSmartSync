@@ -138,8 +138,31 @@ object PhoneFinder {
             audioFocusRequest = focusRequest,
             resetVolume = resetVolume
         )
+        startVibration(context, audioAttributes)
         Timber.d("PhoneFinder: MediaPlayer started. isPlaying=${mediaPlayer.isPlaying}")
     }
+
+    /** Repeating buzz pattern (alarm usage, so it also works in silent / DND-allowed-alarms mode). */
+    private fun startVibration(context: Context, attributes: AudioAttributes) {
+        if (!FindPhoneSettings.vibrate(context)) return
+        runCatching {
+            val vibrator = vibrator(context)
+            if (!vibrator.hasVibrator()) return
+            // off 0 ms, buzz 800, pause 400, buzz 800, pause 1000 — then repeat from index 0
+            val effect = android.os.VibrationEffect.createWaveform(longArrayOf(0, 800, 400, 800, 1000), 0)
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(effect, attributes)
+            Timber.d("PhoneFinder: vibration started")
+        }.onFailure { Timber.e(it, "PhoneFinder: vibration failed") }
+    }
+
+    private fun vibrator(context: Context): android.os.Vibrator =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+        }
 
     private fun getAlarmUri(context: Context): android.net.Uri? {
         val candidates = listOf(
@@ -206,6 +229,7 @@ object PhoneFinder {
             }
         }
         state.resetVolume()
+        runCatching { vibrator(context).cancel() }
         state.sensorHandler?.stopListening()
         state.wakeLock?.let {
             if (it.isHeld) {

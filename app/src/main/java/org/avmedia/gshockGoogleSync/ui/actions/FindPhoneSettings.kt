@@ -9,6 +9,7 @@ object FindPhoneSettings {
     private const val PREFS = "find_phone"
     private const val KEY_URI = "sound_uri"
     private const val KEY_VOLUME = "volume_pct"
+    private const val KEY_VIBRATE = "vibrate"
     const val DEFAULT_VOLUME = 100
 
     private fun p(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -23,6 +24,11 @@ object FindPhoneSettings {
     fun volumePct(context: Context): Int = p(context).getInt(KEY_VOLUME, DEFAULT_VOLUME).coerceIn(10, 100)
 
     fun setVolumePct(context: Context, pct: Int) = p(context).edit().putInt(KEY_VOLUME, pct.coerceIn(10, 100)).apply()
+
+    /** Vibrate together with the ring (default on). */
+    fun vibrate(context: Context): Boolean = p(context).getBoolean(KEY_VIBRATE, true)
+
+    fun setVibrate(context: Context, on: Boolean) = p(context).edit().putBoolean(KEY_VIBRATE, on).apply()
 
     fun soundTitle(context: Context): String {
         val uri = soundUri(context) ?: return "Default alarm sound"
