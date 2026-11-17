@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -37,6 +38,34 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val rideDistancePx = with(density) { RIDE_DISTANCE.toPx() }
     val offset = remember { androidx.compose.animation.core.Animatable(0f) }
+    // Dragging the wrong way (left): the bicycle spins, faster the further it is pulled, with a
+    // short buzz per full turn; on release it finishes the turn and stops upright.
+    val spin = remember { androidx.compose.animation.core.Animatable(0f) }
+    var leftPull by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var held by remember { androidx.compose.runtime.mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        var last = 0L
+        var turns = 0
+        while (true) {
+            val now = androidx.compose.runtime.withFrameNanos { it }
+            val dt = if (last == 0L) 0f else (now - last) / 1e9f
+            last = now
+            val pullDp = leftPull / density.density
+            if (held && pullDp > SPIN_START_DP) {
+                // 360°/s at the start, +40°/s per dp pulled, up to 15 turns a second.
+                val speed = (360f + 40f * (pullDp - SPIN_START_DP)).coerceAtMost(5400f)
+                spin.snapTo(spin.value - speed * dt) // backwards: the wrong way
+                val t = (-spin.value / 360f).toInt()
+                if (t != turns) { turns = t; turnTick(context) }
+            } else if (!held && spin.value != 0f && !spin.isRunning) {
+                // Finish the current turn, then reset.
+                val end = kotlin.math.floor(spin.value / 360f) * 360f
+                spin.animateTo(end, androidx.compose.animation.core.tween(250))
+                spin.snapTo(0f)
+                turns = 0
+            }
+        }
+    }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var unlocked by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
@@ -52,13 +81,27 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
                 // line spacing differs, so the bottom needs more than the top).
                 .padding(top = 8.dp, bottom = 22.5.dp)
                 .offset { androidx.compose.ui.unit.IntOffset(offset.value.toInt(), 0) }
+                .graphicsLayer {
+                    rotationZ = spin.value
+                    // Pivot a bit above the text box centre. The bicycle still swings around a little
+                    // while spinning (the emoji is not centred in its box); the user liked this look.
+                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.34f)
+                }
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, dx ->
                             change.consume()
-                            scope.launch { offset.snapTo((offset.value + dx).coerceIn(0f, rideDistancePx * 1.5f)) }
+                            if (offset.value <= 0f && (dx < 0f || leftPull > 0f)) {
+                                // Pulling left from the start position: the pull distance sets the spin speed.
+                                held = true
+                                leftPull = (leftPull - dx).coerceAtLeast(0f)
+                            } else {
+                                leftPull = 0f
+                                scope.launch { offset.snapTo((offset.value + dx).coerceIn(0f, rideDistancePx * 1.5f)) }
+                            }
                         },
                         onDragEnd = {
+                            held = false; leftPull = 0f // let the spin finish its turn
                             if (offset.value >= rideDistancePx && !unlocked) {
                                 unlocked = true
                                 unlockBuzz(context) // no beep: a short vibration confirms the unlock
@@ -66,7 +109,7 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
                             }
                             scope.launch { offset.animateTo(0f) }
                         },
-                        onDragCancel = { scope.launch { offset.animateTo(0f) } },
+                        onDragCancel = { held = false; leftPull = 0f; scope.launch { offset.animateTo(0f) } },
                     )
                 },
         )
@@ -128,5 +171,21 @@ private fun unlockBuzz(context: android.content.Context) {
             context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
         }
         vibrator.vibrate(android.os.VibrationEffect.createOneShot(60, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+    }
+}
+
+/** The left pull (dp) after which the bicycle starts spinning. */
+private const val SPIN_START_DP = 12f
+
+/** One short tick per full turn: faster spinning, faster ticking. */
+private fun turnTick(context: android.content.Context) {
+    runCatching {
+        val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            (context.getSystemService(android.content.Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
+        }
+        vibrator.vibrate(android.os.VibrationEffect.createOneShot(25, 255))
     }
 }
