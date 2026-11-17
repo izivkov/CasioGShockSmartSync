@@ -839,7 +839,7 @@ constructor(
 
         /**
          * Entry point for callers that already have a fully-built Settings object
-         * (currently: SettingsViewModel.sendToWatch(), via RunEnvironment.DIRECT_INVOCATION).
+         * (currently: SettingsViewModel.applyToWatch(), via RunEnvironment.DIRECT_INVOCATION).
          * Bypasses the settingName/settingValue single-field mapping used by voice commands,
          * since the caller already knows every field it wants to send.
          */

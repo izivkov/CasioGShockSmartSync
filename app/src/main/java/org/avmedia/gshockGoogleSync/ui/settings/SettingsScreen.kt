@@ -50,7 +50,7 @@ fun SettingsScreen() {
                 ) {
                     SettingsList()
                 }
-                BottomRow(modifier = Modifier.fillMaxWidth())
+                // "Send to watch" removed: each change is applied right away (SettingsViewModel.scheduleApply).
             }
         }
     }
