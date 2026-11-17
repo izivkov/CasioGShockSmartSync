@@ -57,6 +57,22 @@ class TimeFormatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Best-effort readback after a 0x13 write: the watch may ignore a GET sent right after a SET,
+     * so wait a moment first, and treat no answer as null (not an error) — the write already succeeded.
+     */
+    private suspend fun <T> confirmRead(read: suspend () -> T?): T? {
+        kotlinx.coroutines.delay(500)
+        return try {
+            kotlinx.coroutines.withTimeoutOrNull(12_000) { read() }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            kotlinx.coroutines.currentCoroutineContext()[kotlinx.coroutines.Job]?.let { if (!it.isActive) throw e } // real cancellation (screen left)
+            null // an inner timeout, not ours
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     /** Hourly time signal (moved here from the Custom tab); same 0x13 packet as the time format. */
     fun setHourlyChime(on: Boolean) {
         viewModelScope.launch {
@@ -64,7 +80,7 @@ class TimeFormatViewModel @Inject constructor(
             _state.value = before.copy(hourlyChime = on, busy = true)
             runCatching {
                 kotlinx.coroutines.withTimeout(20_000) { api.setHourlyChime(on) }
-                kotlinx.coroutines.withTimeoutOrNull(10_000) { api.getHourlyChime() }
+                confirmRead { api.getHourlyChime() }
             }.onSuccess { v ->
                 v?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", it) }
                 _state.value = _state.value.copy(hourlyChime = v ?: on, busy = false)
@@ -80,14 +96,15 @@ class TimeFormatViewModel @Inject constructor(
             _state.value = _state.value.copy(is24h = is24h, busy = true) // move the UI immediately
             runCatching {
                 kotlinx.coroutines.withTimeout(20_000) { api.setTimeFormat24h(is24h) }
-                kotlinx.coroutines.withTimeoutOrNull(10_000) { api.getTimeFormat24h() }
+                confirmRead { api.getTimeFormat24h() }
             }
                 .onSuccess {
-                    _state.value = _state.value.copy(is24h = it ?: _state.value.is24h, busy = false)
-                    it?.let { v ->
-                        org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "time_24h", v)
-                        org.avmedia.gshockGoogleSync.utils.AppTimeFormat.set(context, v)
-                    }
+                    // Readback unanswered: the write itself went through, so trust it.
+                    val v = it ?: is24h
+                    _state.value = _state.value.copy(is24h = v, busy = false)
+                    org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "time_24h", v)
+                    org.avmedia.gshockGoogleSync.utils.AppTimeFormat.set(context, v)
+                    if (it != null && it != is24h) AppSnackbar("Time format: watch kept ${if (it) "24h" else "12h"}")
                 }
                 .onFailure {
                     _state.value = _state.value.copy(is24h = !is24h, busy = false)
