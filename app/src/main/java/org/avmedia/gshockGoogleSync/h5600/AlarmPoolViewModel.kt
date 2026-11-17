@@ -74,7 +74,7 @@ class H5600AlarmPoolViewModel @Inject constructor(
 
     private fun reload() = _state.update {
         it.copy(
-            alarms = AlarmPool.load(context).orEmpty().sortedBy { a -> a.minuteOfDay },
+            alarms = AlarmPool.load(context).orEmpty(), // the user's order
             onWatch = AlarmPool.loadedIds(context).filterNotNull().toSet(),
             onWatchSmart = AlarmPool.loadedSmartId(context),
             lastApplied = H5600Schedule.lastApplied(context),
@@ -108,8 +108,18 @@ class H5600AlarmPoolViewModel @Inject constructor(
     }
 
     /** New alarm from the editor, with all its options: one watch update. */
-    fun add(a: PhoneAlarm) = change { it + AlarmPool.arm(a, java.time.LocalDateTime.now()) }
+    fun add(a: PhoneAlarm) = change { listOf(AlarmPool.arm(a, java.time.LocalDateTime.now())) + it } // new alarms go to the top
     fun delete(id: String) = change { list -> list.filterNot { it.id == id } }
+
+    /** Hold-and-drag on the Alarms tab: only the order on the phone changes, nothing is sent. */
+    fun move(id: String, to: Int) {
+        val list = AlarmPool.load(context).orEmpty().toMutableList()
+        val from = list.indexOfFirst { it.id == id }
+        if (from < 0 || to == from) return
+        list.add(to.coerceIn(0, list.size - 1), list.removeAt(from))
+        AlarmPool.save(context, list)
+        reload()
+    }
 
     /**
      * Saved from the editor. A one-time alarm is switched on and (re)set for the next time its hh:mm

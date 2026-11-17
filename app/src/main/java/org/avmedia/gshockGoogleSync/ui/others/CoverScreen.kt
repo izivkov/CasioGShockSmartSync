@@ -66,6 +66,14 @@ private fun RideToUnlock(onUnlock: () -> Unit) {
                     )
                 },
         )
+        // Same look as the start-screen greeting (bold red).
+        androidx.compose.material3.Text(
+            text = stringResource(R.string.cover_signature),
+            color = androidx.compose.ui.graphics.Color.Red,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            fontSize = 20.sp,
+            lineHeight = 24.sp,
+        )
     }
 }
 

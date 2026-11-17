@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -125,7 +129,16 @@ fun WatchImageWithOverlayAlwaysConnected(
         val context = androidx.compose.ui.platform.LocalContext.current
         val greeting = remember { org.avmedia.gshockGoogleSync.ui.settings.StartGreeting.custom(context) }
             ?: stringResource(R.string.start_greeting)
-        if (greeting.isNotBlank()) Box(
+        val scrolling = remember { org.avmedia.gshockGoogleSync.ui.settings.StartGreeting.scrolling(context) }
+        if (greeting.isNotBlank() && scrolling) Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = with(LocalDensity.current) { textOffsetPx.toDp() }),
+            contentAlignment = Alignment.TopStart
+        ) {
+            LedTicker(greeting)
+        }
+        else if (greeting.isNotBlank()) Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
@@ -243,4 +256,45 @@ fun DrawScope.drawArrow(
             cap = StrokeCap.Round
         )
     )
+}
+
+/**
+ * The greeting as an LED-style ticker: moves left to right in visible steps (a fixed jump every
+ * [STEP_MS]), not smoothly; enters from the left edge again after leaving on the right.
+ */
+private const val STEP_MS = 120L
+private val STEP = 6.dp
+
+@Composable
+private fun LedTicker(text: String) {
+    val density = LocalDensity.current
+    val stepPx = with(density) { STEP.toPx() }
+    var textWidth by remember { mutableStateOf(0) }
+    var step by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(STEP_MS)
+            step++
+        }
+    }
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().clipToBounds()) {
+        val widthPx = constraints.maxWidth
+        val span = (widthPx + textWidth).coerceAtLeast(1)
+        // Snap to whole steps: x jumps by stepPx each tick (no in-between frames).
+        val x = ((step * stepPx).toInt() % span) - textWidth
+        Text(
+            text = text,
+            color = Color.Red,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            lineHeight = 24.sp,
+            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier
+                .onSizeChanged { textWidth = it.width }
+                .offset { androidx.compose.ui.unit.IntOffset(x, 0) }
+                .wrapContentWidth(Alignment.Start, unbounded = true),
+        )
+    }
 }

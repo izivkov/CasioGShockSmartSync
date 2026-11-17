@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
+import AppSwitch
 import AppText
 import AppTextLarge
 import android.content.Context
@@ -29,6 +30,12 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSmallButton
 /** The start-screen greeting: null = the default ("Hello, smart ass"), "" = no greeting. */
 object StartGreeting {
     private const val KEY = "start_greeting"
+    private const val KEY_SCROLL = "start_greeting_scroll"
+
+    /** Ticker: the text steps from left to right instead of standing still. */
+    fun scrolling(context: Context): Boolean = H5600Prefs.get(context).getBoolean(KEY_SCROLL, false)
+
+    fun setScrolling(context: Context, on: Boolean) = H5600Prefs.get(context).edit().putBoolean(KEY_SCROLL, on).apply()
 
     fun custom(context: Context): String? = H5600Prefs.get(context).getString(KEY, null)
 
@@ -42,6 +49,7 @@ fun GreetingCard() {
     val context = LocalContext.current
     val default = stringResource(R.string.start_greeting)
     var text by remember { mutableStateOf(StartGreeting.custom(context) ?: default) }
+    var scrolling by remember { mutableStateOf(StartGreeting.scrolling(context)) }
     AppCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
             AppTextLarge(text = "Start screen greeting")
@@ -59,6 +67,14 @@ fun GreetingCard() {
             ) {
                 AppText(text = "Shown while the app waits for the watch. Empty = none.", fontSize = 13.sp, modifier = Modifier.weight(1f))
                 AppSmallButton(text = "Default", onClick = { StartGreeting.save(context, null); text = default })
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Scrolling (LED ticker, left to right)")
+                AppSwitch(checked = scrolling, onCheckedChange = { scrolling = it; StartGreeting.setScrolling(context, it) })
             }
         }
     }

@@ -111,7 +111,7 @@ object AlarmPool {
 
     fun save(context: Context, alarms: List<PhoneAlarm>) {
         val arr = JSONArray()
-        alarms.sortedBy { it.minuteOfDay }.forEach { a ->
+        alarms.forEach { a -> // kept in the user's order (hold and drag on the Alarms tab)
             arr.put(
                 JSONObject()
                     .put("id", a.id).put("hour", a.hour).put("minute", a.minute).put("enabled", a.enabled)
