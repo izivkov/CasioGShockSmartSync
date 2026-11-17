@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,8 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.emoji2.emojipicker.EmojiPickerView
 import org.avmedia.gshockGoogleSync.h5600.H5600Prefs
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppSmallButton
@@ -52,12 +48,11 @@ object RideEmoji {
     fun limit(s: String): String = graphemes(s).take(MAX).joinToString("")
 }
 
-/** Settings tab: "What are we riding?" — any text up to 14 characters (emoji welcome). */
+/** Settings tab: "What are we riding?" — any text up to 14 characters (emoji from the keyboard welcome). */
 @Composable
 fun RideCard() {
     val context = LocalContext.current
     var chosen by remember { mutableStateOf(RideEmoji.get(context)) }
-    var picking by remember { mutableStateOf(false) }
     AppCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
             AppTextLarge(text = "What are we riding?")
@@ -78,40 +73,11 @@ fun RideCard() {
             ) {
                 AppText(text = "Drag it right on the cover screen to unlock.", fontSize = 13.sp, modifier = Modifier.weight(1f))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    AppSmallButton(text = "Emoji…", onClick = { picking = true })
                     AppSmallButton(text = "Default", onClick = { chosen = RideEmoji.DEFAULT; RideEmoji.set(context, RideEmoji.DEFAULT) })
+                    // Shows the cover screen right away, to try the ride.
+                    AppSmallButton(text = "Lock", onClick = { org.avmedia.gshockGoogleSync.ui.others.CoverLock.lock() })
                 }
             }
-            // Shows the cover screen right away, to try the ride.
-            AppSmallButton(
-                text = "Lock",
-                onClick = { org.avmedia.gshockGoogleSync.ui.others.CoverLock.lock() },
-                modifier = Modifier.padding(top = 8.dp),
-            )
         }
-    }
-    if (picking) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { picking = false },
-            title = { Text("What are we riding?") },
-            text = {
-                // Every emoji, by category, with search and recently used (AndroidX emoji picker).
-                AndroidView(
-                    factory = { ctx ->
-                        EmojiPickerView(ctx).apply {
-                            setOnEmojiPickedListener { item ->
-                                // Adds the emoji to the text (still at most 14 characters).
-                                chosen = RideEmoji.limit(chosen + item.emoji)
-                                RideEmoji.set(context, chosen)
-                                picking = false
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(420.dp),
-                )
-            },
-            confirmButton = {},
-            dismissButton = { TextButton(onClick = { picking = false }) { Text("Cancel") } },
-        )
     }
 }
