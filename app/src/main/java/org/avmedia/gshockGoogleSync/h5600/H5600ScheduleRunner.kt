@@ -146,10 +146,10 @@ class H5600ScheduleRunner @Inject constructor(
                     TempSun.riseCorrection(context), TempSun.setCorrection(context),
                     riseHour = TempSun.lastCategory(context) ?: 0, // W:TT, W = 1 sunny / 2 cloudy / 3 rain
                 )?.also {
-                    context.getSharedPreferences("h5600_prefs", Context.MODE_PRIVATE).edit()
-                        .putString("last_sent_top", "%d:%02d".format(TempSun.lastCategory(context) ?: 0,
+                    H5600Prefs.get(context).edit()
+                        .putString(H5600Prefs.KEY_LAST_SENT_TOP, "%d:%02d".format(TempSun.lastCategory(context) ?: 0,
                             Math.round(temp).toInt().coerceIn(0, TempSun.MAX_TEMP)))
-                        .putLong("last_sent_at", System.currentTimeMillis()).apply()
+                        .putLong(H5600Prefs.KEY_LAST_SENT_AT, System.currentTimeMillis()).apply()
                 }
                     ?.let { return it }
             }

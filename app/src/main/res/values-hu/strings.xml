@@ -155,7 +155,7 @@
     <string name="press_and_hold_for_3_seconds">Kapcsolódás:\nTartsa nyomva\n3 másodpercig</string>
     <string name="short_press_to_run_actions">Ezzel a\ngombbal lehet\nfeladatot futtatni</string>
 
-    <string name="cover_hold_to_unlock">Feloldáshoz tartsa lenyomva</string>
+    <string name="cover_ride_to_unlock">Tekerj a feloldáshoz</string>
     <string name="cover_connected">Csatlakoztatva</string>
     <!-- "ó" is short for "óra" (hour) -->
     <string name="find_phone_instruction">A műveletek végrehajtásához indítsa el az „Telefon keresése” funkciót az órán</string>

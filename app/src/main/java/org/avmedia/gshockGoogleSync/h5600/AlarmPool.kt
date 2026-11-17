@@ -70,7 +70,7 @@ object AlarmPool {
     }
 
     // ---- storage ----
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY_POOL = "alarm_pool_json"
     private const val KEY_LOADED = "alarm_pool_loaded_ids"
     private const val KEY_SMART_LOADED = "alarm_pool_smart_loaded_id"

@@ -118,7 +118,7 @@ object SnoozeOverlay {
 @androidx.compose.runtime.Composable
 fun OverlayPermissionPrompt() {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val prefs = remember(context) { context.getSharedPreferences("h5600_prefs", Context.MODE_PRIVATE) }
+    val prefs = remember(context) { H5600Prefs.get(context) }
     var show by androidx.compose.runtime.remember {
         androidx.compose.runtime.mutableStateOf(
             !SnoozeOverlay.canShow(context) && !prefs.getBoolean("overlay_prompt_never", false),

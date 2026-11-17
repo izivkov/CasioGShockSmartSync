@@ -79,7 +79,7 @@ class H5600ViewModel @Inject constructor(
         val today = java.time.LocalDate.now(zone)
         val realRs = loc?.let { l -> TempSun.riseSetUtcMin(today, l.latitude, l.longitude) }
         val fmt = { m: Double -> org.avmedia.gshockGoogleSync.utils.AppTimeFormat.format(TempSun.toLocal(today, m, zone).toLocalTime()) }
-        val p = context.getSharedPreferences("h5600_prefs", Context.MODE_PRIVATE)
+        val p = H5600Prefs.get(context)
         it.copy(
             realSun = realRs?.let { (r, st) -> "sunrise ${fmt(r)} · sunset ${fmt(st)}" } ?: "no location yet",
             realWeather = TempSun.last(context)?.let { (c, at) ->
@@ -94,9 +94,9 @@ class H5600ViewModel @Inject constructor(
                     val top = TempSun.last(context)?.let { (c, _) ->
                         "%d:%02d".format(TempSun.lastCategory(context) ?: 0, Math.round(c).toInt().coerceIn(0, TempSun.MAX_TEMP))
                     } ?: "?"
-                    val sent = p.getString("last_sent_top", null)?.let { t ->
+                    val sent = p.getString(H5600Prefs.KEY_LAST_SENT_TOP, null)?.let { t ->
                         " (last sent $t at " + org.avmedia.gshockGoogleSync.utils.AppTimeFormat.format(
-                            java.time.LocalTime.ofInstant(java.time.Instant.ofEpochMilli(p.getLong("last_sent_at", 0)), zone)) + ")"
+                            java.time.LocalTime.ofInstant(java.time.Instant.ofEpochMilli(p.getLong(H5600Prefs.KEY_LAST_SENT_AT, 0)), zone)) + ")"
                     } ?: ""
                     "$top / $sunset$sent"
                 } else "${fmt(r)} / $sunset"

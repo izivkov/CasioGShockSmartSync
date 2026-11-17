@@ -158,7 +158,7 @@
     <string name="short_press_to_run_actions">اضغط\nللإجراءات</string>
 
 
-    <string name="cover_hold_to_unlock">اضغط مع الاستمرار لإلغاء القفل</string>
+    <string name="cover_ride_to_unlock">اركب الدراجة لإلغاء القفل</string>
     <string name="cover_connected">متصل</string>
     <!-- "h" as in hours = "ساعات", short form is "س" -->
     <string name="find_phone_instruction">لتنفيذ الإجراءات، ابدأ وظيفة "البحث عن الهاتف" في الساعة</string>

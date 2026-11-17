@@ -162,7 +162,7 @@
     <string name="short_press_to_run_actions">Натисни за\nдействия</string>
 
 
-    <string name="cover_hold_to_unlock">Задръжте, за да отключите</string>
+    <string name="cover_ride_to_unlock">Карай, за да отключиш</string>
     <string name="cover_connected">Свързан</string>
     <!-- "h" as in hours = "часа", abbreviated as "ч" -->
     <string name="find_phone_instruction">За да изпълните действията, стартирайте функцията „Намиране телефон“ на часовника</string>

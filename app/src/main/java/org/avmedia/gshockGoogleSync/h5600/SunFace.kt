@@ -19,7 +19,7 @@ object SunFace {
     const val LEAD_HOURS = 4L
     const val TRAIL_MIN = 10L
 
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY_ENABLED = "dyn_sun_face_enabled"
 
     fun isEnabled(context: Context) =

@@ -159,7 +159,7 @@
     <string name="press_and_hold_for_3_seconds">Удерживать\n3 сек</string>
     <string name="short_press_to_run_actions">Нажать для\nдействий</string>
 
-    <string name="cover_hold_to_unlock">Удерживайте для разблокировки</string>
+    <string name="cover_ride_to_unlock">Прокатитесь, чтобы разблокировать</string>
     <string name="cover_connected">Подключено</string>
     <!-- "ч" = "час" (hour) -->
     <string name="find_phone_instruction">Чтобы выполнить действия, запустите функцию «Найти телефон» на часах</string>

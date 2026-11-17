@@ -13,7 +13,7 @@ import java.util.Locale
  * so every tab shows times the way the watch does. Persisted; defaults to the phone's setting.
  */
 object AppTimeFormat {
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY = "app_time_24h"
 
     private val _is24h = MutableStateFlow(true)

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
  */
 object BatteryBars {
     const val MAX_BARS = 4
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY = "battery_bars_by_level" // "5:3,6:4"
     private val DEFAULT = mapOf(5 to 3)
 

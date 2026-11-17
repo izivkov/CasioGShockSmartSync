@@ -162,7 +162,7 @@
     <string name="press_and_hold_for_3_seconds">Prem i mantén\npremut durant 3\nsegons</string>
     <string name="short_press_to_run_actions">Pressió curta\nper executar\naccions</string>
 
-    <string name="cover_hold_to_unlock">Mantén premut per desbloquejar</string>
+    <string name="cover_ride_to_unlock">Pedaleja per desbloquejar</string>
     <string name="cover_connected">Connectat</string>
     <string name="find_phone_instruction">Per executar accions, inicia la funció \"Troba el telèfon\" al rellotge</string>
     <string name="actions_saved">Accions desades</string>

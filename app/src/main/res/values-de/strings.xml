@@ -163,7 +163,7 @@
     <string name="short_press_to_run_actions">Drücken für\nAktionen</string>
 
 
-    <string name="cover_hold_to_unlock">Zum Entsperren halten</string>
+    <string name="cover_ride_to_unlock">Zum Entsperren radeln</string>
     <string name="cover_connected">Verbunden</string>
     <!-- "h" as in hours = "Stunden", abbreviated as "Std" -->
     <string name="find_phone_instruction">Um Aktionen auszuführen, starten Sie die Funktion „Telefon finden“ auf der Uhr</string>

@@ -11,7 +11,7 @@ object NotificationFilter {
     data class Config(val enabled: Boolean = false, val packages: Set<String> = emptySet())
     data class AppEntry(val packageName: String, val label: String)
 
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY_ENABLED = "notif_filter_enabled"
     private const val KEY_PACKAGES = "notif_filter_packages"
 

@@ -8,7 +8,7 @@ import android.content.Context
  * that used to live here was replaced by per-alarm settings, see [AlarmPool].)
  */
 object H5600Schedule {
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY_LAST = "last_applied"
 
     fun lastApplied(context: Context): String? =

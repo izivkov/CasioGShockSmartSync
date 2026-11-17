@@ -37,7 +37,7 @@ object TempSun {
         return if (q.isAfter(now)) q else q.plusMinutes(15)
     }
 
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY_ENABLED = "temp_sun_enabled"
     private const val KEY_TEMP = "temp_sun_last_c"
     private const val KEY_TEMP_AT = "temp_sun_last_at"

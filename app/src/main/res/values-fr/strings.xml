@@ -168,7 +168,7 @@ si votre montre est en avance de 2,5 secondes par rapport à l\'heure réelle, d
     <string name="short_press_to_run_actions">Appuyer pour\nactions</string>
 
 
-    <string name="cover_hold_to_unlock">Maintenir pour déverrouiller</string>
+    <string name="cover_ride_to_unlock">Pédalez pour déverrouiller</string>
     <string name="cover_connected">Connecté</string>
 
     <!-- "h" is standard for "heure" -->

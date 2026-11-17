@@ -17,7 +17,7 @@ object AlarmDayRules {
     /** How long after an alarm rings its sound choice is kept (covers snooze: up to 7 x 5 min). */
     const val SNOOZE_HOLD_MIN = 40L
 
-    private const val PREFS = "h5600_prefs"
+    private const val PREFS = org.avmedia.gshockGoogleSync.h5600.H5600Prefs.NAME
     private const val KEY_PREFIX = "alarm_dayset_at_"
     private const val KEY_VIBE_PREFIX = "alarm_vibe_only_at_"
 
