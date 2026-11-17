@@ -150,16 +150,16 @@ private fun WatchFaceCard(vm: H5600ViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppText(text = "Watch should show: ${s.watchShould}", fontSize = 13.sp, modifier = Modifier.weight(1f))
-                org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "Refresh weather", enabled = !s.busy, onClick = { vm.refreshWeatherOnly() })
+                org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "Refresh weather", onClick = { vm.refreshWeatherOnly() })
             }
             // Watch face item
             // Face 1 = simple face with the weekday; face 2 = customisable face showing the item below.
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
                 if (s.faceNumber == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
                 else {
-                    AppChoiceButton(text = "Face 1 (weekday)", selected = s.faceNumber == 1, enabled = !s.busy,
+                    AppChoiceButton(text = "Face 1 (weekday)", selected = s.faceNumber == 1,
                         onClick = { vm.setFaceNumber(1) })
-                    AppChoiceButton(text = "Face 2 (custom)", selected = s.faceNumber == 2, enabled = !s.busy,
+                    AppChoiceButton(text = "Face 2 (custom)", selected = s.faceNumber == 2,
                         onClick = { vm.setFaceNumber(2) })
                 }
             }
@@ -181,7 +181,7 @@ private fun WatchFaceCard(vm: H5600ViewModel) {
                         AppChoiceButton(
                             text = label,
                             selected = s.watchFace == item,
-                            enabled = !s.busy && !s.dynamicFace,
+                            enabled = !s.dynamicFace,
                             onClick = { vm.setWatchFace(item) },
                         )
                     }
@@ -196,7 +196,7 @@ private fun WatchFaceCard(vm: H5600ViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppText(text = "Dynamic sunset-step toggle")
-                AppSwitch(checked = s.dynamicFace, enabled = !s.busy, onCheckedChange = { vm.setDynamicFace(it) })
+                AppSwitch(checked = s.dynamicFace, onCheckedChange = { vm.setDynamicFace(it) })
             }
             AppText(
                 text = "Steps all day; Sun data from ${SunFace.LEAD_HOURS} h before sunset until " +
@@ -209,7 +209,7 @@ private fun WatchFaceCard(vm: H5600ViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppText(text = "Weather instead of sunrise")
-                AppSwitch(checked = s.tempSun, enabled = !s.busy, onCheckedChange = { vm.setTempSun(it) })
+                AppSwitch(checked = s.tempSun, onCheckedChange = { vm.setTempSun(it) })
             }
             AppText(
                 text = "Sun screen top line shows W:TT — W = 1 sunny, 2 cloudy, 3 rain/snow, 4 extreme (heavy rain, storm, gusts ≥ 60 km/h); TT = °C (0–59). " +
@@ -230,10 +230,10 @@ private fun WatchFaceCard(vm: H5600ViewModel) {
                     ) {
                         AppText(text = "$label: %+d min".format(value), fontSize = 13.sp)
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "−", enabled = !s.busy, onClick = {
+                            org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "−", onClick = {
                                 if (isRise) vm.adjustTempSun(-1, 0) else vm.adjustTempSun(0, -1)
                             })
-                            org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "+", enabled = !s.busy, onClick = {
+                            org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "+", onClick = {
                                 if (isRise) vm.adjustTempSun(1, 0) else vm.adjustTempSun(0, 1)
                             })
                         }
@@ -246,7 +246,6 @@ private fun WatchFaceCard(vm: H5600ViewModel) {
             }
             org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
                 text = "Send loc/time",
-                enabled = !s.busy,
                 onClick = { vm.sendLocation() },
             )
         }
@@ -278,7 +277,6 @@ private fun SoundNotificationsCard(vm: H5600ViewModel) {
                         AppChoiceButton(
                             text = label,
                             selected = s.soundMode == mode,
-                            enabled = !s.busy,
                             onClick = { vm.setSoundMode(mode) },
                         )
                     }
@@ -292,7 +290,7 @@ private fun SoundNotificationsCard(vm: H5600ViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppText(text = "0x42: " + s.soundHex.ifEmpty { "…" }, fontSize = 13.sp)
-                org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "Re-read", enabled = !s.busy, onClick = { vm.refresh() })
+                org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(text = "Re-read", onClick = { vm.refresh() })
             }
             AppText(text = "Alarm days and Vibe only / Sound are set per alarm in the Alarms tab.", fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
             s.lastApplied?.let { AppText(text = "Last applied: $it", fontSize = 13.sp) }

@@ -73,46 +73,53 @@ constructor(
     // ---- Apply on change (replaces the "Send to watch" button) ----
 
     private val applyMutex = kotlinx.coroutines.sync.Mutex()
-    private var applyJob: kotlinx.coroutines.Job? = null
+    private var debounceJob: kotlinx.coroutines.Job? = null
     @Volatile private var editVersion = 0
     @Volatile private var appliedVersion = 0
 
-    /** Short debounce so quick taps (e.g. tone + vibration) go out as one 0x13 write. */
+    /**
+     * Short debounce so quick taps (e.g. tone + vibration) go out as one 0x13 write. A new edit
+     * cancels only a write that has not started; a write in progress always finishes, and the
+     * newer edit is written right after it (serialized by [applyMutex]).
+     */
     private fun scheduleApply() {
         editVersion++
-        applyJob?.cancel()
-        applyJob = viewModelScope.launch {
+        debounceJob?.cancel()
+        debounceJob = viewModelScope.launch {
             kotlinx.coroutines.delay(500)
-            applyMutex.withLock { applyToWatch() }
+            // A sibling of the debounce job: later edits cannot cancel it mid-write.
+            viewModelScope.launch { applyMutex.withLock { if (appliedVersion != editVersion) applyToWatch() } }
         }
     }
 
     /**
-     * Writes this screen's settings onto a FRESH read of the watch's 0x13 packet. Building the whole
-     * packet from this screen (as the old Send button did) also rewrote fields managed elsewhere:
-     * 12h/24h (Time tab), the hourly signal (always sent as off) and DnD.
+     * Writes this screen's settings onto a FRESH read of the watch's 0x13 packet, under the
+     * library's 0x13 lock. Building the whole packet from this screen (as the old Send button did)
+     * also rewrote fields managed elsewhere: 12h/24h (Time tab), the hourly signal and DnD.
      */
     private suspend fun applyToWatch() {
         val version = editVersion
-        val settingsAction = actionContainer.getAction(ActionContainer.SetSettingsAction::class.java)
-        if (!settingsAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) return
-        val ok = runCatching {
-            api.getTimeFormat24h() // fresh 0x13 read; refreshes the cached settings too
-            val watch = api.getSettings()
-            val mine = buildSettings()
-            watch.buttonTone = mine.buttonTone
-            watch.keyVibration = mine.keyVibration
-            watch.autoLight = mine.autoLight
-            watch.lightDuration = mine.lightDuration
-            if (watchFeatureManager.isFeatureSupported("settings.power_saving")) watch.powerSavingMode = mine.powerSavingMode
-            if (watchFeatureManager.isFeatureSupported("settings.multiple_fonts")) watch.font = mine.font
-            appliedVersion = version
-            settingsAction.runWithSettings(appContext, watch)
-        }.getOrElse {
-            if (it is kotlinx.coroutines.CancellationException) throw it
-            Timber.e(it, "Settings apply failed"); false
+        val mine = buildSettings()
+        val ok = try {
+            kotlinx.coroutines.withTimeout(30_000) {
+                api.updateSettings { watch ->
+                    watch.buttonTone = mine.buttonTone
+                    watch.keyVibration = mine.keyVibration
+                    watch.autoLight = mine.autoLight
+                    watch.lightDuration = mine.lightDuration
+                    if (watchFeatureManager.isFeatureSupported("settings.power_saving")) watch.powerSavingMode = mine.powerSavingMode
+                    if (watchFeatureManager.isFeatureSupported("settings.multiple_fonts")) watch.font = mine.font
+                }
+            }
+            true
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            if (e !is kotlinx.coroutines.TimeoutCancellationException) throw e
+            Timber.e(e, "Settings apply timed out"); false
+        } catch (e: Exception) {
+            Timber.e(e, "Settings apply failed"); false
         }
         if (ok) {
+            appliedVersion = version
             snapshot().let { changes.setBaseline(it, it) }
         } else {
             AppSnackbar("Settings: could not write to the watch")
@@ -152,7 +159,7 @@ constructor(
             arrayOf(
                 EventAction("SettingsUpdated") {
                     // A newer edit is waiting to be applied: don't overwrite it with the older readback.
-                    if (editVersion != appliedVersion && applyJob?.isActive == true) return@EventAction
+                    if (editVersion != appliedVersion) return@EventAction
                     val payload = ProgressEvents.getPayload("SettingsUpdated") as? Settings
                     initializeSettings(payload, reason = "SettingsUpdated event")
                 }

@@ -154,8 +154,11 @@ class HealthViewModel @Inject constructor(
 
     // The DW-H5600 never answers the exercise-profile request (0x2D); without a timeout the Health
     // screen waited forever after fetching steps and kept showing 0.
-    suspend fun readExerciseProfile(): ExerciseProfile? =
-        runCatching { withTimeoutOrNull(5.seconds) { api.getExerciseProfile() } }.getOrNull()
+    // It is not even sent to the DW-H5600 any more (it cost 5 s per step refresh).
+    suspend fun readExerciseProfile(): ExerciseProfile? {
+        if (api.isH5600SettingsSupported()) return null
+        return runCatching { withTimeoutOrNull(5.seconds) { api.getExerciseProfile() } }.getOrNull()
+    }
 
     suspend fun saveExerciseProfile(profile: ExerciseProfile): Boolean =
         runCatching {

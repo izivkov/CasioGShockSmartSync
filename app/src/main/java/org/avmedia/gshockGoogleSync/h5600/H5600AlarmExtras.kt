@@ -3,9 +3,7 @@ package org.avmedia.gshockGoogleSync.h5600
 import AppSwitch
 import AppText
 import android.app.AlertDialog
-import android.app.TimePickerDialog
 import android.content.Context
-import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,12 +33,11 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockGoogleSync.ui.common.AppSmallButton
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
+import org.avmedia.gshockGoogleSync.utils.AppTimeFormat
 import org.avmedia.gshockGoogleSync.h5600.AlarmPool.PhoneAlarm
 import timber.log.Timber
-import java.time.DayOfWeek
-import java.time.format.TextStyle
-import java.util.Locale
 import javax.inject.Inject
 
 /** The phone-side alarm list (any number of alarms) shown in the Alarms tab for DW-H5600 watches. */
@@ -49,11 +49,17 @@ class H5600AlarmPoolViewModel @Inject constructor(
 ) : ViewModel() {
     data class UiState(
         val supported: Boolean = false,
-        val busy: Boolean = false,
+        val busy: Boolean = false, // only the first-use import from the watch
+        /** Watch update running or queued in the background ("sending to watch…"); the UI stays usable. */
+        val syncing: Boolean = false,
+        /** The last watch update failed; it is retried automatically (the phone list stays as edited). */
+        val pending: Boolean = false,
         val alarms: List<PhoneAlarm> = emptyList(),
         val onWatch: Set<String> = emptySet(),
         val onWatchSmart: String? = null,
         val lastApplied: String? = null,
+        /** Alarms that may be snoozing on the watch right now (offer "Stop snooze"). */
+        val snoozing: Set<String> = emptySet(),
     )
 
     private val _state = MutableStateFlow(UiState(supported = api.isH5600SettingsSupported()))
@@ -72,33 +78,72 @@ class H5600AlarmPoolViewModel @Inject constructor(
             onWatch = AlarmPool.loadedIds(context).filterNotNull().toSet(),
             onWatchSmart = AlarmPool.loadedSmartId(context),
             lastApplied = H5600Schedule.lastApplied(context),
+            snoozing = AlarmPool.load(context)?.let { p -> AlarmPool.snoozing(p, java.time.LocalDateTime.now()).map { a -> a.first.id }.toSet() }.orEmpty(),
         )
+    }
+
+    /** Cancels the snooze on the watch (time sync) and ends the alarm's hold — in the background. */
+    fun stopSnooze(id: String) {
+        _state.update { it.copy(snoozing = it.snoozing - id) } // the button goes away at once
+        SnoozeNotifier.cancel(context, id)
+        runner.requestStopSnooze(id)
     }
 
     /** First use: the list starts with the watch's current alarms and earlier per-alarm settings. */
     private fun importFromWatch() = work("import alarms") {
         val watch = api.getAlarms()
         AlarmPool.save(context, AlarmPool.importFrom(watch, AlarmDayRules.load(context), AlarmDayRules.loadVibeOnly(context)))
-        runner.applyIfEnabled()
         reload()
+        runner.requestApplyAlarms()
     }
 
-    private fun change(transform: (List<PhoneAlarm>) -> List<PhoneAlarm>) = work("update alarms") {
+    /**
+     * Saves the change on the phone and shows it at once; the watch is updated in the background
+     * (queued, quick successive edits merged into one update).
+     */
+    private fun change(transform: (List<PhoneAlarm>) -> List<PhoneAlarm>) {
         AlarmPool.save(context, transform(AlarmPool.load(context).orEmpty()))
         reload()
-        runner.applyIfEnabled() // reload the watch's slots + sound mode now
-        reload()
+        runner.requestApplyAlarms()
     }
 
-    fun add(hour: Int, minute: Int) = change { it + PhoneAlarm(hour = hour, minute = minute) }
+    /** New alarm from the editor, with all its options: one watch update. */
+    fun add(a: PhoneAlarm) = change { it + AlarmPool.arm(a, java.time.LocalDateTime.now()) }
     fun delete(id: String) = change { list -> list.filterNot { it.id == id } }
-    fun update(a: PhoneAlarm) = change { list -> list.map { if (it.id == a.id) a else it } }
+
+    /**
+     * Saved from the editor. A one-time alarm is switched on and (re)set for the next time its hh:mm
+     * comes round — editing it means you want it to ring.
+     */
+    fun update(a: PhoneAlarm) = change { list ->
+        val saved = if (a.once) a.copy(enabled = true) else a
+        list.map { if (it.id == a.id) AlarmPool.arm(saved, java.time.LocalDateTime.now()) else it }
+    }
+
+    /** Card switch; switching a one-time alarm back on sets it for its next hh:mm. */
+    fun setEnabled(a: PhoneAlarm, on: Boolean) = change { list ->
+        list.map { if (it.id != a.id) it else if (on) AlarmPool.arm(it.copy(enabled = true), java.time.LocalDateTime.now()) else it.copy(enabled = false) }
+    }
+
+    init {
+        runner.onPoolChanged = { reload() } // after each watch pass: on-watch tags, snooze, one-time alarms
+        viewModelScope.launch { runner.syncing.collect { on -> _state.update { it.copy(syncing = on) }; if (!on) reload() } }
+        viewModelScope.launch { runner.alarmsPending.collect { p -> _state.update { it.copy(pending = p) } } }
+    }
+
+    override fun onCleared() {
+        runner.onPoolChanged = null
+    }
 
     private fun work(what: String, block: suspend () -> Unit) {
         viewModelScope.launch {
             _state.update { it.copy(busy = true) }
             try {
                 block()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                if (e !is kotlinx.coroutines.TimeoutCancellationException) throw e // screen left: not a failure
+                Timber.e(e, "H5600 $what timed out")
+                AppSnackbar("Alarms: $what timed out")
             } catch (e: Exception) {
                 Timber.e(e, "H5600 $what failed")
                 AppSnackbar("Alarms: $what failed: ${e.message}")
@@ -109,56 +154,31 @@ class H5600AlarmPoolViewModel @Inject constructor(
     }
 }
 
-private fun pickTime(context: Context, hour: Int, minute: Int, onPicked: (Int, Int) -> Unit) {
-    TimePickerDialog(context, { _, h, m -> onPicked(h, m) }, hour, minute, org.avmedia.gshockGoogleSync.utils.AppTimeFormat.current()).show()
-}
-
-private fun editLabel(context: Context, a: PhoneAlarm, onSaved: (String) -> Unit) {
-    val input = android.widget.EditText(context).apply {
-        setText(a.label)
-        hint = "e.g. Feed the cats"
-        setSingleLine()
-        setSelection(text.length)
-    }
-    val pad = (16 * context.resources.displayMetrics.density).toInt()
-    val box = android.widget.FrameLayout(context).apply { setPadding(pad, pad / 2, pad, 0); addView(input) }
-    AlertDialog.Builder(context)
-        .setTitle("Label for " + org.avmedia.gshockGoogleSync.utils.AppTimeFormat.hm(a.hour, a.minute))
-        .setView(box)
-        .setPositiveButton("Save") { _, _ -> onSaved(input.text.toString().trim().take(40)) }
-        .setNeutralButton("Clear") { _, _ -> onSaved("") }
-        .setNegativeButton("Cancel", null)
-        .show()
-}
-
-private fun pickDays(context: Context, a: PhoneAlarm, onPicked: (Set<DayOfWeek>) -> Unit) {
-    val days = DayOfWeek.entries // Mon..Sun
-    val checked = BooleanArray(days.size) { days[it] in a.days }
-    AlertDialog.Builder(context)
-        .setTitle(org.avmedia.gshockGoogleSync.utils.AppTimeFormat.hm(a.hour, a.minute) + (if (a.label.isEmpty()) "" else " ${a.label}") + " rings on")
-        .setMultiChoiceItems(days.map { it.getDisplayName(TextStyle.FULL, Locale.ENGLISH) }.toTypedArray(), checked) { _, d, on ->
-            checked[d] = on
-        }
-        .setPositiveButton("Save") { _, _ ->
-            onPicked(days.filterIndexed { d, _ -> checked[d] }.toSet().ifEmpty { AlarmDayRules.ALL_DAYS })
-        }
-        .setNeutralButton("Every day") { _, _ -> onPicked(AlarmDayRules.ALL_DAYS) }
-        .setNegativeButton("Cancel", null)
-        .show()
-}
-
-/** Replaces the stock 4-slot alarm list for DW-H5600 watches. */
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+/** Replaces the stock 4-slot alarm list for DW-H5600 watches. Tap an alarm to edit all its options at once. */
 @Composable
 fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
     val s by vm.state.collectAsState()
     if (!s.supported) return
     val context = LocalContext.current
-    @Suppress("UNUSED_VARIABLE") val is24h by org.avmedia.gshockGoogleSync.utils.AppTimeFormat.is24h.collectAsState() // recompose on change
+    @Suppress("UNUSED_VARIABLE") val is24h by AppTimeFormat.is24h.collectAsState() // recompose on change
+    var editing by remember { mutableStateOf<PhoneAlarm?>(null) }
+    var isNew by remember { mutableStateOf(false) }
+
+    editing?.let { a ->
+        AlarmEditorDialog(
+            initial = a,
+            isNew = isNew,
+            onSave = { edited -> if (isNew) vm.add(edited) else vm.update(edited); editing = null },
+            onDismiss = { editing = null },
+        )
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         s.alarms.forEach { a ->
-            AppCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+            AppCard(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)
+                    .clickable { isNew = false; editing = a },
+            ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -166,73 +186,28 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            AppText(
-                                text = org.avmedia.gshockGoogleSync.utils.AppTimeFormat.hm(a.hour, a.minute),
-                                fontSize = 32.sp,
-                                modifier = Modifier.clickable(enabled = !s.busy) {
-                                    pickTime(context, a.hour, a.minute) { h, m -> vm.update(a.copy(hour = h, minute = m)) }
-                                },
-                            )
-                            AppText(
-                                text = a.label.ifEmpty { "Add label" },
-                                fontSize = 15.sp,
-                                color = if (a.label.isEmpty()) androidx.compose.ui.graphics.Color.Gray
-                                else androidx.compose.ui.graphics.Color.Unspecified,
-                                modifier = Modifier.clickable(enabled = !s.busy) {
-                                    editLabel(context, a) { l -> vm.update(a.copy(label = l)) }
-                                },
-                            )
+                            AppText(text = AppTimeFormat.hm(a.hour, a.minute), fontSize = 32.sp)
+                            if (a.label.isNotEmpty()) AppText(text = a.label, fontSize = 15.sp)
                         }
                         if (a.id in s.onWatch) AppText(text = "on watch", fontSize = 13.sp, modifier = Modifier.padding(end = 16.dp))
                         if (a.id == s.onWatchSmart) AppText(text = "on watch (smart)", fontSize = 13.sp, modifier = Modifier.padding(end = 16.dp))
-                        AppSwitch(
-                            checked = a.enabled,
-                            enabled = !s.busy,
-                            onCheckedChange = { vm.update(a.copy(enabled = it)) },
-                        )
+                        AppSwitch(checked = a.enabled, onCheckedChange = { vm.setEnabled(a, it) })
                     }
-                    // All options in one wrapping row of compact buttons
-                    androidx.compose.foundation.layout.FlowRow(
-                        modifier = Modifier.padding(top = 6.dp), // a little air below the label
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
-                            text = AlarmDayRules.label(a.days),
-                            enabled = !s.busy,
-                            onClick = { pickDays(context, a) { d -> vm.update(a.copy(days = d)) } },
+                        AppText(text = optionsSummary(a), fontSize = 13.sp, modifier = Modifier.weight(1f))
+                        if (a.id in s.snoozing) AppSmallButton(
+                            text = "Stop snooze",
+                            onClick = { vm.stopSnooze(a.id) },
                         )
-                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
-                            text = if (a.vibeOnly) "Vibe only" else "Sound + vibe",
-                            enabled = !s.busy,
-                            onClick = { vm.update(a.copy(vibeOnly = !a.vibeOnly)) },
-                        )
-                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
-                            text = if (a.isSmart) "Smart −${a.smartWindowMin} min" else "Smart off",
-                            enabled = !s.busy,
-                            onClick = {
-                                val options = listOf(0, 15, 30, 45, 60)
-                                val labels = options.map { if (it == 0) "Off (normal alarm)" else "Up to $it min before" }
-                                AlertDialog.Builder(context)
-                                    .setTitle("Smart alarm: wake in light sleep")
-                                    .setSingleChoiceItems(labels.toTypedArray(), options.indexOf(a.smartWindowMin).coerceAtLeast(0)) { d, i ->
-                                        vm.update(a.copy(smartWindowMin = options[i])); d.dismiss()
-                                    }
-                                    .setNegativeButton("Cancel", null)
-                                    .show()
-                            },
-                        )
-                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
-                            text = if (a.snooze) "Snooze on" else "Snooze off",
-                            enabled = !s.busy,
-                            onClick = { vm.update(a.copy(snooze = !a.snooze)) },
-                        )
-                        org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
+                        AppSmallButton(
                             text = "Delete",
-                            enabled = !s.busy,
                             onClick = {
                                 AlertDialog.Builder(context)
-                                    .setTitle("Delete " + org.avmedia.gshockGoogleSync.utils.AppTimeFormat.hm(a.hour, a.minute) + (if (a.label.isEmpty()) "" else " (${a.label})") + "?")
+                                    .setTitle("Delete " + AppTimeFormat.hm(a.hour, a.minute) + (if (a.label.isEmpty()) "" else " (${a.label})") + "?")
                                     .setPositiveButton("Delete") { _, _ -> vm.delete(a.id) }
                                     .setNegativeButton("Cancel", null)
                                     .show()
@@ -244,18 +219,27 @@ fun H5600AlarmPoolList(vm: H5600AlarmPoolViewModel = hiltViewModel()) {
         }
         AppButton(
             text = "+ Add alarm",
-            enabled = !s.busy,
-            onClick = { pickTime(context, 7, 0) { h, m -> vm.add(h, m) } },
+            enabled = !s.busy, // only while the alarms are first imported from the watch
+            onClick = { isNew = true; editing = PhoneAlarm(hour = 7, minute = 0) },
             modifier = Modifier.padding(8.dp),
         )
         AppText(
             text = "Any number of alarms. The watch holds ${AlarmPool.SLOTS}, so the phone keeps the alarms " +
                 "due in the next 24 h on the watch (\"on watch\") and swaps them as they ring, and sets " +
                 "Vibe only or your Custom mode for the alarm due next (held ${AlarmDayRules.SNOOZE_HOLD_MIN} min " +
-                "for snooze). Needs the watch connected; alarms set on the watch itself are overwritten.",
+                "after an alarm with snooze, 1 min without). Needs the watch connected; alarms set on the watch itself are overwritten.",
             fontSize = 13.sp,
             modifier = Modifier.padding(8.dp),
         )
+        when {
+            s.syncing -> AppText(text = "Sending to watch…", fontSize = 13.sp, modifier = Modifier.padding(horizontal = 8.dp))
+            s.pending -> AppText(
+                text = "Not on the watch yet — retrying automatically (also on the next connection).",
+                fontSize = 13.sp,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = 8.dp),
+            )
+        }
         s.lastApplied?.let { AppText(text = "Last applied: $it", fontSize = 13.sp, modifier = Modifier.padding(horizontal = 8.dp)) }
     }
 }

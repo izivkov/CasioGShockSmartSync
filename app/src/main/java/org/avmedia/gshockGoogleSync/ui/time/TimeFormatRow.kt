@@ -19,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.AppChoiceButton
@@ -42,12 +43,14 @@ class TimeFormatViewModel @Inject constructor(
     /** Reads the watch's format; called each time the Time tab is shown (the watch may connect later). */
     fun refresh() {
         viewModelScope.launch {
+            // One 0x13 read gives both bits (the library already retries unanswered reads); the
+            // outer retries cover the watch not being connected yet when the tab opens.
             repeat(3) { attempt ->
-                val v = runCatching { withTimeoutOrNull(6_000) { api.getTimeFormat24h() } }.getOrNull()
-                if (v != null) {
-                    val chime = runCatching { withTimeoutOrNull(6_000) { api.getHourlyChime() } }.getOrNull()
-                    chime?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", it) }
-                    _state.value = State(is24h = v, hourlyChime = chime ?: _state.value.hourlyChime)
+                val bits = confirmRead(delayMs = 0) { api.getTimeFormatAndChime() }
+                if (bits != null) {
+                    val (v, chime) = bits
+                    org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", chime)
+                    _state.value = State(is24h = v, hourlyChime = chime)
                     org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "time_24h", v)
                     org.avmedia.gshockGoogleSync.utils.AppTimeFormat.set(context, v) // the whole app follows the watch
                     return@launch
@@ -61,8 +64,8 @@ class TimeFormatViewModel @Inject constructor(
      * Best-effort readback after a 0x13 write: the watch may ignore a GET sent right after a SET,
      * so wait a moment first, and treat no answer as null (not an error) — the write already succeeded.
      */
-    private suspend fun <T> confirmRead(read: suspend () -> T?): T? {
-        kotlinx.coroutines.delay(500)
+    private suspend fun <T> confirmRead(delayMs: Long = 500, read: suspend () -> T?): T? {
+        kotlinx.coroutines.delay(delayMs)
         return try {
             kotlinx.coroutines.withTimeoutOrNull(12_000) { read() }
         } catch (e: kotlinx.coroutines.CancellationException) {
@@ -73,43 +76,72 @@ class TimeFormatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Readback until the watch reports [expected]: the watch often sends each 0x13 packet twice
+     * (~0.8 s apart), so the first read after a write can still be the OLD packet. Up to 3 reads,
+     * 1.2 s apart; returns the last value read, or null if none answered.
+     */
+    private suspend fun <T> confirmValue(expected: T, read: suspend () -> T?): T? {
+        var last: T? = null
+        repeat(3) { i ->
+            val v = confirmRead(delayMs = if (i == 0) 500 else 1_200, read = read)
+            if (v != null) last = v
+            if (v == expected) return v
+        }
+        return last
+    }
+
+    // Taps are shown at once and sent one after another in the background; the controls stay
+    // usable. A change that fails is rolled back to what the watch has, with a message.
+    private val queue = kotlinx.coroutines.sync.Mutex()
+
+    private fun queued(block: suspend () -> Unit) {
+        viewModelScope.launch { queue.withLock { block() } }
+    }
+
     /** Hourly time signal (moved here from the Custom tab); same 0x13 packet as the time format. */
     fun setHourlyChime(on: Boolean) {
-        viewModelScope.launch {
-            val before = _state.value
-            _state.value = before.copy(hourlyChime = on, busy = true)
-            runCatching {
+        val before = _state.value.hourlyChime
+        _state.value = _state.value.copy(hourlyChime = on)
+        queued {
+            try {
                 kotlinx.coroutines.withTimeout(20_000) { api.setHourlyChime(on) }
-                confirmRead { api.getHourlyChime() }
-            }.onSuccess { v ->
-                v?.let { org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", it) }
-                _state.value = _state.value.copy(hourlyChime = v ?: on, busy = false)
-            }.onFailure {
-                _state.value = before.copy(busy = false)
-                AppSnackbar("Hourly time signal: ${it.message}")
+                val v = confirmValue(on) { api.getHourlyChime() } ?: on
+                org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "hourly_chime", v)
+                _state.value = _state.value.copy(hourlyChime = v)
+                if (v != on) AppSnackbar("Hourly time signal: the watch kept it ${if (v) "on" else "off"}")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                if (e !is kotlinx.coroutines.TimeoutCancellationException) throw e
+                _state.value = _state.value.copy(hourlyChime = before)
+                AppSnackbar("Hourly time signal: the watch did not answer — not changed")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(hourlyChime = before)
+                AppSnackbar("Hourly time signal: ${e.message} — not changed")
             }
         }
     }
 
     fun set(is24h: Boolean) {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(is24h = is24h, busy = true) // move the UI immediately
-            runCatching {
+        val before = _state.value.is24h
+        _state.value = _state.value.copy(is24h = is24h) // move the UI immediately
+        queued {
+            try {
                 kotlinx.coroutines.withTimeout(20_000) { api.setTimeFormat24h(is24h) }
-                confirmRead { api.getTimeFormat24h() }
+                // Readback unanswered: the write itself went through, so trust it.
+                val read = confirmValue(is24h) { api.getTimeFormat24h() }
+                val v = read ?: is24h
+                _state.value = _state.value.copy(is24h = v)
+                org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "time_24h", v)
+                org.avmedia.gshockGoogleSync.utils.AppTimeFormat.set(context, v)
+                if (read != null && read != is24h) AppSnackbar("Time format: the watch kept ${if (read) "24h" else "12h"}")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                if (e !is kotlinx.coroutines.TimeoutCancellationException) throw e
+                _state.value = _state.value.copy(is24h = before)
+                AppSnackbar("Time format: the watch did not answer — not changed")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(is24h = before)
+                AppSnackbar("Time format: ${e.message} — not changed")
             }
-                .onSuccess {
-                    // Readback unanswered: the write itself went through, so trust it.
-                    val v = it ?: is24h
-                    _state.value = _state.value.copy(is24h = v, busy = false)
-                    org.avmedia.gshockGoogleSync.utils.LastKnown.put(context, "time_24h", v)
-                    org.avmedia.gshockGoogleSync.utils.AppTimeFormat.set(context, v)
-                    if (it != null && it != is24h) AppSnackbar("Time format: watch kept ${if (it) "24h" else "12h"}")
-                }
-                .onFailure {
-                    _state.value = _state.value.copy(is24h = !is24h, busy = false)
-                    AppSnackbar("Time format: ${it.message}")
-                }
         }
     }
 }
@@ -130,8 +162,8 @@ fun TimeFormatRow(modifier: Modifier = Modifier, vm: TimeFormatViewModel = hiltV
                 org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner() // never read from the watch
             } else Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 // Current format highlighted; greyed only while syncing.
-                AppChoiceButton(text = "12h", selected = s.is24h == false, enabled = !s.busy, onClick = { vm.set(false) })
-                AppChoiceButton(text = "24h", selected = s.is24h == true, enabled = !s.busy, onClick = { vm.set(true) })
+                AppChoiceButton(text = "12h", selected = s.is24h == false, onClick = { vm.set(false) })
+                AppChoiceButton(text = "24h", selected = s.is24h == true, onClick = { vm.set(true) })
             }
         }
         // Hourly time signal (moved here from the Custom tab)
@@ -142,7 +174,7 @@ fun TimeFormatRow(modifier: Modifier = Modifier, vm: TimeFormatViewModel = hiltV
         ) {
             AppText(text = "Hourly time signal")
             if (s.hourlyChime == null) org.avmedia.gshockGoogleSync.ui.common.LoadingSpinner()
-            else AppSwitch(checked = s.hourlyChime == true, enabled = !s.busy, onCheckedChange = { vm.setHourlyChime(it) })
+            else AppSwitch(checked = s.hourlyChime == true, onCheckedChange = { vm.setHourlyChime(it) })
         }
         }
     }

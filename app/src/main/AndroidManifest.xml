@@ -129,6 +129,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".h5600.SnoozeStopReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".services.BootReceiver"
             android:enabled="true"
             android:exported="true"

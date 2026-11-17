@@ -71,14 +71,23 @@ class ActionRunner @Inject constructor(
         // DW-H5600: 0x39 keep-connected handshake, then per-alarm days / sound. Runs first, because
         // the regular actions may end the connection (e.g. after an automatic time sync).
         // No-op for other watches.
-        h5600ScheduleRunner.onConnected(
-            applySchedule = state.button != null && state.button != ConnectionButton.FIND,
-        )
+        h5600ScheduleRunner.onConnected(applySchedule = state.button != null)
+
+        // DW-H5600: the scheduler above already did the connect work (time sync — postponed while
+        // an alarm may be snoozing, since a time sync cancels the snooze — and the alarm slots).
+        // The stock connect actions would sync the time again regardless, and their prayer alarms
+        // would fight the phone-side alarm list; reminders are not supported on this watch.
+        if (org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600 &&
+            state.button != ConnectionButton.FROM_ACTION
+        ) {
+            Timber.i("DW-H5600: stock connect actions skipped (${state.button})")
+            return
+        }
 
         when (state.button) {
             ConnectionButton.FROM_ACTION -> actionContainer.runActionsForActionButton(context)
             ConnectionButton.AUTOMATIC_SYNC -> actionContainer.runActionsForAutoTimeSetting(context)
-            ConnectionButton.FIND -> actionContainer.runActionFindPhone(context)
+            ConnectionButton.FIND -> Unit // handled above, before the connect routine
             ConnectionButton.NORMAL -> actionContainer.runActionForConnection(context)
             ConnectionButton.ALWAYS_CONNECTED -> actionContainer.runActionForAlwaysConnected(context)
             null -> Unit

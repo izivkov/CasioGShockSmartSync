@@ -95,4 +95,86 @@ class AlarmPoolTest {
         // 07:45 is inside the 30-min window before 08:10 -> must already be vibe-only
         assertEquals(SoundMode.VIBE_ONLY, AlarmPool.desiredSoundMode(listOf(vibeSmart, cats1), at(16, 7, 45)))
     }
+
+    // ---- one-time alarms ----
+
+    private val nap = PhoneAlarm(id = "nap", hour = 15, minute = 0, once = true)
+
+    @Test fun armSetsTodayWhenStillAhead() =
+        assertEquals(java.time.LocalDate.of(2026, 11, 16), AlarmPool.arm(nap, at(16, 14)).onceDate)
+
+    @Test fun armSetsTomorrowWhenPassed() =
+        assertEquals(java.time.LocalDate.of(2026, 11, 17), AlarmPool.arm(nap, at(16, 15, 0)).onceDate)
+
+    @Test fun armClearsDateOfRepeatingAlarm() =
+        assertEquals(null, AlarmPool.arm(cats1.copy(onceDate = java.time.LocalDate.of(2026, 11, 16)), at(16, 9)).onceDate)
+
+    @Test fun oneTimeRingsOnlyOnItsDay() {
+        val armed = AlarmPool.arm(nap, at(16, 14))
+        assertEquals(at(16, 15), AlarmPool.nextRing(armed, at(16, 14)))
+        assertEquals(null, AlarmPool.nextRing(armed, at(16, 16))) // not again tomorrow
+    }
+
+    @Test fun oneTimeLoadedOnWatchBeforeItRings() {
+        val armed = AlarmPool.arm(nap, at(16, 14))
+        assertTrue("nap" in AlarmPool.plan(listOf(armed), List(AlarmPool.SLOTS) { null }, at(16, 14)))
+    }
+
+    @Test fun oneTimeKeptDuringSnoozeHold() {
+        val armed = AlarmPool.arm(nap, at(16, 14))
+        assertEquals(listOf(armed), AlarmPool.expireOnce(listOf(armed), at(16, 15, 30))) // 30 min < 40 min hold
+    }
+
+    @Test fun oneTimeSwitchedOffAfterSnoozeHold() {
+        val armed = AlarmPool.arm(nap, at(16, 14))
+        val after = AlarmPool.expireOnce(listOf(armed, cats1), at(16, 15, 40))
+        assertEquals(false, after[0].enabled)
+        assertEquals(cats1, after[1]) // repeating alarms untouched
+        assertTrue(AlarmPool.plan(after, List(AlarmPool.SLOTS) { "nap" }, at(16, 15, 40)).none { it == "nap" })
+    }
+
+    @Test fun oneTimeReArmedWhenSwitchedBackOn() {
+        val off = AlarmPool.arm(nap, at(16, 14)).copy(enabled = false)
+        assertEquals(java.time.LocalDate.of(2026, 11, 17), AlarmPool.arm(off.copy(enabled = true), at(16, 18)).onceDate)
+    }
+
+    @Test fun oneTimeWithoutSnoozeSwitchedOffRightAfterRing() {
+        val armed = AlarmPool.arm(nap.copy(snooze = false), at(16, 14))
+        assertEquals(true, AlarmPool.expireOnce(listOf(armed), at(16, 15, 0))[0].enabled) // ringing now
+        assertEquals(false, AlarmPool.expireOnce(listOf(armed), at(16, 15, 1))[0].enabled) // 1 min later
+    }
+
+    @Test fun soundModeNotHeldAfterAlarmWithoutSnooze() {
+        // wake (vibe only, 08:10) without snooze: at 08:12 the next alarm (cats1, sound) governs.
+        val noSnooze = wake.copy(snooze = false)
+        assertEquals(SoundMode.CUSTOM, AlarmPool.desiredSoundMode(listOf(noSnooze, cats1), at(16, 8, 12)))
+        assertEquals(SoundMode.VIBE_ONLY, AlarmPool.desiredSoundMode(listOf(wake, cats1), at(16, 8, 12))) // with snooze: held
+    }
+
+    // ---- snooze window / stop snooze ----
+
+    @Test fun snoozingOnlyWithinWindowAndWithSnoozeOn() {
+        val list = listOf(cats1, cats2.copy(snooze = false))
+        assertEquals(listOf("cats1"), AlarmPool.snoozing(list, at(16, 12, 45)).map { it.first.id })
+        assertEquals(emptyList<String>(), AlarmPool.snoozing(list, at(16, 13, 15)).map { it.first.id }) // window over
+        assertEquals(emptyList<String>(), AlarmPool.snoozing(list, at(16, 20, 25)).map { it.first.id }) // no snooze
+    }
+
+    @Test fun dismissEndsTheHoldNow() {
+        val after = AlarmPool.dismiss(listOf(cats1), "cats1", at(16, 12, 35))
+        assertEquals(at(16, 12, 30), after[0].dismissedRing)
+        assertTrue(AlarmPool.snoozing(after, at(16, 12, 35)).isEmpty())
+        assertEquals(AlarmPool.snoozing(listOf(cats1), at(16, 12, 35)).size, 1) // without the stop: still snoozing
+    }
+
+    @Test fun dismissOnlyAffectsThatRing() {
+        val after = AlarmPool.dismiss(listOf(cats1), "cats1", at(16, 12, 35))
+        assertEquals(1, AlarmPool.snoozing(after, at(17, 12, 40)).size) // next day's ring snoozes normally
+    }
+
+    @Test fun dismissedOneTimeAlarmSwitchesOff() {
+        val armed = AlarmPool.arm(nap, at(16, 14))
+        val stopped = AlarmPool.dismiss(listOf(armed), "nap", at(16, 15, 3))
+        assertEquals(false, AlarmPool.expireOnce(stopped, at(16, 15, 3))[0].enabled)
+    }
 }
