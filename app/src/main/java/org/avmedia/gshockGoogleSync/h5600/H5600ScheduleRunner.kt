@@ -278,6 +278,12 @@ class H5600ScheduleRunner @Inject constructor(
         wake.trySend(Unit)
     }
 
+    /** Exact Android alarm fired (see [SchedulerWakeup]): run the loop now, even if the phone dozes. */
+    fun onWakeupAlarm() {
+        SchedulerWakeup.bridge(context)
+        wake.trySend(Unit)
+    }
+
     /** Wakes the boundary loop early (alarms changed), so it re-plans its next wake-up. */
     private val wake = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED)
 
@@ -431,21 +437,24 @@ class H5600ScheduleRunner @Inject constructor(
                 val tickAt = TempSun.nextFetch(now)
                 val next = listOfNotNull(alarmAt, faceAt, tickAt).minOrNull() ?: now.plusMinutes(30)
                 val sleepMs = Duration.between(now, next).toMillis().coerceAtMost(30 * 60_000L) + 5_000
+                // The exact alarm wakes us on time even in Doze; the timer below is only a backup.
+                SchedulerWakeup.schedule(context, now.plusNanos(sleepMs * 1_000_000))
                 // Woken early when alarms change: re-plan without running anything that is not due.
                 kotlinx.coroutines.withTimeoutOrNull(sleepMs) { wake.receive() }
                 val woke = LocalDateTime.now()
-                mutex.withLock {
+                SchedulerWakeup.awake(context) { mutex.withLock {
                     if (!api.isH5600SettingsSupported()) return@withLock
                     val notes = mutableListOf<String>()
                     if (alarmAt != null && !woke.isBefore(alarmAt)) onAlarmPass(applyAlarmsLocked(notes))
                     applyPeriodicLocked(notes) // each part checks its own due time
                     if (faceAt != null && !woke.isBefore(faceAt)) applySunFaceLocked(notes)
                     if (notes.isNotEmpty()) record(notes)
-                }
+                } }
             }
         }
         session.state.first { it.phase is SessionPhase.Closed }
         loop.cancel()
+        SchedulerWakeup.cancel(context) // nothing to do on the watch until it reconnects
     }
 
     private companion object {

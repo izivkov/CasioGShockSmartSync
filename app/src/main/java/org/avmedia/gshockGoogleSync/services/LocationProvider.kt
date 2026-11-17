@@ -38,24 +38,36 @@ object LocationProvider {
         }
     }
 
+    /**
+     * Freshest location the phone has, else the last one this app saw. A refused or failing read
+     * (e.g. Battery Saver allowing location only to apps on screen) also falls back to the saved
+     * one — before, an exception skipped the fallback and returned null.
+     */
     @SuppressLint("MissingPermission")
     fun getLocation(context: Context): Location? =
-        runCatching {
-            when (val result = getLocationResult(context)) {
-                is LocationResult.Success -> {
-                    cacheLocation(context, result.location)
-                    result.location
-                }
-                else -> getCachedLocation(context)
+        when (val result = runCatching { getLocationResult(context) }.getOrNull()) {
+            is LocationResult.Success -> {
+                cacheLocation(context, result.location)
+                result.location
             }
-        }.getOrNull()
+            else -> runCatching { getCachedLocation(context) }.getOrNull()
+        }
 
     @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
     private fun getLocationResult(context: Context): LocationResult {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             ?: return LocationResult.NoProvider
 
-        return locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        // The most recent fix any provider has (network alone is often empty or old).
+        val providers = buildList {
+            add(LocationManager.NETWORK_PROVIDER)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) add(LocationManager.FUSED_PROVIDER)
+            add(LocationManager.GPS_PROVIDER)
+            add(LocationManager.PASSIVE_PROVIDER)
+        }
+        return providers
+            .mapNotNull { p -> runCatching { locationManager.getLastKnownLocation(p) }.getOrNull() }
+            .maxByOrNull { it.time }
             ?.let { LocationResult.Success(Location.fromAndroidLocation(it)) }
             ?: LocationResult.NoLocation
     }

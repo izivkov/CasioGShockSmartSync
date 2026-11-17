@@ -9,6 +9,11 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Snooze card floating over other apps (DW-H5600 alarms) -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Exact wake-ups for the DW-H5600 alarm scheduler, also while the phone dozes -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- Location Permissions -->
@@ -132,6 +137,10 @@
 
         <receiver
             android:name=".h5600.SnoozeStopReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".h5600.SchedulerWakeReceiver"
             android:exported="false" />
 
         <receiver
