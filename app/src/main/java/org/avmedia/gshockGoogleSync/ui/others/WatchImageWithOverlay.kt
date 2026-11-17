@@ -126,7 +126,7 @@ fun WatchImageWithOverlayAlwaysConnected(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
                 .padding(top = with(LocalDensity.current) { textOffsetPx.toDp() }),
-            contentAlignment = Alignment.TopCenter
+            contentAlignment = Alignment.TopStart
         ) {
             Text(
                 text = stringResource(R.string.start_greeting),
@@ -134,7 +134,7 @@ fun WatchImageWithOverlayAlwaysConnected(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 lineHeight = 24.sp,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Start
             )
         }
     }
