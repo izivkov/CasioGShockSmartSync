@@ -29,6 +29,7 @@ class ActionRunner @Inject constructor(
     private val h5600ScheduleRunner: org.avmedia.gshockGoogleSync.h5600.H5600ScheduleRunner,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var findPhoneEndedSubscription: AutoCloseable? = null
 
     fun setupActionSubscriptions() {
         // Everything here is driven by the Session: actions run once per Session when it is Ready,
@@ -41,12 +42,31 @@ class ActionRunner @Inject constructor(
                 launch { h5600ScheduleRunner.applyAtBoundariesWhileConnected(session) }
             }
         }
+        // Back button on the watch's Find Phone screen ("0x0A 00") stops the ring.
+        if (findPhoneEndedSubscription == null) {
+            findPhoneEndedSubscription = org.avmedia.gshockapi.ProgressEvents.subscribe(
+                arrayOf(
+                    org.avmedia.gshockapi.EventAction("FindPhoneEnded") {
+                        if (PhoneFinder.isRinging) PhoneFinder.stop(context)
+                    },
+                ),
+            )
+        }
         Timber.i("Action subscriptions registered at process scope (no UI required)")
     }
 
     private suspend fun runActionsWhenReady(session: Session) {
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
         if (state.phase !is SessionPhase.Ready) return
+
+        // Find Phone rings at once: the H5600 connect routine below (handshake + loc/time sync) can
+        // take 30 s+, and the watch may end the find connection before then, which stops the ring.
+        if (state.button == ConnectionButton.FIND) {
+            Timber.i("Find Phone pressed: ringing before the H5600 connect routine")
+            actionContainer.runActionFindPhone(context)
+            h5600ScheduleRunner.onConnected(applySchedule = false)
+            return
+        }
 
         // DW-H5600: 0x39 keep-connected handshake, then per-alarm days / sound. Runs first, because
         // the regular actions may end the connection (e.g. after an automatic time sync).
@@ -77,7 +97,16 @@ class ActionRunner @Inject constructor(
             .distinctUntilChanged()
             .filter { it }
             .collect {
-                actionContainer.runActionsForActionButton(context) { session.endRunActions() }
+                // DW-H5600: stays connected (0x39 handshake), so its Find Phone press arrives as
+                // "0x0A 02" on the open link instead of as a new FIND connection. The Actions tab is
+                // hidden in this fork, so the press always means: ring the phone.
+                if (org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600) {
+                    Timber.i("DW-H5600 Find Phone pressed while connected: ringing")
+                    actionContainer.runActionFindPhone(context)
+                    session.endRunActions()
+                } else {
+                    actionContainer.runActionsForActionButton(context) { session.endRunActions() }
+                }
             }
     }
 }

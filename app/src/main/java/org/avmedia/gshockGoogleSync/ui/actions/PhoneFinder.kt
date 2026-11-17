@@ -59,6 +59,26 @@ object PhoneFinder {
         stopRing(context, "Ring failure")
     }
 
+    /** True while a ring or a preview is playing. */
+    val isRinging: Boolean get() = state.mediaPlayer != null
+
+    /** Plays the chosen Find Phone sound at the chosen volume for [seconds] (the Custom tab's Test button). */
+    fun preview(context: Context, seconds: Int = 5): Result<Unit> = runCatching {
+        if (isRinging) stopRing(context, "Preview restarted")
+        val uri = getAlarmUri(context) ?: throw IllegalStateException("No playable alarm or ringtone available")
+        startAudio(context, uri)
+        RingCanceler.schedule(seconds * 1000L) { stopRing(context, "Preview finished") }
+    }.onFailure { e ->
+        Timber.e(e, "Find Phone preview failed")
+        stopRing(context, "Preview failure")
+    }
+
+    /** Stops a ring or preview. */
+    fun stop(context: Context) {
+        RingCanceler.cancel()
+        stopRing(context, "Stopped by user")
+    }
+
     private fun acquireWakeLock(context: Context) {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         @Suppress("DEPRECATION")
@@ -79,11 +99,10 @@ object PhoneFinder {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
 
-        audioManager.setStreamVolume(
-            AudioManager.STREAM_ALARM,
-            audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
-            AudioManager.FLAG_PLAY_SOUND
-        )
+        val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+        val target = kotlin.math.round(max * FindPhoneSettings.volumePct(context) / 100.0).toInt().coerceIn(1, max)
+        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, target, 0)
+        Timber.d("PhoneFinder: alarm volume $target/$max")
 
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_ALARM)
@@ -124,6 +143,7 @@ object PhoneFinder {
 
     private fun getAlarmUri(context: Context): android.net.Uri? {
         val candidates = listOf(
+            FindPhoneSettings.soundUri(context), // chosen in the Custom tab; falls through if unplayable
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)

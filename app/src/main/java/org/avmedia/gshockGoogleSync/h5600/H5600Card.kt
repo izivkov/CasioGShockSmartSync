@@ -38,6 +38,87 @@ fun H5600Card(vm: H5600ViewModel = hiltViewModel()) {
         WatchFaceCard(vm)
         androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
         SoundNotificationsCard(vm)
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
+        FindPhoneCard()
+    }
+}
+
+/** Find Phone: ring sound (system picker), volume, and a 5-second test. Phone-side only. */
+@Composable
+private fun FindPhoneCard() {
+    val context = LocalContext.current
+    var title by remember { mutableStateOf(org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.soundTitle(context)) }
+    var volume by remember { mutableStateOf(org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.volumePct(context).toFloat()) }
+    val picker = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode != android.app.Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val picked: android.net.Uri? = result.data?.let {
+            androidx.core.content.IntentCompat.getParcelableExtra(it, android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI, android.net.Uri::class.java)
+        }
+        // "Default" in the picker (or nothing picked) = the phone's default alarm sound.
+        val isDefault = picked == null || picked == android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
+        org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.setSoundUri(context, if (isDefault) null else picked)
+        title = org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.soundTitle(context)
+    }
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            AppTextLarge(text = "Find Phone")
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppText(text = "Sound: $title", modifier = Modifier.weight(1f))
+                org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
+                    text = "Choose",
+                    onClick = {
+                        val current = org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.soundUri(context)
+                            ?: android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
+                        picker.launch(
+                            android.content.Intent(android.media.RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                                putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_TYPE,
+                                    android.media.RingtoneManager.TYPE_ALARM or android.media.RingtoneManager.TYPE_RINGTONE)
+                                putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_TITLE, "Find Phone sound")
+                                putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+                                putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                                putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI,
+                                    android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM))
+                                putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, current)
+                            },
+                        )
+                    },
+                )
+            }
+            AppText(text = "Volume: ${volume.toInt()} %", modifier = Modifier.padding(top = 8.dp))
+            androidx.compose.material3.Slider(
+                value = volume,
+                onValueChange = { volume = it },
+                onValueChangeFinished = {
+                    org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.setVolumePct(context, volume.toInt())
+                },
+                valueRange = 10f..100f,
+                steps = 8, // 10 % steps
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
+                    text = "Test 5 s",
+                    onClick = {
+                        org.avmedia.gshockGoogleSync.ui.actions.FindPhoneSettings.setVolumePct(context, volume.toInt())
+                        org.avmedia.gshockGoogleSync.ui.actions.PhoneFinder.preview(context)
+                    },
+                )
+                org.avmedia.gshockGoogleSync.ui.common.AppSmallButton(
+                    text = "Stop",
+                    onClick = { org.avmedia.gshockGoogleSync.ui.actions.PhoneFinder.stop(context) },
+                )
+            }
+            AppText(
+                text = "Plays on the alarm channel, so it rings even in silent mode. Lift the phone to stop.",
+                fontSize = 13.sp,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
     }
 }
 
