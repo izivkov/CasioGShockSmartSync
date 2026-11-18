@@ -100,7 +100,7 @@ class H5600LifeLogSync {
 
             data.startsWith(0x04, 0x2E) -> {
                 phase = Phase.DONE
-                listOf(H5600Write(H5600Channel.DRSP, data.copyOf()))
+                emptyList()
             }
 
             else -> emptyList()
