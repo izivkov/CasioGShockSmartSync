@@ -179,7 +179,7 @@ object H5600HealthIO {
     ) {
         val transfer = synchronized(lock) { active } ?: return
         val bytes = bytesOf(hex)
-        val writes =
+        val (writes, nowDone) =
             synchronized(lock) {
                 when (channel) {
                     H5600Channel.CONVOY -> {
@@ -205,11 +205,13 @@ object H5600HealthIO {
                     }
                 }
                 val next = transfer.sync.onMessage(channel, bytes)
-                if (transfer.sync.isFinished) transfer.finished.complete(Unit)
-                next
+                next to transfer.sync.isFinished   // capture isFinished; complete() moves below
             }
         scope.launch {
+            // Send all echo writes FIRST (e.g. the END echo for 04 2e), then signal
+            // completion so request() does not resume and clean up before the write goes out.
             for (write in writes) send(write)
+            if (nowDone) transfer.finished.complete(Unit)
         }
     }
 

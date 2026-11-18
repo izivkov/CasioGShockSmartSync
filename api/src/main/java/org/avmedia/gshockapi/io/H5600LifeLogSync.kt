@@ -100,7 +100,9 @@ class H5600LifeLogSync {
 
             data.startsWith(0x04, 0x2E) -> {
                 phase = Phase.DONE
-                emptyList()
+                // Echo END back to the watch, exactly as the Python script does.
+                // Without this the watch returns 0xFF 81 2D (invalid command) and drops the connection.
+                listOf(H5600Write(H5600Channel.DRSP, data.copyOf()))
             }
 
             else -> emptyList()
