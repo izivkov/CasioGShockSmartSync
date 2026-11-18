@@ -109,7 +109,7 @@ object H5600HealthIO {
             val snapshot = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
             Timber.i(
                 "H5600: transfer ${if (completed) "finished" else "TIMED OUT"}: " +
-                        "${snapshot.first.size} CONVOY notifications, announcements=${snapshot.second}",
+                    "${snapshot.first.size} CONVOY notifications, announcements=${snapshot.second}",
             )
 
             val decoded =
@@ -127,8 +127,8 @@ object H5600HealthIO {
             }
             Timber.i(
                 "H5600: decoded steps=${decoded.currentDaySteps} goal=${stepGoal} " +
-                        "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
-                        "warnings=${decoded.warnings.size}",
+                    "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
+                    "warnings=${decoded.warnings.size}",
             )
             return decoded
         } finally {
@@ -234,8 +234,8 @@ object H5600HealthIO {
         if (bytes[2] == 0xFF.toByte()) return null
         val length =
             (bytes[3].toInt() and 0xFF) or
-                    ((bytes[4].toInt() and 0xFF) shl 8) or
-                    ((bytes[5].toInt() and 0xFF) shl 16)
+                ((bytes[4].toInt() and 0xFF) shl 8) or
+                ((bytes[5].toInt() and 0xFF) shl 16)
         return (bytes[2].toInt() and 0xFF) to length
     }
 

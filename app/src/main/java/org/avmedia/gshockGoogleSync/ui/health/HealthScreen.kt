@@ -50,6 +50,11 @@ fun HealthScreen() {
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    // DW-H5600 LifeLog details (nothing is shown for other watches)
+                    DwH5600LifeLogCard(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     // Profile button — opens exercise profile dialog
                     AppButton(
                         text = stringResource(id = R.string.profile),

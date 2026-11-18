@@ -35,6 +35,10 @@ enum class StepDataOption {
 private const val FEATURE_STEP_COUNTER = "time.step_counter"
 private val STEP_POLL_INTERVAL = 5.minutes
 private val STEP_FETCH_TIMEOUT = 8.seconds
+// A DW-H5600 LifeLog transfer takes 30 to 100 seconds, so it needs a longer timeout and a
+// slower poll than the ABL-100 step read.
+private val LIFELOG_FETCH_TIMEOUT = 3.minutes
+private val LIFELOG_POLL_INTERVAL = 15.minutes
 private val IMPERIAL_COUNTRIES = setOf("US", "CA")
 
 internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.73f): Float {
@@ -225,28 +229,34 @@ class HealthViewModel @Inject constructor(
             do {
                 stepFetchPending = false
                 runCatching {
-                    val stepData = withTimeoutOrNull(STEP_FETCH_TIMEOUT) { fetchStepCounter() }
+                    val timeout = if (isDwH5600()) LIFELOG_FETCH_TIMEOUT else STEP_FETCH_TIMEOUT
+                    val stepData = withTimeoutOrNull(timeout) { fetchStepCounter() }
                         ?: return@runCatching
                     val profile = readExerciseProfile()
 
                     _state.update { current ->
                         val withSteps = current.copy(stepCounterData = stepData)
-                        if (profile != null) {
-                            applyExerciseProfileState(withSteps, profile, stepData = stepData)
-                        } else {
-                            withSteps.withStepMetrics(stepData)
-                        }
+                        val updated =
+                            if (profile != null) {
+                                applyExerciseProfileState(withSteps, profile, stepData = stepData)
+                            } else {
+                                withSteps.withStepMetrics(stepData)
+                            }
+                        // The watch's own step goal is authoritative for the DW-H5600.
+                        stepData.h5600?.stepGoal?.let { updated.copy(stepGoal = it) } ?: updated
                     }
                 }
             } while (stepFetchPending)
         }
     }
 
+    private fun isDwH5600(): Boolean = WatchInfo.model == WatchInfo.WatchModel.DW_H5600
+
     private fun startStepCounterPolling() {
         stepPollJob?.cancel()
         stepPollJob = viewModelScope.launch {
             while (isActive) {
-                delay(STEP_POLL_INTERVAL)
+                delay(if (isDwH5600()) LIFELOG_POLL_INTERVAL else STEP_POLL_INTERVAL)
                 if (watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)) {
                     requestStepRefresh()
                 }

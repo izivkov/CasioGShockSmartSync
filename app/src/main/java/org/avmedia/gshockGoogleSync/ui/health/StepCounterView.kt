@@ -88,20 +88,22 @@ fun StepCounterView(
             SectionDivider()
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ── HOURLY section ─────────────────────────────────────────
-            SectionLabel(text = stringResource(id = R.string.hourly))
-            Spacer(modifier = Modifier.height(8.dp))
+            // ── HOURLY section (ABL-100 only; the DW-H5600 hourly values are in its LifeLog card) ──
+            if (state.stepCounterData.h5600 == null) {
+                SectionLabel(text = stringResource(id = R.string.hourly))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(10)
-            if (hourly.isEmpty() || hourly.all { it == 0 }) {
-                EmptyHistory()
-            } else {
-                StepsBarChart(values = hourly, labels = hourlyTimeLabels(hourly.size))
+                val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(10)
+                if (hourly.isEmpty() || hourly.all { it == 0 }) {
+                    EmptyHistory()
+                } else {
+                    StepsBarChart(values = hourly, labels = hourlyTimeLabels(hourly.size))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                SectionDivider()
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionDivider()
-            Spacer(modifier = Modifier.height(16.dp))
 
             // ── DAILY section ──────────────────────────────────────────
             SectionLabel(text = stringResource(id = R.string.daily))
