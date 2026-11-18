@@ -21,6 +21,7 @@ import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.model.ExerciseProfile
 import org.avmedia.gshockapi.model.StepCounterData
+import timber.log.Timber
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -221,6 +222,7 @@ class HealthViewModel @Inject constructor(
         if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
 
     private fun requestStepRefresh() {
+        Timber.i("Health: step refresh requested (running=${stepFetchJob?.isActive == true}, dwH5600=${isDwH5600()})")
         if (stepFetchJob?.isActive == true) {
             stepFetchPending = true
             return
@@ -230,8 +232,13 @@ class HealthViewModel @Inject constructor(
                 stepFetchPending = false
                 runCatching {
                     val timeout = if (isDwH5600()) LIFELOG_FETCH_TIMEOUT else STEP_FETCH_TIMEOUT
+                    Timber.i("Health: fetching step data (timeout=$timeout)")
                     val stepData = withTimeoutOrNull(timeout) { fetchStepCounter() }
-                        ?: return@runCatching
+                    if (stepData == null) {
+                        Timber.w("Health: step fetch returned nothing (timed out or cancelled)")
+                        return@runCatching
+                    }
+                    Timber.i("Health: step data received, steps=${stepData.currentDaySteps}, h5600=${stepData.h5600 != null}")
                     val profile = readExerciseProfile()
 
                     _state.update { current ->
@@ -266,7 +273,9 @@ class HealthViewModel @Inject constructor(
 
     private fun refreshState() {
         viewModelScope.launch {
-            if (WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)) {
+            val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
+            Timber.i("Health: refreshState (hasStepCounter=${WatchInfo.hasStepCounter}, feature supported=$supported)")
+            if (supported) {
                 requestStepRefresh()
             }
         }
