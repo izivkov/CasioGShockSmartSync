@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
@@ -28,6 +30,13 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 @Composable
 fun HealthScreen() {
     var showProfileDialog by remember { mutableStateOf(false) }
+    val healthViewModel: HealthViewModel = hiltViewModel()
+
+    // Refresh every time the screen opens, so a LifeLog read that finished while the screen
+    // was closed (or before the watch connected) reaches the cards.
+    LaunchedEffect(Unit) {
+        healthViewModel.onAction(HealthAction.RefreshState)
+    }
 
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -47,12 +56,14 @@ fun HealthScreen() {
                 ) {
                     // Steps card — shows Today, Hourly, and Daily panels all at once
                     StepCounterView(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        healthViewModel = healthViewModel
                     )
 
                     // DW-H5600 LifeLog details (nothing is shown for other watches)
                     DwH5600LifeLogCard(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        healthViewModel = healthViewModel
                     )
 
                     // Profile button — opens exercise profile dialog
