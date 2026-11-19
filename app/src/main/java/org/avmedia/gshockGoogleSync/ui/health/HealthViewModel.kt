@@ -80,6 +80,8 @@ internal fun HealthState.withStepMetrics(stepData: StepCounterData, weightKg: In
 
 data class HealthState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
+    /** True while the DW-H5600 LifeLog is being read from the watch. */
+    val lifeLogLoading: Boolean = false,
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val stepGoal: Int = 10000,
     val weight: Int = 70, // kg
@@ -224,8 +226,13 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchStepCounter(): StepCounterData =
-        if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
+    private suspend fun fetchStepCounter(): StepCounterData {
+        if (WatchInfo.hasStepCounterMock) return generateMockStepData()
+        if (!isDwH5600()) return api.getStepCount()
+        // DW-H5600: the LifeLog is read once per session and then served from the session cache.
+        H5600Session.data?.let { return it }
+        return api.getStepCount().also { if (it.h5600 != null) H5600Session.data = it }
+    }
 
     private fun requestStepRefresh() {
         Timber.i("Health: step refresh requested (running=${stepFetchJob?.isActive == true}, dwH5600=${isDwH5600()})")
@@ -238,10 +245,13 @@ class HealthViewModel @Inject constructor(
                 stepFetchPending = false
                 runCatching {
                     val timeout = if (isDwH5600()) LIFELOG_FETCH_TIMEOUT else STEP_FETCH_TIMEOUT
-                    Timber.i("Health: fetching step data (timeout=$timeout)")
+                    val needsWatch = isDwH5600() && H5600Session.data == null
+                    if (needsWatch) _state.update { it.copy(lifeLogLoading = true) }
+                    Timber.i("Health: fetching step data (timeout=$timeout, fromWatch=$needsWatch)")
                     val stepData = withTimeoutOrNull(timeout) { fetchStepCounter() }
                     if (stepData == null) {
                         Timber.w("Health: step fetch returned nothing (timed out or cancelled)")
+                        _state.update { it.copy(lifeLogLoading = false) }
                         return@runCatching
                     }
                     Timber.i("Health: step data received, steps=${stepData.currentDaySteps}, h5600=${stepData.h5600 != null}")
@@ -249,7 +259,7 @@ class HealthViewModel @Inject constructor(
                     // timeout: after a DW-H5600 transfer the watch may not answer that request, and
                     // the screen must not wait for it.
                     _state.update { current ->
-                        current.copy(stepCounterData = stepData)
+                        current.copy(stepCounterData = stepData, lifeLogLoading = false)
                             .withStepMetrics(stepData)
                             .withWatchGoal(stepData)
                     }
@@ -261,6 +271,9 @@ class HealthViewModel @Inject constructor(
                                 .withWatchGoal(stepData)
                         }
                     }
+                }.onFailure {
+                    Timber.w(it, "Health: step refresh failed")
+                    _state.update { current -> current.copy(lifeLogLoading = false) }
                 }
             } while (stepFetchPending)
         }
