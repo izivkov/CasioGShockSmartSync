@@ -98,4 +98,37 @@ class H5600HealthDecoderTest {
         assertEquals(true, data?.h5600?.lifeLogPending)
         assertEquals(true, data?.h5600?.activityLogPending)
     }
+
+    @Test
+    fun readsActivityTimesAndHeartRateFromCurrentStats() {
+        // Values from the 2026-11-16 sync: walk 2932 s, bike 24 s, other 60 s, active 3016 s,
+        // max 156, min 47, resting 62 bpm.
+        val body = ByteArray(94)
+        fun putHms(offset: Int, hours: Int, minutes: Int, seconds: Int) {
+            body[offset] = hours.toByte()
+            body[offset + 1] = minutes.toByte()
+            body[offset + 2] = seconds.toByte()
+        }
+        putHms(16, 0, 0, 0)
+        putHms(19, 0, 48, 52)
+        putHms(22, 0, 0, 24)
+        putHms(28, 0, 1, 0)
+        putHms(34, 0, 50, 16)
+        body[88] = 0x9C.toByte()
+        body[90] = 0x2F
+        body[92] = 0x3E
+
+        val plain = header(steps = 0, energy = 0) + frame(0x65, listOf(body))
+        val data = H5600HealthDecoder.decode(notifications(plain), mapOf(0x65 to 99), zone)
+
+        assertNotNull(data)
+        assertEquals(2932, data!!.h5600?.activity?.walkSeconds)
+        assertEquals(24, data.h5600?.activity?.cycleSeconds)
+        assertEquals(60, data.h5600?.activity?.otherSeconds)
+        assertEquals(3016, data.h5600?.activity?.activeSeconds)
+        assertEquals(156, data.h5600?.heartRate?.maxBpm)
+        assertEquals(47, data.h5600?.heartRate?.minBpm)
+        assertEquals(62, data.h5600?.heartRate?.restingBpm)
+        assertTrue(data.warnings.none { it.contains("differs") })
+    }
 }

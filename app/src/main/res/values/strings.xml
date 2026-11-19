@@ -231,4 +231,7 @@
     <string name="up_to_date">Up to date</string>
     <string name="steps_by_hour">Steps by hour</string>
     <string name="notes">Notes</string>
+    <string name="walking">Walking</string>
+    <string name="cycling">Cycling</string>
+    <string name="active_time">Active time</string>
 </resources>

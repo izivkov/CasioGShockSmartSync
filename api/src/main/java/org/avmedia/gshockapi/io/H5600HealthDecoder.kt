@@ -54,6 +54,15 @@ object H5600HealthDecoder {
     private const val TAG_ENERGY = 0x51
     private const val TAG_HEART_RATE = 0x52
     private const val TAG_CURRENT_STATS = 0x65
+    // Activity times in the current-stats frame: each is hour, minute, second bytes (layout from
+    // parse_lifelog.py, matched on 2026-10-26 and 2026-11-16).
+    private const val ACTIVITY_RUN_OFFSET = 16
+    private const val ACTIVITY_WALK_OFFSET = 19
+    private const val ACTIVITY_CYCLE_OFFSET = 22
+    private const val ACTIVITY_ZERO_OFFSET = 25
+    private const val ACTIVITY_OTHER_OFFSET = 28
+    private const val ACTIVITY_STILL_OFFSET = 31
+    private const val ACTIVITY_ACTIVE_OFFSET = 34
     private const val WATCH_CONDITION_LIFELOG_BYTE = 9
     private const val WATCH_CONDITION_ACTIVITY_BYTE = 8
     private val HEADER_MAGIC = byteArrayOf(0x00, 0x0F, 0x00, 0x00, 0x00)
@@ -116,7 +125,8 @@ object H5600HealthDecoder {
             intervals += ActivityPeriod(index = index, steps = slotSteps, intensity = IntArray(0))
         }
         if (slotCount < MIN_SLOTS_FOR_FULL_DAY) warnings += "only recent slots were transferred; hourly values are partial"
-        warnings += "header energy $energyRaw read as kcal (provisional, one comparison)"
+        warnings += "header energy $energyRaw read as kcal (provisional: matched the app's day total on 2026-10-26 " +
+            "and the watch display within 1 kcal on 2026-11-16; not yet compared at the same moment)"
 
         val currentStats = frameBody(stream, spans, TAG_CURRENT_STATS)
         val heartRate =
@@ -128,6 +138,13 @@ object H5600HealthDecoder {
                 )
             }
 
+        val activity = currentStats?.let { activityOf(it) }
+        activity?.let {
+            if (it.walkSeconds + it.cycleSeconds + it.otherSeconds != it.activeSeconds) {
+                warnings += "watch active time (${it.activeSeconds} s) differs from its walking, cycling and other parts"
+            }
+        }
+
         val watchFlags = watchCondition?.takeIf { it.size > WATCH_CONDITION_LIFELOG_BYTE }
 
         val health =
@@ -135,7 +152,8 @@ object H5600HealthDecoder {
                 energyKcal = energyRaw,
                 energyIsProvisional = true,
                 heartRate = heartRate,
-                recentHeartRate = recentHeartRate(stream, spans),
+                activity = activity,
+            recentHeartRate = recentHeartRate(stream, spans),
                 stepGoal = stepGoal,
                 lifeLogPending = watchFlags?.let { it[WATCH_CONDITION_LIFELOG_BYTE].toInt() != 0 },
                 activityLogPending = watchFlags?.let { it[WATCH_CONDITION_ACTIVITY_BYTE].toInt() != 0 },
@@ -233,6 +251,24 @@ object H5600HealthDecoder {
             averageBpm = values.sum() / values.size,
         )
     }
+
+    private fun activityOf(body: ByteArray): ActivitySeconds? {
+        if (body.size < ACTIVITY_ACTIVE_OFFSET + 3) return null
+        return ActivitySeconds(
+            runSeconds = hmsAt(body, ACTIVITY_RUN_OFFSET),
+            walkSeconds = hmsAt(body, ACTIVITY_WALK_OFFSET),
+            cycleSeconds = hmsAt(body, ACTIVITY_CYCLE_OFFSET),
+            zeroSeconds = hmsAt(body, ACTIVITY_ZERO_OFFSET),
+            otherSeconds = hmsAt(body, ACTIVITY_OTHER_OFFSET),
+            stillSeconds = hmsAt(body, ACTIVITY_STILL_OFFSET),
+            activeSeconds = hmsAt(body, ACTIVITY_ACTIVE_OFFSET),
+        )
+    }
+
+    private fun hmsAt(body: ByteArray, offset: Int): Int =
+        (body[offset].toInt() and 0xFF) * 3600 +
+            (body[offset + 1].toInt() and 0xFF) * 60 +
+            (body[offset + 2].toInt() and 0xFF)
 
     private fun validBpm(
         body: ByteArray,

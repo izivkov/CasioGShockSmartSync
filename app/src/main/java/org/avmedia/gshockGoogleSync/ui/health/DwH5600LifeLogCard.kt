@@ -96,6 +96,22 @@ fun DwH5600LifeLogCard(
                 } ?: NO_VALUE,
             )
 
+            health.activity?.let { activity ->
+                HorizontalDivider()
+                InfoRow(
+                    label = stringResource(id = R.string.walking),
+                    value = formatDuration(activity.walkSeconds),
+                )
+                InfoRow(
+                    label = stringResource(id = R.string.cycling),
+                    value = formatDuration(activity.cycleSeconds),
+                )
+                InfoRow(
+                    label = stringResource(id = R.string.active_time),
+                    value = formatDuration(activity.activeSeconds),
+                )
+            }
+
             HorizontalDivider()
 
             InfoRow(
@@ -143,6 +159,9 @@ fun DwH5600LifeLogCard(
         }
     }
 }
+
+private fun formatDuration(seconds: Int): String =
+    String.format(Locale.US, "%d:%02d", seconds / 3600, (seconds % 3600) / 60)
 
 @Composable
 private fun InfoRow(

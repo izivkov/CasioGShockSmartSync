@@ -19,6 +19,8 @@ data class H5600HealthData(
     val heartRate: HeartRateSummary? = null,
     /** Heart-rate samples from the last few minutes covered by the transfer. */
     val recentHeartRate: HeartRateSamples? = null,
+    /** Daily activity time from the current-stats frame, in seconds. Null when not read. */
+    val activity: ActivitySeconds? = null,
     /** Daily step target set on the watch. */
     val stepGoal: Int? = null,
     /** True when the watch reports LifeLog data not yet transferred; null when unknown. */
@@ -42,4 +44,19 @@ data class HeartRateSamples(
     val minBpm: Int,
     val maxBpm: Int,
     val averageBpm: Int,
+)
+
+/**
+ * Activity time for the day, as the watch reports it, in seconds.
+ * Walking, cycling and other add up to [activeSeconds] on the watch (checked on 2026-10-26 and 2026-11-16).
+ */
+@Keep
+data class ActivitySeconds(
+    val runSeconds: Int,
+    val walkSeconds: Int,
+    val cycleSeconds: Int,
+    val zeroSeconds: Int,
+    val otherSeconds: Int,
+    val stillSeconds: Int,
+    val activeSeconds: Int,
 )
