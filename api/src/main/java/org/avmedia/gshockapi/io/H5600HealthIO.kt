@@ -39,6 +39,7 @@ object H5600HealthIO {
     private const val ANNOUNCEMENT_BYTES = 6
     private const val BULK_LOG_EVERY = 50
     private const val HEX_PREVIEW_BYTES = 16
+    private const val POLL_REPLY_TIMEOUT_MS = 1_000L
 
     private class Transfer(
         val sync: H5600LifeLogSync,
@@ -47,6 +48,7 @@ object H5600HealthIO {
         val notifications = mutableListOf<ByteArray>()
         val announcements = mutableMapOf<Int, Int>()
         val setupReplies = Channel<ByteArray>(Channel.UNLIMITED)
+        val convoyReplies = Channel<Unit>(Channel.UNLIMITED)
         val finished = CompletableDeferred<Unit>()
         var watchCondition: ByteArray? = null
         var bulkCount = 0
@@ -105,7 +107,15 @@ object H5600HealthIO {
                 send(write)
             }
 
-            val completed = withTimeoutOrNull(OVERALL_TIMEOUT_MS.milliseconds) { transfer.finished.await() } != null
+            // Re-polls while the watch is silent. Without this, a poll that gets no reply stalls the
+            // whole transfer until the overall timeout.
+            val watchdog = scope.launch { keepPolling(transfer) }
+            val completed =
+                try {
+                    withTimeoutOrNull(OVERALL_TIMEOUT_MS.milliseconds) { transfer.finished.await() } != null
+                } finally {
+                    watchdog.cancel()
+                }
             val snapshot = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
             Timber.i(
                 "H5600: transfer ${if (completed) "finished" else "TIMED OUT"}: " +
@@ -135,6 +145,28 @@ object H5600HealthIO {
             synchronized(lock) { active = null }
             transfer.setupReplies.close()
             Timber.i("H5600: request end")
+        }
+    }
+
+    /**
+     * While the watch has not reported ready, sends the poll again whenever it stays silent for
+     * [POLL_REPLY_TIMEOUT_MS]. Every retry is logged, so a silent watch is visible in logcat.
+     */
+    private suspend fun keepPolling(transfer: Transfer) {
+        var retries = 0
+        while (!transfer.finished.isCompleted) {
+            val answered = withTimeoutOrNull(POLL_REPLY_TIMEOUT_MS.milliseconds) { transfer.convoyReplies.receive() }
+            if (answered != null) {
+                retries = 0
+                continue
+            }
+            if (transfer.finished.isCompleted) break
+            val stillPolling = synchronized(lock) { transfer.sync.isPolling }
+            if (stillPolling) {
+                retries++
+                Timber.w("H5600: no reply to poll within $POLL_REPLY_TIMEOUT_MS ms, retry #$retries")
+                send(H5600Write(H5600Channel.CONVOY, byteArrayOf(0x00, 0x00, 0x00)))
+            }
         }
     }
 
@@ -183,6 +215,7 @@ object H5600HealthIO {
             synchronized(lock) {
                 when (channel) {
                     H5600Channel.CONVOY -> {
+                        transfer.convoyReplies.trySend(Unit)
                         transfer.notifications += bytes
                         transfer.bulkCount++
                         if (bytes.firstOrNull() != BULK_PREFIX_BYTE || transfer.bulkCount % BULK_LOG_EVERY == 0) {

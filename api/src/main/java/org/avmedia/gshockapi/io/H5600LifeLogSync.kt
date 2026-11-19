@@ -32,6 +32,10 @@ class H5600LifeLogSync {
     val isFinished: Boolean
         get() = phase == Phase.DONE
 
+    /** True until the watch reports ready. Only then does the transfer send setup and data. */
+    val isPolling: Boolean
+        get() = phase == Phase.POLLING
+
     fun start(): List<H5600Write> {
         phase = Phase.POLLING
         return listOf(poll())
@@ -116,7 +120,7 @@ class H5600LifeLogSync {
         /** Replies the official app writes back unchanged to STATUS. */
         val ECHO_REPLY_COMMANDS: Set<Int> = setOf(0x11, 0x3B, 0x3A, 0x2F, 0x13, 0x45)
 
-        private const val BUSY_RETRY_MS = 3_500L
+        private const val BUSY_RETRY_MS = 1_000L
         private const val NINE_BYTES = 9
         private const val BULK_PREFIX: Byte = 0x05
 
