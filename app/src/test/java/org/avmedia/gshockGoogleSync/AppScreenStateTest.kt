@@ -91,7 +91,7 @@ class AppScreenStateTest {
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.FROM_ACTION))
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.AUTOMATIC_SYNC))
         assertEquals(EntryReason.CONTENT_SELECTOR, EntryReason.forButton(ConnectionButton.FIND))
-        assertEquals(EntryReason.CONTENT_SELECTOR, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
+        assertEquals(EntryReason.NORMAL, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
     }
 
     @Test
