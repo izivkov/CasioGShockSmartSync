@@ -3,6 +3,7 @@ package org.avmedia.gshockapi.io
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.model.ActivityPeriod
+import org.avmedia.gshockapi.model.ActivitySeconds
 import org.avmedia.gshockapi.model.H5600HealthData
 import org.avmedia.gshockapi.model.HeartRateSamples
 import org.avmedia.gshockapi.model.HeartRateSummary
