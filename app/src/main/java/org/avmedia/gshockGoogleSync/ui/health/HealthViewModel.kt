@@ -40,6 +40,8 @@ private val STEP_FETCH_TIMEOUT = 8.seconds
 // slower poll than the ABL-100 step read.
 private val LIFELOG_FETCH_TIMEOUT = 3.minutes
 private val LIFELOG_POLL_INTERVAL = 15.minutes
+// The exercise profile is read after the steps, and must not hold up the screen.
+private val PROFILE_READ_TIMEOUT = 10.seconds
 private val IMPERIAL_COUNTRIES = setOf("US", "CA")
 
 internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.73f): Float {
@@ -66,6 +68,10 @@ internal fun calculateStepMetrics(stepData: StepCounterData, weightKg: Int): Pai
     val distanceKm = resolveDistanceKm(stepData)
     return distanceKm to distanceKm * weightKg * 1.036f
 }
+
+/** The DW-H5600 step goal comes from the watch and overrides the profile value. */
+internal fun HealthState.withWatchGoal(stepData: StepCounterData): HealthState =
+    stepData.h5600?.stepGoal?.let { copy(stepGoal = it) } ?: this
 
 internal fun HealthState.withStepMetrics(stepData: StepCounterData, weightKg: Int = weight): HealthState {
     val (distanceKm, calories) = calculateStepMetrics(stepData, weightKg)
@@ -239,18 +245,21 @@ class HealthViewModel @Inject constructor(
                         return@runCatching
                     }
                     Timber.i("Health: step data received, steps=${stepData.currentDaySteps}, h5600=${stepData.h5600 != null}")
-                    val profile = readExerciseProfile()
-
+                    // Show the step data first. The exercise profile is read afterwards, with a
+                    // timeout: after a DW-H5600 transfer the watch may not answer that request, and
+                    // the screen must not wait for it.
                     _state.update { current ->
-                        val withSteps = current.copy(stepCounterData = stepData)
-                        val updated =
-                            if (profile != null) {
-                                applyExerciseProfileState(withSteps, profile, stepData = stepData)
-                            } else {
-                                withSteps.withStepMetrics(stepData)
-                            }
-                        // The watch's own step goal is authoritative for the DW-H5600.
-                        stepData.h5600?.stepGoal?.let { updated.copy(stepGoal = it) } ?: updated
+                        current.copy(stepCounterData = stepData)
+                            .withStepMetrics(stepData)
+                            .withWatchGoal(stepData)
+                    }
+
+                    val profile = withTimeoutOrNull(PROFILE_READ_TIMEOUT) { readExerciseProfile() }
+                    if (profile != null) {
+                        _state.update { current ->
+                            applyExerciseProfileState(current, profile, stepData = stepData)
+                                .withWatchGoal(stepData)
+                        }
                     }
                 }
             } while (stepFetchPending)
