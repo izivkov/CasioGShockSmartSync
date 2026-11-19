@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import org.avmedia.gshockapi.WatchInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -66,14 +67,16 @@ fun HealthScreen() {
                         healthViewModel = healthViewModel
                     )
 
-                    // Profile button — opens exercise profile dialog
-                    AppButton(
-                        text = stringResource(id = R.string.profile),
-                        onClick = { showProfileDialog = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    )
+                    // Profile button: the ABL-100 profile does not apply to the DW-H5600
+                    if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) {
+                        AppButton(
+                            text = stringResource(id = R.string.profile),
+                            onClick = { showProfileDialog = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -82,7 +85,7 @@ fun HealthScreen() {
     }
 
     // Exercise profile dialog — shown when user taps the Profile button
-    if (showProfileDialog) {
+    if (showProfileDialog && WatchInfo.model != WatchInfo.WatchModel.DW_H5600) {
         ProfileDialog(
             onDismiss = { showProfileDialog = false }
         )

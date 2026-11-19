@@ -40,6 +40,10 @@ private val STEP_FETCH_TIMEOUT = 8.seconds
 // slower poll than the ABL-100 step read.
 private val LIFELOG_FETCH_TIMEOUT = 3.minutes
 private val LIFELOG_POLL_INTERVAL = 15.minutes
+// The DW-H5600 does not use the ABL-100 exercise profile. These average values stand in until
+// the watch's own profile is decoded. The step goal comes from the watch, not from this profile.
+private val H5600_AVERAGE_PROFILE = ExerciseProfile(stepGoal = 8000, height = 170, weight = 70)
+
 // The exercise profile is read after the steps, and must not hold up the screen.
 private val PROFILE_READ_TIMEOUT = 10.seconds
 private val IMPERIAL_COUNTRIES = setOf("US", "CA")
@@ -159,10 +163,11 @@ class HealthViewModel @Inject constructor(
     }
 
     suspend fun readExerciseProfile(): ExerciseProfile? =
-        runCatching { api.getExerciseProfile() }.getOrNull()
+        if (isDwH5600()) H5600_AVERAGE_PROFILE
+        else runCatching { api.getExerciseProfile() }.getOrNull()
 
     suspend fun saveExerciseProfile(profile: ExerciseProfile): Boolean =
-        runCatching {
+        if (isDwH5600()) false else runCatching {
             val setProfileAction =
                 actionContainer.getAction(ActionContainer.SetExerciseProfileAction::class.java)
             if (!setProfileAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
