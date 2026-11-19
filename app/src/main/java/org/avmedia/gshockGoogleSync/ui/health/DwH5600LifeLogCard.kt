@@ -37,6 +37,16 @@ fun DwH5600LifeLogCard(
     val data = state.stepCounterData
     val health = data.h5600
     if (health == null) {
+        val error = org.avmedia.gshockapi.io.H5600HealthIO.lastError
+        if (!state.lifeLogLoading && error != null) {
+            AppCard(modifier = modifier.fillMaxWidth()) {
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+        }
         if (state.lifeLogLoading) {
             AppCard(modifier = modifier.fillMaxWidth()) {
                 Text(

@@ -40,6 +40,7 @@ object H5600HealthIO {
     private const val BULK_LOG_EVERY = 50
     private const val HEX_PREVIEW_BYTES = 16
     private const val POLL_REPLY_TIMEOUT_MS = 1_000L
+    private const val MAX_POLL_RETRIES = 60
 
     private class Transfer(
         val sync: H5600LifeLogSync,
@@ -56,6 +57,11 @@ object H5600HealthIO {
 
     private val lock = Any()
     private var active: Transfer? = null
+
+    /** Why the last transfer produced no data, for the UI. Null when the last transfer worked. */
+    @Volatile
+    var lastError: String? = null
+        private set
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val isActive: Boolean
@@ -94,6 +100,7 @@ object H5600HealthIO {
             return StepCounterData.unavailable()
         }
         Timber.i("H5600: LifeLog request start (peek=$peek, zone=${transfer.zone})")
+        lastError = null
 
         try {
             val stepGoal = runSetup(transfer)
@@ -116,6 +123,9 @@ object H5600HealthIO {
                 } finally {
                     watchdog.cancel()
                 }
+            if (!completed && lastError == null) {
+                lastError = "The sync did not finish. Tap Sync to try again."
+            }
             val snapshot = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
             Timber.i(
                 "H5600: transfer ${if (completed) "finished" else "TIMED OUT"}: " +
@@ -164,6 +174,12 @@ object H5600HealthIO {
             val stillPolling = synchronized(lock) { transfer.sync.isPolling }
             if (stillPolling) {
                 retries++
+                if (retries > MAX_POLL_RETRIES) {
+                    Timber.e("H5600: watch did not become ready after $MAX_POLL_RETRIES retries; giving up")
+                    lastError = "The watch did not get ready for the sync. Tap Sync to try again."
+                    transfer.finished.complete(Unit)
+                    break
+                }
                 Timber.w("H5600: no reply to poll within $POLL_REPLY_TIMEOUT_MS ms, retry #$retries")
                 send(H5600Write(H5600Channel.CONVOY, byteArrayOf(0x00, 0x00, 0x00)))
             }
@@ -238,7 +254,10 @@ object H5600HealthIO {
                     }
                 }
                 val next = transfer.sync.onMessage(channel, bytes)
-                next to transfer.sync.isFinished   // capture isFinished; complete() moves below
+                // While polling, the watchdog owns the poll timing. The busy re-polls scheduled by
+                // the sync would duplicate it, so they are dropped here.
+                val pending = if (transfer.sync.isPolling) next.filter { it.delayMs == 0L } else next
+                pending to transfer.sync.isFinished   // capture isFinished; complete() moves below
             }
         scope.launch {
             // Send all echo writes FIRST (e.g. the END echo for 04 2e), then signal

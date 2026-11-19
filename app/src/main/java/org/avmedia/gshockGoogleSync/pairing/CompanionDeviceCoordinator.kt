@@ -40,10 +40,6 @@ class CompanionDeviceCoordinator @Inject constructor(
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
                         coordinatorScope.launch {
-                            if (!H5600ConnectPolicy.allowsWatchInitiatedConnection()) {
-                                Timber.i("Ignoring DeviceAppeared for $normalizedAddress: the DW-H5600 connects only when a sync is started")
-                                return@launch
-                            }
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
                             repository.stopScan()
                             if (repository.isConnected()) {

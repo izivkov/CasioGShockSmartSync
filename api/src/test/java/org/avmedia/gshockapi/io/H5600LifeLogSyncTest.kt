@@ -7,7 +7,7 @@ import org.junit.Test
 class H5600LifeLogSyncTest {
 
     @Test
-    fun endAnnouncementFinishesTransferWithoutWritingBack() {
+    fun endAnnouncementFinishesTransferAndEchoesEnd() {
         val sync = H5600LifeLogSync()
         sync.start()
 
@@ -25,6 +25,7 @@ class H5600LifeLogSyncTest {
         val writes = sync.onMessage(H5600Channel.DRSP, endBytes)
 
         assertTrue(sync.isFinished)
-        assertTrue(writes.isEmpty())
+        assertTrue(writes.isNotEmpty())
+        assertTrue(writes.first().data.contentEquals(endBytes))
     }
 }

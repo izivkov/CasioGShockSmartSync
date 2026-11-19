@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
-import org.avmedia.gshockGoogleSync.pairing.H5600ConnectPolicy
 import org.avmedia.gshockapi.WatchInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,8 +36,6 @@ fun HealthScreen() {
     // Refresh every time the screen opens, so a LifeLog read that finished while the screen
     // was closed (or before the watch connected) reaches the cards.
     LaunchedEffect(Unit) {
-        // Opening the Health screen is the user starting a sync: allow the DW-H5600 to connect.
-        if (WatchInfo.model == WatchInfo.WatchModel.DW_H5600) H5600ConnectPolicy.arm()
         healthViewModel.onAction(HealthAction.RefreshState)
     }
 
