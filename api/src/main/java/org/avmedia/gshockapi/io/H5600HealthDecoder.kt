@@ -139,10 +139,10 @@ object H5600HealthDecoder {
             }
 
         val activity = currentStats?.let { activityOf(it) }
-        activity?.let {
-            if (it.walkSeconds + it.cycleSeconds + it.otherSeconds != it.activeSeconds) {
-                warnings += "watch active time (${it.activeSeconds} s) differs from its walking, cycling and other parts"
-            }
+        if (activity != null &&
+            activity.walkSeconds + activity.cycleSeconds + activity.otherSeconds != activity.activeSeconds
+        ) {
+            warnings += "watch active time (${activity.activeSeconds} s) differs from its walking, cycling and other parts"
         }
 
         val watchFlags = watchCondition?.takeIf { it.size > WATCH_CONDITION_LIFELOG_BYTE }
