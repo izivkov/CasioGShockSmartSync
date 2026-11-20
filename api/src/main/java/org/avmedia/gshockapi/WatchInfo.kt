@@ -656,6 +656,14 @@ data object WatchInfo {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun resolveModelInfo(model: WatchModel): ModelInfo = modelMap[model] ?: modelMap.getValue(WatchModel.GENERIC)
 
+    /** Look up whether a watch model is always-connected by device name. */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun isAlwaysConnected(watchName: String): Boolean {
+        if (watchName.isBlank()) return false
+        val model = resolveModel(watchName)
+        return resolveModelInfo(model).alwaysConnected
+    }
+
     /** Pure: build a complete new State from a device name. */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun buildState(name: String): State {
@@ -672,6 +680,7 @@ data object WatchInfo {
     @RequiresApi(Build.VERSION_CODES.O)
     fun setNameAndModel(name: String) {
         state = buildState(name)
+        AlwaysConnectedWatchFilter.updateConnectionTime(name)
         ProgressEvents.onNext("DeviceName", (state as State).name)
     }
 

@@ -40,6 +40,13 @@ class CompanionDeviceCoordinator @Inject constructor(
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
                         coordinatorScope.launch {
+                            val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() }
+                                ?: LocalDataStorage.get(context, "LastDeviceName")?.takeIf { it.isNotBlank() }
+                                ?: org.avmedia.gshockapi.WatchInfo.name
+                            if (deviceName.isNotEmpty() && !org.avmedia.gshockapi.AlwaysConnectedWatchFilter.connectionFilter(deviceName)) {
+                                Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($deviceName): AlwaysConnectedWatchFilter rate limit active")
+                                return@launch
+                            }
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
                             repository.stopScan()
                             if (repository.isConnected()) {

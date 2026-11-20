@@ -50,7 +50,13 @@ constructor(
     private val _triggerPairing = MutableStateFlow(false)
     val triggerPairing: StateFlow<Boolean> = _triggerPairing
 
-    data class DeviceItem(val name: String, val address: String, val isLastUsed: Boolean)
+    data class DeviceItem(
+        val name: String,
+        val address: String,
+        val isLastUsed: Boolean,
+        val isAlwaysConnected: Boolean = false,
+        val allowAlwaysConnected: Boolean = false
+    )
 
     @Inject lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
 
@@ -151,10 +157,17 @@ constructor(
             val name = association?.name?.takeIf { it.isNotBlank() }
                 ?: LocalDataStorage.getDeviceName(appContext, address)
                 ?: noWatchString
-            DeviceItem(name, address, isLastUsed)
+            val isAlwaysConnected = org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)
+            val allowAlwaysConnected = org.avmedia.gshockapi.AlwaysConnectedWatchFilter.isAllowOnce(name)
+            DeviceItem(name, address, isLastUsed, isAlwaysConnected, allowAlwaysConnected)
         }
 
         _pairedDevices.value = formatDeviceNames(items)
+    }
+
+    fun toggleAllowAlwaysConnected(device: DeviceItem, allow: Boolean) {
+        org.avmedia.gshockapi.AlwaysConnectedWatchFilter.setAllowOnce(device.name, allow)
+        loadPairedDevices()
     }
 
     private fun formatDeviceNames(items: List<DeviceItem>): List<DeviceItem> {

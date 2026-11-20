@@ -21,6 +21,7 @@
 
 
     <string name="actions">Actions</string>
+    <string name="allow_always_connected">Allow Always Connected</string>
 
     <string name="front_cam">Front Cam</string>
     <string name="back_cam">Back Cam</string>

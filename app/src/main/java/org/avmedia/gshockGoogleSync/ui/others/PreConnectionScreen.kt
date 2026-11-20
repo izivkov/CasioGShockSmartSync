@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import AppSwitch
 import AppText
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -23,6 +24,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -68,6 +70,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -265,7 +268,7 @@ fun PreConnectionScreen(
                             modifier = Modifier.align(Alignment.Center)
                         )
 
-                        AppCard(
+                        Box(
                             modifier =
                                 Modifier
                                     .align(Alignment.BottomStart)
@@ -275,7 +278,7 @@ fun PreConnectionScreen(
                         ) {
                             PairedDeviceList(
                                 devices = pairedDevices,
-                                onSelect = { device ->  // ← IMPLEMENT THIS
+                                onSelect = { device ->
                                     ptrConnectionViewModel.setDevice(
                                         Utils.sanitizeMacAddress(device.address),
                                         device.name
@@ -293,8 +296,11 @@ fun PreConnectionScreen(
                                         )
                                     }
                                 },
+                                onToggleAllowAlwaysConnected = { device, allow ->
+                                    ptrConnectionViewModel.toggleAllowAlwaysConnected(device, allow)
+                                },
                                 modifier = Modifier
-                                    .padding(8.dp)
+                                    .padding(4.dp)
                                     .fillMaxWidth()
                             )
                         }
@@ -355,45 +361,79 @@ fun PairedDeviceList(
     devices: List<PreConnectionViewModel.DeviceItem>,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
+    onToggleAllowAlwaysConnected: (PreConnectionViewModel.DeviceItem, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
-    Box(modifier = modifier
-        .fillMaxHeight()
-        .verticalScroll(scrollState)) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .verticalScroll(scrollState)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             devices.forEach { device ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                AppCard(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    RemoveButton(onClick = { onDisassociate(device) })
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Text(
-                        text = device.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        // --- TRUNCATION LOGIC START ---
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        softWrap = false,
-                        // --- TRUNCATION LOGIC END ---
+                    Column(
                         modifier = Modifier
-                            .clickable { onSelect(device) }
-                            .weight(1f) // This ensures the text truncates instead of growing
-                    )
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RemoveButton(onClick = { onDisassociate(device) })
+                            Spacer(modifier = Modifier.width(4.dp))
 
-                    if (device.isLastUsed) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Selected",
-                            tint = Color.Red,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .graphicsLayer(scaleX = -1f)
-                        )
+                            Text(
+                                text = device.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                softWrap = false,
+                                modifier = Modifier
+                                    .clickable { onSelect(device) }
+                                    .weight(1f)
+                            )
+
+                            if (device.isLastUsed) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = "Selected",
+                                    tint = Color.Red,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .graphicsLayer(scaleX = -1f)
+                                )
+                            }
+                        }
+
+                        if (device.isAlwaysConnected) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                AppText(
+                                    text = stringResource(R.string.allow_always_connected),
+                                    fontSize = 12.sp,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 4.dp)
+                                )
+                                AppSwitch(
+                                    checked = device.allowAlwaysConnected,
+                                    onCheckedChange = { onToggleAllowAlwaysConnected(device, it) }
+                                )
+                            }
+                        }
                     }
                 }
             }
