@@ -41,10 +41,6 @@ object H5600HealthIO {
     private const val HEX_PREVIEW_BYTES = 16
     private const val POLL_REPLY_TIMEOUT_MS = 1_000L
     private const val MAX_POLL_RETRIES = 60
-    private const val AUTO_SYNC_COOLDOWN_MS = 15 * 60_000L
-
-    @Volatile
-    private var lastSuccessfulSyncMs: Long = 0L
 
     private class Transfer(
         val sync: H5600LifeLogSync,
@@ -86,12 +82,6 @@ object H5600HealthIO {
     suspend fun request(peek: Boolean = true): StepCounterData {
         if (!WatchInfo.hasStepCounter) {
             Timber.i("H5600: step counter not supported on model ${WatchInfo.model}")
-            return StepCounterData.unavailable()
-        }
-
-        val now = System.currentTimeMillis()
-        if (peek && (now - lastSuccessfulSyncMs) < AUTO_SYNC_COOLDOWN_MS) {
-            Timber.i("H5600: skipping automatic background sync (cooldown active, last sync was ${(now - lastSuccessfulSyncMs) / 1000}s ago)")
             return StepCounterData.unavailable()
         }
 
@@ -160,7 +150,6 @@ object H5600HealthIO {
                     "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
                     "warnings=${decoded.warnings.size}",
             )
-            lastSuccessfulSyncMs = System.currentTimeMillis()
             return decoded
         } finally {
             synchronized(lock) { active = null }
