@@ -14,8 +14,13 @@ class AlwaysConnectedConnectionPolicyTest {
     }
 
     @Test
-    fun firstConnectionIsAllowed() {
-        assertTrue(AlwaysConnectedConnectionPolicy.decide(true, false, null, now))
+    fun firstAutomaticConnectionIsDeniedWithoutAllowOnce() {
+        assertFalse(AlwaysConnectedConnectionPolicy.decide(true, false, null, now))
+    }
+
+    @Test
+    fun firstConnectionIsAllowedWhenUserAllowsOnce() {
+        assertTrue(AlwaysConnectedConnectionPolicy.decide(true, true, null, now))
     }
 
     @Test

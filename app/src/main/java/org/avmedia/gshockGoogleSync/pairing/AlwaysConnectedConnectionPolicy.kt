@@ -57,7 +57,9 @@ object AlwaysConnectedConnectionPolicy {
     ): Boolean {
         if (!isAlwaysConnected) return true
         if (allowOnce) return true
-        if (lastConnectedMillis == null) return true
+        // No recorded connection is not permission: the watch connects automatically only after
+        // the user turns on "Connect once now".
+        if (lastConnectedMillis == null) return false
         return now - lastConnectedMillis > SIX_HOURS_IN_MS
     }
 }
