@@ -43,8 +43,9 @@ class CompanionDeviceCoordinator @Inject constructor(
                             val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() }
                                 ?: LocalDataStorage.get(context, "LastDeviceName")?.takeIf { it.isNotBlank() }
                                 ?: org.avmedia.gshockapi.WatchInfo.name
-                            if (deviceName.isNotEmpty() && !org.avmedia.gshockapi.AlwaysConnectedWatchFilter.connectionFilter(deviceName)) {
-                                Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($deviceName): AlwaysConnectedWatchFilter rate limit active")
+                            val isAlwaysConnected = org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(deviceName)
+                            if (!AlwaysConnectedConnectionPolicy.connectionAllowed(context, normalizedAddress, isAlwaysConnected)) {
+                                Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($deviceName): six-hour limit active")
                                 return@launch
                             }
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
@@ -58,6 +59,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                                 try {
                                     Timber.i("$normalizedAddress waitForConnection attempt ${attempt + 1}/$CONNECTION_ATTEMPTS")
                                     repository.waitForConnection(normalizedAddress)
+                                    AlwaysConnectedConnectionPolicy.recordConnection(context, normalizedAddress)
                                     return@launch
                                 } catch (cancelled: CancellationException) {
                                     throw cancelled

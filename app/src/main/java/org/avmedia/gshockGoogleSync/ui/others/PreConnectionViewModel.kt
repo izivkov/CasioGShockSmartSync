@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import org.avmedia.gshockGoogleSync.pairing.AlwaysConnectedConnectionPolicy
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -158,7 +159,7 @@ constructor(
                 ?: LocalDataStorage.getDeviceName(appContext, address)
                 ?: noWatchString
             val isAlwaysConnected = org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)
-            val allowAlwaysConnected = org.avmedia.gshockapi.AlwaysConnectedWatchFilter.isAllowOnce(name)
+            val allowAlwaysConnected = AlwaysConnectedConnectionPolicy.isAllowOnce(appContext, address)
             DeviceItem(name, address, isLastUsed, isAlwaysConnected, allowAlwaysConnected)
         }
 
@@ -166,7 +167,7 @@ constructor(
     }
 
     fun toggleAllowAlwaysConnected(device: DeviceItem, allow: Boolean) {
-        org.avmedia.gshockapi.AlwaysConnectedWatchFilter.setAllowOnce(device.name, allow)
+        AlwaysConnectedConnectionPolicy.setAllowOnce(appContext, device.address, allow)
         loadPairedDevices()
     }
 

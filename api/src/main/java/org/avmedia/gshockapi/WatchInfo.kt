@@ -680,7 +680,6 @@ data object WatchInfo {
     @RequiresApi(Build.VERSION_CODES.O)
     fun setNameAndModel(name: String) {
         state = buildState(name)
-        AlwaysConnectedWatchFilter.updateConnectionTime(name)
         ProgressEvents.onNext("DeviceName", (state as State).name)
     }
 
