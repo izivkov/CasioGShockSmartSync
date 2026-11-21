@@ -91,7 +91,7 @@ class AppScreenStateTest {
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.FROM_ACTION))
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.AUTOMATIC_SYNC))
         assertEquals(EntryReason.CONTENT_SELECTOR, EntryReason.forButton(ConnectionButton.FIND))
-        assertEquals(EntryReason.NORMAL, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
+        assertEquals(EntryReason.BACKGROUND, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
     }
 
     @Test
@@ -111,10 +111,6 @@ class AppScreenStateTest {
 
     @Test
     fun alwaysConnectedConnectionStaysOnTheInitialScreen() {
-        assertEquals(
-            EntryReason.BACKGROUND,
-            EntryReason.forButton(org.avmedia.gshockGoogleSync.session.ConnectionButton.ALWAYS_CONNECTED)
-        )
         assertEquals(AppScreen.INITIAL, screenFor(ready(EntryReason.BACKGROUND)).screen)
     }
 }
