@@ -2,7 +2,6 @@ package org.avmedia.gshockGoogleSync.ui.health
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +12,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,11 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import AppTextLarge
-import org.avmedia.gshockapi.io.H5600HealthIO
+import org.avmedia.gshockapi.model.StepCounterData
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -34,160 +28,111 @@ private const val NO_VALUE = "\u2013"
 private val TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE d MMM HH:mm", Locale.getDefault())
 
 /**
- * LifeLog data read from a DW-H5600, grouped into cards: steps, energy and activity, heart rate, watch
- * status, steps by hour and notes. While the data is being read, a prominent loading message is shown.
+ * The DW-H5600 daily values, as rows of compact tiles. Shown inside the Today card, under the gauge.
  */
 @Composable
-fun DwH5600LifeLogCard(
-    modifier: Modifier = Modifier,
-    healthViewModel: HealthViewModel = hiltViewModel(),
+fun DwH5600DailyContent(
+    data: StepCounterData,
+    stepGoal: Int,
 ) {
-    val state by healthViewModel.state.collectAsState()
-    val status by H5600HealthIO.status.collectAsState()
-    val data = state.stepCounterData
-    val health = data.h5600
+    val health = data.h5600 ?: return
+    val activity = health.activity
+    val heart = health.heartRate
 
-    if (health == null) {
-        val error = H5600HealthIO.lastError
-        if (state.lifeLogLoading) {
-            LoadingCard(status, modifier)
-        } else if (error != null) {
-            MessageCard(error, modifier)
-        }
-        return
-    }
+    StatRow(
+        Stat(stringResource(id = R.string.energy_estimate), health.energyKcal?.let { "$it kcal" } ?: NO_VALUE),
+        Stat(stringResource(id = R.string.active_time), activity?.let { formatDuration(it.activeSeconds) } ?: NO_VALUE),
+        Stat(stringResource(id = R.string.goal), if (stepGoal > 0) format(stepGoal) else NO_VALUE),
+    )
+    StatRow(
+        Stat(stringResource(id = R.string.walking), activity?.let { formatDuration(it.walkSeconds) } ?: NO_VALUE),
+        Stat(stringResource(id = R.string.cycling), activity?.let { formatDuration(it.cycleSeconds) } ?: NO_VALUE),
+        Stat(
+            stringResource(id = R.string.heart_rate_day),
+            if (heart?.maxBpm != null && heart.minBpm != null) "${heart.maxBpm} / ${heart.minBpm}" else NO_VALUE,
+        ),
+    )
+    StatRow(
+        Stat(stringResource(id = R.string.resting_heart_rate), heart?.restingBpm?.let { "$it bpm" } ?: NO_VALUE),
+        Stat(
+            stringResource(id = R.string.heart_rate_recent),
+            health.recentHeartRate?.let { "${it.averageBpm} avg" } ?: NO_VALUE,
+        ),
+        Stat(stringResource(id = R.string.lifelog_status), pendingText(health.lifeLogPending)),
+    )
+    Text(
+        text = stringResource(id = R.string.synced_at) + ": " + (data.timestamp?.format(TIME_FORMAT) ?: NO_VALUE),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+/** The loading message while the watch's data is being read. */
+@Composable
+fun DwH5600Loading(status: String?) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Section(title = stringResource(id = R.string.card_activity)) {
-            InfoRow(
-                label = stringResource(id = R.string.energy_estimate),
-                value = health.energyKcal?.let { "$it kcal" } ?: NO_VALUE,
+        CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 3.dp)
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = stringResource(id = R.string.loading_lifelog),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.Red,
             )
-            health.activity?.let { activity ->
-                InfoRow(
-                    label = stringResource(id = R.string.activity_summary),
-                    value = "${formatDuration(activity.walkSeconds)} / " +
-                        "${formatDuration(activity.cycleSeconds)} / " +
-                        formatDuration(activity.activeSeconds),
-                )
+            status?.let {
+                Text(text = it, style = MaterialTheme.typography.bodyMedium)
             }
         }
-
-        Section(title = stringResource(id = R.string.card_heart_rate)) {
-            val heart = health.heartRate
-            InfoRow(
-                label = stringResource(id = R.string.heart_rate_day),
-                value = if (heart?.maxBpm != null && heart.minBpm != null) {
-                    "${heart.maxBpm} / ${heart.minBpm} bpm"
-                } else {
-                    NO_VALUE
-                },
-            )
-            InfoRow(
-                label = stringResource(id = R.string.resting_heart_rate),
-                value = heart?.restingBpm?.let { "$it bpm" } ?: NO_VALUE,
-            )
-            InfoRow(
-                label = stringResource(id = R.string.heart_rate_recent),
-                value = health.recentHeartRate?.let {
-                    "${it.averageBpm} bpm avg (${it.minBpm}\u2013${it.maxBpm})"
-                } ?: NO_VALUE,
-            )
-        }
-
-        Section(title = stringResource(id = R.string.card_status)) {
-            InfoRow(
-                label = stringResource(id = R.string.synced_at),
-                value = data.timestamp?.format(TIME_FORMAT) ?: NO_VALUE,
-            )
-            InfoRow(
-                label = stringResource(id = R.string.lifelog_status),
-                value = pendingText(health.lifeLogPending),
-            )
-            InfoRow(
-                label = stringResource(id = R.string.workouts_status),
-                value = pendingText(health.activityLogPending),
-            )
-        }
-
-        val hours = data.hourlySteps.withIndex().filter { (it.value ?: 0) > 0 }
-        if (hours.isNotEmpty()) {
-            Section(title = stringResource(id = R.string.steps_by_hour)) {
-                hours.forEach { (hour, count) ->
-                    InfoRow(
-                        label = String.format(Locale.US, "%02d:00", hour),
-                        value = format(count ?: 0),
-                    )
-                }
-            }
-        }
-
     }
 }
 
+/** A message from the last watch read, such as a failure to read the data. */
 @Composable
-private fun Section(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    AppCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            content = {
-                AppTextLarge(text = title, modifier = Modifier.fillMaxWidth())
-                content()
-            },
-        )
-    }
+fun DwH5600Message(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+    )
 }
 
+private class Stat(val label: String, val value: String)
+
 @Composable
-private fun LoadingCard(
-    status: String?,
-    modifier: Modifier,
-) {
-    AppCard(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CircularProgressIndicator(modifier = Modifier.size(32.dp), strokeWidth = 3.dp)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
+private fun StatRow(vararg stats: Stat) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        stats.forEach { stat ->
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 Text(
-                    text = stringResource(id = R.string.loading_lifelog),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Red,
-                    textAlign = TextAlign.Start,
+                    text = stat.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
-                status?.let {
-                    Text(text = it, style = MaterialTheme.typography.bodyMedium)
-                }
+                Text(
+                    text = stat.value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun MessageCard(
-    text: String,
-    modifier: Modifier,
-) {
-    AppCard(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp),
-        )
     }
 }
 
@@ -203,17 +148,3 @@ private fun pendingText(pending: Boolean?): String =
         false -> stringResource(id = R.string.up_to_date)
         null -> NO_VALUE
     }
-
-@Composable
-private fun InfoRow(
-    label: String,
-    value: String,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(text = label, style = MaterialTheme.typography.bodySmall)
-        Text(text = value, style = MaterialTheme.typography.bodySmall)
-    }
-}

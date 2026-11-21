@@ -61,12 +61,6 @@ fun HealthScreen() {
                         healthViewModel = healthViewModel
                     )
 
-                    // DW-H5600 LifeLog details (nothing is shown for other watches)
-                    DwH5600LifeLogCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        healthViewModel = healthViewModel
-                    )
-
                     // Profile button: the ABL-100 profile does not apply to the DW-H5600
                     if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) {
                         AppButton(
