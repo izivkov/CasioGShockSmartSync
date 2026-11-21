@@ -15,10 +15,12 @@ object WatchModelOverride {
     var realName: String? = null
 
     /** The name to give the library so it picks the right model behaviour. */
-    fun effectiveLibraryName(name: String): String = name
+    fun effectiveLibraryName(name: String): String = if (isH5600Family(name)) ALIAS else name
 
     /** Always-connected watches: the H5600 family and the ECB. */
-    fun isAlwaysConnected(name: String): Boolean = "DW-H5600" in name || "ECB" in name
+    fun isAlwaysConnected(name: String): Boolean = isH5600Family(name) || "ECB" in name
+
+    fun isH5600Family(name: String): Boolean = "H5600" in name
 
     /** The name to show: the real one, also while the library believes it is [ALIAS]. */
     fun displayName(libraryName: String): String = realName ?: libraryName

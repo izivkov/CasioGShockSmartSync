@@ -5,6 +5,7 @@ import android.os.BatteryManager
 import java.time.ZoneId
 import java.util.Date
 import java.util.TimeZone
+import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
@@ -57,7 +58,7 @@ object WatchVariables {
             // Watch
             Variable("watch.connected", "True when the watch is connected right now") { it.watchConnected },
             Variable("watch.name", "Watch model name, for example GW-B5600") {
-                WatchInfo.name.takeIf { n -> n.isNotBlank() }
+                WatchModelOverride.displayName(WatchInfo.name).takeIf { n -> n.isNotBlank() }
             },
             Variable("watch.model", "Watch model id used by the app", needsWatch = true) {
                 WatchInfo.model.name
