@@ -109,3 +109,28 @@ class AppScreenStateTest {
         assertEquals(expected, actual, 0.05f)
     }
 }
+class WebhooksScreenStateTest {
+    private val ready = SessionState(
+        phase = SessionPhase.Ready(EntryReason.NORMAL),
+        button = ConnectionButton.ALWAYS_CONNECTED
+    )
+
+    @Test
+    fun webhooksScreenStaysWhenTheWatchDisconnects() {
+        val closed = ready.copy(phase = SessionPhase.Closed("Watch disconnected"))
+        assertEquals(AppScreen.WEBHOOKS, AppScreenState.navigationFor(ready, webhooksOpen = true).screen)
+        assertEquals(AppScreen.WEBHOOKS, AppScreenState.navigationFor(closed, webhooksOpen = true).screen)
+        assertEquals(AppScreen.WEBHOOKS, AppScreenState.navigationFor(SessionState(), webhooksOpen = true).screen)
+        assertEquals(
+            AppScreen.WEBHOOKS,
+            AppScreenState.navigationFor(
+                SessionState(phase = SessionPhase.Closed("boom", isError = true)), webhooksOpen = true
+            ).screen
+        )
+    }
+
+    @Test
+    fun closingWebhooksReturnsToWhereTheSessionIs() {
+        assertEquals(AppScreen.MAIN_NAVIGATION, AppScreenState.navigationFor(ready, webhooksOpen = false).screen)
+    }
+}

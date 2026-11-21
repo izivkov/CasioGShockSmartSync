@@ -21,7 +21,10 @@ enum class AppScreen {
     CONTENT_SELECTOR,
     MAIN_NAVIGATION,
     RUN_ACTIONS,
-    ERROR
+    ERROR,
+
+    /** The Webhooks screen: shown whatever the watch connection does. */
+    WEBHOOKS
 }
 
 data class AppNavigationState(
@@ -45,7 +48,7 @@ class AppScreenState @Inject constructor(
         .stateIn(scope, SharingStarted.Eagerly, navigationFor(sessionManager.sessionState.value))
 
     companion object {
-        internal fun navigationFor(session: SessionState): AppNavigationState =
+        internal fun navigationFor(session: SessionState, webhooksOpen: Boolean = false): AppNavigationState =
             when (val phase = session.phase) {
                 SessionPhase.Disconnected -> AppNavigationState(AppScreen.INITIAL)
 
