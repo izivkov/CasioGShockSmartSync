@@ -73,6 +73,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceHelper
@@ -251,14 +252,14 @@ fun PreConnectionScreen(
                                     "GW" in watchName || "GMW" in watchName ->
                                         R.drawable.gw_b5600
 
-                                    "DW-H5600" in watchName -> R.drawable.dw_h5600
+                                    "H5600" in watchName -> R.drawable.dw_h5600
                                     "DW" in watchName || "DMW" in watchName ->
                                         R.drawable.dw_b5600
 
                                     "ECB" in watchName -> R.drawable.ecb_30d
                                     else -> R.drawable.gw_b5600
                                 },
-                            isAlwaysConnected = "DW-H5600" in watchName || "ECB" in watchName
+                            isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName)
                         )
 
                         AppConnectionSpinner(
