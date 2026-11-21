@@ -62,7 +62,7 @@ class WebhooksViewModel @Inject constructor(
             _testReport.value = report.fold(
                 onSuccess = { formatReport(it) },
                 onFailure = {
-                    android.util.Log.e("Webhook", "Test failed: ${WebhookDiagnostics.describe(it)}", it)
+                    WebhookDiagnostics.logError("Test failed: ${WebhookDiagnostics.describe(it)}", it)
                     "Test failed:\n" + WebhookDiagnostics.describe(it)
                 },
             )

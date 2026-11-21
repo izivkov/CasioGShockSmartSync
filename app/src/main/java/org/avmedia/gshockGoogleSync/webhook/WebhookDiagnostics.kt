@@ -17,4 +17,19 @@ object WebhookDiagnostics {
             .take(3)
         frames.forEach { appendLine("  at ${it.className.removePrefix("$OUR_PACKAGE.")}.${it.methodName}(${it.fileName}:${it.lineNumber})") }
     }.trimEnd()
+
+    /** logcat, tag "Webhook". Silent where android.util.Log is not available (JVM unit tests). */
+    fun logError(message: String, t: Throwable? = null) {
+        try {
+            if (t != null) android.util.Log.e("Webhook", message, t) else android.util.Log.e("Webhook", message)
+        } catch (ignored: Throwable) {
+        }
+    }
+
+    fun logWarn(message: String) {
+        try {
+            android.util.Log.w("Webhook", message)
+        } catch (ignored: Throwable) {
+        }
+    }
 }

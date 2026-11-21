@@ -69,7 +69,7 @@ class WebhookDispatcher @Inject constructor(
             WebhookSender.send(hook, if (hook.method.equals("GET", true)) "" else rendered.text)
         }
         if (rendered.failed.isNotEmpty()) {
-            android.util.Log.w("Webhook", "Variables failed: ${rendered.failed.joinToString()}")
+            WebhookDiagnostics.logWarn("Variables failed: ${rendered.failed.joinToString()}")
         }
         return TestReport(outcome, rendered, api.isConnected())
     }

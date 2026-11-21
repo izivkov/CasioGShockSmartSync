@@ -31,7 +31,7 @@ object WebhookSender {
         }
     } catch (e: Throwable) {
         // Throwable on purpose: a class missing on the device is an Error and must be shown, not crash.
-        android.util.Log.e("Webhook", "Send failed: ${WebhookDiagnostics.describe(e)}")
+        WebhookDiagnostics.logError("Send failed: ${WebhookDiagnostics.describe(e)}")
         Outcome(null, WebhookDiagnostics.oneLine(e))
     }
 
