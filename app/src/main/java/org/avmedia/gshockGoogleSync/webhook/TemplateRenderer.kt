@@ -85,8 +85,7 @@ object TemplateRenderer {
         return root
     }
 
-    private fun jsonValue(value: Any?): String =
-        if (value is String) "\"$value\"" else gson.toJson(value) // BUG (red run): no escaping
+    private fun jsonValue(value: Any?): String = gson.toJson(value)
 
     private fun plainText(value: Any?): String = when (value) {
         null -> ""
