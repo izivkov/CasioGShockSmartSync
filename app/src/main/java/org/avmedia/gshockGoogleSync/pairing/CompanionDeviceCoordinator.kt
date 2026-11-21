@@ -59,6 +59,10 @@ class CompanionDeviceCoordinator @Inject constructor(
                                 try {
                                     Timber.i("$normalizedAddress connection attempt $attempt")
                                     repository.waitForConnection(normalizedAddress)
+                                    // The watch that just connected is the one the screen shows after it disconnects.
+                                    org.avmedia.gshockGoogleSync.utils.LocalDataStorage.put(
+                                        context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name
+                                    )
                                     return@launch
                                 } catch (cancelled: CancellationException) {
                                     throw cancelled

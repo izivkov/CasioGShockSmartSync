@@ -107,6 +107,7 @@ fun PreConnectionScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val watchName by ptrConnectionViewModel.watchName.collectAsState()
+    val waitingForWatch by ptrConnectionViewModel.waitingForWatch.collectAsState()
     val triggerPairing by ptrConnectionViewModel.triggerPairing.collectAsState()
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
@@ -266,9 +267,11 @@ fun PreConnectionScreen(
                             isAlwaysConnected = "DW-H5600" in watchName || "ECB" in watchName
                         )
 
-                        AppConnectionSpinner(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        if (waitingForWatch) {
+                            AppConnectionSpinner(
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
 
                         Box(
                             modifier =
@@ -379,16 +382,17 @@ fun PairedDeviceList(
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             devices.forEach { device ->
                 AppCard(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    padding = 0.dp
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                            .padding(horizontal = 8.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

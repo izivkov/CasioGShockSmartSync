@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import kotlinx.coroutines.delay
 import org.avmedia.gshockGoogleSync.session.SetupWindow
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -144,8 +145,16 @@ constructor(
     }
 
     /** "Set up watch": the next connection opens the main navigation. */
+    private val _waitingForWatch = MutableStateFlow(false)
+    val waitingForWatch: StateFlow<Boolean> = _waitingForWatch
+
     fun startWatchSetUp() {
         SetupWindow.open()
+        viewModelScope.launch {
+            _waitingForWatch.value = true
+            delay(2 * 60_000L)
+            _waitingForWatch.value = false
+        }
     }
 
     fun loadPairedDevices() {
