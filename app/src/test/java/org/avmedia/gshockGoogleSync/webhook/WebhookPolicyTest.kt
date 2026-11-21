@@ -85,4 +85,27 @@ class WebhookPolicyTest {
         assertTrue(WebhookPresets.TRMNL.bodyTemplate.contains("deep_merge"))
         assertEquals("text/plain", WebhookPresets.PLAIN_TEXT.contentType)
     }
+
+    @Test
+    fun homeAssistantPresetsSetTheirTriggersAndRenderValidJson() {
+        assertEquals(true, WebhookPresets.HOME_ASSISTANT_BUTTON.onWatchAction)
+        assertEquals(false, WebhookPresets.HOME_ASSISTANT_BUTTON.onSync)
+        assertEquals(true, WebhookPresets.HOME_ASSISTANT_DATA.onSync)
+        val r = TemplateRenderer.render(
+            WebhookPresets.HOME_ASSISTANT_BUTTON.bodyTemplate,
+            mapOf("event" to "watch_action", "timestamp" to "2026-11-21T10:00:00+01:00", "watch.battery" to 80),
+            setOf("event", "timestamp", "watch.battery"), json = true,
+        )
+        val obj = com.google.gson.JsonParser.parseString(r.text).asJsonObject
+        assertEquals("watch_action", obj.get("event").asString)
+        assertEquals(80, obj.getAsJsonObject("watch").getAsJsonObject("watch").get("battery").asInt)
+    }
+
+    @Test
+    fun newWebhookDefaultsToAllDataAfterSyncEveryFiveMinutes() {
+        val h = Webhook.newDefault()
+        assertTrue(h.onSync && !h.onWatchAction)
+        assertEquals("{{all}}", h.bodyTemplate)
+        assertEquals(5, h.minIntervalMinutes)
+    }
 }

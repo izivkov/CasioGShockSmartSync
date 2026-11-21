@@ -179,6 +179,7 @@ private fun WebhookEditor(
 ) {
     var name by remember { mutableStateOf(initial.name) }
     var url by remember { mutableStateOf(initial.url) }
+    var urlHint by remember { mutableStateOf<String?>(null) }
     var method by remember { mutableStateOf(initial.method) }
     var contentType by remember { mutableStateOf(initial.contentType) }
     var body by remember { mutableStateOf(TextFieldValue(initial.bodyTemplate)) }
@@ -229,7 +230,9 @@ private fun WebhookEditor(
             )
             OutlinedTextField(
                 value = url, onValueChange = { url = it },
-                label = { Text("URL (https://...)") }, modifier = Modifier.fillMaxWidth(),
+                label = { Text("URL (https://...)") },
+                placeholder = urlHint?.let { h -> { Text(h) } },
+                modifier = Modifier.fillMaxWidth(),
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 AppText(text = "Method")
@@ -267,6 +270,9 @@ private fun WebhookEditor(
                             contentType = p.contentType
                             method = p.method
                             body = TextFieldValue(p.bodyTemplate)
+                            p.onWatchAction?.let { onWatchAction = it }
+                            p.onSync?.let { onSync = it }
+                            urlHint = p.urlHint
                         },
                         label = { Text(p.label) },
                     )

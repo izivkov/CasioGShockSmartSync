@@ -53,8 +53,9 @@ data class Webhook(
 
         /** A new webhook as the "Add" button creates it. */
         fun newDefault(): Webhook = Webhook(
-            onWatchAction = true,
-            onSync = false,
+            // Main use: send all data after each sync, at most every 5 minutes.
+            onWatchAction = false,
+            onSync = true,
             minIntervalMinutes = DEFAULT_SYNC_INTERVAL_MINUTES,
         )
     }
@@ -80,6 +81,11 @@ data class WebhookPreset(
     val contentType: String,
     val bodyTemplate: String,
     val method: String = "POST",
+    /** Triggers the preset sets; null leaves the current ones. */
+    val onWatchAction: Boolean? = null,
+    val onSync: Boolean? = null,
+    /** Shown as the URL field's placeholder when the URL is empty. */
+    val urlHint: String? = null,
 )
 
 object WebhookPresets {
@@ -91,7 +97,18 @@ object WebhookPresets {
         """{"merge_variables": {{all}}, "merge_strategy": "deep_merge"}""",
     )
 
-    val HOME_ASSISTANT = WebhookPreset("Home Assistant", "application/json", "{{all}}")
+    private const val HA_HINT = "https://<your-ha>/api/webhook/<webhook_id>  (webhook_id: the id of the Webhook trigger of your Home Assistant automation)"
+
+    val HOME_ASSISTANT_DATA = WebhookPreset(
+        "Home Assistant (data)", "application/json", "{{all}}",
+        onWatchAction = false, onSync = true, urlHint = HA_HINT,
+    )
+
+    val HOME_ASSISTANT_BUTTON = WebhookPreset(
+        "Home Assistant (button)", "application/json",
+        """{"event": {{event}}, "timestamp": {{timestamp}}, "watch": {{all}}}""",
+        onWatchAction = true, onSync = false, urlHint = HA_HINT,
+    )
 
     val PLAIN_TEXT = WebhookPreset(
         "Plain text",
@@ -99,5 +116,5 @@ object WebhookPresets {
         "{{watch.name}}: battery {{watch.battery}}%, event {{event}} at {{timestamp}}",
     )
 
-    val ALL = listOf(RAW_JSON, TRMNL, HOME_ASSISTANT, PLAIN_TEXT)
+    val ALL = listOf(RAW_JSON, TRMNL, HOME_ASSISTANT_DATA, HOME_ASSISTANT_BUTTON, PLAIN_TEXT)
 }
