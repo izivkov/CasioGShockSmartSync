@@ -121,7 +121,7 @@ fun WatchImageWithOverlayAlwaysConnected(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
         )
         Image(
             painter = painterResource(id = imageResId),
@@ -129,7 +129,9 @@ fun WatchImageWithOverlayAlwaysConnected(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            // Sit the picture directly under the reminder, not centred in the space below it.
+            alignment = Alignment.TopCenter
         )
     }
 }
