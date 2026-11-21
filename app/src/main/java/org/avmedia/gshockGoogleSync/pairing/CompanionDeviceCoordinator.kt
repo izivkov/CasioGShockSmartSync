@@ -45,7 +45,8 @@ class CompanionDeviceCoordinator @Inject constructor(
                                 ?: org.avmedia.gshockapi.WatchInfo.name
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
                             repository.stopScan()
-                            if (repository.isConnected()) {
+                            // Only this watch counts. Any other connected watch must not block this one.
+                            if (repository.isConnectedTo(normalizedAddress)) {
                                 Timber.i("Device already connected. Skipping wait.")
                                 return@launch
                             }
@@ -54,7 +55,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                             // attempt fails within about 0.1 s, so a short interval is enough.
                             val windowEnd = System.currentTimeMillis() + CONNECTION_WINDOW_MS
                             var attempt = 0
-                            while (System.currentTimeMillis() < windowEnd && !repository.isConnected()) {
+                            while (System.currentTimeMillis() < windowEnd && !repository.isConnectedTo(normalizedAddress)) {
                                 attempt++
                                 try {
                                     Timber.i("$normalizedAddress connection attempt $attempt")
