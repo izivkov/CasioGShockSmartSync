@@ -235,5 +235,6 @@
     <string name="cycling">Cycling</string>
     <string name="active_time">Active time</string>
     <string name="loading_lifelog">Loading LifeLog from the watch…</string>
-    <string name="set_up_watch">Connect and wait</string>
+    <string name="set_up_watch">Allow connection</string>
+    <string name="allow_connection_info">After you tap Allow connection, the app waits for the watch. The watch connects by itself the next time it tries, and that can take a while. You do not need to press anything on the watch.</string>
 </resources>

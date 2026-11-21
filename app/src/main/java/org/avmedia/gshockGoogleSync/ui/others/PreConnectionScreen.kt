@@ -421,11 +421,21 @@ fun PairedDeviceList(
                         }
 
                         if (device.isAlwaysConnected) {
-                            AppButton(
-                                text = stringResource(R.string.set_up_watch),
-                                onClick = { onSetUpWatch(device) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                AppButton(
+                                    text = stringResource(R.string.set_up_watch),
+                                    onClick = { onSetUpWatch(device) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                InfoButton(
+                                    infoText = stringResource(R.string.allow_connection_info),
+                                    iconSize = 24.dp,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                            }
                         }
 
                     }
