@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -108,37 +110,27 @@ fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
 ) {
-    BoxWithConstraints(modifier = modifier) {
-        val screenHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
-        val textOffsetPx = screenHeightPx * 0.75f // Position text 3/4 down the screen
-
-        // Background watch image
+    Column(modifier = modifier) {
+        // The reminder sits above the watch image, which leaves the room below it for the watch list.
+        Text(
+            text = stringResource(R.string.find_phone_instruction),
+            color = Color.Red,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            lineHeight = 24.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
         Image(
             painter = painterResource(id = imageResId),
             contentDescription = "Watch Image",
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             contentScale = ContentScale.Fit
         )
-
-        // Centered text overlay
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .padding(top = with(LocalDensity.current) { textOffsetPx.toDp() }),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Text(
-                text = stringResource(
-                    R.string.find_phone_instruction
-                ),
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                lineHeight = 24.sp,
-                textAlign = TextAlign.Center
-            )
-        }
     }
 }
 
