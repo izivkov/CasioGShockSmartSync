@@ -38,3 +38,22 @@ for r in sorted(missing):
     if all(c.startswith(optional) for c in missing[r]) and not r.startswith(("Lorg/avmedia", "Lokhttp3", "Lokio", "Lcom/google/gson")):
         continue
     print(" ", r, "<-", ", ".join(sorted(missing[r])[:3]))
+
+# Platform classes our own code refers to that are newer than minSdk (26) according to the SDK's api-versions.xml.
+if len(sys.argv) > 3:
+    import xml.etree.ElementTree as ET
+    since = {}
+    for _, el in ET.iterparse(sys.argv[3]):
+        if el.tag == "class":
+            since[el.get("name")] = int(el.get("since", "1"))
+            el.clear()
+    ours = ("Lorg/avmedia/gshockGoogleSync/", "Lokhttp3/", "Lcom/google/gson/")
+    print("Platform classes referenced by app/okhttp/gson code, newer than API 26 or unknown to the SDK:")
+    for r, c in sorted(referrers.items()):
+        if not r.startswith(("Ljava/", "Ljavax/", "Landroid/")) or not any(x.startswith(ours) for x in c):
+            continue
+        name = r[1:-1]
+        if name not in since:
+            print("  UNKNOWN", r, "<-", sorted(c)[:2])
+        elif since[name] > 26:
+            print(f"  API {since[name]}", r, "<-", sorted(c)[:2])

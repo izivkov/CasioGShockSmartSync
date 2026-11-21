@@ -36,7 +36,8 @@ jobs:
           grep -E "okhttp|okio|gson|work-runtime|GShockAPI|kotlinx-coroutines|kotlin-stdlib" runtime-classpath.txt | sort -u | head -40 || true
           DEXDUMP=$(ls $ANDROID_HOME/build-tools/*/dexdump | tail -1)
           APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
-          python3 .github/scripts/dex_missing_refs.py "$APK" "$DEXDUMP" | tee dex-missing.txt || true
+          API=$(ls $ANDROID_HOME/platforms/*/data/api-versions.xml | tail -1)
+          python3 .github/scripts/dex_missing_refs.py "$APK" "$DEXDUMP" "$API" | tee dex-missing.txt || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
