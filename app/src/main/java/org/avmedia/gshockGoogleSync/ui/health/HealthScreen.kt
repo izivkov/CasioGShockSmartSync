@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Box
 import org.avmedia.gshockapi.WatchInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +36,10 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 fun HealthScreen() {
     var showProfileDialog by remember { mutableStateOf(false) }
     val healthViewModel: HealthViewModel = hiltViewModel()
+    val state by healthViewModel.state.collectAsState()
+    // DW-H5600: until its LifeLog arrives, show only the loading message
+    val waitingForLifeLog = WatchInfo.model == WatchInfo.WatchModel.DW_H5600 &&
+        state.stepCounterData.h5600 == null && state.lifeLogLoading
 
     // Refresh every time the screen opens, so a LifeLog read that finished while the screen
     // was closed (or before the watch connected) reaches the cards.
@@ -47,6 +55,16 @@ fun HealthScreen() {
                     Modifier
                 )
 
+                if (waitingForLifeLog) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = stringResource(id = R.string.loading_lifelog_short))
+                    }
+                } else {
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -79,6 +97,7 @@ fun HealthScreen() {
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
+                }
                 }
             }
         }
