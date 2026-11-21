@@ -29,6 +29,17 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleGithubDebug
 
+      - name: Check the APK signing certificate (updates need the same key every time)
+        env:
+          EXPECTED_SHA256: "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
+        run: |
+          APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
+          APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
+          GOT=$($APKSIGNER verify --print-certs "$APK" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -1)
+          echo "APK certificate SHA-256: $GOT"
+          WANT=$(echo "$EXPECTED_SHA256" | tr -d ':' | tr 'A-F' 'a-f')
+          if [ "$GOT" != "$WANT" ]; then echo "Signing certificate differs from the expected one ($WANT)"; exit 1; fi
+
       - name: Diagnose runtime classpath and dex (classes missing on the device)
         if: always()
         run: |

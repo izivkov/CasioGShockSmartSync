@@ -35,6 +35,14 @@ android {
     }
 
     signingConfigs {
+        // One fixed throwaway key for the webhook test builds, so each test APK installs over the
+        // previous one (a fresh key per CI run makes the phone refuse the update). Not used for release.
+        webhookTest {
+            storeFile file("webhook-test-debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
         release {
             // These environment variables will be set in GitHub Actions
             def ksPath = System.getenv("KEYSTORE_PATH") ?: "release.keystore"
@@ -50,6 +58,7 @@ android {
 
     buildTypes {
         debug {
+            signingConfig signingConfigs.webhookTest
             // Installs beside the official app; the label is set in src/debug/res/values/strings.xml.
             applicationIdSuffix ".webhook"
         }
