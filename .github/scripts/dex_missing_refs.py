@@ -45,7 +45,7 @@ if len(sys.argv) > 3:
     since = {}
     for _, el in ET.iterparse(sys.argv[3]):
         if el.tag == "class":
-            since[el.get("name")] = int(el.get("since", "1"))
+            since[el.get("name")] = float(el.get("since", "1"))
             el.clear()
     ours = ("Lorg/avmedia/gshockGoogleSync/", "Lokhttp3/", "Lcom/google/gson/")
     print("Platform classes referenced by app/okhttp/gson code, newer than API 26 or unknown to the SDK:")
@@ -56,4 +56,4 @@ if len(sys.argv) > 3:
         if name not in since:
             print("  UNKNOWN", r, "<-", sorted(c)[:2])
         elif since[name] > 26:
-            print(f"  API {since[name]}", r, "<-", sorted(c)[:2])
+            print(f"  API {since[name]:g}", r, "<-", sorted(c)[:2])
