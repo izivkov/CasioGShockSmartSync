@@ -14,6 +14,11 @@ object SetupWindow {
         synchronized(this) { openUntil[address.uppercase()] = now + WINDOW_MS }
     }
 
+    /** Closes the window for [address] without a connection. */
+    fun cancel(address: String) {
+        synchronized(this) { openUntil.remove(address.uppercase()) }
+    }
+
     /** True once for a connection from [address] that starts inside its window; the window is then used up. */
     fun consume(address: String, now: Long = System.currentTimeMillis()): Boolean =
         synchronized(this) {

@@ -108,6 +108,7 @@ fun PreConnectionScreen(
     val scope = rememberCoroutineScope()
     val watchName by ptrConnectionViewModel.watchName.collectAsState()
     val waitingForWatch by ptrConnectionViewModel.waitingForWatch.collectAsState()
+    val granted by ptrConnectionViewModel.grantedAddresses.collectAsState()
     val triggerPairing by ptrConnectionViewModel.triggerPairing.collectAsState()
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
@@ -301,13 +302,9 @@ fun PreConnectionScreen(
                                         )
                                     }
                                 },
-                                onSetUpWatch = { device ->
-                                    ptrConnectionViewModel.startWatchSetUp(device.address)
-                                    Toast.makeText(
-                                        context,
-                                        "Waiting for the watch to connect",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                grantedAddresses = granted,
+                                onAllowConnection = { device, allow ->
+                                    ptrConnectionViewModel.setAllowConnection(device.address, allow)
                                 },
                                 modifier = Modifier
                                     .padding(4.dp)
@@ -371,7 +368,8 @@ fun PairedDeviceList(
     devices: List<PreConnectionViewModel.DeviceItem>,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
-    onSetUpWatch: (PreConnectionViewModel.DeviceItem) -> Unit,
+    grantedAddresses: Set<String>,
+    onAllowConnection: (PreConnectionViewModel.DeviceItem, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -404,6 +402,13 @@ fun PairedDeviceList(
                             Text(
                                 text = device.name,
                                 style = MaterialTheme.typography.bodyLarge,
+                                color = if (device.isAlwaysConnected &&
+                                    !grantedAddresses.contains(device.address.uppercase())
+                                ) {
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                } else {
+                                    Color.Unspecified
+                                },
                                 maxLines = 1,
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                 softWrap = false,
@@ -429,15 +434,14 @@ fun PairedDeviceList(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                AppButton(
-                                    text = stringResource(R.string.set_up_watch),
-                                    onClick = { onSetUpWatch(device) },
-                                    modifier = Modifier.weight(1f)
+                                AppSwitch(
+                                    checked = grantedAddresses.contains(device.address.uppercase()),
+                                    onCheckedChange = { onAllowConnection(device, it) }
                                 )
                                 InfoButton(
                                     infoText = stringResource(R.string.allow_connection_info),
                                     iconSize = 24.dp,
-                                    modifier = Modifier.padding(start = 4.dp)
+                                    modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
                         }

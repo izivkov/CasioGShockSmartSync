@@ -149,6 +149,18 @@ constructor(
     private val _waitingForWatch = MutableStateFlow(false)
     val waitingForWatch: StateFlow<Boolean> = _waitingForWatch
 
+    /** The switch on an always-connected watch: on allows one connection; off withdraws it. */
+    val grantedAddresses: StateFlow<Set<String>> = AlwaysConnectedPermission.granted
+
+    fun setAllowConnection(address: String, allow: Boolean) {
+        if (allow) {
+            startWatchSetUp(address)
+        } else {
+            AlwaysConnectedPermission.use(address)
+            SetupWindow.cancel(address)
+        }
+    }
+
     fun startWatchSetUp(address: String) {
         SetupWindow.open(address)
         AlwaysConnectedPermission.grant(address)
