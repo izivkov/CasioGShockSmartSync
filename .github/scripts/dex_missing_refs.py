@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+"""List classes the APK's code refers to that no dex file in the APK defines (and the platform does not
+provide). Such a reference is a NoClassDefFoundError on the device that compiles and unit-tests fine.
+Usage: dex_missing_refs.py <apk> <dexdump>"""
+import re, subprocess, sys, zipfile, tempfile, os, collections
+
+apk, dexdump = sys.argv[1], sys.argv[2]
+tmp = tempfile.mkdtemp()
+with zipfile.ZipFile(apk) as z:
+    dexes = [n for n in z.namelist() if re.fullmatch(r"classes\d*\.dex", n)]
+    z.extractall(tmp, dexes)
+
+defined = set()
+referrers = collections.defaultdict(set)
+cls_re = re.compile(r"Class descriptor\s+:\s+'(L[^']+;)'")
+ref_re = re.compile(r"\b(L[A-Za-z0-9_$/]+;)")
+for d in dexes:
+    out = subprocess.run([dexdump, "-d", os.path.join(tmp, d)], capture_output=True, text=True).stdout
+    current = None
+    for line in out.splitlines():
+        m = cls_re.search(line)
+        if m:
+            current = m.group(1)
+            defined.add(current)
+            continue
+        if current and re.search(r"\|[0-9a-f]{4}: (invoke|new-instance|const-class|check-cast|instance-of|sget|sput|iget|iput|filled-new-array)", line):
+            for r in ref_re.findall(line):
+                referrers[r].add(current)
+
+platform = ("Landroid/", "Ljava/", "Ljavax/", "Ldalvik/", "Llibcore/", "Lorg/json/", "Lorg/w3c/", "Lorg/xml/",
+            "Lorg/apache/http/", "Lsun/", "Lcom/android/", "Ljunit/", "Lorg/junit/")
+missing = {r: c for r, c in referrers.items() if r not in defined and not r.startswith(platform)}
+print(f"dex files: {len(dexes)}, defined classes: {len(defined)}, referenced classes: {len(referrers)}")
+print(f"MISSING referenced classes: {len(missing)}")
+for r in sorted(missing):
+    print(" ", r, "<-", ", ".join(sorted(missing[r])[:3]))

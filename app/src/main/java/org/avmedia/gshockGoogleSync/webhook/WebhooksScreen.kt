@@ -321,8 +321,8 @@ private fun WebhookEditor(
             )
             SwitchLine("Enabled", enabled) { enabled = it }
 
-            AppButton(text = "Test", onClick = { viewModel.test(current()) }, modifier = Modifier.fillMaxWidth())
             testReport?.let { AppText(text = it, fontSize = 14.sp) }
+            AppButton(text = "Test", onClick = { viewModel.test(current()) }, modifier = Modifier.fillMaxWidth())
         }
         ButtonsRow(
             buttons = buildList {

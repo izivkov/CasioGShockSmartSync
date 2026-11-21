@@ -29,8 +29,10 @@ object WebhookSender {
         client.newCall(buildRequest(hook, body)).execute().use { response ->
             Outcome(response.code, WebhookPolicy.preview(response.body?.string()))
         }
-    } catch (e: Exception) {
-        Outcome(null, e.javaClass.simpleName + (e.message?.let { ": ${it.take(120)}" } ?: ""))
+    } catch (e: Throwable) {
+        // Throwable on purpose: a class missing on the device is an Error and must be shown, not crash.
+        android.util.Log.e("Webhook", "Send failed: ${WebhookDiagnostics.describe(e)}")
+        Outcome(null, WebhookDiagnostics.oneLine(e))
     }
 
     internal fun buildRequest(hook: Webhook, body: String): Request {

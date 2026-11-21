@@ -54,8 +54,18 @@ class VariableRegistry(val variables: List<Variable>) {
         context: VariableContext,
         wanted: Set<String>? = null,
         timeoutMs: Long = 5_000,
-    ): Map<String, Any?> {
+    ): Map<String, Any?> = resolveWithFailures(context, wanted, timeoutMs).values
+
+    class Resolution(val values: Map<String, Any?>, val failures: Map<String, String>)
+
+    /** Like [resolve], and also says which providers failed and why ("name" to "Class: message"). */
+    suspend fun resolveWithFailures(
+        context: VariableContext,
+        wanted: Set<String>? = null,
+        timeoutMs: Long = 5_000,
+    ): Resolution {
         val result = LinkedHashMap<String, Any?>()
+        val failures = LinkedHashMap<String, String>()
         for (variable in variables) {
             if (wanted != null && variable.name !in wanted) continue
             result[variable.name] =
@@ -64,17 +74,21 @@ class VariableRegistry(val variables: List<Variable>) {
                     withTimeoutOrNull(timeoutMs) { variable.provider(context) }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
+                    // Also Errors such as NoClassDefFoundError: one variable never breaks the send.
+                    failures[variable.name] = WebhookDiagnostics.oneLine(e)
                     null
                 }
         }
-        return result
+        return Resolution(result, failures)
     }
 
     /** Resolves exactly what [template] needs and renders it. */
     suspend fun render(template: String, json: Boolean, context: VariableContext): TemplateRenderer.Rendered {
         val used = TemplateRenderer.namesIn(template)
         val wanted = if (TemplateRenderer.ALL in used) null else used.toSet()
-        return TemplateRenderer.render(template, resolve(context, wanted), names, json)
+        val resolution = resolveWithFailures(context, wanted)
+        return TemplateRenderer.render(template, resolution.values, names, json)
+            .copy(failed = resolution.failures.map { (n, why) -> "$n ($why)" })
     }
 }

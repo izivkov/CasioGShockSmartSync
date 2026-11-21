@@ -24,6 +24,8 @@ object TemplateRenderer {
         val unknown: List<String>,
         /** Known names that had no value this time (for example a watch that does not support it). */
         val missing: List<String>,
+        /** Variables whose provider threw, with the reason. Filled in by the registry. */
+        val failed: List<String> = emptyList(),
     )
 
     fun isJsonContentType(contentType: String): Boolean {

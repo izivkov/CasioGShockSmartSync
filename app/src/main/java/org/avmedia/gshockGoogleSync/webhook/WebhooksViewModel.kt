@@ -61,7 +61,10 @@ class WebhooksViewModel @Inject constructor(
             val report = runCatching { dispatcher.test(hook) }
             _testReport.value = report.fold(
                 onSuccess = { formatReport(it) },
-                onFailure = { "Test failed: ${it.javaClass.simpleName}" },
+                onFailure = {
+                    android.util.Log.e("Webhook", "Test failed: ${WebhookDiagnostics.describe(it)}", it)
+                    "Test failed:\n" + WebhookDiagnostics.describe(it)
+                },
             )
         }
     }
@@ -71,6 +74,7 @@ class WebhooksViewModel @Inject constructor(
         appendLine(if (status != null) "HTTP $status" else "No response")
         if (r.outcome.message.isNotEmpty()) appendLine(r.outcome.message)
         if (r.rendered.unknown.isNotEmpty()) appendLine("Unknown variables: ${r.rendered.unknown.joinToString()}")
+        if (r.rendered.failed.isNotEmpty()) appendLine("Variables that failed: ${r.rendered.failed.joinToString()}")
         if (r.rendered.missing.isNotEmpty()) appendLine("No value for: ${r.rendered.missing.joinToString()}")
         if (!r.watchConnected) appendLine("Watch not connected: watch values are empty.")
     }.trimEnd()

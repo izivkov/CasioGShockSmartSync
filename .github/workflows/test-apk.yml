@@ -29,6 +29,15 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleGithubDebug
 
+      - name: Diagnose runtime classpath and dex (classes missing on the device)
+        if: always()
+        run: |
+          ./gradlew app:dependencies --configuration githubDebugRuntimeClasspath > runtime-classpath.txt || true
+          grep -E "okhttp|okio|gson|work-runtime|GShockAPI|kotlinx-coroutines|kotlin-stdlib" runtime-classpath.txt | sort -u | head -40 || true
+          DEXDUMP=$(ls $ANDROID_HOME/build-tools/*/dexdump | tail -1)
+          APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
+          python3 .github/scripts/dex_missing_refs.py "$APK" "$DEXDUMP" | tee dex-missing.txt || true
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

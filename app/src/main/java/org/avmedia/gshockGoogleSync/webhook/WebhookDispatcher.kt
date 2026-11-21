@@ -68,6 +68,9 @@ class WebhookDispatcher @Inject constructor(
         val outcome = kotlinx.coroutines.withContext(Dispatchers.IO) {
             WebhookSender.send(hook, if (hook.method.equals("GET", true)) "" else rendered.text)
         }
+        if (rendered.failed.isNotEmpty()) {
+            android.util.Log.w("Webhook", "Variables failed: ${rendered.failed.joinToString()}")
+        }
         return TestReport(outcome, rendered, api.isConnected())
     }
 

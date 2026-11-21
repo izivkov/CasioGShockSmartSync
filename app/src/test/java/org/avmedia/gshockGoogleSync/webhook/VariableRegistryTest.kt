@@ -100,3 +100,26 @@ class VariableRegistryErrorTest {
         assertEquals(listOf("a"), r.missing)
     }
 }
+
+class WebhookDiagnosticsTest {
+    @Test
+    fun describeShowsClassMessageCauseAndOurFrames() {
+        val t = try {
+            throw IllegalStateException("outer", NoClassDefFoundError("org/example/Gone"))
+        } catch (e: IllegalStateException) {
+            e
+        }
+        val text = WebhookDiagnostics.describe(t)
+        assertTrue(text.contains("java.lang.IllegalStateException: outer"))
+        assertTrue(text.contains("Caused by java.lang.NoClassDefFoundError: org/example/Gone"))
+        assertTrue(text.contains("describeShowsClassMessageCauseAndOurFrames"))
+        assertTrue(text.lines().count { it.startsWith("  at ") } <= 3)
+    }
+
+    @Test
+    fun failedProvidersAreListedWithTheReason() = runBlocking {
+        val registry = VariableRegistry(listOf(Variable("a", "") { throw NoClassDefFoundError("org/example/Gone") }))
+        val r = registry.render("{{a}}", true, VariableContext("test", OffsetDateTime.now(), true))
+        assertEquals(listOf("a (NoClassDefFoundError: org/example/Gone)"), r.failed)
+    }
+}
