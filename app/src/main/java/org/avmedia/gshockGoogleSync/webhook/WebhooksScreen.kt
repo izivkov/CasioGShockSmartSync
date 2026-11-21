@@ -45,9 +45,9 @@ import androidx.compose.ui.res.stringResource
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockGoogleSync.ui.common.AppSwitch
-import org.avmedia.gshockGoogleSync.ui.common.AppText
-import org.avmedia.gshockGoogleSync.ui.common.AppTextLarge
+import AppSwitch
+import AppText
+import AppTextLarge
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
