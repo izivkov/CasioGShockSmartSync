@@ -198,30 +198,29 @@ object H5600HealthIO {
     }
 
     /**
-     * While the watch has not reported ready, sends the poll again whenever it stays silent for
-     * [POLL_REPLY_TIMEOUT_MS]. After [POLL_RETRIES_PER_ATTEMPT] silent polls the attempt is marked for restart.
+     * Polls the watch until it reports ready. A poll that gets no reply, and a poll that gets a busy reply
+     * (00 01 xx), both count as not ready. After [POLL_RETRIES_PER_ATTEMPT] such polls in a row, the
+     * attempt is marked for restart.
      */
     private suspend fun keepPolling(transfer: Transfer) {
-        var retries = 0
+        var notReady = 0
         while (!transfer.finished.isCompleted) {
-            val answered = withTimeoutOrNull(POLL_REPLY_TIMEOUT_MS.milliseconds) { transfer.convoyReplies.receive() }
-            if (answered != null) {
-                retries = 0
-                continue
+            val reply = withTimeoutOrNull(POLL_REPLY_TIMEOUT_MS.milliseconds) { transfer.convoyReplies.receive() }
+            if (!synchronized(lock) { transfer.sync.isPolling }) break
+            notReady++
+            if (notReady > POLL_RETRIES_PER_ATTEMPT) {
+                Timber.w("H5600: watch not ready after $POLL_RETRIES_PER_ATTEMPT polls; restarting the attempt")
+                transfer.silent = true
+                transfer.finished.complete(Unit)
+                break
             }
-            if (transfer.finished.isCompleted) break
-            val stillPolling = synchronized(lock) { transfer.sync.isPolling }
-            if (stillPolling) {
-                retries++
-                if (retries > POLL_RETRIES_PER_ATTEMPT) {
-                    Timber.w("H5600: no reply to $POLL_RETRIES_PER_ATTEMPT polls; restarting the attempt")
-                    transfer.silent = true
-                    transfer.finished.complete(Unit)
-                    break
-                }
-                Timber.w("H5600: no reply to poll within $POLL_REPLY_TIMEOUT_MS ms, retry #$retries")
-                send(H5600Write(H5600Channel.CONVOY, byteArrayOf(0x00, 0x00, 0x00)))
+            if (reply == null) {
+                Timber.w("H5600: no reply to poll within $POLL_REPLY_TIMEOUT_MS ms, retry #$notReady")
+            } else {
+                Timber.w("H5600: watch busy, retry #$notReady")
+                delay(POLL_REPLY_TIMEOUT_MS.milliseconds)
             }
+            send(H5600Write(H5600Channel.CONVOY, byteArrayOf(0x00, 0x00, 0x00)))
         }
     }
 
