@@ -108,4 +108,13 @@ class AppScreenStateTest {
 
         assertEquals(expected, actual, 0.05f)
     }
+
+    @Test
+    fun alwaysConnectedConnectionStaysOnTheInitialScreen() {
+        assertEquals(
+            EntryReason.BACKGROUND,
+            EntryReason.forButton(org.avmedia.gshockGoogleSync.session.ConnectionButton.ALWAYS_CONNECTED)
+        )
+        assertEquals(AppScreen.INITIAL, screenFor(ready(EntryReason.BACKGROUND)).screen)
+    }
 }

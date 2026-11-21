@@ -59,6 +59,7 @@ class AppScreenState @Inject constructor(
                             EntryReason.NORMAL -> AppScreen.MAIN_NAVIGATION
                             EntryReason.CONTENT_SELECTOR -> AppScreen.CONTENT_SELECTOR
                             EntryReason.RUN_ACTIONS -> AppScreen.RUN_ACTIONS
+                            EntryReason.BACKGROUND -> AppScreen.INITIAL
                         }
                     }
                 )
