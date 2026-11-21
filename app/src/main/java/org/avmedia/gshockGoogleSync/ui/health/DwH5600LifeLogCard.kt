@@ -61,19 +61,6 @@ fun DwH5600LifeLogCard(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        val steps = data.currentDaySteps
-        val goal = state.stepGoal
-        Section(title = stringResource(id = R.string.card_steps)) {
-            InfoRow(
-                label = stringResource(id = R.string.steps_today),
-                value = if (goal > 0 && steps != null) {
-                    "${format(steps)} of ${format(goal)} (${steps * 100 / goal}%)"
-                } else {
-                    steps?.let { format(it) } ?: NO_VALUE
-                },
-            )
-        }
-
         Section(title = stringResource(id = R.string.card_activity)) {
             InfoRow(
                 label = stringResource(id = R.string.energy_estimate),

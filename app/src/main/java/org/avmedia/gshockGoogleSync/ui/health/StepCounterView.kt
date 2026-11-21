@@ -80,7 +80,7 @@ fun StepCounterView(
                     currentSteps = currentSteps,
                     goal = state.stepGoal,
                     distanceKm = state.distanceKm,
-                    calories = state.calories
+                    calories = state.stepCounterData.h5600?.energyKcal?.toFloat() ?: state.calories
                 )
             }
 
