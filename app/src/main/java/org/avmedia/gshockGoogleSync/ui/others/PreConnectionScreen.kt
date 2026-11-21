@@ -302,7 +302,7 @@ fun PreConnectionScreen(
                                     ptrConnectionViewModel.startWatchSetUp()
                                     Toast.makeText(
                                         context,
-                                        "Now press Connect on the watch within 2 minutes",
+                                        "Waiting for the watch to connect",
                                         Toast.LENGTH_LONG
                                     ).show()
                                 },
