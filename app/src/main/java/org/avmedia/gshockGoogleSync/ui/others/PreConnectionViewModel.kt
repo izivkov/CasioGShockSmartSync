@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import org.avmedia.gshockGoogleSync.session.SetupWindow
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -140,6 +141,11 @@ constructor(
             hidePreparingUi()
             delegate.onError(appContext.getString(R.string.pairing_failed_generic, e.message ?: "Unknown error"))
         }
+    }
+
+    /** "Set up watch": the next connection opens the main navigation. */
+    fun startWatchSetUp() {
+        SetupWindow.open()
     }
 
     fun loadPairedDevices() {

@@ -23,7 +23,7 @@ internal fun GShockRepository.currentConnectionButton(): ConnectionButton = when
     isActionButtonPressed() -> ConnectionButton.FROM_ACTION
     isAutoTimeStarted() -> ConnectionButton.AUTOMATIC_SYNC
     isFindPhoneButtonPressed() -> ConnectionButton.FIND
-    isAlwaysConnectedConnectionPressed() -> ConnectionButton.ALWAYS_CONNECTED
+    isAlwaysConnectedConnectionPressed() && !SetupWindow.consume() -> ConnectionButton.ALWAYS_CONNECTED
     else -> ConnectionButton.NORMAL
 }
 

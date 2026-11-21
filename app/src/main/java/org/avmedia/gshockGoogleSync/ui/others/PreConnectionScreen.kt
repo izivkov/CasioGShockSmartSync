@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import android.widget.Toast
 import androidx.compose.ui.unit.Dp
 import AppSwitch
 import AppText
@@ -297,6 +298,14 @@ fun PreConnectionScreen(
                                         )
                                     }
                                 },
+                                onSetUpWatch = { device ->
+                                    ptrConnectionViewModel.startWatchSetUp()
+                                    Toast.makeText(
+                                        context,
+                                        "Now press Connect on the watch within 2 minutes",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                },
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .fillMaxWidth()
@@ -359,6 +368,7 @@ fun PairedDeviceList(
     devices: List<PreConnectionViewModel.DeviceItem>,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
+    onSetUpWatch: (PreConnectionViewModel.DeviceItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -408,6 +418,16 @@ fun PairedDeviceList(
                                         .graphicsLayer(scaleX = -1f)
                                 )
                             }
+                        }
+
+                        if (device.isAlwaysConnected) {
+                            AppButton(
+                                text = stringResource(R.string.set_up_watch),
+                                onClick = { onSetUpWatch(device) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp)
+                            )
                         }
 
                     }
