@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import android.widget.Toast
 import androidx.compose.ui.unit.Dp
 import AppSwitch
@@ -384,14 +383,12 @@ fun PairedDeviceList(
         ) {
             devices.forEach { device ->
                 AppCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -427,9 +424,7 @@ fun PairedDeviceList(
                             AppButton(
                                 text = stringResource(R.string.set_up_watch),
                                 onClick = { onSetUpWatch(device) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
