@@ -124,7 +124,6 @@ fun DwH5600LifeLogCard(
                 }
             }
         }
-
     }
 }
 
