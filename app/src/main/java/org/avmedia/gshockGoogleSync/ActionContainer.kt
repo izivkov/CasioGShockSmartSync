@@ -43,6 +43,8 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.webhook.WebhookDispatcher
+import org.avmedia.gshockGoogleSync.webhook.WebhookTrigger
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockapi.model.Alarm
@@ -94,7 +96,8 @@ constructor(
     private val watchFeatureManager: IWatchFeatureManager,
     private val eventStorage: EventStorage,
     private val alarmNameStorage: AlarmNameStorage,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val webhookDispatcher: WebhookDispatcher
 ) {
     /** Manually-created scope, since this class has no ViewModel/Activity lifecycle to tie one to. Lives as long as the process. */
     private val containerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -225,6 +228,7 @@ constructor(
                 )
             )
             add(PrayerAlarmsAction("Set Prayer Alarms", false, prayerAlarmsHelper))
+            add(WebhookAction("Call webhooks", true))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
@@ -558,6 +562,34 @@ constructor(
                     }
             }
         }
+    }
+
+    /**
+     * Fires every enabled webhook whose trigger is "a watch action" (see the Webhooks screen).
+     * Its on/off switch is kept in [LocalDataStorage], not in the watch's scratchpad bits.
+     */
+    inner class WebhookAction(override var title: String, override var enabled: Boolean) :
+        Action(title, enabled) {
+
+        // Button press, or the Phone Finder request of always-connected watches (they arrive here too).
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
+            else -> false
+        }
+
+        override fun run(context: Context) {
+            webhookDispatcher.fire(WebhookTrigger.WATCH_ACTION)
+        }
+
+        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
+            LocalDataStorage.put(context, ENABLED_KEY, enabled.toString())
+        }
+
+        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
+            enabled = LocalDataStorage.get(context, ENABLED_KEY, "true") != "false"
+        }
+
+        private val ENABLED_KEY = "WebhookAction.enabled"
     }
 
     inner class Separator(override var title: String, override var enabled: Boolean) :

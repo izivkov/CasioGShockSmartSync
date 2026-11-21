@@ -1,0 +1,37 @@
+name: Test APK (webhook)
+
+on:
+  push:
+    branches: [webhook]
+  workflow_dispatch:
+
+concurrency:
+  group: test-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Unit tests
+        run: ./gradlew testGithubDebugUnitTest
+
+      - name: Build debug APK
+        run: ./gradlew assembleGithubDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartsync-webhook-test
+          path: app/build/outputs/apk/github/debug/*.apk
+          if-no-files-found: error

@@ -217,4 +217,13 @@
     <string name="exercise_profile_read_failed">Couldn\'t read the watch\'s exercise profile. Change not saved.</string>
     <string name="health">Health</string>
     <string name="alarm_send_failed" translatable="false">Couldn\'t save alarms to the watch.</string>
+    <string name="webhooks">Webhooks</string>
+    <string name="webhooks_empty">No webhooks yet. Add one to let your watch call a web service.</string>
+    <string name="webhook_add">Add</string>
+    <string name="webhook_new">New webhook</string>
+    <string name="webhook_edit">Edit webhook</string>
+    <string name="webhook_back">Back</string>
+    <string name="call_webhooks">Call webhooks</string>
+    <string name="call_webhooks_info">Calls the webhooks that are set to fire on a watch action.</string>
+    <string name="manage_webhooks">Manage webhooks</string>
 </resources>
