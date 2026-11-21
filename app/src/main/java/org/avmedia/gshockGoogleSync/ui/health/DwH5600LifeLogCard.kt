@@ -66,14 +66,10 @@ fun DwH5600LifeLogCard(
         Section(title = stringResource(id = R.string.card_steps)) {
             InfoRow(
                 label = stringResource(id = R.string.steps_today),
-                value = steps?.let { format(it) } ?: NO_VALUE,
-            )
-            InfoRow(
-                label = stringResource(id = R.string.goal),
                 value = if (goal > 0 && steps != null) {
-                    "${format(goal)} (${steps * 100 / goal}%)"
+                    "${format(steps)} of ${format(goal)} (${steps * 100 / goal}%)"
                 } else {
-                    NO_VALUE
+                    steps?.let { format(it) } ?: NO_VALUE
                 },
             )
         }
@@ -85,16 +81,10 @@ fun DwH5600LifeLogCard(
             )
             health.activity?.let { activity ->
                 InfoRow(
-                    label = stringResource(id = R.string.walking),
-                    value = formatDuration(activity.walkSeconds),
-                )
-                InfoRow(
-                    label = stringResource(id = R.string.cycling),
-                    value = formatDuration(activity.cycleSeconds),
-                )
-                InfoRow(
-                    label = stringResource(id = R.string.active_time),
-                    value = formatDuration(activity.activeSeconds),
+                    label = stringResource(id = R.string.activity_summary),
+                    value = "${formatDuration(activity.walkSeconds)} / " +
+                        "${formatDuration(activity.cycleSeconds)} / " +
+                        formatDuration(activity.activeSeconds),
                 )
             }
         }
@@ -148,13 +138,6 @@ fun DwH5600LifeLogCard(
             }
         }
 
-        if (data.warnings.isNotEmpty()) {
-            Section(title = stringResource(id = R.string.notes)) {
-                data.warnings.forEach { note ->
-                    Text(text = note, style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
     }
 }
 
@@ -243,7 +226,7 @@ private fun InfoRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
+        Text(text = label, style = MaterialTheme.typography.bodySmall)
+        Text(text = value, style = MaterialTheme.typography.bodySmall)
     }
 }

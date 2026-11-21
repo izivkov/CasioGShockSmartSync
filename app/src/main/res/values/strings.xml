@@ -241,4 +241,5 @@
     <string name="card_activity">Energy and activity</string>
     <string name="card_heart_rate">Heart rate</string>
     <string name="card_status">Watch status</string>
+    <string name="activity_summary">Walk / cycle / active</string>
 </resources>

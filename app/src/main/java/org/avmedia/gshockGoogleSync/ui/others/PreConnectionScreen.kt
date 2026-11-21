@@ -399,13 +399,6 @@ fun PairedDeviceList(
                             RemoveButton(onClick = { onDisassociate(device) })
                             Spacer(modifier = Modifier.width(4.dp))
 
-                            if (device.isAlwaysConnected) {
-                                AppSwitch(
-                                    checked = grantedAddresses.contains(device.address.uppercase()),
-                                    onCheckedChange = { onAllowConnection(device, it) }
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                            }
 
                             Text(
                                 text = device.name,
@@ -425,13 +418,6 @@ fun PairedDeviceList(
                                     .weight(1f)
                             )
 
-                            if (device.isAlwaysConnected) {
-                                InfoButton(
-                                    infoText = stringResource(R.string.allow_connection_info),
-                                    iconSize = 24.dp,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                            }
 
                             if (device.isLastUsed) {
                                 Icon(
@@ -441,6 +427,25 @@ fun PairedDeviceList(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .graphicsLayer(scaleX = -1f)
+                                )
+                            }
+                        }
+
+                        if (device.isAlwaysConnected) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Indented to line up with the watch name above (after the 48 dp remove button)
+                                Spacer(modifier = Modifier.width(52.dp))
+                                AppSwitch(
+                                    checked = grantedAddresses.contains(device.address.uppercase()),
+                                    onCheckedChange = { onAllowConnection(device, it) }
+                                )
+                                InfoButton(
+                                    infoText = stringResource(R.string.allow_connection_info),
+                                    iconSize = 24.dp,
+                                    modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
                         }
