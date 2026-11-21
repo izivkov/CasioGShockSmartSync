@@ -302,7 +302,7 @@ fun PreConnectionScreen(
                                     }
                                 },
                                 onSetUpWatch = { device ->
-                                    ptrConnectionViewModel.startWatchSetUp()
+                                    ptrConnectionViewModel.startWatchSetUp(device.address)
                                     Toast.makeText(
                                         context,
                                         "Waiting for the watch to connect",

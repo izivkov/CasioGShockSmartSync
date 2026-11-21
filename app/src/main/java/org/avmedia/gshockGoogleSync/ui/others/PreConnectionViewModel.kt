@@ -149,9 +149,9 @@ constructor(
     private val _waitingForWatch = MutableStateFlow(false)
     val waitingForWatch: StateFlow<Boolean> = _waitingForWatch
 
-    fun startWatchSetUp() {
-        SetupWindow.open()
-        AlwaysConnectedPermission.grant()
+    fun startWatchSetUp(address: String) {
+        SetupWindow.open(address)
+        AlwaysConnectedPermission.grant(address)
         viewModelScope.launch {
             _waitingForWatch.value = true
             delay(2 * 60_000L)

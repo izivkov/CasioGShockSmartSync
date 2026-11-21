@@ -1,27 +1,24 @@
 package org.avmedia.gshockGoogleSync.session
 
 /**
- * A short window opened by the user's "Set up watch" action. A connection that starts while the
- * window is open opens the main navigation, even when the watch reports the always-connected button
- * type. The first such connection uses up the window.
+ * A short window opened by the "Allow connection" action, kept per watch address. A connection from
+ * that watch that starts while its window is open opens the main navigation, even when the watch
+ * reports the always-connected button type. The first such connection uses up the window.
  */
 object SetupWindow {
     private const val WINDOW_MS = 2 * 60_000L
 
-    private var openUntilMillis: Long = 0L
+    private val openUntil = mutableMapOf<String, Long>()
 
-    fun open(now: Long = System.currentTimeMillis()) {
-        synchronized(this) { openUntilMillis = now + WINDOW_MS }
+    fun open(address: String, now: Long = System.currentTimeMillis()) {
+        synchronized(this) { openUntil[address.uppercase()] = now + WINDOW_MS }
     }
 
-    /** True once for a connection that starts inside the window; the window is then used up. */
-    fun consume(now: Long = System.currentTimeMillis()): Boolean =
+    /** True once for a connection from [address] that starts inside its window; the window is then used up. */
+    fun consume(address: String, now: Long = System.currentTimeMillis()): Boolean =
         synchronized(this) {
-            if (now < openUntilMillis) {
-                openUntilMillis = 0L
-                true
-            } else {
-                false
-            }
+            val until = openUntil[address.uppercase()] ?: return false
+            openUntil.remove(address.uppercase())
+            now < until
         }
 }
