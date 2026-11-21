@@ -399,6 +399,14 @@ fun PairedDeviceList(
                             RemoveButton(onClick = { onDisassociate(device) })
                             Spacer(modifier = Modifier.width(4.dp))
 
+                            if (device.isAlwaysConnected) {
+                                AppSwitch(
+                                    checked = grantedAddresses.contains(device.address.uppercase()),
+                                    onCheckedChange = { onAllowConnection(device, it) }
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                            }
+
                             Text(
                                 text = device.name,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -417,6 +425,14 @@ fun PairedDeviceList(
                                     .weight(1f)
                             )
 
+                            if (device.isAlwaysConnected) {
+                                InfoButton(
+                                    infoText = stringResource(R.string.allow_connection_info),
+                                    iconSize = 24.dp,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                            }
+
                             if (device.isLastUsed) {
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
@@ -429,22 +445,6 @@ fun PairedDeviceList(
                             }
                         }
 
-                        if (device.isAlwaysConnected) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                AppSwitch(
-                                    checked = grantedAddresses.contains(device.address.uppercase()),
-                                    onCheckedChange = { onAllowConnection(device, it) }
-                                )
-                                InfoButton(
-                                    infoText = stringResource(R.string.allow_connection_info),
-                                    iconSize = 24.dp,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
 
                     }
                 }

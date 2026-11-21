@@ -237,4 +237,8 @@
     <string name="loading_lifelog">Loading LifeLog from the watch…</string>
     <string name="set_up_watch">Allow connection</string>
     <string name="allow_connection_info">This watch is an always-connected type. It tries to connect to the phone all the time, so this switch is off by default to stop it. Turn it on to allow one connection; the switch turns off again after the connection. The watch connects by itself, and that can take a while. You do not need to press anything on the watch.</string>
+    <string name="card_steps">Steps</string>
+    <string name="card_activity">Energy and activity</string>
+    <string name="card_heart_rate">Heart rate</string>
+    <string name="card_status">Watch status</string>
 </resources>
