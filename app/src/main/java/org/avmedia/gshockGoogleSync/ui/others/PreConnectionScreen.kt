@@ -1,8 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
 import androidx.compose.ui.unit.Dp
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
-import androidx.compose.runtime.CompositionLocalProvider
 import AppSwitch
 import AppText
 import android.annotation.SuppressLint
@@ -299,9 +297,6 @@ fun PreConnectionScreen(
                                         )
                                     }
                                 },
-                                onToggleAllowAlwaysConnected = { device, allow ->
-                                    ptrConnectionViewModel.toggleAllowAlwaysConnected(device, allow)
-                                },
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .fillMaxWidth()
@@ -364,7 +359,6 @@ fun PairedDeviceList(
     devices: List<PreConnectionViewModel.DeviceItem>,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
-    onToggleAllowAlwaysConnected: (PreConnectionViewModel.DeviceItem, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -375,7 +369,7 @@ fun PairedDeviceList(
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             devices.forEach { device ->
                 AppCard(
@@ -416,28 +410,6 @@ fun PairedDeviceList(
                             }
                         }
 
-                        if (device.isAlwaysConnected) {
-                            // Drop the switch's 48 dp minimum touch area, which adds a large gap per watch.
-                            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    AppText(
-                                        text = stringResource(R.string.allow_always_connected),
-                                        fontSize = 12.sp,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(end = 4.dp)
-                                    )
-                                    AppSwitch(
-                                        checked = device.allowAlwaysConnected,
-                                        onCheckedChange = { onToggleAllowAlwaysConnected(device, it) }
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
             }

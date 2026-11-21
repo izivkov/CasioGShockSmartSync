@@ -43,11 +43,6 @@ class CompanionDeviceCoordinator @Inject constructor(
                             val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() }
                                 ?: LocalDataStorage.get(context, "LastDeviceName")?.takeIf { it.isNotBlank() }
                                 ?: org.avmedia.gshockapi.WatchInfo.name
-                            val isAlwaysConnected = org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(deviceName)
-                            if (!AlwaysConnectedConnectionPolicy.connectionAllowed(context, normalizedAddress, isAlwaysConnected)) {
-                                Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($deviceName): six-hour limit active")
-                                return@launch
-                            }
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
                             repository.stopScan()
                             if (repository.isConnected()) {
@@ -55,24 +50,25 @@ class CompanionDeviceCoordinator @Inject constructor(
                                 return@launch
                             }
 
-                            repeat(CONNECTION_ATTEMPTS) { attempt ->
+                            // Like the official app: while the watch is advertising, retry quickly. A refused
+                            // attempt fails within about 0.1 s, so a short interval is enough.
+                            val windowEnd = System.currentTimeMillis() + CONNECTION_WINDOW_MS
+                            var attempt = 0
+                            while (System.currentTimeMillis() < windowEnd && !repository.isConnected()) {
+                                attempt++
                                 try {
-                                    Timber.i("$normalizedAddress waitForConnection attempt ${attempt + 1}/$CONNECTION_ATTEMPTS")
+                                    Timber.i("$normalizedAddress connection attempt $attempt")
                                     repository.waitForConnection(normalizedAddress)
-                                    AlwaysConnectedConnectionPolicy.recordConnection(context, normalizedAddress)
                                     return@launch
                                 } catch (cancelled: CancellationException) {
                                     throw cancelled
                                 } catch (error: Exception) {
-                                    if (attempt == CONNECTION_ATTEMPTS - 1) {
-                                        Timber.e(error, "Connection attempts exhausted for $normalizedAddress")
-                                    } else {
-                                        Timber.w(error, "Connection attempt failed for $normalizedAddress; retrying shortly")
-                                        repository.disconnect()
-                                        delay(CONNECTION_RETRY_DELAY_MS)
-                                    }
+                                    Timber.w("Attempt $attempt refused for $normalizedAddress: ${error.message}")
+                                    repository.disconnect()
+                                    delay(CONNECTION_RETRY_DELAY_MS)
                                 }
                             }
+                            Timber.i("Advertising window closed without a connection for $normalizedAddress")
                         }
                     }
                 },
@@ -235,8 +231,8 @@ class CompanionDeviceCoordinator @Inject constructor(
     }
 
     private companion object {
-        const val CONNECTION_ATTEMPTS = 2
-        const val CONNECTION_RETRY_DELAY_MS = 1_000L
+        const val CONNECTION_RETRY_DELAY_MS = 200L
+        const val CONNECTION_WINDOW_MS = 120_000L
     }
 }
 
