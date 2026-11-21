@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.animation.core.RepeatMode
@@ -105,34 +107,53 @@ fun WatchImageWithOverlay(
     }
 }
 
+private val REMINDER_BLOCK_HEIGHT = 80.dp
+
 @Composable
 fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
 ) {
-    Column(modifier = modifier) {
-        // The reminder sits above the watch image, which leaves the room below it for the watch list.
-        Text(
-            text = stringResource(R.string.find_phone_instruction),
-            color = Color.Red,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            lineHeight = 24.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
-        )
+    BoxWithConstraints(modifier = modifier) {
+        val painter = painterResource(id = imageResId)
+
+        // The picture is drawn centred ("Fit"), so its top edge depends on its proportions.
+        // Work it out, so the reminder can sit directly above it without moving the picture.
+        val intrinsic = painter.intrinsicSize
+        val drawnHeight: Dp =
+            if (intrinsic.isSpecified && intrinsic.width > 0f) {
+                minOf(maxHeight.value, maxWidth.value * intrinsic.height / intrinsic.width).dp
+            } else {
+                maxHeight
+            }
+        val pictureTop = (maxHeight - drawnHeight) / 2
+
+        // Background watch image, exactly as before
         Image(
-            painter = painterResource(id = imageResId),
+            painter = painter,
             contentDescription = "Watch Image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+
+        // Reminder, bottom-aligned in a block that ends where the picture starts
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            contentScale = ContentScale.Fit,
-            // Sit the picture directly under the reminder, not centred in the space below it.
-            alignment = Alignment.TopCenter
-        )
+                .height(REMINDER_BLOCK_HEIGHT)
+                .offset(y = pictureTop - REMINDER_BLOCK_HEIGHT)
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Text(
+                text = stringResource(R.string.find_phone_instruction),
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                lineHeight = 24.sp,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
