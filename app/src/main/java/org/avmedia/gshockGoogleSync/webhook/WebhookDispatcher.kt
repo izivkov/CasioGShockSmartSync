@@ -58,7 +58,7 @@ class WebhookDispatcher @Inject constructor(
 
     /** Renders [hook] with the current values. [hook] may be an unsaved edit (Test button). */
     suspend fun render(hook: Webhook, trigger: WebhookTrigger): TemplateRenderer.Rendered {
-        val ctx = VariableContext(trigger.eventName, OffsetDateTime.now(), api.isConnected())
+        val ctx = VariableContext(trigger.eventName, OffsetDateTime.now(), runCatching { api.isConnected() }.getOrDefault(false))
         return registry.render(hook.bodyTemplate, hook.isJson, ctx)
     }
 
@@ -71,7 +71,7 @@ class WebhookDispatcher @Inject constructor(
         if (rendered.failed.isNotEmpty()) {
             WebhookDiagnostics.logWarn("Variables failed: ${rendered.failed.joinToString()}")
         }
-        return TestReport(outcome, rendered, api.isConnected())
+        return TestReport(outcome, rendered, runCatching { api.isConnected() }.getOrDefault(false))
     }
 
     data class TestReport(

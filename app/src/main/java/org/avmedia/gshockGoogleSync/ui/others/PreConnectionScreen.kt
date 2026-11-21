@@ -99,6 +99,7 @@ private const val GUIDELINE_LIST_TOP = 0.82f
 @Composable
 fun PreConnectionScreen(
     ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
+    onOpenWebhooks: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -298,6 +299,16 @@ fun PreConnectionScreen(
                                     .padding(8.dp)
                                     .fillMaxWidth()
                             )
+                        }
+
+                        // Works without a watch: the Webhooks screen and its Test button.
+                        androidx.compose.material3.TextButton(
+                            onClick = onOpenWebhooks,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(top = 24.dp, start = 16.dp)
+                        ) {
+                            androidx.compose.material3.Text(stringResource(R.string.webhooks))
                         }
 
                         Box(

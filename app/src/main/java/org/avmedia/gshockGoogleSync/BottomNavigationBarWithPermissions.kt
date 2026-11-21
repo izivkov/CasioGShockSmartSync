@@ -47,12 +47,12 @@ import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
-import org.avmedia.gshockGoogleSync.webhook.WebhooksScreen
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
+    onOpenWebhooks: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -182,7 +182,7 @@ fun BottomNavigationBarWithPermissions(
                     permissions,
                     navController,
                     destinationScreen = {
-                        ActionsScreen(onOpenWebhooks = { navController.navigate(Screens.Webhooks.route) })
+                        ActionsScreen(onOpenWebhooks = onOpenWebhooks)
                     },
                     stringResource(
                         R.string.required_permissions_denied_cannot_access_actions
@@ -191,9 +191,6 @@ fun BottomNavigationBarWithPermissions(
             }
             composable(Screens.Settings.route) {
                 SettingsScreen()
-            }
-            composable(Screens.Webhooks.route) {
-                WebhooksScreen(onBack = { navController.popBackStack() })
             }
         }
     }

@@ -7,6 +7,4 @@ sealed class Screens(val route: String) {
     data object Events : Screens("Events")
     data object Actions : Screens("Actions")
     data object Settings : Screens("Settings")
-    /** Not in the bottom bar: opened from the Actions screen. */
-    data object Webhooks : Screens("Webhooks")
 }

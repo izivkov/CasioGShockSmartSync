@@ -15,6 +15,7 @@ import org.avmedia.gshockGoogleSync.ui.others.CoverScreen
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
+import org.avmedia.gshockGoogleSync.webhook.WebhooksScreen
 
 @Composable
 fun AppNavigationHost(
@@ -36,12 +37,17 @@ fun AppNavigationHost(
             .padding(contentPadding)
     ) {
         when (state.screen) {
-            AppScreen.INITIAL, AppScreen.PRE_CONNECTION -> PreConnectionScreen()
+            AppScreen.INITIAL, AppScreen.PRE_CONNECTION ->
+                PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks)
             AppScreen.CONTENT_SELECTOR -> ContentSelector(viewModel)
             AppScreen.MAIN_NAVIGATION ->
-                BottomNavigationBarWithPermissions(repository = viewModel.repository)
+                BottomNavigationBarWithPermissions(
+                    repository = viewModel.repository,
+                    onOpenWebhooks = viewModel::openWebhooks
+                )
             AppScreen.RUN_ACTIONS -> RunActionsScreen()
-            AppScreen.ERROR -> PreConnectionScreen()
+            AppScreen.ERROR -> PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks)
+            AppScreen.WEBHOOKS -> WebhooksScreen(onBack = viewModel::closeWebhooks)
         }
     }
 }
@@ -60,6 +66,10 @@ private fun ContentSelector(viewModel: AppNavigationViewModel) {
 
         ConnectionButton.FROM_ACTION, ConnectionButton.AUTOMATIC_SYNC -> RunActionsScreen()
         ConnectionButton.FIND -> RunFindPhoneScreen()
-        ConnectionButton.NORMAL, null -> BottomNavigationBarWithPermissions(repository = repository)
+        ConnectionButton.NORMAL, null ->
+            BottomNavigationBarWithPermissions(
+                repository = repository,
+                onOpenWebhooks = viewModel::openWebhooks
+            )
     }
 }

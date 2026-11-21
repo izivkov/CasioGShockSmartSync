@@ -6,12 +6,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.avmedia.gshockGoogleSync.session.EntryReason
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
 import org.avmedia.gshockGoogleSync.session.SessionState
+import org.avmedia.gshockGoogleSync.webhook.WebhookScreenState
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,18 +40,26 @@ data class AppNavigationState(
  */
 @Singleton
 class AppScreenState @Inject constructor(
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    webhookScreenState: WebhookScreenState
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    val state: StateFlow<AppNavigationState> = sessionManager.sessionState
-        .map { navigationFor(it) }
-        .distinctUntilChanged()
-        .stateIn(scope, SharingStarted.Eagerly, navigationFor(sessionManager.sessionState.value))
+    val state: StateFlow<AppNavigationState> =
+        combine(sessionManager.sessionState, webhookScreenState.open) { session, webhooksOpen ->
+            navigationFor(session, webhooksOpen)
+        }
+            .distinctUntilChanged()
+            .stateIn(
+                scope,
+                SharingStarted.Eagerly,
+                navigationFor(sessionManager.sessionState.value, webhookScreenState.open.value)
+            )
 
     companion object {
         internal fun navigationFor(session: SessionState, webhooksOpen: Boolean = false): AppNavigationState =
-            when (val phase = session.phase) {
+            if (webhooksOpen) AppNavigationState(AppScreen.WEBHOOKS)
+            else when (val phase = session.phase) {
                 SessionPhase.Disconnected -> AppNavigationState(AppScreen.INITIAL)
 
                 // The pre-connection screen shows the connection progress.

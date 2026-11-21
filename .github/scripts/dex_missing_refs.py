@@ -15,7 +15,7 @@ referrers = collections.defaultdict(set)
 cls_re = re.compile(r"Class descriptor\s+:\s+'(L[^']+;)'")
 ref_re = re.compile(r"\b(L[A-Za-z0-9_$/]+;)")
 for d in dexes:
-    out = subprocess.run([dexdump, "-d", os.path.join(tmp, d)], capture_output=True, text=True).stdout
+    out = subprocess.run([dexdump, "-d", os.path.join(tmp, d)], capture_output=True, text=True, errors="replace").stdout
     current = None
     for line in out.splitlines():
         m = cls_re.search(line)
