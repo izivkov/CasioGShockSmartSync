@@ -269,11 +269,6 @@ class HealthViewModel @Inject constructor(
                             .withWatchGoal(stepData)
                     }
 
-                    // Like the official app: once the LifeLog is read, release the connection.
-                    if (needsWatch && org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(org.avmedia.gshockapi.WatchInfo.name)) {
-                        Timber.i("Health: LifeLog read; releasing the always-connected watch")
-                        api.disconnect()
-                    }
                     val profile = withTimeoutOrNull(PROFILE_READ_TIMEOUT) { readExerciseProfile() }
                     if (profile != null) {
                         _state.update { current ->
