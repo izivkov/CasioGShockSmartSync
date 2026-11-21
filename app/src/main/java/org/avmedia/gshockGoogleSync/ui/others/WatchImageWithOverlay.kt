@@ -121,7 +121,7 @@ fun WatchImageWithOverlayAlwaysConnected(
         // Work it out, so the reminder can sit directly above it without moving the picture.
         val intrinsic = painter.intrinsicSize
         val drawnHeight: Dp =
-            if (intrinsic.isSpecified && intrinsic.width > 0f) {
+            if (intrinsic.width > 0f && intrinsic.height > 0f) {
                 minOf(maxHeight.value, maxWidth.value * intrinsic.height / intrinsic.width).dp
             } else {
                 maxHeight
