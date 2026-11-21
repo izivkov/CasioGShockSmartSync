@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.ActionContainer
@@ -86,6 +86,8 @@ data class HealthState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
     /** True while the DW-H5600 LifeLog is being read from the watch. */
     val lifeLogLoading: Boolean = false,
+    /** True while the latest data is being read; the Update button is disabled meanwhile. */
+    val updating: Boolean = false,
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val stepGoal: Int = 10000,
     val weight: Int = 70, // kg
@@ -103,6 +105,7 @@ sealed interface HealthAction {
     data class SetHeightInches(val inches: Double) : HealthAction
     data object ClearStepHistory : HealthAction
     data object RefreshState : HealthAction
+    data object UpdateLatest : HealthAction
 }
 
 internal fun applyExerciseProfileState(
@@ -190,6 +193,8 @@ class HealthViewModel @Inject constructor(
 
     fun onAction(action: HealthAction) {
         when (action) {
+            HealthAction.UpdateLatest -> startUpdate()
+
             is HealthAction.SetStepDataOption -> _state.update {
                 it.copy(selectedStepDataOption = action.option)
             }
@@ -239,12 +244,19 @@ class HealthViewModel @Inject constructor(
         return api.getStepCount().also { if (it.h5600 != null) H5600Session.data = it }
     }
 
+    /** The Update button: read the latest data again (the LifeLog for the DW-H5600, the steps for the ABL-100). */
+    private fun startUpdate() {
+        if (isDwH5600()) H5600Session.clear()
+        requestStepRefresh()
+    }
+
     private fun requestStepRefresh() {
         Timber.i("Health: step refresh requested (running=${stepFetchJob?.isActive == true}, dwH5600=${isDwH5600()})")
         if (stepFetchJob?.isActive == true) {
             stepFetchPending = true
             return
         }
+        _state.update { it.copy(updating = true) }
         stepFetchJob = viewModelScope.launch {
             do {
                 stepFetchPending = false
@@ -281,6 +293,7 @@ class HealthViewModel @Inject constructor(
                     _state.update { current -> current.copy(lifeLogLoading = false) }
                 }
             } while (stepFetchPending)
+            _state.update { it.copy(updating = false) }
         }
     }
 

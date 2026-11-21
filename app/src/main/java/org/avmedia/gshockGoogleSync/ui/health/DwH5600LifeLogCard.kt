@@ -70,8 +70,8 @@ fun DwH5600LifeLogCard(
                 InfoRow(
                     label = stringResource(id = R.string.activity_summary),
                     value = "${formatDuration(activity.walkSeconds)} / " +
-                        "${formatDuration(activity.cycleSeconds)} / " +
-                        formatDuration(activity.activeSeconds),
+                            "${formatDuration(activity.cycleSeconds)} / " +
+                            formatDuration(activity.activeSeconds),
                 )
             }
         }
@@ -113,17 +113,7 @@ fun DwH5600LifeLogCard(
             )
         }
 
-        val hours = data.hourlySteps.withIndex().filter { (it.value ?: 0) > 0 }
-        if (hours.isNotEmpty()) {
-            Section(title = stringResource(id = R.string.steps_by_hour)) {
-                hours.forEach { (hour, count) ->
-                    InfoRow(
-                        label = String.format(Locale.US, "%02d:00", hour),
-                        value = format(count ?: 0),
-                    )
-                }
-            }
-        }
+
     }
 }
 

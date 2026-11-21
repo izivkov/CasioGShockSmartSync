@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -43,7 +44,7 @@ fun HealthScreen() {
     val state by healthViewModel.state.collectAsState()
     // DW-H5600: until its LifeLog arrives, show only the loading message
     val waitingForLifeLog = WatchInfo.model == WatchInfo.WatchModel.DW_H5600 &&
-        state.stepCounterData.h5600 == null && state.lifeLogLoading
+            state.stepCounterData.h5600 == null && state.lifeLogLoading
 
     // Refresh every time the screen opens, so a LifeLog read that finished while the screen
     // was closed (or before the watch connected) reaches the cards.
@@ -79,39 +80,49 @@ fun HealthScreen() {
                         }
                     }
                 } else {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Steps card — shows Today, Hourly, and Daily panels all at once
-                    StepCounterView(
-                        modifier = Modifier.fillMaxWidth(),
-                        healthViewModel = healthViewModel
-                    )
-
-                    // DW-H5600 LifeLog details (nothing is shown for other watches)
-                    DwH5600LifeLogCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        healthViewModel = healthViewModel
-                    )
-
-                    // Profile button: the ABL-100 profile does not apply to the DW-H5600
-                    if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) {
-                        AppButton(
-                            text = stringResource(id = R.string.profile),
-                            onClick = { showProfileDialog = true },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Steps card — shows Today, Hourly, and Daily panels all at once
+                        StepCounterView(
+                            modifier = Modifier.fillMaxWidth(),
+                            healthViewModel = healthViewModel
                         )
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        // DW-H5600 LifeLog details (nothing is shown for other watches)
+                        DwH5600LifeLogCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            healthViewModel = healthViewModel
+                        )
+
+                        // Profile button: the ABL-100 profile does not apply to the DW-H5600
+                        if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) {
+                            AppButton(
+                                text = stringResource(id = R.string.profile),
+                                onClick = { showProfileDialog = true },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
+
+                Button(
+                    onClick = { healthViewModel.onAction(HealthAction.UpdateLatest) },
+                    enabled = !state.updating,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(text = stringResource(id = R.string.update_latest))
                 }
             }
         }
