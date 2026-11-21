@@ -1,7 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
-import org.avmedia.gshockapi.io.H5600HealthIO
-import org.avmedia.gshockapi.WatchInfo
 import AppText
 import AppTextLarge
 import androidx.compose.foundation.Canvas
@@ -48,7 +46,6 @@ fun StepCounterView(
     healthViewModel: HealthViewModel = hiltViewModel()
 ) {
     val state by healthViewModel.state.collectAsState()
-    val status by H5600HealthIO.status.collectAsState()
 
     AppCard(
         modifier = modifier.fillMaxWidth()
@@ -87,23 +84,12 @@ fun StepCounterView(
                 )
             }
 
-            // ── DW-H5600: the watch's daily values sit in this card, under the gauge ──
-            val dw = WatchInfo.model == WatchInfo.WatchModel.DW_H5600
-            if (dw) {
-                Spacer(modifier = Modifier.height(8.dp))
-                SectionDivider()
-                Spacer(modifier = Modifier.height(8.dp))
-                if (state.stepCounterData.h5600 != null) {
-                    DwH5600DailyContent(data = state.stepCounterData, stepGoal = state.stepGoal)
-                } else if (state.lifeLogLoading) {
-                    DwH5600Loading(status = status)
-                } else {
-                    H5600HealthIO.lastError?.let { DwH5600Message(text = it) }
-                }
-            }
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionDivider()
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // ── HOURLY section (ABL-100 only) ──
-            if (!dw) {
+            // ── HOURLY section (ABL-100 only; the DW-H5600 hourly values are in its LifeLog card) ──
+            if (state.stepCounterData.h5600 == null) {
                 SectionLabel(text = stringResource(id = R.string.hourly))
                 Spacer(modifier = Modifier.height(8.dp))
 
