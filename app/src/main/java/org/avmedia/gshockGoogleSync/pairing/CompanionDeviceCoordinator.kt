@@ -43,6 +43,10 @@ class CompanionDeviceCoordinator @Inject constructor(
                             val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() }
                                 ?: LocalDataStorage.get(context, "LastDeviceName")?.takeIf { it.isNotBlank() }
                                 ?: org.avmedia.gshockapi.WatchInfo.name
+                            if (org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(deviceName) && !AlwaysConnectedPermission.isGranted()) {
+                                Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($deviceName): press Allow connection first")
+                                return@launch
+                            }
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
                             repository.stopScan()
                             // Only this watch counts. Any other connected watch must not block this one.
@@ -64,6 +68,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                                     org.avmedia.gshockGoogleSync.utils.LocalDataStorage.put(
                                         context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name
                                     )
+                                    AlwaysConnectedPermission.use()
                                     return@launch
                                 } catch (cancelled: CancellationException) {
                                     throw cancelled

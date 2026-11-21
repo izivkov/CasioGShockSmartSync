@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import org.avmedia.gshockGoogleSync.pairing.AlwaysConnectedPermission
 import kotlinx.coroutines.delay
 import org.avmedia.gshockGoogleSync.session.SetupWindow
 import android.annotation.SuppressLint
@@ -150,6 +151,7 @@ constructor(
 
     fun startWatchSetUp() {
         SetupWindow.open()
+        AlwaysConnectedPermission.grant()
         viewModelScope.launch {
             _waitingForWatch.value = true
             delay(2 * 60_000L)
