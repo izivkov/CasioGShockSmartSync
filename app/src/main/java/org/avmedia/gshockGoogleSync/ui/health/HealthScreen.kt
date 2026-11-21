@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.collectAsState
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
@@ -62,7 +66,17 @@ fun HealthScreen() {
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = stringResource(id = R.string.loading_lifelog_short))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 3.dp
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(id = R.string.loading_lifelog_short),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
                     }
                 } else {
                 Column(
