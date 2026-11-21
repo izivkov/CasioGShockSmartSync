@@ -83,3 +83,20 @@ class VariableRegistryTest {
         VariableRegistry(listOf(Variable("a", "") { 1 }, Variable("a", "") { 2 }))
     }
 }
+
+class VariableRegistryErrorTest {
+    private fun ctx() = VariableContext("test", OffsetDateTime.now(), true)
+
+    @Test
+    fun aProviderThrowingAnErrorNotAnExceptionDoesNotStopRendering() = runBlocking {
+        val registry = VariableRegistry(
+            listOf(
+                Variable("a", "class missing on the device") { throw NoClassDefFoundError("org/example/Missing") },
+                Variable("b", "fine") { 7 },
+            )
+        )
+        val r = registry.render("""{"a": {{a}}, "b": {{b}}}""", true, ctx())
+        assertEquals("""{"a": null, "b": 7}""", r.text)
+        assertEquals(listOf("a"), r.missing)
+    }
+}
