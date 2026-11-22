@@ -257,6 +257,11 @@ interface IGShockAPI {
      *
      * @return A [org.avmedia.gshockapi.model.Settings] object.
      */
+    suspend fun getWatchFaceItem(): org.avmedia.gshockapi.model.WatchFaceItem? = null
+    suspend fun setWatchFaceItem(item: org.avmedia.gshockapi.model.WatchFaceItem): org.avmedia.gshockapi.model.WatchFaceItem? = null
+    suspend fun getH5600WatchFaceNumber(): Int? = null
+    suspend fun setH5600WatchFaceNumber(face: Int) {}
+
     suspend fun getSettings(): Settings
 
     /**

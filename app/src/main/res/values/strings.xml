@@ -244,4 +244,7 @@
     <string name="activity_summary">Walk / cycle / active</string>
     <string name="loading_lifelog_short">Loading LifeLog</string>
     <string name="update_latest">Update</string>
+    <string name="watch_face">Watch face</string>
+    <string name="watch_face_item">Display item (face 2)</string>
+    <string name="done">Done</string>
 </resources>

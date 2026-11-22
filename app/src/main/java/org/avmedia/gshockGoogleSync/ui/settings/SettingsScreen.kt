@@ -79,6 +79,9 @@ fun SettingsList() {
         WatchFeature(id = "time_adjustment_card") {
             TimeAdjustment(settingsViewModel::onSettingUpdated)
         }
+        if (org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600) {
+            WatchFace(settingsViewModel::onSettingUpdated)
+        }
     }
 }
 

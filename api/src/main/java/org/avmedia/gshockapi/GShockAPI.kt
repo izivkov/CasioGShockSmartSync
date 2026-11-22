@@ -1,5 +1,7 @@
 package org.avmedia.gshockapi
 
+import org.avmedia.gshockapi.io.H5600SettingsIO
+import org.avmedia.gshockapi.model.WatchFaceItem
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.os.Build
@@ -574,6 +576,14 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      * ```
      * @return [org.avmedia.gshockapi.model.Settings]
      */
+
+    override suspend fun getWatchFaceItem(): WatchFaceItem? = H5600SettingsIO.getWatchFaceItem()
+
+    override suspend fun setWatchFaceItem(item: WatchFaceItem): WatchFaceItem? = H5600SettingsIO.setWatchFaceItem(item)
+
+    override suspend fun getH5600WatchFaceNumber(): Int? = H5600SettingsIO.getWatchFaceNumber()
+
+    override suspend fun setH5600WatchFaceNumber(face: Int) = H5600SettingsIO.setWatchFaceNumber(face)
 
     override suspend fun getSettings(): Settings {
         return WatchInfo.protocol.getSettings()
