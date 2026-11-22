@@ -44,7 +44,10 @@ import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
 import org.avmedia.gshockGoogleSync.ui.health.HealthScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.NotificationSettingsScreen
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchFaceScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WorkoutActivityScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WorkoutSettingsListScreen
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthSettingsScreen
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.EventAction
@@ -199,6 +202,8 @@ fun BottomNavigationBarWithPermissions(
                 SettingsScreen(
                     onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
                     onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
+                    onOpenNotifications = { navController.navigate(Screens.NotificationSettings.route) },
+                    onOpenWorkouts = { navController.navigate(Screens.WorkoutSettings.route) },
                 )
             }
             composable(Screens.WatchFace.route) {
@@ -206,6 +211,24 @@ fun BottomNavigationBarWithPermissions(
             }
             composable(Screens.WatchHealth.route) {
                 WatchHealthSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.NotificationSettings.route) {
+                NotificationSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.WorkoutSettings.route) {
+                WorkoutSettingsListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpen = { navController.navigate(Screens.WorkoutActivity.route(it)) },
+                )
+            }
+            composable(
+                Screens.WorkoutActivity.route,
+                arguments = listOf(androidx.navigation.navArgument("activity") { type = androidx.navigation.NavType.IntType }),
+            ) { entry ->
+                WorkoutActivityScreen(
+                    activity = entry.arguments?.getInt("activity") ?: 0,
+                    onBack = { navController.popBackStack() },
+                )
             }
         }
     }

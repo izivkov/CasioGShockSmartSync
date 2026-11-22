@@ -10,6 +10,7 @@ import org.avmedia.gshockGoogleSync.webhook.RawWatchRequest
 import org.avmedia.gshockGoogleSync.webhook.WatchDecoders
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.GetSetMode
+import org.avmedia.gshockapi.io.ActivityItemCodec
 import org.avmedia.gshockapi.io.H5600HealthIO
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.SafeSettingWrite
@@ -44,11 +45,49 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
         return ByteArray(bytes.size) { bytes[it].toByte() }
     }
 
+    /** The answer to a request of several bytes (first byte = code), kept only when [accept] says it is the one asked for. */
+    suspend fun readRequest(request: ByteArray, accept: (ByteArray) -> Boolean): ByteArray? {
+        if (isBusy) return null
+        val code = request[0].toInt() and 0xFF
+        return raw.request(request, REPLY_TIMEOUT_MS).firstNotNullOfOrNull { answer ->
+            val bytes = WatchDecoders.bytes(answer)?.takeIf { it.firstOrNull() == code && it.size > 1 } ?: return@firstNotNullOfOrNull null
+            ByteArray(bytes.size) { bytes[it].toByte() }.takeIf(accept)
+        }
+    }
+
+    /** A per-activity read such as 4E + activity or 56 + activity; the answer must name the same activity. */
+    suspend fun readForActivity(code: Int, activity: Int): ByteArray? =
+        readRequest(byteArrayOf(code.toByte(), activity.toByte())) { it.size > 1 && (it[1].toInt() and 0xFF) == activity }
+
+    /** One wrapped item of an activity (0x54), as the watch answered it. */
+    suspend fun readItem(activity: Int, cls: Int): ByteArray? =
+        readRequest(ActivityItemCodec.request(activity, cls)) { ActivityItemCodec.parse(it, activity, cls) != null }
+
+    /** Changes the wrapped value of [cls] for [activity]: read, change only [innerTouched] bytes of it, write, read back. */
+    suspend fun updateItem(
+        activity: Int,
+        cls: Int,
+        innerTouched: Set<Int>,
+        change: (ByteArray) -> ByteArray?,
+    ): SettingWriteResult {
+        if (isBusy) return SettingWriteResult.Failed("The watch is sending health data. Try again in a minute.")
+        val item = readItem(activity, cls)?.let { ActivityItemCodec.parse(it, activity, cls) }
+            ?: return SettingWriteResult.Failed("The watch did not answer. Nothing was changed.")
+        return writer.updateWith(ActivityItemCodec.CODE, { readItem(activity, cls) }, ActivityItemCodec.touched(item, innerTouched)) { frame ->
+            val now = ActivityItemCodec.parse(frame, activity, cls)
+            if (now == null || now.offset != item.offset) {
+                null
+            } else {
+                ActivityItemCodec.withInner(frame, now, change(ActivityItemCodec.inner(frame, now)))
+            }
+        }
+    }
+
     suspend fun update(
         code: Int,
         touched: Set<Int>,
-        expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
         change: (ByteArray) -> ByteArray?,
+        expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
     ): SettingWriteResult {
         if (isBusy) return SettingWriteResult.Failed("The watch is sending health data. Try again in a minute.")
         val result = writer.update(code, touched, expectedBack, change)

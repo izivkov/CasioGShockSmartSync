@@ -26,6 +26,9 @@ interface RawLink {
     /** Hands a notification to the library, as if no request were running. */
     fun forward(data: String)
     fun write(code: Int)
+
+    /** A request longer than one byte (the first byte is the code). */
+    fun writeBytes(bytes: ByteArray) = write(bytes[0].toInt() and 0xFF)
 }
 
 internal object AndroidRawLink : RawLink {
@@ -39,6 +42,7 @@ internal object AndroidRawLink : RawLink {
         }
     }
     override fun write(code: Int) = IO.writeCmd(GetSetMode.GET, byteArrayOf(code.toByte()))
+    override fun writeBytes(bytes: ByteArray) = IO.writeCmd(GetSetMode.GET, bytes)
 }
 
 /**
@@ -71,17 +75,21 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
         }
     }
 
-    override suspend fun request(code: Int, timeoutMs: Long): List<String> = mutex.withLock {
+    override suspend fun request(code: Int, timeoutMs: Long): List<String> = request(byteArrayOf(code.toByte()), timeoutMs)
+
+    /** Like [request] for a request of several bytes (for example 54 00 activity class part); answers are those of the first byte. */
+    suspend fun request(bytes: ByteArray, timeoutMs: Long): List<String> = mutex.withLock {
         // A LifeLog transfer is running: it needs the link, so this read does not start.
         if (!WatchExchange.mutex.tryLock()) return@withLock emptyList()
         try {
-            exchange(code, timeoutMs)
+            exchange(bytes, timeoutMs)
         } finally {
             WatchExchange.mutex.unlock()
         }
     }
 
-    private suspend fun exchange(code: Int, timeoutMs: Long): List<String> {
+    private suspend fun exchange(bytes: ByteArray, timeoutMs: Long): List<String> {
+        val code = bytes[0].toInt() and 0xFF
         synchronized(buffer) { buffer.clear() }
         lastRxMillis = 0L
         this.code = code
@@ -93,7 +101,7 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
         }
         waiting = true
         try {
-            link.write(code)
+            if (bytes.size == 1) link.write(code) else link.writeBytes(bytes)
             val start = System.currentTimeMillis()
             while (System.currentTimeMillis() - start < timeoutMs) {
                 delay(100)

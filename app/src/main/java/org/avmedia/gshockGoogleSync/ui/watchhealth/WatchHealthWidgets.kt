@@ -178,12 +178,16 @@ fun TimeDialog(
 
 fun hhmm(time: Pair<Int, Int>): String = "%02d:%02d".format(time.first, time.second)
 
-/** Two rows that open the Watch face and the Watch health settings screens (DW-H5600 family only). */
+/** Rows that open the Watch face, Watch health, Notification and Workout settings screens (DW-H5600 family only). */
 @Composable
 fun WatchHealthLinks(
     onOpenWatchFace: () -> Unit,
     onOpenWatchHealth: () -> Unit,
+    onOpenNotifications: () -> Unit = {},
+    onOpenWorkouts: () -> Unit = {},
 ) {
     ValueRow(title = "Watch face", value = ">", onClick = onOpenWatchFace)
     ValueRow(title = "Watch health settings", value = ">", onClick = onOpenWatchHealth)
+    ValueRow(title = "Notification settings", value = ">", onClick = onOpenNotifications)
+    ValueRow(title = "Workout settings", value = ">", onClick = onOpenWorkouts)
 }

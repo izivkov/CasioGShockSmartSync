@@ -46,7 +46,7 @@ internal sealed class Editing {
     data object AlarmWindow : Editing()
 }
 
-private val HEART_RATE_MODES = listOf("Off", "Only during activities", "Always")
+internal val HEART_RATE_MODES = listOf("Off", "Only during activities", "Always")
 
 /** Heart-rate measurement, sleep times, night window, step reminder, unit, step goal, profile; smart alarm shown only. */
 @Composable

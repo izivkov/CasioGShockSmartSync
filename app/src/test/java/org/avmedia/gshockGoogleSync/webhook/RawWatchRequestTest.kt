@@ -22,6 +22,8 @@ private class FakeLink(library: IDataReceived) : RawLink {
     override fun setCallback(callback: IDataReceived) { current = callback }
     override fun forward(data: String) { forwarded += data }
     override fun write(code: Int) { written += code; onWrite(code) }
+    val writtenBytes = ArrayList<List<Int>>()
+    override fun writeBytes(bytes: ByteArray) { writtenBytes += bytes.map { it.toInt() and 0xFF }; onWrite(bytes[0].toInt() and 0xFF) }
     fun notify(data: String) = current?.dataReceived(data)
 }
 
@@ -43,6 +45,16 @@ class RawWatchRequestTest {
         val answers = raw.request(0x41, 2_000)
         assertEquals(listOf("0x41 01 02 03"), answers)
         assertEquals(listOf("0x00 2E 01 10 00 00", "0x05 AA BB", "0x05 CC DD"), link.forwarded)
+    }
+
+    @Test fun aRequestOfSeveralBytesIsSentWhole() = runBlocking {
+        val link = FakeLink(libraryHandler)
+        link.onWrite = { link.notify("0x54 01 40 0A E8 03"); link.notify("0x05 AA") }
+        val answers = RawWatchRequest(link).request(byteArrayOf(0x54, 0, 1, 0x40, 0), 2_000)
+        assertEquals(listOf(listOf(0x54, 0, 1, 0x40, 0)), link.writtenBytes)
+        assertEquals(emptyList<Int>(), link.written)
+        assertEquals(listOf("0x54 01 40 0A E8 03"), answers)
+        assertEquals(listOf("0x05 AA"), link.forwarded)
     }
 
     @Test fun theErrorAnswerForTheCodeIsKeptToo() = runBlocking {

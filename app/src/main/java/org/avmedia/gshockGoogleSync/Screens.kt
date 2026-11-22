@@ -11,4 +11,9 @@ sealed class Screens(val route: String) {
     /** Reached from the watch and Actions screens, not from the bottom bar. */
     data object WatchFace : Screens("WatchFace")
     data object WatchHealth : Screens("WatchHealth")
+    data object NotificationSettings : Screens("NotificationSettings")
+    data object WorkoutSettings : Screens("WorkoutSettings")
+    data object WorkoutActivity : Screens("WorkoutActivity/{activity}") {
+        fun route(activity: Int) = "WorkoutActivity/$activity"
+    }
 }
