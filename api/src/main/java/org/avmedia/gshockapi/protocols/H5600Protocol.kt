@@ -3,6 +3,8 @@ package org.avmedia.gshockapi.protocols
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.ConnectionKeepAlive
+import org.avmedia.gshockapi.casio.ConnectionSetup
 import org.avmedia.gshockapi.io.H5600Channel
 import org.avmedia.gshockapi.io.H5600HealthIO
 import org.avmedia.gshockapi.model.StepCounterData
@@ -16,17 +18,37 @@ import org.avmedia.gshockapi.model.StepCounterData
  */
 @RequiresApi(Build.VERSION_CODES.O)
 object H5600Protocol : StandardProtocol() {
-    override fun extractKey(data: String): Int? = if (H5600HealthIO.isActive) H5600HealthIO.channelOf(data).key else super.extractKey(data)
+    override fun extractKey(data: String): Int? {
+        // The watch's own connection check and setup notices are answered even in the middle of a transfer.
+        val first = super.extractKey(data)
+        if (first == ConnectionKeepAlive.CHECK || first == ConnectionKeepAlive.SETUP) return first
+        return if (H5600HealthIO.isActive) H5600HealthIO.channelOf(data).key else first
+    }
 
     override suspend fun getStepCount(peek: Boolean): StepCounterData = H5600HealthIO.request(peek)
 
     override val dataReceivedHandlers: Map<Int, (String) -> Unit>
-        get() =
+        get() = withSetup(
             super.dataReceivedHandlers -
                 CasioConstants.CHARACTERISTICS.CASIO_ACTIVITY_RECORD.code +
                 mapOf(
+                    ConnectionKeepAlive.CHECK to ConnectionKeepAlive::onCheck,
+                    ConnectionKeepAlive.SETUP to ConnectionKeepAlive::onSetup,
+                    0x3A to ConnectionSetup::on3a,
+                    0x3B to ConnectionSetup::on3b,
                     H5600Channel.DRSP.key to H5600HealthIO::onDrsp,
                     H5600Channel.CONVOY.key to H5600HealthIO::onConvoy,
                     H5600Channel.STATUS.key to H5600HealthIO::onStatus,
-                )
+                ),
+        )
+
+    /** The library's own handlers for 0x10 and 0x11 still run; the connection setup watches the same frames. */
+    private fun withSetup(handlers: Map<Int, (String) -> Unit>): Map<Int, (String) -> Unit> {
+        val kind = handlers[CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code]
+        val ble = handlers[CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code]
+        return handlers + mapOf<Int, (String) -> Unit>(
+            CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code to { d -> kind?.invoke(d); ConnectionSetup.onKind(d) },
+            CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code to { d -> ble?.invoke(d); ConnectionSetup.onBle(d) },
+        )
+    }
 }

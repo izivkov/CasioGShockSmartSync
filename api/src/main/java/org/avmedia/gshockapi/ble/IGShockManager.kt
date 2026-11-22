@@ -33,6 +33,7 @@ enum class GetSetMode {
     SP_REQUEST,
     SP_DATA,
     CONVOY,
+    LINK_LOSS,
 }
 
 interface GShock {
@@ -76,6 +77,7 @@ private class GShockManagerImpl(
     private var writeCharacteristicHolderSPRequest: BluetoothGattCharacteristic? = null
     private var writeCharacteristicHolderSPData: BluetoothGattCharacteristic? = null
     private var writeCharacteristicHolderConvoy: BluetoothGattCharacteristic? = null
+    private var writeCharacteristicHolderLinkLoss: BluetoothGattCharacteristic? = null
 
     private val subscribedCharacteristics = mutableSetOf<UUID>()
 
@@ -155,6 +157,7 @@ private class GShockManagerImpl(
         onConnected: OnConnectedType,
     ) {
         this.onConnected = onConnected
+        org.avmedia.gshockapi.casio.ConnectionSetup.reset()
 
         connect(device)
             .retry(3, 100)
@@ -186,6 +189,7 @@ private class GShockManagerImpl(
         writeCharacteristicHolderSPRequest = null
         writeCharacteristicHolderSPData = null
         writeCharacteristicHolderConvoy = null
+        writeCharacteristicHolderLinkLoss = null
         characteristicUUIDs.clear()
         subscribedCharacteristics.clear()
 
@@ -335,6 +339,8 @@ private class GShockManagerImpl(
                         CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID,
                     )
             }
+            writeCharacteristicHolderLinkLoss =
+                gatt.getService(CasioConstants.LINK_LOSS_SERVICE_UUID)?.getCharacteristic(CasioConstants.LINK_LOSS_ALERT_LEVEL_UUID)
             Timber.i("isRequiredServiceSupported returning true")
             return true
         }
@@ -428,6 +434,7 @@ private class GShockManagerImpl(
                 GetSetMode.SP_REQUEST -> CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID
                 GetSetMode.SP_DATA -> CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID
                 GetSetMode.CONVOY -> CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID
+                GetSetMode.LINK_LOSS -> CasioConstants.LINK_LOSS_ALERT_LEVEL_UUID
             }
         return characteristicUUIDs.containsKey(uuid.toString())
     }
@@ -456,6 +463,7 @@ private class GShockManagerImpl(
                 GetSetMode.SP_REQUEST -> writeCharacteristicHolderSPRequest
                 GetSetMode.SP_DATA -> writeCharacteristicHolderSPData
                 GetSetMode.CONVOY -> writeCharacteristicHolderConvoy
+                GetSetMode.LINK_LOSS -> writeCharacteristicHolderLinkLoss
             }
 
         val writeType =
