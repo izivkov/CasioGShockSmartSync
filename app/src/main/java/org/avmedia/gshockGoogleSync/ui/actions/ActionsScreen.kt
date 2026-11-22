@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
@@ -129,12 +130,8 @@ private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks
             R.string.call_webhooks, R.drawable.generic_action_item, actionsViewModel,
             infoRes = R.string.call_webhooks_info
         ),
-        androidx.compose.material3.TextButton(onClick = onOpenWebhooks) {
-            androidx.compose.material3.Text(stringResource(id = R.string.manage_webhooks))
-        },
-        androidx.compose.material3.TextButton(onClick = onOpenHa) {
-            androidx.compose.material3.Text(stringResource(id = R.string.home_assistant))
-        },
+        ServiceToggleRow(ServiceToggles.Service.WEBHOOKS, R.string.webhooks, onOpenWebhooks),
+        ServiceToggleRow(ServiceToggles.Service.HOME_ASSISTANT, R.string.home_assistant, onOpenHa),
         SeparatorView(),
         PhoneView(actionsViewModel)
     )

@@ -85,7 +85,7 @@ class HaClientTest {
     @Test
     fun deletedRegistrationIsMadeAgainWithTheNewNameAndModel() {
         val t = HaFakeTransport { c ->
-            if (c.type == "update_registration") HaResponse(200, "") else haOk(c)
+            if (c.url.endsWith("/api/webhook/hook1")) HaResponse(200, "") else haOk(c)
         }
         val (client, _, store) = connected(t)
         val body = HaPayloads.registration("gshock-1", "My watch", "GBX-H5600-1", "1", "14")
@@ -159,11 +159,40 @@ class HaClientTest {
         // The real HA answers 200 with no body for a webhook id it no longer knows (seen 2026-11-22).
         var gone = true
         val t = HaFakeTransport { c ->
-            if (c.url.endsWith("/api/webhook/hook1") && gone) { gone = false; HaResponse(200, "") } else haOk(c)
+            if (c.url.endsWith("/api/webhook/hook1") && c.type == "get_config") HaResponse(200, "")
+            else if (c.url.endsWith("/api/webhook/hook1") && gone) { gone = false; HaResponse(200, "") } else haOk(c)
         }
         val (client, _, store) = connected(t)
         assertTrue(client.send(job) is HaResult.Ok)
         assertEquals("hook2", store.load()?.webhookId)
+    }
+
+    @Test
+    fun emptyAnswerToALiveCommandDoesNotRegisterAgain() {
+        // A live registration may answer a command with nothing; get_config still answers JSON.
+        val t = HaFakeTransport { c ->
+            if (c.type == "fire_event") HaResponse(200, "")
+            else if (c.type == "get_config") HaResponse(200, """{"version":"2026.1"}""")
+            else haOk(c)
+        }
+        val (client, _, store) = connected(t)
+        val r = client.send(HaJob(job.states, mapOf("trigger" to "watch_action")))
+        assertTrue(r.message, r is HaResult.Ok)
+        assertEquals(0, t.calls.count { it.url.endsWith("/registrations") })
+        assertEquals("hook1", store.load()?.webhookId)
+    }
+
+    @Test
+    fun emptyAnswerToUpdateRegistrationDoesNotRegisterAgain() {
+        val t = HaFakeTransport { c ->
+            if (c.type == "update_registration") HaResponse(200, "")
+            else if (c.type == "get_config") HaResponse(200, """{"version":"2026.1"}""")
+            else haOk(c)
+        }
+        val (client, _, store) = connected(t)
+        assertTrue(client.connect("https://ha.example", "tok", reg, "A", "B") is HaResult.Ok)
+        assertEquals(0, t.calls.count { it.url.endsWith("/registrations") })
+        assertEquals("hook1", store.load()?.webhookId)
     }
 
     @Test

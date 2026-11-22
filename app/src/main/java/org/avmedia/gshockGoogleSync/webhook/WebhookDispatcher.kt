@@ -48,7 +48,11 @@ class WebhookDispatcher @Inject constructor(
     fun onHealthDataDownloaded() = fire(WebhookTrigger.HEALTH_DATA)
 
     fun fire(trigger: WebhookTrigger) {
-        scope.launch { runCatching { pushToHomeAssistant(trigger) }.onFailure { Timber.e(it, "Home Assistant push failed") } }
+        val toggles = WebhookStorage.toggles(context)
+        if (toggles.isOn(ServiceToggles.Service.HOME_ASSISTANT)) {
+            scope.launch { runCatching { pushToHomeAssistant(trigger) }.onFailure { Timber.e(it, "Home Assistant push failed") } }
+        }
+        if (!toggles.isOn(ServiceToggles.Service.WEBHOOKS)) return
         scope.launch {
             runCatching {
                 val now = System.currentTimeMillis()
@@ -94,6 +98,7 @@ class WebhookDispatcher @Inject constructor(
      */
     fun sendProbe(json: String): Int {
         var queued = 0
+        if (!WebhookStorage.toggles(context).isOn(ServiceToggles.Service.WEBHOOKS)) return 0
         WebhookStorage.loadHooks(context)
             .filter { WebhookPolicy.shouldFire(it, WebhookTrigger.PROBE, null, System.currentTimeMillis()) }
             .filterNot { it.method.equals("GET", ignoreCase = true) }

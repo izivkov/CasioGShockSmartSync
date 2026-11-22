@@ -20,6 +20,10 @@ class HaWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
     override suspend fun doWork(): Result {
         val store = WebhookStorage.haStore(applicationContext)
         val job = store.getPending() ?: return Result.failure()
+        if (!WebhookStorage.toggles(applicationContext).isOn(ServiceToggles.Service.HOME_ASSISTANT)) {
+            store.clearPending() // switched off after this was queued: send nothing
+            return Result.success()
+        }
         val attempt = runAttemptCount + 1
         val result = withContext(Dispatchers.IO) { HaClient(HaOkHttpTransport, store).send(job) }
         val retry = result is HaResult.Retry && attempt < WebhookPolicy.MAX_ATTEMPTS

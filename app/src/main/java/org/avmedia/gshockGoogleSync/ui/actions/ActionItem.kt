@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +26,8 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
 import org.avmedia.gshockGoogleSync.ui.common.HorizontalSeparator
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
+import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
+import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
 
 @Composable
 fun ActionItem(
@@ -29,7 +36,9 @@ fun ActionItem(
     isEnabled: Boolean,
     onEnabledChange: (Boolean) -> Unit,
     infoText: String? = null,
-    resourceId: Int = R.drawable.generic_action_item
+    resourceId: Int = R.drawable.generic_action_item,
+    /** When set, a small configure button sits next to the switch. */
+    onConfigure: (() -> Unit)? = null,
 ) {
     AppCard(
         modifier = modifier
@@ -54,12 +63,37 @@ fun ActionItem(
                     InfoButton(infoText = it)
                 }
             }
-            AppSwitch(
-                checked = isEnabled,
-                onCheckedChange = onEnabledChange
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                onConfigure?.let {
+                    IconButton(onClick = it) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = stringResource(id = R.string.settings),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+                AppSwitch(
+                    checked = isEnabled,
+                    onCheckedChange = onEnabledChange
+                )
+            }
         }
     }
+}
+
+/** An [ActionItem] for a service master switch: saved at once, with a configure button that opens its screen. */
+@Composable
+fun ServiceToggleRow(service: ServiceToggles.Service, titleRes: Int, onConfigure: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val toggles = remember { WebhookStorage.toggles(context) }
+    var isOn by remember { mutableStateOf(toggles.isOn(service)) }
+    ActionItem(
+        title = stringResource(id = titleRes),
+        isEnabled = isOn,
+        onEnabledChange = { isOn = it; toggles.set(service, it) },
+        onConfigure = onConfigure,
+    )
 }
 
 /**
