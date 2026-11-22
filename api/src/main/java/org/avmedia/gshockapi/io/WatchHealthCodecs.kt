@@ -37,7 +37,7 @@ internal object Frame {
 /** Heart-rate measurement (0x41). Index 0 bits 0-1: 0 off, 1 during activities, 2 always. */
 object HeartRateSettingCodec {
     const val CODE = 0x41
-    private const val MODE_MASK = 0x01
+    private const val MODE_MASK = 0x03
     private const val MIN_INDEX = 3
 
     data class Setting(val mode: Int, val zone: Int, val lowBpm: Int, val highBpm: Int)
@@ -65,7 +65,7 @@ object HeartRateSettingCodec {
 /** Physical settings (0x4F). Index 1, 2: preferred bedtime; 3, 4: preferred wake-up (hour, minute). */
 object PhysicalSettingsCodec {
     const val CODE = 0x4F
-    private const val BED_INDEX = 2
+    private const val BED_INDEX = 1
     private const val WAKE_INDEX = 3
 
     data class Sleep(val bedtime: Pair<Int, Int>, val wakeUp: Pair<Int, Int>)
@@ -112,7 +112,7 @@ object BasicHealthFieldsCodec {
     private const val NIGHT_START_INDEX = 12
     private const val NIGHT_END_INDEX = 14
     private const val UNIT_BIT = 0x01
-    private const val REMINDER_BIT = 0x04
+    private const val REMINDER_BIT = 0x02
 
     data class Fields(
         val unitBit: Boolean,
@@ -180,7 +180,7 @@ object StepGoalCodec {
 
     fun parse(frame: ByteArray): Int? {
         if (!Frame.hasIndex(frame, CODE, 2)) return null
-        val steps = (0..2).sumOf { (Frame.u8(frame, it) ?: return null) shl (8 * (2 - it)) }
+        val steps = (0..2).sumOf { (Frame.u8(frame, it) ?: return null) shl (8 * it) }
         return steps.takeIf { it in MIN_STEPS..MAX_STEPS }
     }
 
@@ -220,7 +220,7 @@ object ProfileCodec {
 
     fun parse(frame: ByteArray): Profile? {
         if (!Frame.hasIndex(frame, CODE, 8)) return null
-        for (lowFirst in listOf(false, true)) {
+        for (lowFirst in listOf(true, false)) {
             val height = bcd(frame, HEIGHT_INDEX, lowFirst) ?: continue
             val weight = bcd(frame, WEIGHT_INDEX, lowFirst) ?: continue
             if (height !in HEIGHT_RANGE || weight !in WEIGHT_RANGE) continue

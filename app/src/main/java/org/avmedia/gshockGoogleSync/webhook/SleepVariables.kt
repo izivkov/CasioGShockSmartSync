@@ -56,7 +56,7 @@ object SleepVariables {
         val stairs = body?.stairs?.lastOrNull()
         return linkedMapOf(
             "health.sleep_date" to night?.date?.toString(),
-            "health.sleep_score" to night?.rechargeStatus,
+            "health.sleep_score" to night?.sleepScore,
             "health.recharge_status" to night?.rechargeStatus,
             "health.recharge_level" to night?.rechargeLevel,
             "health.sleep_fell_asleep" to iso(night?.fellAsleep),

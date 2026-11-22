@@ -33,14 +33,14 @@ class SafeSettingWrite(
             return SettingWriteResult.Failed("The watch did not answer. Nothing was changed.")
         }
         val after = change(before) ?: return SettingWriteResult.Failed("This setting is not in the layout the app knows. Nothing was changed.")
-        if (after.size != before.size || false) {
+        if (after.size != before.size || before.indices.any { it !in touched && before[it] != after[it] }) {
             return SettingWriteResult.Failed("The change would alter other bytes. Nothing was changed.")
         }
         if (after.contentEquals(before)) return SettingWriteResult.Unchanged
         write(after)
         settle()
         val back = read(code) ?: return SettingWriteResult.Failed("The watch did not answer after the change. Check the setting on the watch.")
-        return if (back.isNotEmpty()) {
+        return if (back.contentEquals(after)) {
             SettingWriteResult.Done
         } else {
             SettingWriteResult.Failed("The watch did not keep the change. Check the setting on the watch.")
