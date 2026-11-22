@@ -33,9 +33,13 @@ object ConnectionSetup {
 
     @Volatile private var step = Step.IDLE
     private var reconnectKind = false
+    private var workoutsOffered = false
+
+    /** Called once per connection with the first `0x28` answer after the setup; the workout download starts from it. */
+    @Volatile var afterSetup: (List<Int>) -> Unit = { org.avmedia.gshockapi.io.H5600WorkoutIO.onSetupDone(it) }
 
     /** Set by the transfer code: while a LifeLog transfer runs the setup does not start. */
-    @Volatile var busy: () -> Boolean = { org.avmedia.gshockapi.io.H5600HealthIO.isActive }
+    @Volatile var busy: () -> Boolean = { org.avmedia.gshockapi.io.H5600HealthIO.isActive || org.avmedia.gshockapi.io.H5600WorkoutIO.isActive }
 
     /**
      * The end of Casio's setup, run on every connection (kind 14 included): the time and the DST values.
@@ -51,6 +55,7 @@ object ConnectionSetup {
     fun reset() {
         step = Step.WAIT_KIND
         reconnectKind = false
+        workoutsOffered = false
         selfConnect = false
         condition = emptyList()
     }
@@ -140,6 +145,13 @@ object ConnectionSetup {
 
     /** The `0x28` answer: kept for the `0x39` decision; "index 7" counts after the code, like `0x10` and `0x11`. */
     fun on28(data: String) {
+        if (step == Step.DONE && !workoutsOffered) {
+            val c = bytes(data)
+            if (c.firstOrNull() == CODE_CONDITION) {
+                workoutsOffered = true
+                afterSetup(c)
+            }
+        }
         if (!selfConnect) return
         condition = bytes(data)
         ConnectionKeepAlive.log("0x28 received: " + condition.take(12).joinToString(" ") { "%02X".format(it) })
@@ -174,6 +186,12 @@ object ConnectionSetup {
     private fun answer(value: Int) {
         ConnectionKeepAlive.writer.writeAllFeatures(byteArrayOf(CODE_TIME_MANAGER.toByte(), value.toByte()))
         ConnectionKeepAlive.log("39 %02X written".format(value))
-        if (value != 3) step = Step.DONE
+        if (value != 3) {
+            step = Step.DONE
+            if (!workoutsOffered && condition.isNotEmpty()) {
+                workoutsOffered = true
+                afterSetup(condition)
+            }
+        }
     }
 }

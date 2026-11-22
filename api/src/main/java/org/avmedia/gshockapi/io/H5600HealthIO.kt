@@ -372,7 +372,7 @@ object H5600HealthIO {
         return if (bytes.size > limit) "$shown ..." else shown
     }
 
-    private fun bytesOf(hex: String): ByteArray {
+    internal fun bytesOf(hex: String): ByteArray {
         val intArray = Utils.toIntArray(hex)
         return Utils.byteArrayOfIntArray(intArray.toIntArray())
     }

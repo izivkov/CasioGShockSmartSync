@@ -27,10 +27,12 @@ class H5600RawDump(
     private val dir: File,
     private val keep: Int = KEEP_TRANSFERS,
     private val keepDays: Int = KEEP_DAYS,
+    /** Folder name prefix; the workout transfers use "workout-" in the same folder. */
+    private val prefix: String = "lifelog-",
 ) {
     fun save(capture: H5600Capture, nowMillis: Long): File {
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }
-        val base = "lifelog-" + stamp.format(Date(nowMillis)) + if (capture.failure != null) "-failed" else ""
+        val base = prefix + stamp.format(Date(nowMillis)) + if (capture.failure != null) "-failed" else ""
         var folder = File(dir, base)
         var n = 1
         while (folder.exists()) folder = File(dir, "$base-${n++}")
@@ -43,14 +45,14 @@ class H5600RawDump(
 
     /** How old a transfer folder is, read from its name (UTC stamp); 0 when the name cannot be read, so it is kept. */
     private fun ageMillis(folder: File, nowMillis: Long): Long {
-        val stamp = folder.name.removePrefix("lifelog-").take(15)
+        val stamp = folder.name.removePrefix(prefix).take(15)
         val at = runCatching { SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }.parse(stamp)?.time }.getOrNull()
         return if (at == null) 0 else nowMillis - at
     }
 
     /** Transfer folders, newest first. */
     fun transfers(): List<File> =
-        dir.listFiles { f -> f.isDirectory && f.name.startsWith("lifelog-") }?.sortedByDescending { it.name }.orEmpty()
+        dir.listFiles { f -> f.isDirectory && f.name.startsWith(prefix) }?.sortedByDescending { it.name }.orEmpty()
 
     /** Zips the newest transfer into [target]; null when there is none. */
     fun zipLatest(target: File): File? {
