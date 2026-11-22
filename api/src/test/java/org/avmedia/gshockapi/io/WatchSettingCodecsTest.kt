@@ -344,7 +344,7 @@ class WatchSettingCodecsTest {
         assertEquals(70, ProfileCodec.parse(after)!!.height)
         assertEquals(180, ProfileCodec.parse(after)!!.weight)
         assertNull(ProfileCodec.withHeightAndWeight(before, 175, 180))
-        assertNull(ProfileCodec.withHeightAndWeight(before, 70, 79))
+        assertNull(ProfileCodec.withHeightAndWeight(before, 70, 30))
     }
 
     @Test
