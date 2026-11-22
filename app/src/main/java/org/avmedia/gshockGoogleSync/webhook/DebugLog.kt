@@ -27,7 +27,11 @@ object DebugLog {
     fun clear() = synchronized(this) { lines.clear() }
 
     /** The log goes over the network: never let a token through. */
-    internal fun redact(line: String): String = line
+    internal fun redact(line: String): String =
+        line.replace(BEARER, "$1 ***").replace(QUERY_SECRET, "$1=***")
+
+    private val BEARER = Regex("""(?i)\b(Bearer|Basic|Token)\s+[^\s,;"']+""")
+    private val QUERY_SECRET = Regex("""(?i)\b(token|key|secret|password|access_token|api_key)=[^&\s"']+""")
 
     fun toJson(watchName: String?, phoneTime: String): String =
         GsonBuilder().disableHtmlEscaping().create().toJson(
