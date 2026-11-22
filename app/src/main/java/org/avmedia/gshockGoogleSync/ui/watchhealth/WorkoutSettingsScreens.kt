@@ -1,7 +1,11 @@
 package org.avmedia.gshockGoogleSync.ui.watchhealth
 
+import AppSwitch
 import AppText
+import AppTextLarge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -16,20 +22,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
+import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.io.ActivityFaceCodec
+import org.avmedia.gshockapi.io.ActivityListCodec
 import org.avmedia.gshockapi.io.ActivityNames
 import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.TrainingAlertCodec
 
-/** The Workout settings list: one row per activity the watch shows. */
+/** The Activity settings list: which activities the watch shows and in what order, then one row per activity. */
 @Composable
 fun WorkoutSettingsListScreen(
     onBack: () -> Unit,
@@ -37,7 +46,7 @@ fun WorkoutSettingsListScreen(
     viewModel: WorkoutSettingsListViewModel = hiltViewModel(),
 ) {
     val ui by viewModel.ui.collectAsState()
-    WorkoutSettingsListContent(ui, onBack, viewModel::refresh, onOpen)
+    WorkoutSettingsListContent(ui, onBack, viewModel::refresh, onOpen, viewModel::setEnabled, viewModel::move)
 }
 
 @Composable
@@ -46,13 +55,27 @@ internal fun WorkoutSettingsListContent(
     onBack: () -> Unit,
     onRefresh: () -> Unit,
     onOpen: (Int) -> Unit,
+    onEnable: (Int, Boolean) -> Unit = { _, _ -> },
+    onMove: (Int, Int) -> Unit = { _, _ -> },
 ) {
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
-                ScreenTitle("Workout settings", Modifier)
+                ScreenTitle("Activity settings", Modifier)
                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
-                    ui.activities?.forEach { code -> ValueRow(ActivityNames.name(code), ">", !ui.working) { onOpen(code) } }
+                    val on = ui.activities
+                    if (on != null) {
+                        Section("Activities on the watch")
+                        on.forEachIndexed { i, code ->
+                            ActivityOnRow(code, i + 1, i > 0, i < on.size - 1, !ui.working, onEnable, onMove)
+                        }
+                        ActivityListCodec.ACTIVITIES.filter { it !in on }.forEach { code ->
+                            ActivityOnRow(code, null, false, false, !ui.working, onEnable, onMove)
+                        }
+                        Section("Settings of one activity")
+                        on.forEach { code -> ValueRow(ActivityNames.name(code), ">", !ui.working) { onOpen(code) } }
+                    }
+                    if (ui.rawHex != null) ValueRow("Raw answer", ui.rawHex, false, note = "Read only")
                     val text = if (ui.working) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
                 }
@@ -150,4 +173,31 @@ internal fun WorkoutActivityContent(
 @Composable
 private fun Section(title: String) {
     AppText(text = title, fontSize = 14.sp, modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 2.dp))
+}
+
+/** One activity of the list: its place (null when off), up and down, and the switch. */
+@Composable
+private fun ActivityOnRow(
+    code: Int,
+    place: Int?,
+    canUp: Boolean,
+    canDown: Boolean,
+    enabled: Boolean,
+    onEnable: (Int, Boolean) -> Unit,
+    onMove: (Int, Int) -> Unit,
+) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AppTextLarge(text = if (place != null) "$place. ${ActivityNames.name(code)}" else ActivityNames.name(code), modifier = Modifier.weight(1f))
+            if (place != null) {
+                TextButton(onClick = { onMove(code, -1) }, enabled = enabled && canUp) { Text("Up") }
+                TextButton(onClick = { onMove(code, 1) }, enabled = enabled && canDown) { Text("Down") }
+            }
+            AppSwitch(checked = place != null, onCheckedChange = { onEnable(code, it) }, enabled = enabled)
+        }
+    }
 }

@@ -19,11 +19,14 @@ import org.avmedia.gshockapi.io.TrainingAlertCodec
 
 data class WorkoutListUi(
     val working: Boolean = false,
+    /** The activities the watch shows (0x53), in order. */
     val activities: List<Int>? = null,
     val message: String? = null,
+    /** The answer as hex when its length or contents do not match the notes: shown, never written. */
+    val rawHex: String? = null,
 )
 
-/** The Workout settings list: the activities the watch shows (0x53), read only. */
+/** The Workout settings list: the activities the watch shows (0x53), which can be switched and put in order. */
 @HiltViewModel
 class WorkoutSettingsListViewModel @Inject constructor(private val access: WatchSettingsAccess) : ViewModel() {
     private val _ui = MutableStateFlow(WorkoutListUi())
@@ -36,10 +39,40 @@ class WorkoutSettingsListViewModel @Inject constructor(private val access: Watch
     fun refresh() {
         viewModelScope.launch {
             _ui.update { it.copy(working = true) }
-            val list = access.read(ActivityListCodec.CODE)?.let { ActivityListCodec.parse(it) }
-            _ui.update {
-                WorkoutListUi(false, list, if (list == null) "The watch did not answer. Connect the watch and try again." else null)
+            readList(null)
+        }
+    }
+
+    private suspend fun readList(message: String?) {
+        val frame = access.read(ActivityListCodec.CODE)
+        _ui.value =
+            when {
+                frame == null -> WorkoutListUi(message = "The watch did not answer. Connect the watch and try again.")
+                !ActivityListCodec.layoutOk(frame) ->
+                    WorkoutListUi(message = "The activity list is not in the layout the app knows. It will not be changed.", rawHex = ActivityListCodec.hex(frame))
+                else -> WorkoutListUi(activities = ActivityListCodec.parse(frame), message = message)
             }
+    }
+
+    fun setEnabled(code: Int, on: Boolean) = change("Activity list") { ActivityListCodec.toggle(it, code, on) }
+
+    fun move(code: Int, delta: Int) = change("Activity order") { ActivityListCodec.move(it, code, delta) }
+
+    private fun change(what: String, edit: (List<Int>) -> List<Int>) {
+        val now = _ui.value
+        val current = now.activities ?: return
+        if (now.working) return
+        val wanted = edit(current)
+        if (wanted == current) return
+        if (wanted.isEmpty()) {
+            _ui.update { it.copy(message = "At least one activity must stay on the watch.") }
+            return
+        }
+        viewModelScope.launch {
+            _ui.update { it.copy(working = true, message = null) }
+            val touched = (1..ActivityListCodec.MAX).toSet()
+            val result = access.update(ActivityListCodec.CODE, touched, { frame -> ActivityListCodec.encode(frame, wanted) })
+            readList(result.text(what))
         }
     }
 }

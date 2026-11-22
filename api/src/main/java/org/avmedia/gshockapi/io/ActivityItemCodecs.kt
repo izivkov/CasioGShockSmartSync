@@ -20,8 +20,8 @@ object ActivityListCodec {
     const val CODE = 0x53
     const val MAX = 15
 
-    /** The sports the settings screen offers, in the order of the notes. */
-    val SPORTS: List<Int> = listOf(1, 2, 3, 6, 7, 8, 9, 12, 13, 14)
+    /** The activities the settings screen offers, in the order of the notes. */
+    val ACTIVITIES: List<Int> = listOf(1, 2, 3, 6, 7, 8, 9, 12, 13, 14)
 
     fun parse(frame: ByteArray): List<Int>? {
         if (frame.size < 2 || frame[0] != CODE.toByte()) return null
@@ -29,17 +29,32 @@ object ActivityListCodec {
     }
 
     /** True only for the layout of the notes: code 0x53, 1 to 15 value bytes, each a known activity or 0. */
-    fun layoutOk(frame: ByteArray): Boolean = false
+    fun layoutOk(frame: ByteArray): Boolean =
+        frame.size in 2..(MAX + 1) && frame[0] == CODE.toByte() &&
+            frame.drop(1).all { val c = it.toInt() and 0xFF; c == 0 || ActivityNames.known(c) }
 
     /** The frame for [enabled] (in order, at least one, no repeats, all known), padded with 0 to the length of [frame]; null if refused. */
-    fun encode(frame: ByteArray, enabled: List<Int>): ByteArray? = null
+    fun encode(frame: ByteArray, enabled: List<Int>): ByteArray? {
+        if (!layoutOk(frame) || enabled.isEmpty() || enabled.size > frame.size - 1) return null
+        if (enabled.distinct().size != enabled.size || enabled.any { !ActivityNames.known(it) }) return null
+        val out = ByteArray(frame.size)
+        out[0] = CODE.toByte()
+        enabled.forEachIndexed { i, c -> out[i + 1] = c.toByte() }
+        return out
+    }
 
-    fun toggle(enabled: List<Int>, code: Int, on: Boolean): List<Int> = enabled
+    fun toggle(enabled: List<Int>, code: Int, on: Boolean): List<Int> =
+        if (on) (if (code in enabled) enabled else enabled + code) else enabled - code
 
-    /** Moves [code] by [delta] places among the enabled sports; unchanged at either end. */
-    fun move(enabled: List<Int>, code: Int, delta: Int): List<Int> = enabled
+    /** Moves [code] by [delta] places among the enabled activities; unchanged at either end. */
+    fun move(enabled: List<Int>, code: Int, delta: Int): List<Int> {
+        val from = enabled.indexOf(code)
+        val to = from + delta
+        if (from < 0 || to !in enabled.indices) return enabled
+        return enabled.toMutableList().also { it.add(to, it.removeAt(from)) }
+    }
 
-    fun hex(frame: ByteArray): String = ""
+    fun hex(frame: ByteArray): String = frame.joinToString(" ") { "%02X".format(it.toInt() and 0xFF) }
 }
 
 /** Activity screens (0x4E + activity): index 0 the activity, then per screen three items (main, sub 1, sub 2). Read only. */

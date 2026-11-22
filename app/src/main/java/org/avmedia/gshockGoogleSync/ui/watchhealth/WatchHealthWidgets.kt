@@ -189,5 +189,5 @@ fun WatchHealthLinks(
     ValueRow(title = "Watch face", value = ">", onClick = onOpenWatchFace)
     ValueRow(title = "Watch health settings", value = ">", onClick = onOpenWatchHealth)
     ValueRow(title = "Notification settings", value = ">", onClick = onOpenNotifications)
-    ValueRow(title = "Workout settings", value = ">", onClick = onOpenWorkouts)
+    ValueRow(title = "Activity settings", value = ">", onClick = onOpenWorkouts)
 }

@@ -116,35 +116,35 @@ class ActivityItemCodecsTest {
     }
 
     // Activity list write: 0x53 then 15 value bytes, 0 = unused.
-    private val sportsFrame = bytes(0x53, 1, 2, 3, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    private val activitiesFrame = bytes(0x53, 1, 2, 3, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
     @Test
     fun theActivityListRoundTripsAndKeepsItsLength() {
-        assertTrue(ActivityListCodec.layoutOk(sportsFrame))
-        val enabled = ActivityListCodec.parse(sportsFrame)!!
-        assertArrayEquals(sportsFrame, ActivityListCodec.encode(sportsFrame, enabled)!!)
+        assertTrue(ActivityListCodec.layoutOk(activitiesFrame))
+        val enabled = ActivityListCodec.parse(activitiesFrame)!!
+        assertArrayEquals(activitiesFrame, ActivityListCodec.encode(activitiesFrame, enabled)!!)
     }
 
     @Test
     fun disablingEnablingAndReorderingGiveTheRightBytes() {
         val off = ActivityListCodec.toggle(listOf(1, 2, 3, 6, 7), 3, false)
-        assertArrayEquals(bytes(0x53, 1, 2, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), ActivityListCodec.encode(sportsFrame, off)!!)
+        assertArrayEquals(bytes(0x53, 1, 2, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), ActivityListCodec.encode(activitiesFrame, off)!!)
         val on = ActivityListCodec.toggle(off, 14, true)
         assertEquals(listOf(1, 2, 6, 7, 14), on)
-        assertArrayEquals(bytes(0x53, 1, 2, 6, 7, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), ActivityListCodec.encode(sportsFrame, on)!!)
+        assertArrayEquals(bytes(0x53, 1, 2, 6, 7, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), ActivityListCodec.encode(activitiesFrame, on)!!)
         val up = ActivityListCodec.move(listOf(1, 2, 6), 6, -1)
         assertEquals(listOf(1, 6, 2), up)
         assertEquals(listOf(2, 1, 6), ActivityListCodec.move(listOf(1, 2, 6), 1, 1))
         assertEquals(listOf(1, 2, 6), ActivityListCodec.move(listOf(1, 2, 6), 1, -1))
         assertEquals(listOf(1, 2, 6), ActivityListCodec.move(listOf(1, 2, 6), 6, 1))
-        assertEquals(sportsFrame.size, ActivityListCodec.encode(sportsFrame, up)!!.size)
+        assertEquals(activitiesFrame.size, ActivityListCodec.encode(activitiesFrame, up)!!.size)
     }
 
     @Test
     fun anEmptyOrUnfittingListIsRefused() {
-        assertNull(ActivityListCodec.encode(sportsFrame, emptyList()))
-        assertNull(ActivityListCodec.encode(sportsFrame, listOf(1, 1)))
-        assertNull(ActivityListCodec.encode(sportsFrame, listOf(99)))
+        assertNull(ActivityListCodec.encode(activitiesFrame, emptyList()))
+        assertNull(ActivityListCodec.encode(activitiesFrame, listOf(1, 1)))
+        assertNull(ActivityListCodec.encode(activitiesFrame, listOf(99)))
         assertNull(ActivityListCodec.encode(bytes(0x53, 1, 2), listOf(1, 2, 3)))
     }
 

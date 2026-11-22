@@ -12,7 +12,7 @@ import org.avmedia.gshockapi.io.RunMeasurementCodec
 import org.avmedia.gshockapi.io.TrainingAlertCodec
 import org.junit.Test
 
-/** Workout settings: the list of activities, one activity with everything read, and an activity the watch did not answer for. */
+/** Activity settings: the list of activities, one activity with everything read, and an activity the watch did not answer for. */
 class WorkoutSettingsScreenshotTest : ScreenshotTest() {
     private val running = WorkoutActivityUi(
         activity = 1,
@@ -31,6 +31,9 @@ class WorkoutSettingsScreenshotTest : ScreenshotTest() {
     @Test fun listDark() = snap("workout_settings_list", true) { WorkoutSettingsListContent(WorkoutListUi(activities = listOf(1, 2, 3, 6, 7)), {}, {}, {}) }
     @Test fun listNoAnswerLight() = snap("workout_settings_list_no_answer", false) {
         WorkoutSettingsListContent(WorkoutListUi(message = "The watch did not answer. Connect the watch and try again."), {}, {}, {})
+    }
+    @Test fun listRawLight() = snap("workout_settings_list_raw", false) {
+        WorkoutSettingsListContent(WorkoutListUi(message = "The activity list is not in the layout the app knows. It will not be changed.", rawHex = "53 01 4D 00"), {}, {}, {})
     }
     @Test fun activityLight() = snap("workout_settings_activity", false) { Activity(running) }
     @Test fun activityDark() = snap("workout_settings_activity", true) { Activity(running) }
