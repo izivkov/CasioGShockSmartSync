@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
+import org.avmedia.gshockGoogleSync.ui.health.H5600Session
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import timber.log.Timber
 
@@ -26,6 +27,11 @@ class WebhookDispatcher @Inject constructor(
     raw: RawWatchRequest,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    init {
+        // The point where a DW-H5600 LifeLog read completes: the "health data downloaded" trigger.
+        H5600Session.onDownloaded = { onHealthDataDownloaded() }
+    }
 
     val registry: VariableRegistry = WatchVariables.registry(WatchVariables.androidEnv(context, api, features, raw))
 

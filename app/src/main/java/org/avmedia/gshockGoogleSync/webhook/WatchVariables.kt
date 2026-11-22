@@ -9,6 +9,8 @@ import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockapi.IGShockAPI
+import org.avmedia.gshockapi.model.StepCounterData
+import org.avmedia.gshockGoogleSync.ui.health.H5600Session
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
@@ -31,6 +33,8 @@ object WatchVariables {
         val isH5600: () -> Boolean,
         val phoneBattery: () -> Int?,
         val lastSync: () -> String?,
+        /** The last DW-H5600 LifeLog transfer, or null when none was read this session. */
+        val healthData: () -> StepCounterData? = { null },
     )
 
     fun androidEnv(appContext: Context, api: GShockRepository, features: IWatchFeatureManager, raw: RawRequester) = Env(
@@ -43,6 +47,7 @@ object WatchVariables {
             manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).takeIf { p -> p in 0..100 }
         },
         lastSync = { LocalDataStorage.get(appContext, WebhookStorage.KEY_LAST_SYNC) },
+        healthData = { H5600Session.data },
     )
 
     fun registry(env: Env): VariableRegistry {
@@ -115,8 +120,10 @@ object WatchVariables {
             Variable("watch.timer_seconds", "Countdown timer set on the watch, seconds", needsWatch = true) {
                 api.getTimer()
             },
-            Variable("health.steps_today", "Steps counted today (watches with a step counter)", needsWatch = true) {
-                if (supported("time.step_counter")) api.getStepCount().currentDaySteps else null
+            Variable("health.steps_today", HealthVariables.DESCRIPTIONS.getValue("health.steps_today"), needsWatch = false) {
+                // H5600: the LifeLog read takes 30 to 100 s, so only the last transfer is used, never a new read here.
+                if (h5600()) HealthVariables.values(env.healthData())["health.steps_today"]
+                else if (it.watchConnected && supported("time.step_counter")) api.getStepCount().currentDaySteps else null
             },
 
             // Watch settings
@@ -178,6 +185,11 @@ object WatchVariables {
                 }
             },
         )
+
+        // DW-H5600 LifeLog values, from the last transfer (health.steps_today is defined above).
+        for (name in HealthVariables.NAMES.filter { it != "health.steps_today" }) {
+            list += Variable(name, HealthVariables.DESCRIPTIONS.getValue(name)) { HealthVariables.values(env.healthData())[name] }
+        }
 
         // World cities 1 to 5 (name only).
         for (i in 1..5) {

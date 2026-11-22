@@ -340,7 +340,7 @@ private fun WebhookEditor(
             AppText(text = "When to send")
             SwitchLine("A watch action runs (button press, Phone Finder)", onWatchAction) { onWatchAction = it }
             SwitchLine("After each watch connection / sync", onSync) { onSync = it }
-            SwitchLine("Health data downloaded (not available yet)", onHealth, enabled = false) { onHealth = it }
+            SwitchLine("Health data downloaded (DW-H5600 / GBX-H5600 LifeLog)", onHealth) { onHealth = it }
             OutlinedTextField(
                 value = interval, onValueChange = { interval = it.filter { c -> c.isDigit() }.take(5) },
                 singleLine = true, label = { Text("Minimum minutes between sends (0 = no limit)") },
