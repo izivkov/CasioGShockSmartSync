@@ -107,6 +107,7 @@ fun WatchImageWithOverlay(
 fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
+    instructionResId: Int = R.string.find_phone_instruction,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val screenHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
@@ -129,9 +130,7 @@ fun WatchImageWithOverlayAlwaysConnected(
             contentAlignment = Alignment.TopCenter
         ) {
             Text(
-                text = stringResource(
-                    R.string.find_phone_instruction
-                ),
+                text = stringResource(instructionResId),
                 color = Color.Red,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
