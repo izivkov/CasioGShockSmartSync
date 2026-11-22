@@ -41,7 +41,7 @@ object OpenOnConnect {
     ): Boolean {
         val ready = (session.phase as? SessionPhase.Ready)?.entryReason == EntryReason.BACKGROUND
         if (!inFront || !onFirstPage || !ready) return false
-        return true
+        return switchOn || sameAddress(waitingFor, session.watch.address)
     }
 
     fun sameAddress(a: String?, b: String?): Boolean =
