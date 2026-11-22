@@ -55,7 +55,8 @@ class HaDashboardService(
         val path = HaDashboard.urlPath(deviceId)
         val found = entities(s, deviceName) ?: return noAdmin()
         if (found.isEmpty()) return DashResult(false, "Home Assistant has no sensors of this watch yet. Connect the watch first.")
-        val config = HaDashboard.build(deviceId, deviceName, found)
+        val states = s.call("get_states").takeIf { it.ok }?.result.objects()
+        val config = HaDashboard.build(deviceId, deviceName, found, stepGoalOf(states, found["step_goal"]), calendarsOf(states))
         val list = s.call("lovelace/dashboards/list")
         if (!list.ok) return fail(list)
         val present = list.result.objects().any { it.get("url_path")?.asString == path }
@@ -88,8 +89,15 @@ class HaDashboardService(
             .getOrDefault(emptySet())
         val found = HaDashboard.predictedEntities(deviceName).filterValues { it in have }
         if (found.isEmpty()) return DashResult(false, "Home Assistant has no sensors of this watch yet. Connect the watch first.")
-        return DashResult(true, "Copied.", text = HaYaml.dump(HaDashboard.build(deviceId, deviceName, found)))
+        val states = runCatching { com.google.gson.JsonParser.parseString(r.body).asJsonArray.mapNotNull { it as? JsonObject } }.getOrDefault(emptyList())
+        return DashResult(true, "Copied.", text = HaYaml.dump(HaDashboard.build(deviceId, deviceName, found, stepGoalOf(states, found["step_goal"]), calendarsOf(states))))
     }
+
+    private fun stepGoalOf(states: List<JsonObject>, entity: String?): Int? =
+        states.firstOrNull { it.get("entity_id")?.asString == entity }?.get("state")?.asString?.toDoubleOrNull()?.toInt()?.takeIf { it > 0 }
+
+    private fun calendarsOf(states: List<JsonObject>): List<String> =
+        states.mapNotNull { it.get("entity_id")?.asString }.filter { it.startsWith("calendar.") }
 
     private fun cardCount(config: JsonObject): Int =
         config.getAsJsonArray("views").sumOf { (it as JsonObject).getAsJsonArray("cards").size() }

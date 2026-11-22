@@ -12,17 +12,26 @@ class HaDashboardTest {
     private val id = "gshock-c5951dde28df"
     private val all = HaDashboard.predictedEntities("CASIO GBX-H5600")
 
-    private fun cardTitles(c: JsonObject) =
-        c.getAsJsonArray("views")[0].asJsonObject.getAsJsonArray("cards").map { it.asJsonObject.get("title").asString }
+    private fun cards(c: JsonObject) = c.getAsJsonArray("views").flatMap { it.asJsonObject.getAsJsonArray("cards").map { card -> card.asJsonObject } }
+
+    /** The card's title, or its name (the gauge and the button have a name). */
+    private fun cardTitles(c: JsonObject) = cards(c).map { (it.get("title") ?: it.get("name")).asString }
 
     @Test fun onlyPresentSensorsGetCards() {
         val found = mapOf("steps_today" to "sensor.w_steps_today", "battery" to "sensor.w_battery")
         val c = HaDashboard.build(id, "W", found)
-        assertEquals(listOf("Now", "Steps per day", "Today", "Watch battery and temperature"), cardTitles(c))
-        val now = c.getAsJsonArray("views")[0].asJsonObject.getAsJsonArray("cards")[0].asJsonObject.getAsJsonArray("entities").map { it.asString }
-        assertEquals(listOf("sensor.w_steps_today", "sensor.w_battery"), now)
-        assertFalse(cardTitles(c).contains("Heart rate"))
+        assertEquals(
+            listOf(
+                "Steps today", "Steps and heart rate today", "Steps per day", "Steps per week", "Watch",
+                "Battery and temperature, 7 days", "Send a test to the watch",
+            ),
+            cardTitles(c),
+        )
+        val watch = cards(c).first { it.get("title")?.asString == "Watch" }.getAsJsonArray("entities").map { it.asString }
+        assertEquals(listOf("sensor.w_battery"), watch)
+        assertFalse(cardTitles(c).contains("Heart rate per day"))
         assertFalse(cardTitles(c).contains("Walk, run, still per day"))
+        assertFalse(cardTitles(c).contains("Last night"))
     }
 
     @Test fun noSensorsNoCards() {
@@ -30,17 +39,50 @@ class HaDashboardTest {
         assertTrue(HaDashboard.hasCards(HaDashboard.build(id, "W", all)))
     }
 
-    @Test fun fullSetHasTheReferenceCards() {
+    @Test fun fullSetHasTheReferenceViewsAndCards() {
         val c = HaDashboard.build(id, "W", all)
+        assertEquals(listOf("today", "trends", "watch"), c.getAsJsonArray("views").map { it.asJsonObject.get("path").asString })
         assertEquals(
-            listOf("Now", "Steps per day", "Heart rate", "Energy and active minutes per day", "Walk, run, still per day",
-                "Sleep score per night", "Today", "Watch battery and temperature"),
+            listOf(
+                "Steps today", "Today", "Heart rate", "Last night", "Steps and heart rate today",
+                "Steps per day", "Heart rate per day", "Energy and active minutes per day", "Walk, run, still per day",
+                "Steps per week", "Sleep score per night", "Sleep per night, minutes",
+                "Watch", "Battery and temperature, 7 days", "Connection, 24 h", "Send a test to the watch",
+            ),
             cardTitles(c),
         )
-        val steps = c.getAsJsonArray("views")[0].asJsonObject.getAsJsonArray("cards")[1].asJsonObject
+        val steps = cards(c).first { it.get("title")?.asString == "Steps per day" }
         assertEquals("statistics-graph", steps.get("type").asString)
         assertEquals("change", steps.getAsJsonArray("stat_types")[0].asString)
         assertEquals("day", steps.get("period").asString)
+        val weekly = cards(c).first { it.get("title")?.asString == "Steps per week" }
+        assertEquals("week", weekly.get("period").asString)
+    }
+
+    @Test fun theGaugeMaximumIsTheStepGoal() {
+        val g = cards(HaDashboard.build(id, "W", all, stepGoal = 6000)).first { it.get("type").asString == "gauge" }
+        assertEquals(6000, g.get("max").asInt)
+        assertEquals(6000, g.getAsJsonObject("severity").get("green").asInt)
+        assertEquals(3000, g.getAsJsonObject("severity").get("yellow").asInt)
+        val d = cards(HaDashboard.build(id, "W", all)).first { it.get("type").asString == "gauge" }
+        assertEquals(HaDashboard.DEFAULT_STEP_GOAL, d.get("max").asInt)
+    }
+
+    @Test fun aCalendarCardOnlyWhenCalendarsExist() {
+        assertFalse(cards(HaDashboard.build(id, "W", all)).any { it.get("type").asString == "calendar" })
+        val c = cards(HaDashboard.build(id, "W", all, calendars = listOf("calendar.family"))).first { it.get("type").asString == "calendar" }
+        assertEquals("calendar.family", c.getAsJsonArray("entities")[0].asString)
+    }
+
+    @Test fun sleepCardsOnlyWhenSleepSensorsExist() {
+        val noSleep = all.filterKeys { !it.startsWith("sleep") }
+        assertFalse(cardTitles(HaDashboard.build(id, "W", noSleep)).any { it.startsWith("Sleep") || it == "Last night" })
+        assertTrue(cardTitles(HaDashboard.build(id, "W", all)).containsAll(listOf("Last night", "Sleep score per night")))
+    }
+
+    @Test fun theTestButtonUsesTheNotifyServiceOfTheDevice() {
+        val b = cards(HaDashboard.build(id, "CASIO GBX-H5600", all)).first { it.get("type").asString == "button" }
+        assertEquals("notify.mobile_app_casio_gbx_h5600", b.getAsJsonObject("tap_action").get("perform_action").asString)
     }
 
     @Test fun markerNamesTheWatchAndTheSensors() {
@@ -87,9 +129,10 @@ class HaDashboardTest {
     @Test fun yamlShape() {
         val y = HaYaml.dump(HaDashboard.build(id, "W", mapOf("steps_today" to "sensor.w_steps_today", "battery" to "sensor.w_battery")))
         assertTrue(y, y.startsWith("gshock_smartsync:\n  device: gshock-c5951dde28df\n"))
-        assertTrue(y, y.contains("views:\n- title: Watch\n  path: watch\n  icon: \"mdi:watch\"\n  cards:\n  - type: entities\n"))
+        assertTrue(y, y.contains("views:\n- title: Today\n  path: today\n  icon: \"mdi:walk\"\n  cards:\n  - type: gauge\n"))
         assertTrue(y, y.contains("\n    - sensor.w_steps_today\n"))
         assertTrue(y, y.contains("    stat_types:\n    - change\n"))
+        assertTrue(y, y.contains("    severity:\n      green: 8000\n"))
         assertFalse(y.contains("\t"))
     }
 
