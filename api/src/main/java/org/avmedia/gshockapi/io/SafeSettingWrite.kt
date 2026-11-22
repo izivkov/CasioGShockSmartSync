@@ -54,7 +54,7 @@ class SafeSettingWrite(
         write(after)
         settle()
         val back = readValue() ?: return SettingWriteResult.Failed("The watch did not answer after the change. Check the setting on the watch.")
-        return if (back.contentEquals(expectedBack(before, after))) {
+        return if (back.contentEquals(after)) {
             SettingWriteResult.Done
         } else {
             SettingWriteResult.Failed("The watch did not keep the change. Check the setting on the watch.")

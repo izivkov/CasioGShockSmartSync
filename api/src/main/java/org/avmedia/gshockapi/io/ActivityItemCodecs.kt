@@ -69,7 +69,7 @@ object ActivityItemCodec {
     fun parse(frame: ByteArray, activity: Int, cls: Int): Item? {
         if (activity !in 1..0xFF || frame.size < 4 || frame[0] != CODE.toByte()) return null
         fun at(i: Int) = frame[i].toInt() and 0xFF
-        if (at(1) == activity && at(2) == cls) return Item(activity, cls, 3)
+        if (at(1) == activity && at(2) == cls) return Item(activity, cls, 4)
         if (frame.size >= 5 && at(1) == 0 && at(2) == activity && at(3) == cls) return Item(activity, cls, 4)
         return null
     }
@@ -80,7 +80,7 @@ object ActivityItemCodec {
     /** [frame] with the wrapped value replaced by [newInner] (same class byte, same size); the bytes before it stay. */
     fun withInner(frame: ByteArray, item: Item, newInner: ByteArray?): ByteArray? {
         if (newInner == null || newInner.size != frame.size - item.offset + 1 || newInner[0] != item.cls.toByte()) return null
-        return frame.copyOf().also { newInner.copyInto(it, item.offset, 1) }
+        return frame.copyOf().also { newInner.copyInto(it, item.offset, 1); it[it.size - 1] = 0 }
     }
 
     /** Frame positions for bytes of the inner frame (inner byte k >= 1 is frame byte offset + k - 1). */

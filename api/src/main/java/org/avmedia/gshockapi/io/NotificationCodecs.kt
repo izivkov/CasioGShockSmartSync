@@ -49,7 +49,7 @@ object NotificationSoundCodec {
 
     fun withSoundEvent(frame: ByteArray, event: Int, on: Boolean): ByteArray? = withEvent(frame, event, on, 1)
 
-    fun withVibrationEvent(frame: ByteArray, event: Int, on: Boolean): ByteArray? = withEvent(frame, event, on, 3)
+    fun withVibrationEvent(frame: ByteArray, event: Int, on: Boolean): ByteArray? = withEvent(frame, event, on, 1)
 
     private fun withEvent(frame: ByteArray, event: Int, on: Boolean, index: Int): ByteArray? {
         if (parse(frame) == null || event !in EVENTS.indices) return null
@@ -99,7 +99,7 @@ object NotificationManagerCodec {
         if (language !in 0..3) return null
         if (language == current.language) return frame.copyOf()
         val flags = Frame.u8(frame, 1) ?: return null
-        return Frame.withBytes(frame, mapOf(0 to LANGUAGE_CHANGED, 1 to ((flags and 3.inv()) or language)))
+        return Frame.withBytes(frame, mapOf(0 to NIGHT_CHANGED, 1 to ((flags and 3.inv()) or language)))
     }
 
     fun withOffAtNight(frame: ByteArray, value: Int): ByteArray? {
