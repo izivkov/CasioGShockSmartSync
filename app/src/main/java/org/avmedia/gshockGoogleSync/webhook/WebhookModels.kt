@@ -16,6 +16,9 @@ enum class WebhookTrigger(val eventName: String) {
 
     /** The Test button. */
     TEST("test"),
+
+    /** The "Probe watch" screen posting its result. */
+    PROBE("probe"),
 }
 
 @Keep
@@ -42,7 +45,7 @@ data class Webhook(
         WebhookTrigger.WATCH_ACTION -> onWatchAction
         WebhookTrigger.SYNC -> onSync
         WebhookTrigger.HEALTH_DATA -> onHealthData
-        WebhookTrigger.TEST -> true
+        WebhookTrigger.TEST, WebhookTrigger.PROBE -> true
     }
 
     val isJson: Boolean get() = TemplateRenderer.isJsonContentType(contentType)
