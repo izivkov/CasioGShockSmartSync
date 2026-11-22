@@ -25,6 +25,8 @@ data class HaWatchUi(
     val lastText: String = "",
     val deviceUrl: String = "",
     val lookingUpDevice: Boolean = false,
+    /** False when the connected watch cannot show notifications; true while not known. */
+    val notificationsSupported: Boolean = true,
 )
 
 data class HaGroupUi(val group: HaGroup, val on: Boolean, val rows: List<Pair<String, String>>)

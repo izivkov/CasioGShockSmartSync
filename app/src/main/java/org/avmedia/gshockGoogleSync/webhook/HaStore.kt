@@ -78,6 +78,7 @@ class HaStore(private val store: KeyValueStore) {
         store.delete(KEY_RESULT_OK)
         store.delete(KEY_SENT)
         store.delete(KEY_DEVICE)
+        store.delete(KEY_PUSH_OK)
     }
 
     /** The newest job replaces a waiting one; a waiting button event is kept until it is sent. */
@@ -114,6 +115,11 @@ class HaStore(private val store: KeyValueStore) {
 
     fun lastResult(): String? = store.get(KEY_RESULT)
 
+    /** Whether the connected watch showed notifications at its last connection; null = not known yet. */
+    fun notificationsSupported(): Boolean? = store.get(KEY_PUSH_OK)?.let { it == "yes" }
+
+    fun saveNotificationsSupported(ok: Boolean) = store.put(KEY_PUSH_OK, if (ok) "yes" else "no")
+
     /** The action a button press runs besides the event; null = nothing. */
     fun loadAction(): HaAction? =
         runCatching { gson.fromJson(store.get(KEY_ACTION), HaAction::class.java) }.getOrNull()?.takeIf { it.entityId.isNotBlank() }
@@ -131,6 +137,7 @@ class HaStore(private val store: KeyValueStore) {
     fun setGroupOn(group: HaGroup, on: Boolean) = store.put(KEY_GROUP + group.name, if (on) "on" else "off")
 
     private companion object {
+        const val KEY_PUSH_OK = "ha.push.ok"
         const val KEY_GROUP = "ha.group."
         const val KEY_CONFIG = "ha.config"
         const val KEY_REG = "ha.reg."

@@ -50,6 +50,7 @@ class HaViewModel @Inject constructor(
                 lastText = store.lastResult().orEmpty(),
                 deviceUrl = HaDeviceLookup.deviceUrl(form.baseUrl, store.loadDeviceId()),
                 lookingUpDevice = old?.watch?.lookingUpDevice ?: false,
+                notificationsSupported = store.notificationsSupported() != false,
             ),
             sent = HaSentUi(HaSentView.groups(sent, store.groupsOn()), sending = store.getPending() != null, failed = failed),
             actions = (old?.actions ?: HaActionsUi()).copy(chosen = store.loadAction(), lastRun = store.lastActionResult().orEmpty()),

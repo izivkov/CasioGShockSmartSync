@@ -42,6 +42,8 @@ object HaPayloads {
         val o = JsonParser.parseString(registrationBody).asJsonObject
         val data = linkedMapOf<String, Any?>()
         UPDATABLE.forEach { k -> o.get(k)?.takeIf { it.isJsonPrimitive }?.let { data[k] = it.asString } }
+        // HA's update_registration also takes app_data: an old registration gets the push flag this way.
+        o.get("app_data")?.takeIf { it.isJsonObject }?.let { data["app_data"] = gson.fromJson(it, Map::class.java) }
         return gson.toJson(linkedMapOf("type" to "update_registration", "data" to data))
     }
 
@@ -63,6 +65,7 @@ object HaPayloads {
             "os_name" to "Android",
             "os_version" to osVersion,
             "supports_encryption" to false,
+            "app_data" to linkedMapOf("push_websocket_channel" to true),
         )
     )
 

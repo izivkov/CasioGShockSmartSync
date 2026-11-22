@@ -19,6 +19,11 @@ import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
+import org.avmedia.gshockGoogleSync.webhook.HaPayloads
+import org.avmedia.gshockGoogleSync.webhook.HaPushChannel
+import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
+import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
 import timber.log.Timber
 
 /**
@@ -49,6 +54,7 @@ class MainEventHandler(
             sessionManager.currentSession.filterNotNull().collect { session ->
                 launch { startNotificationServiceWhenReady(session) }
                 launch { reportErrorWhenClosed(session) }
+                launch { pushWhileConnected(session) }
             }
         }
     }
@@ -57,6 +63,30 @@ class MainEventHandler(
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
         if (state.phase is SessionPhase.Ready && repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
+        }
+    }
+
+    /** Home Assistant notifications to the watch: only for a watch that shows them, only while it is connected. */
+    private suspend fun pushWhileConnected(session: Session) {
+        val state = session.state.first { it.phase !is SessionPhase.Connecting }
+        if (state.phase !is SessionPhase.Ready) return
+        val haStore = WebhookStorage.haStore(context)
+        val supported = repository.supportsAppNotifications()
+        haStore.saveNotificationsSupported(supported)
+        if (!supported) return
+        val address = runCatching { WatchInfo.getAddress() }.getOrDefault("")
+        if (address.isBlank()) return
+        val toggles = WebhookStorage.toggles(context)
+        val channel = HaPushChannel(
+            haStore,
+            deliver = { n -> scope.launch { repository.sendAppNotification(n) } },
+            enabled = { toggles.isOn(ServiceToggles.Service.HOME_ASSISTANT) },
+        )
+        val job = scope.launch(Dispatchers.IO) { channel.run(HaPayloads.deviceId(address)) }
+        try {
+            session.state.first { it.phase is SessionPhase.Closed }
+        } finally {
+            job.cancel()
         }
     }
 
