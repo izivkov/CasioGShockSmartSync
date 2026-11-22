@@ -45,7 +45,7 @@ object WatchDecoders {
     fun versionRaw(answer: String?): String? {
         val b = answer?.let { bytes(it) } ?: return null
         if (b.size < 2 || b[0] != 0x20) return null
-        return b.drop(1).dropLast(1).joinToString(" ") { "%02X".format(it) }
+        return b.drop(1).joinToString(" ") { "%02X".format(it) }
     }
 
     /** "unknown" while the version bytes are read but not decodable; null when there was no answer. */

@@ -33,7 +33,7 @@ class HaClient(
         val cfg = HaConfig(baseUrl = base, token = token.trim(), registration = registrationBody, deviceName = deviceName, model = model)
         if (old != null && old.baseUrl == base && old.token == cfg.token) {
             // Already registered: change the existing device, no new registration.
-            val kept = old.copy(deviceName = deviceName, model = model)
+            val kept = old.copy(registration = registrationBody, deviceName = deviceName, model = model)
             store.save(kept)
             val r = transport.post("$base/api/webhook/${old.webhookId}", HaPayloads.updateRegistration(registrationBody), null)
             if (!gone(r)) {
