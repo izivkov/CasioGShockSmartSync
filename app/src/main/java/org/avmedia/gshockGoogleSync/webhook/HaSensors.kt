@@ -50,6 +50,7 @@ object HaSensors {
         HaSensor("temperature", "Temperature", "watch.temperature", "temperature", "°C", "measurement", "mdi:thermometer"),
         HaSensor("steps_today", "Steps today", "health.steps_today", null, "steps", "total_increasing", "mdi:shoe-print", attributes = mapOf("steps_by_hour" to "health.steps_by_hour")),
         HaSensor("kcal_today", "Energy today", "health.kcal_today", null, "kcal", "total_increasing", "mdi:fire"),
+        HaSensor("distance_today", "Distance today", "health.distance_m", "distance", "m", "total_increasing", "mdi:map-marker-distance"),
         HaSensor("active_minutes", "Active minutes", "health.active_minutes", "duration", "min", "total_increasing", "mdi:run"),
         HaSensor("hr_rest", "Resting heart rate", "health.hr_rest", null, "bpm", "measurement", "mdi:heart-pulse"),
         HaSensor("hr_max", "Max heart rate", "health.hr_max", null, "bpm", "measurement", "mdi:heart-pulse"),

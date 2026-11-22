@@ -48,6 +48,7 @@ class RawSettingsReaderTest {
         val reader = RawSettingsReader(clock = { now })
         reader.refresh(fake)
         val first = fake.asked.size
+        assertTrue(first > 0)
         now = 29 * 60_000L
         reader.refresh(fake)
         assertEquals(first, fake.asked.size)
