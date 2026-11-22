@@ -36,7 +36,7 @@ class HaClient(
             val kept = old.copy(registration = registrationBody, deviceName = deviceName, model = model)
             store.save(kept)
             val r = transport.post("$base/api/webhook/${old.webhookId}", HaPayloads.updateRegistration(registrationBody), null)
-            if (!gone(r)) {
+            if (!gone(r, "$base/api/webhook/${old.webhookId}")) {
                 classify(r)?.let { return it }
                 return HaResult.Ok("Updated " + deviceNameOf(registrationBody))
             }
@@ -99,20 +99,20 @@ class HaClient(
         if (cfg.sensorsHash != fingerprint) {
             for (s in sensors) {
                 val r = transport.post(hook, HaPayloads.registerSensor(s, job.states[s.uniqueId], job.attributes?.get(s.uniqueId)), null)
-                if (gone(r)) return Push.NeedsRegistration(true)
+                if (gone(r, hook)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }
             }
             store.save(cfg.copy(sensorsHash = fingerprint))
         }
         if (job.states.isNotEmpty()) {
             val r = transport.post(hook, HaPayloads.updateSensorStates(job.states, sensors, job.attributes.orEmpty()), null)
-            if (gone(r)) return Push.NeedsRegistration(true)
+            if (gone(r, hook)) return Push.NeedsRegistration(true)
             classify(r)?.let { return Push.Finished(it) }
             if (notRegistered(r.body)) return Push.NeedsRegistration(false)
         }
         job.event?.let {
             val r = transport.post(hook, HaPayloads.fireEvent(it), null)
-            if (gone(r)) return Push.NeedsRegistration(true)
+            if (gone(r, hook)) return Push.NeedsRegistration(true)
             classify(r)?.let { res -> return Push.Finished(res) }
         }
         val what = "Sent ${job.states.size} sensor value(s)" + if (job.event != null) " and the button event" else ""
@@ -120,11 +120,16 @@ class HaClient(
     }
 
     /**
-     * The registration was deleted in HA. The docs say HTTP 410; the real HA (checked 2026-11-22) answers
-     * 200 with an empty body instead, while every live answer has a JSON body. Both mean: register again.
+     * The registration was deleted in HA: HTTP 410, or an empty 200 that get_config (which always answers JSON
+     * while the registration exists) confirms. An empty 200 alone is not enough: some live commands answer
+     * with nothing, and a needless re-registration replaces the HA entry and drops its sensors.
      */
-    private fun gone(r: HaResponse): Boolean =
-        r.status == 410 || (r.status != null && r.status in 200..299 && r.body.isBlank())
+    private fun gone(r: HaResponse, hook: String): Boolean {
+        if (r.status == 410) return true
+        if (r.status == null || r.status !in 200..299 || r.body.isNotBlank()) return false
+        val c = transport.post(hook, """{"type":"get_config"}""", null)
+        return c.status == 410 || (c.status != null && c.status in 200..299 && c.body.isBlank())
+    }
 
     /** Null for a 2xx answer; otherwise the failure, retryable or final. */
     private fun classify(r: HaResponse): HaResult? {
