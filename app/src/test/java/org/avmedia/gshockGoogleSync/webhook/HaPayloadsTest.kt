@@ -183,14 +183,14 @@ class HaPayloadsTest {
 
     @Test
     fun faceAnswersAreKeptAsHexWithoutThe0xPrefixTheGuardDrops() {
-        assertEquals("51 01 00 FF", WatchDecoders.faceRaw("0x51 01 00 ff", 0x51))
-        assertEquals("52 0A", WatchDecoders.faceRaw("0x52 0A", 0x52))
-        assertFalse(WatchDecoders.looksLikeRawHex(WatchDecoders.faceRaw("0x51 01 00 ff", 0x51)!!))
+        assertEquals("51 01 00 FF", WatchDecoders.rawAnswer("0x51 01 00 ff", 0x51))
+        assertEquals("52 0A", WatchDecoders.rawAnswer("0x52 0A", 0x52))
+        assertFalse(WatchDecoders.looksLikeRawHex(WatchDecoders.rawAnswer("0x51 01 00 ff", 0x51)!!))
         // wrong code, no data bytes, not hex, nothing: unknown, never a guess
-        assertEquals(null, WatchDecoders.faceRaw("0x52 01", 0x51))
-        assertEquals(null, WatchDecoders.faceRaw("0x51", 0x51))
-        assertEquals(null, WatchDecoders.faceRaw("0x51 zz", 0x51))
-        assertEquals(null, WatchDecoders.faceRaw(null, 0x51))
+        assertEquals(null, WatchDecoders.rawAnswer("0x52 01", 0x51))
+        assertEquals(null, WatchDecoders.rawAnswer("0x51", 0x51))
+        assertEquals(null, WatchDecoders.rawAnswer("0x51 zz", 0x51))
+        assertEquals(null, WatchDecoders.rawAnswer(null, 0x51))
     }
 
     @Test
@@ -204,6 +204,19 @@ class HaPayloadsTest {
         assertEquals(250, (HaSensors.states(mapOf("watch.face_raw" to long))["watch_face_raw"] as String).length)
         assertEquals("51 01", HaSensors.states(mapOf("watch.face_raw" to "51 01"))["watch_face_raw"])
         assertFalse(HaSensors.states(mapOf("watch.face_raw" to null)).containsKey("watch_face_raw"))
+    }
+
+    @Test
+    fun rawSettingsSensorShowsTheReadTimeAndHasOneAttributePerCode() {
+        val s = sensor("watch_settings_raw")
+        assertEquals("diagnostic", s.entityCategory)
+        assertEquals("timestamp", s.deviceClass)
+        assertEquals("watch.raw_settings_read_at", s.variable)
+        assertEquals(RawSettings.CODES.map { RawSettings.name(it) }.toSet(), s.attributes.keys)
+        assertEquals("watch.raw.0x41", s.attributes.getValue("0x41"))
+        val values = mapOf("watch.raw_settings_read_at" to "2026-11-22T10:15:00+01:00", "watch.raw.0x41" to "41 01 02")
+        assertEquals("2026-11-22T10:15:00+01:00", HaSensors.states(values)["watch_settings_raw"])
+        assertEquals(mapOf("0x41" to "41 01 02"), HaSensors.attributes(values)["watch_settings_raw"])
     }
 
     @Test

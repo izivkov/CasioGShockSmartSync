@@ -48,8 +48,8 @@ object WatchDecoders {
         return b.drop(1).joinToString(" ") { "%02X".format(it) }
     }
 
-    /** Watch face answers (requests 0x51, 0x52): all bytes as hex pairs. Not implemented yet. */
-    fun faceRaw(answer: String?, code: Int): String? = null
+    /** Answer to a raw setting request: all bytes as hex pairs. Not implemented yet. */
+    fun rawAnswer(answer: String?, code: Int): String? = null
 
     /** "unknown" while the version bytes are read but not decodable; null when there was no answer. */
     fun firmwareState(answer: String?): String? = versionRaw(answer)?.let { "unknown" }
