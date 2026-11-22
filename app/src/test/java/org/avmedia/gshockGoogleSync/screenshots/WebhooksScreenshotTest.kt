@@ -27,7 +27,7 @@ class WebhooksScreenshotTest : ScreenshotTest() {
     @Composable
     private fun ListScreen(list: List<Webhook>) = WebhookList(
         hooks = list, results = if (list.isEmpty()) emptyMap() else results, unreadable = false,
-        onBack = {}, onProbe = {}, onSendLog = {}, onAdd = {}, onOpen = {}, onEnabled = { _, _ -> },
+        onBack = {}, onAdd = {}, onOpen = {}, onEnabled = { _, _ -> },
         onConfirmOverwrite = {},
     )
 

@@ -61,7 +61,6 @@ fun WebhooksScreen(
 ) {
     val hooks by viewModel.hooks.collectAsState()
     val results by viewModel.results.collectAsState()
-    var showProbe by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf(viewModel.loadDraft()?.hook) }
     val unreadable by viewModel.unreadable.collectAsState()
 
@@ -75,21 +74,13 @@ fun WebhooksScreen(
     GShockSmartSyncTheme {
         Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             val current = editing
-            if (showProbe) {
-                BackHandler { showProbe = false }
-                ProbeScreen(viewModel = viewModel, onBack = { showProbe = false })
-            } else if (current == null) {
+            if (current == null) {
                 BackHandler(onBack = onBack)
                 WebhookList(
                     hooks = hooks,
                     results = results,
                     unreadable = unreadable,
                     onBack = onBack,
-                    onProbe = { showProbe = true },
-                    onSendLog = {
-                        val n = viewModel.sendLogToWebhooks()
-                        AppSnackbar(if (n == 0) "No enabled POST/PUT webhook to send to" else "Log queued for $n webhook(s)")
-                    },
                     onAdd = { editing = Webhook.newDefault() },
                     onOpen = { editing = it },
                     onEnabled = { id, on -> viewModel.setEnabled(id, on) },
@@ -121,8 +112,6 @@ internal fun WebhookList(
     results: Map<String, WebhookResult>,
     unreadable: Boolean,
     onBack: () -> Unit,
-    onProbe: () -> Unit,
-    onSendLog: () -> Unit,
     onAdd: () -> Unit,
     onOpen: (Webhook) -> Unit,
     onEnabled: (String, Boolean) -> Unit,
@@ -165,8 +154,6 @@ internal fun WebhookList(
         ButtonsRow(
             buttons = listOf(
                 ButtonData(stringResource(R.string.webhook_back), onBack),
-                ButtonData("Probe watch", onProbe),
-                ButtonData("Send log", onSendLog),
                 ButtonData(stringResource(R.string.webhook_add), onAdd),
             )
         )

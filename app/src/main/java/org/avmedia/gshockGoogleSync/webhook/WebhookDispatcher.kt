@@ -97,25 +97,6 @@ class WebhookDispatcher @Inject constructor(
         return registry.render(hook.bodyTemplate, hook.isJson, ctx)
     }
 
-    /**
-     * Posts a probe result (already JSON, event "probe") to every enabled webhook, whatever its
-     * triggers. The body replaces the template; GET webhooks have no body and are skipped.
-     * Returns how many webhooks it was queued for.
-     */
-    fun sendProbe(json: String): Int {
-        var queued = 0
-        if (!WebhookStorage.toggles(context).isOn(ServiceToggles.Service.WEBHOOKS)) return 0
-        WebhookStorage.loadHooks(context)
-            .filter { WebhookPolicy.shouldFire(it, WebhookTrigger.PROBE, null, System.currentTimeMillis()) }
-            .filterNot { it.method.equals("GET", ignoreCase = true) }
-            .forEach { hook ->
-                WebhookStorage.putPending(context, hook.id, json)
-                WebhookWorker.enqueue(context, hook.id)
-                queued++
-            }
-        return queued
-    }
-
     /** The Test button: sends right now, without WorkManager, and returns what came back. */
     suspend fun test(hook: Webhook): TestReport {
         val rendered = render(hook, WebhookTrigger.TEST)

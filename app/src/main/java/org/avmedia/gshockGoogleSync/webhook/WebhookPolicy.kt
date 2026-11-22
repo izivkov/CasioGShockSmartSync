@@ -13,7 +13,7 @@ object WebhookPolicy {
         nowMillis: Long,
     ): Boolean {
         if (!hook.enabled || hook.url.isBlank() || !hook.firesOn(trigger)) return false
-        if (trigger == WebhookTrigger.TEST || trigger == WebhookTrigger.PROBE) return true
+        if (trigger == WebhookTrigger.TEST) return true
         val intervalMs = hook.minIntervalMinutes.coerceAtLeast(0) * 60_000L
         return lastAttemptMillis == null || nowMillis - lastAttemptMillis >= intervalMs
     }

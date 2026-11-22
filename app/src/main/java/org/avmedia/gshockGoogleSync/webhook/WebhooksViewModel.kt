@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 class WebhooksViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val dispatcher: WebhookDispatcher,
-    val probe: WatchProbe,
 ) : ViewModel() {
 
     private val _hooks = MutableStateFlow(WebhookStorage.loadHooks(context))
@@ -72,17 +71,6 @@ class WebhooksViewModel @Inject constructor(
         _hooks.value = _hooks.value.filterNot { it.id == id }
         refreshResults()
     }
-
-    /** Posts the probe result to the enabled webhooks; returns how many were queued. */
-    fun sendProbeToWebhooks(): Int = dispatcher.sendProbe(probe.result().toJson())
-
-    /** Posts the newest app log lines (event "debug_log"); returns how many webhooks it was queued for. */
-    fun sendLogToWebhooks(): Int = dispatcher.sendProbe(
-        DebugLog.toJson(
-            org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name),
-            java.time.OffsetDateTime.now().withNano(0).toString(),
-        )
-    )
 
     fun clearTestReport() {
         _testReport.value = null
