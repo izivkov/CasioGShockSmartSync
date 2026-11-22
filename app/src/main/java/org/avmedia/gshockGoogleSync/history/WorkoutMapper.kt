@@ -19,7 +19,7 @@ object WorkoutMapper {
         )
         val laps = s.laps.map { l ->
             WorkoutLapRow(
-                key, s.sport, l.index, l.lapSeconds, l.manual, l.distance, l.pace, l.speed, l.hrAvg, l.hrMax, l.hrMin,
+                key, s.sport, l.index, l.lapSeconds, l.manual, l.distance, l.pace, l.speed, l.hrMax, l.hrMax, l.hrMin,
                 l.ascent, l.descent, l.cadence,
             )
         }

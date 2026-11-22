@@ -25,7 +25,7 @@ class WorkoutTextTest {
     }
 
     @Test fun seriesIsBoundedAndKeepsGaps() {
-        val samples = List(1000) { WorkoutSampleRow(1, 1, it, hr = if (it % 2 == 0) 100 else null) }
+        val samples = List(1000) { WorkoutSampleRow(1, 1, it, hr = if (it % 20 == 0) 100 else null) }
         val s = WorkoutText.series(samples, 100) { it.hr }
         assertEquals(100, s.size)
         assertEquals(100f, s[0])

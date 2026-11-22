@@ -52,7 +52,6 @@ abstract class HistoryDao {
     @Transaction
     open fun upsert(batch: WorkoutBatch) {
         val w = batch.workout
-        clearLaps(w.startMs, w.sport)
         clearSamples(w.startMs, w.sport)
         putWorkout(w)
         putLaps(batch.laps)
