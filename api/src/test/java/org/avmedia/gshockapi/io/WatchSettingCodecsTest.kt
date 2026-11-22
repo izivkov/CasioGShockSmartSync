@@ -108,7 +108,7 @@ class WatchSettingCodecsTest {
     fun parsesTheStepReminderUnitAndNightWindow() {
         val fields = BasicHealthFieldsCodec.parse(basic(0b0000_0010))!!
         assertEquals(true, fields.stepReminder)
-        assertEquals(false, fields.unitBit)
+        assertEquals(LengthUnit.KM, fields.unit)
         assertEquals(22 to 30, fields.nightStart)
         assertEquals(6 to 15, fields.nightEnd)
     }
@@ -126,9 +126,17 @@ class WatchSettingCodecsTest {
     @Test
     fun theUnitChangesOnlyItsBit() {
         val before = basic(0b0010_0110)
-        val after = BasicHealthFieldsCodec.withUnitBit(before, true)!!
+        val after = BasicHealthFieldsCodec.withUnit(before, LengthUnit.MILES)!!
         assertEquals(0b0010_0111, after[12].toInt())
         assertEquals(BasicHealthFieldsCodec.FLAGS_BYTES, changed(before, after))
+    }
+
+    @Test
+    fun theUnitIsAChoiceOfTwoNamedValues() {
+        assertEquals(listOf("Kilometres", "Miles"), LengthUnit.entries.map { it.label })
+        assertEquals(LengthUnit.MILES, BasicHealthFieldsCodec.parse(basic(0b0000_0001))!!.unit)
+        val back = BasicHealthFieldsCodec.withUnit(basic(0b0000_0001), LengthUnit.KM)!!
+        assertEquals(0b0000_0000, back[12].toInt())
     }
 
     @Test
@@ -249,5 +257,63 @@ class WatchSettingCodecsTest {
         // The bytes of slots 1, 2 and 4, the face and the trailing byte are kept.
         assertEquals(listOf<Byte>(0x51, 2, 0, 10, 6, 19, 0x77), after.toList())
         assertNull(WatchFaceCodec.withTopRight(before, 20))
+    }
+
+    // 0x45 birth date and 0x4F body values
+
+    @Test
+    fun aBirthDateWriteChangesOnlyTheDateBytes() {
+        val before = profile(0xFF, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14, 0xAA)
+        val after = ProfileCodec.withBirthDate(before, 1990, 7, 9)!!
+        assertTrue(ProfileCodec.BIRTH_BYTES.containsAll(changed(before, after)))
+        val p = ProfileCodec.parse(after)!!
+        assertEquals(listOf(1990, 7, 9), listOf(p.birthYear, p.birthMonth, p.birthDay))
+        assertEquals(175, p.heightCm)
+        assertEquals(0xAA.toByte(), after[10])
+    }
+
+    @Test
+    fun anImpossibleBirthDateIsRefused() {
+        val before = profile(0xFF, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14)
+        assertNull(ProfileCodec.withBirthDate(before, 1990, 2, 30))
+        assertNull(ProfileCodec.withBirthDate(before, 1990, 13, 1))
+        assertNull(ProfileCodec.withBirthDate(before, 1850, 1, 1))
+    }
+
+    private fun body(flags: Int = 0b0000_0001) = frame(0x4F, 3, 23, 15, 6, 45, flags, 190, 60, 45, 0x77)
+
+    @Test
+    fun parsesTheBodyValues() {
+        val b = PhysicalSettingsCodec.parseBody(body(0b0000_0101))!!
+        assertEquals(PhysicalSettingsCodec.Body(3, 190, 60, 45, true, false, true), b)
+        assertNull(PhysicalSettingsCodec.parseBody(frame(0x4F, 9, 23, 15, 6, 45, 0, 190, 60, 45)))
+    }
+
+    @Test
+    fun eachBodyValueChangesOnlyItsByteAndItsFlag() {
+        val before = body(0b0000_0001)
+        val max = PhysicalSettingsCodec.withMaxHeartRate(before, 185)!!
+        assertEquals(setOf(7), changed(before, max))
+        assertTrue(PhysicalSettingsCodec.MAX_HR_BYTES.containsAll(changed(before, max)))
+        assertEquals(185, PhysicalSettingsCodec.parseBody(max)!!.maxHr)
+        val rest = PhysicalSettingsCodec.withRestingHeartRate(before, 52)!!
+        assertTrue(PhysicalSettingsCodec.RESTING_HR_BYTES.containsAll(changed(before, rest)))
+        assertEquals(setOf(8, 6), changed(before, rest))
+        assertEquals(true, PhysicalSettingsCodec.parseBody(rest)!!.restingHrByUser)
+        assertEquals(true, PhysicalSettingsCodec.parseBody(rest)!!.maxHrByUser)
+        val vo2 = PhysicalSettingsCodec.withVo2max(before, 50)!!
+        assertEquals(setOf(9, 6), changed(before, vo2))
+        val bg = PhysicalSettingsCodec.withTrainingBackground(before, 5)!!
+        assertEquals(PhysicalSettingsCodec.BACKGROUND_BYTES, changed(before, bg))
+    }
+
+    @Test
+    fun bodyValuesOutsideTheirRangeAreRefused() {
+        val b = body()
+        assertNull(PhysicalSettingsCodec.withMaxHeartRate(b, 99))
+        assertNull(PhysicalSettingsCodec.withMaxHeartRate(b, 231))
+        assertNull(PhysicalSettingsCodec.withRestingHeartRate(b, 20))
+        assertNull(PhysicalSettingsCodec.withVo2max(b, 5))
+        assertNull(PhysicalSettingsCodec.withTrainingBackground(b, 7))
     }
 }

@@ -67,6 +67,10 @@ object PhysicalSettingsCodec {
     const val CODE = 0x4F
     private const val BED_INDEX = 1
     private const val WAKE_INDEX = 3
+    private const val FLAGS_INDEX = 5
+    private const val MAX_HR_INDEX = 6
+    private const val RESTING_HR_INDEX = 7
+    private const val VO2MAX_INDEX = 8
 
     data class Sleep(val bedtime: Pair<Int, Int>, val wakeUp: Pair<Int, Int>)
 
@@ -97,8 +101,69 @@ object PhysicalSettingsCodec {
         return Frame.withBytes(frame, mapOf(index to hour, index + 1 to minute))
     }
 
+    /** Body values: training background, highest and resting heart rate, VO2max, with the "set by the user" flags. */
+    data class Body(
+        val trainingBackground: Int,
+        val maxHr: Int,
+        val restingHr: Int,
+        val vo2max: Int,
+        val maxHrByUser: Boolean,
+        val restingHrByUser: Boolean,
+        val vo2maxByUser: Boolean,
+    )
+
+    val TRAINING_BACKGROUNDS: List<String> = listOf("Not set", "Occasional", "Regular", "Frequent", "Heavy", "Semi-pro", "Pro")
+    val MAX_HR_RANGE = 100..230
+    val RESTING_HR_RANGE = 30..120
+    val VO2MAX_RANGE = 10..90
+
+    fun parseBody(frame: ByteArray): Body? {
+        if (!Frame.hasIndex(frame, CODE, VO2MAX_INDEX)) return null
+        val background = Frame.u8(frame, 0)?.takeIf { it in TRAINING_BACKGROUNDS.indices } ?: return null
+        val flags = Frame.u8(frame, FLAGS_INDEX) ?: return null
+        return Body(
+            background, Frame.u8(frame, MAX_HR_INDEX) ?: return null, Frame.u8(frame, RESTING_HR_INDEX) ?: return null,
+            Frame.u8(frame, VO2MAX_INDEX) ?: return null, flags and 1 != 0, flags and 2 != 0, flags and 4 != 0,
+        )
+    }
+
+    fun withTrainingBackground(frame: ByteArray, value: Int): ByteArray? =
+        if (parseBody(frame) == null || value !in TRAINING_BACKGROUNDS.indices) null else Frame.withBytes(frame, mapOf(0 to value))
+
+    /** Sets the value and its "set by the user" flag; the other flag bits stay. */
+    fun withMaxHeartRate(frame: ByteArray, bpm: Int): ByteArray? = withValue(frame, MAX_HR_INDEX, 1, bpm, MAX_HR_RANGE)
+
+    fun withRestingHeartRate(frame: ByteArray, bpm: Int): ByteArray? = withValue(frame, RESTING_HR_INDEX, 2, bpm, RESTING_HR_RANGE)
+
+    fun withVo2max(frame: ByteArray, value: Int): ByteArray? = withValue(frame, VO2MAX_INDEX, 4, value, VO2MAX_RANGE)
+
+    private fun withValue(frame: ByteArray, index: Int, flag: Int, value: Int, range: IntRange): ByteArray? {
+        if (parseBody(frame) == null || value !in range) return null
+        val flags = Frame.u8(frame, FLAGS_INDEX) ?: return null
+        return Frame.withBytes(frame, mapOf(index to value, FLAGS_INDEX to Frame.bits(flags, flag, true)))
+    }
+
+    val BACKGROUND_BYTES: Set<Int> = setOf(1)
+    val MAX_HR_BYTES: Set<Int> = setOf(MAX_HR_INDEX + 1, FLAGS_INDEX + 1)
+    val RESTING_HR_BYTES: Set<Int> = setOf(RESTING_HR_INDEX + 1, FLAGS_INDEX + 1)
+    val VO2MAX_BYTES: Set<Int> = setOf(VO2MAX_INDEX + 1, FLAGS_INDEX + 1)
+
     val BEDTIME_BYTES: Set<Int> = setOf(BED_INDEX + 1, BED_INDEX + 2)
     val WAKE_BYTES: Set<Int> = setOf(WAKE_INDEX + 1, WAKE_INDEX + 2)
+}
+
+/**
+ * Unit of length, bit 0 of 0x13 index 11. The notes know only the values 0 and 1; which one is miles is likely 1,
+ * not confirmed on the watch.
+ */
+enum class LengthUnit(val bit: Boolean, val label: String) {
+    KM(false, "Kilometres"),
+    MILES(true, "Miles"),
+    ;
+
+    companion object {
+        fun of(bit: Boolean): LengthUnit = if (bit) MILES else KM
+    }
 }
 
 /**
@@ -115,7 +180,7 @@ object BasicHealthFieldsCodec {
     private const val REMINDER_BIT = 0x02
 
     data class Fields(
-        val unitBit: Boolean,
+        val unit: LengthUnit,
         val stepReminder: Boolean,
         val nightStart: Pair<Int, Int>,
         val nightEnd: Pair<Int, Int>,
@@ -125,7 +190,7 @@ object BasicHealthFieldsCodec {
         if (!Frame.hasIndex(frame, CODE, NIGHT_END_INDEX + 1)) return null
         val flags = Frame.u8(frame, FLAGS_INDEX) ?: return null
         return Fields(
-            unitBit = flags and UNIT_BIT != 0,
+            unit = LengthUnit.of(flags and UNIT_BIT != 0),
             stepReminder = flags and REMINDER_BIT != 0,
             nightStart = Frame.time(frame, NIGHT_START_INDEX) ?: return null,
             nightEnd = Frame.time(frame, NIGHT_END_INDEX) ?: return null,
@@ -137,10 +202,10 @@ object BasicHealthFieldsCodec {
         on: Boolean,
     ): ByteArray? = withFlag(frame, REMINDER_BIT, on)
 
-    fun withUnitBit(
+    fun withUnit(
         frame: ByteArray,
-        on: Boolean,
-    ): ByteArray? = withFlag(frame, UNIT_BIT, on)
+        unit: LengthUnit,
+    ): ByteArray? = withFlag(frame, UNIT_BIT, unit.bit)
 
     private fun withFlag(
         frame: ByteArray,
@@ -199,7 +264,7 @@ object StepGoalCodec {
  * Profile (0x45): index 1, 2 height and 3, 4 weight (BCD, two bytes each), 5, 6 birth year (BCD), 7 month, 8 day.
  * The byte order of a BCD pair is not documented, so it is found from the height: the order that gives a
  * plausible height is used for every pair. When neither does, the profile is "not recognised" and is never
- * written. Only height and weight can be changed; the birth date is shown, never written.
+ * written. Height, weight and the birth date can be changed (the layout is proven in the notes); sex is not in the layout.
  */
 object ProfileCodec {
     const val CODE = 0x45
@@ -243,6 +308,19 @@ object ProfileCodec {
         return Frame.withBytes(frame, changes)
     }
 
+    /** The birth date (index 5, 6 year, 7 month, 8 day, BCD): only a real calendar date from 1900 to 2100 is written. */
+    fun withBirthDate(
+        frame: ByteArray,
+        year: Int,
+        month: Int,
+        day: Int,
+    ): ByteArray? {
+        val current = parse(frame) ?: return null
+        val valid = year in 1900..2100 && runCatching { java.time.LocalDate.of(year, month, day) }.isSuccess
+        if (!valid) return null
+        return Frame.withBytes(frame, pair(YEAR_INDEX, year, current.lowByteFirst) + mapOf(7 to toBcd(month), 8 to toBcd(day)))
+    }
+
     private fun pair(
         index: Int,
         value: Int,
@@ -272,6 +350,9 @@ object ProfileCodec {
     }
 
     val BYTES: Set<Int> = setOf(HEIGHT_INDEX + 1, HEIGHT_INDEX + 2, WEIGHT_INDEX + 1, WEIGHT_INDEX + 2)
+
+    /** Frame bytes that [withBirthDate] may change. */
+    val BIRTH_BYTES: Set<Int> = (YEAR_INDEX..8).map { it + 1 }.toSet()
 }
 
 /** Smart alarm (0x50), read only: index 0 hour, 1 minute, 2 bit 0 on and bit 1 snooze, 3 wake window in minutes. */

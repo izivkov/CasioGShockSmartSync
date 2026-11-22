@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.webhook
 
 import org.avmedia.gshockapi.io.BasicHealthFieldsCodec
+import org.avmedia.gshockapi.io.LengthUnit
 import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
 import org.avmedia.gshockapi.io.ProfileCodec
@@ -52,7 +53,7 @@ object WatchSettingVariables {
             parsed(it, 0x13, BasicHealthFieldsCodec::parse)?.stepReminder
         },
         Def("watch.length_unit", "H5600 only: unit of length, km or miles (UNCONFIRMED: bit set is read as miles)") {
-            parsed(it, 0x13, BasicHealthFieldsCodec::parse)?.unitBit?.let { miles -> if (miles) "miles" else "km" }
+            parsed(it, 0x13, BasicHealthFieldsCodec::parse)?.unit?.let { u -> if (u == LengthUnit.MILES) "miles" else "km" }
         },
         Def("watch.step_goal", "H5600 only: daily step goal read from the step goal setting") {
             parsed(it, 0x43, StepGoalCodec::parse)

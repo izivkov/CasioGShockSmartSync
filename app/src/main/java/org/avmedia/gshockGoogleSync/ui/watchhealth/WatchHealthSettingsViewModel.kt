@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.io.BasicHealthFieldsCodec
 import org.avmedia.gshockapi.io.HeartRateSettingCodec
+import org.avmedia.gshockapi.io.LengthUnit
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
 import org.avmedia.gshockapi.io.ProfileCodec
 import org.avmedia.gshockapi.io.SmartAlarmCodec
@@ -24,6 +25,7 @@ data class WatchHealthUi(
     val basic: BasicHealthFieldsCodec.Fields? = null,
     val stepGoal: Int? = null,
     val profile: ProfileCodec.Profile? = null,
+    val body: PhysicalSettingsCodec.Body? = null,
     val alarm: SmartAlarmCodec.Setting? = null,
 )
 
@@ -51,7 +53,9 @@ class WatchHealthSettingsViewModel @Inject constructor(private val access: Watch
 
     private suspend fun readAll() {
         val hr = access.read(HeartRateSettingCodec.CODE)?.let { HeartRateSettingCodec.parse(it) }
-        val sleep = access.read(PhysicalSettingsCodec.CODE)?.let { PhysicalSettingsCodec.parse(it) }
+        val physical = access.read(PhysicalSettingsCodec.CODE)
+        val sleep = physical?.let { PhysicalSettingsCodec.parse(it) }
+        val body = physical?.let { PhysicalSettingsCodec.parseBody(it) }
         val basic = access.read(BasicHealthFieldsCodec.CODE)?.let { BasicHealthFieldsCodec.parse(it) }
         val goal = access.read(StepGoalCodec.CODE)?.let { StepGoalCodec.parse(it) }
         val profile = access.read(ProfileCodec.CODE)?.let { ProfileCodec.parse(it) }
@@ -59,7 +63,7 @@ class WatchHealthSettingsViewModel @Inject constructor(private val access: Watch
         val none = listOf(hr, sleep, basic, goal, profile, alarm).all { it == null }
         _ui.update {
             it.copy(
-                heartRate = hr, sleep = sleep, basic = basic, stepGoal = goal, profile = profile, alarm = alarm,
+                heartRate = hr, sleep = sleep, body = body, basic = basic, stepGoal = goal, profile = profile, alarm = alarm,
                 message = if (none) "The watch did not answer. Connect the watch and try again." else it.message,
             )
         }
@@ -75,11 +79,21 @@ class WatchHealthSettingsViewModel @Inject constructor(private val access: Watch
 
     fun setStepReminder(on: Boolean) = write(BasicHealthFieldsCodec.CODE, "Step reminder", BasicHealthFieldsCodec.FLAGS_BYTES) { BasicHealthFieldsCodec.withStepReminder(it, on) }
 
-    fun setMiles(on: Boolean) = write(BasicHealthFieldsCodec.CODE, "Length unit", BasicHealthFieldsCodec.FLAGS_BYTES) { BasicHealthFieldsCodec.withUnitBit(it, on) }
+    fun setLengthUnit(unit: LengthUnit) = write(BasicHealthFieldsCodec.CODE, "Length unit", BasicHealthFieldsCodec.FLAGS_BYTES) { BasicHealthFieldsCodec.withUnit(it, unit) }
 
     fun setStepGoal(steps: Int) = write(StepGoalCodec.CODE, "Step goal", StepGoalCodec.BYTES) { StepGoalCodec.withSteps(it, steps) }
 
     fun setHeightAndWeight(heightCm: Int, weightKg: Int) = write(ProfileCodec.CODE, "Profile", ProfileCodec.BYTES) { ProfileCodec.withHeightAndWeight(it, heightCm, weightKg) }
+
+    fun setBirthDate(year: Int, month: Int, day: Int) = write(ProfileCodec.CODE, "Birth date", ProfileCodec.BIRTH_BYTES) { ProfileCodec.withBirthDate(it, year, month, day) }
+
+    fun setTrainingBackground(value: Int) = write(PhysicalSettingsCodec.CODE, "Training background", PhysicalSettingsCodec.BACKGROUND_BYTES) { PhysicalSettingsCodec.withTrainingBackground(it, value) }
+
+    fun setMaxHeartRate(bpm: Int) = write(PhysicalSettingsCodec.CODE, "Highest heart rate", PhysicalSettingsCodec.MAX_HR_BYTES) { PhysicalSettingsCodec.withMaxHeartRate(it, bpm) }
+
+    fun setRestingHeartRate(bpm: Int) = write(PhysicalSettingsCodec.CODE, "Resting heart rate", PhysicalSettingsCodec.RESTING_HR_BYTES) { PhysicalSettingsCodec.withRestingHeartRate(it, bpm) }
+
+    fun setVo2max(value: Int) = write(PhysicalSettingsCodec.CODE, "VO2max", PhysicalSettingsCodec.VO2MAX_BYTES) { PhysicalSettingsCodec.withVo2max(it, value) }
 
     private fun write(
         code: Int,

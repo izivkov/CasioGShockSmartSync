@@ -23,17 +23,25 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.io.StepGoalCodec
+import org.avmedia.gshockapi.io.LengthUnit
+import org.avmedia.gshockapi.io.PhysicalSettingsCodec
 
 /** Which dialog is open. */
-private sealed class Editing {
+internal sealed class Editing {
     data object HeartRate : Editing()
     data object Bedtime : Editing()
     data object WakeUp : Editing()
     data object NightStart : Editing()
     data object NightEnd : Editing()
+    data object LengthUnit : Editing()
     data object StepGoal : Editing()
     data object Height : Editing()
     data object Weight : Editing()
+    data object BirthDate : Editing()
+    data object Background : Editing()
+    data object MaxHr : Editing()
+    data object RestingHr : Editing()
+    data object Vo2 : Editing()
 }
 
 private val HEART_RATE_MODES = listOf("Off", "Only during activities", "Always")
@@ -61,6 +69,7 @@ internal fun WatchHealthSettingsContent(
             Column(modifier = Modifier.fillMaxSize()) {
                 ScreenTitle("Watch health settings", Modifier)
                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
+                    ProfileSection(ui) { editing = it }
                     val hr = ui.heartRate
                     ValueRow("Heart rate measurement", hr?.let { HEART_RATE_MODES[it.mode] } ?: "-", can && hr != null) { editing = Editing.HeartRate }
                     val sleep = ui.sleep
@@ -70,22 +79,13 @@ internal fun WatchHealthSettingsContent(
                     ValueRow("Night window starts", basic?.let { hhmm(it.nightStart) } ?: "-", can && basic != null) { editing = Editing.NightStart }
                     ValueRow("Night window ends", basic?.let { hhmm(it.nightEnd) } ?: "-", can && basic != null) { editing = Editing.NightEnd }
                     SwitchRow("Step reminder", basic?.stepReminder ?: false, can && basic != null) { viewModel.setStepReminder(it) }
-                    SwitchRow(
-                        title = "Length unit: miles",
-                        checked = basic?.unitBit ?: false,
-                        enabled = can && basic != null,
-                        note = "Off is km. Which value means miles is likely, not confirmed",
-                    ) { viewModel.setMiles(it) }
-                    ValueRow("Step goal", ui.stepGoal?.toString() ?: "-", can && ui.stepGoal != null) { editing = Editing.StepGoal }
-                    val profile = ui.profile
-                    ValueRow("Height", profile?.let { "${it.heightCm} cm" } ?: "-", can && profile != null) { editing = Editing.Height }
-                    ValueRow("Weight", profile?.let { "${it.weightKg} kg" } ?: "-", can && profile != null) { editing = Editing.Weight }
                     ValueRow(
-                        title = "Birth date",
-                        value = profile?.let { p -> listOfNotNull(p.birthYear, p.birthMonth, p.birthDay).joinToString("-") } ?: "-",
-                        enabled = false,
-                        note = "Shown only",
-                    )
+                        title = "Length unit",
+                        value = basic?.unit?.label ?: "-",
+                        enabled = can && basic != null,
+                        note = "Check on the watch: which value shows miles is likely, not confirmed",
+                    ) { editing = Editing.LengthUnit }
+                    ValueRow("Step goal", ui.stepGoal?.toString() ?: "-", can && ui.stepGoal != null) { editing = Editing.StepGoal }
                     val alarm = ui.alarm
                     ValueRow(
                         title = "Smart alarm",
@@ -119,6 +119,8 @@ private fun EditDialogs(
     val sleep = ui.sleep
     val basic = ui.basic
     val profile = ui.profile
+    val body = ui.body
+    val unit = ui.basic?.unit ?: LengthUnit.KM
     when (editing) {
         Editing.HeartRate ->
             if (hr != null) {
@@ -136,18 +138,36 @@ private fun EditDialogs(
             if (basic != null) {
                 TimeDialog(basic.nightEnd.first, basic.nightEnd.second, { h, m -> close(); viewModel.setNightWindow(basic.nightStart, h to m) }, close)
             }
+        Editing.LengthUnit ->
+            if (basic != null) {
+                val units = org.avmedia.gshockapi.io.LengthUnit.entries
+                ChoiceDialog("Length unit", units.map { it.label }, units.indexOf(basic.unit), { close(); viewModel.setLengthUnit(units[it]) }, close)
+            }
         Editing.StepGoal ->
             ui.stepGoal?.let {
                 NumberDialog("Step goal", it, StepGoalCodec.MIN_STEPS..StepGoalCodec.MAX_STEPS, { v -> close(); viewModel.setStepGoal(v) }, close)
             }
         Editing.Height ->
             if (profile != null) {
-                NumberDialog("Height, cm", profile.heightCm, 100..250, { v -> close(); viewModel.setHeightAndWeight(v, profile.weightKg) }, close)
+                val r = BodyUnits.heightRange(unit)
+                NumberDialog("Height, ${if (unit == LengthUnit.MILES) "in" else "cm"}", BodyUnits.heightShown(profile.heightCm, unit), r, { v -> close(); viewModel.setHeightAndWeight(BodyUnits.heightStored(v, unit), profile.weightKg) }, close)
             }
         Editing.Weight ->
             if (profile != null) {
-                NumberDialog("Weight, kg", profile.weightKg, 20..300, { v -> close(); viewModel.setHeightAndWeight(profile.heightCm, v) }, close)
+                val r = BodyUnits.weightRange(unit)
+                NumberDialog("Weight, ${if (unit == LengthUnit.MILES) "lb" else "kg"}", BodyUnits.weightShown(profile.weightKg, unit), r, { v -> close(); viewModel.setHeightAndWeight(profile.heightCm, BodyUnits.weightStored(v, unit)) }, close)
             }
+        Editing.BirthDate -> if (profile != null) BirthDateDialog(profile, close, viewModel)
+        Editing.Background ->
+            if (body != null) {
+                ChoiceDialog("Training background", PhysicalSettingsCodec.TRAINING_BACKGROUNDS, body.trainingBackground, { close(); viewModel.setTrainingBackground(it) }, close)
+            }
+        Editing.MaxHr ->
+            if (body != null) NumberDialog("Highest heart rate, bpm", body.maxHr, PhysicalSettingsCodec.MAX_HR_RANGE, { close(); viewModel.setMaxHeartRate(it) }, close)
+        Editing.RestingHr ->
+            if (body != null) NumberDialog("Resting heart rate, bpm", body.restingHr, PhysicalSettingsCodec.RESTING_HR_RANGE, { close(); viewModel.setRestingHeartRate(it) }, close)
+        Editing.Vo2 ->
+            if (body != null) NumberDialog("VO2max", body.vo2max, PhysicalSettingsCodec.VO2MAX_RANGE, { close(); viewModel.setVo2max(it) }, close)
         null -> Unit
     }
 }
