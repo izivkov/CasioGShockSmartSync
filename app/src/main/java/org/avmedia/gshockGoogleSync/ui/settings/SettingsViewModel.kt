@@ -136,6 +136,11 @@ constructor(
     /** DW-H5600 only: reads the watch face from the watch, so the settings list can show it. */
     private suspend fun watchFaceSetting(): SettingsViewModel.WatchFace? {
         if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) return null
+        // Read only while the watch is connected and set up; otherwise reloadOnSetupComplete reads it later.
+        if (!sessionManager.sessionState.value.isSetupComplete) {
+            Timber.i("Watch face: not connected yet; it is read when the watch is set up")
+            return null
+        }
         return runCatching {
             WatchFace(api.getH5600WatchFaceNumber() ?: 1, api.getWatchFaceItem(), api)
         }.onFailure { Timber.w(it, "Watch face not read") }.getOrNull()

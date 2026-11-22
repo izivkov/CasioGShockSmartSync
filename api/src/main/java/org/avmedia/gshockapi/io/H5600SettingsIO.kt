@@ -171,14 +171,4 @@ object H5600SettingsIO {
 
     // ---- Basic settings restore (0x13) ----
 
-    /**
-     * Writes a full 17-byte 0x13 (basic settings) packet as-is. Intended only for restoring a
-     * packet previously read from this same watch (e.g. after stock Smart Sync zeroed bytes 12-16).
-     */
-    fun restoreBasicSettings(packet: IntArray) {
-        checkSupported()
-        check(packet.size == 17 && packet[0] == 0x13) { "Not a 17-byte 0x13 packet" }
-        RawSettingIO.write(packet)
-        SettingsIO.rememberRaw(Utils.byteArrayOfIntArray(packet))
-    }
 }
