@@ -54,6 +54,8 @@ class GShockApplication : Application() {
 
         org.avmedia.gshockapi.io.H5600HealthIO.rawDump =
             org.avmedia.gshockapi.io.H5600RawDump(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this))
+        org.avmedia.gshockapi.casio.ConnectionKeepAlive.logFile =
+            java.io.File(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this), org.avmedia.gshockapi.io.H5600RawDump.CONNECTION_LOG)
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.onStored =
             { org.avmedia.gshockGoogleSync.history.HistoryStore.record(applicationContext, it) }
         ActivityProvider.initialize(this)

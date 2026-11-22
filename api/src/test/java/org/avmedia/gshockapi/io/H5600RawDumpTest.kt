@@ -79,6 +79,18 @@ class H5600RawDumpTest {
     }
 
     @Test
+    fun theConnectionLogGoesInTheZipWhenThereIsOne() {
+        val folder = tmp.newFolder("log")
+        val dump = H5600RawDump(folder)
+        dump.save(capture(1), nowMillis = 1_000L)
+        folder.resolve("connection.log").writeText("2026-11-22 20:00:00.000 49 00 received, 49 01 written\n")
+        val zip = dump.zipLatest(tmp.newFile("c.zip"))
+        ZipFile(zip).use { z ->
+            assertEquals("2026-11-22 20:00:00.000 49 00 received, 49 01 written\n", z.getInputStream(z.getEntry("connection.log")).bufferedReader().readText())
+        }
+    }
+
+    @Test
     fun twoTransfersInTheSameMillisecondDoNotOverwrite() {
         val dump = H5600RawDump(tmp.newFolder("log"))
         dump.save(capture(1), nowMillis = 5L)

@@ -61,6 +61,12 @@ class H5600RawDump(
                 File(latest, name).inputStream().use { it.copyTo(zip) }
                 zip.closeEntry()
             }
+            // The connection events (49 00 checks, 47 notices, setup writes) with their times, when there are any.
+            File(dir, CONNECTION_LOG).takeIf { it.isFile }?.let { log ->
+                zip.putNextEntry(ZipEntry(CONNECTION_LOG))
+                log.inputStream().use { it.copyTo(zip) }
+                zip.closeEntry()
+            }
         }
         return target
     }
@@ -78,6 +84,7 @@ class H5600RawDump(
         const val KEEP_TRANSFERS = 400
         const val KEEP_DAYS = 30
         private const val DAY_MS = 24L * 60 * 60 * 1000
+        const val CONNECTION_LOG = "connection.log"
         private const val STREAM_FILE = "stream.bin"
         private const val NOTIFICATIONS_FILE = "notifications.txt"
     }
