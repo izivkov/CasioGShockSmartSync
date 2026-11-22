@@ -63,7 +63,7 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
 
     private val collector = IDataReceived { data ->
         if (data == null) return@IDataReceived
-        if (waiting && answersTo(data, code)) {
+        if (waiting) {
             synchronized(buffer) { buffer.add(data) }
             lastRxMillis = System.currentTimeMillis()
         } else {
@@ -104,7 +104,7 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
             waiting = false
             try {
                 // The handler that was there before, not a new one: the library may have set it for its own purpose.
-                link.setCallback(before ?: IDataReceived { data -> data?.let { link.forward(it) } })
+                link.setCallback(IDataReceived { data -> data?.let { link.forward(it) } })
             } catch (ignored: Throwable) {
             }
         }
