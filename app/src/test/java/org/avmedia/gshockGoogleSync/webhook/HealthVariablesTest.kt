@@ -18,6 +18,7 @@ class HealthVariablesTest {
     private val data = StepCounterData(
         timestamp = LocalDateTime.of(2026, 11, 22, 14, 35, 0),
         hourlySteps = List(24) { if (it == 14) 120 else null },
+        dailyHistory = emptyList(),
         currentDaySteps = 5306,
         hourlyByHour = List(24) { if (it == 14) 120 else null },
         hourlyIntervals = listOf(
