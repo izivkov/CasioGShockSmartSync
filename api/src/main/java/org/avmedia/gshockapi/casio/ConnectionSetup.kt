@@ -15,7 +15,7 @@ import org.avmedia.gshockapi.utils.Utils
  * Never answers a frame it did not ask for.
  */
 object ConnectionSetup {
-    private enum class Step { IDLE, WAIT_KIND, WAIT_11, WAIT_3B, WAIT_3A, WAIT_23, DONE }
+    private enum class Step { IDLE, WAIT_KIND, WAIT_11, WAIT_3B, WAIT_3A, WAIT_23, WAIT_39, DONE }
 
     private const val CODE_KIND = 0x10
     private const val CODE_BLE = 0x11
@@ -23,7 +23,13 @@ object ConnectionSetup {
     private const val CODE_3B = 0x3B
     private const val CODE_NAME = 0x23
     private const val CODE_CONDITION = 0x28
-    private val ALWAYS_CONNECT_KINDS = setOf(9, 10) // the owner's H5600 reports 14 (2026-11-22): it gets the common steps only
+    private const val CODE_TIME_MANAGER = 0x39
+    private val ALWAYS_CONNECT_KINDS = setOf(9, 10)
+
+    /** 13: the watch connected itself after sleep, 14: after a link loss. Casio's setup: no 0x11, 0x3A, 0x3B; the 0x39 exchange. */
+    private val SELF_CONNECT_KINDS = setOf(13, 14)
+    private var selfConnect = false
+    private var condition: List<Int> = emptyList()
 
     @Volatile private var step = Step.IDLE
     private var reconnectKind = false
@@ -45,6 +51,8 @@ object ConnectionSetup {
     fun reset() {
         step = Step.WAIT_KIND
         reconnectKind = false
+        selfConnect = false
+        condition = emptyList()
     }
 
     private fun bytes(data: String): List<Int> = runCatching { Utils.toIntArray(data) }.getOrDefault(emptyList())
@@ -55,7 +63,14 @@ object ConnectionSetup {
         val b = bytes(data)
         val kind = b.getOrNull(8) ?: return
         reconnectKind = kind in ALWAYS_CONNECT_KINDS
+        selfConnect = kind in SELF_CONNECT_KINDS
         ConnectionKeepAlive.log("Connection kind $kind: setup starts")
+        if (selfConnect) {
+            // No 0x11 (it holds the link-end flag), no 0x3A, no 0x3B.
+            ConnectionKeepAlive.log("kind $kind: 0x11, 0x3A and 0x3B are not written")
+            nextName()
+            return
+        }
         step = Step.WAIT_11
         ConnectionKeepAlive.writer.request(CODE_BLE)
     }
@@ -85,9 +100,17 @@ object ConnectionSetup {
         if (step != Step.WAIT_23) return
         val b = bytes(data)
         if (b.firstOrNull() != CODE_NAME) return
-        step = Step.DONE
         ConnectionKeepAlive.writer.writeAllFeatures(b.map { it.toByte() }.toByteArray())
         ConnectionKeepAlive.log("0x23 name written back")
+        if (selfConnect) {
+            step = Step.WAIT_39
+            for (code in listOf(0x26, CODE_CONDITION, 0x20, CODE_CONDITION, CODE_TIME_MANAGER)) {
+                ConnectionKeepAlive.writer.request(code)
+            }
+            ConnectionKeepAlive.log("read 0x26, 0x28, 0x20, 0x28, 0x39; waiting for the 0x39 value")
+            return
+        }
+        step = Step.DONE
         ConnectionKeepAlive.writer.request(CODE_CONDITION)
         ConnectionKeepAlive.log("0x28 watch condition requested")
         timeWriter()
@@ -113,5 +136,44 @@ object ConnectionSetup {
         ConnectionKeepAlive.writer.writeAllFeatures(b.map { it.toByte() }.toByteArray())
         ConnectionKeepAlive.log("0x3A written with bytes 7 and 8 set to DC 05")
         nextName()
+    }
+
+    /** The `0x28` answer: kept for the `0x39` decision; "index 7" counts after the code, like `0x10` and `0x11`. */
+    fun on28(data: String) {
+        if (!selfConnect) return
+        condition = bytes(data)
+        ConnectionKeepAlive.log("0x28 received: " + condition.take(12).joinToString(" ") { "%02X".format(it) })
+    }
+
+    private fun timeChangeAllowed(): Boolean {
+        val v = condition.getOrNull(8) ?: return true.also { ConnectionKeepAlive.log("0x28 unknown: time change taken as allowed") }
+        return v and 0x04 == 0
+    }
+
+    private fun timeUpdate() {
+        ConnectionKeepAlive.log("leap-second write 25 18 18 17 20 01 01 skipped (values not confirmed)")
+        timeWriter()
+        ConnectionKeepAlive.writer.request(CODE_CONDITION)
+        ConnectionKeepAlive.log("time update: time and DST write started, 0x28 requested")
+    }
+
+    /** The watch's `39` value (read at setup, and whenever it notifies again). Kinds 13 and 14 only. */
+    fun on39(data: String) {
+        if (!selfConnect || busy()) return
+        val value = bytes(data).getOrNull(1) ?: return
+        ConnectionKeepAlive.log("39 %02X received".format(value))
+        when (value) {
+            0 -> if (timeChangeAllowed()) answer(3) else answer(5)
+            2 -> timeUpdate().also { step = Step.DONE }
+            4 -> answer(4) // time zone, DST and home city are taken as equal: nothing to do
+            5 -> ConnectionKeepAlive.log("39 05: the watch aborted (ignored)")
+            else -> ConnectionKeepAlive.log("39 %02X: not handled".format(value))
+        }
+    }
+
+    private fun answer(value: Int) {
+        ConnectionKeepAlive.writer.writeAllFeatures(byteArrayOf(CODE_TIME_MANAGER.toByte(), value.toByte()))
+        ConnectionKeepAlive.log("39 %02X written".format(value))
+        if (value != 3) step = Step.DONE
     }
 }

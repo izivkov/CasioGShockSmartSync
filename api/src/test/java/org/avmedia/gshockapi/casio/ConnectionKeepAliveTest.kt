@@ -93,12 +93,53 @@ class ConnectionKeepAliveTest {
         assertEquals("the time write runs on every connection", 1, timeWrites)
     }
 
-    @Test fun kindFourteenAlsoRunsNameConditionAndTimeWrite() {
+    private fun kindFourteenUpTo39() {
         ConnectionSetup.reset()
         receive("0x10 00 00 00 00 00 00 00 0E 00")
-        receive("0x11 01 02 03 04 04 06 07 08")
-        finishWithName()
-        assertTrue(fake.requests.none { it == 0x3A || it == 0x3B })
+        assertEquals(listOf(0x23), fake.requests)
+        receive("0x23 41 42 43")
+        assertEquals(listOf(0x23, 0x41, 0x42, 0x43), fake.all.single())
+        assertEquals(listOf(0x23, 0x26, 0x28, 0x20, 0x28, 0x39), fake.requests)
+    }
+
+    @Test fun kindFourteenNeverWrites0x11Or3A3B() {
+        kindFourteenUpTo39()
+        assertTrue(fake.requests.none { it == 0x11 || it == 0x3A || it == 0x3B })
+        receive("0x11 01 02 03 04 04 06 07 08") // a stray answer is not echoed either
+        assertEquals(1, fake.all.size)
+    }
+
+    @Test fun thirtyNineZeroAllowedAnswersThreeAndWaitsForTwo() {
+        kindFourteenUpTo39()
+        receive("0x28 00 00 00 00 00 00 00 00 00") // bit 2 of index 7 clear
+        receive("0x39 00")
+        assertEquals(listOf(0x39, 0x03), fake.all.last())
+        assertEquals(0, timeWrites)
+        receive("0x39 02")
+        assertEquals(1, timeWrites)
+    }
+
+    @Test fun thirtyNineZeroNotPermittedAnswersFive() {
+        kindFourteenUpTo39()
+        receive("0x28 00 00 00 00 00 00 00 04 00")
+        receive("0x39 00")
+        assertEquals(listOf(0x39, 0x05), fake.all.last())
+        assertEquals(0, timeWrites)
+    }
+
+    @Test fun thirtyNineFourIsAnsweredWithFourAndNoTimeWrite() {
+        kindFourteenUpTo39()
+        receive("0x39 04")
+        assertEquals(listOf(0x39, 0x04), fake.all.last())
+        assertEquals(0, timeWrites)
+    }
+
+    @Test fun thirtyNineFiveFromTheWatchIsOnlyLogged() {
+        kindFourteenUpTo39()
+        val before = fake.all.size
+        receive("0x39 05")
+        assertEquals(before, fake.all.size)
+        assertTrue(ConnectionKeepAlive.recentEvents().last().endsWith("39 05: the watch aborted (ignored)"))
     }
 
     @Test fun otherKindsSkipThe3AAnd3BSteps() {

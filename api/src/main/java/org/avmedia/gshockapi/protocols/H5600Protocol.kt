@@ -46,8 +46,11 @@ object H5600Protocol : StandardProtocol() {
     private fun withSetup(handlers: Map<Int, (String) -> Unit>): Map<Int, (String) -> Unit> {
         val kind = handlers[CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code]
         val ble = handlers[CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code]
+        val condition = handlers[CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code]
         val name = handlers[CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code]
         return handlers + mapOf<Int, (String) -> Unit>(
+            CasioConstants.CHARACTERISTICS.CASIO_WATCH_CONDITION.code to { d -> condition?.invoke(d); ConnectionSetup.on28(d) },
+            CasioConstants.CHARACTERISTICS.CASIO_CURRENT_TIME_MANAGER.code to ConnectionSetup::on39,
             CasioConstants.CHARACTERISTICS.CASIO_WATCH_NAME.code to { d -> name?.invoke(d); ConnectionSetup.on23(d) },
             CasioConstants.CHARACTERISTICS.CASIO_BLE_FEATURES.code to { d -> kind?.invoke(d); ConnectionSetup.onKind(d) },
             CasioConstants.CHARACTERISTICS.CASIO_SETTING_FOR_BLE.code to { d -> ble?.invoke(d); ConnectionSetup.onBle(d) },
