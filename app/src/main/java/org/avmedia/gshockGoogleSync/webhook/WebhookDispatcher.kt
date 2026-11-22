@@ -77,8 +77,9 @@ class WebhookDispatcher @Inject constructor(
         val watchName = org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name)
         val now = OffsetDateTime.now().withNano(0)
         val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
-        val values = registry.resolve(ctx, HaSensors.VARIABLES)
-        val states = HaSensors.states(values)
+        val sensors = HaGroups.sensors(store.groupsOn())
+        val values = registry.resolve(ctx, HaSensors.variablesOf(sensors))
+        val states = HaSensors.states(values, sensors)
         val event = if (trigger == WebhookTrigger.WATCH_ACTION) {
             mapOf("trigger" to trigger.eventName, "time" to now.toString(),
                 "watch" to org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name))
@@ -87,7 +88,7 @@ class WebhookDispatcher @Inject constructor(
         val registration = HaPayloads.registrationFor(
             address, watchName, cfg, org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME, android.os.Build.VERSION.RELEASE,
         )
-        store.putPending(HaJob(states, event, HaSensors.attributes(values), HaPayloads.deviceId(address), registration))
+        store.putPending(HaJob(states, event, HaSensors.attributes(values, sensors), HaPayloads.deviceId(address), registration))
         HaWorker.enqueue(context)
     }
 

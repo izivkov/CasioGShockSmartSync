@@ -26,13 +26,12 @@ private const val NOTHING = "Nothing (only the gshock_button event)"
 internal fun HaActionPicker(
     actions: List<HaAction>,
     chosen: HaAction?,
-    status: String,
     onChoose: (HaAction?) -> Unit,
     onRefresh: () -> Unit,
     initiallyOpen: Boolean = false,
 ) {
     var open by remember { mutableStateOf(initiallyOpen) }
-    AppText(text = "Watch button runs", fontSize = 14.sp)
+    AppText(text = "A press of the watch button runs", fontSize = 14.sp)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Box(Modifier.weight(1f)) {
             OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) {
@@ -47,5 +46,4 @@ internal fun HaActionPicker(
         }
         TextButton(onClick = onRefresh) { Text("Refresh") }
     }
-    if (status.isNotBlank()) AppText(text = status, fontSize = 14.sp)
 }

@@ -25,9 +25,10 @@ class HaClient(
         val base = normalizeBase(baseUrl) ?: return HaResult.Failed("The URL must start with http:// or https://")
         if (token.isBlank()) return HaResult.Failed("The token is empty")
         val r = transport.get("$base/api/", token.trim())
-        classify(r)?.let { return if (it is HaResult.Retry) HaResult.Failed("Cannot reach Home Assistant: ${it.message}") else it }
+        val check = HaConnectionCheck.classify(r)
+        if (check != HaCheck.OK) return HaResult.Failed(HaConnectionCheck.message(check), HaConnectionCheck.detail(r))
         store.save(HaConfig(base, token.trim(), deviceName.trim(), model.trim()))
-        return HaResult.Ok("Saved. Home Assistant answered OK")
+        return HaResult.Ok(HaConnectionCheck.message(HaCheck.OK))
     }
 
     /** Registers the watch [deviceId] when it has no registration yet. Never registers an address twice. */

@@ -84,12 +84,13 @@ fun ActionItem(
 
 /** An [ActionItem] for a service master switch: saved at once, with a configure button that opens its screen. */
 @Composable
-fun ServiceToggleRow(service: ServiceToggles.Service, titleRes: Int, onConfigure: () -> Unit) {
+fun ServiceToggleRow(service: ServiceToggles.Service, titleRes: Int, iconRes: Int, onConfigure: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val toggles = remember { WebhookStorage.toggles(context) }
     var isOn by remember { mutableStateOf(toggles.isOn(service)) }
     ActionItem(
         title = stringResource(id = titleRes),
+        resourceId = iconRes,
         isEnabled = isOn,
         onEnabledChange = { isOn = it; toggles.set(service, it) },
         onConfigure = onConfigure,

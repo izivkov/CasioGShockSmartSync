@@ -69,7 +69,9 @@ object HaSensors {
     )
 
     /** The variables to resolve for an update: the states and the attributes. */
-    val VARIABLES: Set<String> = ALL.flatMap { listOf(it.variable) + it.attributes.values }.toSet()
+    val VARIABLES: Set<String> = variablesOf(ALL)
+
+    fun variablesOf(sensors: List<HaSensor>): Set<String> = sensors.flatMap { listOf(it.variable) + it.attributes.values }.toSet()
 
     private fun usable(v: Any?): Any? = when (v) {
         is String -> v.takeIf { it.isNotBlank() }

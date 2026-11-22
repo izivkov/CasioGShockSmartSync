@@ -231,3 +231,5 @@ Or download the installer from [wireshark.org](https://www.wireshark.org/downloa
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+The Home Assistant and Webhook icons are from Material Design Icons (Pictogrammers), Apache-2.0.

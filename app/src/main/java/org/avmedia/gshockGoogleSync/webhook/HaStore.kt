@@ -36,6 +36,10 @@ data class HaRegistration(
     val sensorsHash: String = "",
 )
 
+/** Sensor values last sent to HA and the time (epoch millis, 0 = never). */
+@Keep
+data class HaSent(val states: Map<String, Any> = emptyMap(), val at: Long = 0)
+
 /** The Home Assistant setup, one registration per watch and the newest unsent job, on a [KeyValueStore]. Android-free. */
 class HaStore(private val store: KeyValueStore) {
     // Whole numbers stay Long (not 1234.0) when a pending job is read back.
@@ -71,6 +75,9 @@ class HaStore(private val store: KeyValueStore) {
         store.delete(KEY_PENDING)
         store.delete(KEY_ACTION)
         store.delete(KEY_ACTION_RESULT)
+        store.delete(KEY_RESULT_OK)
+        store.delete(KEY_SENT)
+        store.delete(KEY_DEVICE)
     }
 
     /** The newest job replaces a waiting one; a waiting button event is kept until it is sent. */
@@ -83,7 +90,27 @@ class HaStore(private val store: KeyValueStore) {
 
     fun clearPending() = store.delete(KEY_PENDING)
 
-    fun saveResult(text: String) = store.put(KEY_RESULT, text)
+    fun saveResult(text: String, ok: Boolean = true) {
+        store.put(KEY_RESULT, text)
+        store.put(KEY_RESULT_OK, if (ok) "yes" else "no")
+    }
+
+    /** False when the last send failed; null before the first one. */
+    fun lastResultOk(): Boolean? = store.get(KEY_RESULT_OK)?.let { it == "yes" }
+
+    /** The values of the last good send (merged over earlier ones) and when it was, for the screen. */
+    fun saveSent(states: Map<String, Any>, atMillis: Long) {
+        val merged = loadSent().states + states
+        store.put(KEY_SENT, gson.toJson(HaSent(merged, atMillis)))
+    }
+
+    fun loadSent(): HaSent =
+        runCatching { gson.fromJson(store.get(KEY_SENT), HaSent::class.java) }.getOrNull() ?: HaSent()
+
+    /** The HA device page id of the watch, once found. */
+    fun saveDeviceId(id: String) = store.put(KEY_DEVICE, id)
+
+    fun loadDeviceId(): String? = store.get(KEY_DEVICE)?.takeIf { it.isNotBlank() }
 
     fun lastResult(): String? = store.get(KEY_RESULT)
 
@@ -110,6 +137,9 @@ class HaStore(private val store: KeyValueStore) {
         const val KEY_IDS = "ha.regs"
         const val KEY_PENDING = "ha.pending"
         const val KEY_RESULT = "ha.result"
+        const val KEY_RESULT_OK = "ha.result.ok"
+        const val KEY_SENT = "ha.sent"
+        const val KEY_DEVICE = "ha.device"
         const val KEY_ACTION = "ha.action"
         const val KEY_ACTION_RESULT = "ha.action.result"
     }

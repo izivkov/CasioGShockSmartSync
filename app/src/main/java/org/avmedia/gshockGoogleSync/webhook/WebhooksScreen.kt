@@ -118,7 +118,7 @@ internal fun WebhookList(
     onConfirmOverwrite: () -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
-        ScreenTitle(text = stringResource(R.string.webhooks), modifier = Modifier)
+        HaTitle(text = stringResource(R.string.webhooks), iconRes = R.drawable.ic_webhook)
         Column(
             Modifier
                 .weight(1f)

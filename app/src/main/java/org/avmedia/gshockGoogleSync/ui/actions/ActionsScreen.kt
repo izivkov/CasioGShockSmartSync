@@ -130,8 +130,8 @@ private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks
             R.string.call_webhooks, R.drawable.generic_action_item, actionsViewModel,
             infoRes = R.string.call_webhooks_info
         ),
-        ServiceToggleRow(ServiceToggles.Service.WEBHOOKS, R.string.webhooks, onOpenWebhooks),
-        ServiceToggleRow(ServiceToggles.Service.HOME_ASSISTANT, R.string.home_assistant, onOpenHa),
+        ServiceToggleRow(ServiceToggles.Service.WEBHOOKS, R.string.webhooks, R.drawable.ic_webhook, onOpenWebhooks),
+        ServiceToggleRow(ServiceToggles.Service.HOME_ASSISTANT, R.string.home_assistant, R.drawable.ic_home_assistant, onOpenHa),
         SeparatorView(),
         PhoneView(actionsViewModel)
     )

@@ -309,10 +309,12 @@ fun PreConnectionScreen(
                                 .padding(top = 24.dp, start = 16.dp)
                         ) {
                             androidx.compose.material3.TextButton(onClick = onOpenWebhooks) {
-                                androidx.compose.material3.Text(stringResource(R.string.webhooks))
+                                org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource(resourceId = R.drawable.ic_webhook, size = 20.dp)
+                                androidx.compose.material3.Text("  " + stringResource(R.string.webhooks))
                             }
                             androidx.compose.material3.TextButton(onClick = onOpenHa) {
-                                androidx.compose.material3.Text(stringResource(R.string.home_assistant))
+                                org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource(resourceId = R.drawable.ic_home_assistant, size = 20.dp)
+                                androidx.compose.material3.Text("  " + stringResource(R.string.home_assistant))
                             }
                         }
 

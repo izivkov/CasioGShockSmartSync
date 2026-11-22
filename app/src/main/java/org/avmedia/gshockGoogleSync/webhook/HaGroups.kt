@@ -4,8 +4,12 @@ package org.avmedia.gshockGoogleSync.webhook
 enum class HaGroup(val title: String) { WATCH("Watch"), HEALTH("Health"), SETTINGS("Settings") }
 
 object HaGroups {
-    fun of(sensor: HaSensor): HaGroup = HaGroup.WATCH
+    fun of(sensor: HaSensor): HaGroup = when {
+        sensor.uniqueId == "watch_settings" -> HaGroup.SETTINGS
+        sensor.variable.startsWith("health.") -> HaGroup.HEALTH
+        else -> HaGroup.WATCH
+    }
 
     /** The sensors of [on] groups, in the order of [HaSensors.ALL]. */
-    fun sensors(on: Set<HaGroup>, all: List<HaSensor> = HaSensors.ALL): List<HaSensor> = all
+    fun sensors(on: Set<HaGroup>, all: List<HaSensor> = HaSensors.ALL): List<HaSensor> = all.filter { of(it) in on }
 }
