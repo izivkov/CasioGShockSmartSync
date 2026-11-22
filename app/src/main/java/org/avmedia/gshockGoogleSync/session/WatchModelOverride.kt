@@ -35,6 +35,8 @@ object WatchModelOverride {
         getAddress: () -> String,
         setAddress: (String) -> Unit,
     ) {
+        val address = getAddress()
         setNameAndModel(libraryName)
+        if (address.isNotBlank() && getAddress() != address) setAddress(address)
     }
 }
