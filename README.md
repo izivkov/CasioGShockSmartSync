@@ -29,7 +29,7 @@ It offers a faster, privacy-focused, and more powerful alternative to the offici
 
 ## Supported Watch Models
 
-The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
+The app works with many Bluetooth-enabled G-Shock, Edifice, Oceanus, and Pro Trek models.
 
 <p align="center">
   <img src="images/gw_b5600.png" width="150" alt="GW-B5600" style="margin: 10px;">
@@ -45,6 +45,7 @@ The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
 | **G-Steel** | GST-B100 to B1000, GST-W1000, ECB-900 | Metal series |
 | **Edifice** | ECB-10 to ECB-2300, EQB-500 to EQB-2000 | Bluetooth Edifice series |
 | **MT-G / MR-G** | MTG-B1000/B3000/B3100, MRG-B5000/B2100 | Premium metal and carbon models |
+| **Oceanus** | OCW-S400 | Manta S400 series |
 | **Others** | ABL-100WE, GBD-100/200, GBD-H1000/H2000, GPR-B1000 | Step trackers, GPS, and sensors |
 
 ---
