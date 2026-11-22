@@ -26,6 +26,19 @@ jobs:
       - name: Unit tests
         run: ./gradlew testGithubDebugUnitTest
 
+      # Records pictures of the screens (never compares, so a changed screen does not fail the run;
+      # a screen that no longer compiles or renders does).
+      - name: Record UI screenshots
+        run: ./gradlew recordRoborazziGithubDebug
+
+      - name: Upload UI screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screens
+          path: app/build/outputs/roborazzi/*.png
+          if-no-files-found: warn
+
       - name: Build debug APK
         run: ./gradlew assembleGithubDebug
 

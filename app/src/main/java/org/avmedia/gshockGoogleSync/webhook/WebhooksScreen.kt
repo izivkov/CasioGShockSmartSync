@@ -80,52 +80,21 @@ fun WebhooksScreen(
                 ProbeScreen(viewModel = viewModel, onBack = { showProbe = false })
             } else if (current == null) {
                 BackHandler(onBack = onBack)
-                Column(Modifier.fillMaxSize()) {
-                    ScreenTitle(text = stringResource(R.string.webhooks), modifier = Modifier)
-                    Column(
-                        Modifier
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        if (unreadable) {
-                            AppText(
-                                text = "Saved webhooks could not be read. The data is kept untouched, with a raw copy. " +
-                                    "New webhooks cannot be saved until you confirm.",
-                                modifier = Modifier.padding(16.dp),
-                            )
-                            AppButton(
-                                text = "Start fresh (overwrite)",
-                                onClick = { viewModel.confirmOverwrite() },
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                            )
-                        }
-                        if (hooks.isEmpty()) {
-                            AppText(
-                                text = stringResource(R.string.webhooks_empty),
-                                modifier = Modifier.padding(16.dp),
-                            )
-                        }
-                        hooks.forEach { hook ->
-                            WebhookRow(
-                                hook = hook,
-                                result = results[hook.id],
-                                onOpen = { editing = hook },
-                                onEnabled = { viewModel.setEnabled(hook.id, it) },
-                            )
-                        }
-                    }
-                    ButtonsRow(
-                        buttons = listOf(
-                            ButtonData(stringResource(R.string.webhook_back), onBack),
-                            ButtonData("Probe watch", { showProbe = true }),
-                            ButtonData("Send log", {
-                                val n = viewModel.sendLogToWebhooks()
-                                AppSnackbar(if (n == 0) "No enabled POST/PUT webhook to send to" else "Log queued for $n webhook(s)")
-                            }),
-                            ButtonData(stringResource(R.string.webhook_add), { editing = Webhook.newDefault() }),
-                        )
-                    )
-                }
+                WebhookList(
+                    hooks = hooks,
+                    results = results,
+                    unreadable = unreadable,
+                    onBack = onBack,
+                    onProbe = { showProbe = true },
+                    onSendLog = {
+                        val n = viewModel.sendLogToWebhooks()
+                        AppSnackbar(if (n == 0) "No enabled POST/PUT webhook to send to" else "Log queued for $n webhook(s)")
+                    },
+                    onAdd = { editing = Webhook.newDefault() },
+                    onOpen = { editing = it },
+                    onEnabled = { id, on -> viewModel.setEnabled(id, on) },
+                    onConfirmOverwrite = { viewModel.confirmOverwrite() },
+                )
             } else {
                 val closeEditor = {
                     viewModel.clearDraft() // Save or Cancel ends the draft
@@ -142,6 +111,65 @@ fun WebhooksScreen(
                 )
             }
         }
+    }
+}
+
+/** The stateless list body of [WebhooksScreen] (also used by the screenshot tests). */
+@Composable
+internal fun WebhookList(
+    hooks: List<Webhook>,
+    results: Map<String, WebhookResult>,
+    unreadable: Boolean,
+    onBack: () -> Unit,
+    onProbe: () -> Unit,
+    onSendLog: () -> Unit,
+    onAdd: () -> Unit,
+    onOpen: (Webhook) -> Unit,
+    onEnabled: (String, Boolean) -> Unit,
+    onConfirmOverwrite: () -> Unit,
+) {
+    Column(Modifier.fillMaxSize()) {
+        ScreenTitle(text = stringResource(R.string.webhooks), modifier = Modifier)
+        Column(
+            Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            if (unreadable) {
+                AppText(
+                    text = "Saved webhooks could not be read. The data is kept untouched, with a raw copy. " +
+                        "New webhooks cannot be saved until you confirm.",
+                    modifier = Modifier.padding(16.dp),
+                )
+                AppButton(
+                    text = "Start fresh (overwrite)",
+                    onClick = onConfirmOverwrite,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
+            if (hooks.isEmpty()) {
+                AppText(
+                    text = stringResource(R.string.webhooks_empty),
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+            hooks.forEach { hook ->
+                WebhookRow(
+                    hook = hook,
+                    result = results[hook.id],
+                    onOpen = { onOpen(hook) },
+                    onEnabled = { onEnabled(hook.id, it) },
+                )
+            }
+        }
+        ButtonsRow(
+            buttons = listOf(
+                ButtonData(stringResource(R.string.webhook_back), onBack),
+                ButtonData("Probe watch", onProbe),
+                ButtonData("Send log", onSendLog),
+                ButtonData(stringResource(R.string.webhook_add), onAdd),
+            )
+        )
     }
 }
 
@@ -192,7 +220,7 @@ private fun describeResult(result: WebhookResult?): String {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun WebhookEditor(
+internal fun WebhookEditor(
     initial: Webhook,
     isNew: Boolean,
     variables: List<Variable>,

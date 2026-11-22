@@ -27,6 +27,24 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
     val form by viewModel.form.collectAsState()
     val status by viewModel.status.collectAsState()
+    HaScreenContent(
+        form = form,
+        status = status,
+        onBack = onBack,
+        onForget = viewModel::forget,
+        onSave = viewModel::save,
+    )
+}
+
+/** The stateless body of [HaScreen]: state in, events out (also used by the screenshot tests). */
+@Composable
+internal fun HaScreenContent(
+    form: HaConfig,
+    status: String,
+    onBack: () -> Unit,
+    onForget: () -> Unit,
+    onSave: (url: String, token: String, deviceName: String, model: String) -> Unit,
+) {
     var url by remember { mutableStateOf(form.baseUrl) }
     var token by remember { mutableStateOf(form.token) }
     var deviceName by remember { mutableStateOf(form.deviceName) }
@@ -81,8 +99,8 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
         ButtonsRow(
             buttons = listOf(
                 ButtonData("Back", onBack),
-                ButtonData("Forget", { viewModel.forget(); url = ""; token = ""; deviceName = ""; model = "" }, enabled = saved),
-                ButtonData("Save", { viewModel.save(url, token, deviceName, model) }, enabled = url.isNotBlank() && token.isNotBlank()),
+                ButtonData("Forget", { onForget(); url = ""; token = ""; deviceName = ""; model = "" }, enabled = saved),
+                ButtonData("Save", { onSave(url, token, deviceName, model) }, enabled = url.isNotBlank() && token.isNotBlank()),
             )
         )
     }
