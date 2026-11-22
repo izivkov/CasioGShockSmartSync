@@ -4,10 +4,10 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
 /** Result of one Home Assistant call. [retry] means WorkManager should try again later. */
-sealed class HaResult(val message: String) {
+sealed class HaResult(val message: String, val detail: String = "") {
     class Ok(message: String) : HaResult(message)
     class Retry(message: String) : HaResult(message)
-    class Failed(message: String) : HaResult(message)
+    class Failed(message: String, detail: String = "") : HaResult(message, detail)
 }
 
 /**

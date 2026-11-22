@@ -98,7 +98,13 @@ class HaStore(private val store: KeyValueStore) {
 
     fun lastActionResult(): String? = store.get(KEY_ACTION_RESULT)
 
+    /** The groups of values that are sent; all on until switched off. */
+    fun groupsOn(): Set<HaGroup> = HaGroup.entries.filter { store.get(KEY_GROUP + it.name) != "off" }.toSet()
+
+    fun setGroupOn(group: HaGroup, on: Boolean) = store.put(KEY_GROUP + group.name, if (on) "on" else "off")
+
     private companion object {
+        const val KEY_GROUP = "ha.group."
         const val KEY_CONFIG = "ha.config"
         const val KEY_REG = "ha.reg."
         const val KEY_IDS = "ha.regs"

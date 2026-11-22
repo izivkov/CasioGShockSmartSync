@@ -7,7 +7,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-private class HaMemoryStore : KeyValueStore {
+internal class HaMemoryStore : KeyValueStore {
     val map = HashMap<String, String>()
     override fun get(key: String) = map[key]
     override fun put(key: String, value: String) { map[key] = value }
@@ -66,7 +66,8 @@ class HaClientTest {
         val store = HaStore(HaMemoryStore())
         val r = HaClient(HaFakeTransport(get = HaResponse(401, "")), store).saveSettings("https://ha.example", "bad")
         assertTrue(r is HaResult.Failed)
-        assertTrue(r.message.contains("401"))
+        assertFalse(r.message.contains("401"))
+        assertTrue(r.message.contains("token"))
         assertNull(store.load())
     }
 
