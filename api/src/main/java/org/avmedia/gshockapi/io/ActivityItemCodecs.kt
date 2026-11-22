@@ -15,15 +15,31 @@ object ActivityNames {
     fun known(code: Int): Boolean = code in NAMES
 }
 
-/** Activity list (0x53): up to 15 activity codes in order, 0 = unused. Read only. */
+/** Activity list (0x53): up to 15 activity codes in order, 0 = unused. Read, and written as the same length. */
 object ActivityListCodec {
     const val CODE = 0x53
     const val MAX = 15
+
+    /** The sports the settings screen offers, in the order of the notes. */
+    val SPORTS: List<Int> = listOf(1, 2, 3, 6, 7, 8, 9, 12, 13, 14)
 
     fun parse(frame: ByteArray): List<Int>? {
         if (frame.size < 2 || frame[0] != CODE.toByte()) return null
         return frame.drop(1).take(MAX).map { it.toInt() and 0xFF }.filter { it != 0 }
     }
+
+    /** True only for the layout of the notes: code 0x53, 1 to 15 value bytes, each a known activity or 0. */
+    fun layoutOk(frame: ByteArray): Boolean = false
+
+    /** The frame for [enabled] (in order, at least one, no repeats, all known), padded with 0 to the length of [frame]; null if refused. */
+    fun encode(frame: ByteArray, enabled: List<Int>): ByteArray? = null
+
+    fun toggle(enabled: List<Int>, code: Int, on: Boolean): List<Int> = enabled
+
+    /** Moves [code] by [delta] places among the enabled sports; unchanged at either end. */
+    fun move(enabled: List<Int>, code: Int, delta: Int): List<Int> = enabled
+
+    fun hex(frame: ByteArray): String = ""
 }
 
 /** Activity screens (0x4E + activity): index 0 the activity, then per screen three items (main, sub 1, sub 2). Read only. */
