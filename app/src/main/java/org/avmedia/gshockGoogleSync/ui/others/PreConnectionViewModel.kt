@@ -185,7 +185,7 @@ constructor(
             val name = association?.name?.takeIf { it.isNotBlank() }
                 ?: LocalDataStorage.getDeviceName(appContext, address)
                 ?: noWatchString
-            val isAlwaysConnected = org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)
+            val isAlwaysConnected = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)
             DeviceItem(name, address, isLastUsed, isAlwaysConnected)
         }
 

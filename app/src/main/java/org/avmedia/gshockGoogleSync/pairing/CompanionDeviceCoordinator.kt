@@ -43,7 +43,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                             val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() }
                                 ?: LocalDataStorage.get(context, "LastDeviceName")?.takeIf { it.isNotBlank() }
                                 ?: org.avmedia.gshockapi.WatchInfo.name
-                            if (org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(deviceName) && !AlwaysConnectedPermission.isGranted(normalizedAddress)) {
+                            if (org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(deviceName) && !AlwaysConnectedPermission.isGranted(normalizedAddress)) {
                                 Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($deviceName): press Allow connection first")
                                 return@launch
                             }
