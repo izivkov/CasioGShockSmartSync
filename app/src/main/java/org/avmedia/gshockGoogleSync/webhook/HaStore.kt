@@ -9,6 +9,8 @@ import com.google.gson.ToNumberPolicy
 data class HaJob(
     val states: Map<String, Any> = emptyMap(),
     val event: Map<String, Any?>? = null,
+    /** Sensor id to attributes. Null in a job stored by an older version. */
+    val attributes: Map<String, Map<String, Any?>>? = null,
 )
 
 /** The Home Assistant link: where it is, how to get in, and the webhook the registration gave us. */

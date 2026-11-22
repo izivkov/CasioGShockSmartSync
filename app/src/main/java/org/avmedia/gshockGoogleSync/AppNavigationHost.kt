@@ -14,6 +14,7 @@ import org.avmedia.gshockGoogleSync.session.ConnectionButton
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
+import org.avmedia.gshockGoogleSync.webhook.HaScreen
 import org.avmedia.gshockGoogleSync.webhook.WebhooksScreen
 
 @Composable
@@ -37,16 +38,21 @@ fun AppNavigationHost(
     ) {
         when (state.screen) {
             AppScreen.INITIAL, AppScreen.PRE_CONNECTION ->
-                PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks)
+                PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks, onOpenHa = viewModel::openHa)
             AppScreen.CONTENT_SELECTOR -> ContentSelector(viewModel)
             AppScreen.MAIN_NAVIGATION ->
                 BottomNavigationBarWithPermissions(
                     repository = viewModel.repository,
-                    onOpenWebhooks = viewModel::openWebhooks
+                    onOpenWebhooks = viewModel::openWebhooks,
+                    onOpenHa = viewModel::openHa
                 )
             AppScreen.RUN_ACTIONS -> RunActionsScreen()
-            AppScreen.ERROR -> PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks)
+            AppScreen.ERROR -> PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks, onOpenHa = viewModel::openHa)
             AppScreen.WEBHOOKS -> WebhooksScreen(onBack = viewModel::closeWebhooks)
+            AppScreen.HOME_ASSISTANT -> {
+                androidx.activity.compose.BackHandler(onBack = viewModel::closeHa)
+                HaScreen(viewModel = hiltViewModel(), onBack = viewModel::closeHa)
+            }
         }
     }
 }
@@ -61,7 +67,8 @@ private fun ContentSelector(viewModel: AppNavigationViewModel) {
         ConnectionButton.ALWAYS_CONNECTED, ConnectionButton.NORMAL, null ->
             BottomNavigationBarWithPermissions(
                 repository = repository,
-                onOpenWebhooks = viewModel::openWebhooks
+                onOpenWebhooks = viewModel::openWebhooks,
+                onOpenHa = viewModel::openHa
             )
     }
 }

@@ -70,13 +70,14 @@ class WebhookDispatcher @Inject constructor(
         if (store.load() == null) return
         val now = OffsetDateTime.now().withNano(0)
         val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
-        val states = HaSensors.states(registry.resolve(ctx, HaSensors.VARIABLES))
+        val values = registry.resolve(ctx, HaSensors.VARIABLES)
+        val states = HaSensors.states(values)
         val event = if (trigger == WebhookTrigger.WATCH_ACTION) {
             mapOf("trigger" to trigger.eventName, "time" to now.toString(),
                 "watch" to org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name))
         } else null
         if (states.isEmpty() && event == null) return
-        store.putPending(HaJob(states, event))
+        store.putPending(HaJob(states, event, HaSensors.attributes(values)))
         HaWorker.enqueue(context)
     }
 

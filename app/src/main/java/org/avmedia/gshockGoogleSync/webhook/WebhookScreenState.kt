@@ -16,4 +16,11 @@ class WebhookScreenState @Inject constructor() {
 
     fun show() { _open.value = true }
     fun hide() { _open.value = false }
+
+    /** The Home Assistant screen: its own entry next to Webhooks, same app-level rule. */
+    private val _haOpen = MutableStateFlow(false)
+    val haOpen: StateFlow<Boolean> = _haOpen
+
+    fun showHa() { _haOpen.value = true }
+    fun hideHa() { _haOpen.value = false }
 }

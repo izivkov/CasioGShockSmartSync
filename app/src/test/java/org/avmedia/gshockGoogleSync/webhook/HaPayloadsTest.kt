@@ -92,6 +92,74 @@ class HaPayloadsTest {
         assertTrue(a != HaSensors.fingerprint(HaSensors.ALL.dropLast(1)))
     }
 
+    private fun sensor(id: String) = HaSensors.ALL.first { it.uniqueId == id }
+
+    @Test
+    fun binarySensorIsRegisteredAndUpdatedAsBinarySensorWithABoolean() {
+        val reg = obj(HaPayloads.registerSensor(sensor("connected"), true)).getAsJsonObject("data")
+        assertEquals("binary_sensor", reg.get("type").asString)
+        assertEquals("connectivity", reg.get("device_class").asString)
+        assertTrue(reg.get("state").isJsonPrimitive && reg.get("state").asJsonPrimitive.isBoolean)
+        assertFalse(reg.has("unit_of_measurement"))
+        val states = HaSensors.states(mapOf("watch.connected" to false, "watch.dst.home" to true))
+        val upd = obj(HaPayloads.updateSensorStates(states)).getAsJsonArray("data")
+        val byId = upd.associate { it.asJsonObject.get("unique_id").asString to it.asJsonObject }
+        assertEquals("binary_sensor", byId.getValue("connected").get("type").asString)
+        assertFalse(byId.getValue("connected").get("state").asBoolean)
+        assertEquals("binary_sensor", byId.getValue("home_dst").get("type").asString)
+    }
+
+    @Test
+    fun stepsTodayCarriesStepsByHourAsAnAttribute() {
+        val values = mapOf("health.steps_today" to 4000, "health.steps_by_hour" to listOf(0, 120, null, 300))
+        val attrs = HaSensors.attributes(values)
+        val upd = obj(HaPayloads.updateSensorStates(HaSensors.states(values), HaSensors.ALL, attrs))
+            .getAsJsonArray("data").map { it.asJsonObject }.first { it.get("unique_id").asString == "steps_today" }
+        val hours = upd.getAsJsonObject("attributes").getAsJsonArray("steps_by_hour")
+        assertEquals(4, hours.size())
+        assertEquals(120, hours[1].asInt)
+        assertTrue(hours[2].isJsonNull)
+        val reg = obj(HaPayloads.registerSensor(sensor("steps_today"), 4000, attrs["steps_today"])).getAsJsonObject("data")
+        assertEquals(4, reg.getAsJsonObject("attributes").getAsJsonArray("steps_by_hour").size())
+    }
+
+    @Test
+    fun watchSettingsSensorHasTheTimeFormatAsStateAndTheRestAsAttributes() {
+        val values = mapOf("watch.settings.time_format" to "24h", "watch.settings.font" to "Classic", "watch.settings.auto_light" to true,
+            "watch.settings.language" to " ")
+        assertEquals("24h", HaSensors.states(values)["watch_settings"])
+        val a = HaSensors.attributes(values).getValue("watch_settings")
+        assertEquals(mapOf("font" to "Classic", "auto_light" to true), a)
+    }
+
+    @Test
+    fun secondsBecomeMinutes() {
+        val states = HaSensors.states(mapOf("health.walk_seconds" to 3659, "health.run_seconds" to 59, "health.still_seconds" to 7200))
+        assertEquals(60L, states["walk_minutes"])
+        assertEquals(0L, states["run_minutes"])
+        assertEquals(120L, states["still_minutes"])
+        assertEquals("min", sensor("walk_minutes").unit)
+    }
+
+    @Test
+    fun recordedAtGetsTheOffsetHomeAssistantNeeds() {
+        val z = java.time.ZoneId.of("Europe/Brussels")
+        val s = HaSensors.states(mapOf("health.recorded_at" to "2026-11-22T10:15:00"), zone = z)
+        assertEquals("2026-11-22T10:15+01:00", s["health_recorded_at"])
+        assertFalse(HaSensors.states(mapOf("health.recorded_at" to "garbage"), zone = z).containsKey("health_recorded_at"))
+    }
+
+    @Test
+    fun newSensorsLeaveUnknownValuesOut() {
+        val values = mapOf<String, Any?>(
+            "health.step_goal" to null, "health.hr_min" to null, "health.walk_seconds" to null,
+            "watch.notifications_supported" to null, "watch.home_city" to " ", "watch.settings.time_format" to null,
+            "health.steps_by_hour" to emptyList<Int>(),
+        )
+        assertTrue(HaSensors.states(values).isEmpty())
+        assertTrue(HaSensors.attributes(values).isEmpty())
+    }
+
     private fun fakeEnv(): WatchVariables.Env = WatchVariables.Env(
         api = io.mockk.mockk(relaxed = true),
         features = io.mockk.mockk(relaxed = true),

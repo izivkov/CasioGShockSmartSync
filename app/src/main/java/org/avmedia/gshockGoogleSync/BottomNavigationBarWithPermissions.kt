@@ -53,6 +53,7 @@ import kotlin.time.Duration.Companion.seconds
 fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
     onOpenWebhooks: () -> Unit = {},
+    onOpenHa: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -182,7 +183,7 @@ fun BottomNavigationBarWithPermissions(
                     permissions,
                     navController,
                     destinationScreen = {
-                        ActionsScreen(onOpenWebhooks = onOpenWebhooks)
+                        ActionsScreen(onOpenWebhooks = onOpenWebhooks, onOpenHa = onOpenHa)
                     },
                     stringResource(
                         R.string.required_permissions_denied_cannot_access_actions

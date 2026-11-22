@@ -117,6 +117,9 @@ object WatchVariables {
             Variable("watch.dst.home", "True while daylight saving is on for the home time", needsWatch = true) {
                 if (supported("time.home_time")) WatchDecoders.dstHomeOn(api.getDSTWatchState(IO.DstState.ZERO)) else null
             },
+            Variable("watch.notifications_supported", "True when the watch accepts app notifications (read while connected)", needsWatch = true) {
+                api.supportsAppNotifications()
+            },
             Variable("watch.timer_seconds", "Countdown timer set on the watch, seconds", needsWatch = true) {
                 api.getTimer()
             },

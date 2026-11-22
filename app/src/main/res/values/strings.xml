@@ -253,4 +253,5 @@
     <string name="call_webhooks">Call webhooks</string>
     <string name="call_webhooks_info">Calls the webhooks that are set to fire on a watch action.</string>
     <string name="manage_webhooks">Manage webhooks</string>
+    <string name="home_assistant">Home Assistant</string>
 </resources>

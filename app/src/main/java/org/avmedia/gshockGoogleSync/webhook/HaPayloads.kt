@@ -41,7 +41,7 @@ object HaPayloads {
         )
     )
 
-    fun registerSensor(s: HaSensor, state: Any?): String = gson.toJson(
+    fun registerSensor(s: HaSensor, state: Any?, attributes: Map<String, Any?>? = null): String = gson.toJson(
         linkedMapOf(
             "type" to "register_sensor",
             "data" to linkedMapOf<String, Any?>(
@@ -53,11 +53,16 @@ object HaPayloads {
                 "state_class" to s.stateClass,
                 "icon" to s.icon,
                 "entity_category" to s.entityCategory,
+                "attributes" to attributes?.takeIf { it.isNotEmpty() },
             ).filterValues { it != null } + ("state" to state), // state is required, null when not known yet
         )
     )
 
-    fun updateSensorStates(states: Map<String, Any>, sensors: List<HaSensor> = HaSensors.ALL): String {
+    fun updateSensorStates(
+        states: Map<String, Any>,
+        sensors: List<HaSensor> = HaSensors.ALL,
+        attributes: Map<String, Map<String, Any?>> = emptyMap(),
+    ): String {
         val byId = sensors.associateBy { it.uniqueId }
         val data = states.map { (id, state) ->
             linkedMapOf<String, Any?>(
@@ -65,6 +70,7 @@ object HaPayloads {
                 "state" to state,
                 "type" to "sensor",
                 "icon" to byId[id]?.icon,
+                
             ).filterValues { it != null }
         }
         return gson.toJson(linkedMapOf("type" to "update_sensor_states", "data" to data))

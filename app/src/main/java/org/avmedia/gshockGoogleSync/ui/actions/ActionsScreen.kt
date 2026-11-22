@@ -28,6 +28,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 fun ActionsScreen(
     modifier: Modifier = Modifier,
     onOpenWebhooks: () -> Unit = {},
+    onOpenHa: () -> Unit = {},
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
     val isModified by actionsViewModel.isModified.collectAsState()
@@ -43,7 +44,8 @@ fun ActionsScreen(
                 ActionsContent(
                     modifier = Modifier.weight(1f),
                     actionsViewModel = actionsViewModel,
-                    onOpenWebhooks = onOpenWebhooks
+                    onOpenWebhooks = onOpenWebhooks,
+                    onOpenHa = onOpenHa
                 )
 
                 ButtonsRow(
@@ -66,6 +68,7 @@ private fun ActionsContent(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel,
     onOpenWebhooks: () -> Unit,
+    onOpenHa: () -> Unit,
 ) {
     Column(
         modifier =
@@ -73,11 +76,11 @@ private fun ActionsContent(
                 .verticalScroll(rememberScrollState())
                 .padding(0.dp)
                 .fillMaxWidth()
-    ) { ItemList(items = createActionItems(actionsViewModel, onOpenWebhooks)) }
+    ) { ItemList(items = createActionItems(actionsViewModel, onOpenWebhooks, onOpenHa)) }
 }
 
 @Composable
-private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks: () -> Unit): List<Any> {
+private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks: () -> Unit, onOpenHa: () -> Unit): List<Any> {
     val watchFeatureManager = LocalWatchFeatureManager.current
 
     return listOfNotNull(
@@ -128,6 +131,9 @@ private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks
         ),
         androidx.compose.material3.TextButton(onClick = onOpenWebhooks) {
             androidx.compose.material3.Text(stringResource(id = R.string.manage_webhooks))
+        },
+        androidx.compose.material3.TextButton(onClick = onOpenHa) {
+            androidx.compose.material3.Text(stringResource(id = R.string.home_assistant))
         },
         SeparatorView(),
         PhoneView(actionsViewModel)

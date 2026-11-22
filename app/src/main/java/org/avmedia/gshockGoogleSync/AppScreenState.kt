@@ -26,7 +26,10 @@ enum class AppScreen {
     ERROR,
 
     /** The Webhooks screen: shown whatever the watch connection does. */
-    WEBHOOKS
+    WEBHOOKS,
+
+    /** The Home Assistant screen: same rule as [WEBHOOKS]. */
+    HOME_ASSISTANT
 }
 
 data class AppNavigationState(
@@ -46,19 +49,20 @@ class AppScreenState @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     val state: StateFlow<AppNavigationState> =
-        combine(sessionManager.sessionState, webhookScreenState.open) { session, webhooksOpen ->
-            navigationFor(session, webhooksOpen)
+        combine(sessionManager.sessionState, webhookScreenState.open, webhookScreenState.haOpen) { session, webhooksOpen, haOpen ->
+            navigationFor(session, webhooksOpen, haOpen)
         }
             .distinctUntilChanged()
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
-                navigationFor(sessionManager.sessionState.value, webhookScreenState.open.value)
+                navigationFor(sessionManager.sessionState.value, webhookScreenState.open.value, webhookScreenState.haOpen.value)
             )
 
     companion object {
-        internal fun navigationFor(session: SessionState, webhooksOpen: Boolean = false): AppNavigationState =
-            if (webhooksOpen) AppNavigationState(AppScreen.WEBHOOKS)
+        internal fun navigationFor(session: SessionState, webhooksOpen: Boolean = false, haOpen: Boolean = false): AppNavigationState =
+            if (haOpen) AppNavigationState(AppScreen.HOME_ASSISTANT)
+            else if (webhooksOpen) AppNavigationState(AppScreen.WEBHOOKS)
             else when (val phase = session.phase) {
                 SessionPhase.Disconnected -> AppNavigationState(AppScreen.INITIAL)
 

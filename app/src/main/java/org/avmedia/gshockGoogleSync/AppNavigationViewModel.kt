@@ -26,4 +26,6 @@ class AppNavigationViewModel @Inject constructor(
 
     fun openWebhooks() = webhookScreenState.show()
     fun closeWebhooks() = webhookScreenState.hide()
+    fun openHa() = webhookScreenState.showHa()
+    fun closeHa() = webhookScreenState.hideHa()
 }

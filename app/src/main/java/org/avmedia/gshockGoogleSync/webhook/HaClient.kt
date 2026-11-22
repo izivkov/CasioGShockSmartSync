@@ -80,14 +80,14 @@ class HaClient(
         val fingerprint = HaSensors.fingerprint(sensors)
         if (cfg.sensorsHash != fingerprint) {
             for (s in sensors) {
-                val r = transport.post(hook, HaPayloads.registerSensor(s, job.states[s.uniqueId]), null)
+                val r = transport.post(hook, HaPayloads.registerSensor(s, job.states[s.uniqueId], job.attributes?.get(s.uniqueId)), null)
                 if (gone(r)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }
             }
             store.save(cfg.copy(sensorsHash = fingerprint))
         }
         if (job.states.isNotEmpty()) {
-            val r = transport.post(hook, HaPayloads.updateSensorStates(job.states, sensors), null)
+            val r = transport.post(hook, HaPayloads.updateSensorStates(job.states, sensors, job.attributes.orEmpty()), null)
             if (gone(r)) return Push.NeedsRegistration(true)
             classify(r)?.let { return Push.Finished(it) }
             if (notRegistered(r.body)) return Push.NeedsRegistration(false)
