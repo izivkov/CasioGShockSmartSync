@@ -145,9 +145,17 @@ class HealthViewModel @Inject constructor(
         refreshState()
         setupEventSubscription()
 
-        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) {
-            startStepCounterPolling()
-        }
+    }
+
+    /** The Health screen is on screen: poll while it stays open. */
+    fun onScreenShown() {
+        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) startStepCounterPolling()
+    }
+
+    /** The Health screen is off screen: stop polling, so no LifeLog reads start from a screen you are not viewing. */
+    fun onScreenHidden() {
+        stepPollJob?.cancel()
+        stepPollJob = null
     }
 
     private fun setupEventSubscription() {
@@ -297,7 +305,7 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private fun isDwH5600(): Boolean = WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol
+    private fun isDwH5600(): Boolean = WatchInfo.model == WatchInfo.WatchModel.DW_H5600
 
     private fun startStepCounterPolling() {
         stepPollJob?.cancel()

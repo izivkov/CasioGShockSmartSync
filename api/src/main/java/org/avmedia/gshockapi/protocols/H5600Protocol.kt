@@ -5,8 +5,6 @@ import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.io.H5600Channel
 import org.avmedia.gshockapi.io.H5600HealthIO
-import org.avmedia.gshockapi.io.H5600SettingsIO
-import org.avmedia.gshockapi.io.RawSettingIO
 import org.avmedia.gshockapi.model.StepCounterData
 
 /**
@@ -18,25 +16,27 @@ import org.avmedia.gshockapi.model.StepCounterData
  */
 @RequiresApi(Build.VERSION_CODES.O)
 object H5600Protocol : StandardProtocol() {
-    override fun extractKey(data: String): Int? = if (H5600HealthIO.isActive) H5600HealthIO.channelOf(data).key else super.extractKey(data)
+    override fun extractKey(data: String): Int? {
+        if (!H5600HealthIO.isActive) return super.extractKey(data)
+        val channel = H5600HealthIO.channelOf(data)
+        // A status notification belongs to the transfer only while one of its setup requests is waiting.
+        // Anything else on status (such as the button info reply) goes through the normal routing.
+        return if (channel == H5600Channel.STATUS && !H5600HealthIO.isAwaitingSetupReply()) {
+            super.extractKey(data)
+        } else {
+            channel.key
+        }
+    }
 
     override suspend fun getStepCount(peek: Boolean): StepCounterData = H5600HealthIO.request(peek)
 
     override val dataReceivedHandlers: Map<Int, (String) -> Unit>
         get() =
             super.dataReceivedHandlers -
-                CasioConstants.CHARACTERISTICS.CASIO_ACTIVITY_RECORD.code +
-                mapOf(
-                    H5600Channel.DRSP.key to H5600HealthIO::onDrsp,
-                    H5600Channel.CONVOY.key to H5600HealthIO::onConvoy,
-                    H5600Channel.STATUS.key to H5600HealthIO::onStatus,
-                    H5600SettingsIO.SOUND_MODE_CODE to RawSettingIO::onReceived,
-                    H5600SettingsIO.SMART_ALARM_CODE to RawSettingIO::onReceived,
-                    H5600SettingsIO.WATCH_FACE_CODE to RawSettingIO::onReceived,
-                    H5600SettingsIO.TIME_MANAGER_CODE to RawSettingIO::onReceived,
-                    0x24 to RawSettingIO::onReceived,
-                    0x45 to RawSettingIO::onReceived,
-                    0x4F to RawSettingIO::onReceived,
-                    0x13 to RawSettingIO::onReceived,
-                )
+                    CasioConstants.CHARACTERISTICS.CASIO_ACTIVITY_RECORD.code +
+                    mapOf(
+                        H5600Channel.DRSP.key to H5600HealthIO::onDrsp,
+                        H5600Channel.CONVOY.key to H5600HealthIO::onConvoy,
+                        H5600Channel.STATUS.key to H5600HealthIO::onStatus,
+                    )
 }

@@ -89,6 +89,12 @@ object H5600HealthIO {
 
     private var requestRunning = false
 
+    /** True while a setup request is waiting for its reply. Only then does the transfer take status notifications. */
+    @Volatile
+    private var setupWaiting = false
+
+    fun isAwaitingSetupReply(): Boolean = setupWaiting
+
     private class AttemptOutcome(val data: StepCounterData, val restart: Boolean)
 
     /**
@@ -195,6 +201,7 @@ object H5600HealthIO {
             )
             return AttemptOutcome(decoded, restart = false)
         } finally {
+            setupWaiting = false
             synchronized(lock) { active = null }
             transfer.setupReplies.close()
             Timber.i("H5600: attempt end")
@@ -233,8 +240,10 @@ object H5600HealthIO {
         var stepGoal: Int? = null
         for (command in H5600LifeLogSync.SETUP_COMMANDS) {
             Timber.d("H5600: setup 0x${command.toString(16)} -> watch")
+            setupWaiting = true
             IO.writeCmd(GetSetMode.GET, byteArrayOf(command.toByte()))
             val reply = awaitSetupReply(transfer, command)
+            setupWaiting = false
             if (reply == null) {
                 Timber.w("H5600: setup 0x${command.toString(16)}: no reply within ${SETUP_REPLY_TIMEOUT_MS} ms")
                 continue

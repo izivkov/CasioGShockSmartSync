@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
+import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -34,8 +36,6 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
-import org.avmedia.gshockGoogleSync.ui.common.ButtonData
-import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
@@ -44,7 +44,7 @@ fun HealthScreen() {
     val healthViewModel: HealthViewModel = hiltViewModel()
     val state by healthViewModel.state.collectAsState()
     // DW-H5600: until its LifeLog arrives, show only the loading message
-    val waitingForLifeLog = WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol &&
+    val waitingForLifeLog = WatchInfo.model == WatchInfo.WatchModel.DW_H5600 &&
             state.stepCounterData.h5600 == null && state.lifeLogLoading
 
     // Refresh every time the screen opens, so a LifeLog read that finished while the screen
