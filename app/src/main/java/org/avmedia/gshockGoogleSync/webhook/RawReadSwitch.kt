@@ -25,7 +25,7 @@ class RawReadSwitch(
         if (isOn()) DateTimeFormatter.ofPattern("HH:mm").format(Instant.ofEpochMilli(until()).atZone(zone)) else null
 
     companion object {
-        const val HOURS_ON = 48L
+        const val HOURS_ON = 24L
         private const val KEY = "raw.read.until"
     }
 }
