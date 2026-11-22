@@ -18,11 +18,6 @@ import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
 import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockapi.ble.Connection
-import org.avmedia.gshockapi.ble.GetSetMode
-import org.avmedia.gshockapi.ble.IDataReceived
-import org.avmedia.gshockapi.casio.MessageDispatcher
-import org.avmedia.gshockapi.io.IO
 
 /**
  * Debug probe: sends Casio one-byte READ request codes to the request characteristic (26eb002c, the
@@ -38,6 +33,7 @@ class WatchProbe @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val api: GShockRepository,
     private val sessionManager: SessionManager,
+    private val raw: RawWatchRequest,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var job: Job? = null
@@ -50,28 +46,6 @@ class WatchProbe @Inject constructor(
 
     private val _running = MutableStateFlow(false)
     val running: StateFlow<Boolean> = _running
-
-    @Volatile private var waiting = false
-    @Volatile private var lastRxMillis = 0L
-    private val buffer = ArrayList<String>()
-
-    private val collector = IDataReceived { data ->
-        if (data == null) return@IDataReceived
-        if (waiting) {
-            synchronized(buffer) { buffer.add(data) }
-            lastRxMillis = System.currentTimeMillis()
-        } else {
-            forwardToLibrary(data)
-        }
-    }
-
-    private fun forwardToLibrary(data: String) {
-        try {
-            MessageDispatcher.onReceived(data, WatchInfo.protocol)
-        } catch (t: Throwable) {
-            WebhookDiagnostics.logError("Probe: library handler failed: ${WebhookDiagnostics.oneLine(t)}")
-        }
-    }
 
     fun result(): ProbeResult = ProbeResult(
         watchName = WatchModelOverride.displayName(WatchInfo.name),
@@ -97,7 +71,6 @@ class WatchProbe @Inject constructor(
             try {
                 run()
             } finally {
-                restoreLibraryCallback()
                 _running.value = false
             }
         }
@@ -106,7 +79,6 @@ class WatchProbe @Inject constructor(
     fun stop() {
         job?.cancel()
         job = null
-        waiting = false
         _running.value = false
     }
 
@@ -137,9 +109,8 @@ class WatchProbe @Inject constructor(
                 delay(3000)
                 if (!isReady()) continue
             }
-            installCollector()
             _status.value = "Request ${ProbePlan.hex(entry.code)} (${index + 1}/${_entries.value.size})"
-            val answers = requestOnce(entry.code)
+            val answers = raw.request(entry.code, 2000)
             if (!isReady()) {
                 // The watch dropped during the request: the answer (or its absence) means nothing. Retry.
                 continue
@@ -148,38 +119,5 @@ class WatchProbe @Inject constructor(
             index++
         }
         _status.value = "Done: ${_entries.value.count { it.answers.orEmpty().isNotEmpty() }} of ${_entries.value.size} codes answered"
-    }
-
-    private fun installCollector() {
-        try {
-            Connection.setDataCallback(collector)
-        } catch (t: Throwable) {
-            WebhookDiagnostics.logError("Probe: cannot hook notifications: ${WebhookDiagnostics.oneLine(t)}")
-        }
-    }
-
-    private fun restoreLibraryCallback() {
-        try {
-            Connection.setDataCallback(IDataReceived { data -> data?.let { forwardToLibrary(it) } })
-        } catch (ignored: Throwable) {
-        }
-    }
-
-    private suspend fun requestOnce(code: Int): List<String> {
-        synchronized(buffer) { buffer.clear() }
-        lastRxMillis = 0L
-        waiting = true
-        try {
-            IO.writeCmd(GetSetMode.GET, byteArrayOf(code.toByte()))
-            val start = System.currentTimeMillis()
-            while (System.currentTimeMillis() - start < 2000) {
-                delay(100)
-                val rx = lastRxMillis
-                if (rx != 0L && System.currentTimeMillis() - rx > 400) break
-            }
-        } finally {
-            waiting = false
-        }
-        return synchronized(buffer) { buffer.toList() }
     }
 }

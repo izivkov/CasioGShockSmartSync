@@ -71,7 +71,12 @@ class VariableRegistry(val variables: List<Variable>) {
             result[variable.name] =
                 if (variable.needsWatch && !context.watchConnected) null
                 else try {
-                    withTimeoutOrNull(timeoutMs) { variable.provider(context) }
+                    withTimeoutOrNull(timeoutMs) { variable.provider(context) }.let { value ->
+                        if (value is String && WatchDecoders.looksLikeRawHex(value)) {
+                            failures[variable.name] = "raw hex dropped (needs a decoder)"
+                            null
+                        } else value
+                    }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (e: Throwable) {

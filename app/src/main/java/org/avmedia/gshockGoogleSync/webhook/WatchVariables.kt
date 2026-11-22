@@ -8,6 +8,7 @@ import java.util.TimeZone
 import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
+import org.avmedia.gshockapi.IGShockAPI
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
@@ -22,16 +23,45 @@ import org.avmedia.gshockapi.io.IO
  */
 object WatchVariables {
 
-    fun registry(
-        appContext: Context,
-        api: GShockRepository,
-        features: IWatchFeatureManager,
-    ): VariableRegistry {
+    /** What the variables read from. [androidEnv] is the real one; unit tests pass fakes. */
+    class Env(
+        val api: IGShockAPI,
+        val features: IWatchFeatureManager,
+        val raw: RawRequester,
+        val isH5600: () -> Boolean,
+        val phoneBattery: () -> Int?,
+        val lastSync: () -> String?,
+    )
+
+    fun androidEnv(appContext: Context, api: GShockRepository, features: IWatchFeatureManager, raw: RawRequester) = Env(
+        api = api,
+        features = features,
+        raw = raw,
+        isH5600 = { WatchModelOverride.isH5600Family(WatchModelOverride.displayName(WatchInfo.name)) },
+        phoneBattery = {
+            val manager = appContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).takeIf { p -> p in 0..100 }
+        },
+        lastSync = { LocalDataStorage.get(appContext, WebhookStorage.KEY_LAST_SYNC) },
+    )
+
+    fun registry(env: Env): VariableRegistry {
+        val api = env.api
+        val features = env.features
+        val raw = env.raw
+
         fun supported(feature: String) = features.isFeatureSupported(feature)
 
         suspend fun settings(ctx: VariableContext) = ctx.cached("settings") { api.getSettings() }
         suspend fun alarms(ctx: VariableContext) = ctx.cached("alarms") {
             api.getAlarms().take(features.getAlarmCount())
+        }
+
+        fun h5600() = env.isH5600()
+
+        /** Watch condition of the H5600 family, read once per call (the library's profile has no battery for it). */
+        suspend fun h5600Condition(ctx: VariableContext) = ctx.cached("h5600.condition") {
+            WatchDecoders.h5600Condition(raw.request(0x28, 2000).firstOrNull())
         }
 
         val list = mutableListOf(
@@ -41,8 +71,7 @@ object WatchVariables {
 
             // Phone and app
             Variable("phone.battery", "Phone battery level, percent") {
-                val manager = appContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-                manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).takeIf { p -> p in 0..100 }
+                env.phoneBattery()
             },
             Variable("phone.timezone", "Phone time zone id, for example Europe/Brussels") {
                 ZoneId.systemDefault().id
@@ -52,7 +81,7 @@ object WatchVariables {
             },
             Variable("app.version", "Smart Sync app version") { BuildConfig.VERSION_NAME },
             Variable("app.last_sync", "When the app last connected to the watch, ISO 8601") {
-                LocalDataStorage.get(appContext, WebhookStorage.KEY_LAST_SYNC)
+                env.lastSync()
             },
 
             // Watch
@@ -63,17 +92,25 @@ object WatchVariables {
             Variable("watch.model", "Watch model id used by the app", needsWatch = true) {
                 WatchInfo.model.name
             },
-            Variable("watch.battery", "Watch battery level, percent", needsWatch = true) {
-                if (supported("time.battery")) api.getBatteryLevel() else null
+            Variable("watch.battery", "Watch battery level, percent (H5600: 7-step scale, 0 = charging/empty, from watch.battery_level)", needsWatch = true) {
+                if (h5600()) h5600Condition(it)?.batteryPercent
+                else if (supported("time.battery")) api.getBatteryLevel() else null
+            },
+            Variable("watch.battery_level", "H5600 only: battery step 0..6 (H5600: 7-step scale, 0 = charging/empty)", needsWatch = true) {
+                if (h5600()) h5600Condition(it)?.batteryLevel else null
+            },
+            Variable("watch.battery_label", "H5600 only: battery indicator CHG, LOW, 1, 2, 3, 4 or HIGH (H5600: 7-step scale, 0 = charging/empty)", needsWatch = true) {
+                if (h5600()) h5600Condition(it)?.batteryLabel else null
             },
             Variable("watch.temperature", "Temperature from the watch sensor, degrees Celsius", needsWatch = true) {
-                if (supported("time.temperature")) api.getWatchTemperature() else null
+                if (h5600()) h5600Condition(it)?.temperature
+                else if (supported("time.temperature")) api.getWatchTemperature() else null
             },
             Variable("watch.home_city", "Home time city set on the watch", needsWatch = true) {
-                if (supported("time.home_time")) api.getHomeTime() else null
+                if (supported("time.home_time")) api.getHomeTime().takeIf { c -> c.isNotBlank() && c != "N/A" } else null
             },
-            Variable("watch.dst.home", "Daylight saving state of the home time", needsWatch = true) {
-                if (supported("time.home_time")) api.getDSTWatchState(IO.DstState.ZERO) else null
+            Variable("watch.dst.home", "True while daylight saving is on for the home time", needsWatch = true) {
+                if (supported("time.home_time")) WatchDecoders.dstHomeOn(api.getDSTWatchState(IO.DstState.ZERO)) else null
             },
             Variable("watch.timer_seconds", "Countdown timer set on the watch, seconds", needsWatch = true) {
                 api.getTimer()
@@ -145,7 +182,7 @@ object WatchVariables {
         // World cities 1 to 5 (name only).
         for (i in 1..5) {
             list += Variable("watch.world_city.$i", "Name of world city $i on the watch", needsWatch = true) {
-                if (supported("time.world_cities")) api.getWorldCities(i).ifBlank { null } else null
+                if (supported("time.world_cities")) WatchDecoders.worldCityName(api.getWorldCities(i), i) else null
             }
         }
         return VariableRegistry(list)

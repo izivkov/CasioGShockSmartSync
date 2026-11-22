@@ -23,10 +23,11 @@ class WebhookDispatcher @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val api: GShockRepository,
     features: IWatchFeatureManager,
+    raw: RawWatchRequest,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    val registry: VariableRegistry = WatchVariables.registry(context, api, features)
+    val registry: VariableRegistry = WatchVariables.registry(WatchVariables.androidEnv(context, api, features, raw))
 
     /** Records "now" as the last connection, then fires the webhooks that want [WebhookTrigger.SYNC]. */
     fun onSync() {
