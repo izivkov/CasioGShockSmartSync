@@ -31,7 +31,8 @@ class SessionEventBridge @Inject constructor(
         if (libraryName != name && real != name) {
             Timber.i("Re-resolving '$name' as '$libraryName' (always-connected H5600 platform)")
             WatchModelOverride.realName = name
-            WatchInfo.setNameAndModel(libraryName) // emits an echo "DeviceName" with the alias
+            // emits an echo "DeviceName" with the alias
+            WatchModelOverride.reResolve(libraryName, WatchInfo::setNameAndModel, WatchInfo::getAddress, WatchInfo::setAddress)
             ProgressEvents.onNext("DeviceName", name) // put the real name back for the other listeners
         }
         sessionManager.onDeviceName(name)

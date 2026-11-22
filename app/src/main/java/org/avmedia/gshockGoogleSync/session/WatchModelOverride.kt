@@ -24,4 +24,17 @@ object WatchModelOverride {
 
     /** The name to show: the real one, also while the library believes it is [ALIAS]. */
     fun displayName(libraryName: String): String = realName ?: libraryName
+
+    /**
+     * Re-resolves the library's model as [libraryName]. The library's setNameAndModel builds a new state
+     * and drops the watch address; the Allow connection window is keyed by that address.
+     */
+    fun reResolve(
+        libraryName: String,
+        setNameAndModel: (String) -> Unit,
+        getAddress: () -> String,
+        setAddress: (String) -> Unit,
+    ) {
+        setNameAndModel(libraryName)
+    }
 }

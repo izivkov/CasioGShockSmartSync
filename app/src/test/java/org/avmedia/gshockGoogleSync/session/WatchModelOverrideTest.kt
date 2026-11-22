@@ -48,4 +48,20 @@ class WatchModelOverrideTest {
         WatchModelOverride.realName = null
         assertEquals("GW-B5600", WatchModelOverride.displayName("GW-B5600"))
     }
+
+    @Test
+    fun reResolveKeepsTheWatchAddress() {
+        // The library's setNameAndModel drops the address (2026-11-22: the GBX-H5600 then never left the
+        // first page, because the Allow connection window is looked up by that address).
+        var address = "AA:BB:CC:DD:EE:FF"
+        var name = "CASIO GBX-H5600"
+        WatchModelOverride.reResolve(
+            "DW-H5600",
+            setNameAndModel = { name = it; address = "" },
+            getAddress = { address },
+            setAddress = { address = it },
+        )
+        assertEquals("DW-H5600", name)
+        assertEquals("AA:BB:CC:DD:EE:FF", address)
+    }
 }
