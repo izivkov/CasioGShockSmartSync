@@ -69,6 +69,8 @@ class HaStore(private val store: KeyValueStore) {
         store.delete(KEY_IDS)
         store.delete(KEY_CONFIG)
         store.delete(KEY_PENDING)
+        store.delete(KEY_ACTION)
+        store.delete(KEY_ACTION_RESULT)
     }
 
     /** The newest job replaces a waiting one; a waiting button event is kept until it is sent. */
@@ -85,11 +87,24 @@ class HaStore(private val store: KeyValueStore) {
 
     fun lastResult(): String? = store.get(KEY_RESULT)
 
+    /** The action a button press runs besides the event; null = nothing. */
+    fun loadAction(): HaAction? =
+        runCatching { gson.fromJson(store.get(KEY_ACTION), HaAction::class.java) }.getOrNull()?.takeIf { it.entityId.isNotBlank() }
+
+    fun saveAction(action: HaAction?) = if (action == null) store.delete(KEY_ACTION) else store.put(KEY_ACTION, gson.toJson(action))
+
+    /** The last press result in plain words, for example "Ran Goodnight at 22:14". */
+    fun saveActionResult(text: String) = store.put(KEY_ACTION_RESULT, text)
+
+    fun lastActionResult(): String? = store.get(KEY_ACTION_RESULT)
+
     private companion object {
         const val KEY_CONFIG = "ha.config"
         const val KEY_REG = "ha.reg."
         const val KEY_IDS = "ha.regs"
         const val KEY_PENDING = "ha.pending"
         const val KEY_RESULT = "ha.result"
+        const val KEY_ACTION = "ha.action"
+        const val KEY_ACTION_RESULT = "ha.action.result"
     }
 }

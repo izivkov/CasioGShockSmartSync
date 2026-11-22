@@ -131,6 +131,8 @@ class HaClient(
             val r = transport.post(hook, HaPayloads.fireEvent(it), null)
             if (gone(r, hook)) return Push.NeedsRegistration(true)
             classify(r)?.let { res -> return Push.Finished(res) }
+            // The event is out. The chosen action is extra: its failure is saved for the screen, never returned.
+            HaActionRunner(transport, store).runChosen()
         }
         val what = "Sent ${job.states.size} sensor value(s)" + if (job.event != null) " and the button event" else ""
         return Push.Finished(HaResult.Ok(what))
