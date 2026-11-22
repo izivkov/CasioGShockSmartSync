@@ -182,6 +182,17 @@ class HaPayloadsTest {
     }
 
     @Test
+    fun distanceTodayIsASensorInMetres() {
+        val d = sensor("distance_today")
+        assertEquals("health.distance_m", d.variable)
+        assertEquals("distance", d.deviceClass)
+        assertEquals("m", d.unit)
+        assertEquals("total_increasing", d.stateClass)
+        assertEquals(3873, HaSensors.states(mapOf("health.distance_m" to 3873))["distance_today"])
+        assertFalse(HaSensors.states(mapOf("health.distance_m" to null)).containsKey("distance_today"))
+    }
+
+    @Test
     fun recordedAtGetsTheOffsetHomeAssistantNeeds() {
         val z = java.time.ZoneId.of("Europe/Brussels")
         val s = HaSensors.states(mapOf("health.recorded_at" to "2026-11-22T10:15:00"), zone = z)

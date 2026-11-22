@@ -88,4 +88,21 @@ class HealthVariablesTest {
         assertFalse(HealthVariables.NAMES.isEmpty())
         assertEquals(HealthVariables.NAMES.toSet(), HealthVariables.DESCRIPTIONS.keys)
     }
+
+    @Test
+    fun distanceIsTheWatchValueWhenPlausibleElseTheStepEstimate() {
+        // 5306 steps: the watch sends no distance, so the Health screen's estimate (0.73 m a step) is used
+        assertEquals(3873, HealthVariables.values(data)["health.distance_m"])
+        // a watch distance inside 0.4 to 0.85 m a step is taken as it is
+        assertEquals(3900, HealthVariables.values(data.copy(distanceMeters = 3900))["health.distance_m"])
+        // an implausible one is not
+        assertEquals(3873, HealthVariables.values(data.copy(distanceMeters = 90000))["health.distance_m"])
+    }
+
+    @Test
+    fun noStepsMeansNoDistanceNotZero() {
+        assertNull(HealthVariables.values(null)["health.distance_m"])
+        assertNull(HealthVariables.values(data.copy(currentDaySteps = null))["health.distance_m"])
+        assertTrue(HealthVariables.DESCRIPTIONS.getValue("health.distance_m").contains("estimate", ignoreCase = true))
+    }
 }
