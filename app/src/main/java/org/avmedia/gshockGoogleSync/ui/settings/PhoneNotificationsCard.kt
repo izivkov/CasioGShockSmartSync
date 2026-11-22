@@ -29,7 +29,7 @@ import org.avmedia.gshockGoogleSync.notifications.AppEntry
 import org.avmedia.gshockGoogleSync.notifications.InstalledApps
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockGoogleSync.ui.common.AppSwitch
+import AppSwitch
 import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
 
 /** "Phone notifications on the watch": a switch (off by default) and the apps allowed to send. */
