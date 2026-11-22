@@ -32,6 +32,9 @@ import kotlin.time.Duration.Companion.milliseconds
  * `adb logcat | grep H5600`.
  */
 @RequiresApi(Build.VERSION_CODES.O)
+/** Peek test: when true, a peek read does not echo END. Set to false to restore the normal transfer. */
+private const val TEST_PEEK_SKIPS_END = true
+
 object H5600HealthIO {
     private const val SETUP_REPLY_TIMEOUT_MS = 5_000L
     private const val OVERALL_TIMEOUT_MS = 180_000L
@@ -135,7 +138,8 @@ object H5600HealthIO {
 
     /** One attempt: setup, START, polls, then the data. restart = true when the watch stopped answering. */
     private suspend fun runAttempt(zone: ZoneId, peek: Boolean): AttemptOutcome {
-        val transfer = Transfer(H5600LifeLogSync(), zone)
+        // Peek test: with peek, END is not echoed, so the watch may keep the data it has not yet been told it can drop.
+        val transfer = Transfer(H5600LifeLogSync(echoEnd = !(peek && TEST_PEEK_SKIPS_END)), zone)
         synchronized(lock) { active = transfer }
         try {
             Timber.i("H5600: LifeLog attempt start (peek=$peek, zone=$zone)")
@@ -168,7 +172,7 @@ object H5600HealthIO {
             val snapshot = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
             Timber.i(
                 "H5600: transfer ${if (completed) "finished" else "TIMED OUT"}: " +
-                    "${snapshot.first.size} CONVOY notifications, announcements=${snapshot.second}",
+                        "${snapshot.first.size} CONVOY notifications, announcements=${snapshot.second}",
             )
 
             val decoded =
@@ -186,8 +190,8 @@ object H5600HealthIO {
             }
             Timber.i(
                 "H5600: decoded steps=${decoded.currentDaySteps} goal=$stepGoal " +
-                    "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
-                    "warnings=${decoded.warnings.size}",
+                        "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
+                        "warnings=${decoded.warnings.size}",
             )
             return AttemptOutcome(decoded, restart = false)
         } finally {
@@ -326,8 +330,8 @@ object H5600HealthIO {
         if (bytes[2] == 0xFF.toByte()) return null
         val length =
             (bytes[3].toInt() and 0xFF) or
-                ((bytes[4].toInt() and 0xFF) shl 8) or
-                ((bytes[5].toInt() and 0xFF) shl 16)
+                    ((bytes[4].toInt() and 0xFF) shl 8) or
+                    ((bytes[5].toInt() and 0xFF) shl 16)
         return (bytes[2].toInt() and 0xFF) to length
     }
 

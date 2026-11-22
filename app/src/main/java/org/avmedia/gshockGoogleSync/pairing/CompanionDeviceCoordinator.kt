@@ -75,9 +75,9 @@ class CompanionDeviceCoordinator @Inject constructor(
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
                         coordinatorScope.launch {
-                            val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() }
-                                ?: LocalDataStorage.get(context, "LastDeviceName")?.takeIf { it.isNotBlank() }
-                                ?: org.avmedia.gshockapi.WatchInfo.name
+                            // The watch's own stored name only. Falling back to LastDeviceName would treat every
+                            // unknown watch as the last one connected, and block it.
+                            val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() } ?: ""
                             val background = BackgroundReadPermission.consume(normalizedAddress)
                             if (org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(deviceName) &&
                                 !AlwaysConnectedPermission.isGranted(normalizedAddress) &&
