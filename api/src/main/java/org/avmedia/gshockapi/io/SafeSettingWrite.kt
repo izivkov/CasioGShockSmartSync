@@ -26,9 +26,23 @@ class SafeSettingWrite(
     suspend fun update(
         code: Int,
         touched: Set<Int>,
+        expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
+        change: (ByteArray) -> ByteArray?,
+    ): SettingWriteResult = updateWith(code, { read(code) }, touched, expectedBack, change)
+
+    /**
+     * Same as [update] for a value that is read with its own request ([readValue]), such as the per-activity
+     * items. [expectedBack] says what the watch should return after the write; it differs from the written frame
+     * only where the watch rewrites a command byte (0x3D).
+     */
+    suspend fun updateWith(
+        code: Int,
+        readValue: suspend () -> ByteArray?,
+        touched: Set<Int>,
+        expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
         change: (ByteArray) -> ByteArray?,
     ): SettingWriteResult {
-        val before = read(code)
+        val before = readValue()
         if (before == null || before.isEmpty() || before[0] != code.toByte()) {
             return SettingWriteResult.Failed("The watch did not answer. Nothing was changed.")
         }
@@ -39,8 +53,8 @@ class SafeSettingWrite(
         if (after.contentEquals(before)) return SettingWriteResult.Unchanged
         write(after)
         settle()
-        val back = read(code) ?: return SettingWriteResult.Failed("The watch did not answer after the change. Check the setting on the watch.")
-        return if (back.contentEquals(after)) {
+        val back = readValue() ?: return SettingWriteResult.Failed("The watch did not answer after the change. Check the setting on the watch.")
+        return if (back.contentEquals(expectedBack(before, after))) {
             SettingWriteResult.Done
         } else {
             SettingWriteResult.Failed("The watch did not keep the change. Check the setting on the watch.")

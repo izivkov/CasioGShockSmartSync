@@ -47,10 +47,11 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
     suspend fun update(
         code: Int,
         touched: Set<Int>,
+        expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
         change: (ByteArray) -> ByteArray?,
     ): SettingWriteResult {
         if (isBusy) return SettingWriteResult.Failed("The watch is sending health data. Try again in a minute.")
-        val result = writer.update(code, touched, change)
+        val result = writer.update(code, touched, expectedBack, change)
         if (result == SettingWriteResult.Done) RawSettings.shared.forget(code)
         return result
     }
