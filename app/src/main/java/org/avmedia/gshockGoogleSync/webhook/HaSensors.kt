@@ -33,6 +33,9 @@ enum class Convert {
 
     /** A local date-time without offset gets the phone's offset: HA refuses a timestamp without one. */
     LOCAL_TO_OFFSET,
+
+    /** Home Assistant refuses a state longer than 255 characters. */
+    TRUNCATE_250,
 }
 
 object HaSensors {
@@ -65,6 +68,12 @@ object HaSensors {
         HaSensor("timer_seconds", "Watch timer", "watch.timer_seconds", "duration", "s", null, "mdi:timer-outline"),
         HaSensor("notifications_supported", "Notifications supported", "watch.notifications_supported", null, null, null, "mdi:bell-ring", "diagnostic", kind = "binary_sensor"),
         HaSensor("watch_firmware", "Watch firmware", "watch.firmware", null, null, null, "mdi:chip", "diagnostic", attributes = mapOf("version_raw" to "watch.firmware_raw")),
+        HaSensor("watch_face_raw", "Watch face (raw)", "watch.face_raw", null, null, null, "mdi:watch", "diagnostic", convert = Convert.TRUNCATE_250),
+        HaSensor("face_items_raw", "Face items (raw)", "watch.face_items_raw", null, null, null, "mdi:watch", "diagnostic", convert = Convert.TRUNCATE_250),
+        HaSensor(
+            "watch_settings_raw", "Watch settings (raw)", "watch.raw_settings_read_at", "timestamp", null, null, "mdi:code-braces", "diagnostic",
+            attributes = RawSettings.CODES.associate { RawSettings.name(it) to RawSettings.variable(it) },
+        ),
         HaSensor("watch_settings", "Watch settings", "watch.settings.time_format", null, null, null, "mdi:cog", "diagnostic", attributes = SETTINGS_ATTRIBUTES),
     )
 
@@ -82,6 +91,7 @@ object HaSensors {
     private fun convert(s: HaSensor, v: Any, zone: ZoneId): Any? = when (s.convert) {
         Convert.NONE -> v
         Convert.SECONDS_TO_MINUTES -> (v as? Number)?.let { it.toLong() / 60 }
+        Convert.TRUNCATE_250 -> (v as? String)?.take(250)
         Convert.LOCAL_TO_OFFSET -> (v as? String)?.let {
             runCatching { LocalDateTime.parse(it).atZone(zone).toOffsetDateTime().toString() }.getOrNull()
         }

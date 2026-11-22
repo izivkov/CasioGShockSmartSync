@@ -49,7 +49,11 @@ object WatchDecoders {
     }
 
     /** Answer to a raw setting request: all bytes as hex pairs. Not implemented yet. */
-    fun rawAnswer(answer: String?, code: Int): String? = null
+    fun rawAnswer(answer: String?, code: Int): String? {
+        val b = answer?.let { bytes(it) } ?: return null
+        if (b.size < 2 || b[0] != code) return null
+        return b.joinToString(" ") { "%02X".format(it) }
+    }
 
     /** "unknown" while the version bytes are read but not decodable; null when there was no answer. */
     fun firmwareState(answer: String?): String? = versionRaw(answer)?.let { "unknown" }

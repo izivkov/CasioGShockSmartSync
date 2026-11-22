@@ -73,6 +73,14 @@ object WatchVariables {
             raw.request(0x20, 2000).firstOrNull()
         }
 
+        /** Raw setting codes (see [RawSettings]), read once per call, at most every 30 minutes each, H5600 only. */
+        suspend fun rawSettings(ctx: VariableContext): Map<String, String> =
+            if (!h5600()) emptyMap()
+            else ctx.cached("raw.settings") {
+                RawSettings.shared.refresh(raw)
+                RawSettings.shared.values()
+            }
+
         val list = mutableListOf(
             // Event
             Variable("event", "What triggered this call: watch_action, sync, health_data or test") { it.event },
@@ -126,6 +134,21 @@ object WatchVariables {
             },
             Variable("watch.firmware_raw", "H5600 only: the version answer (request 0x20) as hex bytes, not decoded", needsWatch = true) {
                 if (h5600()) WatchDecoders.versionRaw(versionAnswer(it)) else null
+            },
+            Variable("watch.face_raw", "H5600 only: request 0x51 (watch face) as hex bytes, not decoded", needsWatch = true) {
+                rawSettings(it)[RawSettings.name(0x51)]
+            },
+            Variable("watch.face_items_raw", "H5600 only: request 0x52 (items of the custom face) as hex bytes, not decoded", needsWatch = true) {
+                rawSettings(it)[RawSettings.name(0x52)]
+            },
+            Variable("watch.raw_settings", "H5600 only: raw setting requests as an object, code to hex bytes, not decoded", needsWatch = true) {
+                rawSettings(it).takeIf { m -> m.isNotEmpty() }
+            },
+            Variable("watch.raw_settings_read_at", "H5600 only: when a raw setting was last read, ISO 8601 with offset", needsWatch = true) {
+                rawSettings(it)
+                RawSettings.shared.lastReadMillis()?.let { ms ->
+                    java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime().withNano(0).toString()
+                }
             },
             Variable("watch.notifications_supported", "True when the watch accepts app notifications (read while connected)", needsWatch = true) {
                 api.supportsAppNotifications()
@@ -202,6 +225,13 @@ object WatchVariables {
         // DW-H5600 LifeLog values, from the last transfer (health.steps_today is defined above).
         for (name in HealthVariables.NAMES.filter { it != "health.steps_today" }) {
             list += Variable(name, HealthVariables.DESCRIPTIONS.getValue(name)) { HealthVariables.values(env.healthData())[name] }
+        }
+
+        // One variable per raw code, from the table: adding a code is one entry in RawSettings.CODES.
+        for (code in RawSettings.CODES) {
+            list += Variable(RawSettings.variable(code), "H5600 only: request ${RawSettings.name(code)} as hex bytes, not decoded", needsWatch = true) {
+                rawSettings(it)[RawSettings.name(code)]
+            }
         }
 
         // World cities 1 to 5 (name only).
