@@ -71,7 +71,10 @@ class WebhookDispatcher @Inject constructor(
     /** Home Assistant: the sensor values (one registry read) and, for a watch action, the button event. */
     private suspend fun pushToHomeAssistant(trigger: WebhookTrigger) {
         val store = WebhookStorage.haStore(context)
-        if (store.load() == null) return
+        val cfg = store.load() ?: return
+        val address = org.avmedia.gshockapi.WatchInfo.getAddress()
+        if (address.isBlank()) return
+        val watchName = org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name)
         val now = OffsetDateTime.now().withNano(0)
         val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
         val values = registry.resolve(ctx, HaSensors.VARIABLES)
@@ -81,7 +84,10 @@ class WebhookDispatcher @Inject constructor(
                 "watch" to org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name))
         } else null
         if (states.isEmpty() && event == null) return
-        store.putPending(HaJob(states, event, HaSensors.attributes(values)))
+        val registration = HaPayloads.registrationFor(
+            address, watchName, cfg, org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME, android.os.Build.VERSION.RELEASE,
+        )
+        store.putPending(HaJob(states, event, HaSensors.attributes(values), HaPayloads.deviceId(address), registration))
         HaWorker.enqueue(context)
     }
 

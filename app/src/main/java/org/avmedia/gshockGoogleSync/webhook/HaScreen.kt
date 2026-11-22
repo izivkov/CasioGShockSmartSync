@@ -31,7 +31,7 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
     var token by remember { mutableStateOf(form.token) }
     var deviceName by remember { mutableStateOf(form.deviceName) }
     var model by remember { mutableStateOf(form.model) }
-    val connected = form.webhookId.isNotBlank()
+    val saved = form.baseUrl.isNotBlank() && form.token.isNotBlank()
 
     Column(Modifier.fillMaxSize()) {
         ScreenTitle(text = "Home Assistant", modifier = Modifier)
@@ -40,7 +40,7 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             AppText(
-                text = "Registers the watch as a device with sensors (battery, steps, heart rate and more). " +
+                text = "Set up once; each watch you connect becomes its own device with sensors (battery, steps, heart rate and more). " +
                     "The token is a long-lived access token from your Home Assistant profile.",
                 fontSize = 14.sp,
             )
@@ -75,14 +75,14 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            AppText(text = if (connected) "Connected" else "Not connected", fontSize = 14.sp)
+            AppText(text = if (saved) "Saved: each watch registers itself when it connects" else "Not set up", fontSize = 14.sp)
             if (status.isNotBlank()) AppText(text = status, fontSize = 14.sp)
         }
         ButtonsRow(
             buttons = listOf(
                 ButtonData("Back", onBack),
-                ButtonData("Disconnect", { viewModel.disconnect() }, enabled = connected),
-                ButtonData("Connect", { viewModel.connect(url, token, deviceName, model) }, enabled = url.isNotBlank() && token.isNotBlank()),
+                ButtonData("Forget", { viewModel.forget(); url = ""; token = ""; deviceName = ""; model = "" }, enabled = saved),
+                ButtonData("Save", { viewModel.save(url, token, deviceName, model) }, enabled = url.isNotBlank() && token.isNotBlank()),
             )
         )
     }

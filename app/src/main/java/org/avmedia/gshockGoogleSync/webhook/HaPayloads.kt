@@ -29,6 +29,12 @@ object HaPayloads {
     fun resolveNames(watchName: String, typedName: String, typedModel: String): Pair<String, String> =
         Pair(typedName.trim().ifBlank { deviceName(watchName) }, typedModel.trim().ifBlank { defaultModel(watchName) })
 
+    /** The registration body for the watch at [address], with the typed name and model of [cfg] or the defaults. */
+    fun registrationFor(address: String, watchName: String, cfg: HaConfig, appVersion: String, osVersion: String): String {
+        val (name, model) = resolveNames(watchName, cfg.deviceName, cfg.model)
+        return registration(deviceId(address), name, model, appVersion, osVersion)
+    }
+
     private val UPDATABLE = listOf("app_version", "device_name", "manufacturer", "model", "os_version")
 
     /** The mobile_app "update_registration" call, from a [registration] body: only the fields HA lets us change. */

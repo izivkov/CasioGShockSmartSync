@@ -11,65 +11,77 @@ sealed class HaResult(val message: String) {
 }
 
 /**
- * Registers the app as a Home Assistant mobile_app device and pushes sensor states and button
- * events to its webhook. Android-free: the transport and the store are passed in.
+ * Home Assistant mobile_app client. The URL and token are saved once ([saveSettings]); each watch address
+ * gets its own registration the first time a job for it is sent ([send]), and only then. Android-free: the
+ * transport and the store are passed in.
  */
 class HaClient(
     private val transport: HaTransport,
     private val store: HaStore,
     private val sensors: List<HaSensor> = HaSensors.ALL,
 ) {
-    /** Registers the device and keeps the webhook id. [registrationBody] is [HaPayloads.registration]. */
-    fun connect(
-        baseUrl: String,
-        token: String,
-        registrationBody: String,
-        deviceName: String = "",
-        model: String = "",
-    ): HaResult {
+    /** Saves URL, token and the typed name and model, after GET /api/ shows that HA accepts them. Saves nothing on an error. */
+    fun saveSettings(baseUrl: String, token: String, deviceName: String = "", model: String = ""): HaResult {
         val base = normalizeBase(baseUrl) ?: return HaResult.Failed("The URL must start with http:// or https://")
         if (token.isBlank()) return HaResult.Failed("The token is empty")
-        val old = store.load()
-        val cfg = HaConfig(baseUrl = base, token = token.trim(), registration = registrationBody, deviceName = deviceName, model = model)
-        if (old != null && old.baseUrl == base && old.token == cfg.token) {
-            // Already registered: change the existing device, no new registration.
-            val kept = old.copy(registration = registrationBody, deviceName = deviceName, model = model)
-            store.save(kept)
-            val r = transport.post("$base/api/webhook/${old.webhookId}", HaPayloads.updateRegistration(registrationBody), null)
-            if (!gone(r, "$base/api/webhook/${old.webhookId}")) {
-                classify(r)?.let { return it }
-                return HaResult.Ok("Updated " + deviceNameOf(registrationBody))
-            }
-            // The registration is gone in HA: register again below.
-        }
-        store.save(cfg)
-        return when (val r = register(cfg)) {
+        val r = transport.get("$base/api/", token.trim())
+        store.save(HaConfig(base, token.trim(), deviceName.trim(), model.trim()))
+        classify(r)?.let { return if (it is HaResult.Retry) HaResult.Failed("Cannot reach Home Assistant: ${it.message}") else it }
+        store.save(HaConfig(base, token.trim(), deviceName.trim(), model.trim()))
+        return HaResult.Ok("Saved. Home Assistant answered OK")
+    }
+
+    /** Registers the watch [deviceId] when it has no registration yet. Never registers an address twice. */
+    fun ensureRegistered(deviceId: String, registrationBody: String): HaResult {
+        val cfg = store.load() ?: return HaResult.Failed("Home Assistant is not set up")
+        return when (val r = register(cfg, registrationBody)) {
             is Reg.Done -> {
-                store.save(cfg.copy(webhookId = r.webhookId))
-                HaResult.Ok("Connected as " + deviceNameOf(registrationBody))
+                store.saveRegistration(deviceId, HaRegistration(r.webhookId, registrationBody))
+                HaResult.Ok("Registered " + deviceNameOf(registrationBody))
             }
             is Reg.Refused -> r.result
         }
     }
 
-    /** Sends [job]. A 410 (registration deleted in HA) registers again once and retries. */
+    /**
+     * Sends [job] for its watch. A watch without a registration is registered first. A changed name or model
+     * goes out as update_registration. A deleted registration (410, or an empty answer that get_config confirms)
+     * registers again once and retries.
+     */
     fun send(job: HaJob): HaResult {
-        var cfg = store.load() ?: return HaResult.Failed("Home Assistant is not connected")
+        val cfg = store.load() ?: return HaResult.Failed("Home Assistant is not set up")
+        if (job.deviceId.isBlank() || job.registration.isBlank()) return HaResult.Failed("The job has no watch")
+        (ensureRegistered(job.deviceId, job.registration) as? HaResult.Failed)?.let { return it }
+        var reg = store.loadRegistration(job.deviceId) ?: return HaResult.Failed("Home Assistant gave no webhook id")
         var again = false
+        if (reg.registration != job.registration) {
+            val hook = "${cfg.baseUrl}/api/webhook/${reg.webhookId}"
+            val r = transport.post(hook, HaPayloads.updateRegistration(job.registration), null)
+            if (!gone(r, hook)) {
+                classify(r)?.let { return it }
+                reg = reg.copy(registration = job.registration).also { store.saveRegistration(job.deviceId, it) }
+            } else {
+                again = true
+                when (val n = register(cfg, job.registration)) {
+                    is Reg.Done -> reg = HaRegistration(n.webhookId, job.registration).also { store.saveRegistration(job.deviceId, it) }
+                    is Reg.Refused -> return n.result
+                }
+            }
+        }
         while (true) {
-            when (val outcome = push(cfg, job)) {
+            when (val outcome = push(cfg, reg, job)) {
                 is Push.Finished -> return outcome.result
                 is Push.NeedsRegistration -> {
                     if (again) return HaResult.Failed("Home Assistant keeps refusing the registration")
                     again = true
                     if (outcome.registrationGone) {
-                        when (val r = register(cfg)) {
-                            is Reg.Done -> cfg = cfg.copy(webhookId = r.webhookId, sensorsHash = "").also(store::save)
+                        when (val r = register(cfg, job.registration)) {
+                            is Reg.Done -> reg = HaRegistration(r.webhookId, job.registration, "").also { store.saveRegistration(job.deviceId, it) }
                             is Reg.Refused -> return r.result
                         }
                     } else {
                         // A sensor is unknown to HA: register the sensors again.
-                        cfg = cfg.copy(sensorsHash = "").also(store::save)
+                        reg = reg.copy(sensorsHash = "").also { store.saveRegistration(job.deviceId, it) }
                     }
                 }
             }
@@ -86,23 +98,23 @@ class HaClient(
         class NeedsRegistration(val registrationGone: Boolean) : Push
     }
 
-    private fun register(cfg: HaConfig): Reg {
-        val r = transport.post("${cfg.baseUrl}/api/mobile_app/registrations", cfg.registration, cfg.token)
+    private fun register(cfg: HaConfig, body: String): Reg {
+        val r = transport.post("${cfg.baseUrl}/api/mobile_app/registrations", body, cfg.token)
         classify(r)?.let { return Reg.Refused(it) }
         val id = runCatching { JsonParser.parseString(r.body).asJsonObject.get("webhook_id").asString }.getOrNull()
         return if (id.isNullOrBlank()) Reg.Refused(HaResult.Failed("Home Assistant gave no webhook id")) else Reg.Done(id)
     }
 
-    private fun push(cfg: HaConfig, job: HaJob): Push {
-        val hook = "${cfg.baseUrl}/api/webhook/${cfg.webhookId}"
+    private fun push(cfg: HaConfig, reg: HaRegistration, job: HaJob): Push {
+        val hook = "${cfg.baseUrl}/api/webhook/${reg.webhookId}"
         val fingerprint = HaSensors.fingerprint(sensors)
-        if (cfg.sensorsHash != fingerprint) {
+        if (reg.sensorsHash != fingerprint) {
             for (s in sensors) {
                 val r = transport.post(hook, HaPayloads.registerSensor(s, job.states[s.uniqueId], job.attributes?.get(s.uniqueId)), null)
                 if (gone(r, hook)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }
             }
-            store.save(cfg.copy(sensorsHash = fingerprint))
+            store.saveRegistration(job.deviceId, reg.copy(sensorsHash = fingerprint))
         }
         if (job.states.isNotEmpty()) {
             val r = transport.post(hook, HaPayloads.updateSensorStates(job.states, sensors, job.attributes.orEmpty()), null)

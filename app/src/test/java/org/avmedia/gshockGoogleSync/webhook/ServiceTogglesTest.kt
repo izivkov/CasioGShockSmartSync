@@ -34,9 +34,9 @@ class ServiceTogglesTest {
     fun turningHomeAssistantOffKeepsTheRegistration() {
         val mem = Mem()
         val ha = HaStore(mem)
-        ha.save(HaConfig(baseUrl = "https://ha.example", token = "t", webhookId = "hook1", registration = "{}"))
+        ha.saveRegistration("gshock-1", HaRegistration("hook1", "{}"))
         ServiceToggles(mem).set(ServiceToggles.Service.HOME_ASSISTANT, false)
         ServiceToggles(mem).set(ServiceToggles.Service.HOME_ASSISTANT, true)
-        assertEquals("hook1", ha.load()?.webhookId)
+        assertEquals("hook1", ha.loadRegistration("gshock-1")?.webhookId)
     }
 }
