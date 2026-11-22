@@ -231,7 +231,7 @@ class WatchSettingCodecsTest {
         assertNull(WatchFaceCodec.withFace(before, -1))
         assertNull(WatchFaceCodec.withFace(before, 256))
         for (f in 1..4) assertEquals(f.toByte(), WatchFaceCodec.withFace(before, f)!![1])
-        assertEquals("Face 2 (custom)", WatchFaceCodec.faceName(WatchFaceCodec.CUSTOM_FACE))
+        assertEquals(listOf("Time only", "Custom", "Steps", "Tide"), WatchFaceCodec.FACES.map { WatchFaceCodec.faceName(it) })
     }
 
     @Test

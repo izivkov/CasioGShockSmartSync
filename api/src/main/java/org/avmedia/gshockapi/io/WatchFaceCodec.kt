@@ -20,10 +20,10 @@ object WatchFaceCodec {
 
     fun faceName(face: Int): String =
         when (face) {
-            1 -> "Face 1"
-            CUSTOM_FACE -> "Face 2 (custom)"
-            3 -> "Face 3"
-            4 -> "Face 4"
+            1 -> "Time only"
+            CUSTOM_FACE -> "Custom"
+            3 -> "Steps"
+            4 -> "Tide" // the owner was not fully sure of this one
             else -> "Face $face"
         }
 
