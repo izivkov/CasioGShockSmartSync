@@ -11,8 +11,8 @@ import java.time.Instant
 class H5600WorkoutDecoderTest {
     @Test
     fun theSyntheticSummaryHasTheSizeOfTheNotes() {
-        assertEquals(91, WorkoutTestData.runningSummary(withLoadFloat = false).size)
-        assertEquals(95, WorkoutTestData.runningSummary().size)
+        assertEquals(87, WorkoutTestData.runningSummary(withLoadFloat = false).size)
+        assertEquals(91, WorkoutTestData.runningSummary().size)
     }
 
     @Test

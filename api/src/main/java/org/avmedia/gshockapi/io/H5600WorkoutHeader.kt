@@ -48,8 +48,8 @@ class WorkoutHeader(
 
         /** Year (2 BCD, low pair first), month, day, hour, minute, second (BCD) to UTC epoch millis. */
         private fun time(c: WorkoutCursor): Long? {
-            val yHi = WorkoutCodec.bcd(c.u8())
             val yLo = WorkoutCodec.bcd(c.u8())
+            val yHi = WorkoutCodec.bcd(c.u8())
             val parts = List(5) { WorkoutCodec.bcd(c.u8()) }
             if (yLo == null || yHi == null || parts.any { it == null }) return null
             return runCatching {

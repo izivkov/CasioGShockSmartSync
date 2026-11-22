@@ -24,7 +24,7 @@ class Bytes {
 object WorkoutTestData {
     fun at(buf: ByteArray, pos: Int, part: ByteArray) = part.copyInto(buf, pos)
 
-    /** Running summary, 91 bytes (format 4 adds the float load: 95). */
+    /** Running summary, 87 bytes; with the float load of format 4: 91. */
     fun runningSummary(withLoadFloat: Boolean = true): ByteArray {
         val b = Bytes().u8(0x81).hms(0, 31, 5).f(5.25f).ms(5, 54).ms(5, 10).ms(7, 2)
             .u32(412).u8(60).u8(10).u8(30).u16(88).u8(3).u8(34).u8(1).u8(150).u8(178).u8(92)

@@ -49,7 +49,7 @@ class WorkoutTransfer(
             for ((index, item) in sorted.withIndex()) {
                 val (slot, hdr) = item
                 val session = fetchWorkout(slot, hdr)
-                if (runCatching { sink(session) }.isFailure) throw Fail("the workout could not be stored; it stays on the watch")
+                if (!(runCatching { sink(session) }.getOrDefault(false))) throw Fail("the workout could not be stored; it stays on the watch")
                 transferred += slot
                 link.bulk(WorkoutGroup.fetchedMark(transferred, noneLeft = index == sorted.lastIndex))
                 awaitBulk(KIND_MARK) ?: throw Fail("no answer to the fetched mark")

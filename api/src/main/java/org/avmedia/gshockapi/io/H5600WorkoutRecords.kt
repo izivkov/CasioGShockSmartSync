@@ -77,7 +77,7 @@ object WorkoutRecords {
                 index = out.size,
                 atSeconds = atSec,
                 lapSeconds = lapSec,
-                manual = manualFlag == 0xFE,
+                manual = manualFlag != 0xFE,
                 distance = v["dist"], pace = v["pace"]?.toInt(), speed = v["speed"],
                 hrAvg = v["hrAvg"]?.toInt(), hrMax = v["hrMax"]?.toInt(), hrMin = v["hrMin"]?.toInt(),
                 ascent = v["asc"]?.toInt(), descent = v["desc"]?.toInt(), cadence = v["cad"]?.toInt(),

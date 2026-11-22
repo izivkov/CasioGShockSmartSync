@@ -37,7 +37,7 @@ object WorkoutGroup {
         out[1] = if (noneLeft) 1 else 0
         for (b in 0 until MASK_BYTES) {
             var v = 0xFF
-            for (bit in 0 until 8) if ((b * 8 + bit) in transferred) v = v or (1 shl bit)
+            for (bit in 0 until 8) if ((b * 8 + bit) in transferred) v = v and (1 shl bit).inv()
             out[2 + b] = v.toByte()
         }
         return out

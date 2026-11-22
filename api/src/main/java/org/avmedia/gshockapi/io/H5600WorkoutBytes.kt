@@ -76,7 +76,7 @@ object WorkoutCodec {
         var crc = 0
         for (i in from until to) {
             crc = crc xor (data[i].toInt() and 0xFF)
-            repeat(8) { crc = if (crc and 1 != 0) (crc ushr 1) xor 0x8409 else crc ushr 1 }
+            repeat(8) { crc = if (crc and 1 != 0) (crc ushr 1) xor 0x8408 else crc ushr 1 }
         }
         return crc and 0xFFFF
     }

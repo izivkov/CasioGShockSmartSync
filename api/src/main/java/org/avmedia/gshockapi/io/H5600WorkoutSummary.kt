@@ -51,8 +51,12 @@ object WorkoutSummaryDecoder {
         else -> null
     }
 
-    /** Summary bytes the notes list for the family (without the float load); null for an unknown sport. */
-    fun sizeFor(sport: Int): Int? = WorkoutSportFamily.of(sport)?.let { layoutFor(it) }?.size
+    /** Summary bytes the notes list for the sport (with the float load of format 4, except swimming); null for an unknown sport. */
+    fun sizeFor(sport: Int): Int? {
+        val family = WorkoutSportFamily.of(sport) ?: return null
+        val swim = family == WorkoutSportFamily.POOL || family == WorkoutSportFamily.OPEN_WATER
+        return layoutFor(family)?.size?.plus(if (swim) 0 else LOAD_FLOAT.size)
+    }
 
     /** Null when the sport is unknown or the header is too short for the summary. */
     fun decode(header: ByteArray, sport: Int, formatVersion: Int): WorkoutSummary? {
