@@ -235,7 +235,7 @@ object WatchVariables {
         }
 
         // Decoded health settings (face, heart-rate measurement, bedtime, night window, unit, profile, smart alarm).
-        for (def in WatchSettingVariables.DEFS) {
+        for (def in WatchSettingVariables.DEFS.take(0)) {
             list += Variable(def.name, def.description, needsWatch = true) {
                 if (h5600()) def.value(WatchSettingVariables.frames(rawSettings(it))) else null
             }

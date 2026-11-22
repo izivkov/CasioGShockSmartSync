@@ -65,7 +65,6 @@ class RawSettingsReader(
     /** After a write: the next refresh reads [code] again instead of waiting for the interval. */
     fun forget(code: Int) {
         synchronized(hex) {
-            attempted.remove(code)
             hex.remove(RawSettings.name(code))
         }
     }
