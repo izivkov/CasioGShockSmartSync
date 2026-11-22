@@ -47,7 +47,7 @@ object H5600BodyDecoder {
 
     private fun breathingSession(record: ByteArray): BreathingSession? {
         val time = Bcd.dateTime(record, 0) ?: return null
-        return BreathingSession(time, (7 until 15).map { Bcd.byte(record[it]) })
+        return BreathingSession(time, (6 until 14).map { Bcd.byte(record[it]) })
     }
 
     private fun cardioStatus(record: ByteArray): CardioStatus? {
@@ -64,7 +64,7 @@ object H5600BodyDecoder {
     private fun stairsRecord(record: ByteArray): StairsRecord? {
         val time = Bcd.dateTime(record, 0, withSeconds = true) ?: return null
         val buffer = ByteBuffer.wrap(record).order(ByteOrder.LITTLE_ENDIAN)
-        val up = (buffer.getShort(9).toInt() and 0xFFFF).takeIf { it < 0xFFFE } ?: return null
+        val up = (buffer.getShort(8).toInt() and 0xFFFF).takeIf { it < 0xFFFE } ?: return null
         val down = (buffer.getShort(10).toInt() and 0xFFFF).takeIf { it < 0xFFFE } ?: return null
         return StairsRecord(time, up, down)
     }

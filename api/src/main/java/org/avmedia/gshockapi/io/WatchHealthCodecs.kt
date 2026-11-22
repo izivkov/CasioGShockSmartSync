@@ -250,7 +250,7 @@ object ProfileCodec {
     ): Map<Int, Int> {
         val low = toBcd(value % 100)
         val high = toBcd(value / 100)
-        return if (lowFirst) mapOf(index to high, index + 1 to low) else mapOf(index to low, index + 1 to high)
+        return if (lowFirst) mapOf(index to low, index + 1 to high) else mapOf(index to high, index + 1 to low)
     }
 
     private fun toBcd(value: Int): Int = (value / 10) * 16 + value % 10
@@ -285,6 +285,6 @@ object SmartAlarmCodec {
         val (hour, minute) = Frame.time(frame, 0) ?: return null
         val flags = Frame.u8(frame, 2) ?: return null
         val window = Frame.u8(frame, 3) ?: return null
-        return Setting(hour, minute, flags and 2 != 0, flags and 1 != 0, window)
+        return Setting(hour, minute, flags and 1 != 0, flags and 2 != 0, window)
     }
 }

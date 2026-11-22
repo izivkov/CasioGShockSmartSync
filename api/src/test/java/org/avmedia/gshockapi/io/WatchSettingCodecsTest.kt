@@ -154,7 +154,9 @@ class WatchSettingCodecsTest {
         assertEquals(10_000, StepGoalCodec.parse(before))
         val after = StepGoalCodec.withSteps(before, 12_345)!!
         assertEquals(12_345, StepGoalCodec.parse(after))
-        assertEquals(StepGoalCodec.BYTES, changed(before, after))
+        // 0x00 stays 0x00: only the first two bytes differ, and nothing outside the three changes
+        assertEquals(setOf(1, 2), changed(before, after))
+        assertTrue(StepGoalCodec.BYTES.containsAll(changed(before, after)))
         assertArrayEquals(byteArrayOf(0x39, 0x30, 0x00), after.copyOfRange(1, 4))
     }
 
@@ -216,5 +218,8 @@ class WatchSettingCodecsTest {
         val s = SmartAlarmCodec.parse(frame(0x50, 6, 30, 0b11, 30))!!
         assertEquals(SmartAlarmCodec.Setting(6, 30, true, true, 30), s)
         assertNull(SmartAlarmCodec.parse(frame(0x50, 6, 30)))
+        // the two flag bits are told apart: bit 0 is on, bit 1 is snooze
+        assertEquals(SmartAlarmCodec.Setting(7, 0, true, false, 45), SmartAlarmCodec.parse(frame(0x50, 7, 0, 0b01, 45)))
+        assertEquals(SmartAlarmCodec.Setting(7, 0, false, true, 15), SmartAlarmCodec.parse(frame(0x50, 7, 0, 0b10, 15)))
     }
 }
