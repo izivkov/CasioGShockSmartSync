@@ -27,6 +27,8 @@ class HaPushChannel(
     private val deliver: (AppNotification) -> Unit,
     private val enabled: () -> Boolean = { true },
 ) {
+    private val router = HaPushRouter(deliver, now = ::now)
+
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder().pingInterval(30, TimeUnit.SECONDS).readTimeout(0, TimeUnit.SECONDS).build()
     }
@@ -58,7 +60,7 @@ class HaPushChannel(
                         HaPushEvent.AuthInvalid -> webSocket.close(1000, null)
                         is HaPushEvent.Push -> {
                             subscribed = true
-                            runCatching { deliver(HaPush.toNotification(e, now())) }.onFailure { Timber.w("HA push: not delivered") }
+                            runCatching { router.route(e) }.onFailure { Timber.w("HA push: not delivered") }
                             e.confirmId?.let { webSocket.send(HaPush.confirm(nextId++, reg.webhookId, it)) }
                         }
                         HaPushEvent.Ignored -> if (text.contains("\"result\"") && text.contains("\"success\":true")) subscribed = true

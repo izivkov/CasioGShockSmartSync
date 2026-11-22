@@ -31,6 +31,8 @@ class WebhookDispatcher @Inject constructor(
     init {
         // The point where a DW-H5600 LifeLog read completes: the "health data downloaded" trigger.
         H5600Session.onDownloaded = { onHealthDataDownloaded() }
+        // Home Assistant's "command_update_sensors" push: send the sensors once, nothing else.
+        HaPushRouter.updateSensorsHook = { pushSensorsNow() }
     }
 
     val registry: VariableRegistry = WatchVariables.registry(WatchVariables.androidEnv(context, api, features, raw))
@@ -46,6 +48,12 @@ class WebhookDispatcher @Inject constructor(
      * a background job has finished downloading data from the watch. Nothing calls it yet.
      */
     fun onHealthDataDownloaded() = fire(WebhookTrigger.HEALTH_DATA)
+
+    /** One Home Assistant sensor push on request of HA. Uses the values already known: no LifeLog read is started. */
+    fun pushSensorsNow() {
+        if (!WebhookStorage.toggles(context).isOn(ServiceToggles.Service.HOME_ASSISTANT)) return
+        scope.launch { runCatching { pushToHomeAssistant(WebhookTrigger.SYNC) }.onFailure { Timber.e(it, "Home Assistant push failed") } }
+    }
 
     fun fire(trigger: WebhookTrigger) {
         val toggles = WebhookStorage.toggles(context)

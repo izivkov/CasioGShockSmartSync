@@ -10,7 +10,13 @@ sealed interface HaPushEvent {
     data object AuthRequired : HaPushEvent
     data object AuthOk : HaPushEvent
     data object AuthInvalid : HaPushEvent
-    data class Push(val title: String?, val message: String, val confirmId: String?) : HaPushEvent
+    data class Push(
+        val title: String?,
+        val message: String,
+        val confirmId: String?,
+        /** The companion-app command this message carries (`command_update_sensors`, ...), null for a normal message. */
+        val command: String? = null,
+    ) : HaPushEvent
     data object Ignored : HaPushEvent
 }
 
@@ -46,11 +52,23 @@ object HaPush {
                 val e = o.getAsJsonObject("event")
                 fun str(k: String) = e.get(k)?.takeIf { it.isJsonPrimitive }?.asString
                 val message = str("message")
-                if (message.isNullOrBlank()) HaPushEvent.Ignored else HaPushEvent.Push(str("title"), message, str("confirm_id"))
+                val dataCommand = e.get("data")?.takeIf { it.isJsonObject }?.asJsonObject?.get("command")?.takeIf { it.isJsonPrimitive }?.asString
+                if (message.isNullOrBlank()) HaPushEvent.Ignored
+                else HaPushEvent.Push(str("title"), message, str("confirm_id"), commandOf(message, dataCommand))
             }
             else -> HaPushEvent.Ignored
         }
     }.getOrDefault(HaPushEvent.Ignored)
+
+    const val COMMAND_UPDATE_SENSORS = "command_update_sensors"
+    private val COMMAND_WORDS = setOf("request_location_update", "clear_notification")
+
+    /** The command in a push: data.command when present, else the message when it is a command word. Null for a normal message. */
+    fun commandOf(message: String, dataCommand: String?): String? {
+        dataCommand?.trim()?.takeIf { it.isNotEmpty() }?.let { return it }
+        val m = message.trim()
+        return m.takeIf { it.startsWith("command_") || it in COMMAND_WORDS }
+    }
 
     fun toNotification(push: HaPushEvent.Push, timestamp: String): AppNotification =
         AppNotification.create(
