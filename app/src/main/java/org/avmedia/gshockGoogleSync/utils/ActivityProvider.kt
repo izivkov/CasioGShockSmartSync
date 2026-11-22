@@ -16,6 +16,7 @@ object ActivityProvider {
             }
 
             override fun onActivityStarted(activity: Activity) {
+                AppForeground.activityStarted()
                 currentActivity = WeakReference(activity)
             }
 
@@ -27,6 +28,7 @@ object ActivityProvider {
                 // Needed to satisfy Interface, but not used here
             }
             override fun onActivityStopped(activity: Activity) {
+                AppForeground.activityStopped()
                 // Needed to satisfy Interface, but not used here
             }
 

@@ -236,7 +236,6 @@
     <string name="active_time">Active time</string>
     <string name="loading_lifelog">Loading LifeLog from the watch…</string>
     <string name="set_up_watch">Allow connection</string>
-    <string name="allow_connection_info">Turn this on to allow the watch to connect. The switch turns off again after one connection, because this watch tries to connect all the time. To connect, choose Connect from the watch menu. Some watches connect automatically once the switch is on, and that can take a while.</string>
     <string name="card_steps">Steps</string>
     <string name="card_activity">Energy and activity</string>
     <string name="card_heart_rate">Heart rate</string>

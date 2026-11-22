@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.utils.AppForeground
 import org.avmedia.gshockGoogleSync.session.EntryReason
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
@@ -49,18 +51,38 @@ class AppScreenState @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     val state: StateFlow<AppNavigationState> =
-        combine(sessionManager.sessionState, webhookScreenState.open, webhookScreenState.haOpen) { session, webhooksOpen, haOpen ->
-            navigationFor(session, webhooksOpen, haOpen)
+        combine(
+            sessionManager.sessionState, webhookScreenState.open, webhookScreenState.haOpen, AppForeground.inFront
+        ) { session, webhooksOpen, haOpen, inFront ->
+            navigationFor(session, webhooksOpen, haOpen, inFront)
         }
             .distinctUntilChanged()
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
-                navigationFor(sessionManager.sessionState.value, webhookScreenState.open.value, webhookScreenState.haOpen.value)
+                navigationFor(
+                    sessionManager.sessionState.value, webhookScreenState.open.value,
+                    webhookScreenState.haOpen.value, AppForeground.inFront.value
+                )
             )
 
+    init {
+        // An always-connected watch that connects, or is connected, while the app is in front opens the
+        // main screen and stays there (also when the app goes to the background and comes back).
+        scope.launch {
+            combine(sessionManager.sessionState, AppForeground.inFront) { session, inFront ->
+                inFront && (session.phase as? SessionPhase.Ready)?.entryReason == EntryReason.BACKGROUND
+            }.collect { latch -> if (latch) sessionManager.activeSession?.enterMainNavigation() }
+        }
+    }
+
     companion object {
-        internal fun navigationFor(session: SessionState, webhooksOpen: Boolean = false, haOpen: Boolean = false): AppNavigationState =
+        internal fun navigationFor(
+            session: SessionState,
+            webhooksOpen: Boolean = false,
+            haOpen: Boolean = false,
+            appInForeground: Boolean = false
+        ): AppNavigationState =
             if (haOpen) AppNavigationState(AppScreen.HOME_ASSISTANT)
             else if (webhooksOpen) AppNavigationState(AppScreen.WEBHOOKS)
             else when (val phase = session.phase) {
@@ -76,7 +98,8 @@ class AppScreenState @Inject constructor(
                             EntryReason.NORMAL -> AppScreen.MAIN_NAVIGATION
                             EntryReason.CONTENT_SELECTOR -> AppScreen.CONTENT_SELECTOR
                             EntryReason.RUN_ACTIONS -> AppScreen.RUN_ACTIONS
-                            EntryReason.BACKGROUND -> AppScreen.INITIAL
+                            EntryReason.BACKGROUND ->
+                                if (appInForeground) AppScreen.MAIN_NAVIGATION else AppScreen.INITIAL
                         }
                     }
                 )

@@ -1,8 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import org.avmedia.gshockGoogleSync.pairing.AlwaysConnectedPermission
 import kotlinx.coroutines.delay
-import org.avmedia.gshockGoogleSync.session.SetupWindow
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -142,32 +140,6 @@ constructor(
         } catch (e: Exception) {
             hidePreparingUi()
             delegate.onError(appContext.getString(R.string.pairing_failed_generic, e.message ?: "Unknown error"))
-        }
-    }
-
-    /** "Set up watch": the next connection opens the main navigation. */
-    private val _waitingForWatch = MutableStateFlow(false)
-    val waitingForWatch: StateFlow<Boolean> = _waitingForWatch
-
-    /** The switch on an always-connected watch: on allows one connection; off withdraws it. */
-    val grantedAddresses: StateFlow<Set<String>> = AlwaysConnectedPermission.granted
-
-    fun setAllowConnection(address: String, allow: Boolean) {
-        if (allow) {
-            startWatchSetUp(address)
-        } else {
-            AlwaysConnectedPermission.use(address)
-            SetupWindow.cancel(address)
-        }
-    }
-
-    fun startWatchSetUp(address: String) {
-        SetupWindow.open(address)
-        AlwaysConnectedPermission.grant(address)
-        viewModelScope.launch {
-            _waitingForWatch.value = true
-            delay(2 * 60_000L)
-            _waitingForWatch.value = false
         }
     }
 

@@ -2,7 +2,6 @@ package org.avmedia.gshockGoogleSync.ui.others
 
 import android.widget.Toast
 import androidx.compose.ui.unit.Dp
-import AppSwitch
 import AppText
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -85,7 +84,6 @@ import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceHelper
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockGoogleSync.ui.common.AppConnectionSpinner
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
@@ -110,8 +108,6 @@ fun PreConnectionScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val watchName by ptrConnectionViewModel.watchName.collectAsState()
-    val waitingForWatch by ptrConnectionViewModel.waitingForWatch.collectAsState()
-    val granted by ptrConnectionViewModel.grantedAddresses.collectAsState()
     val triggerPairing by ptrConnectionViewModel.triggerPairing.collectAsState()
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
@@ -271,11 +267,6 @@ fun PreConnectionScreen(
                             isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName)
                         )
 
-                        if (waitingForWatch) {
-                            AppConnectionSpinner(
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
 
                         Box(
                             modifier =
@@ -304,10 +295,6 @@ fun PreConnectionScreen(
                                             device.address
                                         )
                                     }
-                                },
-                                grantedAddresses = granted,
-                                onAllowConnection = { device, allow ->
-                                    ptrConnectionViewModel.setAllowConnection(device.address, allow)
                                 },
                                 modifier = Modifier
                                     .padding(4.dp)
@@ -385,8 +372,6 @@ fun PairedDeviceList(
     devices: List<PreConnectionViewModel.DeviceItem>,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
-    grantedAddresses: Set<String>,
-    onAllowConnection: (PreConnectionViewModel.DeviceItem, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -420,13 +405,7 @@ fun PairedDeviceList(
                             Text(
                                 text = device.name,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = if (device.isAlwaysConnected &&
-                                    !grantedAddresses.contains(device.address.uppercase())
-                                ) {
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                } else {
-                                    Color.Unspecified
-                                },
+                                color = Color.Unspecified,
                                 maxLines = 1,
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                 softWrap = false,
@@ -448,24 +427,6 @@ fun PairedDeviceList(
                             }
                         }
 
-                        if (device.isAlwaysConnected) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Indented to line up with the watch name above (after the 48 dp remove button)
-                                Spacer(modifier = Modifier.width(52.dp))
-                                AppSwitch(
-                                    checked = grantedAddresses.contains(device.address.uppercase()),
-                                    onCheckedChange = { onAllowConnection(device, it) }
-                                )
-                                InfoButton(
-                                    infoText = stringResource(R.string.allow_connection_info),
-                                    iconSize = 24.dp,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
 
 
                     }
