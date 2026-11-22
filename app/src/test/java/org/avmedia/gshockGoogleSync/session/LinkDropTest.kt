@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -23,7 +23,7 @@ import org.junit.Test
 /** The H5600 drops its link about every 45 s; a drop must not end the visit (owner, 2026-11-22). */
 @OptIn(ExperimentalCoroutinesApi::class)
 class LinkDropTest {
-    private val dispatcher = StandardTestDispatcher()
+    private val dispatcher = UnconfinedTestDispatcher()
     private val watch = mockk<BluetoothDevice> { every { address } returns "AA:BB" }
     private val other = mockk<BluetoothDevice> { every { address } returns "CC:DD" }
 
