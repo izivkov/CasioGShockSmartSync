@@ -215,10 +215,13 @@ class TimeViewModel @Inject constructor(
     }
 
     private fun refreshState() {
-        viewModelScope.launch { readState() }
+        // Automatic refresh (screen opened, event): a failed read keeps the old values and is only logged.
+        // The Home Assistant push reads the watch at the same moment as this screen, and a read that
+        // loses that race is not an error the owner can act on. The Send button still reports its own errors.
+        viewModelScope.launch { readState(silent = true) }
     }
 
-    private suspend fun readState() {
+    private suspend fun readState(silent: Boolean = false) {
         runCatching {
             timeSettingsStorage.load()
             val option = timeSettingsStorage.getTimeZoneOption()
@@ -247,7 +250,7 @@ class TimeViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            AppSnackbar("Api Error")
+            if (silent) timber.log.Timber.w(it, "Time screen refresh failed") else AppSnackbar("Api Error")
         }
     }
 }
