@@ -118,6 +118,10 @@ fun WebhooksScreen(
                         buttons = listOf(
                             ButtonData(stringResource(R.string.webhook_back), onBack),
                             ButtonData("Probe watch", { showProbe = true }),
+                            ButtonData("Send log", {
+                                val n = viewModel.sendLogToWebhooks()
+                                AppSnackbar(if (n == 0) "No enabled POST/PUT webhook to send to" else "Log queued for $n webhook(s)")
+                            }),
                             ButtonData(stringResource(R.string.webhook_add), { editing = Webhook.newDefault() }),
                         )
                     )
