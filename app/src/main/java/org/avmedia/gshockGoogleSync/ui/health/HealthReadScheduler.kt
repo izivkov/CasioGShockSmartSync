@@ -58,7 +58,7 @@ class HealthReadScheduler(
         ): Boolean = (haConfigured && haOn && haHealthGroupOn) || (webhooksOn && healthHookEnabled)
 
 
-        const val INTERVAL_MS = 2 * 60 * 60_000L
+        const val INTERVAL_MS = 30 * 60_000L
         const val RETRY_MS = 5 * 60_000L
     }
 }
