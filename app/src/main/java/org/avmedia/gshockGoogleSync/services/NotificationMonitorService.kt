@@ -9,7 +9,10 @@ import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dagger.hilt.android.AndroidEntryPoint
+import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationPolicy
+import org.avmedia.gshockGoogleSync.notifications.PostedNotification
 import org.avmedia.gshockGoogleSync.session.SessionManager
+import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.NotificationType
 import org.avmedia.gshockapi.ProgressEvents
@@ -48,6 +51,9 @@ class NotificationMonitorService : NotificationListenerService() {
         // Forward notifications only while a watch session is Ready. Read from the Session at the
         // moment of use, so a recreated service instance cannot miss a connection event.
         if (!sessionManager.isReady) return
+        // Off by default; when on, only the apps the person chose and only real, audible notifications.
+        val posted = PostedNotification(sbn.packageName, sbn.notification.flags, importanceOf(sbn))
+        if (!WebhookStorage.phoneNotifications(applicationContext).allows(posted, packageName)) return
 
         processNotification(sbn)
             .onSuccess { notificationInfo ->
@@ -60,6 +66,12 @@ class NotificationMonitorService : NotificationListenerService() {
             .onFailure { error ->
                 Timber.e(error, "Error processing notification")
             }
+    }
+
+    private fun importanceOf(sbn: StatusBarNotification): Int = try {
+        Ranking().let { r -> if (currentRanking.getRanking(sbn.key, r)) r.importance else PhoneNotificationPolicy.IMPORTANCE_UNKNOWN }
+    } catch (t: Throwable) {
+        PhoneNotificationPolicy.IMPORTANCE_UNKNOWN
     }
 
     private fun processNotification(sbn: StatusBarNotification): Result<NotificationInfo> =

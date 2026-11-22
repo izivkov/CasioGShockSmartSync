@@ -79,6 +79,7 @@ fun SettingsList() {
         WatchFeature(id = "time_adjustment_card") {
             TimeAdjustment(settingsViewModel::onSettingUpdated)
         }
+        PhoneNotificationsCard()
     }
 }
 
