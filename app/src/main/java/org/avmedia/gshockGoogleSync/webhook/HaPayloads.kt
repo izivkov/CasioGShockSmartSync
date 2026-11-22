@@ -47,7 +47,7 @@ object HaPayloads {
             "data" to linkedMapOf<String, Any?>(
                 "unique_id" to s.uniqueId,
                 "name" to s.name,
-                "type" to "sensor",
+                "type" to s.kind,
                 "device_class" to s.deviceClass,
                 "unit_of_measurement" to s.unit,
                 "state_class" to s.stateClass,
@@ -68,9 +68,9 @@ object HaPayloads {
             linkedMapOf<String, Any?>(
                 "unique_id" to id,
                 "state" to state,
-                "type" to "sensor",
+                "type" to (byId[id]?.kind ?: "sensor"),
                 "icon" to byId[id]?.icon,
-                
+                "attributes" to attributes[id]?.takeIf { it.isNotEmpty() },
             ).filterValues { it != null }
         }
         return gson.toJson(linkedMapOf("type" to "update_sensor_states", "data" to data))

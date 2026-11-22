@@ -78,7 +78,7 @@ object HaSensors {
 
     private fun convert(s: HaSensor, v: Any, zone: ZoneId): Any? = when (s.convert) {
         Convert.NONE -> v
-        Convert.SECONDS_TO_MINUTES -> (v as? Number)?.toLong()
+        Convert.SECONDS_TO_MINUTES -> (v as? Number)?.let { it.toLong() / 60 }
         Convert.LOCAL_TO_OFFSET -> (v as? String)?.let {
             runCatching { LocalDateTime.parse(it).atZone(zone).toOffsetDateTime().toString() }.getOrNull()
         }
@@ -91,7 +91,7 @@ object HaSensors {
         zone: ZoneId = ZoneId.systemDefault(),
     ): Map<String, Any> =
         sensors.mapNotNull { s ->
-            (usable(values[s.variable]) ?: if (s.uniqueId == "step_goal") 0 else null)?.let { convert(s, it, zone) }?.let { s.uniqueId to it }
+            usable(values[s.variable])?.let { convert(s, it, zone) }?.let { s.uniqueId to it }
         }.toMap()
 
     /** Attribute maps by sensor id, for sensors that have attributes with a value. Unknown values are left out. */
