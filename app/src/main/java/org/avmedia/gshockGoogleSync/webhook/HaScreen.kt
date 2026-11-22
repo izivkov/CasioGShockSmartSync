@@ -27,8 +27,16 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
     val form by viewModel.form.collectAsState()
     val status by viewModel.status.collectAsState()
+    val actions by viewModel.actions.collectAsState()
+    val chosen by viewModel.chosen.collectAsState()
+    val actionStatus by viewModel.actionStatus.collectAsState()
     HaScreenContent(
         form = form,
+        actions = actions,
+        chosen = chosen,
+        actionStatus = actionStatus,
+        onChoose = viewModel::choose,
+        onRefreshActions = viewModel::refreshActions,
         status = status,
         onBack = onBack,
         onForget = viewModel::forget,
@@ -44,6 +52,12 @@ internal fun HaScreenContent(
     onBack: () -> Unit,
     onForget: () -> Unit,
     onSave: (url: String, token: String, deviceName: String, model: String) -> Unit,
+    actions: List<HaAction> = emptyList(),
+    chosen: HaAction? = null,
+    actionStatus: String = "",
+    onChoose: (HaAction?) -> Unit = {},
+    onRefreshActions: () -> Unit = {},
+    pickerOpen: Boolean = false,
 ) {
     var url by remember { mutableStateOf(form.baseUrl) }
     var token by remember { mutableStateOf(form.token) }
@@ -95,6 +109,7 @@ internal fun HaScreenContent(
             )
             AppText(text = if (saved) "Saved: each watch registers itself when it connects" else "Not set up", fontSize = 14.sp)
             if (status.isNotBlank()) AppText(text = status, fontSize = 14.sp)
+            if (saved) HaActionPicker(actions, chosen, actionStatus, onChoose, onRefreshActions, pickerOpen)
         }
         ButtonsRow(
             buttons = listOf(

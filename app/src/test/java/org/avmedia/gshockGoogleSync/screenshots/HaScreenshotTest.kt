@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.screenshots
 
 import androidx.compose.runtime.Composable
+import org.avmedia.gshockGoogleSync.webhook.HaAction
 import org.avmedia.gshockGoogleSync.webhook.HaConfig
 import org.avmedia.gshockGoogleSync.webhook.HaScreenContent
 import org.junit.Test
@@ -16,8 +17,18 @@ class HaScreenshotTest : ScreenshotTest() {
     )
 
     @Composable
-    private fun Screen(form: HaConfig, status: String) =
-        HaScreenContent(form = form, status = status, onBack = {}, onForget = {}, onSave = { _, _, _, _ -> })
+    private fun Screen(form: HaConfig, status: String, picker: Boolean = false) =
+        HaScreenContent(
+            form = form, status = status, onBack = {}, onForget = {}, onSave = { _, _, _, _ -> },
+            actions = listOf(
+                HaAction("automation", "automation.goodnight", "Goodnight"),
+                HaAction("script", "script.bedtime", "Bedtime"),
+                HaAction("scene", "scene.movie", "Movie night"),
+            ),
+            chosen = if (picker) null else HaAction("automation", "automation.goodnight", "Goodnight"),
+            actionStatus = if (picker) "" else "Ran Goodnight at 22:14",
+            pickerOpen = picker,
+        )
 
     @Test fun notSetUpLight() = snap("ha_not_set_up", false) { Screen(HaConfig(), "") }
     @Test fun notSetUpDark() = snap("ha_not_set_up", true) { Screen(HaConfig(), "") }
@@ -25,4 +36,6 @@ class HaScreenshotTest : ScreenshotTest() {
     @Test fun workingDark() = snap("ha_working", true) { Screen(configured, "Registered 1 watch, 12 sensors updated") }
     @Test fun errorLight() = snap("ha_error", false) { Screen(configured, "Failed: HTTP 401 Unauthorized (check the token)") }
     @Test fun errorDark() = snap("ha_error", true) { Screen(configured, "Failed: HTTP 401 Unauthorized (check the token)") }
+    @Test fun pickerOpenLight() = snap("ha_picker", false) { Screen(configured, "", picker = true) }
+    @Test fun pickerOpenDark() = snap("ha_picker", true) { Screen(configured, "", picker = true) }
 }

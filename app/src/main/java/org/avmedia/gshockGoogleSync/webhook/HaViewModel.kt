@@ -25,6 +25,33 @@ class HaViewModel @Inject constructor(
     private val _status = MutableStateFlow(store.lastResult().orEmpty())
     val status: StateFlow<String> = _status
 
+    private val _actions = MutableStateFlow<List<HaAction>>(emptyList())
+    val actions: StateFlow<List<HaAction>> = _actions
+
+    private val _chosen = MutableStateFlow(store.loadAction())
+    val chosen: StateFlow<HaAction?> = _chosen
+
+    private val _actionStatus = MutableStateFlow(store.lastActionResult().orEmpty())
+    val actionStatus: StateFlow<String> = _actionStatus
+
+    init { if (store.load() != null) refreshActions() }
+
+    /** Reloads the automations, scripts and scenes from HA. */
+    fun refreshActions() {
+        _actionStatus.value = "Loading..."
+        viewModelScope.launch {
+            val list = withContext(Dispatchers.IO) { HaActionRunner(HaOkHttpTransport, store).fetch() }
+            _actions.value = list.items
+            _actionStatus.value = list.error ?: store.lastActionResult().orEmpty()
+        }
+    }
+
+    /** Null = "Nothing (only the gshock_button event)". */
+    fun choose(action: HaAction?) {
+        store.saveAction(action)
+        _chosen.value = action
+    }
+
     val saved: Boolean get() = store.load() != null
 
     fun save(baseUrl: String, token: String, deviceName: String, model: String) {
@@ -39,6 +66,9 @@ class HaViewModel @Inject constructor(
     fun forget() {
         store.forgetAll()
         _form.value = store.loadForm()
+        _chosen.value = null
+        _actions.value = emptyList()
+        _actionStatus.value = ""
         _status.value = "Forgotten. The devices stay in Home Assistant until you delete them there."
     }
 }

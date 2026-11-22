@@ -53,11 +53,11 @@ class HaActionTest {
     fun statesParseIntoTheThreeKindsByFriendlyName() {
         val items = HaAction.parseStates(STATES)
         assertEquals(
-            listOf("automation.goodnight", "automation.noname", "script.bedtime", "scene.movie"),
+            listOf("automation.noname", "automation.goodnight", "script.bedtime", "scene.movie"),
             items.map { it.entityId },
         )
-        assertEquals("Goodnight", items[0].name)
-        assertEquals("automation.noname", items[1].name)
+        assertEquals("automation.noname", items[0].name)
+        assertEquals("Goodnight", items[1].name)
         assertTrue(items.none { it.entityId.startsWith("light.") })
     }
 
@@ -83,7 +83,7 @@ class HaActionTest {
         val (_, runner) = setup(ActTransport(states = HaResponse(401, "")), null)
         val list = runner.fetch()
         assertTrue(list.items.isEmpty())
-        assertTrue(list.error!!, list.error!!.contains("token"))
+        assertTrue(list.error, list.error!!.contains("token"))
     }
 
     @Test
