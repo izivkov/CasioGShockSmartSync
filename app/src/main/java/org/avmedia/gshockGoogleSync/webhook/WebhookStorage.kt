@@ -17,8 +17,9 @@ object WebhookStorage {
 
     internal class LocalKeyValueStore(private val context: Context) : KeyValueStore {
         override fun get(key: String): String? = LocalDataStorage.get(context, key)
-        override fun put(key: String, value: String) = LocalDataStorage.put(context, key, value)
-        override fun delete(key: String) = LocalDataStorage.delete(context, key)
+        // Wait for each write: the fire-and-forget put/delete can land out of order (see StorageOrderTest).
+        override fun put(key: String, value: String) = kotlinx.coroutines.runBlocking { LocalDataStorage.putAndWait(context, key, value) }
+        override fun delete(key: String) = kotlinx.coroutines.runBlocking { LocalDataStorage.deleteAsync(context, key) }
     }
 
     @Volatile
