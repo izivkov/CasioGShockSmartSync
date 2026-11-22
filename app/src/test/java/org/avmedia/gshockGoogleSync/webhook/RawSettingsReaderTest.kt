@@ -58,6 +58,20 @@ class RawSettingsReaderTest {
     }
 
     @Test
+    fun aCodeThatWasWrittenIsReadAgainAtOnceAndOnlyThatOne() = runBlocking {
+        val fake = Fake { ok(it) }
+        val reader = RawSettingsReader(clock = { 1000L })
+        reader.refresh(fake)
+        val first = fake.asked.size
+        reader.forget(0x4F)
+        assertNull(reader.values()["0x4F"])
+        reader.refresh(fake)
+        assertEquals(first + 1, fake.asked.size)
+        assertEquals(0x4F, fake.asked.last())
+        assertEquals("4F 01 02", reader.values()["0x4F"])
+    }
+
+    @Test
     fun nothingIsReadWhileTheLifeLogRuns() = runBlocking {
         val fake = Fake { ok(it) }
         val reader = RawSettingsReader(busy = { true })

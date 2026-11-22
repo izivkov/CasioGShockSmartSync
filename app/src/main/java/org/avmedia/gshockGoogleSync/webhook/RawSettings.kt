@@ -32,7 +32,7 @@ class RawSettingsReader(
     private val busy: () -> Boolean = { false },
     private val intervalMs: Long = 30 * 60 * 1000L,
 ) {
-    private val attempted = HashMap<Int, Long>()
+    private val attempted = java.util.concurrent.ConcurrentHashMap<Int, Long>()
     private val hex = LinkedHashMap<String, String>()
     private var lastRead: Long? = null
 
@@ -59,6 +59,14 @@ class RawSettingsReader(
             } catch (t: Throwable) {
                 synchronized(hex) { hex.remove(RawSettings.name(code)) }
             }
+        }
+    }
+
+    /** After a write: the next refresh reads [code] again instead of waiting for the interval. */
+    fun forget(code: Int) {
+        synchronized(hex) {
+            attempted.remove(code)
+            hex.remove(RawSettings.name(code))
         }
     }
 

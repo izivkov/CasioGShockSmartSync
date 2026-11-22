@@ -15,9 +15,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthLinks
+import org.avmedia.gshockGoogleSync.ui.watchhealth.isH5600Watch
 
 @Composable
-fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
+fun TimeScreen(
+    timeViewModel: TimeViewModel = hiltViewModel(),
+    onOpenWatchFace: () -> Unit = {},
+    onOpenWatchHealth: () -> Unit = {},
+) {
 
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -38,6 +44,10 @@ fun TimeScreen(timeViewModel: TimeViewModel = hiltViewModel()) {
                         Modifier
                             .fillMaxWidth()
                 )
+
+                if (isH5600Watch()) {
+                    WatchHealthLinks(onOpenWatchFace, onOpenWatchHealth)
+                }
 
                 WatchNameView(
                     modifier =

@@ -24,12 +24,16 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
 import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthLinks
+import org.avmedia.gshockGoogleSync.ui.watchhealth.isH5600Watch
 
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
     onOpenWebhooks: () -> Unit = {},
     onOpenHa: () -> Unit = {},
+    onOpenWatchFace: () -> Unit = {},
+    onOpenWatchHealth: () -> Unit = {},
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
     val isModified by actionsViewModel.isModified.collectAsState()
@@ -46,7 +50,9 @@ fun ActionsScreen(
                     modifier = Modifier.weight(1f),
                     actionsViewModel = actionsViewModel,
                     onOpenWebhooks = onOpenWebhooks,
-                    onOpenHa = onOpenHa
+                    onOpenHa = onOpenHa,
+                    onOpenWatchFace = onOpenWatchFace,
+                    onOpenWatchHealth = onOpenWatchHealth,
                 )
 
                 ButtonsRow(
@@ -70,6 +76,8 @@ private fun ActionsContent(
     actionsViewModel: ActionsViewModel,
     onOpenWebhooks: () -> Unit,
     onOpenHa: () -> Unit,
+    onOpenWatchFace: () -> Unit,
+    onOpenWatchHealth: () -> Unit,
 ) {
     Column(
         modifier =
@@ -77,11 +85,17 @@ private fun ActionsContent(
                 .verticalScroll(rememberScrollState())
                 .padding(0.dp)
                 .fillMaxWidth()
-    ) { ItemList(items = createActionItems(actionsViewModel, onOpenWebhooks, onOpenHa)) }
+    ) { ItemList(items = createActionItems(actionsViewModel, onOpenWebhooks, onOpenHa, onOpenWatchFace, onOpenWatchHealth)) }
 }
 
 @Composable
-private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks: () -> Unit, onOpenHa: () -> Unit): List<Any> {
+private fun createActionItems(
+    actionsViewModel: ActionsViewModel,
+    onOpenWebhooks: () -> Unit,
+    onOpenHa: () -> Unit,
+    onOpenWatchFace: () -> Unit,
+    onOpenWatchHealth: () -> Unit,
+): List<Any> {
     val watchFeatureManager = LocalWatchFeatureManager.current
 
     return listOfNotNull(
@@ -127,6 +141,7 @@ private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks
         ),
         ServiceToggleRow(ServiceToggles.Service.WEBHOOKS, R.string.webhooks, R.drawable.ic_webhook, onOpenWebhooks),
         ServiceToggleRow(ServiceToggles.Service.HOME_ASSISTANT, R.string.home_assistant, R.drawable.ic_home_assistant, onOpenHa),
+        if (isH5600Watch()) WatchHealthLinks(onOpenWatchFace, onOpenWatchHealth) else null,
         SeparatorView(),
         PhoneView(actionsViewModel)
     )

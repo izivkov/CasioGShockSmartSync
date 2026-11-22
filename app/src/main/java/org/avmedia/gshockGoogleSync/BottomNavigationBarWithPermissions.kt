@@ -44,6 +44,8 @@ import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
 import org.avmedia.gshockGoogleSync.ui.health.HealthScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchFaceScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthSettingsScreen
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
@@ -150,7 +152,10 @@ fun BottomNavigationBarWithPermissions(
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Time.route) {
-                TimeScreen()
+                TimeScreen(
+                    onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
+                    onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
+                )
             }
             composable(Screens.Health.route) {
                 HealthScreen()
@@ -183,7 +188,12 @@ fun BottomNavigationBarWithPermissions(
                     permissions,
                     navController,
                     destinationScreen = {
-                        ActionsScreen(onOpenWebhooks = onOpenWebhooks, onOpenHa = onOpenHa)
+                        ActionsScreen(
+                            onOpenWebhooks = onOpenWebhooks,
+                            onOpenHa = onOpenHa,
+                            onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
+                            onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
+                        )
                     },
                     stringResource(
                         R.string.required_permissions_denied_cannot_access_actions
@@ -192,6 +202,12 @@ fun BottomNavigationBarWithPermissions(
             }
             composable(Screens.Settings.route) {
                 SettingsScreen()
+            }
+            composable(Screens.WatchFace.route) {
+                WatchFaceScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.WatchHealth.route) {
+                WatchHealthSettingsScreen(onBack = { navController.popBackStack() })
             }
         }
     }
