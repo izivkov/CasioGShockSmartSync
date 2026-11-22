@@ -208,6 +208,10 @@ interface IGShockAPI {
      */
     suspend fun getAlarms(): ArrayList<Alarm>
 
+    /** DW-H5600 smart alarm slot (0x50). */
+    suspend fun getH5600SmartAlarm(): org.avmedia.gshockapi.model.SmartAlarm? = null
+    suspend fun setH5600SmartAlarm(alarm: org.avmedia.gshockapi.model.SmartAlarm) {}
+
     /**
      * Updates the alarms on the watch.
      *

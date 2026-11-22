@@ -77,6 +77,9 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
             ) {
+                if (org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600) {
+                    SmartAlarmCard()
+                }
                 AlarmList()
                 AlarmChimeSwitch(
                     onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }

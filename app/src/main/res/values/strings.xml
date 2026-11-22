@@ -247,4 +247,7 @@
     <string name="watch_face">Watch face</string>
     <string name="watch_face_item">Display item (face 2)</string>
     <string name="done">Done</string>
+    <string name="smart_alarm">Smart alarm</string>
+    <string name="smart_alarm_save">Save</string>
+    <string name="smart_alarm_cancel">Cancel</string>
 </resources>

@@ -577,6 +577,11 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      * @return [org.avmedia.gshockapi.model.Settings]
      */
 
+    override suspend fun getH5600SmartAlarm(): org.avmedia.gshockapi.model.SmartAlarm? = H5600SettingsIO.getSmartAlarm()
+
+    override suspend fun setH5600SmartAlarm(alarm: org.avmedia.gshockapi.model.SmartAlarm) =
+        H5600SettingsIO.setSmartAlarm(alarm)
+
     override suspend fun getWatchFaceItem(): WatchFaceItem? = H5600SettingsIO.getWatchFaceItem()
 
     override suspend fun setWatchFaceItem(item: WatchFaceItem): WatchFaceItem? = H5600SettingsIO.setWatchFaceItem(item)

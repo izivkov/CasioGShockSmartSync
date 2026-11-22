@@ -550,6 +550,13 @@ constructor(
                         ) {
                             lastSet = System.currentTimeMillis()
                         }
+                        // DW-H5600: setting prayer alarms turns the smart alarm on, with snooze off.
+                        if (org.avmedia.gshockapi.WatchInfo.model == org.avmedia.gshockapi.WatchInfo.WatchModel.DW_H5600) {
+                            runCatching { api.getH5600SmartAlarm() }.getOrNull()?.let { smart ->
+                                runCatching { api.setH5600SmartAlarm(smart.copy(enabled = true, snooze = false)) }
+                                    .onFailure { Timber.w(it, "Could not update the smart alarm") }
+                            }
+                        }
                     }
                     .onFailure { error ->
                         Timber.e("Could not set prayer alarms: ${error.message}")
