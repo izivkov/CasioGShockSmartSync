@@ -62,7 +62,10 @@ fun SettingsScreen(
 }
 
 @Composable
-fun SettingsList(onOpenWatchFace, onOpenWatchHealth) {
+fun SettingsList(
+    onOpenWatchFace: () -> Unit = {},
+    onOpenWatchHealth: () -> Unit = {},
+) {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     Column {
