@@ -3,6 +3,7 @@ package org.avmedia.gshockGoogleSync.session
 import android.bluetooth.BluetoothDevice
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,17 +18,37 @@ class SessionEventBridge @Inject constructor(
 ) {
     private var subscription: AutoCloseable? = null
 
+    /**
+     * The library has just resolved the model from the exact name. H5600 watches the library maps to
+     * the wrong model (GBX-H5600 -> GBD) are re-resolved as DW-H5600 (always connected); the real
+     * name stays in [WatchModelOverride.realName] and in the session.
+     */
+    private fun onDeviceName(name: String) {
+        val real = WatchModelOverride.realName
+        if (real != null && name == WatchModelOverride.ALIAS) return // echo of our own re-resolve
+
+        val libraryName = WatchModelOverride.effectiveLibraryName(name)
+        if (libraryName != name && real != name) {
+            Timber.i("Re-resolving '$name' as '$libraryName' (always-connected H5600 platform)")
+            WatchModelOverride.realName = name
+            WatchInfo.setNameAndModel(libraryName) // emits an echo "DeviceName" with the alias
+            ProgressEvents.onNext("DeviceName", name) // put the real name back for the other listeners
+        }
+        sessionManager.onDeviceName(name)
+    }
+
     fun setupEventBridge() {
         if (subscription != null) return
         Timber.i("Setting up SessionEventBridge")
         val eventActions = arrayOf(
             EventAction("ConnectionStarted") {
+                WatchModelOverride.realName = null
                 sessionManager.onConnecting()
             },
             EventAction("DeviceName") {
                 (ProgressEvents.getPayload("DeviceName") as? String)
                     ?.takeIf { it.isNotBlank() }
-                    ?.let(sessionManager::onDeviceName)
+                    ?.let(::onDeviceName)
             },
             EventAction("DeviceAddress") {
                 (ProgressEvents.getPayload("DeviceAddress") as? String)

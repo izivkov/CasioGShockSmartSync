@@ -17,6 +17,7 @@ import org.avmedia.gshockGoogleSync.session.ConnectionButton
 import org.avmedia.gshockGoogleSync.session.Session
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
+import org.avmedia.gshockGoogleSync.webhook.WebhookDispatcher
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +26,8 @@ import javax.inject.Singleton
 class ActionRunner @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sessionManager: SessionManager,
-    private val actionContainer: ActionContainer
+    private val actionContainer: ActionContainer,
+    private val webhookDispatcher: WebhookDispatcher
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -45,6 +47,9 @@ class ActionRunner @Inject constructor(
     private suspend fun runActionsWhenReady(session: Session) {
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
         if (state.phase !is SessionPhase.Ready) return
+
+        // Webhooks with the trigger "after each connection/sync" (their own minimum interval applies).
+        webhookDispatcher.onSync()
 
         when (state.button) {
             ConnectionButton.FROM_ACTION -> actionContainer.runActionsForActionButton(context)

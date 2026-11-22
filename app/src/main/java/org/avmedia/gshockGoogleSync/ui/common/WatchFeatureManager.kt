@@ -7,6 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
@@ -124,7 +125,7 @@ class WatchFeatureManager @Inject constructor(
 
     override fun getWatchName(): String {
         refreshCounter.intValue // Observe for recomposition
-        return WatchInfo.name
+        return WatchModelOverride.displayName(WatchInfo.name)
     }
 
     override fun getAlarmCount(): Int {

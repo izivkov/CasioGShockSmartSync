@@ -1,0 +1,59 @@
+name: Test APK (webhook)
+
+on:
+  push:
+    branches: [webhook]
+  workflow_dispatch:
+
+concurrency:
+  group: test-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Unit tests
+        run: ./gradlew testGithubDebugUnitTest
+
+      - name: Build debug APK
+        run: ./gradlew assembleGithubDebug
+
+      - name: Check the APK signing certificate (updates need the same key every time)
+        env:
+          EXPECTED_SHA256: "DE:AD:72:F3:C8:FF:93:92:A4:8A:D9:40:E6:3E:AE:7D:49:DA:9B:03:ED:E3:08:15:76:E9:81:4B:6B:55:AB:3D"
+        run: |
+          APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
+          APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
+          $APKSIGNER verify --print-certs "$APK" | tee signer.txt
+          GOT=$(grep -i "certificate SHA-256 digest" signer.txt | head -1 | sed 's/.*: *//' | tr -d ': ' | tr 'A-F' 'a-f')
+          echo "APK certificate SHA-256: $GOT"
+          WANT=$(echo "$EXPECTED_SHA256" | tr -d ':' | tr 'A-F' 'a-f')
+          if [ "$GOT" != "$WANT" ]; then echo "Signing certificate differs from the expected one ($WANT)"; exit 1; fi
+
+      - name: Diagnose runtime classpath and dex (classes missing on the device)
+        if: always()
+        run: |
+          ./gradlew app:dependencies --configuration githubDebugRuntimeClasspath > runtime-classpath.txt || true
+          grep -E "okhttp|okio|gson|work-runtime|GShockAPI|kotlinx-coroutines|kotlin-stdlib" runtime-classpath.txt | sort -u | head -40 || true
+          DEXDUMP=$(ls $ANDROID_HOME/build-tools/*/dexdump | tail -1)
+          APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
+          API=$(ls $ANDROID_HOME/platforms/*/data/api-versions.xml | tail -1)
+          python3 .github/scripts/dex_missing_refs.py "$APK" "$DEXDUMP" "$API" | tee dex-missing.txt || true
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartsync-webhook-test
+          path: app/build/outputs/apk/github/debug/*.apk
+          if-no-files-found: error

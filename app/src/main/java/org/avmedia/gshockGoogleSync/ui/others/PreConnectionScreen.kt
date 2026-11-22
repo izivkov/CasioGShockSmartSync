@@ -78,6 +78,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceHelper
@@ -103,6 +104,7 @@ private const val GUIDELINE_LIST_TOP = 0.82f
 @Composable
 fun PreConnectionScreen(
     ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
+    onOpenWebhooks: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -258,14 +260,14 @@ fun PreConnectionScreen(
                                     "GW" in watchName || "GMW" in watchName ->
                                         R.drawable.gw_b5600
 
-                                    "DW-H5600" in watchName -> R.drawable.dw_h5600
+                                    "H5600" in watchName -> R.drawable.dw_h5600
                                     "DW" in watchName || "DMW" in watchName ->
                                         R.drawable.dw_b5600
 
                                     "ECB" in watchName -> R.drawable.ecb_30d
                                     else -> R.drawable.gw_b5600
                                 },
-                            isAlwaysConnected = "DW-H5600" in watchName || "ECB" in watchName
+                            isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName)
                         )
 
                         if (waitingForWatch) {
@@ -310,6 +312,16 @@ fun PreConnectionScreen(
                                     .padding(4.dp)
                                     .fillMaxWidth()
                             )
+                        }
+
+                        // Works without a watch: the Webhooks screen and its Test button.
+                        androidx.compose.material3.TextButton(
+                            onClick = onOpenWebhooks,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(top = 24.dp, start = 16.dp)
+                        ) {
+                            androidx.compose.material3.Text(stringResource(R.string.webhooks))
                         }
 
                         Box(

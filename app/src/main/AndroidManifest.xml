@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <permission
-        android:name="com.your.package.RECEIVE_BOOT_COMPLETED"
+        android:name="${applicationId}.RECEIVE_BOOT_COMPLETED"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -123,7 +123,7 @@
             android:name=".services.BootReceiver"
             android:enabled="true"
             android:exported="true"
-            android:permission="org.avmedia.gshockGoogleSync.RECEIVE_BOOT_COMPLETED">
+            android:permission="${applicationId}.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

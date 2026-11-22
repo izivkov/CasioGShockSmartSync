@@ -27,6 +27,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
+    onOpenWebhooks: () -> Unit = {},
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
     val isModified by actionsViewModel.isModified.collectAsState()
@@ -41,7 +42,8 @@ fun ActionsScreen(
 
                 ActionsContent(
                     modifier = Modifier.weight(1f),
-                    actionsViewModel = actionsViewModel
+                    actionsViewModel = actionsViewModel,
+                    onOpenWebhooks = onOpenWebhooks
                 )
 
                 ButtonsRow(
@@ -60,18 +62,22 @@ fun ActionsScreen(
 }
 
 @Composable
-private fun ActionsContent(modifier: Modifier = Modifier, actionsViewModel: ActionsViewModel) {
+private fun ActionsContent(
+    modifier: Modifier = Modifier,
+    actionsViewModel: ActionsViewModel,
+    onOpenWebhooks: () -> Unit,
+) {
     Column(
         modifier =
             modifier
                 .verticalScroll(rememberScrollState())
                 .padding(0.dp)
                 .fillMaxWidth()
-    ) { ItemList(items = createActionItems(actionsViewModel)) }
+    ) { ItemList(items = createActionItems(actionsViewModel, onOpenWebhooks)) }
 }
 
 @Composable
-private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
+private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks: () -> Unit): List<Any> {
     val watchFeatureManager = LocalWatchFeatureManager.current
 
     return listOfNotNull(
@@ -115,6 +121,14 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
             R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
             infoRes = R.string.prayer_times_info
         ),
+        ToggleActionView(
+            ActionContainer.WebhookAction::class.java,
+            R.string.call_webhooks, R.drawable.generic_action_item, actionsViewModel,
+            infoRes = R.string.call_webhooks_info
+        ),
+        androidx.compose.material3.TextButton(onClick = onOpenWebhooks) {
+            androidx.compose.material3.Text(stringResource(id = R.string.manage_webhooks))
+        },
         SeparatorView(),
         PhoneView(actionsViewModel)
     )
