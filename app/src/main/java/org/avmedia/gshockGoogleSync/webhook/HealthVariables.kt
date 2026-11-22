@@ -52,7 +52,7 @@ object HealthVariables {
         }
         return linkedMapOf(
             "health.steps_today" to data?.currentDaySteps,
-            "health.recorded_at" to data?.timestamp?.toString(),
+            "health.recorded_at" to data?.timestamp?.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             "health.kcal_today" to h?.energyKcal,
             "health.hr_rest" to hr?.restingBpm,
             "health.hr_min" to hr?.minBpm,
