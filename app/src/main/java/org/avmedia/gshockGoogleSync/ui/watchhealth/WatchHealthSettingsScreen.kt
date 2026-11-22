@@ -42,6 +42,8 @@ internal sealed class Editing {
     data object MaxHr : Editing()
     data object RestingHr : Editing()
     data object Vo2 : Editing()
+    data object AlarmTime : Editing()
+    data object AlarmWindow : Editing()
 }
 
 private val HEART_RATE_MODES = listOf("Off", "Only during activities", "Always")
@@ -83,16 +85,13 @@ internal fun WatchHealthSettingsContent(
                         title = "Length unit",
                         value = basic?.unit?.label ?: "-",
                         enabled = can && basic != null,
-                        note = "Check on the watch: which value shows miles is likely, not confirmed",
                     ) { editing = Editing.LengthUnit }
                     ValueRow("Step goal", ui.stepGoal?.toString() ?: "-", can && ui.stepGoal != null) { editing = Editing.StepGoal }
                     val alarm = ui.alarm
-                    ValueRow(
-                        title = "Smart alarm",
-                        value = alarm?.let { "${hhmm(it.hour to it.minute)} ${if (it.on) "on" else "off"}, ${it.windowMinutes} min" } ?: "-",
-                        enabled = false,
-                        note = "Read only, $NOT_CONFIRMED",
-                    )
+                    ValueRow("Smart alarm time", alarm?.let { hhmm(it.hour to it.minute) } ?: "-", can && alarm != null) { editing = Editing.AlarmTime }
+                    SwitchRow("Smart alarm on", alarm?.on ?: false, can && alarm != null) { viewModel.setAlarmOn(it) }
+                    SwitchRow("Smart alarm snooze", alarm?.snooze ?: false, can && alarm != null && alarm.on) { viewModel.setAlarmSnooze(it) }
+                    ValueRow("Smart alarm wake window", alarm?.let { "${it.windowMinutes} min" } ?: "-", can && alarm != null) { editing = Editing.AlarmWindow }
                     val text = if (ui.working) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
                 }
@@ -120,7 +119,6 @@ private fun EditDialogs(
     val basic = ui.basic
     val profile = ui.profile
     val body = ui.body
-    val unit = ui.basic?.unit ?: LengthUnit.KM
     when (editing) {
         Editing.HeartRate ->
             if (hr != null) {
@@ -149,15 +147,20 @@ private fun EditDialogs(
             }
         Editing.Height ->
             if (profile != null) {
-                val r = BodyUnits.heightRange(unit)
-                NumberDialog("Height, ${if (unit == LengthUnit.MILES) "in" else "cm"}", BodyUnits.heightShown(profile.heightCm, unit), r, { v -> close(); viewModel.setHeightAndWeight(BodyUnits.heightStored(v, unit), profile.weightKg) }, close)
+                NumberDialog("Height, ${BodyUnits.heightUnit(profile)}", profile.height, BodyUnits.heightRange(profile), { v -> close(); viewModel.setHeightAndWeight(v, profile.weight) }, close)
             }
         Editing.Weight ->
             if (profile != null) {
-                val r = BodyUnits.weightRange(unit)
-                NumberDialog("Weight, ${if (unit == LengthUnit.MILES) "lb" else "kg"}", BodyUnits.weightShown(profile.weightKg, unit), r, { v -> close(); viewModel.setHeightAndWeight(profile.heightCm, BodyUnits.weightStored(v, unit)) }, close)
+                NumberDialog("Weight, ${BodyUnits.weightUnit(profile)}", profile.weight, BodyUnits.weightRange(profile), { v -> close(); viewModel.setHeightAndWeight(profile.height, v) }, close)
             }
         Editing.BirthDate -> if (profile != null) BirthDateDialog(profile, close, viewModel)
+        Editing.AlarmTime ->
+            ui.alarm?.let { a -> TimeDialog(a.hour, a.minute, { h, m -> close(); viewModel.setAlarmTime(h, m) }, close) }
+        Editing.AlarmWindow ->
+            ui.alarm?.let { a ->
+                val windows = org.avmedia.gshockapi.io.SmartAlarmCodec.WINDOWS
+                ChoiceDialog("Wake window", windows.map { "$it min" }, windows.indexOf(a.windowMinutes), { close(); viewModel.setAlarmWindow(windows[it]) }, close)
+            }
         Editing.Background ->
             if (body != null) {
                 ChoiceDialog("Training background", PhysicalSettingsCodec.TRAINING_BACKGROUNDS, body.trainingBackground, { close(); viewModel.setTrainingBackground(it) }, close)

@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
-import org.avmedia.gshockapi.io.LengthUnit
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
 import org.avmedia.gshockapi.io.ProfileCodec
 
@@ -17,16 +16,18 @@ internal fun birthText(p: ProfileCodec.Profile?): String =
 @Composable
 internal fun ProfileSection(ui: WatchHealthUi, edit: (Editing) -> Unit) {
     val can = !ui.working
-    val unit = ui.basic?.unit ?: LengthUnit.KM
     val p = ui.profile
     val b = ui.body
-    ValueRow("Height", p?.let { BodyUnits.heightText(it.heightCm, unit) } ?: "-", can && p != null) { edit(Editing.Height) }
-    ValueRow("Weight", p?.let { BodyUnits.weightText(it.weightKg, unit) } ?: "-", can && p != null) { edit(Editing.Weight) }
+    ValueRow("Height", p?.let { BodyUnits.heightText(it) } ?: "-", can && p != null, note = BodyUnits.CHECK) { edit(Editing.Height) }
+    ValueRow("Weight", p?.let { BodyUnits.weightText(it) } ?: "-", can && p != null, note = BodyUnits.CHECK) { edit(Editing.Weight) }
     ValueRow(
         "Birth date", birthText(p), can && p != null && p.birthYear != null,
         note = if (p != null && p.birthYear == null) "The watch's date could not be read" else null,
     ) { edit(Editing.BirthDate) }
-    ValueRow("Sex", "-", enabled = false, note = "Not in the profile layout the app knows, not confirmed yet")
+    ValueRow(
+        "Sex", p?.let { "Value ${if (it.sexBit) 1 else 0}" } ?: "-", enabled = false,
+        note = "Read from the watch. Which sex is 0: ${BodyUnits.CHECK.lowercase()}",
+    )
     ValueRow("Training background", b?.let { PhysicalSettingsCodec.TRAINING_BACKGROUNDS[it.trainingBackground] } ?: "-", can && b != null) { edit(Editing.Background) }
     ValueRow(
         "Highest heart rate", b?.let { "${it.maxHr} bpm" } ?: "-", can && b != null,

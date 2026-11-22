@@ -153,8 +153,7 @@ object PhysicalSettingsCodec {
 }
 
 /**
- * Unit of length, bit 0 of 0x13 index 11. The notes know only the values 0 and 1; which one is miles is likely 1,
- * not confirmed on the watch.
+ * Unit of length, bit 0 of 0x13 index 11: 0 kilometres, 1 miles (proven in the notes, round 4).
  */
 enum class LengthUnit(val bit: Boolean, val label: String) {
     KM(false, "Kilometres"),
@@ -168,7 +167,7 @@ enum class LengthUnit(val bit: Boolean, val label: String) {
 
 /**
  * Fields of the basic settings (0x13) that the health settings screen uses:
- * index 11 bit 0 length unit (which value is miles is likely 1, not confirmed), bit 1 step reminder;
+ * index 11 bit 0 length unit (0 km, 1 miles), bit 1 step reminder;
  * index 12, 13 night window start hour and minute, index 14, 15 end hour and minute.
  */
 object BasicHealthFieldsCodec {
@@ -261,27 +260,45 @@ object StepGoalCodec {
 }
 
 /**
- * Profile (0x45): index 1, 2 height and 3, 4 weight (BCD, two bytes each), 5, 6 birth year (BCD), 7 month, 8 day.
- * The byte order of a BCD pair is not documented, so it is found from the height: the order that gives a
- * plausible height is used for every pair. When neither does, the profile is "not recognised" and is never
- * written. Height, weight and the birth date can be changed (the layout is proven in the notes); sex is not in the layout.
+ * Profile (0x45): index 0 flags (bit 0 sex field, bit 2 imperial length, bit 3 weight not kg, bit 4 energy not kcal),
+ * index 1, 2 height and 3, 4 weight (BCD, lowest pair first), 5, 6 birth year (BCD, full year), 7 month, 8 day.
+ * The pair order is still checked against a plausible height (low pair first is tried first). When nothing is
+ * plausible the profile is "not recognised" and never written. Height, weight and the birth date are writable;
+ * which sex is 0 and the scale of height and weight are not confirmed.
  */
 object ProfileCodec {
     const val CODE = 0x45
     private const val HEIGHT_INDEX = 1
     private const val WEIGHT_INDEX = 3
     private const val YEAR_INDEX = 5
-    private val HEIGHT_RANGE = 100..250
-    private val WEIGHT_RANGE = 20..300
+    private val HEIGHT_RANGE = 30..250
+    private val WEIGHT_RANGE = 20..700
 
+    /** The range a height may be written in: inches with the imperial flag, else centimetres. */
+    fun heightRange(imperial: Boolean): IntRange = if (imperial) 39..98 else 100..250
+
+    /** The range a weight may be written in: pounds with the flag, else kilograms. */
+    fun weightRange(notKg: Boolean): IntRange = if (notKg) 44..661 else 20..300
+
+    /**
+     * [height] and [weight] are the numbers in the frame: inches and pounds with the imperial flags, else cm and kg
+     * (the scale is likely, not confirmed). [sexBit] is the first value of the sex field; which sex is 0 is not known.
+     */
     data class Profile(
-        val heightCm: Int,
-        val weightKg: Int,
+        val height: Int,
+        val weight: Int,
         val birthYear: Int?,
         val birthMonth: Int?,
         val birthDay: Int?,
         val lowByteFirst: Boolean,
-    )
+        val sexBit: Boolean = false,
+        val imperialLength: Boolean = false,
+        val weightNotKg: Boolean = false,
+        val energyNotKcal: Boolean = false,
+    ) {
+        val heightCm: Int get() = if (imperialLength) Math.round(height * 2.54).toInt() else height
+        val weightKg: Int get() = if (weightNotKg) Math.round(weight / 2.2046226).toInt() else weight
+    }
 
     fun parse(frame: ByteArray): Profile? {
         if (!Frame.hasIndex(frame, CODE, 8)) return null
@@ -292,19 +309,21 @@ object ProfileCodec {
             val year = bcd(frame, YEAR_INDEX, lowFirst)?.takeIf { it in 1900..2100 }
             val month = Frame.u8(frame, 7)?.let { digits(it) }?.takeIf { it in 1..12 }
             val day = Frame.u8(frame, 8)?.let { digits(it) }?.takeIf { it in 1..31 }
-            return Profile(height, weight, year, month, day, lowFirst)
+            val flags = Frame.u8(frame, 0) ?: 0
+            return Profile(height, weight, year, month, day, lowFirst, flags and 1 != 0, flags and 4 != 0, flags and 8 != 0, flags and 16 != 0)
         }
         return null
     }
 
+    /** Height and weight as the numbers in the frame's own units (see [Profile]); the flag byte stays. */
     fun withHeightAndWeight(
         frame: ByteArray,
-        heightCm: Int,
-        weightKg: Int,
+        height: Int,
+        weight: Int,
     ): ByteArray? {
         val current = parse(frame) ?: return null
-        if (heightCm !in HEIGHT_RANGE || weightKg !in WEIGHT_RANGE) return null
-        val changes = pair(HEIGHT_INDEX, heightCm, current.lowByteFirst) + pair(WEIGHT_INDEX, weightKg, current.lowByteFirst)
+        if (height !in heightRange(current.imperialLength) || weight !in weightRange(current.weightNotKg)) return null
+        val changes = pair(HEIGHT_INDEX, height, current.lowByteFirst) + pair(WEIGHT_INDEX, weight, current.lowByteFirst)
         return Frame.withBytes(frame, changes)
     }
 
@@ -355,7 +374,10 @@ object ProfileCodec {
     val BIRTH_BYTES: Set<Int> = (YEAR_INDEX..8).map { it + 1 }.toSet()
 }
 
-/** Smart alarm (0x50), read only: index 0 hour, 1 minute, 2 bit 0 on and bit 1 snooze, 3 wake window in minutes. */
+/**
+ * Smart alarm (0x50): index 0 hour, 1 minute (plain numbers), 2 bit 0 on and bit 1 snooze, 3 wake window in minutes
+ * (15, 30, 45 or 60). Switching the alarm off also clears the snooze bit. Every other byte stays.
+ */
 object SmartAlarmCodec {
     const val CODE = 0x50
 
@@ -368,4 +390,35 @@ object SmartAlarmCodec {
         val window = Frame.u8(frame, 3) ?: return null
         return Setting(hour, minute, flags and 1 != 0, flags and 2 != 0, window)
     }
+
+    val WINDOWS: List<Int> = listOf(15, 30, 45, 60)
+
+    fun withTime(frame: ByteArray, hour: Int, minute: Int): ByteArray? {
+        if (parse(frame) == null || hour !in 0..23 || minute !in 0..59) return null
+        return Frame.withBytes(frame, mapOf(0 to hour, 1 to minute))
+    }
+
+    /** On or off; off also clears the snooze bit. */
+    fun withOn(frame: ByteArray, on: Boolean): ByteArray? {
+        val flags = parse(frame)?.let { Frame.u8(frame, 2) } ?: return null
+        val next = if (on) Frame.bits(flags, 1, true) else flags and 3.inv()
+        return Frame.withBytes(frame, mapOf(2 to next))
+    }
+
+    /** Snooze can only be set while the alarm is on. */
+    fun withSnooze(frame: ByteArray, snooze: Boolean): ByteArray? {
+        val current = parse(frame) ?: return null
+        if (snooze && !current.on) return null
+        val flags = Frame.u8(frame, 2) ?: return null
+        return Frame.withBytes(frame, mapOf(2 to Frame.bits(flags, 2, snooze)))
+    }
+
+    fun withWindow(frame: ByteArray, minutes: Int): ByteArray? {
+        if (parse(frame) == null || minutes !in WINDOWS) return null
+        return Frame.withBytes(frame, mapOf(3 to minutes))
+    }
+
+    val TIME_BYTES: Set<Int> = setOf(1, 2)
+    val FLAG_BYTES: Set<Int> = setOf(3)
+    val WINDOW_BYTES: Set<Int> = setOf(4)
 }

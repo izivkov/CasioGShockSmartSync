@@ -31,14 +31,20 @@ object WatchFaceCodec {
     private const val FIRST_ITEM_AT = 2
     private const val MIN_FRAME = FIRST_ITEM_AT + SLOTS
 
-    /** Face item names by code, 0 to 19. Code 0x0F has no recovered name. */
+    /** Face item names by code, 0 to 19, as in the notes. */
     val ITEM_NAMES: List<String> =
         listOf(
-            "Steps", "Step goal graph", "Training status", "Monthly distance, run", "Monthly distance, walk",
-            "Monthly distance, bike", "Floors", "Monthly graph, run", "Monthly graph, walk", "Monthly graph, bike",
+            "Steps", "Step goal graph", "Training status", "Monthly distance run", "Monthly distance walk",
+            "Monthly distance bike", "Floors", "Monthly graph run", "Monthly graph walk", "Monthly graph bike",
             "Heart rate", "Highest/lowest heart rate", "Sleep score and level", "Sleep time", "Sleep rating",
-            "Item 15", "Calories", "Active time", "Sunrise/sunset", "Moon age",
+            "Stress score", "Calories", "Active time", "Sunrise/sunset", "Moon age",
         )
+
+    /** The stress score (0x0F) is in the code table but not among the items the watch offers. */
+    const val STRESS_ITEM = 0x0F
+
+    /** The item codes a person can choose: all but [STRESS_ITEM]. */
+    val OFFERED_ITEMS: List<Int> = ITEM_NAMES.indices.filter { it != STRESS_ITEM }
 
     fun itemName(code: Int): String = ITEM_NAMES.getOrNull(code) ?: "Item $code"
 
@@ -72,7 +78,7 @@ object WatchFaceCodec {
     fun withTopRight(
         frame: ByteArray,
         item: Int,
-    ): ByteArray? = withItem(frame, TOP_RIGHT_SLOT, item)
+    ): ByteArray? = if (item in OFFERED_ITEMS) withItem(frame, TOP_RIGHT_SLOT, item) else null
 
     /** Frame bytes that [withTopRight] may change. */
     val TOP_RIGHT_BYTES: Set<Int> get() = itemBytes(TOP_RIGHT_SLOT)

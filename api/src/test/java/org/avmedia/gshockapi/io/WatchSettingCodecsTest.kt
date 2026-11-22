@@ -50,7 +50,9 @@ class WatchSettingCodecsTest {
     fun theItemTableHasTwentyNamesAndTheUnnamedOneIsItem15() {
         assertEquals(20, WatchFaceCodec.ITEM_NAMES.size)
         assertEquals("Steps", WatchFaceCodec.itemName(0))
-        assertEquals("Item 15", WatchFaceCodec.itemName(0x0F))
+        assertEquals("Stress score", WatchFaceCodec.itemName(0x0F))
+        assertEquals(19, WatchFaceCodec.OFFERED_ITEMS.size)
+        assertEquals(false, 0x0F in WatchFaceCodec.OFFERED_ITEMS)
         assertEquals("Moon age", WatchFaceCodec.itemName(0x13))
     }
 
@@ -182,7 +184,7 @@ class WatchSettingCodecsTest {
     @Test
     fun readsTheProfileWithTheLowByteFirst() {
         // height 175 = 75 01, weight 82 = 82 00, year 1985 = 85 19, month 3, day 14
-        val p = ProfileCodec.parse(profile(0xFF, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14))!!
+        val p = ProfileCodec.parse(profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14))!!
         assertEquals(175, p.heightCm)
         assertEquals(82, p.weightKg)
         assertEquals(1985, p.birthYear)
@@ -193,7 +195,7 @@ class WatchSettingCodecsTest {
 
     @Test
     fun readsTheProfileWithTheHighByteFirstWhenOnlyThatIsPlausible() {
-        val p = ProfileCodec.parse(profile(0xFF, 0x01, 0x75, 0x00, 0x82, 0x19, 0x85, 0x03, 0x14))!!
+        val p = ProfileCodec.parse(profile(0x00, 0x01, 0x75, 0x00, 0x82, 0x19, 0x85, 0x03, 0x14))!!
         assertEquals(175, p.heightCm)
         assertEquals(82, p.weightKg)
         assertEquals(false, p.lowByteFirst)
@@ -201,7 +203,7 @@ class WatchSettingCodecsTest {
 
     @Test
     fun aProfileWriteChangesOnlyHeightAndWeight() {
-        val before = profile(0xFF, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14, 0xAA)
+        val before = profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14, 0xAA)
         val after = ProfileCodec.withHeightAndWeight(before, 180, 79)!!
         assertTrue(ProfileCodec.BYTES.containsAll(changed(before, after)))
         val p = ProfileCodec.parse(after)!!
@@ -213,10 +215,10 @@ class WatchSettingCodecsTest {
 
     @Test
     fun anUnrecognisedProfileIsNeverWritten() {
-        val odd = profile(0xFF, 0x12, 0x34, 0x56, 0x78, 0x85, 0x19, 0x03, 0x14)
+        val odd = profile(0x00, 0x12, 0x34, 0x56, 0x78, 0x85, 0x19, 0x03, 0x14)
         assertNull(ProfileCodec.parse(odd))
         assertNull(ProfileCodec.withHeightAndWeight(odd, 180, 79))
-        assertNotNull(ProfileCodec.parse(profile(0xFF, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14)))
+        assertNotNull(ProfileCodec.parse(profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14)))
     }
 
     // 0x50 smart alarm
@@ -257,13 +259,14 @@ class WatchSettingCodecsTest {
         // The bytes of slots 1, 2 and 4, the face and the trailing byte are kept.
         assertEquals(listOf<Byte>(0x51, 2, 0, 10, 6, 19, 0x77), after.toList())
         assertNull(WatchFaceCodec.withTopRight(before, 20))
+        assertNull(WatchFaceCodec.withTopRight(before, 0x0F))
     }
 
     // 0x45 birth date and 0x4F body values
 
     @Test
     fun aBirthDateWriteChangesOnlyTheDateBytes() {
-        val before = profile(0xFF, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14, 0xAA)
+        val before = profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14, 0xAA)
         val after = ProfileCodec.withBirthDate(before, 1990, 7, 9)!!
         assertTrue(ProfileCodec.BIRTH_BYTES.containsAll(changed(before, after)))
         val p = ProfileCodec.parse(after)!!
@@ -274,7 +277,7 @@ class WatchSettingCodecsTest {
 
     @Test
     fun anImpossibleBirthDateIsRefused() {
-        val before = profile(0xFF, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14)
+        val before = profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14)
         assertNull(ProfileCodec.withBirthDate(before, 1990, 2, 30))
         assertNull(ProfileCodec.withBirthDate(before, 1990, 13, 1))
         assertNull(ProfileCodec.withBirthDate(before, 1850, 1, 1))
@@ -315,5 +318,72 @@ class WatchSettingCodecsTest {
         assertNull(PhysicalSettingsCodec.withRestingHeartRate(b, 20))
         assertNull(PhysicalSettingsCodec.withVo2max(b, 5))
         assertNull(PhysicalSettingsCodec.withTrainingBackground(b, 7))
+    }
+
+    // 0x45 flags, 0x50 smart alarm writes
+
+    @Test
+    fun theProfileFlagsAndImperialUnitsAreRead() {
+        val p = ProfileCodec.parse(profile(0b0001_1101, 0x69, 0x00, 0x74, 0x01, 0x85, 0x19, 0x03, 0x14))!!
+        assertEquals(true, p.sexBit)
+        assertEquals(true, p.imperialLength)
+        assertEquals(true, p.weightNotKg)
+        assertEquals(true, p.energyNotKcal)
+        assertEquals(69, p.height)
+        assertEquals(174, p.weight)
+        assertEquals(175, p.heightCm)
+        assertEquals(79, p.weightKg)
+    }
+
+    @Test
+    fun aWriteInInchesAndPoundsKeepsTheFlagByteAndOnlyChangesItsBytes() {
+        val before = profile(0b0000_1100, 0x69, 0x00, 0x74, 0x01, 0x85, 0x19, 0x03, 0x14)
+        val after = ProfileCodec.withHeightAndWeight(before, 70, 180)!!
+        assertTrue(ProfileCodec.BYTES.containsAll(changed(before, after)))
+        assertEquals(0b0000_1100, after[1].toInt())
+        assertEquals(70, ProfileCodec.parse(after)!!.height)
+        assertEquals(180, ProfileCodec.parse(after)!!.weight)
+        assertNull(ProfileCodec.withHeightAndWeight(before, 175, 180))
+        assertNull(ProfileCodec.withHeightAndWeight(before, 70, 79))
+    }
+
+    @Test
+    fun theSmartAlarmTimeChangesOnlyItsTwoBytes() {
+        val before = frame(0x50, 6, 30, 0b01, 30, 1, 2, 3, 4)
+        val after = SmartAlarmCodec.withTime(before, 7, 15)!!
+        assertEquals(SmartAlarmCodec.TIME_BYTES, changed(before, after))
+        assertEquals(7 to 15, SmartAlarmCodec.parse(after)!!.let { it.hour to it.minute })
+        assertNull(SmartAlarmCodec.withTime(before, 24, 0))
+        assertNull(SmartAlarmCodec.withTime(before, 6, 60))
+    }
+
+    @Test
+    fun switchingTheSmartAlarmOffAlsoClearsSnooze() {
+        val before = frame(0x50, 6, 30, 0b11, 30, 9)
+        val off = SmartAlarmCodec.withOn(before, false)!!
+        assertEquals(0, off[3].toInt())
+        assertEquals(SmartAlarmCodec.FLAG_BYTES, changed(before, off))
+        val on = SmartAlarmCodec.withOn(off, true)!!
+        assertEquals(1, on[3].toInt())
+    }
+
+    @Test
+    fun snoozeNeedsTheAlarmOnAndChangesOnlyItsBit() {
+        val on = frame(0x50, 6, 30, 0b01, 30)
+        val snoozed = SmartAlarmCodec.withSnooze(on, true)!!
+        assertEquals(0b11, snoozed[3].toInt())
+        assertEquals(SmartAlarmCodec.FLAG_BYTES, changed(on, snoozed))
+        assertNull(SmartAlarmCodec.withSnooze(frame(0x50, 6, 30, 0b00, 30), true))
+        assertEquals(0b00, SmartAlarmCodec.withSnooze(frame(0x50, 6, 30, 0b00, 30), false)!![3].toInt())
+    }
+
+    @Test
+    fun theWakeWindowIsOneOfFifteenThirtyFortyFiveSixty() {
+        val before = frame(0x50, 6, 30, 0b01, 30, 9)
+        val after = SmartAlarmCodec.withWindow(before, 45)!!
+        assertEquals(SmartAlarmCodec.WINDOW_BYTES, changed(before, after))
+        assertEquals(45, SmartAlarmCodec.parse(after)!!.windowMinutes)
+        assertNull(SmartAlarmCodec.withWindow(before, 20))
+        assertNull(SmartAlarmCodec.withWindow(before, 90))
     }
 }

@@ -1,35 +1,23 @@
 package org.avmedia.gshockGoogleSync.ui.watchhealth
 
-import org.avmedia.gshockapi.io.LengthUnit
+import org.avmedia.gshockapi.io.ProfileCodec
 
-/** Height and weight are stored as cm and kg; the screen shows inches and pounds when the length unit is miles. */
+/**
+ * Height and weight are shown and edited in the units the watch's own profile flags name: inches with the imperial
+ * length flag, pounds with the weight flag, else cm and kg. The scale is likely, not confirmed: the screen says so.
+ */
 object BodyUnits {
-    private const val CM_PER_INCH = 2.54
-    private const val LB_PER_KG = 2.2046226
+    fun heightUnit(p: ProfileCodec.Profile): String = if (p.imperialLength) "in" else "cm"
 
-    fun heightText(cm: Int, unit: LengthUnit): String = if (unit == LengthUnit.MILES) "${toInches(cm)} in" else "$cm cm"
+    fun weightUnit(p: ProfileCodec.Profile): String = if (p.weightNotKg) "lb" else "kg"
 
-    fun weightText(kg: Int, unit: LengthUnit): String = if (unit == LengthUnit.MILES) "${toPounds(kg)} lb" else "$kg kg"
+    fun heightText(p: ProfileCodec.Profile): String = "${p.height} ${heightUnit(p)}"
 
-    fun toInches(cm: Int): Int = Math.round(cm / CM_PER_INCH).toInt()
+    fun weightText(p: ProfileCodec.Profile): String = "${p.weight} ${weightUnit(p)}"
 
-    fun toCm(inches: Int): Int = Math.round(inches * CM_PER_INCH).toInt()
+    fun heightRange(p: ProfileCodec.Profile): IntRange = ProfileCodec.heightRange(p.imperialLength)
 
-    fun toPounds(kg: Int): Int = Math.round(kg * LB_PER_KG).toInt()
+    fun weightRange(p: ProfileCodec.Profile): IntRange = ProfileCodec.weightRange(p.weightNotKg)
 
-    fun toKg(pounds: Int): Int = Math.round(pounds / LB_PER_KG).toInt()
-
-    /** The value shown in the edit dialog, in the display unit. */
-    fun heightShown(cm: Int, unit: LengthUnit): Int = if (unit == LengthUnit.MILES) toInches(cm) else cm
-
-    fun weightShown(kg: Int, unit: LengthUnit): Int = if (unit == LengthUnit.MILES) toPounds(kg) else kg
-
-    fun heightStored(shown: Int, unit: LengthUnit): Int = if (unit == LengthUnit.MILES) toCm(shown) else shown
-
-    fun weightStored(shown: Int, unit: LengthUnit): Int = if (unit == LengthUnit.MILES) toKg(shown) else shown
-
-    /** The edit range in the display unit: the stored range 100..250 cm and 20..300 kg. */
-    fun heightRange(unit: LengthUnit): IntRange = if (unit == LengthUnit.MILES) toInches(100)..toInches(250) else 100..250
-
-    fun weightRange(unit: LengthUnit): IntRange = if (unit == LengthUnit.MILES) toPounds(20)..toPounds(300) else 20..300
+    const val CHECK = "Check on the watch"
 }

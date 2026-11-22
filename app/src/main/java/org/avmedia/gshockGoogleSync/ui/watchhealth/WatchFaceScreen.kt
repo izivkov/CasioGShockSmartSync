@@ -126,9 +126,9 @@ internal fun WatchFaceContent(
     if (topRightPicker && face != null) {
         ChoiceDialog(
             title = "Top right shows",
-            options = WatchFaceCodec.ITEM_NAMES,
-            selected = face.items[WatchFaceCodec.TOP_RIGHT_SLOT - 1],
-            onPick = { topRightPicker = false; onTopRight(it) },
+            options = WatchFaceCodec.OFFERED_ITEMS.map { WatchFaceCodec.itemName(it) },
+            selected = WatchFaceCodec.OFFERED_ITEMS.indexOf(face.items[WatchFaceCodec.TOP_RIGHT_SLOT - 1]),
+            onPick = { topRightPicker = false; onTopRight(WatchFaceCodec.OFFERED_ITEMS[it]) },
             onDismiss = { topRightPicker = false },
         )
     }
