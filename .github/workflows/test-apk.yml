@@ -31,7 +31,7 @@ jobs:
 
       - name: Check the APK signing certificate (updates need the same key every time)
         env:
-          EXPECTED_SHA256: "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
+          EXPECTED_SHA256: "DE:AD:72:F3:C8:FF:93:92:A4:8A:D9:40:E6:3E:AE:7D:49:DA:9B:03:ED:E3:08:15:76:E9:81:4B:6B:55:AB:3D"
         run: |
           APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
           APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
