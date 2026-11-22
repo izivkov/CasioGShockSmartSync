@@ -29,6 +29,8 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
     val status by viewModel.status.collectAsState()
     var url by remember { mutableStateOf(form.baseUrl) }
     var token by remember { mutableStateOf(form.token) }
+    var deviceName by remember { mutableStateOf(form.deviceName) }
+    var model by remember { mutableStateOf(form.model) }
     val connected = form.webhookId.isNotBlank()
 
     Column(Modifier.fillMaxSize()) {
@@ -59,6 +61,20 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
             )
+            OutlinedTextField(
+                value = deviceName,
+                onValueChange = { deviceName = it },
+                label = { androidx.compose.material3.Text("Device name (empty: the watch name, e.g. CASIO GBX-H5600)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = model,
+                onValueChange = { model = it },
+                label = { androidx.compose.material3.Text("Model (empty: the watch name, e.g. GBX-H5600; you can type GBX-H5600-1)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
             AppText(text = if (connected) "Connected" else "Not connected", fontSize = 14.sp)
             if (status.isNotBlank()) AppText(text = status, fontSize = 14.sp)
         }
@@ -66,7 +82,7 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
             buttons = listOf(
                 ButtonData("Back", onBack),
                 ButtonData("Disconnect", { viewModel.disconnect() }, enabled = connected),
-                ButtonData("Connect", { viewModel.connect(url, token) }, enabled = url.isNotBlank() && token.isNotBlank()),
+                ButtonData("Connect", { viewModel.connect(url, token, deviceName, model) }, enabled = url.isNotBlank() && token.isNotBlank()),
             )
         )
     }

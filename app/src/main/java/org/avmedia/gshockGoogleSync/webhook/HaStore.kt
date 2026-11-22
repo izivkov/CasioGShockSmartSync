@@ -23,6 +23,9 @@ data class HaConfig(
     val registration: String = "",
     /** [HaSensors.fingerprint] of the sensors HA knows. Empty = register them before the next update. */
     val sensorsHash: String = "",
+    /** What the owner typed in the form; empty = the default from the watch name. */
+    val deviceName: String = "",
+    val model: String = "",
 )
 
 /** The Home Assistant link and the newest unsent job, on top of a [KeyValueStore]. Android-free. */

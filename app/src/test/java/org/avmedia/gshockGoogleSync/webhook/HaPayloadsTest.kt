@@ -24,6 +24,46 @@ class HaPayloadsTest {
     }
 
     @Test
+    fun emptyNameAndModelFallBackToTheWatchName() {
+        assertEquals("CASIO GBX-H5600" to "GBX-H5600", HaPayloads.resolveNames("CASIO GBX-H5600", "", "  "))
+        assertEquals("CASIO GBX-H5600" to "GBX-H5600", HaPayloads.resolveNames("GBX-H5600", "", ""))
+        assertEquals("My watch" to "GBX-H5600-1", HaPayloads.resolveNames("CASIO GBX-H5600", " My watch ", "GBX-H5600-1"))
+    }
+
+    @Test
+    fun updateRegistrationCarriesTheNewNameAndModelAndOnlyChangeableFields() {
+        val body = HaPayloads.registration("gshock-1", "My watch", "GBX-H5600-1", "1.2", "14")
+        val o = obj(HaPayloads.updateRegistration(body))
+        assertEquals("update_registration", o.get("type").asString)
+        val d = o.getAsJsonObject("data")
+        assertEquals("My watch", d.get("device_name").asString)
+        assertEquals("GBX-H5600-1", d.get("model").asString)
+        assertEquals("1.2", d.get("app_version").asString)
+        assertEquals("14", d.get("os_version").asString)
+        assertEquals("CASIO", d.get("manufacturer").asString)
+        assertFalse(d.has("device_id"))
+        assertFalse(d.has("supports_encryption"))
+    }
+
+    @Test
+    fun firmwareIsNotGuessedFromTheOwnersVersionAnswer() {
+        val answer = "0x20 23 07 00 12 00 00 00 00 00 00 00 00 04 02 01 00 09 00 00"
+        assertEquals("23 07 00 12 00 00 00 00 00 00 00 00 04 02 01 00 09 00 00", WatchDecoders.versionRaw(answer))
+        assertEquals("unknown", WatchDecoders.firmwareState(answer))
+        assertEquals(null, WatchDecoders.versionRaw("0x28 06 1D"))
+        assertEquals(null, WatchDecoders.versionRaw(null))
+        assertEquals(null, WatchDecoders.firmwareState("0x20"))
+    }
+
+    @Test
+    fun firmwareSensorCarriesTheRawBytesAsAttribute() {
+        val values = mapOf("watch.firmware" to "unknown", "watch.firmware_raw" to "23 07 00")
+        assertEquals("unknown", HaSensors.states(values)["watch_firmware"])
+        assertEquals("23 07 00", HaSensors.attributes(values).getValue("watch_firmware")["version_raw"])
+        assertTrue(HaSensors.states(emptyMap()).isEmpty())
+    }
+
+    @Test
     fun registrationHasTheFieldsHomeAssistantNeeds() {
         val o = obj(HaPayloads.registration("gshock-1", "CASIO GBX-H5600", "GBX-H5600", "1.2", "14"))
         assertEquals("org.avmedia.gshocksync.webhook", o.get("app_id").asString)

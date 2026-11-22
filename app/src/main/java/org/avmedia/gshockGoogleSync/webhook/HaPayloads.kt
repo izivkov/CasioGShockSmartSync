@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.webhook
 
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 
 /** The JSON bodies of the Home Assistant mobile_app API. Pure, so the shapes are unit tested. */
 object HaPayloads {
@@ -18,6 +19,24 @@ object HaPayloads {
     fun deviceName(watchName: String): String {
         val n = watchName.trim().ifBlank { "G-Shock" }
         return if (n.startsWith("CASIO", ignoreCase = true)) n else "CASIO $n"
+    }
+
+    /** The model without the maker: "CASIO GBX-H5600" gives "GBX-H5600". */
+    fun defaultModel(watchName: String): String =
+        watchName.trim().removePrefix("CASIO").trim().ifBlank { "G-Shock" }
+
+    /** The device name and model to register: what the owner typed, or the defaults from the watch name. */
+    fun resolveNames(watchName: String, typedName: String, typedModel: String): Pair<String, String> =
+        Pair(typedName.trim().ifBlank { deviceName(watchName) }, typedModel.trim())
+
+    private val UPDATABLE = listOf("app_version", "device_name", "manufacturer", "os_version")
+
+    /** The mobile_app "update_registration" call, from a [registration] body: only the fields HA lets us change. */
+    fun updateRegistration(registrationBody: String): String {
+        val o = JsonParser.parseString(registrationBody).asJsonObject
+        val data = linkedMapOf<String, Any?>()
+        UPDATABLE.forEach { k -> o.get(k)?.takeIf { it.isJsonPrimitive }?.let { data[k] = it.asString } }
+        return gson.toJson(linkedMapOf("type" to "update_registration", "data" to data))
     }
 
     fun registration(

@@ -31,23 +31,24 @@ class HaViewModel @Inject constructor(
 
     val connected: Boolean get() = store.load() != null
 
-    fun connect(baseUrl: String, token: String) {
+    fun connect(baseUrl: String, token: String, typedName: String, typedModel: String) {
         val address = WatchInfo.getAddress()
         if (address.isBlank()) {
             _status.value = "Connect to the watch once first: the device is named after it."
             return
         }
         val name = WatchModelOverride.displayName(WatchInfo.name)
+        val (deviceName, model) = HaPayloads.resolveNames(name, typedName, typedModel)
         val body = HaPayloads.registration(
             deviceId = HaPayloads.deviceId(address),
-            deviceName = HaPayloads.deviceName(name),
-            model = name.removePrefix("CASIO").trim().ifBlank { "G-Shock" },
+            deviceName = deviceName,
+            model = model,
             appVersion = BuildConfig.VERSION_NAME,
             osVersion = Build.VERSION.RELEASE,
         )
         _status.value = "Connecting..."
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) { HaClient(HaOkHttpTransport, store).connect(baseUrl, token, body) }
+            val result = withContext(Dispatchers.IO) { HaClient(HaOkHttpTransport, store).connect(baseUrl, token, body, typedName.trim(), typedModel.trim()) }
             _status.value = if (result is HaResult.Ok) result.message else "Failed: ${result.message}"
             _form.value = store.loadForm()
         }

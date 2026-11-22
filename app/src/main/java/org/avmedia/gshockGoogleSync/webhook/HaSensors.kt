@@ -64,6 +64,7 @@ object HaSensors {
         HaSensor("home_dst", "Home daylight saving", "watch.dst.home", null, null, null, "mdi:weather-sunny", kind = "binary_sensor"),
         HaSensor("timer_seconds", "Watch timer", "watch.timer_seconds", "duration", "s", null, "mdi:timer-outline"),
         HaSensor("notifications_supported", "Notifications supported", "watch.notifications_supported", null, null, null, "mdi:bell-ring", "diagnostic", kind = "binary_sensor"),
+        HaSensor("watch_firmware", "Watch firmware", "watch.firmware", null, null, null, "mdi:chip", "diagnostic", attributes = mapOf("version_raw" to "watch.firmware_raw")),
         HaSensor("watch_settings", "Watch settings", "watch.settings.time_format", null, null, null, "mdi:cog", "diagnostic", attributes = SETTINGS_ATTRIBUTES),
     )
 

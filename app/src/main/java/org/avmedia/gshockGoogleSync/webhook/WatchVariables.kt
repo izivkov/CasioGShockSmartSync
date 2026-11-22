@@ -69,6 +69,10 @@ object WatchVariables {
             WatchDecoders.h5600Condition(raw.request(0x28, 2000).firstOrNull())
         }
 
+        suspend fun versionAnswer(ctx: VariableContext) = ctx.cached("h5600.version") {
+            raw.request(0x20, 2000).firstOrNull()
+        }
+
         val list = mutableListOf(
             // Event
             Variable("event", "What triggered this call: watch_action, sync, health_data or test") { it.event },
@@ -116,6 +120,12 @@ object WatchVariables {
             },
             Variable("watch.dst.home", "True while daylight saving is on for the home time", needsWatch = true) {
                 if (supported("time.home_time")) WatchDecoders.dstHomeOn(api.getDSTWatchState(IO.DstState.ZERO)) else null
+            },
+            Variable("watch.firmware", "Firmware: unknown until the version bytes are decoded (see watch.firmware_raw)", needsWatch = true) {
+                if (h5600()) WatchDecoders.firmwareState(versionAnswer(it)) else null
+            },
+            Variable("watch.firmware_raw", "H5600 only: the version answer (request 0x20) as hex bytes, not decoded", needsWatch = true) {
+                if (h5600()) WatchDecoders.versionRaw(versionAnswer(it)) else null
             },
             Variable("watch.notifications_supported", "True when the watch accepts app notifications (read while connected)", needsWatch = true) {
                 api.supportsAppNotifications()

@@ -61,6 +61,50 @@ class HaClientTest {
     }
 
     @Test
+    fun connectAgainWithANewNameUpdatesTheDeviceWithoutRegisteringAgain() {
+        val (client, t, store) = connected()
+        val body = HaPayloads.registration("gshock-1", "My watch", "GBX-H5600-1", "1", "14")
+        val r = client.connect("https://ha.example", "tok", body, "My watch", "GBX-H5600-1")
+        assertTrue(r.message, r is HaResult.Ok)
+        val c = t.calls.single()
+        assertEquals("https://ha.example/api/webhook/hook1", c.url)
+        assertEquals("update_registration", c.type)
+        val d = JsonParser.parseString(c.body).asJsonObject.getAsJsonObject("data")
+        assertEquals("My watch", d.get("device_name").asString)
+        assertEquals("GBX-H5600-1", d.get("model").asString)
+        val cfg = store.load()!!
+        assertEquals("hook1", cfg.webhookId)
+        assertEquals(sensorsHashKept(store), cfg.sensorsHash)
+        assertEquals(body, cfg.registration)
+        assertEquals("My watch", cfg.deviceName)
+        assertEquals("GBX-H5600-1", cfg.model)
+    }
+
+    private fun sensorsHashKept(store: HaStore) = store.load()!!.sensorsHash
+
+    @Test
+    fun deletedRegistrationIsMadeAgainWithTheNewNameAndModel() {
+        val t = HaFakeTransport { c ->
+            if (c.type == "update_registration") HaResponse(200, "") else haOk(c)
+        }
+        val (client, _, store) = connected(t)
+        val body = HaPayloads.registration("gshock-1", "My watch", "GBX-H5600-1", "1", "14")
+        assertTrue(client.connect("https://ha.example", "tok", body, "My watch", "GBX-H5600-1") is HaResult.Ok)
+        val reg = t.calls.last { it.url.endsWith("/registrations") }
+        assertEquals("GBX-H5600-1", JsonParser.parseString(reg.body).asJsonObject.get("model").asString)
+        assertEquals("hook2", store.load()?.webhookId)
+    }
+
+    @Test
+    fun updateRegistrationFailureIsShownAndKeepsTheWebhook() {
+        val t = HaFakeTransport { c -> if (c.type == "update_registration") HaResponse(400, "x") else haOk(c) }
+        val (client, _, store) = connected(t)
+        val r = client.connect("https://ha.example", "tok", reg, "A", "B")
+        assertTrue(r is HaResult.Failed)
+        assertEquals("hook1", store.load()?.webhookId)
+    }
+
+    @Test
     fun connectShowsTheHttpErrorAndKeepsNoWebhook() {
         val store = HaStore(HaMemoryStore())
         val r = HaClient(HaFakeTransport { HaResponse(401, "") }, store).connect("https://ha.example", "bad", reg)

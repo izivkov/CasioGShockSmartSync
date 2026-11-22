@@ -20,10 +20,28 @@ class HaClient(
     private val sensors: List<HaSensor> = HaSensors.ALL,
 ) {
     /** Registers the device and keeps the webhook id. [registrationBody] is [HaPayloads.registration]. */
-    fun connect(baseUrl: String, token: String, registrationBody: String): HaResult {
+    fun connect(
+        baseUrl: String,
+        token: String,
+        registrationBody: String,
+        deviceName: String = "",
+        model: String = "",
+    ): HaResult {
         val base = normalizeBase(baseUrl) ?: return HaResult.Failed("The URL must start with http:// or https://")
         if (token.isBlank()) return HaResult.Failed("The token is empty")
-        val cfg = HaConfig(baseUrl = base, token = token.trim(), registration = registrationBody)
+        val old = store.load()
+        val cfg = HaConfig(baseUrl = base, token = token.trim(), registration = registrationBody, deviceName = deviceName, model = model)
+        if (old != null && old.baseUrl == base && old.token == cfg.token) {
+            // Already registered: change the existing device, no new registration.
+            val kept = old.copy(deviceName = deviceName, model = model)
+            store.save(kept)
+            val r = transport.post("$base/api/webhook/${old.webhookId}", HaPayloads.updateRegistration(registrationBody), null)
+            if (!gone(r)) {
+                classify(r)?.let { return it }
+                return HaResult.Ok("Updated " + deviceNameOf(registrationBody))
+            }
+            // The registration is gone in HA: register again below.
+        }
         store.save(cfg)
         return when (val r = register(cfg)) {
             is Reg.Done -> {

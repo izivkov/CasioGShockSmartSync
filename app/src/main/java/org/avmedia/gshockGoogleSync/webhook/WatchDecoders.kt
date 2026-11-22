@@ -38,6 +38,19 @@ object WatchDecoders {
         return Condition(level, temp)
     }
 
+    /**
+     * Version answer (request 0x20, "0x20 23 07 00 12 ..."): the bytes after the code, as hex pairs. Nothing
+     * in the library or its Python twin decodes them, so their meaning is not guessed. Null for a wrong answer.
+     */
+    fun versionRaw(answer: String?): String? {
+        val b = answer?.let { bytes(it) } ?: return null
+        if (b.size < 2 || b[0] != 0x20) return null
+        return b.drop(1).dropLast(1).joinToString(" ") { "%02X".format(it) }
+    }
+
+    /** "unknown" while the version bytes are read but not decodable; null when there was no answer. */
+    fun firmwareState(answer: String?): String? = versionRaw(answer)?.let { "unknown" }
+
     /** Home-time daylight saving (request 1D 00: "1D 00 01 DST0 DST1 ..."): bit 0 = DST on. */
     fun dstHomeOn(raw: String?): Boolean? {
         val b = raw?.let { bytes(it) } ?: return null
