@@ -182,6 +182,31 @@ class HaPayloadsTest {
     }
 
     @Test
+    fun faceAnswersAreKeptAsHexWithoutThe0xPrefixTheGuardDrops() {
+        assertEquals("51 01 00 FF", WatchDecoders.faceRaw("0x51 01 00 ff", 0x51))
+        assertEquals("52 0A", WatchDecoders.faceRaw("0x52 0A", 0x52))
+        assertFalse(WatchDecoders.looksLikeRawHex(WatchDecoders.faceRaw("0x51 01 00 ff", 0x51)!!))
+        // wrong code, no data bytes, not hex, nothing: unknown, never a guess
+        assertEquals(null, WatchDecoders.faceRaw("0x52 01", 0x51))
+        assertEquals(null, WatchDecoders.faceRaw("0x51", 0x51))
+        assertEquals(null, WatchDecoders.faceRaw("0x51 zz", 0x51))
+        assertEquals(null, WatchDecoders.faceRaw(null, 0x51))
+    }
+
+    @Test
+    fun faceSensorsAreDiagnosticAndTheirStateIsCutTo250Characters() {
+        val face = sensor("watch_face_raw")
+        assertEquals("watch.face_raw", face.variable)
+        assertEquals("diagnostic", face.entityCategory)
+        assertEquals("diagnostic", sensor("face_items_raw").entityCategory)
+        assertEquals("watch.face_items_raw", sensor("face_items_raw").variable)
+        val long = (1..200).joinToString(" ") { "AB" } // 599 characters
+        assertEquals(250, (HaSensors.states(mapOf("watch.face_raw" to long))["watch_face_raw"] as String).length)
+        assertEquals("51 01", HaSensors.states(mapOf("watch.face_raw" to "51 01"))["watch_face_raw"])
+        assertFalse(HaSensors.states(mapOf("watch.face_raw" to null)).containsKey("watch_face_raw"))
+    }
+
+    @Test
     fun distanceTodayIsASensorInMetres() {
         val d = sensor("distance_today")
         assertEquals("health.distance_m", d.variable)
