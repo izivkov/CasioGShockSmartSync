@@ -43,6 +43,7 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
     VoiceCommand.SetTimer::class to VoiceCommandSpec(
         route = Screens.Time.route,
         actionClass = ActionContainer.SetTimerAction::class.java,
+        isSupported = { WatchInfo.hasTimer },
         featureName = { "Timer" },
         applyParams = { action, cmd, _ -> (action as ActionContainer.SetTimerAction).let {
             val c = cmd as VoiceCommand.SetTimer
@@ -60,6 +61,8 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
                 "date format" -> WatchInfo.hasDateFormat
                 "auto light" -> WatchInfo.hasAutoLight
                 "power saving" -> WatchInfo.hasPowerSavingMode
+                "light duration" -> WatchInfo.hasLight
+                "button tone" -> WatchInfo.hasOperationTone
                 else -> true
             }
         },
@@ -85,6 +88,8 @@ val voiceCommandTable: Map<KClass<out VoiceCommand>, VoiceCommandSpec> = mapOf(
     VoiceCommand.SetSettingsToDefault::class to VoiceCommandSpec(
         route = Screens.Settings.route,
         actionClass = ActionContainer.SetSettingsToDefaultAction::class.java,
+        isSupported = { WatchInfo.hasWatchSettings },
+        featureName = { "Settings" },
         applyParams = { _, _, _ -> },
     ),
 )
