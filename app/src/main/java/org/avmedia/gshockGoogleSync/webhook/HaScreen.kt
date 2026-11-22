@@ -21,6 +21,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 @Composable
 fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
     val ui by viewModel.ui.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
     HaScreenContent(
         ui = ui,
         events = HaEvents(
@@ -32,6 +33,8 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
             onChoose = viewModel::choose,
             onRefreshActions = viewModel::refreshActions,
             onRawSwitch = viewModel::setRawSwitch,
+            onCreateDashboard = viewModel::createDashboard,
+            onCopyYaml = { viewModel.copyYaml(context) },
         ),
     )
 }
@@ -58,6 +61,7 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen
             )
             HaSentCard(ui.sent, ui.saved, events.onGroup)
             HaButtonCard(ui.saved, ui.actions, events.onChoose, events.onRefreshActions, pickerOpen)
+            HaDashboardCard(ui.saved, ui.watch.registered, ui.dash, events.onCreateDashboard, events.onCopyYaml)
         }
         ButtonsRow(
             buttons = listOf(

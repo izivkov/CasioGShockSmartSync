@@ -52,6 +52,7 @@ data class HaUi(
     val watch: HaWatchUi = HaWatchUi(),
     val sent: HaSentUi = HaSentUi(),
     val actions: HaActionsUi = HaActionsUi(),
+    val dash: HaDashUi = HaDashUi(),
 ) {
     val saved: Boolean get() = form.baseUrl.isNotBlank() && form.token.isNotBlank()
 }
@@ -66,4 +67,6 @@ class HaEvents(
     val onChoose: (HaAction?) -> Unit = {},
     val onRefreshActions: () -> Unit = {},
     val onRawSwitch: (Boolean) -> Unit = {},
+    val onCreateDashboard: () -> Unit = {},
+    val onCopyYaml: () -> Unit = {},
 )

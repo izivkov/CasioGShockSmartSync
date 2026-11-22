@@ -23,12 +23,54 @@ class HaViewModel @Inject constructor(
     private val store = WebhookStorage.haStore(context)
     private val discovery = HaDiscovery(context)
     private val rawSwitch = WebhookStorage.rawSwitch(context)
+    private val dashboards = HaDashboardService(HaOkHttpWs, store, HaOkHttpTransport)
 
     private val _ui = MutableStateFlow(snapshot())
     val ui: StateFlow<HaUi> = _ui
 
     init {
-        if (store.load() != null) { refreshActions(); lookUpDevice() }
+        if (store.load() != null) { refreshActions(); lookUpDevice(); refreshDashboard() }
+    }
+
+    /** The watch id and its name in Home Assistant, once it is registered. */
+    private fun watchNames(): Pair<String, String>? {
+        val id = watchId() ?: return null
+        val body = store.loadRegistration(id)?.registration ?: return null
+        val name = runCatching { JsonParser.parseString(body).asJsonObject.get("device_name").asString }.getOrNull() ?: return null
+        return id to name
+    }
+
+    /** Looks at the dashboard address quietly: "Create" or "Update" on the button. A failure leaves "Create". */
+    private fun refreshDashboard() {
+        val (id, name) = watchNames() ?: return
+        viewModelScope.launch {
+            val status = withContext(Dispatchers.IO) { dashboards.status(id, name) }
+            update { it.copy(dash = it.dash.copy(status = status)) }
+        }
+    }
+
+    fun createDashboard() {
+        val (id, name) = watchNames() ?: return
+        update { it.copy(dash = it.dash.copy(working = true, message = "", failed = false, url = "")) }
+        viewModelScope.launch {
+            val r = withContext(Dispatchers.IO) { dashboards.createOrUpdate(id, name) }
+            val status = if (r.ok) withContext(Dispatchers.IO) { dashboards.status(id, name) } else null
+            update { it.copy(dash = it.dash.copy(status = status ?: it.dash.status, working = false, message = r.message, failed = !r.ok, url = r.url)) }
+        }
+    }
+
+    /** Puts the dashboard YAML on the clipboard. */
+    fun copyYaml(context: Context) {
+        val (id, name) = watchNames() ?: return
+        update { it.copy(dash = it.dash.copy(working = true, message = "", failed = false, url = "")) }
+        viewModelScope.launch {
+            val r = withContext(Dispatchers.IO) { dashboards.yaml(id, name) }
+            if (r.ok) {
+                val cm = context.getSystemService(android.content.ClipboardManager::class.java)
+                cm?.setPrimaryClip(android.content.ClipData.newPlainText("Home Assistant dashboard", r.text))
+            }
+            update { it.copy(dash = it.dash.copy(working = false, message = r.message, failed = !r.ok)) }
+        }
     }
 
     /** Rebuilds everything that comes from the store; keeps what only lives here (check, search, loading). */
@@ -56,6 +98,7 @@ class HaViewModel @Inject constructor(
             ),
             sent = HaSentUi(HaSentView.groups(sent, store.groupsOn()), sending = store.getPending() != null, failed = failed),
             actions = (old?.actions ?: HaActionsUi()).copy(chosen = store.loadAction(), lastRun = store.lastActionResult().orEmpty()),
+            dash = old?.dash ?: HaDashUi(),
         )
     }
 
