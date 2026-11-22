@@ -31,6 +31,15 @@ data class H5600HealthData(
     val sleep: SleepData? = null,
     /** Blood oxygen, breathing exercises, cardio status and stairs; null on a transfer without them. */
     val body: BodyReadings? = null,
+    val dailySummary: DailySummary? = null,
+)
+
+/** The daily summary section (0x5C): steps, calories and a u16 that is likely the resting calories (not confirmed). */
+@Keep
+data class DailySummary(
+    val steps: Long,
+    val calories: Long,
+    val restingCalories: Int?,
 )
 
 /** Daily heart-rate values in beats per minute. A field is null when the watch has no valid value. */

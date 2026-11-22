@@ -21,6 +21,9 @@ object HealthVariables {
         "health.steps_today" to "Steps today ($UNCONFIRMED_STEPS)",
         "health.recorded_at" to "When the LifeLog was recorded, watch local time, ISO 8601 without offset",
         "health.kcal_today" to "Energy today, kcal ($UNCONFIRMED_KCAL)",
+        "health.energy_total_kcal" to "Total energy today incl. resting, kcal (UNCONFIRMED: calories of the daily summary section 0x5C; null when the watch sent none)",
+        "health.energy_resting_kcal" to "Resting energy today, kcal (UNCONFIRMED: the u16 of the daily summary is only likely the resting calories)",
+        "health.energy_active_kcal" to "Active energy today, kcal (UNCONFIRMED: total minus resting, from the daily summary)",
         "health.hr_rest" to "Resting heart rate of the day, bpm",
         "health.hr_min" to "Lowest heart rate of the day, bpm",
         "health.hr_max" to "Highest heart rate of the day, bpm",
@@ -71,6 +74,11 @@ object HealthVariables {
             "health.steps_today" to data?.currentDaySteps,
             "health.recorded_at" to data?.timestamp?.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             "health.kcal_today" to h?.energyKcal,
+            "health.energy_total_kcal" to h?.dailySummary?.calories,
+            "health.energy_resting_kcal" to h?.dailySummary?.restingCalories,
+            "health.energy_active_kcal" to h?.dailySummary?.let { d ->
+                d.restingCalories?.takeIf { it <= d.calories }?.let { d.calories - it }
+            },
             "health.hr_rest" to hr?.restingBpm,
             "health.hr_min" to hr?.minBpm,
             "health.hr_max" to hr?.maxBpm,

@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.model.ActivityPeriod
 import org.avmedia.gshockapi.model.ActivitySeconds
+import org.avmedia.gshockapi.model.DailySummary
 import org.avmedia.gshockapi.model.H5600HealthData
 import org.avmedia.gshockapi.model.HeartRateSamples
 import org.avmedia.gshockapi.model.HeartRateSummary
@@ -63,6 +64,7 @@ object H5600HealthDecoder {
     private const val TAG_SPO2 = 0x59
     private const val TAG_NIGHT = 0x5A
     private const val TAG_CARDIO = 0x5B
+    private const val TAG_DAILY_SUMMARY = 0x5C
     // Activity times in the current-stats frame: each is hour, minute, second bytes (layout from
     // parse_lifelog.py, matched on 2026-10-26 and 2026-11-16).
     private const val ACTIVITY_RUN_OFFSET = 16
@@ -75,7 +77,7 @@ object H5600HealthDecoder {
     private const val WATCH_CONDITION_LIFELOG_BYTE = 9
     private const val WATCH_CONDITION_ACTIVITY_BYTE = 8
     private val HEADER_MAGIC = byteArrayOf(0x00, 0x0F, 0x00, 0x00, 0x00)
-    private val FRAME_ORDER = intArrayOf(0x65, 0x50, 0x51, 0x52, 0x53, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x63, 0x72)
+    private val FRAME_ORDER = intArrayOf(0x65, 0x50, 0x51, 0x52, 0x53, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x63, 0x72)
 
     /**
      * Decodes a transfer.
@@ -175,6 +177,7 @@ object H5600HealthDecoder {
                         cardio = frameBody(stream, spans, TAG_CARDIO),
                         stairs = frameBody(stream, spans, TAG_STAIRS),
                     ),
+                dailySummary = decodeDailySummary(frameBody(stream, spans, TAG_DAILY_SUMMARY)),
                 stepGoal = stepGoal,
                 lifeLogPending = watchFlags?.let { it[WATCH_CONDITION_LIFELOG_BYTE].toInt() != 0 },
                 activityLogPending = watchFlags?.let { it[WATCH_CONDITION_ACTIVITY_BYTE].toInt() != 0 },
@@ -315,6 +318,14 @@ object H5600HealthDecoder {
             stillSeconds = hmsAt(body, ACTIVITY_STILL_OFFSET),
             activeSeconds = hmsAt(body, ACTIVITY_ACTIVE_OFFSET),
         )
+    }
+
+    /** 0x5C: u32 steps, u32 calories, u16 (likely resting calories). Null when the body is shorter than 8 bytes. */
+    internal fun decodeDailySummary(body: ByteArray?): DailySummary? {
+        if (body == null || body.size < 8) return null
+        val b = ByteBuffer.wrap(body).order(ByteOrder.LITTLE_ENDIAN)
+        val resting = if (body.size >= 10) b.getShort(8).toInt() and 0xFFFF else null
+        return DailySummary(b.getInt(0).toLong() and 0xFFFFFFFFL, b.getInt(4).toLong() and 0xFFFFFFFFL, resting)
     }
 
     private fun hmsAt(body: ByteArray, offset: Int): Int =

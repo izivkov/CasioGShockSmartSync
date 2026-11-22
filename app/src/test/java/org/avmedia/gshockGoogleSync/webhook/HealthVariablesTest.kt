@@ -105,4 +105,24 @@ class HealthVariablesTest {
         assertNull(HealthVariables.values(data.copy(currentDaySteps = null))["health.distance_m"])
         assertTrue(HealthVariables.DESCRIPTIONS.getValue("health.distance_m").contains("estimate", ignoreCase = true))
     }
+
+    @Test fun theDailySummaryGivesTotalRestingAndActiveEnergy() {
+        val withSummary = data.copy(h5600 = data.h5600!!.copy(dailySummary = org.avmedia.gshockapi.model.DailySummary(5306, 2400, 1700)))
+        val v = HealthVariables.values(withSummary)
+        assertEquals(2400L, v["health.energy_total_kcal"])
+        assertEquals(1700, v["health.energy_resting_kcal"])
+        assertEquals(700L, v["health.energy_active_kcal"])
+        assertEquals(254, v["health.kcal_today"])
+    }
+
+    @Test fun withoutADailySummaryNoEnergyValueIsMadeUp() {
+        val v = HealthVariables.values(data)
+        assertNull(v["health.energy_total_kcal"])
+        assertNull(v["health.energy_active_kcal"])
+    }
+
+    @Test fun aRestingValueAboveTheTotalGivesNoActiveEnergy() {
+        val odd = data.copy(h5600 = data.h5600!!.copy(dailySummary = org.avmedia.gshockapi.model.DailySummary(5306, 1000, 1700)))
+        assertNull(HealthVariables.values(odd)["health.energy_active_kcal"])
+    }
 }
