@@ -100,6 +100,11 @@ fun HealthScreen() {
                             healthViewModel = healthViewModel
                         )
 
+                        // Week and month charts, calendar and export of what the watch has delivered so far
+                        if (WatchInfo.model == WatchInfo.WatchModel.DW_H5600) {
+                            org.avmedia.gshockGoogleSync.ui.health.history.HistorySection(Modifier.fillMaxWidth())
+                        }
+
                         // Profile button: the ABL-100 profile does not apply to the DW-H5600
                         if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) {
                             AppButton(

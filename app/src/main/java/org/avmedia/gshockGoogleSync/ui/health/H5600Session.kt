@@ -21,12 +21,19 @@ internal object H5600Session {
     @Volatile
     var onDownloaded: (() -> Unit)? = null
 
+    /** Called with every stored transfer: the health history keeps what it decoded. */
+    @Volatile
+    var onStored: ((StepCounterData) -> Unit)? = null
+
     @Volatile
     var data: StepCounterData? = null
         set(value) {
             field = value
             storedAtMs = if (value != null) System.currentTimeMillis() else 0L
-            if (value != null) onDownloaded?.invoke()
+            if (value != null) {
+                onStored?.invoke(value)
+                onDownloaded?.invoke()
+            }
         }
 
     fun clear() {
