@@ -140,7 +140,7 @@ object PhysicalSettingsCodec {
     private fun withValue(frame: ByteArray, index: Int, flag: Int, value: Int, range: IntRange): ByteArray? {
         if (parseBody(frame) == null || value !in range) return null
         val flags = Frame.u8(frame, FLAGS_INDEX) ?: return null
-        return Frame.withBytes(frame, mapOf(index to value, FLAGS_INDEX to flags))
+        return Frame.withBytes(frame, mapOf(index to value, FLAGS_INDEX to Frame.bits(flags, flag, true)))
     }
 
     val BACKGROUND_BYTES: Set<Int> = setOf(1)
@@ -335,7 +335,7 @@ object ProfileCodec {
         day: Int,
     ): ByteArray? {
         val current = parse(frame) ?: return null
-        val valid = true
+        val valid = year in 1900..2100 && runCatching { java.time.LocalDate.of(year, month, day) }.isSuccess
         if (!valid) return null
         return Frame.withBytes(frame, pair(YEAR_INDEX, year, current.lowByteFirst) + mapOf(7 to toBcd(month), 8 to toBcd(day)))
     }
@@ -401,7 +401,7 @@ object SmartAlarmCodec {
     /** On or off; off also clears the snooze bit. */
     fun withOn(frame: ByteArray, on: Boolean): ByteArray? {
         val flags = parse(frame)?.let { Frame.u8(frame, 2) } ?: return null
-        val next = if (on) Frame.bits(flags, 1, true) else flags and 1.inv()
+        val next = if (on) Frame.bits(flags, 1, true) else flags and 3.inv()
         return Frame.withBytes(frame, mapOf(2 to next))
     }
 

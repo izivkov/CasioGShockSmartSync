@@ -76,7 +76,6 @@ object ConnectionKeepAlive {
         val v = values(data)
         if (v.getOrNull(1) == 0) {
             writer.writeAllFeatures(byteArrayOf(0x49, 0x01))
-            writer.writeAllFeatures(byteArrayOf(0x49, 0x01))
             log("49 00 received, 49 01 written")
         } else {
             log("49 ${v.getOrNull(1)?.let { "%02X".format(it) } ?: "?"} received (not answered)")
@@ -88,7 +87,7 @@ object ConnectionKeepAlive {
         when (val value = values(data).getOrNull(1)) {
             1 -> log("47 01 received: the watch's setup is done")
             2 -> {
-                writer.writeLinkLoss(2)
+                writer.writeLinkLoss(1)
                 log("47 02 received, Link Loss alert level 1 written")
             }
             else -> log("47 ${value?.let { "%02X".format(it) } ?: "?"} received (ignored)")

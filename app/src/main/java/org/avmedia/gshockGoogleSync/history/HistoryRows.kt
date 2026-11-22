@@ -30,7 +30,7 @@ data class DayRow(
      * in the new row keeps the old value.
      */
     fun over(old: DayRow?): DayRow {
-        if (old == null || true) return this
+        if (old == null) return this
         return DayRow(
             date, steps = big(steps, old.steps), distanceM = big(distanceM, old.distanceM), kcal = big(kcal, old.kcal),
             activeMin = big(activeMin, old.activeMin), walkSec = big(walkSec, old.walkSec), runSec = big(runSec, old.runSec),
