@@ -35,17 +35,53 @@ class WebhookRepository(
     var unreadable: Boolean = false
         private set
 
-    fun loadHooks(): List<Webhook> =
-        WebhookJson.hooksFromJson(store.get(KEY_HOOKS))
+    @Volatile
+    private var overwriteConfirmed = false
 
+    fun loadHooks(): List<Webhook> {
+        val raw = store.get(KEY_HOOKS)
+        if (raw.isNullOrBlank()) {
+            unreadable = false
+            return emptyList()
+        }
+        val parsed = WebhookJson.parseHooks(raw)
+        if (parsed == null) {
+            markUnreadable(raw)
+            return emptyList()
+        }
+        unreadable = false
+        return parsed
+    }
+
+    /** False (and nothing written) while the stored list is unreadable and the user has not confirmed. */
     fun saveHooks(hooks: List<Webhook>): Boolean {
+        if (!overwriteConfirmed) {
+            val raw = store.get(KEY_HOOKS)
+            if (!raw.isNullOrBlank() && WebhookJson.parseHooks(raw) == null) {
+                markUnreadable(raw)
+                return false
+            }
+        }
         store.put(KEY_HOOKS, WebhookJson.hooksToJson(hooks))
+        overwriteConfirmed = false
+        unreadable = false
         return true
     }
 
-    /** The user accepted losing the unreadable list. */
+    /** The user accepted losing the unreadable list (a raw copy was kept). */
     fun confirmOverwrite() {
+        overwriteConfirmed = true
         unreadable = false
+    }
+
+    /** Keeps a raw copy once per distinct unreadable content. */
+    private fun markUnreadable(raw: String) {
+        unreadable = true
+        val mark = raw.hashCode().toString()
+        if (store.get(KEY_UNREADABLE_MARK) != mark) {
+            store.put(KEY_UNREADABLE_PREFIX + now(), raw)
+            store.put(KEY_UNREADABLE_MARK, mark)
+        }
     }
 
     fun saveDraft(draft: WebhookDraft) = store.put(KEY_DRAFT, gson.toJson(draft))

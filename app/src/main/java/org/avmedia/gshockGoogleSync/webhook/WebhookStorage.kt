@@ -8,7 +8,6 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
  * background worker can use it without dependency injection.
  */
 object WebhookStorage {
-    private const val KEY_HOOKS = "webhooks.list"
     private const val KEY_RESULTS = "webhooks.results"
     private const val KEY_PENDING = "webhooks.pending."
     private const val KEY_LAST_ATTEMPT = "webhooks.lastAttempt."
@@ -16,11 +15,24 @@ object WebhookStorage {
 
     private val lock = Any()
 
-    fun loadHooks(context: Context): List<Webhook> =
-        WebhookJson.hooksFromJson(LocalDataStorage.get(context, KEY_HOOKS))
+    private class LocalKeyValueStore(private val context: Context) : KeyValueStore {
+        override fun get(key: String): String? = LocalDataStorage.get(context, key)
+        override fun put(key: String, value: String) = LocalDataStorage.put(context, key, value)
+        override fun delete(key: String) = LocalDataStorage.delete(context, key)
+    }
 
-    fun saveHooks(context: Context, hooks: List<Webhook>) =
-        LocalDataStorage.put(context, KEY_HOOKS, WebhookJson.hooksToJson(hooks))
+    @Volatile
+    private var repository: WebhookRepository? = null
+
+    fun repository(context: Context): WebhookRepository =
+        repository ?: synchronized(lock) {
+            repository ?: WebhookRepository(LocalKeyValueStore(context.applicationContext)).also { repository = it }
+        }
+
+    fun loadHooks(context: Context): List<Webhook> = repository(context).loadHooks()
+
+    /** False when the stored list is unreadable and was not overwritten. */
+    fun saveHooks(context: Context, hooks: List<Webhook>): Boolean = repository(context).saveHooks(hooks)
 
     fun loadResults(context: Context): Map<String, WebhookResult> =
         WebhookJson.resultsFromJson(LocalDataStorage.get(context, KEY_RESULTS))

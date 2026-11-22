@@ -11,7 +11,11 @@ object WebhookJson {
 
     fun hooksToJson(hooks: List<Webhook>): String = gson.toJson(hooks)
 
-    fun hooksFromJson(json: String?): List<Webhook> = parse(json, hooksType) ?: emptyList()
+    fun hooksFromJson(json: String?): List<Webhook> = parseHooks(json) ?: emptyList()
+
+    /** The stored list, or null when [json] cannot be read (callers must not treat that as "no webhooks"). */
+    fun parseHooks(json: String?): List<Webhook>? =
+        parse<List<Webhook?>>(json, hooksType)?.filterNotNull()
 
     fun resultsToJson(results: Map<String, WebhookResult>): String = gson.toJson(results)
 

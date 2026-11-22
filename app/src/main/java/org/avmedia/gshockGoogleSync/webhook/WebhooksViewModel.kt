@@ -19,6 +19,22 @@ class WebhooksViewModel @Inject constructor(
     private val _hooks = MutableStateFlow(WebhookStorage.loadHooks(context))
     val hooks: StateFlow<List<Webhook>> = _hooks
 
+    private val repository = WebhookStorage.repository(context)
+
+    /** True when the stored webhooks could not be read; they are kept untouched until the user confirms. */
+    private val _unreadable = MutableStateFlow(repository.unreadable)
+    val unreadable: StateFlow<Boolean> = _unreadable
+
+    fun confirmOverwrite() {
+        repository.confirmOverwrite()
+        _unreadable.value = false
+    }
+
+    fun loadDraft(): WebhookDraft? = repository.loadDraft()
+    fun saveDraft(hook: Webhook) =
+        repository.saveDraft(WebhookDraft(hook, isNew = _hooks.value.none { it.id == hook.id }))
+    fun clearDraft() = repository.clearDraft()
+
     private val _results = MutableStateFlow(WebhookStorage.loadResults(context))
     val results: StateFlow<Map<String, WebhookResult>> = _results
 
@@ -32,12 +48,18 @@ class WebhooksViewModel @Inject constructor(
         _results.value = WebhookStorage.loadResults(context)
     }
 
-    fun save(hook: Webhook) {
+    /** False when nothing was written because the stored list is unreadable. */
+    fun save(hook: Webhook): Boolean {
         val list = _hooks.value
-        _hooks.value =
+        val updated =
             if (list.any { it.id == hook.id }) list.map { if (it.id == hook.id) hook else it }
             else list + hook
-        WebhookStorage.saveHooks(context, _hooks.value)
+        if (!WebhookStorage.saveHooks(context, updated)) {
+            _unreadable.value = true
+            return false
+        }
+        _hooks.value = updated
+        return true
     }
 
     fun setEnabled(id: String, enabled: Boolean) {
@@ -56,6 +78,7 @@ class WebhooksViewModel @Inject constructor(
 
     /** Sends [hook] now (with the values currently in the editor, saved or not). */
     fun test(hook: Webhook) {
+        saveDraft(hook) // the draft, never the list
         _testReport.value = "Sending..."
         viewModelScope.launch {
             val report = runCatching { dispatcher.test(hook) }

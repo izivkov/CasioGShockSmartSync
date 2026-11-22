@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
+import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import AppSwitch
 import AppText
 import AppTextLarge
@@ -60,7 +61,8 @@ fun WebhooksScreen(
 ) {
     val hooks by viewModel.hooks.collectAsState()
     val results by viewModel.results.collectAsState()
-    var editing by remember { mutableStateOf<Webhook?>(null) }
+    var editing by remember { mutableStateOf(viewModel.loadDraft()?.hook) }
+    val unreadable by viewModel.unreadable.collectAsState()
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -81,6 +83,18 @@ fun WebhooksScreen(
                             .weight(1f)
                             .verticalScroll(rememberScrollState())
                     ) {
+                        if (unreadable) {
+                            AppText(
+                                text = "Saved webhooks could not be read. The data is kept untouched, with a raw copy. " +
+                                    "New webhooks cannot be saved until you confirm.",
+                                modifier = Modifier.padding(16.dp),
+                            )
+                            AppButton(
+                                text = "Start fresh (overwrite)",
+                                onClick = { viewModel.confirmOverwrite() },
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
+                        }
                         if (hooks.isEmpty()) {
                             AppText(
                                 text = stringResource(R.string.webhooks_empty),
@@ -104,19 +118,18 @@ fun WebhooksScreen(
                     )
                 }
             } else {
-                BackHandler {
+                val closeEditor = {
+                    viewModel.clearDraft() // Save or Cancel ends the draft
                     viewModel.clearTestReport()
                     editing = null
                 }
+                BackHandler(onBack = closeEditor)
                 WebhookEditor(
                     initial = current,
                     isNew = hooks.none { it.id == current.id },
                     variables = viewModel.variables,
                     viewModel = viewModel,
-                    onClose = {
-                        viewModel.clearTestReport()
-                        editing = null
-                    },
+                    onClose = closeEditor,
                 )
             }
         }
@@ -191,6 +204,7 @@ private fun WebhookEditor(
     var enabled by remember { mutableStateOf(initial.enabled) }
     var showVariables by remember { mutableStateOf(false) }
     val testReport by viewModel.testReport.collectAsState()
+    val storedHooks by viewModel.hooks.collectAsState()
 
     fun current() = initial.copy(
         name = name.trim(),
@@ -210,6 +224,15 @@ private fun WebhookEditor(
         val sel = body.selection
         val newText = body.text.replaceRange(sel.min, sel.max, text)
         body = TextFieldValue(newText, TextRange(sel.min + text.length))
+    }
+
+    val baseline = storedHooks.firstOrNull { it.id == initial.id } ?: Webhook.newDefault().copy(id = initial.id)
+    val dirty = current() != baseline
+
+    // Keep what is typed, so it survives leaving the screen or the app being killed.
+    val draftNow = current()
+    LaunchedEffect(draftNow) {
+        if (draftNow != initial) viewModel.saveDraft(draftNow)
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -324,11 +347,17 @@ private fun WebhookEditor(
             testReport?.let { AppText(text = it, fontSize = 14.sp) }
             AppButton(text = "Test", onClick = { viewModel.test(current()) }, modifier = Modifier.fillMaxWidth())
         }
+        if (dirty) {
+            AppText(text = "Unsaved changes", fontSize = 14.sp, modifier = Modifier.padding(horizontal = 12.dp))
+        }
         ButtonsRow(
             buttons = buildList {
                 add(ButtonData("Cancel", onClose))
                 if (!isNew) add(ButtonData("Delete", { viewModel.delete(initial.id); onClose() }))
-                add(ButtonData("Save", { viewModel.save(current()); onClose() }))
+                add(ButtonData("Save", {
+                    if (viewModel.save(current())) onClose()
+                    else AppSnackbar("Saved webhooks could not be read: confirm on the list screen first")
+                }))
             }
         )
     }
