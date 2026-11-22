@@ -31,10 +31,11 @@ class HaClient(
     }
 
     /** Registers the watch [deviceId] when it has no registration yet. Never registers an address twice. */
-    fun ensureRegistered(deviceId: String, registrationBody: String): HaResult {
-        val cfg = store.load() ?: return HaResult.Failed("Home Assistant is not set up")
-        if (store.loadRegistration(deviceId) != null) return HaResult.Ok("Already registered")
-        return when (val r = register(cfg, registrationBody)) {
+    fun ensureRegistered(deviceId: String, registrationBody: String): HaResult = withWatchLock(deviceId) {
+        val cfg = store.load() ?: return@withWatchLock HaResult.Failed("Home Assistant is not set up")
+        // Read inside the lock: a job that ran before us has registered the watch already.
+        if (store.loadRegistration(deviceId) != null) return@withWatchLock HaResult.Ok("Already registered")
+        when (val r = register(cfg, registrationBody)) {
             is Reg.Done -> {
                 store.saveRegistration(deviceId, HaRegistration(r.webhookId, registrationBody))
                 HaResult.Ok("Registered " + deviceNameOf(registrationBody))
@@ -49,8 +50,12 @@ class HaClient(
      * registers again once and retries.
      */
     fun send(job: HaJob): HaResult {
-        val cfg = store.load() ?: return HaResult.Failed("Home Assistant is not set up")
         if (job.deviceId.isBlank() || job.registration.isBlank()) return HaResult.Failed("The job has no watch")
+        return withWatchLock(job.deviceId) { sendLocked(job) }
+    }
+
+    private fun sendLocked(job: HaJob): HaResult {
+        val cfg = store.load() ?: return HaResult.Failed("Home Assistant is not set up")
         (ensureRegistered(job.deviceId, job.registration) as? HaResult.Failed)?.let { return it }
         var reg = store.loadRegistration(job.deviceId) ?: return HaResult.Failed("Home Assistant gave no webhook id")
         var again = false
@@ -166,6 +171,17 @@ class HaClient(
             .getOrDefault("the watch")
 
     companion object {
+        // One lock per watch for the whole process: HaWorker makes a new HaClient per run, and a replaced
+        // worker's blocking HTTP call goes on after WorkManager cancelled it. Without this, jobs that overlap
+        // each register the watch, and every new registration makes HA drop the sensors of the old one.
+        private val locks = java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.locks.ReentrantLock>()
+
+        private inline fun <T> withWatchLock(deviceId: String, block: () -> T): T {
+            val lock = locks.getOrPut(deviceId) { java.util.concurrent.locks.ReentrantLock() }
+            lock.lock()
+            try { return block() } finally { lock.unlock() }
+        }
+
         /** "https://ha.example/" gives "https://ha.example"; null when it is not an http(s) URL. */
         fun normalizeBase(url: String): String? =
             url.trim().trimEnd('/').takeIf { it.startsWith("http://") || it.startsWith("https://") }
