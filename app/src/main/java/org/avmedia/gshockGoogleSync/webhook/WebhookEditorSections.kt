@@ -87,7 +87,7 @@ internal fun WhenCard(
     HaCard("When") {
         SwitchLine("A watch button runs the action", onWatchAction, onWatchActionChange)
         SwitchLine("After each watch connection", onSync, onSyncChange)
-        SwitchLine("Health data downloaded (DW-H5600, GBX-H5600)", onHealth, onHealthChange)
+        SwitchLine("Health data downloaded", onHealth, onHealthChange)
         OutlinedTextField(
             value = interval, onValueChange = { onInterval(it.filter { c -> c.isDigit() }.take(5)) },
             singleLine = true, label = { Text("Pause between sends, minutes (0 = none)") },

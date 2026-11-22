@@ -565,14 +565,14 @@ constructor(
 
     /**
      * Fires every enabled webhook whose trigger is "a watch action" (see the Webhooks screen).
-     * Its on/off switch is kept in [LocalDataStorage], not in the watch's scratchpad bits.
+     * The Webhooks switch on the Actions screen decides (checked in the dispatcher); no row of its own.
      */
     inner class WebhookAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
 
         // Button press, or the Phone Finder request of always-connected watches (they arrive here too).
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.ACTION_BUTTON_PRESSED -> enabled
+            RunEnvironment.ACTION_BUTTON_PRESSED -> true
             else -> false
         }
 

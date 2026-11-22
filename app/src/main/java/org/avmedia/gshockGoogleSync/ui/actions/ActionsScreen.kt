@@ -125,11 +125,6 @@ private fun createActionItems(actionsViewModel: ActionsViewModel, onOpenWebhooks
             R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
             infoRes = R.string.prayer_times_info
         ),
-        ToggleActionView(
-            ActionContainer.WebhookAction::class.java,
-            R.string.call_webhooks, R.drawable.generic_action_item, actionsViewModel,
-            infoRes = R.string.call_webhooks_info
-        ),
         ServiceToggleRow(ServiceToggles.Service.WEBHOOKS, R.string.webhooks, R.drawable.ic_webhook, onOpenWebhooks),
         ServiceToggleRow(ServiceToggles.Service.HOME_ASSISTANT, R.string.home_assistant, R.drawable.ic_home_assistant, onOpenHa),
         SeparatorView(),

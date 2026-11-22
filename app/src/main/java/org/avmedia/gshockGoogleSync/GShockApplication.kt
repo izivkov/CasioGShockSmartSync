@@ -46,6 +46,7 @@ class GShockApplication : Application() {
     @SuppressLint("NewApi")
     override fun onCreate() {
         super.onCreate()
+        org.avmedia.gshockGoogleSync.webhook.HaSentView.appContext = applicationContext
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
             Timber.d("Timber planted for Debug")

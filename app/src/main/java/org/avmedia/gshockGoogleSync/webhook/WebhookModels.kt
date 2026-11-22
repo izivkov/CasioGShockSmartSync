@@ -97,24 +97,11 @@ object WebhookPresets {
         """{"merge_variables": {{all}}, "merge_strategy": "deep_merge"}""",
     )
 
-    private const val HA_HINT = "https://<your-ha>/api/webhook/<webhook_id>  (webhook_id: the id of the Webhook trigger of your Home Assistant automation)"
-
-    val HOME_ASSISTANT_DATA = WebhookPreset(
-        "Home Assistant (data)", "application/json", "{{all}}",
-        onWatchAction = false, onSync = true, urlHint = HA_HINT,
-    )
-
-    val HOME_ASSISTANT_BUTTON = WebhookPreset(
-        "Home Assistant (button)", "application/json",
-        """{"event": {{event}}, "timestamp": {{timestamp}}, "watch": {{all}}}""",
-        onWatchAction = true, onSync = false, urlHint = HA_HINT,
-    )
-
     val PLAIN_TEXT = WebhookPreset(
         "Plain text",
         "text/plain",
         "{{watch.name}}: battery {{watch.battery}}%, event {{event}} at {{timestamp}}",
     )
 
-    val ALL = listOf(RAW_JSON, TRMNL, HOME_ASSISTANT_DATA, HOME_ASSISTANT_BUTTON, PLAIN_TEXT)
+    val ALL = listOf(RAW_JSON, TRMNL, PLAIN_TEXT)
 }

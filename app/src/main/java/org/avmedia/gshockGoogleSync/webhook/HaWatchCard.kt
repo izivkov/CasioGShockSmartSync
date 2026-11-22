@@ -22,7 +22,7 @@ internal fun HaWatchCard(
     onSave: () -> Unit,
 ) {
     val context = LocalContext.current
-    HaCard("This watch", R.drawable.ic_watch_later_black_24dp) {
+    HaCard("This watch", R.drawable.ic_mdi_watch) {
         OutlinedTextField(
             value = deviceName, onValueChange = onName, singleLine = true, modifier = Modifier.fillMaxWidth(),
             label = { Text("Name in Home Assistant (empty: the watch name)") },

@@ -12,7 +12,7 @@ internal fun HaButtonCard(
     onRefresh: () -> Unit,
     pickerOpen: Boolean = false,
 ) {
-    HaCard("Watch button", R.drawable.find_phone) {
+    HaCard("Watch button", R.drawable.ic_mdi_gesture_tap_button) {
         when {
             !saved -> HaNote("Set up the connection first.")
             else -> {

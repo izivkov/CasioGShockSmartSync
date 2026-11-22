@@ -26,8 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.DateFormat
-import java.util.Date
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
@@ -109,7 +107,7 @@ private fun ResultChip(result: WebhookResult?, onClick: () -> Unit) {
         result.retrying -> scheme.tertiaryContainer to scheme.onTertiaryContainer
         else -> scheme.errorContainer to scheme.onErrorContainer
     }
-    val time = result?.let { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it.timeMillis)) }
+    val time = result?.let { ShortDateTime.format(LocalContext.current, it.timeMillis) }
     AssistChip(
         onClick = onClick,
         label = { Text(WebhookLabels.resultText(result, time), fontSize = 12.sp) },

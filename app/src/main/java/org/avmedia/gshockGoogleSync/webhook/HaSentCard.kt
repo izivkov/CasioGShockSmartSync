@@ -18,7 +18,7 @@ private const val SHOWN = 5
 /** Card 3: what goes to Home Assistant, one switch per group, with the values of the last update. */
 @Composable
 internal fun HaSentCard(sent: HaSentUi, saved: Boolean, onGroup: (HaGroup, Boolean) -> Unit) {
-    HaCard("What is sent", R.drawable.ic_watch_later_black_24dp) {
+    HaCard("What is sent", R.drawable.ic_mdi_upload) {
         if (!saved) {
             HaNote("Set up the connection first.")
             return@HaCard
