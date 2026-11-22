@@ -11,7 +11,7 @@ class HistorySeriesTest {
     @Test fun missingDaysAndEmptyColumnsAreNullNotZero() {
         val rows = listOf(DayRow("2026-11-20", steps = 100), DayRow("2026-11-22", hrRest = 60))
         val v = HistorySeries.days(rows, LocalDate.of(2026, 11, 22), 4) { it.steps }
-        assertEquals(listOf(null, null, 100f, null), v)
+        assertEquals(listOf(null, 100f, null, null), v)
     }
 
     @Test fun nightSeriesFollowsTheSameRule() {
