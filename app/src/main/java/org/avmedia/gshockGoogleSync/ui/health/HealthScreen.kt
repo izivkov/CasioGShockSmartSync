@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -35,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
+import org.avmedia.gshockGoogleSync.ui.common.ButtonData
+import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
@@ -43,7 +44,7 @@ fun HealthScreen() {
     val healthViewModel: HealthViewModel = hiltViewModel()
     val state by healthViewModel.state.collectAsState()
     // DW-H5600: until its LifeLog arrives, show only the loading message
-    val waitingForLifeLog = WatchInfo.model == WatchInfo.WatchModel.DW_H5600 &&
+    val waitingForLifeLog = WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol &&
             state.stepCounterData.h5600 == null && state.lifeLogLoading
 
     // Refresh every time the screen opens, so a LifeLog read that finished while the screen
@@ -115,15 +116,16 @@ fun HealthScreen() {
                     }
                 }
 
-                Button(
-                    onClick = { healthViewModel.onAction(HealthAction.UpdateLatest) },
-                    enabled = !state.updating,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(text = stringResource(id = R.string.update_latest))
-                }
+                ButtonsRow(
+                    buttons = listOf(
+                        ButtonData(
+                            text = stringResource(id = R.string.update_latest),
+                            onClick = { healthViewModel.onAction(HealthAction.UpdateLatest) },
+                            enabled = !state.updating
+                        )
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

@@ -297,7 +297,7 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private fun isDwH5600(): Boolean = WatchInfo.model == WatchInfo.WatchModel.DW_H5600
+    private fun isDwH5600(): Boolean = WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol
 
     private fun startStepCounterPolling() {
         stepPollJob?.cancel()

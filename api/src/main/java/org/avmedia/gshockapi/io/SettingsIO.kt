@@ -5,11 +5,17 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.model.Settings
+import org.avmedia.gshockapi.model.SmartAlarm
+import org.avmedia.gshockapi.model.SoundMode
+import org.avmedia.gshockapi.model.WatchFaceItem
 import org.avmedia.gshockapi.utils.Utils
 import org.json.JSONObject
 import timber.log.Timber
@@ -306,6 +312,26 @@ object SettingsIO {
 
     @Suppress("UNUSED_PARAMETER")
     fun sendToWatch(message: String) {
+        if (H5600SettingsIO.isSupported()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val settings = Settings()
+                runCatching { settings.soundMode = H5600SettingsIO.getSoundMode()?.name }
+                    .onFailure { Timber.w(it, "Failed to read soundMode") }
+                runCatching { settings.watchFaceNumber = H5600SettingsIO.getWatchFaceNumber() }
+                    .onFailure { Timber.w(it, "Failed to read watchFaceNumber") }
+                runCatching { settings.watchFaceItem = H5600SettingsIO.getWatchFaceItem()?.name }
+                    .onFailure { Timber.w(it, "Failed to read watchFaceItem") }
+                runCatching { settings.smartAlarm = H5600SettingsIO.getSmartAlarm() }
+                    .onFailure { Timber.w(it, "Failed to read smartAlarm") }
+
+                synchronized(this@SettingsIO) {
+                    state.deferredResult?.complete(settings)
+                    state = state.copy(deferredResult = null)
+                }
+            }
+            return
+        }
+
         // Use pure function to build command, then execute
         IO.writeCmd(
             GetSetMode.GET,
@@ -314,8 +340,49 @@ object SettingsIO {
     }
 
     fun sendToWatchSet(message: String) {
+        val jsonObj = JSONObject(message)
+        val valueObj = jsonObj.optJSONObject("value") ?: jsonObj
+
+        if (H5600SettingsIO.isSupported()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                runCatching {
+                    val soundModeStr = valueObj.optString("soundMode", "")
+                    if (soundModeStr.isNotEmpty()) {
+                        SoundMode.entries.firstOrNull { it.name.equals(soundModeStr, ignoreCase = true) }?.let { mode ->
+                            H5600SettingsIO.setSoundMode(mode)
+                        }
+                    }
+                    if (valueObj.has("watchFaceNumber")) {
+                        val faceNum = valueObj.getInt("watchFaceNumber")
+                        H5600SettingsIO.setWatchFaceNumber(faceNum)
+                    }
+                    val itemStr = valueObj.optString("watchFaceItem", "")
+                    if (itemStr.isNotEmpty()) {
+                        WatchFaceItem.entries.firstOrNull { it.name.equals(itemStr, ignoreCase = true) }?.let { item ->
+                            H5600SettingsIO.setWatchFaceItem(item)
+                        }
+                    }
+                    if (valueObj.has("smartAlarm")) {
+                        val saJson = valueObj.optJSONObject("smartAlarm")
+                        if (saJson != null) {
+                            val smartAlarm = SmartAlarm(
+                                hour = saJson.optInt("hour", 0),
+                                minute = saJson.optInt("minute", 0),
+                                enabled = saJson.optBoolean("enabled", false),
+                                snooze = saJson.optBoolean("snooze", false),
+                                windowMin = saJson.optInt("windowMin", 0)
+                            )
+                            H5600SettingsIO.setSmartAlarm(smartAlarm)
+                        }
+                    }
+                }.onFailure { error ->
+                    Timber.e(error, "Failed to set DW-H5600 settings")
+                }
+            }
+            return
+        }
+
         // Use pure function to encode, then execute
-        val settings = JSONObject(message).get("value") as JSONObject
-        IO.writeCmd(GetSetMode.SET, SettingsIOFunctional.encode(settings))
+        IO.writeCmd(GetSetMode.SET, SettingsIOFunctional.encode(valueObj))
     }
 }

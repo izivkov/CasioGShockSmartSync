@@ -1,9 +1,12 @@
 package org.avmedia.gshockapi.io
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.model.SmartAlarm
 import org.avmedia.gshockapi.model.SoundMode
 import org.avmedia.gshockapi.model.WatchFaceItem
+import org.avmedia.gshockapi.protocols.H5600Protocol
 import org.avmedia.gshockapi.utils.Utils
 import timber.log.Timber
 
@@ -18,6 +21,7 @@ import timber.log.Timber
  * All reads go through [RawSettingIO] (shared requests, retries); all writes are read-modify-write
  * through [RawSettingIO.modify], so they keep unknown bytes and cannot undo each other.
  */
+@RequiresApi(Build.VERSION_CODES.O)
 object H5600SettingsIO {
     const val SOUND_MODE_CODE = 0x42
     const val WATCH_FACE_CODE = 0x51
@@ -29,9 +33,11 @@ object H5600SettingsIO {
     private const val PACKET_SIZE = 6
     private const val SMART_ALARM_SIZE = 5
 
-    fun isSupported(): Boolean = WatchInfo.model == WatchInfo.WatchModel.DW_H5600
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun isSupported(): Boolean = WatchInfo.protocol is H5600Protocol
 
-    private fun checkSupported() = check(isSupported()) { "Not a DW-H5600 family watch (model=${WatchInfo.model})" }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun checkSupported() = check(isSupported()) { "Not an H5600 protocol watch (protocol=${WatchInfo.protocol})" }
 
     private fun checkPacket(code: Int, packet: IntArray, size: Int = PACKET_SIZE) =
         check(packet.size == size && packet[0] == code) { "Unexpected 0x%02X packet: %s".format(code, packet.toHex()) }

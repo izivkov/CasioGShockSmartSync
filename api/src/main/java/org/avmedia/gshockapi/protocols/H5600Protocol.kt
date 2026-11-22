@@ -5,6 +5,8 @@ import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.io.H5600Channel
 import org.avmedia.gshockapi.io.H5600HealthIO
+import org.avmedia.gshockapi.io.H5600SettingsIO
+import org.avmedia.gshockapi.io.RawSettingIO
 import org.avmedia.gshockapi.model.StepCounterData
 
 /**
@@ -28,5 +30,13 @@ object H5600Protocol : StandardProtocol() {
                     H5600Channel.DRSP.key to H5600HealthIO::onDrsp,
                     H5600Channel.CONVOY.key to H5600HealthIO::onConvoy,
                     H5600Channel.STATUS.key to H5600HealthIO::onStatus,
+                    H5600SettingsIO.SOUND_MODE_CODE to RawSettingIO::onReceived,
+                    H5600SettingsIO.SMART_ALARM_CODE to RawSettingIO::onReceived,
+                    H5600SettingsIO.WATCH_FACE_CODE to RawSettingIO::onReceived,
+                    H5600SettingsIO.TIME_MANAGER_CODE to RawSettingIO::onReceived,
+                    0x24 to RawSettingIO::onReceived,
+                    0x45 to RawSettingIO::onReceived,
+                    0x4F to RawSettingIO::onReceived,
+                    0x13 to RawSettingIO::onReceived,
                 )
 }
