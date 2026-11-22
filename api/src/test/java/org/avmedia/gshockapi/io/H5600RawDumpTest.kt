@@ -33,13 +33,49 @@ class H5600RawDumpTest {
 
     @Test
     fun keepsTheLastSevenTransfersNewestFirst() {
-        val dump = H5600RawDump(tmp.newFolder("log"))
+        val dump = H5600RawDump(tmp.newFolder("log"), keep = 7)
         for (i in 1..9) dump.save(capture(i), nowMillis = i * 1_000L)
 
         val kept = dump.transfers()
         assertEquals(7, kept.size)
         assertEquals(9.toByte(), kept.first().resolve("stream.bin").readBytes()[0])
         assertEquals(3.toByte(), kept.last().resolve("stream.bin").readBytes()[0])
+    }
+
+    @Test
+    fun keepsThirtyDaysAndDropsOlderOnes() {
+        val dump = H5600RawDump(tmp.newFolder("log"))
+        val day = 24L * 3_600_000
+        val t0 = 1_700_000_000_000L
+        dump.save(capture(1), nowMillis = t0)
+        dump.save(capture(2), nowMillis = t0 + 29 * day)
+        assertEquals(2, dump.transfers().size)
+        dump.save(capture(3), nowMillis = t0 + 31 * day)
+        assertEquals(listOf(3.toByte(), 2.toByte()), dump.transfers().map { it.resolve("stream.bin").readBytes()[0] })
+    }
+
+    @Test
+    fun manyReadsADayAreAllKeptWithinThirtyDays() {
+        val dump = H5600RawDump(tmp.newFolder("log"))
+        val t0 = 1_700_000_000_000L
+        for (i in 0 until 60) dump.save(capture(i), nowMillis = t0 + i * 2 * 3_600_000L)
+        assertEquals(60, dump.transfers().size)
+    }
+
+    @Test
+    fun aFailedTransferIsKeptMarkedAndShared() {
+        val dump = H5600RawDump(tmp.newFolder("log"))
+        dump.save(capture(1), nowMillis = 1_000L)
+        val failed = dump.save(
+            H5600Capture(capture(2).notifications, capture(2).announcements, capture(2).stream, failure = "the watch stopped answering"),
+            nowMillis = 2_000L,
+        )
+        assertTrue(failed.name.endsWith("-failed"))
+        assertTrue(failed.resolve("notifications.txt").readLines().any { it == "# FAILED: the watch stopped answering" })
+        assertEquals(failed, dump.transfers().first())
+        val zip = dump.zipLatest(tmp.newFile("failed.zip"))
+        assertNotNull(zip)
+        ZipFile(zip).use { assertEquals(setOf("stream.bin", "notifications.txt"), it.entries().asSequence().map { e -> e.name }.toSet()) }
     }
 
     @Test

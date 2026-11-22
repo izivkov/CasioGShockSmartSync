@@ -125,6 +125,9 @@ object Connection {
         MessageDispatcher.sendToWatch(message)
     }
 
+    /** The handler now installed, so a temporary one can be replaced and the same instance put back. */
+    fun getDataCallback(): IDataReceived? = requireBleManager().dataReceivedCallback
+
     fun setDataCallback(dataCallback: IDataReceived) {
         requireBleManager().setDataCallback(dataCallback)
     }

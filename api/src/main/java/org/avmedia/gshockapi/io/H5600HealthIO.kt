@@ -111,7 +111,11 @@ object H5600HealthIO {
             return StepCounterData.unavailable()
         }
         lastError = null
+        // One exchange on the link at a time: a raw or settings read in progress finishes first.
+        var locked = false
         try {
+            WatchExchange.mutex.lock()
+            locked = true
             for (attempt in 1..MAX_TRANSFER_ATTEMPTS) {
                 _status.value =
                     if (attempt == 1) {
@@ -130,6 +134,7 @@ object H5600HealthIO {
         } finally {
             _status.value = null
             synchronized(lock) { requestRunning = false }
+            if (locked) WatchExchange.mutex.unlock()
         }
     }
 
@@ -159,6 +164,8 @@ object H5600HealthIO {
                     watchdog.cancel()
                 }
             if (transfer.silent) {
+                val quiet = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
+                saveRawDump(quiet.first, quiet.second, "the watch stopped answering the polls")
                 return AttemptOutcome(StepCounterData.unavailable(), restart = true)
             }
             if (!completed) {
@@ -171,8 +178,6 @@ object H5600HealthIO {
                     "${snapshot.first.size} CONVOY notifications, announcements=${snapshot.second}",
             )
 
-            saveRawDump(snapshot.first, snapshot.second)
-
             val decoded =
                 H5600HealthDecoder.decode(
                     notifications = snapshot.first,
@@ -181,6 +186,14 @@ object H5600HealthIO {
                     stepGoal = stepGoal,
                     watchCondition = transfer.watchCondition,
                 )
+            saveRawDump(
+                snapshot.first, snapshot.second,
+                when {
+                    !completed -> "the transfer did not finish in time"
+                    decoded == null -> "no LifeLog header in the stream"
+                    else -> null
+                },
+            )
             if (decoded == null) {
                 val stream = H5600HealthDecoder.lifeLogStream(snapshot.first, snapshot.second)
                 Timber.w("H5600: no LifeLog header in ${stream.size} stream bytes; first bytes ${hex(stream, 20)}")
@@ -327,11 +340,12 @@ object H5600HealthIO {
     private fun saveRawDump(
         notifications: List<ByteArray>,
         announcements: Map<Int, Int>,
+        failure: String? = null,
     ) {
         val dump = rawDump ?: return
         try {
             val stream = H5600HealthDecoder.lifeLogStream(notifications, announcements)
-            dump.save(H5600Capture(notifications, announcements, stream), System.currentTimeMillis())
+            dump.save(H5600Capture(notifications, announcements, stream, failure), System.currentTimeMillis())
         } catch (t: Throwable) {
             Timber.w(t, "H5600: could not keep the raw transfer")
         }
