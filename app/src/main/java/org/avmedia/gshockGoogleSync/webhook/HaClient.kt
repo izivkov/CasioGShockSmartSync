@@ -115,8 +115,12 @@ class HaClient(
         val hook = "${cfg.baseUrl}/api/webhook/${reg.webhookId}"
         val fingerprint = HaSensors.fingerprint(sensors)
         if (reg.sensorsHash != fingerprint) {
+            // register_sensor carries a state and HA shows it: a null would turn a known value to unknown.
+            // So: the value of this job, else the last one sent (persisted), else null for a sensor never sent.
+            val lastSent = store.loadSent().states
             for (s in sensors) {
-                val r = transport.post(hook, HaPayloads.registerSensor(s, job.states[s.uniqueId], job.attributes?.get(s.uniqueId)), null)
+                val state = job.states[s.uniqueId] ?: lastSent[s.uniqueId]
+                val r = transport.post(hook, HaPayloads.registerSensor(s, state, job.attributes?.get(s.uniqueId)), null)
                 if (gone(r, hook)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }
             }
