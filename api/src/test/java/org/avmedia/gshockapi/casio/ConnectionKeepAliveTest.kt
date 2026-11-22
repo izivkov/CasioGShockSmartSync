@@ -24,7 +24,10 @@ class ConnectionKeepAliveTest {
         ConnectionKeepAlive.clock = { 1_700_000_000_000L }
         ConnectionKeepAlive.clearEvents()
         ConnectionSetup.busy = { false }
+        ConnectionSetup.timeWriter = { timeWrites++ }
     }
+
+    private var timeWrites = 0
 
     @After fun restore() {
         ConnectionKeepAlive.writer = ConnectionWriter
@@ -79,14 +82,31 @@ class ConnectionKeepAliveTest {
         assertEquals(listOf(0x11, 0x3B, 0x3A), fake.requests)
         receive("0x3A 00 01 02 03 04 05 06 07 08 09 10 11")
         assertEquals(listOf(0x3A, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0xDC, 0x05, 0x09, 0x10, 0x11), fake.all[2])
+        finishWithName()
     }
 
-    @Test fun otherKindsStopAfterTheBleSetting() {
+    private fun finishWithName() {
+        assertEquals(0x23, fake.requests.last())
+        receive("0x23 41 42 43")
+        assertEquals(listOf(0x23, 0x41, 0x42, 0x43), fake.all.last())
+        assertEquals(0x28, fake.requests.last())
+        assertEquals("the time write runs on every connection", 1, timeWrites)
+    }
+
+    @Test fun kindFourteenAlsoRunsNameConditionAndTimeWrite() {
+        ConnectionSetup.reset()
+        receive("0x10 00 00 00 00 00 00 00 0E 00")
+        receive("0x11 01 02 03 04 04 06 07 08")
+        finishWithName()
+        assertTrue(fake.requests.none { it == 0x3A || it == 0x3B })
+    }
+
+    @Test fun otherKindsSkipThe3AAnd3BSteps() {
         ConnectionSetup.reset()
         receive("0x10 00 00 00 00 00 00 00 01 00")
         receive("0x11 01 02 03 04 04 06 07 08")
         assertEquals(1, fake.all.size)
-        assertEquals(listOf(0x11), fake.requests)
+        assertEquals(listOf(0x11, 0x23), fake.requests)
         assertEquals(0x00, fake.all[0][5])
     }
 
@@ -99,7 +119,8 @@ class ConnectionKeepAliveTest {
         ConnectionSetup.reset()
         receive("0x10 00 00 00 00 00 00 00 01 00")
         receive("0x11 01 02 03 04 04 06 07 08")
+        receive("0x23 41")
         receive("0x11 01 02 03 04 04 06 07 08")
-        assertEquals("a finished setup does not answer a second 0x11", 1, fake.all.size)
+        assertEquals("a finished setup does not answer a second 0x11", 2, fake.all.size)
     }
 }

@@ -224,7 +224,6 @@ class SessionManager @Inject constructor(
     /** Ready session of an always-connected watch (the H5600 family and the ECB). */
     private fun keepsAcrossDrops(session: Session): Boolean {
         val state = session.state.value
-        if (true) return false
         if (state.phase !is SessionPhase.Ready) return false
         return state.isAlwaysConnected || WatchModelOverride.isAlwaysConnected(state.watch.name)
     }

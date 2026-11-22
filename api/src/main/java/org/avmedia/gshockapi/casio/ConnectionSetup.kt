@@ -1,5 +1,8 @@
 package org.avmedia.gshockapi.casio
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.utils.Utils
 
 /**
@@ -12,19 +15,32 @@ import org.avmedia.gshockapi.utils.Utils
  * Never answers a frame it did not ask for.
  */
 object ConnectionSetup {
-    private enum class Step { IDLE, WAIT_KIND, WAIT_11, WAIT_3B, WAIT_3A, DONE }
+    private enum class Step { IDLE, WAIT_KIND, WAIT_11, WAIT_3B, WAIT_3A, WAIT_23, DONE }
 
     private const val CODE_KIND = 0x10
     private const val CODE_BLE = 0x11
     private const val CODE_3A = 0x3A
     private const val CODE_3B = 0x3B
-    private val ALWAYS_CONNECT_KINDS = setOf(9, 10)
+    private const val CODE_NAME = 0x23
+    private const val CODE_CONDITION = 0x28
+    private val ALWAYS_CONNECT_KINDS = setOf(9, 10) // the owner's H5600 reports 14 (2026-11-22): it gets the common steps only
 
     @Volatile private var step = Step.IDLE
     private var reconnectKind = false
 
     /** Set by the transfer code: while a LifeLog transfer runs the setup does not start. */
     @Volatile var busy: () -> Boolean = { org.avmedia.gshockapi.io.H5600HealthIO.isActive }
+
+    /**
+     * The end of Casio's setup, run on every connection (kind 14 included): the time and the DST values.
+     * The default hands them to the library's own time setter.
+     */
+    @Volatile var timeWriter: () -> Unit = {
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching { org.avmedia.gshockapi.io.TimeIO.set() }
+                .onFailure { ConnectionKeepAlive.log("time write failed: ${it.message}") }
+        }
+    }
 
     fun reset() {
         step = Step.WAIT_KIND
@@ -55,8 +71,27 @@ object ConnectionSetup {
             step = Step.WAIT_3B
             ConnectionKeepAlive.writer.request(CODE_3B)
         } else {
-            step = Step.DONE
+            nextName()
         }
+    }
+
+    /** Every kind: read the watch name and write it back (Casio does so every time). */
+    private fun nextName() {
+        step = Step.WAIT_23
+        ConnectionKeepAlive.writer.request(CODE_NAME)
+    }
+
+    fun on23(data: String) {
+        if (step != Step.WAIT_23) return
+        val b = bytes(data)
+        if (b.firstOrNull() != CODE_NAME) return
+        step = Step.DONE
+        ConnectionKeepAlive.writer.writeAllFeatures(b.map { it.toByte() }.toByteArray())
+        ConnectionKeepAlive.log("0x23 name written back")
+        ConnectionKeepAlive.writer.request(CODE_CONDITION)
+        ConnectionKeepAlive.log("0x28 watch condition requested")
+        timeWriter()
+        ConnectionKeepAlive.log("time and DST write started")
     }
 
     fun on3b(data: String) {
@@ -77,6 +112,6 @@ object ConnectionSetup {
         b[9] = 0x05
         ConnectionKeepAlive.writer.writeAllFeatures(b.map { it.toByte() }.toByteArray())
         ConnectionKeepAlive.log("0x3A written with bytes 7 and 8 set to DC 05")
-        step = Step.DONE
+        nextName()
     }
 }

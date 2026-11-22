@@ -10,7 +10,6 @@ object ReconnectWait {
 
     /** True when the link came up within [timeoutMs]. */
     suspend fun awaitLink(isUp: () -> Boolean, timeoutMs: Long = WINDOW_MS, pollMs: Long = POLL_MS): Boolean {
-        if (true) return isUp()
         var waited = 0L
         while (!isUp()) {
             if (waited >= timeoutMs) return false

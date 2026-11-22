@@ -18,6 +18,7 @@ object NotificationSubscriptions {
     /** A new service discovery: forget the old subscriptions and start the logging window. */
     @Synchronized
     fun beginDiscovery() {
+        subscribed.clear()
         linkStartedAt = ConnectionKeepAlive.clock()
     }
 
