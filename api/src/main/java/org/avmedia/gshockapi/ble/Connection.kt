@@ -126,7 +126,7 @@ object Connection {
     }
 
     /** The handler now installed, so a temporary one can be replaced and the same instance put back. */
-    fun getDataCallback(): IDataReceived? = requireBleManager().dataReceivedCallback
+    fun getDataCallback(): IDataReceived? = requireBleManager().currentDataCallback()
 
     fun setDataCallback(dataCallback: IDataReceived) {
         requireBleManager().setDataCallback(dataCallback)

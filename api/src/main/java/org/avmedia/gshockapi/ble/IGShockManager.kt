@@ -47,6 +47,9 @@ interface GShock {
 
     fun setDataCallback(dataCallback: IDataReceived?)
 
+    /** The handler now installed (null when none). */
+    fun currentDataCallback(): IDataReceived?
+
     fun enableNotifications()
 
     var connectionState: ConnectionState
@@ -194,6 +197,8 @@ private class GShockManagerImpl(
     override fun setDataCallback(dataCallback: IDataReceived?) {
         dataReceivedCallback = dataCallback
     }
+
+    override fun currentDataCallback(): IDataReceived? = dataReceivedCallback
 
     override fun enableNotifications() {
         // No-op: notifications are now enabled for all notifiable characteristics
