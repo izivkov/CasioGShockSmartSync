@@ -26,7 +26,7 @@ private fun haOk(c: HaCall) =
     else HaResponse(200, """{"success":true}""")
 
 /** Answers from [answer]; the default is a good reply. */
-private class HaFakeTransport(val answer: (HaCall) -> HaResponse = { haOk(it) }, val get: HaResponse = HaResponse(200, """{"message":"API running."}""")) : HaTransport {
+private class HaFakeTransport(val get: HaResponse = HaResponse(200, """{"message":"API running."}"""), val answer: (HaCall) -> HaResponse = { haOk(it) }) : HaTransport {
     val calls = ArrayList<HaCall>()
     val gets = ArrayList<String>()
     override fun get(url: String, bearer: String?): HaResponse { gets += url; return get }
