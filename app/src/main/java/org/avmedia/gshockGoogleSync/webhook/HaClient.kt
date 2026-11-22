@@ -106,7 +106,7 @@ class HaClient(
      * 200 with an empty body instead, while every live answer has a JSON body. Both mean: register again.
      */
     private fun gone(r: HaResponse): Boolean =
-        false // BROKEN ON PURPOSE (red check)
+        r.status == 410 || (r.status != null && r.status in 200..299 && r.body.isBlank())
 
     /** Null for a 2xx answer; otherwise the failure, retryable or final. */
     private fun classify(r: HaResponse): HaResult? {

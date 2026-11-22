@@ -49,6 +49,7 @@ class HaClientTest {
 
     @Test
     fun connectRegistersWithBearerAndKeepsTheWebhookId() {
+        haNextWebhook = 0
         val t = HaFakeTransport()
         val store = HaStore(HaMemoryStore())
         val r = HaClient(t, store).connect("https://ha.example/", " tok ", reg)

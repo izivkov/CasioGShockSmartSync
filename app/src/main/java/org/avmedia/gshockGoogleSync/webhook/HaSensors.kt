@@ -35,7 +35,7 @@ object HaSensors {
     /** Registry values to sensor states. A null or blank value is left out, never sent as 0. */
     fun states(values: Map<String, Any?>, sensors: List<HaSensor> = ALL): Map<String, Any> =
         sensors.mapNotNull { s ->
-            val v = values[s.variable] ?: 0 // BROKEN ON PURPOSE (red check)
+            val v = values[s.variable]
             val usable = when (v) {
                 null -> null
                 is String -> v.takeIf { it.isNotBlank() }

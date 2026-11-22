@@ -12,7 +12,7 @@ object HaPayloads {
 
     /** Stable for one watch address: "gshock-" + address without colons, lower case. */
     fun deviceId(address: String): String =
-        "gshock-" + address.lowercase() // BROKEN ON PURPOSE (red check)
+        "gshock-" + address.filter { it.isLetterOrDigit() }.lowercase()
 
     /** HA shows this as the device; the manufacturer is a separate field. */
     fun deviceName(watchName: String): String {
