@@ -27,6 +27,10 @@ data class H5600HealthData(
     val lifeLogPending: Boolean? = null,
     /** True when the watch reports workout (ActivityLog) data pending; null when unknown. */
     val activityLogPending: Boolean? = null,
+    /** Sleep and Nightly Recharge from sections 0x53 and 0x5A; null on a transfer without them. */
+    val sleep: SleepData? = null,
+    /** Blood oxygen, breathing exercises, cardio status and stairs; null on a transfer without them. */
+    val body: BodyReadings? = null,
 )
 
 /** Daily heart-rate values in beats per minute. A field is null when the watch has no valid value. */

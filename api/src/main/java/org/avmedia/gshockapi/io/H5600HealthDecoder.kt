@@ -57,6 +57,12 @@ object H5600HealthDecoder {
     private const val TAG_ENERGY = 0x51
     private const val TAG_HEART_RATE = 0x52
     private const val TAG_CURRENT_STATS = 0x65
+    private const val TAG_SLEEP_STAGES = 0x53
+    private const val TAG_STAIRS = 0x57
+    private const val TAG_BREATHING = 0x58
+    private const val TAG_SPO2 = 0x59
+    private const val TAG_NIGHT = 0x5A
+    private const val TAG_CARDIO = 0x5B
     // Activity times in the current-stats frame: each is hour, minute, second bytes (layout from
     // parse_lifelog.py, matched on 2026-10-26 and 2026-11-16).
     private const val ACTIVITY_RUN_OFFSET = 16
@@ -69,7 +75,7 @@ object H5600HealthDecoder {
     private const val WATCH_CONDITION_LIFELOG_BYTE = 9
     private const val WATCH_CONDITION_ACTIVITY_BYTE = 8
     private val HEADER_MAGIC = byteArrayOf(0x00, 0x0F, 0x00, 0x00, 0x00)
-    private val FRAME_ORDER = intArrayOf(0x65, 0x50, 0x51, 0x52, 0x53, 0x56, 0x58, 0x59, 0x5A, 0x5B, 0x63, 0x72)
+    private val FRAME_ORDER = intArrayOf(0x65, 0x50, 0x51, 0x52, 0x53, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x63, 0x72)
 
     /**
      * Decodes a transfer.
@@ -156,7 +162,19 @@ object H5600HealthDecoder {
                 energyIsProvisional = true,
                 heartRate = heartRate,
                 activity = activity,
-            recentHeartRate = recentHeartRate(stream, spans),
+                recentHeartRate = recentHeartRate(stream, spans),
+                sleep =
+                    H5600SleepDecoder.decode(
+                        frameBody(stream, spans, TAG_SLEEP_STAGES),
+                        frameBody(stream, spans, TAG_NIGHT),
+                    ),
+                body =
+                    H5600BodyDecoder.decode(
+                        spo2 = frameBody(stream, spans, TAG_SPO2),
+                        breathing = frameBody(stream, spans, TAG_BREATHING),
+                        cardio = frameBody(stream, spans, TAG_CARDIO),
+                        stairs = frameBody(stream, spans, TAG_STAIRS),
+                    ),
                 stepGoal = stepGoal,
                 lifeLogPending = watchFlags?.let { it[WATCH_CONDITION_LIFELOG_BYTE].toInt() != 0 },
                 activityLogPending = watchFlags?.let { it[WATCH_CONDITION_ACTIVITY_BYTE].toInt() != 0 },

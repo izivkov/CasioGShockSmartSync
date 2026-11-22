@@ -1,6 +1,10 @@
 package org.avmedia.gshockGoogleSync.webhook
 
 import org.avmedia.gshockGoogleSync.ui.health.resolveDistanceKm
+import org.avmedia.gshockapi.model.ActivitySeconds
+import org.avmedia.gshockapi.model.H5600HealthData
+import org.avmedia.gshockapi.model.HeartRateSamples
+import org.avmedia.gshockapi.model.HeartRateSummary
 import org.avmedia.gshockapi.model.StepCounterData
 
 /**
@@ -36,7 +40,7 @@ object HealthVariables {
         "health.slot_minutes" to "Length of one entry of health.slots, minutes",
         "health.slots" to "Steps per 5-minute slot, newest first (entry i ends i * 5 minutes before health.recorded_at); null = slot skipped as implausible",
         "health.steps_by_hour" to "Steps per hour of the day (24 entries, null = no data; partial when only recent slots were transferred)",
-    )
+    ) + SleepVariables.DESCRIPTIONS
 
     val NAMES: List<String> = DESCRIPTIONS.keys.toList()
 
@@ -52,6 +56,17 @@ object HealthVariables {
                 (0..intervals.maxOf { it.index }).map { byIndex[it] }
             }
         }
+        return base(data, h, hr, recent, act, slots) + SleepVariables.values(data)
+    }
+
+    private fun base(
+        data: StepCounterData?,
+        h: H5600HealthData?,
+        hr: HeartRateSummary?,
+        recent: HeartRateSamples?,
+        act: ActivitySeconds?,
+        slots: List<Int?>?,
+    ): Map<String, Any?> {
         return linkedMapOf(
             "health.steps_today" to data?.currentDaySteps,
             "health.recorded_at" to data?.timestamp?.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME),

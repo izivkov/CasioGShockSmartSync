@@ -234,6 +234,13 @@ object WatchVariables {
             }
         }
 
+        // Decoded health settings (face, heart-rate measurement, bedtime, night window, unit, profile, smart alarm).
+        for (def in WatchSettingVariables.DEFS) {
+            list += Variable(def.name, def.description, needsWatch = true) {
+                if (h5600()) def.value(WatchSettingVariables.frames(rawSettings(it))) else null
+            }
+        }
+
         // World cities 1 to 5 (name only).
         for (i in 1..5) {
             list += Variable("watch.world_city.$i", "Name of world city $i on the watch", needsWatch = true) {

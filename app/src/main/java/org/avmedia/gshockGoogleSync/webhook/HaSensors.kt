@@ -75,6 +75,37 @@ object HaSensors {
             "watch_settings_raw", "Watch settings (raw)", "watch.raw_settings_read_at", "timestamp", null, null, "mdi:code-braces", "diagnostic",
             attributes = RawSettings.CODES.associate { RawSettings.name(it) to RawSettings.variable(it) },
         ),
+        // Sleep and night (LifeLog 0x53, 0x5A). The time base is not yet checked on a real night: names say so.
+        HaSensor("sleep_score", "Sleep score", "health.sleep_score", null, null, "measurement", "mdi:sleep", attributes = mapOf("night" to "health.sleep_date")),
+        HaSensor("recharge_status", "Nightly Recharge status", "health.recharge_status", null, null, "measurement", "mdi:battery-heart-variant", attributes = mapOf("level" to "health.recharge_level")),
+        HaSensor("sleep_fell_asleep", "Fell asleep (unconfirmed)", "health.sleep_fell_asleep", "timestamp", null, null, "mdi:bed-clock", convert = Convert.LOCAL_TO_OFFSET),
+        HaSensor("sleep_woke_up", "Woke up (unconfirmed)", "health.sleep_woke_up", "timestamp", null, null, "mdi:alarm", convert = Convert.LOCAL_TO_OFFSET),
+        HaSensor("sleep_total", "Sleep total (stages unconfirmed)", "health.sleep_total_min", "duration", "min", "measurement", "mdi:bed", attributes = mapOf("stages" to "health.sleep_stages")),
+        HaSensor("sleep_deep", "Deep sleep", "health.sleep_deep_min", "duration", "min", "measurement", "mdi:sleep"),
+        HaSensor("sleep_light", "Light sleep", "health.sleep_light_min", "duration", "min", "measurement", "mdi:sleep"),
+        HaSensor("sleep_rem", "REM sleep", "health.sleep_rem_min", "duration", "min", "measurement", "mdi:sleep"),
+        HaSensor("sleep_awake", "Sleep interruptions", "health.sleep_awake_min", "duration", "min", "measurement", "mdi:sleep-off"),
+        HaSensor("sleep_hr", "Heart rate in the night", "health.sleep_hr", null, "bpm", "measurement", "mdi:heart-pulse"),
+        HaSensor("sleep_breathing", "Breathing rate in the night", "health.sleep_breathing", null, "br/min", "measurement", "mdi:lungs"),
+        HaSensor("spo2", "Blood oxygen", "health.spo2", null, "%", "measurement", "mdi:water-percent", attributes = mapOf("measured_at" to "health.spo2_at")),
+        HaSensor(
+            "cardio_load", "Cardio load ratio", "health.cardio_load_ratio", null, null, "measurement", "mdi:heart-flash",
+            attributes = mapOf("feedback" to "health.cardio_feedback", "strain" to "health.cardio_strain", "tolerance" to "health.cardio_tolerance"),
+        ),
+        HaSensor("breathing_exercise", "Last breathing exercise", "health.breathing_exercise_at", "timestamp", null, null, "mdi:meditation", convert = Convert.LOCAL_TO_OFFSET),
+        HaSensor("stairs_up", "Floors up (unconfirmed)", "health.stairs_up", null, null, "measurement", "mdi:stairs-up"),
+        HaSensor("stairs_down", "Floors down (unconfirmed)", "health.stairs_down", null, null, "measurement", "mdi:stairs-down"),
+        // Decoded watch settings (read from the raw cache).
+        HaSensor(
+            "watch_face", "Watch face", "watch.face_index", null, null, null, "mdi:watch", "diagnostic",
+            attributes = (1..4).associate { "slot_$it" to "watch.face_item.$it" },
+        ),
+        HaSensor("hr_measurement", "Heart rate measurement", "watch.hr_measurement", null, null, null, "mdi:heart-cog", "diagnostic"),
+        HaSensor("bedtime", "Bedtime", "watch.bedtime", null, null, null, "mdi:bed-clock", "diagnostic", attributes = mapOf("wake_up" to "watch.wake_up_time")),
+        HaSensor(
+            "smart_alarm", "Smart alarm", "watch.smart_alarm_time", null, null, null, "mdi:alarm-check", "diagnostic",
+            attributes = mapOf("on" to "watch.smart_alarm_on", "window_min" to "watch.smart_alarm_window_min"),
+        ),
         HaSensor("watch_settings", "Watch settings", "watch.settings.time_format", null, null, null, "mdi:cog", "diagnostic", attributes = SETTINGS_ATTRIBUTES),
     )
 
