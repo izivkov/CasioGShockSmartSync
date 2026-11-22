@@ -222,4 +222,32 @@ class WatchSettingCodecsTest {
         assertEquals(SmartAlarmCodec.Setting(7, 0, true, false, 45), SmartAlarmCodec.parse(frame(0x50, 7, 0, 0b01, 45)))
         assertEquals(SmartAlarmCodec.Setting(7, 0, false, true, 15), SmartAlarmCodec.parse(frame(0x50, 7, 0, 0b10, 15)))
     }
+
+    @Test
+    fun onlyFacesOneToFourAreWritten() {
+        val before = frame(0x51, 2, 0, 10, 12, 19, 0x77)
+        assertNull(WatchFaceCodec.withFace(before, 0))
+        assertNull(WatchFaceCodec.withFace(before, 5))
+        assertNull(WatchFaceCodec.withFace(before, -1))
+        assertNull(WatchFaceCodec.withFace(before, 256))
+        for (f in 1..4) assertEquals(f.toByte(), WatchFaceCodec.withFace(before, f)!![1])
+        assertEquals("Face 2 (custom)", WatchFaceCodec.faceName(WatchFaceCodec.CUSTOM_FACE))
+    }
+
+    @Test
+    fun theRawFaceIndexStillWorksForDecoding() {
+        assertEquals(7.toByte(), WatchFaceCodec.withFaceRaw(frame(0x51, 2, 0, 10, 12, 19, 0x77), 7)!![1])
+    }
+
+    @Test
+    fun aTopRightWriteChangesOnlySlotThreesByte() {
+        val before = frame(0x51, 2, 0, 10, 12, 19, 0x77)
+        val after = WatchFaceCodec.withTopRight(before, 6)!!
+        assertEquals(setOf(4), changed(before, after))
+        assertEquals(WatchFaceCodec.TOP_RIGHT_BYTES, changed(before, after))
+        assertEquals(6.toByte(), after[4])
+        // The bytes of slots 1, 2 and 4, the face and the trailing byte are kept.
+        assertEquals(listOf<Byte>(0x51, 2, 0, 10, 6, 19, 0x77), after.toList())
+        assertNull(WatchFaceCodec.withTopRight(before, 20))
+    }
 }

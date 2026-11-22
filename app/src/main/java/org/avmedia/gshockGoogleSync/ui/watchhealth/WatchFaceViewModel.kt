@@ -43,7 +43,15 @@ class WatchFaceViewModel @Inject constructor(private val access: WatchSettingsAc
         }
     }
 
-    fun setFace(face: Int) = write("Face", null, WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFace(it, face) }
+    /** Faces 1 to 4 only: [WatchFaceCodec.withFace] refuses anything else, so nothing is written for it. */
+    fun setFace(face: Int) = write(WatchFaceCodec.faceName(face), null, WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFace(it, face) }
+
+    /** The top-right item of the custom face (slot 3). Slots 1, 2 and 4 are never written from the screen. */
+    fun setTopRight(item: Int) =
+        write("Top right (${WatchFaceCodec.itemName(item)})", null, WatchFaceCodec.TOP_RIGHT_BYTES) { WatchFaceCodec.withTopRight(it, item) }
+
+    /** Decoding only (Details): any face index. */
+    fun setFaceRaw(face: Int) = write("Face index $face", null, WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFaceRaw(it, face) }
 
     fun setItem(
         slot: Int,

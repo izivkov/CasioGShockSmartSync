@@ -5,11 +5,28 @@ package org.avmedia.gshockapi.io
  * index 1 to 4 = the four items of the user custom face (one item code each). Frame byte = index + 1.
  *
  * Pure: bytes in, bytes out. A change copies the frame and replaces only the byte it names.
- * Which slot of 1 to 4 is top right, and which face index is the custom face, are not known yet.
+ * Owner's test on the watch: face 0 does nothing; faces 1 to 4 each change the face, and face 2 is the custom face.
+ * On the custom face only slot 3 changes anything (the top-right item); slots 1, 2 and 4 are never written.
  */
 object WatchFaceCodec {
     const val CODE = 0x51
     const val SLOTS = 4
+    /** The faces the watch has: 1 to 4. Face 0 does nothing and is refused. */
+    val FACES: IntRange = 1..4
+
+    /** The custom face, and the slot of it that does something: the top-right item. */
+    const val CUSTOM_FACE = 2
+    const val TOP_RIGHT_SLOT = 3
+
+    fun faceName(face: Int): String =
+        when (face) {
+            1 -> "Face 1"
+            CUSTOM_FACE -> "Face 2 (custom)"
+            3 -> "Face 3"
+            4 -> "Face 4"
+            else -> "Face $face"
+        }
+
     private const val FACE_AT = 1
     private const val FIRST_ITEM_AT = 2
     private const val MIN_FRAME = FIRST_ITEM_AT + SLOTS
@@ -36,14 +53,29 @@ object WatchFaceCodec {
         return Face(frame[FACE_AT].toInt() and 0xFF, (0 until SLOTS).map { frame[FIRST_ITEM_AT + it].toInt() and 0xFF })
     }
 
-    /** The frame with the selected face replaced; every other byte stays. */
+    /** The frame with the selected face replaced (faces 1 to 4 only; anything else is refused); every other byte stays. */
     fun withFace(
+        frame: ByteArray,
+        face: Int,
+    ): ByteArray? = if (face in FACES) withFaceRaw(frame, face) else null
+
+    /** Any face index 0 to 255, for decoding only (the Details part of the screen). */
+    fun withFaceRaw(
         frame: ByteArray,
         face: Int,
     ): ByteArray? {
         if (parse(frame) == null || face !in 0..0xFF) return null
         return frame.copyOf().also { it[FACE_AT] = face.toByte() }
     }
+
+    /** The top-right item of the custom face: slot 3 only, every other byte stays. */
+    fun withTopRight(
+        frame: ByteArray,
+        item: Int,
+    ): ByteArray? = withItem(frame, TOP_RIGHT_SLOT, item)
+
+    /** Frame bytes that [withTopRight] may change. */
+    val TOP_RIGHT_BYTES: Set<Int> get() = itemBytes(TOP_RIGHT_SLOT)
 
     /** The frame with item [slot] (1 to 4) set to [item] (0 to 19); every other byte stays. */
     fun withItem(
