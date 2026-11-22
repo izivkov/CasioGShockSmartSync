@@ -21,7 +21,7 @@ object WatchSettingVariables {
     private fun <T> parsed(frames: Map<String, ByteArray>, code: Int, parse: (ByteArray) -> T?): T? =
         frames[RawSettings.name(code)]?.let(parse)
 
-    private val HEART_MODES = listOf("off", "activities", "always")
+    private val HEART_MODES = listOf("always", "activities", "off")
     private const val UNCONFIRMED_SLOT = "UNCONFIRMED which slot of 1 to 4 is top right"
 
     val DEFS: List<Def> = listOf(

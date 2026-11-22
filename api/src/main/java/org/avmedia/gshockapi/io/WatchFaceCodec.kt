@@ -11,7 +11,7 @@ object WatchFaceCodec {
     const val CODE = 0x51
     const val SLOTS = 4
     private const val FACE_AT = 1
-    private const val FIRST_ITEM_AT = 2
+    private const val FIRST_ITEM_AT = 3
     private const val MIN_FRAME = FIRST_ITEM_AT + SLOTS
 
     /** Face item names by code, 0 to 19. Code 0x0F has no recovered name. */

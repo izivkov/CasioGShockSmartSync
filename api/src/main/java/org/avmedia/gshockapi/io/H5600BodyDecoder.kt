@@ -41,7 +41,7 @@ object H5600BodyDecoder {
 
     private fun spo2Reading(record: ByteArray): Spo2Reading? {
         val time = Bcd.dateTime(record, 0) ?: return null
-        val percent = Bcd.validU8(record[6])?.takeIf { it in 50..100 } ?: return null
+        val percent = Bcd.validU8(record[7])?.takeIf { it in 50..100 } ?: return null
         return Spo2Reading(time, percent)
     }
 
@@ -54,7 +54,7 @@ object H5600BodyDecoder {
         val date = Bcd.date(record, 0) ?: return null
         val buffer = ByteBuffer.wrap(record).order(ByteOrder.LITTLE_ENDIAN)
         fun u16(at: Int) = (buffer.getShort(at).toInt() and 0xFFFF).takeIf { it <= MAX_CARDIO_VALUE }
-        val ratio = buffer.getFloat(4).takeIf { it.isFinite() && it >= 0f && it <= MAX_LOAD_RATIO }
+        val ratio = buffer.getFloat(5).takeIf { it.isFinite() && it >= 0f && it <= MAX_LOAD_RATIO }
         val feedback = Bcd.validU8(record[8])?.takeIf { it in 1..4 }
         val status = CardioStatus(date, ratio, feedback, u16(9), u16(11))
         val empty = ratio == null && feedback == null && status.strain == null && status.tolerance == null

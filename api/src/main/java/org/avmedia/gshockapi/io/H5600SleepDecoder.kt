@@ -72,7 +72,7 @@ object H5600SleepDecoder {
     }
 
     private fun night(record: ByteArray): SleepNight? {
-        val date = Bcd.date(record, 0) ?: return null
+        val date = Bcd.date(record, 1) ?: return null
         val buffer = ByteBuffer.wrap(record).order(ByteOrder.LITTLE_ENDIAN)
         fun u8(at: Int) = Bcd.validU8(record[at])
         fun u16(at: Int) = (buffer.getShort(at).toInt() and 0xFFFF).takeIf { it < 0xFFFE }
@@ -93,7 +93,7 @@ object H5600SleepDecoder {
         return SleepNight(
             date = date,
             zoneQuarterHours = record[3].toInt().takeIf { it != -1 && it != -2 },
-            sleepScore = u8(30)?.takeIf { it in 1..100 },
+            sleepScore = u8(31)?.takeIf { it in 1..100 },
             rechargeStatus = u8(5)?.takeIf { it in 1..5 },
             rechargeLevel = u8(6),
             fellAsleep = fellAsleep,
