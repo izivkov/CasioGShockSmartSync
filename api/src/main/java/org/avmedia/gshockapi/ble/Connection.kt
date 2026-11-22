@@ -25,6 +25,9 @@ object Connection {
     private lateinit var appContext: Context
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    /** Kept across manager re-creation: a fresh manager would otherwise drop every notification, `49 00` included. */
+    @Volatile private var lastDataCallback: IDataReceived? = null
+
     fun isInitialized(): Boolean = bleManager != null
 
     @Synchronized
@@ -34,7 +37,7 @@ object Connection {
         }
 
         if (bleManager == null) {
-            bleManager = IGShockManager(appContext)
+            bleManager = IGShockManager(appContext).also { it.setDataCallback(lastDataCallback) }
             Timber.i("Created BLE manager for connection lifecycle")
         }
     }
@@ -43,7 +46,7 @@ object Connection {
         bleManager ?: synchronized(this) {
             bleManager ?: run {
                 check(::appContext.isInitialized) { "Connection.init(context) must be called first" }
-                IGShockManager(appContext).also { bleManager = it }
+                IGShockManager(appContext).also { it.setDataCallback(lastDataCallback); bleManager = it }
             }
         }
 
@@ -129,6 +132,7 @@ object Connection {
     fun getDataCallback(): IDataReceived? = requireBleManager().currentDataCallback()
 
     fun setDataCallback(dataCallback: IDataReceived) {
+        lastDataCallback = dataCallback
         requireBleManager().setDataCallback(dataCallback)
     }
 

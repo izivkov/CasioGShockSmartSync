@@ -121,7 +121,14 @@ class SessionManager @Inject constructor(
             Timber.w("Ignoring setup complete: no active session")
             return
         }
+        if (session.state.value.link != LinkState.UP && isForDifferentDevice(session, device)) {
+            // Another watch connected while the first was away: that visit is over.
+            session.close("Another watch connected")
+            onConnecting(device).markSetupComplete()
+            return
+        }
         device?.let(session::attachDevice)
+        session.onLinkRestored()
         session.markSetupComplete()
     }
 
@@ -167,6 +174,14 @@ class SessionManager @Inject constructor(
                 Timber.w("Ignoring '$reason' for ${device?.address}: current session is for ${current.device?.address}")
                 return
             }
+            if (!isError && keepsAcrossDrops(current)) {
+                // An always-connected watch drops by design: stay on the screen, keep the data, wait for it.
+                if (current.state.value.link == LinkState.UP) {
+                    Timber.i("Link dropped ('$reason'): session ${current.id} waits for the watch")
+                    current.onLinkDropped()
+                }
+                return
+            }
             current.close(reason, device, isError)
         }
     }
@@ -205,6 +220,14 @@ class SessionManager @Inject constructor(
 
     private fun ensureActiveSession(device: BluetoothDevice?): Session =
         activeSession ?: createSession(device)
+
+    /** Ready session of an always-connected watch (the H5600 family and the ECB). */
+    private fun keepsAcrossDrops(session: Session): Boolean {
+        val state = session.state.value
+        if (true) return false
+        if (state.phase !is SessionPhase.Ready) return false
+        return state.isAlwaysConnected || WatchModelOverride.isAlwaysConnected(state.watch.name)
+    }
 
     private fun isForDifferentDevice(session: Session, device: BluetoothDevice?): Boolean {
         val sessionDevice = session.device ?: return false

@@ -79,8 +79,6 @@ private class GShockManagerImpl(
     private var writeCharacteristicHolderConvoy: BluetoothGattCharacteristic? = null
     private var writeCharacteristicHolderLinkLoss: BluetoothGattCharacteristic? = null
 
-    private val subscribedCharacteristics = mutableSetOf<UUID>()
-
     var dataReceivedCallback: IDataReceived? = null
     private lateinit var device: BluetoothDevice
     override var connectionState = ConnectionState.DISCONNECTED
@@ -119,14 +117,16 @@ private class GShockManagerImpl(
             Timber.i("UUID: $key, Properties: ${propsToString(info.properties)}")
         }
 
+        // A new link: notifications must be enabled again (the descriptors are per connection).
+        org.avmedia.gshockapi.casio.NotificationSubscriptions.beginDiscovery()
+
         // Subscribe to notifications on every characteristic that supports them.
         // Mirrors the Python subscribe-all approach — no per-model whitelists needed.
         gatt.services.forEach { service ->
             service.characteristics.forEach { char ->
                 val hasNotify = char.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
                 val hasIndicate = char.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0
-                if ((hasNotify || hasIndicate) && !subscribedCharacteristics.contains(char.uuid)) {
-                    subscribedCharacteristics.add(char.uuid)
+                if ((hasNotify || hasIndicate) && org.avmedia.gshockapi.casio.NotificationSubscriptions.claim(char.uuid)) {
 
                     setNotificationCallback(char).with { _, data ->
                         val hexData =
@@ -134,6 +134,7 @@ private class GShockManagerImpl(
                                 String.format("%02X", it)
                             }
                         Timber.d("Notification from ${char.uuid}: $hexData")
+                        org.avmedia.gshockapi.casio.NotificationSubscriptions.logNotification(char.uuid, hexData)
                         dataReceivedCallback?.dataReceived(hexData)
                     }
                     enableNotifications(char)
@@ -191,7 +192,7 @@ private class GShockManagerImpl(
         writeCharacteristicHolderConvoy = null
         writeCharacteristicHolderLinkLoss = null
         characteristicUUIDs.clear()
-        subscribedCharacteristics.clear()
+        org.avmedia.gshockapi.casio.NotificationSubscriptions.clear()
 
         if (isReady) {
             disconnect().enqueue()
@@ -444,9 +445,11 @@ private class GShockManagerImpl(
         data: ByteArray,
     ) {
         if (characteristicUUIDs.isEmpty()) {
-            ProgressEvents.onNext("ApiError", "Not connected to watch")
-            disconnect()
-            return
+            // The link is away (an always-connected watch drops by design): wait for it, else fail plainly.
+            if (!ReconnectWait.awaitLink({ characteristicUUIDs.isNotEmpty() && writeCharacteristicHolder != null })) {
+                ProgressEvents.onNext("ApiError", ReconnectWait.NOT_CONNECTED_MESSAGE)
+                return
+            }
         }
 
         if (!isServiceSupported(handle)) {

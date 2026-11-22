@@ -8,9 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.session.ConnectionButton
+import org.avmedia.gshockGoogleSync.session.LinkState
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
@@ -30,6 +33,8 @@ fun AppNavigationHost(
             companionDeviceCoordinator.checkPairedDevicesOrNotify()
         }
     }
+
+    val sessionState by viewModel.sessionState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -54,6 +59,7 @@ fun AppNavigationHost(
                 HaScreen(viewModel = hiltViewModel(), onBack = viewModel::closeHa)
             }
         }
+        LinkBar(sessionState.link, Modifier.align(Alignment.TopCenter))
     }
 }
 
@@ -70,5 +76,24 @@ private fun ContentSelector(viewModel: AppNavigationViewModel) {
                 onOpenWebhooks = viewModel::openWebhooks,
                 onOpenHa = viewModel::openHa
             )
+    }
+}
+
+/** A small bar while the watch's link is away: the screen and its data stay as they are. */
+@Composable
+internal fun LinkBar(link: LinkState, modifier: Modifier = Modifier) {
+    if (link == LinkState.UP) return
+    androidx.compose.material3.Surface(
+        modifier = modifier,
+        color = androidx.compose.material3.MaterialTheme.colorScheme.secondaryContainer,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
+    ) {
+        androidx.compose.material3.Text(
+            text = androidx.compose.ui.res.stringResource(
+                if (link == LinkState.RECONNECTING) R.string.link_reconnecting else R.string.link_lost
+            ),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+        )
     }
 }
