@@ -23,8 +23,8 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Unit tests
-        run: ./gradlew testGithubDebugUnitTest
+      - name: Unit tests (app and api; the api tests did not run before)
+        run: ./gradlew --continue testGithubDebugUnitTest :api:testDebugUnitTest
 
       # Records pictures of the screens (never compares, so a changed screen does not fail the run;
       # a screen that no longer compiles or renders does).
