@@ -23,7 +23,7 @@ object WorkoutExport {
     /** Three tables in one file, each led by a "# name" line and its header. Column names say "unconfirmed" where the unit is. */
     fun csv(workouts: List<WorkoutRow>, laps: List<WorkoutLapRow>, samples: List<WorkoutSampleRow>): String = buildString {
         table("workouts", WORKOUT_COLS, workouts.map {
-            listOf(it.startMs, it.sport, it.sportName, it.endMs, it.totalSec, it.distance, it.avgPace, it.avgSpeed, it.hrAvg, it.kcal, it.hrMax, it.hrMin, it.ascent, it.descent, it.cadenceAvg, it.lapCount, it.hasGps)
+            listOf(it.startMs, it.sport, it.sportName, it.endMs, it.totalSec, it.distance, it.avgPace, it.avgSpeed, it.kcal, it.hrAvg, it.hrMax, it.hrMin, it.ascent, it.descent, it.cadenceAvg, it.lapCount, it.hasGps)
         })
         append('\n')
         table("laps", LAP_COLS, laps.map {

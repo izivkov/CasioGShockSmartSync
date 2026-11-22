@@ -27,7 +27,7 @@ object WorkoutVariables {
         "workout.distance" to s?.summary?.distance,
         "workout.kcal" to s?.summary?.kcal,
         "workout.hr_avg" to s?.summary?.hrAvg,
-        "workout.hr_max" to s?.summary?.hrAvg,
+        "workout.hr_max" to s?.summary?.hrMax,
         "workout.unconfirmed" to s?.unconfirmed?.entries?.joinToString("; ") { "${it.key}: ${it.value}" },
     )
 }

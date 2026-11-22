@@ -46,7 +46,7 @@ data class Webhook(
         WebhookTrigger.WATCH_ACTION -> onWatchAction
         WebhookTrigger.SYNC -> onSync
         WebhookTrigger.HEALTH_DATA -> onHealthData
-        WebhookTrigger.WORKOUT -> onHealthData
+        WebhookTrigger.WORKOUT -> onWorkout
         WebhookTrigger.TEST -> true
     }
 

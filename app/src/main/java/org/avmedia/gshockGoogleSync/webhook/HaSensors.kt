@@ -100,7 +100,7 @@ object HaSensors {
         // Last workout (DW-H5600 activity log). Units the notes mark as likely say "unconfirmed" in the name.
         HaSensor("workout_sport", "Last workout", "workout.sport", null, null, null, "mdi:run", attributes = mapOf("unconfirmed" to "workout.unconfirmed")),
         HaSensor("workout_start", "Last workout start", "workout.start", "timestamp", null, null, "mdi:clock-start"),
-        HaSensor("workout_duration", "Last workout duration", "workout.duration_seconds", "duration", "min", null, "mdi:timer"),
+        HaSensor("workout_duration", "Last workout duration", "workout.duration_seconds", "duration", "min", null, "mdi:timer", convert = Convert.SECONDS_TO_MINUTES),
         HaSensor("workout_distance", "Last workout distance (unconfirmed unit, likely km)", "workout.distance", null, null, null, "mdi:map-marker-distance"),
         HaSensor("workout_kcal", "Last workout energy (unconfirmed)", "workout.kcal", null, "kcal", null, "mdi:fire"),
         HaSensor("workout_hr_avg", "Last workout average heart rate", "workout.hr_avg", null, "bpm", null, "mdi:heart-pulse"),
