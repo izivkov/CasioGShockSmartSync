@@ -15,7 +15,7 @@ import com.google.gson.GsonBuilder
 object TemplateRenderer {
     const val ALL = "all"
 
-    private val placeholder = Regex("""\{\{\s*([A-Za-z0-9_.\-]+)\s*}}""")
+    private val placeholder = Regex("""\{\{\s*([A-Za-z0-9_.\-]+)\s*\}\}""")
     private val gson = GsonBuilder().disableHtmlEscaping().create()
 
     data class Rendered(
