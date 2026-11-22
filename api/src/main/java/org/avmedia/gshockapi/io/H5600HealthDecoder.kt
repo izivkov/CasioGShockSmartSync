@@ -177,7 +177,10 @@ object H5600HealthDecoder {
     }
 
     /** Concatenates the bulk payloads, drops their prefix and checksum, and XORs with 0xFF. */
-    fun lifeLogStream(notifications: List<ByteArray>): ByteArray {
+    fun lifeLogStream(
+        notifications: List<ByteArray>,
+        announcedLengths: Map<Int, Int> = emptyMap(),
+    ): ByteArray {
         val out = java.io.ByteArrayOutputStream()
         for (notification in notifications) {
             if (notification.size > CHECKSUM_BYTES && notification[0] == BULK_PREFIX) {
