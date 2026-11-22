@@ -20,10 +20,32 @@ class HealthReadScheduler(
 ) {
     enum class Outcome { SKIPPED_MODEL, NO_CONSUMER, NOT_DUE, BUSY, OK, FAILED }
 
-    fun isDue(): Boolean = true
+    fun isDue(): Boolean {
+        val now = clock()
+        if (store.lastSuccessMs != 0L && now - store.lastSuccessMs < INTERVAL_MS) return false
+        if (store.lastFailureMs != 0L && now - store.lastFailureMs < RETRY_MS) return false
+        return true
+    }
 
-    suspend fun onConnection(isH5600: Boolean, hasConsumer: Boolean, read: suspend () -> Boolean): Outcome =
-        if (runCatching { read() }.getOrDefault(false)) Outcome.OK else Outcome.FAILED
+    /** Call on every connection. [read] returns true when the LifeLog was read and stored. */
+    suspend fun onConnection(isH5600: Boolean, hasConsumer: Boolean, read: suspend () -> Boolean): Outcome {
+        if (!isH5600) return Outcome.SKIPPED_MODEL
+        if (!hasConsumer) return Outcome.NO_CONSUMER
+        if (!isDue()) return Outcome.NOT_DUE
+        if (!inFlight.compareAndSet(false, true)) return Outcome.BUSY
+        try {
+            val ok = runCatching { read() }.getOrDefault(false)
+            if (ok) {
+                store.lastSuccessMs = clock()
+                store.lastFailureMs = 0L
+            } else {
+                store.lastFailureMs = clock()
+            }
+            return if (ok) Outcome.OK else Outcome.FAILED
+        } finally {
+            inFlight.set(false)
+        }
+    }
 
     companion object {
         /**
@@ -33,7 +55,7 @@ class HealthReadScheduler(
         fun hasConsumer(
             haConfigured: Boolean, haOn: Boolean, haHealthGroupOn: Boolean,
             webhooksOn: Boolean, healthHookEnabled: Boolean,
-        ): Boolean = true
+        ): Boolean = (haConfigured && haOn && haHealthGroupOn) || (webhooksOn && healthHookEnabled)
 
 
         const val INTERVAL_MS = 30 * 60_000L

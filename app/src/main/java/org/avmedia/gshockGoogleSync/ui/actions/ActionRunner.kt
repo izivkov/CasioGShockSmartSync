@@ -27,7 +27,8 @@ class ActionRunner @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sessionManager: SessionManager,
     private val actionContainer: ActionContainer,
-    private val webhookDispatcher: WebhookDispatcher
+    private val webhookDispatcher: WebhookDispatcher,
+    private val backgroundHealthSync: org.avmedia.gshockGoogleSync.ui.health.BackgroundHealthSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -50,6 +51,7 @@ class ActionRunner @Inject constructor(
 
         // Webhooks with the trigger "after each connection/sync" (their own minimum interval applies).
         webhookDispatcher.onSync()
+        backgroundHealthSync.onConnection()
 
         when (state.button) {
             ConnectionButton.FROM_ACTION -> actionContainer.runActionsForActionButton(context)
@@ -73,6 +75,7 @@ class ActionRunner @Inject constructor(
             .distinctUntilChanged()
             .filter { it }
             .collect {
+                backgroundHealthSync.onConnection()
                 actionContainer.runActionsForActionButton(context) { session.endRunActions() }
             }
     }

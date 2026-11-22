@@ -86,6 +86,8 @@ data class HealthState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
     /** True while the DW-H5600 LifeLog is being read from the watch. */
     val lifeLogLoading: Boolean = false,
+    /** Last background read, one line (time and outcome); null if none yet. */
+    val backgroundLine: String? = null,
     /** True while the latest data is being read; the Update button is disabled meanwhile. */
     val updating: Boolean = false,
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
@@ -239,9 +241,17 @@ class HealthViewModel @Inject constructor(
     private suspend fun fetchStepCounter(): StepCounterData {
         if (WatchInfo.hasStepCounterMock) return generateMockStepData()
         if (!isDwH5600()) return api.getStepCount()
-        // DW-H5600: the LifeLog is read once per session and then served from the session cache.
-        H5600Session.data?.let { return it }
-        return api.getStepCount().also { if (it.h5600 != null) H5600Session.data = it }
+        // DW-H5600: a result younger than 30 minutes (often from the background read) is shown as is.
+        if (H5600Session.isFresh()) H5600Session.data?.let { return it }
+        // One transfer at a time, shared with the background read.
+        if (!H5600Session.inFlight.compareAndSet(false, true)) {
+            return H5600Session.data ?: StepCounterData.unavailable()
+        }
+        try {
+            return api.getStepCount().also { if (it.h5600 != null) H5600Session.data = it }
+        } finally {
+            H5600Session.inFlight.set(false)
+        }
     }
 
     /** The Update button: read the latest data again (the LifeLog for the DW-H5600, the steps for the ABL-100). */
@@ -312,6 +322,9 @@ class HealthViewModel @Inject constructor(
     }
 
     private fun refreshState() {
+        _state.update {
+            it.copy(backgroundLine = org.avmedia.gshockGoogleSync.utils.LocalDataStorage.get(appContext, BackgroundHealthSync.KEY_LINE))
+        }
         viewModelScope.launch {
             val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
             Timber.i("Health: refreshState (hasStepCounter=${WatchInfo.hasStepCounter}, feature supported=$supported)")
