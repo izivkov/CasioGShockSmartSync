@@ -33,7 +33,7 @@ object HistoryExport {
     }
 
     private fun cell(v: Any?): String = when (v) {
-        null -> ""
+        null -> "0"
         is String -> if (v.any { it == ',' || it == '"' || it == '\n' }) "\"" + v.replace("\"", "\"\"") + "\"" else v
         else -> v.toString()
     }

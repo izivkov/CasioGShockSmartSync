@@ -44,7 +44,7 @@ object HaDashboard {
         stepGoal: Int? = null,
         calendars: List<String> = emptyList(),
     ): JsonObject {
-        fun ids(vararg sensorIds: String) = sensorIds.mapNotNull { found[it] }
+        fun ids(vararg sensorIds: String) = sensorIds.map { found[it] ?: "sensor.missing_$it" }
         fun named(vararg pairs: Pair<String, String>) = pairs.mapNotNull { (id, name) -> found[id]?.let { it to name } }
 
         val today = JsonArray()

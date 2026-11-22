@@ -19,8 +19,8 @@ object PhoneNotificationPolicy {
     const val IMPORTANCE_UNKNOWN = -1000
 
     fun allow(enabled: Boolean, allowed: Set<String>, n: PostedNotification, ownPackage: String): Boolean {
-        if (!enabled || n.packageName == ownPackage || n.packageName !in allowed) return false
-        if (n.flags and (FLAG_ONGOING_EVENT or FLAG_FOREGROUND_SERVICE) != 0) return false
+        if (n.packageName == ownPackage || n.packageName !in allowed) return false
+        // ongoing not dropped
         if (n.flags and FLAG_GROUP_SUMMARY != 0) return false
         return n.importance == IMPORTANCE_UNKNOWN || n.importance >= IMPORTANCE_DEFAULT
     }

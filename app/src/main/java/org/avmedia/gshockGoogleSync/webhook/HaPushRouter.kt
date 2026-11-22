@@ -21,7 +21,7 @@ class HaPushRouter(
                 log("HA push: $command, pushing the sensors")
                 updateSensors()
             }
-            else -> log("HA push: command $command ignored")
+            else -> deliver(HaPush.toNotification(push, now()))
         }
     }
 

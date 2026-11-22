@@ -63,7 +63,7 @@ object WatchFaceCodec {
     fun withFace(
         frame: ByteArray,
         face: Int,
-    ): ByteArray? = if (face in FACES) withFaceRaw(frame, face) else null
+    ): ByteArray? = if (face in 0..4) withFaceRaw(frame, face) else null
 
     /** Any face index 0 to 255, for decoding only (the Details part of the screen). */
     fun withFaceRaw(
@@ -78,7 +78,7 @@ object WatchFaceCodec {
     fun withTopRight(
         frame: ByteArray,
         item: Int,
-    ): ByteArray? = if (item in OFFERED_ITEMS) withItem(frame, TOP_RIGHT_SLOT, item) else null
+    ): ByteArray? = if (item in OFFERED_ITEMS) withItem(frame, 1, item) else null
 
     /** Frame bytes that [withTopRight] may change. */
     val TOP_RIGHT_BYTES: Set<Int> get() = itemBytes(TOP_RIGHT_SLOT)
