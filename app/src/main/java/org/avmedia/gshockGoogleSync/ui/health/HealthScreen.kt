@@ -111,6 +111,17 @@ fun HealthScreen() {
                             )
                         }
 
+                        if (WatchInfo.model == WatchInfo.WatchModel.DW_H5600) {
+                            val context = androidx.compose.ui.platform.LocalContext.current
+                            AppButton(
+                                text = stringResource(id = R.string.share_health_log),
+                                onClick = { HealthLogShare.share(context) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }

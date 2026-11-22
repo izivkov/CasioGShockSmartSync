@@ -241,6 +241,8 @@
     <string name="card_heart_rate">Heart rate</string>
     <string name="card_status">Watch status</string>
     <string name="activity_summary">Walk / cycle / active</string>
+    <string name="share_health_log">Share last health log</string>
+    <string name="health_log_none">No health log yet. Read the LifeLog first.</string>
     <string name="loading_lifelog_short">Loading LifeLog</string>
     <string name="update_latest">Update</string>
     <string name="webhooks">Webhooks</string>

@@ -52,6 +52,8 @@ class GShockApplication : Application() {
             Timber.d("Timber planted for Debug")
         }
 
+        org.avmedia.gshockapi.io.H5600HealthIO.rawDump =
+            org.avmedia.gshockapi.io.H5600RawDump(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this))
         ActivityProvider.initialize(this)
         eventHandler = MainEventHandler(
             context = this,
