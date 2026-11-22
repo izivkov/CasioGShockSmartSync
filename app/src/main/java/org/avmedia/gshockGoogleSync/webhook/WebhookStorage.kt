@@ -15,7 +15,7 @@ object WebhookStorage {
 
     private val lock = Any()
 
-    private class LocalKeyValueStore(private val context: Context) : KeyValueStore {
+    internal class LocalKeyValueStore(private val context: Context) : KeyValueStore {
         override fun get(key: String): String? = LocalDataStorage.get(context, key)
         override fun put(key: String, value: String) = LocalDataStorage.put(context, key, value)
         override fun delete(key: String) = LocalDataStorage.delete(context, key)
@@ -28,6 +28,9 @@ object WebhookStorage {
         repository ?: synchronized(lock) {
             repository ?: WebhookRepository(LocalKeyValueStore(context.applicationContext)).also { repository = it }
         }
+
+    /** The Home Assistant link, on the same storage. */
+    fun haStore(context: Context): HaStore = HaStore(LocalKeyValueStore(context.applicationContext))
 
     fun loadHooks(context: Context): List<Webhook> = repository(context).loadHooks()
 

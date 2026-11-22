@@ -48,6 +48,7 @@ class WebhookDispatcher @Inject constructor(
     fun onHealthDataDownloaded() = fire(WebhookTrigger.HEALTH_DATA)
 
     fun fire(trigger: WebhookTrigger) {
+        scope.launch { runCatching { pushToHomeAssistant(trigger) }.onFailure { Timber.e(it, "Home Assistant push failed") } }
         scope.launch {
             runCatching {
                 val now = System.currentTimeMillis()
@@ -61,6 +62,22 @@ class WebhookDispatcher @Inject constructor(
                     }
             }.onFailure { Timber.e(it, "Webhook dispatch failed") }
         }
+    }
+
+    /** Home Assistant: the sensor values (one registry read) and, for a watch action, the button event. */
+    private suspend fun pushToHomeAssistant(trigger: WebhookTrigger) {
+        val store = WebhookStorage.haStore(context)
+        if (store.load() == null) return
+        val now = OffsetDateTime.now().withNano(0)
+        val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
+        val states = HaSensors.states(registry.resolve(ctx, HaSensors.VARIABLES))
+        val event = if (trigger == WebhookTrigger.WATCH_ACTION) {
+            mapOf("trigger" to trigger.eventName, "time" to now.toString(),
+                "watch" to org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name))
+        } else null
+        if (states.isEmpty() && event == null) return
+        store.putPending(HaJob(states, event))
+        HaWorker.enqueue(context)
     }
 
     /** Renders [hook] with the current values. [hook] may be an unsaved edit (Test button). */

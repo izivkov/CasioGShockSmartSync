@@ -62,6 +62,7 @@ fun WebhooksScreen(
     val hooks by viewModel.hooks.collectAsState()
     val results by viewModel.results.collectAsState()
     var showProbe by remember { mutableStateOf(false) }
+    var showHa by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf(viewModel.loadDraft()?.hook) }
     val unreadable by viewModel.unreadable.collectAsState()
 
@@ -75,7 +76,10 @@ fun WebhooksScreen(
     GShockSmartSyncTheme {
         Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             val current = editing
-            if (showProbe) {
+            if (showHa) {
+                BackHandler { showHa = false }
+                HaScreen(viewModel = hiltViewModel(), onBack = { showHa = false })
+            } else if (showProbe) {
                 BackHandler { showProbe = false }
                 ProbeScreen(viewModel = viewModel, onBack = { showProbe = false })
             } else if (current == null) {
@@ -117,6 +121,7 @@ fun WebhooksScreen(
                     ButtonsRow(
                         buttons = listOf(
                             ButtonData(stringResource(R.string.webhook_back), onBack),
+                            ButtonData("HA", { showHa = true }),
                             ButtonData("Probe watch", { showProbe = true }),
                             ButtonData("Send log", {
                                 val n = viewModel.sendLogToWebhooks()
