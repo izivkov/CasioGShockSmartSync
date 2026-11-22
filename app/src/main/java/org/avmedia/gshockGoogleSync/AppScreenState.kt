@@ -16,6 +16,9 @@ import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
 import org.avmedia.gshockGoogleSync.session.SessionState
 import org.avmedia.gshockGoogleSync.webhook.WebhookScreenState
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,7 +49,8 @@ data class AppNavigationState(
 @Singleton
 class AppScreenState @Inject constructor(
     sessionManager: SessionManager,
-    webhookScreenState: WebhookScreenState
+    webhookScreenState: WebhookScreenState,
+    @ApplicationContext appContext: Context
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -67,12 +71,25 @@ class AppScreenState @Inject constructor(
             )
 
     init {
-        // An always-connected watch that connects, or is connected, while the app is in front opens the
-        // main screen and stays there (also when the app goes to the background and comes back).
+        // An always-connected watch that connects, or is connected, while the app is in front on the first
+        // page opens the main screen when its "Open when the watch connects" switch is on, or when the
+        // person tapped its name. Otherwise the app stays where it is (sync, webhooks, HA run unchanged).
         scope.launch {
-            combine(sessionManager.sessionState, AppForeground.inFront) { session, inFront ->
-                inFront && (session.phase as? SessionPhase.Ready)?.entryReason == EntryReason.BACKGROUND
-            }.collect { latch -> if (latch) sessionManager.activeSession?.enterMainNavigation() }
+            combine(
+                sessionManager.sessionState, AppForeground.inFront, webhookScreenState.open,
+                webhookScreenState.haOpen, OpenOnConnect.waiting
+            ) { session, inFront, webhooksOpen, haOpen, waiting ->
+                val address = session.watch.address
+                OpenOnConnect.shouldOpen(
+                    session, inFront, !webhooksOpen && !haOpen,
+                    OpenOnConnect.isOn(appContext, address), waiting
+                )
+            }.collect { latch ->
+                if (latch) sessionManager.activeSession?.let {
+                    OpenOnConnect.consumed(it.state.value.watch.address)
+                    it.enterMainNavigation()
+                }
+            }
         }
     }
 
@@ -98,8 +115,8 @@ class AppScreenState @Inject constructor(
                             EntryReason.NORMAL -> AppScreen.MAIN_NAVIGATION
                             EntryReason.CONTENT_SELECTOR -> AppScreen.CONTENT_SELECTOR
                             EntryReason.RUN_ACTIONS -> AppScreen.RUN_ACTIONS
-                            EntryReason.BACKGROUND ->
-                                if (appInForeground) AppScreen.MAIN_NAVIGATION else AppScreen.INITIAL
+                            // Stays on the first page; see OpenOnConnect for when it moves on.
+                            EntryReason.BACKGROUND -> AppScreen.INITIAL
                         }
                     }
                 )

@@ -173,6 +173,8 @@
     <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Ensure the official manufacturer app is not running.</string>
     <string name="bluetooth_is_not_enabled">Bluetooth is not enabled.</string>
     <string name="disconnected_due_to_inactivity">Disconnected due to inactivity.</string>
+    <string name="open_when_watch_connects" translatable="false">Open when the watch connects</string>
+    <string name="waiting_for_watch" translatable="false">Waiting for the watch...</string>
     <string name="link_reconnecting" translatable="false">Reconnecting...</string>
     <string name="link_lost" translatable="false">Watch disconnected</string>
     <string name="when_found_lift_phone_to_stop_ringing">When found, lift phone to stop ringing</string>

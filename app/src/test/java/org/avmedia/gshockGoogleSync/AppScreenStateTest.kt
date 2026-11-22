@@ -119,9 +119,9 @@ class AppScreenStateTest {
     }
 
     @Test
-    fun alwaysConnectedConnectionWithTheAppInFrontOpensMainNavigation() {
+    fun alwaysConnectedConnectionWithTheAppInFrontStaysOnTheFirstPageUntilOpenOnConnectLatches() {
         val state = ready(EntryReason.BACKGROUND, ConnectionButton.ALWAYS_CONNECTED)
-        assertEquals(AppScreen.MAIN_NAVIGATION, AppScreenState.navigationFor(state, appInForeground = true).screen)
+        assertEquals(AppScreen.INITIAL, AppScreenState.navigationFor(state, appInForeground = true).screen)
     }
 
     @Test

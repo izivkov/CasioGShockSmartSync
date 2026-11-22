@@ -77,6 +77,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
@@ -111,6 +112,7 @@ fun PreConnectionScreen(
     val triggerPairing by ptrConnectionViewModel.triggerPairing.collectAsState()
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
+    val waitingAddress by ptrConnectionViewModel.waitingAddress.collectAsState()
 
     val timeoutJob = remember { mutableStateOf<Job?>(null) }
 
@@ -283,7 +285,15 @@ fun PreConnectionScreen(
                                         Utils.sanitizeMacAddress(device.address),
                                         device.name
                                     )
+                                    if (device.isAlwaysConnected) {
+                                        ptrConnectionViewModel.openWhenConnected(device.address)
+                                    }
                                 },
+                                waitingAddress = waitingAddress,
+                                onOpenOnConnect = { device, on ->
+                                    ptrConnectionViewModel.setOpenOnConnect(device.address, on)
+                                },
+                                onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
                                 onDisassociate = { device ->
                                     ptrConnectionViewModel.disassociate(
                                         context,
@@ -374,7 +384,10 @@ fun PairedDeviceList(
     devices: List<PreConnectionViewModel.DeviceItem>,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    waitingAddress: String? = null,
+    onOpenOnConnect: (PreConnectionViewModel.DeviceItem, Boolean) -> Unit = { _, _ -> },
+    onCancelWaiting: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
     Box(
@@ -429,8 +442,38 @@ fun PairedDeviceList(
                             }
                         }
 
-
-
+                        if (device.isAlwaysConnected) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(start = 52.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.open_when_watch_connects),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                androidx.compose.material3.Switch(
+                                    checked = device.openOnConnect,
+                                    onCheckedChange = { onOpenOnConnect(device, it) },
+                                    modifier = Modifier.padding(end = 4.dp).graphicsLayer(scaleX = 0.75f, scaleY = 0.75f)
+                                )
+                            }
+                            if (OpenOnConnect.sameAddress(waitingAddress, device.address)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.waiting_for_watch),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    androidx.compose.material3.TextButton(onClick = onCancelWaiting) {
+                                        Text(stringResource(R.string.cancel))
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -23,6 +23,7 @@ import org.avmedia.gshockGoogleSync.GShockApplication
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
+import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.ICDPDelegate
@@ -55,7 +56,8 @@ constructor(
         val name: String,
         val address: String,
         val isLastUsed: Boolean,
-        val isAlwaysConnected: Boolean = false
+        val isAlwaysConnected: Boolean = false,
+        val openOnConnect: Boolean = false
     )
 
     @Inject lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
@@ -102,6 +104,25 @@ constructor(
                 }
         }
     }
+
+    val waitingAddress: StateFlow<String?> = OpenOnConnect.waiting
+
+    fun setOpenOnConnect(address: String, on: Boolean) {
+        viewModelScope.launch {
+            OpenOnConnect.set(appContext, address, on)
+            loadPairedDevices()
+        }
+    }
+
+    /** Tap on an always-connected watch: open the main screen now if connected, else at its next connection. */
+    fun openWhenConnected(address: String) {
+        val state = sessionManager.sessionState.value
+        val onMain = (state.phase as? org.avmedia.gshockGoogleSync.session.SessionPhase.Ready)?.entryReason !=
+            org.avmedia.gshockGoogleSync.session.EntryReason.BACKGROUND && state.phase is org.avmedia.gshockGoogleSync.session.SessionPhase.Ready
+        if (!(onMain && OpenOnConnect.sameAddress(state.watch.address, address))) OpenOnConnect.waitFor(address)
+    }
+
+    fun cancelWaiting() = OpenOnConnect.cancelWaiting()
 
     fun hidePreparing() {
         _showPreparing.value = false
@@ -158,7 +179,10 @@ constructor(
                 ?: LocalDataStorage.getDeviceName(appContext, address)
                 ?: noWatchString
             val isAlwaysConnected = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)
-            DeviceItem(name, address, isLastUsed, isAlwaysConnected)
+            DeviceItem(
+                name, address, isLastUsed, isAlwaysConnected,
+                isAlwaysConnected && OpenOnConnect.isOn(appContext, address)
+            )
         }
 
         _pairedDevices.value = formatDeviceNames(items)
