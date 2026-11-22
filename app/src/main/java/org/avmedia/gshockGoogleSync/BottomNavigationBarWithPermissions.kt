@@ -152,10 +152,7 @@ fun BottomNavigationBarWithPermissions(
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Time.route) {
-                TimeScreen(
-                    onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
-                    onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
-                )
+                TimeScreen()
             }
             composable(Screens.Health.route) {
                 HealthScreen()
@@ -191,8 +188,6 @@ fun BottomNavigationBarWithPermissions(
                         ActionsScreen(
                             onOpenWebhooks = onOpenWebhooks,
                             onOpenHa = onOpenHa,
-                            onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
-                            onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
                         )
                     },
                     stringResource(
@@ -201,7 +196,10 @@ fun BottomNavigationBarWithPermissions(
                 )
             }
             composable(Screens.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(
+                    onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
+                    onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
+                )
             }
             composable(Screens.WatchFace.route) {
                 WatchFaceScreen(onBack = { navController.popBackStack() })

@@ -29,11 +29,16 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthLinks
+import org.avmedia.gshockGoogleSync.ui.watchhealth.isH5600Watch
 import org.avmedia.gshockGoogleSync.utils.Utils
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onOpenWatchFace: () -> Unit = {},
+    onOpenWatchHealth: () -> Unit = {},
+) {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -48,7 +53,7 @@ fun SettingsScreen() {
                         .padding(0.dp)
                         .fillMaxWidth()
                 ) {
-                    SettingsList()
+                    SettingsList(onOpenWatchFace, onOpenWatchHealth)
                 }
                 BottomRow(modifier = Modifier.fillMaxWidth())
             }
@@ -57,10 +62,12 @@ fun SettingsScreen() {
 }
 
 @Composable
-fun SettingsList() {
+fun SettingsList(onOpenWatchFace, onOpenWatchHealth) {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     Column {
+        // The watch face and the health settings of the DW-H5600 family open from the top of Settings.
+        if (isH5600Watch()) WatchHealthLinks(onOpenWatchFace, onOpenWatchHealth)
         WatchFeature(id = "locale_card") {
             Locale(settingsViewModel::onSettingUpdated)
         }
