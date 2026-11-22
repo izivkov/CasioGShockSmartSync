@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.avmedia.gshockGoogleSync.webhook.TestUi
 import org.avmedia.gshockGoogleSync.webhook.Variable
 import org.avmedia.gshockGoogleSync.webhook.Webhook
 import org.avmedia.gshockGoogleSync.webhook.WebhookEditor
@@ -22,6 +23,7 @@ class WebhooksScreenshotTest : ScreenshotTest() {
     )
     private val results = mapOf(
         "1" to WebhookResult(timeMillis = 1_700_000_000_000L, ok = true, status = 200),
+        "2" to WebhookResult(timeMillis = 1_700_000_000_000L, ok = false, status = 401),
     )
 
     @Composable
@@ -32,17 +34,24 @@ class WebhooksScreenshotTest : ScreenshotTest() {
     )
 
     @Composable
-    private fun EditorScreen() {
+    private fun EditorScreen(pickerOpen: Boolean = false) {
         val vm: WebhooksViewModel = mockk(relaxed = true) {
-            every { testReport } returns MutableStateFlow(null)
+            every { testState } returns MutableStateFlow<TestUi>(TestUi.Idle)
+            every { previewValues } returns MutableStateFlow(emptyMap<String, Any?>())
             every { this@mockk.hooks } returns MutableStateFlow(this@WebhooksScreenshotTest.hooks)
         }
         WebhookEditor(
             initial = hooks[0],
             isNew = false,
-            variables = listOf(Variable("event", "What caused the send") { null }),
+            variables = listOf(
+                Variable("event", "What caused the send") { null },
+                Variable("watch.battery", "Battery level in percent") { null },
+                Variable("health.steps_today", "Steps today") { null },
+                Variable("phone.battery", "Phone battery in percent") { null },
+            ),
             viewModel = vm,
             onClose = {},
+            pickerOpen = pickerOpen,
         )
     }
 
@@ -50,5 +59,6 @@ class WebhooksScreenshotTest : ScreenshotTest() {
     @Test fun listDark() = snap("webhooks_list", true) { ListScreen(hooks) }
     @Test fun listEmptyLight() = snap("webhooks_list_empty", false) { ListScreen(emptyList()) }
     @Test fun editorLight() = snap("webhook_editor", false) { EditorScreen() }
+    @Test fun editorValuesLight() = snap("webhook_editor_values", false) { EditorScreen(pickerOpen = true) }
     @Test fun editorDark() = snap("webhook_editor", true) { EditorScreen() }
 }

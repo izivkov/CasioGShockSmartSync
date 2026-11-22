@@ -38,9 +38,19 @@ class WebhooksViewModel @Inject constructor(
     private val _results = MutableStateFlow(WebhookStorage.loadResults(context))
     val results: StateFlow<Map<String, WebhookResult>> = _results
 
-    /** Text of the last Test run, null while none ran or one is running. */
-    private val _testReport = MutableStateFlow<String?>(null)
-    val testReport: StateFlow<String?> = _testReport
+    /** The Test button: idle, sending, the result in words, or a failure to run. */
+    private val _testState = MutableStateFlow<TestUi>(TestUi.Idle)
+    val testState: StateFlow<TestUi> = _testState
+
+    /** Values for the live preview: the ones the phone and app know now (watch values need a connection). */
+    private val _previewValues = MutableStateFlow<Map<String, Any?>>(emptyMap())
+    val previewValues: StateFlow<Map<String, Any?>> = _previewValues
+
+    fun loadPreviewValues() {
+        viewModelScope.launch {
+            runCatching { dispatcher.sampleValues() }.onSuccess { _previewValues.value = it }
+        }
+    }
 
     val variables: List<Variable> = dispatcher.registry.variables
 
@@ -73,32 +83,26 @@ class WebhooksViewModel @Inject constructor(
     }
 
     fun clearTestReport() {
-        _testReport.value = null
+        _testState.value = TestUi.Idle
     }
 
     /** Sends [hook] now (with the values currently in the editor, saved or not). */
     fun test(hook: Webhook) {
         saveDraft(hook) // the draft, never the list
-        _testReport.value = "Sending..."
+        _testState.value = TestUi.Sending
         viewModelScope.launch {
             val report = runCatching { dispatcher.test(hook) }
-            _testReport.value = report.fold(
-                onSuccess = { formatReport(it) },
+            _testState.value = report.fold(
+                onSuccess = { TestUi.Done(readable(it)) },
                 onFailure = {
                     WebhookDiagnostics.logError("Test failed: ${WebhookDiagnostics.describe(it)}", it)
-                    "Test failed:\n" + WebhookDiagnostics.describe(it)
+                    TestUi.Failed(WebhookDiagnostics.describe(it))
                 },
             )
         }
     }
 
-    internal fun formatReport(r: WebhookDispatcher.TestReport): String = buildString {
-        val status = r.outcome.status
-        appendLine(if (status != null) "HTTP $status" else "No response")
-        if (r.outcome.message.isNotEmpty()) appendLine(r.outcome.message)
-        if (r.rendered.unknown.isNotEmpty()) appendLine("Unknown variables: ${r.rendered.unknown.joinToString()}")
-        if (r.rendered.failed.isNotEmpty()) appendLine("Variables that failed: ${r.rendered.failed.joinToString()}")
-        if (r.rendered.missing.isNotEmpty()) appendLine("No value for: ${r.rendered.missing.joinToString()}")
-        if (!r.watchConnected) appendLine("Watch not connected: watch values are empty.")
-    }.trimEnd()
+    internal fun readable(r: WebhookDispatcher.TestReport): ReadableTest = TestResultText.of(
+        r.outcome.status, r.outcome.message, r.rendered.unknown, r.rendered.failed, r.rendered.missing, r.watchConnected,
+    )
 }

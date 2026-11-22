@@ -98,6 +98,10 @@ class WebhookDispatcher @Inject constructor(
         return registry.render(hook.bodyTemplate, hook.isJson, ctx)
     }
 
+    /** Values the phone and app know right now, for the editor preview. Watch values need a connection and are left out. */
+    suspend fun sampleValues(): Map<String, Any?> =
+        registry.resolve(VariableContext(WebhookTrigger.TEST.eventName, OffsetDateTime.now(), false), null, 2_000)
+
     /** The Test button: sends right now, without WorkManager, and returns what came back. */
     suspend fun test(hook: Webhook): TestReport {
         val rendered = render(hook, WebhookTrigger.TEST)
