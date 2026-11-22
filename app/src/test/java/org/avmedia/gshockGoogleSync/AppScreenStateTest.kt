@@ -112,6 +112,24 @@ class AppScreenStateTest {
     @Test
     fun alwaysConnectedConnectionStaysOnTheInitialScreen() {
         assertEquals(AppScreen.INITIAL, screenFor(ready(EntryReason.BACKGROUND)).screen)
+        assertEquals(
+            AppScreen.INITIAL,
+            AppScreenState.navigationFor(ready(EntryReason.BACKGROUND), appInForeground = false).screen
+        )
+    }
+
+    @Test
+    fun alwaysConnectedConnectionWithTheAppInFrontOpensMainNavigation() {
+        val state = ready(EntryReason.BACKGROUND, ConnectionButton.ALWAYS_CONNECTED)
+        assertEquals(AppScreen.MAIN_NAVIGATION, AppScreenState.navigationFor(state, appInForeground = true).screen)
+    }
+
+    @Test
+    fun foregroundDoesNotChangeOtherScreens() {
+        assertEquals(AppScreen.RUN_ACTIONS, AppScreenState.navigationFor(ready(EntryReason.RUN_ACTIONS), appInForeground = true).screen)
+        assertEquals(AppScreen.INITIAL, AppScreenState.navigationFor(SessionState(), appInForeground = true).screen)
+        val running = ready(EntryReason.BACKGROUND, ConnectionButton.ALWAYS_CONNECTED, runningActions = true)
+        assertEquals(AppScreen.RUN_ACTIONS, AppScreenState.navigationFor(running, appInForeground = true).screen)
     }
 }
 
