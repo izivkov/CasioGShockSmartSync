@@ -22,6 +22,7 @@ class HaViewModel @Inject constructor(
 ) : ViewModel() {
     private val store = WebhookStorage.haStore(context)
     private val discovery = HaDiscovery(context)
+    private val rawSwitch = WebhookStorage.rawSwitch(context)
 
     private val _ui = MutableStateFlow(snapshot())
     val ui: StateFlow<HaUi> = _ui
@@ -51,6 +52,7 @@ class HaViewModel @Inject constructor(
                 deviceUrl = HaDeviceLookup.deviceUrl(form.baseUrl, store.loadDeviceId()),
                 lookingUpDevice = old?.watch?.lookingUpDevice ?: false,
                 notificationsSupported = store.notificationsSupported() != false,
+                rawUntil = rawSwitch.onUntilText(),
             ),
             sent = HaSentUi(HaSentView.groups(sent, store.groupsOn()), sending = store.getPending() != null, failed = failed),
             actions = (old?.actions ?: HaActionsUi()).copy(chosen = store.loadAction(), lastRun = store.lastActionResult().orEmpty()),
@@ -77,6 +79,11 @@ class HaViewModel @Inject constructor(
     fun choose(action: HaAction?) {
         store.saveAction(action)
         update { it.copy(actions = it.actions.copy(chosen = action)) }
+    }
+
+    fun setRawSwitch(on: Boolean) {
+        if (on) rawSwitch.turnOn() else rawSwitch.turnOff()
+        update { snapshot(it) }
     }
 
     fun setGroup(group: HaGroup, on: Boolean) {

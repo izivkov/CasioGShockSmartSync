@@ -14,6 +14,12 @@ object RawSettings {
         0x55, 0x57, 0x58, 0x40, 0x44, 0x2A, 0x2E, 0x45, 0x43, 0x13,
     )
 
+    /** The codes the decoded features (face, health settings) read, whatever the raw switch says. */
+    val DECODED_CODES: List<Int> = listOf(0x51, 0x41, 0x4F, 0x13, 0x43, 0x45, 0x50)
+
+    /** What a sync may read: the whole table only while the raw switch is on. */
+    fun codesFor(rawOn: Boolean): List<Int> = if (rawOn) CODES else DECODED_CODES
+
     fun name(code: Int): String = "0x%02X".format(code)
 
     fun variable(code: Int): String = "watch.raw.${name(code)}"
@@ -36,9 +42,9 @@ class RawSettingsReader(
     private val hex = LinkedHashMap<String, String>()
     private var lastRead: Long? = null
 
-    suspend fun refresh(raw: RawRequester) {
+    suspend fun refresh(raw: RawRequester, codes: List<Int> = RawSettings.CODES) {
         val start = clock()
-        for (code in RawSettings.CODES) {
+        for (code in codes) {
             if (busy() || clock() - start > BUDGET_MS) return
             val last = attempted[code]
             if (last != null && clock() - last < intervalMs) continue

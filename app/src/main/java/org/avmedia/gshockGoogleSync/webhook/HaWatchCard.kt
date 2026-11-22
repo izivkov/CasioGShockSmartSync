@@ -1,6 +1,10 @@
 package org.avmedia.gshockGoogleSync.webhook
 
+import AppSwitch
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +24,7 @@ internal fun HaWatchCard(
     onModel: (String) -> Unit,
     changed: Boolean,
     onSave: () -> Unit,
+    onRaw: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     HaCard("This watch", R.drawable.ic_mdi_watch) {
@@ -46,6 +51,14 @@ internal fun HaWatchCard(
         if (watch.failed) HaNote("The last update did not go through. It is tried again at the next connection.", error = true)
         if (watch.lookingUpDevice) HaLoading("Looking for the device in Home Assistant...")
         AppButton("Open in Home Assistant", { openInBrowser(context, watch.deviceUrl) }, enabled = watch.deviceUrl.isNotBlank(), modifier = Modifier.fillMaxWidth())
-        HaDetails(watch.lastText)
+        HaDetails(watch.lastText) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    HaNote("Read raw watch settings (for decoding)")
+                    HaNote(watch.rawUntil?.let { "on until $it" } ?: "off")
+                }
+                AppSwitch(checked = watch.rawUntil != null, onCheckedChange = onRaw)
+            }
+        }
     }
 }

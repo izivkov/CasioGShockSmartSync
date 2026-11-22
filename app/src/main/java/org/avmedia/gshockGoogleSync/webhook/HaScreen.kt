@@ -31,6 +31,7 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
             onGroup = viewModel::setGroup,
             onChoose = viewModel::choose,
             onRefreshActions = viewModel::refreshActions,
+            onRawSwitch = viewModel::setRawSwitch,
         ),
     )
 }
@@ -53,7 +54,7 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen
             HaConnectionCard(ui.saved, url, token, { url = it }, { token = it }, ui.check, ui.find, events.onFind, save)
             HaWatchCard(
                 ui.saved, ui.watch, deviceName, model, { deviceName = it }, { model = it },
-                changed = deviceName != ui.form.deviceName || model != ui.form.model, onSave = save,
+                changed = deviceName != ui.form.deviceName || model != ui.form.model, onSave = save, onRaw = events.onRawSwitch,
             )
             HaSentCard(ui.sent, ui.saved, events.onGroup)
             HaButtonCard(ui.saved, ui.actions, events.onChoose, events.onRefreshActions, pickerOpen)

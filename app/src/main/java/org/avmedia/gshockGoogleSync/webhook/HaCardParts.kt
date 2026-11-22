@@ -77,12 +77,15 @@ internal fun HaNote(text: String, error: Boolean = false) {
 
 /** "Details": the technical text (codes, last answer), hidden until asked for. Nothing when [text] is blank. */
 @Composable
-internal fun HaDetails(text: String) {
-    if (text.isBlank()) return
+internal fun HaDetails(text: String, extra: (@Composable () -> Unit)? = null) {
+    if (text.isBlank() && extra == null) return
     var open by remember { mutableStateOf(false) }
     Column {
         TextButton(onClick = { open = !open }) { Text(if (open) "Hide details" else "Details") }
-        if (open) AppText(text = text, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+        if (open) {
+            extra?.invoke()
+            if (text.isNotBlank()) AppText(text = text, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+        }
     }
 }
 

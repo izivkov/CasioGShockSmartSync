@@ -33,6 +33,8 @@ object WebhookStorage {
     /** The Home Assistant link, on the same storage. */
     fun haStore(context: Context): HaStore = HaStore(LocalKeyValueStore(context.applicationContext))
 
+    fun rawSwitch(context: Context): RawReadSwitch = RawReadSwitch(LocalKeyValueStore(context.applicationContext))
+
     fun toggles(context: Context): ServiceToggles = ServiceToggles(LocalKeyValueStore(context.applicationContext))
 
     fun loadHooks(context: Context): List<Webhook> = repository(context).loadHooks()

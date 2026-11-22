@@ -27,6 +27,8 @@ data class HaWatchUi(
     val lookingUpDevice: Boolean = false,
     /** False when the connected watch cannot show notifications; true while not known. */
     val notificationsSupported: Boolean = true,
+    /** "HH:mm" the raw settings switch turns itself off, null while off. */
+    val rawUntil: String? = null,
 )
 
 data class HaGroupUi(val group: HaGroup, val on: Boolean, val rows: List<Pair<String, String>>)
@@ -63,4 +65,5 @@ class HaEvents(
     val onGroup: (HaGroup, Boolean) -> Unit = { _, _ -> },
     val onChoose: (HaAction?) -> Unit = {},
     val onRefreshActions: () -> Unit = {},
+    val onRawSwitch: (Boolean) -> Unit = {},
 )

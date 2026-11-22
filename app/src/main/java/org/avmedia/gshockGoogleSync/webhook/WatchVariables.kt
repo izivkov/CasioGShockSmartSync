@@ -35,6 +35,8 @@ object WatchVariables {
         val lastSync: () -> String?,
         /** The last DW-H5600 LifeLog transfer, or null when none was read this session. */
         val healthData: () -> StepCounterData? = { null },
+        /** The "Read raw watch settings" switch; off reads only the decoded codes. */
+        val rawOn: () -> Boolean = { false },
     )
 
     fun androidEnv(appContext: Context, api: GShockRepository, features: IWatchFeatureManager, raw: RawRequester) = Env(
@@ -48,6 +50,7 @@ object WatchVariables {
         },
         lastSync = { LocalDataStorage.get(appContext, WebhookStorage.KEY_LAST_SYNC) },
         healthData = { H5600Session.data },
+        rawOn = { WebhookStorage.rawSwitch(appContext).isOn() },
     )
 
     fun registry(env: Env): VariableRegistry {
@@ -77,8 +80,10 @@ object WatchVariables {
         suspend fun rawSettings(ctx: VariableContext): Map<String, String> =
             if (!h5600()) emptyMap()
             else ctx.cached("raw.settings") {
-                RawSettings.shared.refresh(raw)
-                RawSettings.shared.values()
+                val codes = RawSettings.codesFor(env.rawOn())
+                RawSettings.shared.refresh(raw, codes)
+                val allowed = codes.map { c -> RawSettings.name(c) }.toSet()
+                RawSettings.shared.values().filterKeys { k -> k in allowed }
             }
 
         val list = mutableListOf(

@@ -29,8 +29,8 @@ class HealthReadSchedulerTest {
         assertEquals(Outcome.OK, connect()); assertEquals(1, reads)
     }
 
-    @Test fun notAgainWithin30Minutes() = runTest {
-        connect(); now += 29 * 60_000L
+    @Test fun notAgainWithin2Hours() = runTest {
+        connect(); now += 119 * 60_000L
         assertEquals(Outcome.NOT_DUE, connect()); assertEquals(1, reads)
         now += 2 * 60_000L
         assertEquals(Outcome.OK, connect()); assertEquals(2, reads)
