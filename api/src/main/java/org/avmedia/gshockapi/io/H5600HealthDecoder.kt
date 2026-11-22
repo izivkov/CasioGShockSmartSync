@@ -22,8 +22,9 @@ import java.time.ZoneOffset
  * and the DRSP index announcements, then calls [decode].
  *
  * Stream layout, from the transfer captures:
- * - Every bulk notification starts with 0x05 and ends with a 2-byte checksum. Both are removed,
- *   then every byte is XOR'd with 0xFF.
+ * - Every bulk notification starts with 0x05. Each block is sent in chunks of 512 data bytes
+ *   followed by a 2-byte checksum (see [lifeLogStream]). Prefix and checksums are removed, then
+ *   every byte is XOR'd with 0xFF.
  * - The stream begins with a 20-byte header: magic `00 0F 00 00 00`, then the UTC time
  *   (year-2000, month, day, hour, minute), the payload length, the day's steps (u16 at 14,
  *   valid only when bytes 16-17 are zero) and the energy (u16 at 18, kcal provisional).
@@ -38,6 +39,7 @@ import java.time.ZoneOffset
 object H5600HealthDecoder {
     private const val BULK_PREFIX: Byte = 0x05
     private const val CHECKSUM_BYTES = 2
+    private const val CHUNK_BYTES = 512
     private const val HEADER_SIZE = 20
     private const val FRAME_HEADER_SIZE = 5
     private const val RECORD_SIZE = 4
@@ -86,7 +88,7 @@ object H5600HealthDecoder {
         stepGoal: Int? = null,
         watchCondition: ByteArray? = null,
     ): StepCounterData? {
-        val stream = lifeLogStream(notifications)
+        val stream = lifeLogStream(notifications, announcedLengths)
         if (stream.size < HEADER_SIZE || !stream.copyOfRange(0, HEADER_MAGIC.size).contentEquals(HEADER_MAGIC)) {
             return null
         }
@@ -176,16 +178,44 @@ object H5600HealthDecoder {
         )
     }
 
-    /** Concatenates the bulk payloads, drops their prefix and checksum, and XORs with 0xFF. */
+    /**
+     * Concatenates the bulk payloads, drops their prefix and the chunk checksums, and XORs with 0xFF.
+     *
+     * The watch sends each block (the header, then one block per announced frame, in announcement
+     * order) as chunks of [CHUNK_BYTES] data bytes, each followed by a [CHECKSUM_BYTES]-byte checksum.
+     * A chunk spans several notifications, so the checksum is not at the end of a notification.
+     * Block lengths come from the announcements; the header is [HEADER_SIZE] bytes unless announced
+     * under index 0. Whatever follows the announced blocks is read as one more block of unknown length.
+     */
     fun lifeLogStream(
         notifications: List<ByteArray>,
         announcedLengths: Map<Int, Int> = emptyMap(),
     ): ByteArray {
-        val out = java.io.ByteArrayOutputStream()
+        val payload = java.io.ByteArrayOutputStream()
         for (notification in notifications) {
-            if (notification.size > CHECKSUM_BYTES && notification[0] == BULK_PREFIX) {
-                out.write(notification, 1, notification.size - 1 - CHECKSUM_BYTES)
+            if (notification.size > 1 && notification[0] == BULK_PREFIX) {
+                payload.write(notification, 1, notification.size - 1)
             }
+        }
+        val raw = payload.toByteArray()
+        val out = java.io.ByteArrayOutputStream()
+        var pos = 0
+
+        val lengths = listOf(announcedLengths[0] ?: HEADER_SIZE) + announcedLengths.filterKeys { it != 0 }.values
+        for (length in lengths) {
+            var remaining = length
+            while (remaining > 0 && pos < raw.size) {
+                val take = minOf(CHUNK_BYTES, remaining, raw.size - pos)
+                out.write(raw, pos, take)
+                pos += take + CHECKSUM_BYTES
+                remaining -= take
+            }
+        }
+        while (pos < raw.size) {
+            val left = raw.size - pos
+            val take = if (left > CHUNK_BYTES + CHECKSUM_BYTES) CHUNK_BYTES else maxOf(0, left - CHECKSUM_BYTES)
+            out.write(raw, pos, take)
+            pos += take + CHECKSUM_BYTES
         }
         return out.toByteArray().map { (it.toInt() xor 0xFF).toByte() }.toByteArray()
     }
