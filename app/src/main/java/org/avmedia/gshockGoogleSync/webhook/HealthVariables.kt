@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.webhook
 
+import org.avmedia.gshockGoogleSync.ui.health.resolveDistanceKm
 import org.avmedia.gshockapi.model.StepCounterData
 
 /**
@@ -29,6 +30,7 @@ object HealthVariables {
         "health.cycle_seconds" to "Cycling time today, seconds",
         "health.other_seconds" to "Other activity time today, seconds",
         "health.still_seconds" to "Time without activity today, seconds",
+        "health.distance_m" to "Distance today, metres (estimate: the watch sends none; steps times 0.73 m, as on the Health screen)",
         "health.step_goal" to "Daily step goal set on the watch",
         "health.lifelog_pending" to "True when the watch still has LifeLog data it has not transferred",
         "health.slot_minutes" to "Length of one entry of health.slots, minutes",
@@ -67,6 +69,8 @@ object HealthVariables {
             "health.cycle_seconds" to act?.cycleSeconds,
             "health.other_seconds" to act?.otherSeconds,
             "health.still_seconds" to act?.stillSeconds,
+            "health.distance_m" to data?.takeIf { it.currentDaySteps != null }
+                ?.let { Math.round(resolveDistanceKm(it) * 1000f) },
             "health.step_goal" to h?.stepGoal,
             "health.lifelog_pending" to h?.lifeLogPending,
             "health.slot_minutes" to if (slots != null) 5 else null,
