@@ -51,6 +51,7 @@ internal fun WebhookEditor(
     var onWatchAction by remember { mutableStateOf(initial.onWatchAction) }
     var onSync by remember { mutableStateOf(initial.onSync) }
     var onHealth by remember { mutableStateOf(initial.onHealthData) }
+    var onWorkout by remember { mutableStateOf(initial.onWorkout) }
     var interval by remember { mutableStateOf(initial.minIntervalMinutes.toString()) }
     var enabled by remember { mutableStateOf(initial.enabled) }
     val testState by viewModel.testState.collectAsState()
@@ -69,6 +70,7 @@ internal fun WebhookEditor(
         onWatchAction = onWatchAction,
         onSync = onSync,
         onHealthData = onHealth,
+        onWorkout = onWorkout,
         minIntervalMinutes = interval.toIntOrNull()?.coerceAtLeast(0) ?: 0,
         enabled = enabled,
     )
@@ -102,7 +104,7 @@ internal fun WebhookEditor(
             }
             WhereCard(name, { name = it }, url, { url = it }, urlHint, method, { method = it }, headers)
             WhenCard(
-                onWatchAction, { onWatchAction = it }, onSync, { onSync = it }, onHealth, { onHealth = it },
+                onWatchAction, { onWatchAction = it }, onSync, { onSync = it }, onHealth, { onHealth = it }, onWorkout, { onWorkout = it },
                 interval, { interval = it }, enabled, { enabled = it },
             )
             HaCard("What") {

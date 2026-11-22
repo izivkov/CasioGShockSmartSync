@@ -10,6 +10,7 @@ object WebhookLabels {
         if (hook.onWatchAction) add("Watch button")
         if (hook.onSync) add("After sync")
         if (hook.onHealthData) add("Health data")
+        if (hook.onWorkout) add("Workout")
     }
 
     /** [time] is already formatted; null result means never sent. */

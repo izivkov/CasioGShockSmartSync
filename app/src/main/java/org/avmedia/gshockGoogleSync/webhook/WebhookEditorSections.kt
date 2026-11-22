@@ -81,6 +81,7 @@ internal fun WhenCard(
     onWatchAction: Boolean, onWatchActionChange: (Boolean) -> Unit,
     onSync: Boolean, onSyncChange: (Boolean) -> Unit,
     onHealth: Boolean, onHealthChange: (Boolean) -> Unit,
+    onWorkout: Boolean, onWorkoutChange: (Boolean) -> Unit,
     interval: String, onInterval: (String) -> Unit,
     enabled: Boolean, onEnabled: (Boolean) -> Unit,
 ) {
@@ -88,6 +89,7 @@ internal fun WhenCard(
         SwitchLine("A watch button runs the action", onWatchAction, onWatchActionChange)
         SwitchLine("After each watch connection", onSync, onSyncChange)
         SwitchLine("Health data downloaded", onHealth, onHealthChange)
+        SwitchLine("Workout downloaded", onWorkout, onWorkoutChange)
         OutlinedTextField(
             value = interval, onValueChange = { onInterval(it.filter { c -> c.isDigit() }.take(5)) },
             singleLine = true, label = { Text("Pause between sends, minutes (0 = none)") },

@@ -9,6 +9,8 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 /** What one decoded transfer adds to the history. */
@@ -39,19 +41,55 @@ abstract class HistoryDao {
     @Query("SELECT * FROM day ORDER BY date") abstract fun watchDays(): Flow<List<DayRow>>
     @Query("SELECT * FROM night ORDER BY date") abstract fun watchNights(): Flow<List<NightRow>>
     @Query("SELECT * FROM hour WHERE date = :date ORDER BY hour") abstract fun hoursOf(date: String): List<HourRow>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE) abstract fun putWorkout(row: WorkoutRow)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) abstract fun putLaps(rows: List<WorkoutLapRow>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) abstract fun putSamples(rows: List<WorkoutSampleRow>)
+    @Query("DELETE FROM workout_lap WHERE startMs = :startMs AND sport = :sport") abstract fun clearLaps(startMs: Long, sport: Int)
+    @Query("DELETE FROM workout_sample WHERE startMs = :startMs AND sport = :sport") abstract fun clearSamples(startMs: Long, sport: Int)
+
+    /** One row per workout (start and sport) however often it is read: laps and samples are replaced as a set, never added to. */
+    @Transaction
+    open fun upsert(batch: WorkoutBatch) {
+        val w = batch.workout
+        clearLaps(w.startMs, w.sport)
+        clearSamples(w.startMs, w.sport)
+        putWorkout(w)
+        putLaps(batch.laps)
+        putSamples(batch.samples)
+    }
+
+    @Query("SELECT * FROM workout ORDER BY startMs DESC") abstract fun allWorkouts(): List<WorkoutRow>
+    @Query("SELECT * FROM workout ORDER BY startMs DESC") abstract fun watchWorkouts(): Flow<List<WorkoutRow>>
+    @Query("SELECT * FROM workout_lap ORDER BY startMs, sport, idx") abstract fun allLaps(): List<WorkoutLapRow>
+    @Query("SELECT * FROM workout_sample ORDER BY startMs, sport, idx") abstract fun allSamples(): List<WorkoutSampleRow>
+    @Query("SELECT * FROM workout_lap WHERE startMs = :startMs AND sport = :sport ORDER BY idx") abstract fun lapsOf(startMs: Long, sport: Int): List<WorkoutLapRow>
+    @Query("SELECT * FROM workout_sample WHERE startMs = :startMs AND sport = :sport ORDER BY idx") abstract fun samplesOf(startMs: Long, sport: Int): List<WorkoutSampleRow>
 }
 
-@Database(entities = [DayRow::class, HourRow::class, NightRow::class], version = 1, exportSchema = false)
+@Database(
+    entities = [DayRow::class, HourRow::class, NightRow::class, WorkoutRow::class, WorkoutLapRow::class, WorkoutSampleRow::class],
+    version = 2, exportSchema = false,
+)
 abstract class HistoryDb : RoomDatabase() {
     abstract fun dao(): HistoryDao
 
     companion object {
         const val NAME = "health_history.db"
 
+        /** Version 2 adds the workout tables; days, hours and nights are left as they are. */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `workout` (`startMs` INTEGER NOT NULL, `sport` INTEGER NOT NULL, `sportName` TEXT NOT NULL, `endMs` INTEGER, `utcOffsetRaw` INTEGER NOT NULL, `hasGps` INTEGER NOT NULL, `totalSec` INTEGER, `distance` REAL, `avgPace` INTEGER, `avgSpeed` REAL, `kcal` INTEGER, `hrAvg` INTEGER, `hrMax` INTEGER, `hrMin` INTEGER, `ascent` INTEGER, `descent` INTEGER, `cadenceAvg` INTEGER, `lapCount` INTEGER, `warnings` TEXT, `savedAtMs` INTEGER NOT NULL, PRIMARY KEY(`startMs`, `sport`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `workout_lap` (`startMs` INTEGER NOT NULL, `sport` INTEGER NOT NULL, `idx` INTEGER NOT NULL, `lapSec` INTEGER, `manual` INTEGER NOT NULL, `distance` REAL, `pace` INTEGER, `speed` REAL, `hrAvg` INTEGER, `hrMax` INTEGER, `hrMin` INTEGER, `ascent` INTEGER, `descent` INTEGER, `cadence` INTEGER, PRIMARY KEY(`startMs`, `sport`, `idx`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `workout_sample` (`startMs` INTEGER NOT NULL, `sport` INTEGER NOT NULL, `idx` INTEGER NOT NULL, `elapsedSec` INTEGER, `paused` INTEGER NOT NULL, `pace` INTEGER, `hr` INTEGER, `altitude` INTEGER, `cadence` INTEGER, `latitude` REAL, `longitude` REAL, `speed` REAL, `totalDistance` REAL, PRIMARY KEY(`startMs`, `sport`, `idx`))")
+            }
+        }
+
         @Volatile private var instance: HistoryDb? = null
 
         fun get(context: Context): HistoryDb = instance ?: synchronized(this) {
-            instance ?: Room.databaseBuilder(context.applicationContext, HistoryDb::class.java, NAME).build().also { instance = it }
+            instance ?: Room.databaseBuilder(context.applicationContext, HistoryDb::class.java, NAME).addMigrations(MIGRATION_1_2).build().also { instance = it }
         }
     }
 }

@@ -13,10 +13,13 @@ import java.io.File
 internal object HealthLogShare {
     fun dir(context: Context): File = File(context.filesDir, "health-log")
 
-    fun share(context: Context) {
+    /** The newest raw workout transfer (failed or not), zipped like the LifeLog one. */
+    fun shareWorkout(context: Context) = share(context, "workout-", "workout.zip")
+
+    fun share(context: Context, prefix: String = "lifelog-", zipName: String = "lifelog.zip") {
         try {
             val folder = File(context.cacheDir, "health-log-share").apply { mkdirs() }
-            val zip = H5600RawDump(dir(context)).zipLatest(File(folder, "lifelog.zip"))
+            val zip = H5600RawDump(dir(context), prefix = prefix).zipLatest(File(folder, zipName))
             if (zip == null) {
                 Toast.makeText(context, R.string.health_log_none, Toast.LENGTH_LONG).show()
                 return

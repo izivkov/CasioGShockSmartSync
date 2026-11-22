@@ -97,6 +97,14 @@ object HaSensors {
         HaSensor("breathing_exercise", "Last breathing exercise", "health.breathing_exercise_at", "timestamp", null, null, "mdi:meditation", convert = Convert.LOCAL_TO_OFFSET),
         HaSensor("stairs_up", "Floors up (unconfirmed)", "health.stairs_up", null, null, "measurement", "mdi:stairs-up"),
         HaSensor("stairs_down", "Floors down (unconfirmed)", "health.stairs_down", null, null, "measurement", "mdi:stairs-down"),
+        // Last workout (DW-H5600 activity log). Units the notes mark as likely say "unconfirmed" in the name.
+        HaSensor("workout_sport", "Last workout", "workout.sport", null, null, null, "mdi:run", attributes = mapOf("unconfirmed" to "workout.unconfirmed")),
+        HaSensor("workout_start", "Last workout start", "workout.start", "timestamp", null, null, "mdi:clock-start"),
+        HaSensor("workout_duration", "Last workout duration", "workout.duration_seconds", "duration", "min", null, "mdi:timer", convert = Convert.SECONDS_TO_MINUTES),
+        HaSensor("workout_distance", "Last workout distance (unconfirmed unit, likely km)", "workout.distance", null, null, null, "mdi:map-marker-distance"),
+        HaSensor("workout_kcal", "Last workout energy (unconfirmed)", "workout.kcal", null, "kcal", null, "mdi:fire"),
+        HaSensor("workout_hr_avg", "Last workout average heart rate", "workout.hr_avg", null, "bpm", null, "mdi:heart-pulse"),
+        HaSensor("workout_hr_max", "Last workout max heart rate", "workout.hr_max", null, "bpm", null, "mdi:heart-pulse"),
         // Decoded watch settings (read from the raw cache).
         HaSensor(
             "watch_face", "Watch face", "watch.face_index", null, null, null, "mdi:watch", "diagnostic",

@@ -14,6 +14,9 @@ enum class WebhookTrigger(val eventName: String) {
     /** Future: health data was downloaded from the watch. Nothing fires this yet, see [WebhookDispatcher.onHealthDataDownloaded]. */
     HEALTH_DATA("health_data"),
 
+    /** A DW-H5600 workout was downloaded and stored. */
+    WORKOUT("workout_downloaded"),
+
     /** The Test button. */
     TEST("test"),
 }
@@ -34,6 +37,7 @@ data class Webhook(
     val onWatchAction: Boolean = true,
     val onSync: Boolean = false,
     val onHealthData: Boolean = false,
+    val onWorkout: Boolean = false,
     /** Minimum time between two automatic sends, in minutes. 0 means no limit. */
     val minIntervalMinutes: Int = 0,
     val enabled: Boolean = true,
@@ -42,6 +46,7 @@ data class Webhook(
         WebhookTrigger.WATCH_ACTION -> onWatchAction
         WebhookTrigger.SYNC -> onSync
         WebhookTrigger.HEALTH_DATA -> onHealthData
+        WebhookTrigger.WORKOUT -> onWorkout
         WebhookTrigger.TEST -> true
     }
 

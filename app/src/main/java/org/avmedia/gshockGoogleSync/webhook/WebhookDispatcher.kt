@@ -31,6 +31,8 @@ class WebhookDispatcher @Inject constructor(
     init {
         // The point where a DW-H5600 LifeLog read completes: the "health data downloaded" trigger.
         H5600Session.onDownloaded = { onHealthDataDownloaded() }
+        // A stored workout: the "Workout downloaded" trigger (also pushes the sensors to Home Assistant).
+        org.avmedia.gshockGoogleSync.history.WorkoutStore.onDownloaded = { fire(WebhookTrigger.WORKOUT) }
         // Home Assistant's "command_update_sensors" push: send the sensors once, nothing else.
         HaPushRouter.updateSensorsHook = { pushSensorsNow() }
     }
