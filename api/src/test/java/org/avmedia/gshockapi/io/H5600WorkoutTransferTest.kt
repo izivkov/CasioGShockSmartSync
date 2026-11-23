@@ -80,6 +80,19 @@ class H5600WorkoutTransferTest {
         assertEquals(0xFE, watch.marks[0][2].toInt() and 0xFF)
     }
 
+    /** Owner log 2026-11-23h: a workout read left no line at all. Every category and the stored mark are logged now. */
+    @Test
+    fun eachCategoryAndSlotIsLogged() = runTest {
+        val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)
+        val lines = mutableListOf<String>()
+        val result = WorkoutTransfer(FakeWatch(inbox), inbox, sink = { true }, log = { lines += it }).run()
+        assertNull(result.error)
+        for (want in listOf("1C requested", "1C the watch is ready", "1D group header read, 1 on the watch, 1 new (slots [0])", "1E 1 workout headers",
+            "slot 0 1F 1 data blocks", "slot 0 20 1 lap blocks", "slot 0 stored and marked")) {
+            assertTrue("$want in $lines", lines.any { it.contains(want) })
+        }
+    }
+
     @Test
     fun aWorkoutTheSinkRefusesIsNeverMarked() = runTest {
         val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)

@@ -74,8 +74,9 @@ object H5600WorkoutIO {
 
     /** After the connection setup: `0x28` index 6 (one byte after the code, so list position 7) is 1 or 2 when the watch holds workouts. */
     fun onSetupDone(condition: List<Int>) {
-        val flag = condition.getOrNull(CONDITION_POSITION) ?: return
-        if (flag != 1 && flag != 2) return
+        val flag = condition.getOrNull(WorkoutReadTrigger.FLAG_POSITION) ?: return
+        if (!WorkoutReadTrigger.waiting(flag)) return
+        log("Workout read: 0x28 index 6 is $flag after the setup, workouts are waiting")
         scope.launch { download() }
     }
 
@@ -87,49 +88,101 @@ object H5600WorkoutIO {
     /** After a LifeLog read ([condition] = its raw `0x28` answer, code byte first): download when [WorkoutReadTrigger] says so. */
     fun afterRead(condition: ByteArray?, nowMs: Long = System.currentTimeMillis()) {
         if (sink == null) return
-        val flag = condition?.getOrNull(CONDITION_POSITION)?.toInt()?.and(0xFF)
+        val flag = WorkoutReadTrigger.flagOf(condition)
         if (!WorkoutReadTrigger.shouldDownload(flag, lastCheckMs, nowMs)) return
+        log("Workout read after the LifeLog read: " + if (WorkoutReadTrigger.waiting(flag)) "0x28 index 6 is $flag" else "hourly check (index 6 is $flag)")
         scope.launch { download() }
     }
 
-    /** One download run; waits for the exchange lock. Returns the number of workouts stored, or null when it did not run. */
+    /** One download run; waits for the exchange lock (and says so). Returns the number of workouts stored, or null when it did not run. */
     suspend fun download(): WorkoutRunResult? {
-        val store = sink ?: return null.also { Timber.w("H5600 workouts: no sink set, nothing downloaded") }
-        if (!running.compareAndSet(false, true)) return null
-        WatchExchange.mutex.lock()
+        log("Workout read asked")
+        if (sink == null) return null.also { log("Workout read not started: the app keeps no workouts") }
+        if (!WatchExchange.mutex.tryLock()) {
+            log("Workout read waits: another exchange (a LifeLog or settings read) holds the link")
+            WatchExchange.mutex.lock()
+            log("Workout read: the link is free")
+        }
+        try {
+            return downloadHeld()
+        } finally {
+            WatchExchange.mutex.unlock()
+        }
+    }
+
+    /**
+     * Inside a LifeLog read (exchange lock held), before its START: when its `0x28` answer flags workouts (index 6 is 1 or 2)
+     * they are read first ([run], normally [downloadHeld]), as Casio's app does (notes T4: workouts, then the LifeLog). Owner
+     * log 2026-11-23h 21:31:39: the first `0x28` ever with index 6 = 1, and a START the watch did not answer for 60 s.
+     */
+    suspend fun beforeLifeLog(condition: ByteArray?, run: suspend () -> Unit) {
+        val flag = WorkoutReadTrigger.flagOf(condition)
+        if (!WorkoutReadTrigger.waiting(flag)) return
+        log("LifeLog: 0x28 index 6 is $flag, the waiting workouts are read first")
+        try {
+            run()
+        } catch (c: kotlinx.coroutines.CancellationException) {
+            throw c
+        } catch (t: Throwable) {
+            log("Workout read before the LifeLog failed: ${t.javaClass.simpleName} ${t.message.orEmpty()}")
+        }
+        log("LifeLog read goes on after the workouts")
+    }
+
+    /**
+     * One download run for a caller that holds [WatchExchange.mutex]: the LifeLog read runs it before its START when `0x28`
+     * flags workouts, as Casio's app does (notes T4: workouts first, then the LifeLog).
+     */
+    suspend fun downloadHeld(): WorkoutRunResult? {
+        val store = sink ?: return null.also { log("Workout read not started: the app keeps no workouts") }
+        if (!running.compareAndSet(false, true)) return null.also { log("Workout read not started: one is already running") }
+        log("Workout read starts")
         val channel = Channel<WorkoutMsg>(Channel.UNLIMITED)
-        val log = mutableListOf<ByteArray>()
+        val frames = mutableListOf<ByteArray>()
         val stream = java.io.ByteArrayOutputStream()
         try {
             _status.value = "Downloading workouts"
             lastError = null
             inbox = channel
             val transfer = WorkoutTransfer(
-                link = ioLink,
+                link = link,
                 inbox = channel,
                 sink = { s -> store(s).also { ok -> if (ok) _workouts.emit(s) } },
                 blockCache = blockCache,
                 capture = { m, bytes ->
-                    m?.let { log += it.data }
+                    m?.let { frames += it.data }
                     bytes?.let { stream.write(it) }
                 },
+                log = ::log,
             )
             val result = transfer.run()
             lastError = result.error
             if (result.error == null) lastCheckMs = System.currentTimeMillis()
-            if (result.error != null) Timber.w("H5600 workouts: ${result.error}")
-            keepDump(log, stream.toByteArray(), result.error)
+            log(
+                if (result.error == null) "Workout read done: ${result.downloaded} new stored"
+                else "Workout read stopped: ${result.error}" + if (result.downloaded > 0) " (${result.downloaded} stored before)" else "",
+            )
+            keepDump(frames, stream.toByteArray(), result.error)
             return result
+        } catch (t: Throwable) {
+            log("Workout read stopped: ${t.javaClass.simpleName} ${t.message.orEmpty()}")
+            throw t
         } finally {
             inbox = null
             org.avmedia.gshockapi.casio.ConnectionSetup.onTransferEnded()
             _status.value = null
             running.set(false)
-            WatchExchange.mutex.unlock()
         }
     }
 
-    private val ioLink = object : WorkoutLink {
+    private fun log(text: String) {
+        Timber.i("H5600 workouts: $text")
+        org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(text)
+    }
+
+    /** The two characteristics; a test seam. */
+    @Volatile
+    internal var link: WorkoutLink = object : WorkoutLink {
         override fun drsp(data: ByteArray) = IO.writeCmd(GetSetMode.DATA_REQUEST, data)
 
         override fun bulk(data: ByteArray) = IO.writeCmd(GetSetMode.CONVOY, data)
@@ -144,7 +197,6 @@ object H5600WorkoutIO {
         }
     }
 
-    private const val CONDITION_POSITION = 7
     private val DRSP_FIRST = setOf(0x00, 0x03, 0x04, 0x06, 0x07, 0x08, 0x09)
     private const val BULK_LAST = 0x07
 }

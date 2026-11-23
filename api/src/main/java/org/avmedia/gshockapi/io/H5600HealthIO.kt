@@ -70,6 +70,10 @@ object H5600HealthIO {
     @Volatile
     var afterRead: (ByteArray?) -> Unit = { H5600WorkoutIO.afterRead(it) }
 
+    /** The workout read [H5600WorkoutIO.beforeLifeLog] runs before START when `0x28` flags workouts; a test seam. */
+    @Volatile
+    var workoutsFirst: suspend () -> Unit = { H5600WorkoutIO.downloadHeld() }
+
     private val lock = Any()
     private var active: Transfer? = null
 
@@ -208,6 +212,8 @@ object H5600HealthIO {
             val stepGoal = runSetup(transfer)
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
             Timber.i("H5600: setup finished, step goal=$stepGoal")
+            H5600WorkoutIO.beforeLifeLog(transfer.watchCondition, workoutsFirst)
+            if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
 
             // The official app and the Python script write START before the first poll. The watch
             // acknowledges it on DRSP once it is ready. Without this write the first poll gets no reply.
