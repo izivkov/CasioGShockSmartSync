@@ -237,8 +237,8 @@ class WatchSettingCodecsTest {
     fun sexIsBitZeroOfTheFlagsZeroMaleOneFemale() {
         val male = frame(0x45, 0x00, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA)
         assertEquals(false, ProfileCodec.parse(male)!!.female)
-        val female = ProfileCodec.withFemale(frame(0x45, 0x0C, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA), true)!!
-        assertEquals(0x0D, female[1].toInt() and 0xFF)
+        val female = ProfileCodec.withFemale(frame(0x45, 0x08, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA), true)!!
+        assertEquals(0x09, female[1].toInt() and 0xFF)
         assertEquals(true, ProfileCodec.parse(female)!!.female)
         assertEquals(setOf(1), changed(male, ProfileCodec.withFemale(male, true)!!).toSet())
         assertEquals(168, ProfileCodec.parse(female)!!.heightCm)
