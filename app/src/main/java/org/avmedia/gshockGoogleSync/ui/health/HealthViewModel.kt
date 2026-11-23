@@ -144,11 +144,27 @@ class HealthViewModel @Inject constructor(
     private var stepFetchPending = false
 
     init {
+        showStoredHistory()
         refreshState()
         setupEventSubscription()
 
         if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) {
             startStepCounterPolling()
+        }
+    }
+
+    /** DW-H5600: show the last stored day at once; a running or later read replaces it. Nothing stored: the screen stays as it was. */
+    private fun showStoredHistory() {
+        if (!isDwH5600()) return
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val stored = runCatching {
+                val dao = org.avmedia.gshockGoogleSync.history.HistoryDb.get(appContext).dao()
+                org.avmedia.gshockGoogleSync.history.StoredHealth.stepData(dao.allDays()) { dao.hoursOf(it) }
+            }.onFailure { Timber.w(it, "Health: reading the stored history failed") }.getOrNull() ?: return@launch
+            _state.update { current ->
+                if (current.stepCounterData.h5600 != null) current
+                else current.copy(stepCounterData = stored, lifeLogLoading = false).withStepMetrics(stored).withWatchGoal(stored)
+            }
         }
     }
 

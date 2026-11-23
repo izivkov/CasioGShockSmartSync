@@ -224,10 +224,10 @@ class WatchSettingCodecsTest {
 
     @Test
     fun aProfileWriteKeepsTheFlagByteAndIndexNineAndInvertsTheValues() {
-        val raw = frame(0x45, 0x05, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA)
+        val raw = frame(0x45, 0x01, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA)
         val after = ProfileCodec.withHeightAndWeight(raw, 170, 70)!!
         assertEquals(raw.size, after.size)
-        assertEquals(0x05, after[1].toInt() and 0xFF)
+        assertEquals(0x01, after[1].toInt() and 0xFF)
         assertEquals(0xAA, after[10].toInt() and 0xFF)
         assertEquals(listOf(0x8F, 0xFE, 0x8F, 0xFF), (2..5).map { after[it].toInt() and 0xFF })
         assertEquals(170, ProfileCodec.parse(after)!!.heightCm)

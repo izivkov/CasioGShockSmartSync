@@ -331,7 +331,7 @@ object ProfileCodec {
     ): ByteArray? {
         if (parse(frame) == null) return null
         val flags = Frame.u8(frame, 0) ?: return null
-        return Frame.withBytes(frame, mapOf(0 to Frame.bits(flags, 1, !female)))
+        return Frame.withBytes(frame, mapOf(0 to Frame.bits(flags, 1, female)))
     }
 
     /** Frame bytes that [withFemale] may change. */

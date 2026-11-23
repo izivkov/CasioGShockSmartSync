@@ -115,6 +115,15 @@ class H5600RawDumpTest {
     }
 
     @Test
+    fun onlyTheConnectionLogStillMakesAZip() {
+        val folder = tmp.newFolder("only-log")
+        folder.resolve("connection.log").writeText("2026-11-22 20:00:00.000 49 00 received\n")
+        val zip = H5600RawDump(folder).zipLatest(tmp.newFile("only.zip"))
+        assertNotNull(zip)
+        ZipFile(zip!!).use { assertEquals(setOf("connection.log"), it.entries().asSequence().map { e -> e.name }.toSet()) }
+    }
+
+    @Test
     fun noTransfersMeansNoZip() {
         val dump = H5600RawDump(tmp.newFolder("log"))
         assertNull(dump.zipLatest(tmp.newFile("none.zip")))

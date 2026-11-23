@@ -57,6 +57,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                 ) {
                     SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
+                    org.avmedia.gshockGoogleSync.ui.health.ShareLogsButton(Modifier.fillMaxWidth().padding(16.dp))
                 }
                 BottomRow(modifier = Modifier.fillMaxWidth())
             }
