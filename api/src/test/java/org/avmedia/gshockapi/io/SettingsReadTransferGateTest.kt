@@ -20,14 +20,14 @@ class SettingsReadTransferGateTest {
     }
 
     @Test fun aSettingsReadDoesNotGoOutWhileATransferRunsAndGoesOutAfterIt() = runBlocking {
-        @Volatile var running = true
-        WatchExchange.transferRunning = { running }
-        var sent = 0
-        val read = async(Dispatchers.Default) { CachedIO.request("GATE_TEST") { sent++; 7 } }
+        val running = java.util.concurrent.atomic.AtomicBoolean(true)
+        WatchExchange.transferRunning = { running.get() }
+        val sent = java.util.concurrent.atomic.AtomicInteger(0)
+        val read = async(Dispatchers.Default) { CachedIO.request("GATE_TEST") { sent.incrementAndGet(); 7 } }
         delay(400)
-        assertEquals("sent during the transfer", 0, sent)
-        running = false
+        assertEquals("sent during the transfer", 0, sent.get())
+        running.set(false)
         assertEquals(7, withTimeout(3_000) { read.await() })
-        assertEquals(1, sent)
+        assertEquals(1, sent.get())
     }
 }
