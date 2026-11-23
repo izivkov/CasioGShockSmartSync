@@ -42,6 +42,11 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleGithubDebug -PminifyTest
 
+      - name: Keep the shrunk APK (the full build below writes to the same folder)
+        run: |
+          mkdir -p shrunk full
+          cp app/build/outputs/apk/github/debug/*.apk shrunk/smartsync-test.apk
+
       - name: APK size
         run: |
           ls -l app/build/outputs/apk/github/debug/*.apk
@@ -74,4 +79,25 @@ jobs:
         with:
           name: smartsync-${{ github.ref_name }}-test
           path: app/build/outputs/apk/github/debug/*.apk
+          if-no-files-found: error
+
+      - name: Upload shrunk APK under a fixed name
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartsync-test.apk
+          path: shrunk/smartsync-test.apk
+          if-no-files-found: error
+
+      - name: Build the full-size debug APK (no R8), the fallback if the shrunk one does not start
+        run: |
+          ./gradlew assembleGithubDebug
+          cp app/build/outputs/apk/github/debug/*.apk full/smartsync-test-full.apk
+          ls -l shrunk full
+          echo "Shrunk: $(du -h shrunk/smartsync-test.apk | cut -f1), full: $(du -h full/smartsync-test-full.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload full-size APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartsync-test-full.apk
+          path: full/smartsync-test-full.apk
           if-no-files-found: error
