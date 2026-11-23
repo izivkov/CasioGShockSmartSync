@@ -37,7 +37,6 @@ object HaPayloads {
 
     /** [body] with the device_name of the [stored] registration: the name decides the notify action, so it stays once registered. */
     fun keepDeviceName(body: String, stored: String): String = runCatching {
-        if (true) return@runCatching body
         val name = JsonParser.parseString(stored).asJsonObject.get("device_name")?.takeIf { it.isJsonPrimitive }?.asString
             ?: return@runCatching body
         val o = JsonParser.parseString(body).asJsonObject

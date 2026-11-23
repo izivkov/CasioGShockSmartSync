@@ -116,6 +116,13 @@ object HaSensors {
             "smart_alarm", "Smart alarm", "watch.smart_alarm_time", null, null, null, "mdi:alarm-check", "diagnostic",
             attributes = mapOf("on" to "watch.smart_alarm_on", "window_min" to "watch.smart_alarm_window_min"),
         ),
+        // The settings Home Assistant can change (command_watch_setting): the face and the custom slot are the ones people schedule.
+        HaSensor("watch_face_name", "Watch face name", "watch.setting.watch_face", null, null, null, "mdi:watch", "diagnostic"),
+        HaSensor("custom_slot", "Custom face slot", "watch.setting.custom_slot", null, null, null, "mdi:watch-variant", "diagnostic"),
+        HaSensor(
+            "watch_writable_settings", "Watch settings (writable)", "watch.setting_count", null, null, "measurement", "mdi:tune", "diagnostic",
+            attributes = WatchSettingRegistry.ALL.associate { it.key to "watch.setting.${it.key}" },
+        ),
         HaSensor("watch_settings", "Watch settings", "watch.settings.time_format", null, null, null, "mdi:cog", "diagnostic", attributes = SETTINGS_ATTRIBUTES),
     )
 

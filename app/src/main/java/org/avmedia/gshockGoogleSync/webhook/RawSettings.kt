@@ -15,7 +15,7 @@ object RawSettings {
     )
 
     /** The codes the decoded features (face, health settings) read, whatever the raw switch says. */
-    val DECODED_CODES: List<Int> = listOf(0x51, 0x41, 0x4F, 0x13, 0x43, 0x45, 0x50)
+    val DECODED_CODES: List<Int> = listOf(0x51, 0x41, 0x4F, 0x13, 0x43, 0x45, 0x50, 0x42)
 
     /** What a sync may read: the whole table only while the raw switch is on. */
     fun codesFor(rawOn: Boolean): List<Int> = if (rawOn) CODES else DECODED_CODES

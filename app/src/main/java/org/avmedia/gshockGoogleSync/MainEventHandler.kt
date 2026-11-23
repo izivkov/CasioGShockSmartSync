@@ -25,6 +25,7 @@ import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockGoogleSync.webhook.HaPayloads
 import org.avmedia.gshockGoogleSync.webhook.HaPushChannel
 import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
+import org.avmedia.gshockGoogleSync.webhook.WatchSettingCommands
 import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
 import timber.log.Timber
 
@@ -85,10 +86,12 @@ class MainEventHandler(
             enabled = { toggles.isOn(ServiceToggles.Service.HOME_ASSISTANT) },
         )
         val job = scope.launch(Dispatchers.IO) { channel.run(HaPayloads.deviceId(address)) }
+        WatchSettingCommands.shared?.flushLater()
         try {
             session.state.first { it.phase is SessionPhase.Closed }
         } finally {
             job.cancel()
+            WatchSettingCommands.shared?.onDisconnected()
         }
     }
 

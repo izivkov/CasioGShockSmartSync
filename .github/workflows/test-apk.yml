@@ -40,7 +40,12 @@ jobs:
           if-no-files-found: warn
 
       - name: Build debug APK
-        run: ./gradlew assembleGithubDebug
+        run: ./gradlew assembleGithubDebug -PminifyTest
+
+      - name: APK size
+        run: |
+          ls -l app/build/outputs/apk/github/debug/*.apk
+          echo "APK size: $(du -h app/build/outputs/apk/github/debug/*.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check the APK signing certificate (updates need the same key every time)
         env:

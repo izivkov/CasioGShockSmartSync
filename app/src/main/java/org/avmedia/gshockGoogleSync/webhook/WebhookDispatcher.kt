@@ -27,6 +27,7 @@ class WebhookDispatcher @Inject constructor(
     private val api: GShockRepository,
     features: IWatchFeatureManager,
     raw: RawWatchRequest,
+    access: org.avmedia.gshockGoogleSync.ui.watchhealth.WatchSettingsAccess,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -37,6 +38,14 @@ class WebhookDispatcher @Inject constructor(
         org.avmedia.gshockGoogleSync.history.WorkoutStore.onDownloaded = { fire(WebhookTrigger.WORKOUT) }
         // Home Assistant's "command_update_sensors" push: send the sensors once, nothing else.
         HaPushRouter.updateSensorsHook = { pushSensorsNow() }
+        // Home Assistant's "command_watch_setting": checked, queued, written once the watch's setup is done.
+        val commands = WatchSettingCommands(
+            write = { s, v -> access.update(s.code, s.touched, { f -> s.change(f, v) }) },
+            connected = { runCatching { api.isConnected() }.getOrDefault(false) },
+            afterWrites = { pushSensorsNow() },
+        )
+        WatchSettingCommands.shared = commands
+        org.avmedia.gshockapi.casio.ConnectionKeepAlive.onSetupDone = { commands.onSetupDone() }
     }
 
     val registry: VariableRegistry = WatchVariables.registry(WatchVariables.androidEnv(context, api, features, raw))

@@ -19,6 +19,27 @@ object CallRetry {
 
     @Volatile var sleeper: (Long) -> Unit = { Thread.sleep(it) }
     @Volatile var writer: (LogSource, String) -> Unit = AppLog::log
+    @Volatile var clock: () -> Long = System::currentTimeMillis
+
+    /**
+     * WorkManager runs a failed job again (up to 3 runs, 30 s and 60 s apart), and each run is a new call chain here.
+     * The same failure line is written once per [REPEAT_WINDOW_MS]: one line per failed call chain of the job.
+     */
+    const val REPEAT_WINDOW_MS = 10 * 60 * 1000L
+    private val lastFailure = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
+    fun resetFailureWindow() = lastFailure.clear()
+
+    private fun failureLine(source: LogSource, line: String) {
+        val key = "${source.label}|$line"
+        val now = clock()
+        val before = lastFailure.put(key, now)
+        if (before != null && now - before < REPEAT_WINDOW_MS) {
+            lastFailure[key] = before // the window counts from the first line
+            return
+        }
+        writer(source, line)
+    }
 
     /** One try: [status] is null when no answer came, [reason] says why in a few words (null for an answer). */
     class Attempt<T>(val value: T, val status: Int?, val reason: String? = null) {
@@ -43,6 +64,7 @@ object CallRetry {
             val a = call()
             tries++
             if (a.ok) {
+                lastFailure.keys.removeAll { it.startsWith("${source.label}|$what:") } // a recovery opens a new window
                 if (tries > 1) writer(source, "$what: sent after $tries tries")
                 return a.value
             }
@@ -50,7 +72,7 @@ object CallRetry {
                 sleeper(waits[tries - 1])
                 continue
             }
-            if (a.status == null || a.status !in quiet) writer(source, "$what: failed after $tries ${if (tries == 1) "try" else "tries"}: ${a.reason ?: reasonOf(a.status, null)}")
+            if (a.status == null || a.status !in quiet) (if (retries) ::failureLine else writer)(source, "$what: failed after $tries ${if (tries == 1) "try" else "tries"}: ${a.reason ?: reasonOf(a.status, null)}")
             return a.value
         }
     }

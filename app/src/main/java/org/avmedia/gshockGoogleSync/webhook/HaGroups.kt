@@ -5,7 +5,7 @@ enum class HaGroup(val title: String) { WATCH("Watch"), HEALTH("Health"), SETTIN
 
 object HaGroups {
     fun of(sensor: HaSensor): HaGroup = when {
-        sensor.uniqueId == "watch_settings" -> HaGroup.SETTINGS
+        sensor.uniqueId == "watch_settings" || sensor.uniqueId == "watch_writable_settings" -> HaGroup.SETTINGS
         sensor.variable.startsWith("health.") || sensor.variable.startsWith("workout.") -> HaGroup.HEALTH
         else -> HaGroup.WATCH
     }

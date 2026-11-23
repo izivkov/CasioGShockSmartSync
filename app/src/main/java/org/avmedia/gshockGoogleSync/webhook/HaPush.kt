@@ -16,6 +16,8 @@ sealed interface HaPushEvent {
         val confirmId: String?,
         /** The companion-app command this message carries (`command_update_sensors`, ...), null for a normal message. */
         val command: String? = null,
+        /** The `data` object of the message (the arguments of a command), empty when none. */
+        val data: Map<String, Any?> = emptyMap(),
     ) : HaPushEvent
     data object Ignored : HaPushEvent
 }
@@ -54,11 +56,17 @@ object HaPush {
                 val message = str("message")
                 val dataCommand = e.get("data")?.takeIf { it.isJsonObject }?.asJsonObject?.get("command")?.takeIf { it.isJsonPrimitive }?.asString
                 if (message.isNullOrBlank()) HaPushEvent.Ignored
-                else HaPushEvent.Push(str("title"), message, str("confirm_id"), commandOf(message, dataCommand))
+                else HaPushEvent.Push(str("title"), message, str("confirm_id"), commandOf(message, dataCommand), dataOf(e))
             }
             else -> HaPushEvent.Ignored
         }
     }.getOrDefault(HaPushEvent.Ignored)
+
+    const val COMMAND_WATCH_SETTING = "command_watch_setting"
+
+    @Suppress("UNCHECKED_CAST")
+    private fun dataOf(event: com.google.gson.JsonObject): Map<String, Any?> =
+        event.get("data")?.takeIf { it.isJsonObject }?.let { runCatching { gson.fromJson(it, Map::class.java) as Map<String, Any?> }.getOrNull() } ?: emptyMap()
 
     const val COMMAND_UPDATE_SENSORS = "command_update_sensors"
     private val COMMAND_WORDS = setOf("request_location_update", "clear_notification")

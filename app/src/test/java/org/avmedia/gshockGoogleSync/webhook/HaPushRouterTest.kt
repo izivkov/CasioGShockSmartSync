@@ -10,7 +10,8 @@ class HaPushRouterTest {
     private val delivered = ArrayList<AppNotification>()
     private var updates = 0
     private val logged = ArrayList<String>()
-    private val router = HaPushRouter({ delivered += it }, { updates++ }, { logged += it }, { "20261122T200000" })
+    private val settings = ArrayList<Map<String, Any?>>()
+    private val router = HaPushRouter({ delivered += it }, { updates++ }, { logged += it }, { "20261122T200000" }, { settings += it })
 
     private fun push(json: String) = HaPush.parse(json) as HaPushEvent.Push
 
@@ -45,5 +46,16 @@ class HaPushRouterTest {
     @Test fun aMessageThatOnlyMentionsACommandInTheMiddleIsStillAMessage() {
         assertNull(HaPush.commandOf("please run command_update_sensors later", null))
         assertEquals("command_update_sensors", HaPush.commandOf("command_update_sensors", null))
+    }
+
+    @Test fun aWatchSettingCommandGoesToTheSettingsAndNeverToTheWatch() {
+        router.route(push("""{"type":"event","event":{"message":"command_watch_setting","data":{"setting":"watch_face","value":"steps"}}}"""))
+        router.route(push("""{"type":"event","event":{"message":"command_watch_setting","data":{"settings":{"step_goal":9000}}}}"""))
+        assertTrue(delivered.isEmpty())
+        assertEquals(2, settings.size)
+        assertEquals("watch_face", settings[0]["setting"])
+        assertEquals("steps", settings[0]["value"])
+        assertEquals(mapOf("step_goal" to 9000.0), settings[1]["settings"])
+        assertTrue(logged.isEmpty())
     }
 }

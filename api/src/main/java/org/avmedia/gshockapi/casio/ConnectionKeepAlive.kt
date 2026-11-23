@@ -41,6 +41,9 @@ object ConnectionKeepAlive {
 
     @Volatile var writer: WatchWriter = ConnectionWriter
 
+    /** Called on `47 01` (the watch's setup is done): the app writes what was waiting for it. */
+    @Volatile var onSetupDone: () -> Unit = {}
+
     /** Where the events are also kept (a file in the health-log folder), null keeps them in memory only. */
     var logFile: File?
         get() = AppLog.logFile
@@ -73,7 +76,10 @@ object ConnectionKeepAlive {
     /** `47 01`: setup done. `47 02`: write the Link Loss alert level 1. */
     fun onSetup(data: String) {
         when (val value = values(data).getOrNull(1)) {
-            1 -> log("47 01 received: the watch's setup is done")
+            1 -> {
+                log("47 01 received: the watch's setup is done")
+                runCatching { onSetupDone() }
+            }
             2 -> {
                 writer.writeLinkLoss(1)
                 log("47 02 received, Link Loss alert level 1 written")

@@ -73,7 +73,13 @@ object WatchSettingVariables {
         Def("watch.smart_alarm_window_min", "H5600 only: smart alarm wake window, minutes before the alarm time") {
             parsed(it, 0x50, SmartAlarmCodec::parse)?.windowMinutes
         },
-    )
+    ) + WatchSettingRegistry.ALL.map { setting ->
+        Def("watch.setting.${setting.key}", "H5600 only: the value of the writable setting ${setting.key} (Home Assistant can change it)") {
+            setting.valueIn(it)
+        }
+    } + Def("watch.setting_count", "H5600 only: how many writable settings were read from the watch") {
+        WatchSettingRegistry.ALL.count { s -> s.valueIn(it) != null }.takeIf { n -> n > 0 }
+    }
 
     /** Raw cache ("0x41" to "41 01 02") to frames; entries that are not hex are left out. */
     fun frames(raw: Map<String, String>): Map<String, ByteArray> =

@@ -14,15 +14,19 @@ import org.junit.Test
 class CallRetryTest {
     private val waits = ArrayList<Long>()
     private val lines = ArrayList<String>()
+    private var now = 1_000_000L
 
     @Before fun install() {
         CallRetry.sleeper = { waits += it }
         CallRetry.writer = { _, text -> lines += text }
+        CallRetry.clock = { now }
+        CallRetry.resetFailureWindow()
     }
 
     @After fun restore() {
         CallRetry.sleeper = { Thread.sleep(it) }
         CallRetry.writer = org.avmedia.gshockapi.log.AppLog::log
+        CallRetry.clock = System::currentTimeMillis
     }
 
     private fun run(vararg answers: Int?, quiet: Set<Int> = emptySet(), retries: Boolean = true): Int {
@@ -79,5 +83,26 @@ class CallRetryTest {
         assertEquals("timeout", CallRetry.reasonOf(null, SocketTimeoutException("t")))
         assertEquals("HTTP 503", CallRetry.reasonOf(503, null))
         assertFalse(CallRetry.reasonOf(null, IllegalStateException("token=SECRET")).contains("SECRET"))
+    }
+
+    // WorkManager runs the job up to 3 times; each run is a call chain with the same failure.
+    @Test fun threeWorkManagerRunsOfTheSameFailureWriteOneLine() {
+        repeat(3) { run(null); now += 60_000 }
+        assertEquals(listOf("W: failed after 4 tries: host not reachable"), lines)
+    }
+
+    @Test fun theSameFailureIsWrittenAgainAfterTheWindowAndADifferentOneAtOnce() {
+        run(null)
+        now += CallRetry.REPEAT_WINDOW_MS + 1
+        run(null)
+        run(503)
+        assertEquals(3, lines.size)
+    }
+
+    @Test fun aRecoveryOpensANewWindow() {
+        run(null)
+        run(200)
+        run(null)
+        assertEquals(2, lines.size)
     }
 }
