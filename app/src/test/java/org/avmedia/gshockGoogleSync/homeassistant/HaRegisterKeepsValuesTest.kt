@@ -47,7 +47,7 @@ class HaRegisterKeepsValuesTest {
     }
 
     /**
-     * Log 2026-11-23: the first push after installing a build with a changed sensor set (21:26:05, no LifeLog read yet in
+     * Before: the first push after installing a build with a changed sensor set (no LifeLog read yet in
      * the new app session) re-registered steps_today with the last sent value 3184 but no attributes, and HA dropped
      * `steps_by_hour` (register_sensor replaces the attributes like an update does). Same for the heart rate curve.
      */

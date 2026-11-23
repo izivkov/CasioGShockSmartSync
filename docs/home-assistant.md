@@ -10,7 +10,7 @@ field, the list and the detail view show the title field, so the title goes in b
 | `message` only | `HA` | empty | message |
 
 - Keep titles to 32 characters (32 bytes in UTF-8; accents count 2): the app cuts the first line there, as Gadgetbridge's
-  Casio support does. Measured on the GBX-H5600 (owner, 2026-11-23): the pop-up shows about 10 characters of the first
+  Casio support does. Measured on the GBX-H5600: the pop-up shows about 10 characters of the first
   field; the detail view shows the title line and then the text wrapped at about 14 characters per line, over several
   lines. Short titles (10 characters or fewer) show whole in the pop-up.
 - The text is cut at 193 bytes (UTF-8).

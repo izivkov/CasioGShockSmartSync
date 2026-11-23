@@ -157,7 +157,7 @@ internal fun dwHourlySlots(hourlySteps: List<Int?>): List<Float?> = List(24) { h
 /**
  * DW-H5600: the shared history chart over the fixed 24 hours, x labels every 6 h, a y axis, no value label per bar. Before, the
  * bars ran from the first to the last hour with steps, each labelled, and 24 of them in half the width were 1 px lines with
- * overlapping labels (owner screenshot 2026-11-23 17:53); one hour alone filled the whole width (17:54).
+ * overlapping labels; one hour alone filled the whole width.
  */
 @Composable
 private fun DwHourlyBars(data: StepCounterData) {

@@ -10,7 +10,7 @@ import org.junit.Test
 
 /**
  * A scripted watch holding one running workout in slot 0 (header at 4096, one data block at 8192, one lap block at 12288).
- * It echoes the session request `00 1C` + 8 zero as the real watch does (owner dump 2026-11-23i: `001c0000000000000000`).
+ * It echoes the session request `00 1C` + 8 zero as the real watch does (`001c0000000000000000`).
  */
 internal class FakeWatch(private val inbox: Channel<WorkoutMsg>, private val corruptFirstHeader: Boolean = false) : WorkoutLink {
     val events = mutableListOf<String>()
@@ -83,7 +83,7 @@ class H5600WorkoutTransferTest {
         assertEquals(0xFE, watch.marks[0][2].toInt() and 0xFF)
     }
 
-    /** Owner log 2026-11-23h: a workout read left no line at all. Every category and the stored mark are logged now. */
+    /** A workout read left no line at all. Every category and the stored mark are logged now. */
     @Test
     fun eachCategoryAndSlotIsLogged() = runTest {
         val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)

@@ -10,7 +10,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Owner log 2026-11-23_2309 lines 3570-3586: a settings read (`0x11`) went out every 4 to 5 s while a workout read held the link. */
+/** Before: a settings read (`0x11`) went out every 4 to 5 s while a workout read held the link. */
 class SettingsReadTransferGateTest {
     private val saved = WatchExchange.transferRunning
 

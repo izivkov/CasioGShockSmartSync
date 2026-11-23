@@ -14,7 +14,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Recorded answers of the owner's GBX-H5600 are the fixtures. */
+/** Real GBX-H5600 answers are the fixtures. */
 class WatchDecodersTest {
     private val condition = "0x28 06 1D 01 00 FA 00 00 00 01"
     private val brussels = "0x1F 00 42 52 55 53 53 45 4C 53"

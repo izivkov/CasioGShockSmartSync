@@ -36,23 +36,60 @@ class PrivateReferencesTest {
         "app/src/main/java/org/avmedia/gshockGoogleSync/pairing/CompanionDeviceCoordinator.kt" to "// Like the official app: while the watch is advertising, retry quickly. A refused",
     )
 
+    /**
+     * Where a decoding or a fix came from: owner or user logs, screenshots, dumps and hints, dated logs, recordings and
+     * captures, decode dates, analysis script names. The comment says what the watch does, not who saw it when.
+     */
+    private val provenance = Regex(
+        listOf(
+            """\bowner'?s?\s+(log|logs|screenshot|screenshots|dump|hint|test|reads|watch|capture)\b""",
+            """\b(owner|user)\b,?\s+20\d\d-\d\d-\d\d""", """\((owner|user),?\s*20\d\d""",
+            """\blogs?\s+(of\s+)?20\d\d-\d\d-\d\d""", """\blogs?\s+\d\d:\d\d""",
+            """\b(recording|recorded|capture|captured|decoded|matched|seen|measured|brief)\b(\s+\S+){0,3}\s+20\d\d-\d\d-\d\d""",
+            """\b(recording|recorded|capture|captured|decoded)\b(\s+\S+){0,3}\s+\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December) 20\d\d""",
+            """\buser'?s (capture|log|screenshot|watch)\b""", """\(20\d\d-\d\d-\d\d:""", """parse_\w+\.py""",
+            """\bscreenshots? 20\d\d""",
+        ).joinToString("|"),
+        RegexOption.IGNORE_CASE,
+    )
+
+    /** Upstream text (izivkov) that names its own captures and decode dates, kept word for word. */
+    private val upstreamProvenance = setOf(
+        "api/src/main/java/org/avmedia/gshockapi/model/H5600Settings.kt" to "ALL_ON(0x0A), // all five confirmed on the user's watch 2026-11-16",
+        "api/src/main/java/org/avmedia/gshockapi/model/H5600Settings.kt" to "* flags bit 0x01 = on, 0x02 = snooze; window = minutes before (15/30/45/60). Decoded 2026-11-16.",
+        "api/src/main/java/org/avmedia/gshockapi/io/H5600HealthDecoder.kt" to "// parse_lifelog.py, matched on 2026-10-26 and 2026-11-16).",
+        "api/src/main/java/org/avmedia/gshockapi/io/H5600SettingsIO.kt" to "* Connection handshake copied from the official CASIO app (capture 2026-11-16 17:57:06):",
+        "api/src/main/java/org/avmedia/gshockapi/io/H5600SettingsIO.kt" to "* as the current official app writes it (user's capture 2026-11-16 23:08; izivkov's older capture",
+    )
+
     private val textExtensions = setOf("kt", "kts", "java", "md", "yml", "yaml", "gradle", "txt", "json", "xml", "properties")
 
     @Test
     fun noSourceOrDocPointsAtPrivateNotesOrAnotherApp() {
+        val hits = scan(pattern, upstream)
+        assertTrue("Describe the protocol in our own words, without pointing at notes or another app:\n" +
+            hits.joinToString("\n"), hits.isEmpty())
+    }
+
+    @Test
+    fun noCommentSaysWhereADecodingCameFrom() {
+        val hits = scan(provenance, upstreamProvenance)
+        assertTrue("Say what the watch does, without owner/user logs, screenshots, recordings or decode dates:\n" +
+            hits.joinToString("\n"), hits.isEmpty())
+    }
+
+    private fun scan(regex: Regex, allowed: Set<Pair<String, String>>): List<String> {
         val repo = File("..").canonicalFile
         val roots = listOf("app/src", "api/src", "docs", "fastlane", ".github").map { File(repo, it) } +
             repo.listFiles().orEmpty().filter { it.isFile && it.extension in setOf("md", "gradle", "yml") }
         val self = File(repo, "app/src/test/java/org/avmedia/gshockGoogleSync/PrivateReferencesTest.kt").canonicalFile
         val files = roots.flatMap { r -> r.walkTopDown().filter { it.isFile && it.extension in textExtensions }.toList() }
         assertTrue("the scan found too few files, wrong working directory? ${repo.path}", files.size > 200)
-        val hits = files.filter { it.canonicalFile != self }.flatMap { f ->
+        return files.filter { it.canonicalFile != self }.flatMap { f ->
             val rel = f.relativeTo(repo).invariantSeparatorsPath
             f.readLines().withIndex()
-                .filter { (_, line) -> pattern.containsMatchIn(line) && (rel to line.trim()) !in upstream }
+                .filter { (_, line) -> regex.containsMatchIn(line) && (rel to line.trim()) !in allowed }
                 .map { (i, line) -> "$rel:${i + 1}: ${line.trim()}" }
         }
-        assertTrue("Describe the protocol in our own words, without pointing at notes or another app:\n" +
-            hits.joinToString("\n"), hits.isEmpty())
     }
 }

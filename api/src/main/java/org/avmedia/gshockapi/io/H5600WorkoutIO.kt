@@ -56,7 +56,7 @@ object H5600WorkoutIO {
 
     /**
      * Which characteristic a message belongs to while a workout or tide transfer runs. The characteristic it came on decides;
-     * the guess from the bytes is only the fallback when the connection code did not say. Owner log 2026-11-23_2309: the
+     * the guess from the bytes is only the fallback when the connection code did not say. The
      * watch's `09 1D` (all sent) is longer than 2 bytes, the guess called it a status frame and the read never answered it.
      */
     fun channelOf(hex: String): H5600Channel =
@@ -111,7 +111,7 @@ object H5600WorkoutIO {
         scope.launch { download() }
     }
 
-    /** After a failed read an automatic one waits this long; the button always reads (owner log 2026-11-23j: six tries in 14 min). */
+    /** After a failed read an automatic one waits this long; the button always reads (no retry storm). */
     const val RETRY_AFTER_FAIL_MS = 10 * 60_000L
 
     /** A test seam for the back-off. */
@@ -164,7 +164,7 @@ object H5600WorkoutIO {
         return "Workout read not started: the last one failed, next automatic try in ${(left + 59_999) / 60_000} min (the button reads now)"
     }
 
-    /** Like the LifeLog: no transfer before the watch's setup is done (`47 01`) and our own setup is idle. Owner log 2026-11-23j 22:27:39. */
+    /** Like the LifeLog: no transfer before the watch's setup is done (`47 01`) and our own setup is idle. */
     private suspend fun awaitWatchSetup() {
         org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
         if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) return
@@ -178,8 +178,8 @@ object H5600WorkoutIO {
 
     /**
      * Inside a LifeLog read (exchange lock held), before its START: when its `0x28` answer flags workouts (index 6 is 1 or 2)
-     * they are read first ([run], normally [downloadHeld]): workouts first, then the LifeLog. Owner
-     * log 2026-11-23h 21:31:39: the first `0x28` ever with index 6 = 1, and a START the watch did not answer for 60 s.
+     * they are read first ([run], normally [downloadHeld]): workouts first, then the LifeLog.
+     * With a workout waiting (`0x28` index 6 = 1) the watch does not answer a LifeLog START.
      */
     suspend fun beforeLifeLog(condition: ByteArray?, run: suspend () -> Unit) {
         val flag = WorkoutReadTrigger.flagOf(condition)

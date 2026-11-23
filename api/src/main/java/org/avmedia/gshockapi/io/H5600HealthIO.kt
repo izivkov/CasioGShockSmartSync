@@ -110,7 +110,7 @@ object H5600HealthIO {
 
     /**
      * The link dropped: a running read ends now. Before, it ran on into the next link, sent its setup there and took the
-     * init's 0x10 answer (log 2026-11-23b 15:42:33).
+     * init's 0x10 answer.
      */
     fun onLinkLost() {
         val transfer =
@@ -289,8 +289,8 @@ object H5600HealthIO {
 
     /**
      * Polls the watch until it reports ready. A busy reply (`00 01`) and a poll without a reply both mean "still preparing": the
-     * watch answers a few polls busy, then goes silent while it prepares and answers the next poll ready (log 2026-11-23f
-     * 17:17:22 to 17:17:29: ready 6.6 s after START). Before, five such polls ended the attempt 0.2 s before the watch was ready
+     * watch answers a few polls busy, then goes silent while it prepares and answers the next poll ready (about
+     * 6.6 s after START). Before, five such polls ended the attempt 0.2 s before the watch was ready
      * and the second attempt replayed the whole setup (20 s lost on every read). Now the attempt ends only when the watch has not
      * been ready for [readyWaitMs].
      */
@@ -320,7 +320,7 @@ object H5600HealthIO {
     /**
      * The setup requests of this read. On a link whose setup the watch finished (`47 01`) only the two values the decoder needs
      * are read: the watch needs no replay before a transfer, and our replay of twelve reads and six echoes cost about
-     * 13 s on the slow always-connected link (0.78 s per answer, log 2026-11-23f). Without `47 01` the full replay stays.
+     * 13 s on the slow always-connected link (0.78 s per answer). Without `47 01` the full replay stays.
      */
     internal fun setupCommands(): List<Int> =
         if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) QUICK_SETUP_COMMANDS else H5600LifeLogSync.SETUP_COMMANDS

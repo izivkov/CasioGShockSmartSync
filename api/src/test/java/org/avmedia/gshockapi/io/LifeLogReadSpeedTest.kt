@@ -22,7 +22,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * A watch on the slow always-connected link, with the timings of log 2026-11-23e/f: every write takes one connection event
+ * A watch on the slow always-connected link, with the timings of a real watch: every write takes one connection event
  * (0.39 s, two with response), every answer comes one event later (a read costs 0.78 s, a read plus echo 1.56 s). After START
  * it answers three polls busy (`00 01`), is silent while it prepares and answers ready 10 s after the first START (log e
  * 14:38:59 to 14:39:10). No new data: the transfer is the parameter exchange and END.
@@ -87,7 +87,7 @@ private class SlowLinkWatch(private val prepMs: Long = 10_000L) : WatchTransport
     }
 }
 
-/** LifeLog read speed (owner 2026-11-23: "soooo slow", 56 and 61 s for a read with no new data, log 2026-11-23f). */
+/** LifeLog read speed (56 and 61 s for a read with no new data before). */
 class LifeLogReadSpeedTest {
     private val savedQueue = WatchLink.queue
 

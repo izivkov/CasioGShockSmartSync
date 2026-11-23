@@ -14,7 +14,7 @@ import org.junit.Test
 private fun frame(hex: String): ByteArray = hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 
 /**
- * Steps 1 to 3 of the workout transfer with the timing of the owner's log 2026-11-23i (connection.log 2954-3050, dump notifications.txt):
+ * Steps 1 to 3 of the workout transfer with the timing of a real watch:
  * the start state `000000` comes 1.35 s after our write, the echo `001c0000000000000000` of the session request 6 to 10 s
  * after it, and the watch answers `04` only after that echo (`04000000000000000000`, 0.8 s later). Later steps go to [FakeWatch].
  */
@@ -66,7 +66,7 @@ class H5600WorkoutStartTest {
     private fun TestScope.transfer(watch: WorkoutLink, inbox: Channel<WorkoutMsg>, lines: MutableList<String> = mutableListOf()) =
         WorkoutTransfer(watch, inbox, sink = { true }, log = { lines += "${testScheduler.currentTime} $it" })
 
-    /** Owner log 21:56:58: the echo came 7.6 s after the request, and the run stopped with "no answer to the connection parameters". */
+    /** The echo came 7.6 s after the request, and the run stopped with "no answer to the connection parameters". */
     @Test
     fun aSlowSessionAnswerIsAwaitedBeforeTheConnectionParameters() = runTest {
         val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)
@@ -81,7 +81,7 @@ class H5600WorkoutStartTest {
         }
     }
 
-    /** The echo may come before the start state (owner log 21:58:00, other order): it is not a start state of 0x1C. */
+    /** The echo may come before the start state (other order): it is not a start state of 0x1C. */
     @Test
     fun theEchoBeforeTheStartStateIsNotReadAsAState() = runTest {
         val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)
@@ -91,7 +91,7 @@ class H5600WorkoutStartTest {
         assertEquals(1, watch.bulks.count { it[0].toInt() == 0 })
     }
 
-    /** Owner log 21:57:55: the watch answered `03 01` (fail reason 1); we waited 5 s and then said "did not answer the start". */
+    /** The watch answered `03 01` (fail reason 1); we waited 5 s and then said "did not answer the start". */
     @Test
     fun aFailReasonEndsTheStartAtOnceWithTheAbort() = runTest {
         val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)

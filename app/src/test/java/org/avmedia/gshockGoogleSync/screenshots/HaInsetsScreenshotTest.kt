@@ -29,8 +29,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Owner screenshot 2026-11-23 22:20: the app draws edge to edge and the Home Assistant title sat under the status bar.
- * Same picture: once registered the name field is read-only and says "fixed at registration".
+ * The app draws edge to edge and the Home Assistant title sat under the status bar.
+ * Once registered the name field is read-only and says "fixed at registration".
  * A 40 dp status bar is given to the screen; the title must start below it. The grey strip in the picture is that bar.
  */
 class HaInsetsScreenshotTest : ScreenshotTest() {
@@ -68,7 +68,7 @@ class HaInsetsScreenshotTest : ScreenshotTest() {
         composeRule.onRoot().captureRoboImage("build/outputs/roborazzi/ha_status_bar_inset_light.png")
         val top = composeRule.onAllNodesWithText("Home Assistant", substring = true).onFirst().fetchSemanticsNode().boundsInRoot.top
         assertTrue("title top $top px, status bar $barPx px", top >= barPx)
-        // Owner 22:20: once registered the name cannot change, so the field says so (and is read-only).
+        // Once registered the name cannot change, so the field says so (and is read-only).
         composeRule.onAllNodesWithText("fixed at registration", substring = true).onFirst().assertExists()
     }
 }

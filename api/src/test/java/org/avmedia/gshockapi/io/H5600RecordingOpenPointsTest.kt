@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * Settles open points of the LifeLog layout on the real recording of 28 October 2026 (see the resource file).
+ * Settles open points of the LifeLog layout on upstream's recorded transfer (see the resource file).
  * That day holds no night, so the sleep sections are checked for their no-data marks only.
  */
 class H5600RecordingOpenPointsTest {
@@ -70,7 +70,7 @@ class H5600RecordingOpenPointsTest {
         val night = block(stream, 0x5A)
         val zoneByte = night[5 + 3].toInt()
         assertEquals(-16, zoneByte)
-        // the recording was made in Toronto, UTC-4 on 28 October 2026
+        // the transfer was made in UTC-4
         val offset = ZoneId.of("America/Toronto").rules.getOffset(LocalDate.of(2026, 10, 28).atStartOfDay())
         assertEquals(offset.totalSeconds, zoneByte * 15 * 60)
         assertEquals(zoneByte, block(stream, 0x53)[5 + 6].toInt())

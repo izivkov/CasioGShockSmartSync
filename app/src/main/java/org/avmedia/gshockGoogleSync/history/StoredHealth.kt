@@ -12,7 +12,7 @@ object StoredHealth {
     /**
      * The newest stored day with its hours ([TodayHours]: nothing after [now]); null when nothing is stored. [last] is the
      * time and step goal of the last read, kept outside the history: without it the screen said "synced at 00:00" and the
-     * default goal 10000 (owner screenshot 2026-11-23 17:53).
+     * default goal 10000.
      */
     fun stepData(
         days: List<DayRow>,

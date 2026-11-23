@@ -17,7 +17,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Owner log 2026-11-23j 22:15 to 22:29: a workout read started before `47 01`, and reads from the after-read path and the
+ * Before: a workout read started before `47 01`, and reads from the after-read path and the
  * button queued behind a running one and started again right after it failed (six tries in 14 minutes).
  */
 class H5600WorkoutReadGateTest {
@@ -25,7 +25,7 @@ class H5600WorkoutReadGateTest {
     private val savedLink = H5600WorkoutIO.link
     private var now = 1_000_000L
 
-    /** Answers the start with the fail reason `03 01` (log 2026-11-23i 21:57:55), so each read fails at once. */
+    /** Answers the start with the fail reason `03 01` so each read fails at once. */
     private val writes = CopyOnWriteArrayList<String>()
 
     @Before fun install() {

@@ -38,7 +38,7 @@ class WorkoutTransfer(
     private val blockCache: MutableMap<String, ByteArray> = HashMap(),
     private val capture: (WorkoutMsg?, ByteArray?) -> Unit = { _, _ -> },
     private val replyTimeoutMs: Long = org.avmedia.gshockapi.casio.LongProcess.WORKOUT.answerMs!!,
-    // The echo of `00 1C` came 6 to 10 s after the request (owner log 2026-11-23i), so the 5 s answer limit cannot hold for it;
+    // The echo of `00 1C` came 6 to 10 s after the request, so the 5 s answer limit cannot hold for it;
     // it gets the 30 s limit of a read the user asked for, measured from our write.
     private val sessionTimeoutMs: Long = org.avmedia.gshockapi.casio.LongProcess.WORKOUT.totalMs!!,
     private val readTimeoutMs: Long = 10_000L,
@@ -89,8 +89,8 @@ class WorkoutTransfer(
     }
 
     /**
-     * Steps 1 to 3. The watch echoes the session request and answers the start state, in either order (owner log
-     * 2026-11-23i); it answers `04` only after its echo, so step 3 starts when both came. A fail reason (kind `03`) ends at once.
+     * Steps 1 to 3. The watch echoes the session request and answers the start state, in either
+     * order; it answers `04` only after its echo, so step 3 starts when both came. A fail reason (kind `03`) ends at once.
      */
     private suspend fun start() {
         val open = request(CAT_SESSION, 0L, 0)
@@ -144,7 +144,7 @@ class WorkoutTransfer(
         awaitBulk("step 3", KIND_SIZES)
     }
 
-    /** Kind `03` (fail reason, A1) on either channel ends the start: owner log 21:57:55 `03 01`. */
+    /** Kind `03` (fail reason, A1) on either channel ends the start, e.g. `03 01`. */
     private fun failReason(data: ByteArray) {
         if (data.firstOrNull()?.toInt() == ABORTED && data.size >= 2) {
             log("Workout read: rx ${hex(data)} (fail reason)")

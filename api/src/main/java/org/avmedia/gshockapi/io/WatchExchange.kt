@@ -15,7 +15,7 @@ object WatchExchange {
 
     /**
      * The library's settings reads ([CachedIO]) wait here: during a transfer their answers would reach the transfer, not
-     * the read, and a caller with a limit asks again and again (owner log 2026-11-23_2309: `0x11` every 4 to 5 s).
+     * the read, and a caller with a limit asks again and again (`0x11` every 4 to 5 s).
      */
     suspend fun awaitNoTransfer(pollMs: Long = 100) {
         if (!transferRunning()) return

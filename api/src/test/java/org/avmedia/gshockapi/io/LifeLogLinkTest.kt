@@ -14,8 +14,8 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Logs 2026-11-23b/e: every background and Health screen read is a peek read, and the merged peek test did not echo
- * END, so the watch dropped the link about 16 s after the data (e, 16:11:28 END, 16:11:44 new link). A read that was
+ * Every background and Health screen read is a peek read, and the merged peek test did not echo
+ * END, so the watch dropped the link about 16 s after the data. A read that was
  * still running when the link dropped ran its setup on the next link and took the init's 0x10 answer
  * (b, 15:42:33 to 15:42:35: "Timed out waiting for button info").
  */

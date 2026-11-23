@@ -26,7 +26,7 @@ data class SleepData(
 @Keep
 data class SleepNight(
     val date: LocalDate,
-    /** Time zone byte of the record in quarter hours (a recording in UTC-4 held -16). */
+    /** Time zone byte of the record in quarter hours (UTC-4 is -16). */
     val zoneQuarterHours: Int?,
     val sleepScore: Int?,
     val rechargeStatus: Int?,

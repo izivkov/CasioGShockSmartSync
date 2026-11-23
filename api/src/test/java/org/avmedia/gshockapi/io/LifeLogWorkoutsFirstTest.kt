@@ -23,7 +23,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** The owner's `0x28` answers of log 2026-11-23h: 21:25:45 (no workout waiting) and 21:31:39 (index 6 = 1, workout waiting). */
+/** Two real `0x28` answers: no workout waiting, and index 6 = 1 (workout waiting). */
 private fun frame(hex: String): ByteArray = hex.split(" ").map { it.toInt(16).toByte() }.toByteArray()
 private val NO_WORKOUT = frame("28 06 18 00 00 FA 00 00 04 00")
 private val WORKOUT_WAITING = frame("28 06 17 00 00 FA 00 01 04 00")
@@ -31,7 +31,7 @@ private val WORKOUT_WAITING_LATER = frame("28 06 17 00 00 FA 00 01 00 00")
 
 /**
  * A watch that answers `0x28` with [condition] and, while it holds an unfetched workout, never answers the LifeLog START or
- * its polls (log 2026-11-23h 21:31:39 to 21:32:40). Once the workouts are fetched it behaves as on every earlier read.
+ * its polls. Once the workouts are fetched it behaves as on every earlier read.
  */
 private class WorkoutHoldingWatch(private val condition: ByteArray) : WatchTransport {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)

@@ -133,8 +133,7 @@ object H5600HealthDecoder {
             val slotSteps = stepRecords[index].first
             if (slotSteps > MAX_STEPS_PER_SLOT) continue
             val slotTime = utcTime.minusMinutes(SLOT_MINUTES * index).atZoneSameInstant(zone).toLocalDateTime()
-            // Only the slots of the read's own day go into its hours: yesterday's 23:00 slot is not today's hour 23
-            // (owner screenshot 2026-11-23 17:53: hour 23 = 179 before 18:00).
+            // Only the slots of the read's own day go into its hours: yesterday's 23:00 slot is not today's hour 23.
             if (slotTime.toLocalDate() == localTime.toLocalDate()) {
                 hourly[slotTime.hour] = (hourly[slotTime.hour] ?: 0) + slotSteps
             }
@@ -315,7 +314,7 @@ object H5600HealthDecoder {
 
     /**
      * Section 0x52 as one value per [HR_SLOT_MINUTES]: newest record first, record i starts i slots before the header time
-     * rounded down to the slot. The 2 minutes are proven on the owner's reads of 2026-11-23 (logs a, c, f): each carried half
+     * rounded down to the slot. The 2 minutes are proven on real reads: each carried half
      * as many heart rate records as minutes of the one-minute section 0x56 of the same read. Oldest first, valid bpm only.
      */
     private fun heartRateSlots(

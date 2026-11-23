@@ -10,8 +10,8 @@ import java.time.ZoneId
 
 /**
  * Guards the chunk rule: a block is sent as chunks of 512 data bytes, each followed by a 2-byte
- * checksum, and a chunk spans several notifications. The recorded session is upstream's 28 October
- * transfer (see the resource file for source and licence).
+ * checksum, and a chunk spans several notifications. The recorded session is upstream's
+ * (see the resource file for source and licence).
  */
 class H5600LifeLogReassemblyTest {
     private class Recording(

@@ -73,7 +73,7 @@ class NotificationCodecsTest {
     fun badInputIsRefused() {
         assertNull(NotificationSoundCodec.parse(frame(0x42, 3, 0, 0, 0, 0, 1)))
         assertNull(NotificationSoundCodec.parse(frame(0x42, 0, 0, 0, 0, 0, 4)))
-        assertNull(NotificationSoundCodec.parse(frame(0x42, 0, 0, 0, 0))) // 4 value bytes is too short; 5 is the real answer of the owner's watch
+        assertNull(NotificationSoundCodec.parse(frame(0x42, 0, 0, 0, 0))) // 4 value bytes is too short; 5 is the real answer of a GBX-H5600
         assertNull(NotificationSoundCodec.parse(frame(0x41, 0, 0, 0, 0, 0, 1)))
         assertNull(NotificationSoundCodec.withSoundMode(sounds, 3))
         assertNull(NotificationSoundCodec.withSoundEvent(sounds, 15, true))
@@ -161,7 +161,7 @@ class NotificationCodecsTest {
         assertTrue(watch.writes.isEmpty())
     }
 
-    // Owner's watch (2026-11-23), exact answers.
+    // A GBX-H5600, exact answers.
     @Test
     fun theRealSoundAnswerOfFiveValueBytesParsesWithoutAPatternAndIsWrittenBackAsFive() {
         val real = byteArrayOf(0x42, 0x0A, 0xFF.toByte(), 0x7F, 0xFF.toByte(), 0x7F)

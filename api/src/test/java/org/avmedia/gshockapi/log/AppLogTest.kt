@@ -75,7 +75,7 @@ class AppLogTest {
         assertTrue(AppLog.readLines().isEmpty())
     }
 
-    /** Brief 2026-11-23: the App log screen must never be empty after a connection attempt, even when the file cannot be written. */
+    /** The App log screen must never be empty after a connection attempt, even when the file cannot be written. */
     @Test fun theScreenShowsTheLinesWhenTheFileCannotBeWritten() {
         val blocker = File(tmp.root, "not-a-folder").apply { writeText("x") }
         AppLog.logFile = File(blocker, "connection.log")

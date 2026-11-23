@@ -67,7 +67,7 @@ internal fun NotificationSettingsContent(
                     AppText(text = NOTIFICATION_SOUNDS_INTRO, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
                     ModeRow("Sound", s?.soundMode, can && s != null, viewModel::setSoundMode)
                     ModeRow("Vibration", s?.vibrationMode, can && s != null, viewModel::setVibrationMode)
-                    // The owner's watch sends no pattern byte: the row is hidden then (a read that failed still shows "-").
+                    // The GBX-H5600 sends no pattern byte: the row is hidden then (a read that failed still shows "-").
                     if (s == null || s.pattern != null) {
                         ValueRow("Sound pattern", s?.pattern?.let { NotificationSoundCodec.PATTERNS[it] } ?: "-", can && s != null) { picker = Picker.Pattern }
                     }

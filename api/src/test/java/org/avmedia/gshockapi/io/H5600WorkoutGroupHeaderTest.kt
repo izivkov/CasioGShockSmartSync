@@ -20,7 +20,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Owner log 2026-11-23_2309 lines 3636-3683 (dump workout/notifications.txt): after step 3 the watch answers the group header
+ * After step 3 the watch answers the group header
  * request with `00 1D` + address + length on the data request characteristic, two bulk chunks (247 and 13 bytes, data 256 +
  * CRC `22 33`), then `09 1D` (all sent). Our read never answered and stopped 10 s later. Every frame here goes through the real
  * routing (characteristic + [H5600Protocol] + [MessageDispatcher]), not straight into the transfer's inbox.
@@ -62,7 +62,7 @@ class H5600WorkoutGroupHeaderTest {
                     0x1C -> deliver(drspChar, data.copyOf())
                     0x1D -> {
                         deliver(drspChar, data.copyOf())
-                        // A settings answer in the middle of the transfer (log 23:07:37 `11 00 00 00 06 ...`).
+                        // A settings answer in the middle of the transfer (`11 00 00 00 06 ...`).
                         keysOfSettingsAnswers += WatchLink.withSource(allFeatures) { H5600Protocol.extractKey("0x11 00 00 00 06 00 00 00 00 00 00") }
                         bulkFrames().forEach { deliver(bulkChar, it) }
                         deliver(drspChar, byteArrayOf(9) + data.copyOfRange(1, 10))

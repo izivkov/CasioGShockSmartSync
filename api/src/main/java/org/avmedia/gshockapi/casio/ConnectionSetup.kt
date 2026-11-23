@@ -84,7 +84,7 @@ object ConnectionSetup {
 
     /**
      * Waits (at most [timeoutMs]) until the setup is not running, so a LifeLog transfer or a settings read does not queue its own
-     * requests in front of the setup's and take the answers it waits for (log 2026-11-23 15:44:24: the setup got none of its answers).
+     * requests in front of the setup's and take the answers it waits for (then the setup gets none of its answers).
      * Returns true when the setup is idle, false when it still ran at the timeout (the caller goes on and the log says so).
      */
     suspend fun awaitIdle(timeoutMs: Long = SETUP_WAIT_MS, pollMs: Long = 100): Boolean {

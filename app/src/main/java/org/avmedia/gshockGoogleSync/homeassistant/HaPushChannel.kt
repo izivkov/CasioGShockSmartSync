@@ -57,7 +57,7 @@ class HaPushChannel(
 
     private var lastNote: String? = null
 
-    /** Why the socket is not up, once per change of reason (not per retry): an empty log made a dead push invisible (2026-11-23). */
+    /** Why the socket is not up, once per change of reason (not per retry): an empty log makes a dead push invisible. */
     private fun noteReason(reason: String) {
         if (reason == lastNote) return
         lastNote = reason

@@ -123,7 +123,7 @@ class HaClient(
         if (reg.sensorsHash != fingerprint) {
             // register_sensor carries a state and HA shows it: a null would turn a known value to unknown.
             // So: the value of this job, else the last one sent (persisted), else null for a sensor never sent.
-            // The attributes come with the value they belong to: HA replaces them too (log 2026-11-23 21:26, steps_by_hour).
+            // The attributes come with the value they belong to: HA replaces them too (steps_by_hour).
             val lastSent = store.loadSent()
             for (s in sensors) {
                 val fresh = job.states[s.uniqueId]

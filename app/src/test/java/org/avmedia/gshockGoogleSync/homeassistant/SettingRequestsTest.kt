@@ -26,14 +26,14 @@ class SettingRequestsTest {
         assertEquals(true, short.contains("42 01 02"))
     }
 
-    // Owner's watch (2026-11-23): 3D 30 + 16 value bytes. 17 were expected; the real answer is the minimum.
+    // A GBX-H5600: 3D 30 + 16 value bytes. 17 were expected; the real answer is the minimum.
     @Test fun theNotificationManagerNeedsSixteenValueBytesAfterThe30() {
         val real = "3D 30 00 02 01 00 03 00 2F 28 00 28 00 28 00 FA 00 00".split(' ').map { it.toInt(16).toByte() }.toByteArray()
         assertNull(SettingRequests.tooShort(0x3D, real))
         assertNotNull(SettingRequests.tooShort(0x3D, real.copyOf(17)))
     }
 
-    // Owner's watch: 42 0A FF 7F FF 7F, five value bytes, no sound pattern byte.
+    // A GBX-H5600: 42 0A FF 7F FF 7F, five value bytes, no sound pattern byte.
     @Test fun theSoundSettingAcceptsFiveValueBytes() {
         val real = byteArrayOf(0x42, 0x0A, 0xFF.toByte(), 0x7F, 0xFF.toByte(), 0x7F)
         assertNull(SettingRequests.tooShort(0x42, real))

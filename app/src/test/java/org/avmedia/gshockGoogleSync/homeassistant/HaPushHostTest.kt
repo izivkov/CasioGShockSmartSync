@@ -57,7 +57,7 @@ class HaPushHostTest {
     }
 
     /**
-     * Owner hint 2026-11-23: the app returns to its main screen after 3 min without input and the inactivity handler
+     * The app returns to its main screen after 3 min without input and the inactivity handler
      * disconnects the watch (the session ends). The HA push subscription must stay: same socket, no new subscribe,
      * sensor still on, while the companion service holds the host.
      */

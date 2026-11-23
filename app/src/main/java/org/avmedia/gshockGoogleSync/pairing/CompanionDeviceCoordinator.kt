@@ -88,7 +88,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                                         context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name
                                     )
                                     // No read and no release here: BackgroundHealthSync reads the LifeLog of every connection
-                                    // and the keep-alive holds the watch (log 2026-11-23b: a second reader plus a release cut the link).
+                                    // and the keep-alive holds the watch (a second reader plus a release cuts the link).
                                     BackgroundConnection.active = false
                                     return@launch
                                 } catch (cancelled: CancellationException) {

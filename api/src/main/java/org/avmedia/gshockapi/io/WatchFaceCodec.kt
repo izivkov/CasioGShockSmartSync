@@ -5,7 +5,7 @@ package org.avmedia.gshockapi.io
  * index 1 to 4 = the four items of the user custom face (one item code each). Frame byte = index + 1.
  *
  * Pure: bytes in, bytes out. A change copies the frame and replaces only the byte it names.
- * Owner's test on the watch: face 0 does nothing; faces 1 to 4 each change the face, and face 2 is the custom face.
+ * On the watch: face 0 does nothing; faces 1 to 4 each change the face, and face 2 is the custom face.
  * On the custom face only slot 3 changes anything (the top-right item); slots 1, 2 and 4 are never written.
  */
 object WatchFaceCodec {
@@ -23,7 +23,7 @@ object WatchFaceCodec {
             1 -> "Time only"
             CUSTOM_FACE -> "Custom"
             3 -> "Steps"
-            4 -> "Tide" // the owner was not fully sure of this one
+            4 -> "Tide" // likely, not proven
             else -> "Face $face"
         }
 

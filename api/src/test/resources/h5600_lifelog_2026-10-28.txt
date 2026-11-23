@@ -1,4 +1,4 @@
-# Recorded DW-H5600 LifeLog transfer of 2026-10-28, bulk notifications (RX CONVOY, prefix 05) and index announcements (RX DRSP 00 2e).
+# Recorded DW-H5600 LifeLog transfer, bulk notifications (RX CONVOY, prefix 05) and index announcements (RX DRSP 00 2e).
 # Source: https://github.com/izivkov/gshock_api, file h5600_lifelog.json.sav (MIT licence, Copyright izivkov). Only the received bytes are copied.
 # Lines: 'A <index hex> <announced length>' then 'N <notification hex>' in arrival order.
 A 00 20

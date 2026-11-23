@@ -16,8 +16,8 @@ import org.junit.Test
 /**
  * The push socket as Home Assistant runs it (homeassistant/components/mobile_app, push_notification.py and
  * websocket_api.py): a push carries `hass_confirm_id`; a push not confirmed within 10 s tears the channel down
- * without a word on the socket, and a confirm then gets `not_found`. 2026-11-23: our confirms used the wrong key,
- * HA dropped the channel 10 s after the first push and the sensor still said connected.
+ * without a word on the socket, and a confirm then gets `not_found`. With a wrong confirm key
+ * HA drops the channel 10 s after the first push and the sensor still says connected.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class HaPushSessionTest {

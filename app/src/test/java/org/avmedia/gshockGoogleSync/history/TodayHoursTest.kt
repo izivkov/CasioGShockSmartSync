@@ -11,7 +11,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Logs 2026-11-23: HA `steps_by_hour` held only the newest transfer (hours 13 to 15 in one read, only 16 in the next), and
+ * Before: HA `steps_by_hour` held only the newest transfer (hours 13 to 15 in one read, only 16 in the next), and
  * the Health screen showed only hour 17 after a read, a stored day with values after now before it.
  */
 class TodayHoursTest {
@@ -63,7 +63,7 @@ class TodayHoursTest {
         assertEquals(HealthVariables.values(merged)["health.steps_by_hour"], screen.hourlySteps)
     }
 
-    /** Log 2026-11-23 21:26: a read with no new hourly slots must still send the whole stored day with steps_today. */
+    /** A read with no new hourly slots must still send the whole stored day with steps_today. */
     @Test fun aReadWithNoNewHoursStillSendsTheStoredDay() {
         val first = TodayHours.merge(transfer(day.atTime(20, 15), 13 to 242, 14 to 518, 20 to 18), emptyList(), day.atTime(20, 15))
         val now = day.atTime(21, 26)
@@ -82,7 +82,7 @@ class TodayHoursTest {
         assertEquals(day.atTime(17, 53), screen.timestamp)
     }
 
-    /** Owner screenshots 2026-11-23 17:53 and 17:54: the chart drew the first to last hour with steps; one hour filled the width. */
+    /** Before, the chart drew the first to last hour with steps; one hour filled the width. */
     @Test fun theChartAlwaysHas24SlotsWithGapsForNoData() {
         val one = org.avmedia.gshockGoogleSync.ui.health.dwHourlySlots(List(24) { if (it == 17) 123 else null })
         assertEquals(24, one.size)

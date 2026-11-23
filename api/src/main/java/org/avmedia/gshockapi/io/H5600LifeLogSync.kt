@@ -106,7 +106,7 @@ class H5600LifeLogSync {
                 phase = Phase.DONE
                 // Echo END back to the watch, exactly as the Python script does.
                 // Without this the watch returns 0xFF 81 2D (invalid command) and drops the connection.
-                // Every read echoes it, peek or not (log 2026-11-23e: without the echo the link dropped 16 s later).
+                // Every read echoes it, peek or not (without the echo the link drops about 16 s later).
                 listOf(H5600Write(H5600Channel.DRSP, data.copyOf()))
             }
 

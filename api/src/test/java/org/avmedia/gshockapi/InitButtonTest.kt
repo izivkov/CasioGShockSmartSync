@@ -79,7 +79,7 @@ class InitButtonTest {
     }
 
     /**
-     * Log 2026-11-23b 15:35 to 15:42: the watch answered nothing on 20 links in a row (no kind answer, no 0x10), and each
+     * The watch can answer nothing on many links in a row (no kind answer, no 0x10), and each
      * one raised the blocking "Timed out waiting for button info" popup. Without a kind answer nobody knows a button was
      * pressed: init ends quietly with one log line, the link is released and connecting goes on.
      */
@@ -88,7 +88,7 @@ class InitButtonTest {
         assertFalse(d.complete)
         assertNull(d.error)
         assertNotNull(d.log)
-        // A known kind keeps the owner's rule: a user-started connection that failed is a blocking error.
+        // A known kind keeps the rule: a user-started connection that failed is a blocking error.
         assertEquals("Timed out waiting for button info from the watch", InitCheck.decide(null, automatic = false, kindKnown = true).error)
     }
 }

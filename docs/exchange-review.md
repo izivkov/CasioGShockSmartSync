@@ -18,9 +18,9 @@ Status: fixed = guard exists; open = not changed, reason given. Guards are in `a
 | 9 | 0x3D, 0x39 unasked | during a LifeLog, workout or tide transfer routed by first-byte guess, so never handled; 0x3D had no handler | handled at any time | Med | fixed (UNSOLICITED_ALWAYS, NotificationGate) |
 | 10 | 0x11, 0x3A in the LifeLog setup | echoed as read (undoes bit 2 and `DC 05` of the setup) | same bytes as the connection setup | Med | fixed (writeBackValue). The LifeLog setup still reads more codes than Casio (0x3B, 0x2F, 0x43, 0x13): open, Low |
 | 11 | Read of write-only code (09, 25, 49), bare code that needs an option (1F, 24, 2E, 30, 31, 44, 4E, 54, 56, 58), 3D not `3D 30` | nothing stopped it | never sent | Med | fixed (table refuses; test) |
-| 12 | 0x42, 0x3D minimum length | 6 and 17 value bytes; the owner's watch answers 5 and 16 | at least what is decoded | Med | fixed (5 and 16; sound pattern and pop-up size hidden when absent; tests from the real bytes) |
+| 12 | 0x42, 0x3D minimum length | 6 and 17 value bytes; the GBX-H5600 answers 5 and 16 | at least what is decoded | Med | fixed (5 and 16; sound pattern and pop-up size hidden when absent; tests from the real bytes) |
 | 13 | Tide transfer end | end message routed by its first byte, so an unknown first byte was dropped | the data-request characteristic decides; next piece 400 ms after the write result | Med | fixed (channelOf by source; confirmed chunks; every message logged). Real cause on the watch unproven |
-| 14 | 0x45 profile | reads nothing on the owner's watch | any length accepted, every answer logged | Med | logging added (settings read answers, queue rx, parse failure text); cause unproven |
+| 14 | 0x45 profile | reads nothing on the GBX-H5600 | any length accepted, every answer logged | Med | logging added (settings read answers, queue rx, parse failure text); cause unproven |
 | 15 | Process limits (LifeLog 5/10 s, workout 5/10/30 s, tide 5 s, 400 ms, 70 s) | constants in several files | one table | Low | fixed (LongProcess; test) |
 | 16 | 0x39 exchange 30 s, setup steps 20 s | no limit | limits | Med | open: needs a timer in ConnectionSetup and a device run |
 | 17 | 0x1D, 0x1E in the time exchange | we send `1D 00`, `1E 00`, `1E 01` | Casio sends bare `1D`, `1E`, `1E` (second answer unknown) | Med | open: works on devices today; table allows both forms |

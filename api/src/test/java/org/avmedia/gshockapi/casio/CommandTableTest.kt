@@ -120,7 +120,7 @@ class CommandTableTest {
         assertTrue(CommandTable.matches(b(0x1F, 1), b(0x1F, 1, 9)))
         assertFalse(CommandTable.matches(b(0x1F, 1), b(0x1F, 0, 9)))
         assertTrue(CommandTable.matches(b(0x3D, 0x30), b(0x3D, 0x30, 0, 2)))
-        // 0x56 answers `56` + value without echoing the activity (log 2026-11-23: `56 02` got `56 6D 03 20`)
+        // 0x56 answers `56` + value without echoing the activity (`56 02` gets `56 6D 03 20`)
         assertTrue(CommandTable.matches(b(0x56, 2), b(0x56, 0x6D, 3, 0x20)))
         assertTrue(CommandTable.longEnough(b(0x56, 2), b(0x56, 0x6D, 3, 0x20)))
         assertTrue(CommandTable.matches(b(0x54, 0, 3, 0x46, 0), b(0x54, 3, 0x46, 1)))

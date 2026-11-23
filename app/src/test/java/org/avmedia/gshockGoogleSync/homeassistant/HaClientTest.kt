@@ -203,7 +203,7 @@ class HaClientTest {
 
     @Test
     fun emptyAnswerMeansDeletedRegistrationToo() {
-        // The real HA answers 200 with no body for a webhook id it no longer knows (seen 2026-11-22).
+        // The real HA answers 200 with no body for a webhook id it no longer knows.
         var gone = true
         val t = HaFakeTransport { c ->
             if (c.url.endsWith("/api/webhook/hook1") && c.type == "get_config") HaResponse(200, "")

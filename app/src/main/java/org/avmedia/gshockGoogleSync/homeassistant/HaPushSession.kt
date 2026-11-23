@@ -6,8 +6,7 @@ package org.avmedia.gshockGoogleSync.homeassistant
  *
  * "Up" is HA's success answer to our `mobile_app/push_notification_channel`, never "socket open": HA ends a channel
  * without a word on the socket (a push not confirmed within 10 s, a second subscription for the mobile_app webhook), and a
- * confirm then gets `not_found`. That ends the socket, so the loop reports the outage and subscribes again at once
- * (2026-11-23: wrong confirm key, channel gone 10 s after the first push, sensor still on).
+ * confirm then gets `not_found`. That ends the socket, so the loop reports the outage and subscribes again at once.
  */
 class HaPushSession(
     private val token: String,

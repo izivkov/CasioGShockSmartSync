@@ -7,7 +7,7 @@ package org.avmedia.gshockapi.io
  */
 object NotificationSoundCodec {
     const val CODE = 0x42
-    /** The model of the owner's watch answers 5 value bytes (index 0 to 4): there is no sound pattern byte, so [Setting.pattern] is null. */
+    /** The GBX-H5600 answers 5 value bytes (index 0 to 4): there is no sound pattern byte, so [Setting.pattern] is null. */
     private const val MIN_INDEX = 4
     const val CUSTOM = 1
 
@@ -80,7 +80,7 @@ object NotificationSoundCodec {
  */
 object NotificationManagerCodec {
     const val CODE = 0x3D
-    /** Index 6 (off at night) is the last one needed; index 16 (pop-up size) is read when the answer has it (the owner's watch sends 16 bytes after the 30, so it is there). */
+    /** Index 6 (off at night) is the last one needed; index 16 (pop-up size) is read when the answer has it (the GBX-H5600 sends 16 bytes after the 30, so it is there). */
     private const val MIN_INDEX = 6
     const val READ_COMMAND = 0x30
     const val LANGUAGE_CHANGED = 0x31

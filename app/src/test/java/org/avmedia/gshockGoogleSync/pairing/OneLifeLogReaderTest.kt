@@ -5,7 +5,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Log 2026-11-23b: after the upstream merge the coordinator read the LifeLog after every background connection and then
+ * Before: after the upstream merge the coordinator read the LifeLog after every background connection and then
  * released the watch, next to our BackgroundHealthSync read of the same connection. The second read was refused as
  * "already running", counted as failed, and the coordinator disconnected the watch in the middle of the first one.
  * One reader starts background LifeLog reads (BackgroundHealthSync); the coordinator only connects.

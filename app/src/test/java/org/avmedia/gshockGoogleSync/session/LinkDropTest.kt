@@ -20,7 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** The H5600 drops its link about every 45 s; a drop must not end the visit (owner, 2026-11-22). */
+/** The H5600 drops its link about every 45 s; a drop must not end the visit. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class LinkDropTest {
     private val dispatcher = UnconfinedTestDispatcher()

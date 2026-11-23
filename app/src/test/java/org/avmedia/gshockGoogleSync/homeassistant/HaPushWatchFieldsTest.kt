@@ -9,7 +9,7 @@ import org.junit.Test
 
 /**
  * What an HA push puts in the four text fields of the watch frame (app name, title, short text, text).
- * The app name is the first line the H5600 shows; a fixed "Home Assistant" there left no room for the push (owner 2026-11-23).
+ * The app name is the first line the H5600 shows; a fixed "Home Assistant" there left no room for the push.
  */
 class HaPushWatchFieldsTest {
     private fun frame(push: HaPushEvent.Push) =
@@ -28,7 +28,7 @@ class HaPushWatchFieldsTest {
 
     @Test
     fun theTitleIsInBothThePopUpAndTheListField() {
-        // Owner 2026-11-23: with the title only in the app name field the list and detail view showed an empty title.
+        // With the title only in the app name field the list and detail view showed an empty title.
         val n = decoded(HaPushEvent.Push("Charge watch", "Battery 25%", null))
         assertEquals("Charge watch", n.app)
         assertEquals("Charge watch", n.title)

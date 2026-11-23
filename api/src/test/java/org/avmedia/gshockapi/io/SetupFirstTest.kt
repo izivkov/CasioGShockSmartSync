@@ -18,7 +18,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Log 2026-11-23 15:44:24: the connection setup (kind 14) started, a settings or LifeLog sequence started at once
+ * Before: the connection setup (kind 14) started, a settings or LifeLog sequence started at once
  * (0x23, 0x10, 0x11, 0x3B ...), and the setup got none of its answers (no "0x23 name written back", no 47 01).
  * The setup runs first; the rest waits for it.
  */

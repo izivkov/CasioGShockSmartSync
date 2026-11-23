@@ -6,7 +6,7 @@ import org.junit.Test
 
 /**
  * LocalDataStorage.put/delete launch the write and return at once, so two quick writes can land in
- * either order and a read right after a write sees the old value (2026-11-22: Connect saved the HA
+ * either order and a read right after a write sees the old value (before: Connect saved the HA
  * link twice, the webhook id was lost, the screen said "Not connected" and no sensor was sent).
  * The app store must wait for each write.
  */

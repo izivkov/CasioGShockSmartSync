@@ -74,7 +74,7 @@ class H5600HealthDecoderTest {
         assertTrue(data.h5600?.energyIsProvisional == true)
     }
 
-    /** Owner screenshot 2026-11-23 17:53: hour 23 had 179 steps before 18:00, yesterday's late slots counted as today's. */
+    /** Hour 23 had 179 steps before 18:00: yesterday's late slots must not count as today's. */
     @Test
     fun slotsOfThePreviousDayAreNotCountedInTodaysHours() {
         val steps = frame(0x50, listOf(record(10), record(20), record(30), record(179)))

@@ -5,9 +5,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** auto_light and light_duration on the owner's real 0x13 frame: only the target bits change; bad values are refused. */
+/** auto_light and light_duration on a real 0x13 frame: only the target bits change; bad values are refused. */
 class LightSettingsTest {
-    /** 0x13 as the owner's GBX-H5600 answers it (connection logs of 2026-11-23). */
+    /** 0x13 as a GBX-H5600 answers it. */
     private val owner = "13 05 00 00 00 00 00 00 00 00 00 00 04 00 00 06 00".split(" ").map { it.toInt(16).toByte() }.toByteArray()
 
     private fun setting(key: String) = WatchSettingRegistry.find(key)!!

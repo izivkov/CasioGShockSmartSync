@@ -19,8 +19,8 @@ object InitCheck {
      * is shown as a blocking Error.
      */
     /**
-     * [kindKnown] false: no kind answer came on this link at all, so nobody knows a button was pressed (log 2026-11-23b:
-     * 20 silent links in 7 minutes, each with a blocking popup). Init ends without an error; the caller releases the link.
+     * [kindKnown] false: no kind answer came on this link at all, so nobody knows a button was pressed (the
+     * watch can stay silent on many links in a row). Init ends without an error; the caller releases the link.
      */
     fun decide(button: IO.WatchButton?, automatic: Boolean, kindKnown: Boolean = true): Decision {
         if (button == null && !kindKnown) {
