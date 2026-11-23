@@ -22,7 +22,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.health.BackgroundHealthSync
 import org.avmedia.gshockGoogleSync.ui.health.HealthReadScheduler
 
-/** "Background health read": how often the LifeLog is read while the watch stays connected (15, 30, 60 min or off). */
+/** "Background health read": how often the LifeLog is read while the watch stays connected (5, 15, 30, 60 min or off; 15 by default). */
 @Composable
 fun BackgroundReadCard() {
     val context = LocalContext.current

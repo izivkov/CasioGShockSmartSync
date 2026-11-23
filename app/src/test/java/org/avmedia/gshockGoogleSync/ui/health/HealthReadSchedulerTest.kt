@@ -47,6 +47,16 @@ class HealthReadSchedulerTest {
         assertEquals(Outcome.OFF, sched.onConnection(true, true) { reads++; true }); assertEquals(1, reads)
     }
 
+    @Test fun fiveMinutesIsAChoiceAndReadsEveryFiveMinutes() = runTest {
+        assertEquals(listOf(5, 15, 30, 60, 0), HealthReadScheduler.CHOICES_MIN)
+        val sched = HealthReadScheduler(store, { now }, intervalMs = { 5 * 60_000L })
+        sched.onConnection(true, true) { reads++; true }
+        now += 4 * 60_000L
+        assertEquals(Outcome.NOT_DUE, sched.onConnection(true, true) { reads++; true })
+        now += 60_000L
+        assertEquals(Outcome.OK, sched.onConnection(true, true) { reads++; true }); assertEquals(2, reads)
+    }
+
     @Test fun skippedWhileAWatchActionOrExchangeRuns() = runTest {
         var busy = true
         val sched = HealthReadScheduler(store, { now }, busy = { busy })

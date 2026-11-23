@@ -62,6 +62,6 @@ class HealthReadScheduler(
         const val RETRY_MS = 5 * 60_000L
 
         /** The choices of the setting, in minutes; 0 = off. */
-        val CHOICES_MIN = listOf(15, 30, 60, 0)
+        val CHOICES_MIN = listOf(5, 15, 30, 60, 0)
     }
 }
