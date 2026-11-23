@@ -66,7 +66,7 @@ class HaButtonPressTest {
     @Test fun theButtonActionGoesStraightToHomeAssistant() {
         val src = File("src/main/java/org/avmedia/gshockGoogleSync/ActionContainer.kt").readText()
         val action = src.substringAfter("inner class HaButtonAction").substringBefore("inner class Separator")
-        assertTrue(action, "haEvents.fire(HaTrigger.WATCH_ACTION)" in action)
+        assertTrue(action, "haSync.fire(HaTrigger.WATCH_ACTION)" in action)
     }
 
     /** No screen, string, icon, log source or class of the removed feature is left (HA's own mobile_app webhook stays). */

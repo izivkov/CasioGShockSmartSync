@@ -97,7 +97,7 @@ class SingleSettingsPathTest {
 
     @Test fun theFaceScreenAndHomeAssistantWriteThroughTheSameAccess() {
         val face = File("src/main/java/org/avmedia/gshockGoogleSync/ui/watchhealth/WatchFaceViewModel.kt").readText()
-        val ha = File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant/HaEvents.kt").readText()
+        val ha = File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant/HaSync.kt").readText()
         assertTrue("the face screen writes through access.update", "access.update(WatchFaceCodec.CODE" in face)
         assertTrue("Home Assistant commands write through access.update", "access.update(s.code" in ha)
         assertTrue("the registry's watch_face entry names the face code", "pick(\"watch_face\"" in File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant/WatchSettingRegistry.kt").readText())

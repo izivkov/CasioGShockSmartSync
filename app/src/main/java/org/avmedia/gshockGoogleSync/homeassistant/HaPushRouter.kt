@@ -28,7 +28,7 @@ class HaPushRouter(
     }
 
     companion object {
-        /** Set by [HaEvents]: queues one Home Assistant sensor push. */
+        /** Set by [HaSync]: queues one Home Assistant sensor push. */
         @Volatile var updateSensorsHook: (() -> Unit)? = null
     }
 }

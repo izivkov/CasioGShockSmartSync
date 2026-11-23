@@ -60,7 +60,7 @@ object HaJobs {
  * runner (sync), the LifeLog read (health_data) and a stored workout (workout_downloaded).
  */
 @Singleton
-class HaEvents @Inject constructor(
+class HaSync @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val api: GShockRepository,
     features: IWatchFeatureManager,

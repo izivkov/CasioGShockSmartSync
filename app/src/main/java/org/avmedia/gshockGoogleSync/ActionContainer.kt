@@ -45,7 +45,7 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.homeassistant.HaEvents
+import org.avmedia.gshockGoogleSync.homeassistant.HaSync
 import org.avmedia.gshockGoogleSync.homeassistant.HaTrigger
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
@@ -99,7 +99,7 @@ constructor(
     private val eventStorage: EventStorage,
     private val alarmNameStorage: AlarmNameStorage,
     private val sessionManager: SessionManager,
-    private val haEvents: HaEvents
+    private val haSync: HaSync
 ) {
     /** Manually-created scope, since this class has no ViewModel/Activity lifecycle to tie one to. Lives as long as the process. */
     private val containerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -567,7 +567,7 @@ constructor(
 
     /**
      * Sends the button event to Home Assistant, which then runs the action chosen on the Home Assistant screen
-     * ([HaClient]). The Home Assistant switch on the Actions screen decides (checked in [HaEvents]); no row of its own.
+     * ([HaClient]). The Home Assistant switch on the Actions screen decides (checked in [HaSync]); no row of its own.
      */
     inner class HaButtonAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
@@ -584,7 +584,7 @@ constructor(
         }.getOrDefault(false)
 
         override fun run(context: Context) {
-            haEvents.fire(HaTrigger.WATCH_ACTION)
+            haSync.fire(HaTrigger.WATCH_ACTION)
         }
     }
 

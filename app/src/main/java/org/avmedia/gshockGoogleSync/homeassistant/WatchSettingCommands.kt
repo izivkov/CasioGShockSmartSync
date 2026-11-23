@@ -105,7 +105,7 @@ class WatchSettingCommands(
     companion object {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-        /** Set by [HaEvents]; the push router, the setup-done hook and the session reach it here. */
+        /** Set by [HaSync]; the push router, the setup-done hook and the session reach it here. */
         @Volatile var shared: WatchSettingCommands? = null
     }
 }
