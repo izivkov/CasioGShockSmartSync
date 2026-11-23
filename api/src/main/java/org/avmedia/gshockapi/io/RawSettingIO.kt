@@ -195,7 +195,7 @@ object RawSettingIO {
      * [change] gets a fresh copy of the frame and returns the frame to write, or null (refused) / an equal frame (no write).
      */
     suspend fun modifySafe(code: Int, touched: Set<Int>, change: (ByteArray) -> ByteArray?): SettingWriteResult =
-        withLock(code) { safeWriter().update(code, touched, change = change) }
+        withLock(code) { safeWriter().update(code, touched) { change(it.copyOf()) } }
 
     /** The checked writer every setting write goes through: [read] defaults to [readFrame]. */
     fun safeWriter(read: suspend (Int) -> ByteArray? = ::readFrame): SafeSettingWrite =
