@@ -29,11 +29,40 @@ class HealthReadSchedulerTest {
         assertEquals(Outcome.OK, connect()); assertEquals(1, reads)
     }
 
-    @Test fun notAgainWithin2Hours() = runTest {
-        connect(); now += 119 * 60_000L
+    @Test fun defaultPeriodIs15Minutes() = runTest {
+        assertEquals(15 * 60_000L, HealthReadScheduler.DEFAULT_INTERVAL_MS)
+        connect(); now += 14 * 60_000L
         assertEquals(Outcome.NOT_DUE, connect()); assertEquals(1, reads)
         now += 2 * 60_000L
         assertEquals(Outcome.OK, connect()); assertEquals(2, reads)
+    }
+
+    @Test fun periodFollowsTheSettingAndOffReadsNothing() = runTest {
+        var minutes = 30L
+        val sched = HealthReadScheduler(store, { now }, intervalMs = { minutes * 60_000L })
+        sched.onConnection(true, true) { reads++; true }
+        now += 20 * 60_000L
+        assertEquals(Outcome.NOT_DUE, sched.onConnection(true, true) { reads++; true })
+        minutes = 0L; now += 60 * 60_000L
+        assertEquals(Outcome.OFF, sched.onConnection(true, true) { reads++; true }); assertEquals(1, reads)
+    }
+
+    @Test fun skippedWhileAWatchActionOrExchangeRuns() = runTest {
+        var busy = true
+        val sched = HealthReadScheduler(store, { now }, busy = { busy })
+        assertEquals(Outcome.BUSY, sched.onConnection(true, true) { reads++; true }); assertEquals(0, reads)
+        busy = false
+        assertEquals(Outcome.OK, sched.onConnection(true, true) { reads++; true }); assertEquals(1, reads)
+    }
+
+    @Test fun aRunningReadIsNeverJoinedByASecond() = runTest(UnconfinedTestDispatcher()) {
+        val shared = AtomicBoolean(false)
+        val a = HealthReadScheduler(store, { now }, shared)
+        val b = HealthReadScheduler(Mem(), { now }, shared)
+        val gate = CompletableDeferred<Unit>()
+        val first = launch { a.onConnection(true, true) { reads++; gate.await(); true } }
+        assertEquals(Outcome.BUSY, b.onConnection(true, true) { reads++; true }); assertEquals(1, reads)
+        gate.complete(Unit); first.join()
     }
 
     @Test fun notTwiceAtOnce() = runTest(UnconfinedTestDispatcher()) {

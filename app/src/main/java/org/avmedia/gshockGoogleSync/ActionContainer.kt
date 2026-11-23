@@ -1115,7 +1115,7 @@ constructor(
             isDataLoaded.await()
             val actions = _actions.value.filter { it.shouldRun(environment) }
             if (announce) ProgressEvents.onNext("ActionNames", actions.map { it.title })
-            runFilteredActions(context, actions)
+            org.avmedia.gshockGoogleSync.ui.actions.WatchActions.running { runFilteredActions(context, actions) }
             afterRun()
         }
     }

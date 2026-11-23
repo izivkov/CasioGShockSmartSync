@@ -14,8 +14,11 @@ internal object H5600Session {
     @Volatile
     var storedAtMs: Long = 0L
 
+    /** Opening the Health screen reads again only after this (the background read keeps it newer). */
+    private const val FRESH_MS = 2 * 60 * 60_000L
+
     fun isFresh(now: Long = System.currentTimeMillis()): Boolean =
-        data != null && now - storedAtMs < HealthReadScheduler.INTERVAL_MS
+        data != null && now - storedAtMs < FRESH_MS
 
     /** Called when a LifeLog read has just been stored (the "health data downloaded" webhook trigger). */
     @Volatile
