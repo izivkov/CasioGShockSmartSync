@@ -1,3 +1,19 @@
+# Release Notes - Casio G-Shock Smart Sync v42.9.30 — November 23, 2026
+
+## Highlights
+
+### 🌊 Oceanus OCW-S400 Watch Support & Dynamic Feature-Gating
+* **Oceanus OCW-S400 Model Support**: Added native support for the Oceanus OCW-S400 (Manta series), including custom vector watch graphics and specific pairing instructions ("Hold (A) for 2.5 s").
+* **Capability Feature-Gating (`WatchFeatureManager`)**:
+  * **Alarms & Actions Tabs**: Dynamically hides the Alarms tab for models without alarm registers (`alarmCount == 0`) and the Actions tab for models without configurable scratchpad storage (`WatchInfo.hasScratchpad`).
+  * **Timer & Watch Settings**: Dynamically hides the Timer view and AUTO settings configuration button for models that do not support timer registers or basic watch settings, preventing invalid BLE calls (`0x18`, `0x13`).
+  * **Prayer Alarms Safety**: Automatically gates prayer alarm execution on watch models that do not support alarms.
+
+### ⚡ Dependencies & Core Engine
+* **GShockAPI 1.8.6 Upgrade**: Upgraded core `gshockapi` library dependency to `1.8.6` for enhanced protocol handling and hardware synchronization stability.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.28 — November 13, 2026
 
 ## Highlights
