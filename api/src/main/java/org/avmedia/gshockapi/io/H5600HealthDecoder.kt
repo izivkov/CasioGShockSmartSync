@@ -45,6 +45,7 @@ object H5600HealthDecoder {
     private const val FRAME_HEADER_SIZE = 5
     private const val RECORD_SIZE = 4
     private const val SLOT_MINUTES = 5L
+    const val HR_SLOT_MINUTES = 2L
     private const val MAX_STEPS_PER_SLOT = 1_000
     private const val MAX_ENERGY_RAW_PER_SLOT = 5_000
     private const val MAX_DAY_STEPS = 100_000
@@ -180,7 +181,8 @@ object H5600HealthDecoder {
                         breathing = frameBody(stream, spans, TAG_BREATHING),
                         cardio = frameBody(stream, spans, TAG_CARDIO),
                         stairs = frameBody(stream, spans, TAG_STAIRS),
-                    ),
+                    ).copy(cardioNow = H5600CurrentValues.cardio(currentStats, localTime.toLocalDate())),
+                heartRateSlots = heartRateSlots(stream, spans, utcTime, zone),
                 dailySummary = decodeDailySummary(frameBody(stream, spans, TAG_DAILY_SUMMARY)),
                 stepGoal = stepGoal,
                 lifeLogPending = watchFlags?.let { it[WATCH_CONDITION_LIFELOG_BYTE].toInt() != 0 },
@@ -309,6 +311,27 @@ object H5600HealthDecoder {
             maxBpm = max,
             averageBpm = values.sum() / values.size,
         )
+    }
+
+    /**
+     * Section 0x52 as one value per [HR_SLOT_MINUTES]: newest record first, record i starts i slots before the header time
+     * rounded down to the slot. The 2 minutes are proven on the owner's reads of 2026-11-23 (logs a, c, f): each carried half
+     * as many heart rate records as minutes of the one-minute section 0x56 of the same read. Oldest first, valid bpm only.
+     */
+    private fun heartRateSlots(
+        stream: ByteArray,
+        spans: Map<Int, IntRange>,
+        utcTime: OffsetDateTime,
+        zone: ZoneId,
+    ): List<org.avmedia.gshockapi.model.HeartRateSlot> {
+        val body = frameBody(stream, spans, TAG_HEART_RATE) ?: return emptyList()
+        val first = utcTime.minusMinutes((utcTime.minute % HR_SLOT_MINUTES).toLong())
+        return (0 until body.size / RECORD_SIZE).mapNotNull { i ->
+            val bpm = body[i * RECORD_SIZE].toInt() and 0xFF
+            if (bpm !in MIN_BPM..MAX_BPM) return@mapNotNull null
+            val time = first.minusMinutes(HR_SLOT_MINUTES * i).atZoneSameInstant(zone).toLocalDateTime()
+            org.avmedia.gshockapi.model.HeartRateSlot(time, bpm)
+        }.reversed()
     }
 
     private fun activityOf(body: ByteArray): ActivitySeconds? {

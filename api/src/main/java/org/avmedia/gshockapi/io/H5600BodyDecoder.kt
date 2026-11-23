@@ -20,6 +20,7 @@ object H5600BodyDecoder {
     private const val STAIRS_BYTES = 12
     private const val MAX_LOAD_RATIO = 9.99f
     private const val MAX_CARDIO_VALUE = 999
+    private const val CARDIO_BLOCK_BYTES = 9
 
     fun decode(
         spo2: ByteArray?,
@@ -52,11 +53,21 @@ object H5600BodyDecoder {
 
     private fun cardioStatus(record: ByteArray): CardioStatus? {
         val date = Bcd.date(record, 0) ?: return null
-        val buffer = ByteBuffer.wrap(record).order(ByteOrder.LITTLE_ENDIAN)
-        fun u16(at: Int) = (buffer.getShort(at).toInt() and 0xFFFF).takeIf { it <= MAX_CARDIO_VALUE }
-        val ratio = buffer.getFloat(4).takeIf { it.isFinite() && it >= 0f && it <= MAX_LOAD_RATIO }
-        val feedback = Bcd.validU8(record[8])?.takeIf { it in 1..4 }
-        val status = CardioStatus(date, ratio, feedback, u16(9), u16(11))
+        return cardioBlock(record, 4, date)
+    }
+
+    /**
+     * The 9-byte cardio block at [at] (notes A4): float load ratio (0 to 9.99), u8 feedback (1 to 4), u16 strain and u16
+     * tolerance (each up to 999). Shared by the cardio status section 0x5B and the current values 0x65. Null when every value
+     * is "no data" or the block does not fit.
+     */
+    internal fun cardioBlock(bytes: ByteArray, at: Int, date: java.time.LocalDate): CardioStatus? {
+        if (at < 0 || bytes.size < at + CARDIO_BLOCK_BYTES) return null
+        val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+        fun u16(pos: Int) = (buffer.getShort(at + pos).toInt() and 0xFFFF).takeIf { it <= MAX_CARDIO_VALUE }
+        val ratio = buffer.getFloat(at).takeIf { it.isFinite() && it >= 0f && it <= MAX_LOAD_RATIO }
+        val feedback = Bcd.validU8(bytes[at + 4])?.takeIf { it in 1..4 }
+        val status = CardioStatus(date, ratio, feedback, u16(5), u16(7))
         val empty = ratio == null && feedback == null && status.strain == null && status.tolerance == null
         return if (empty) null else status
     }

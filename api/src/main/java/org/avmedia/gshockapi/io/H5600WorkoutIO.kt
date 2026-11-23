@@ -79,6 +79,19 @@ object H5600WorkoutIO {
         scope.launch { download() }
     }
 
+    /** End of the last download that finished (with or without workouts); null until one did. */
+    @Volatile
+    var lastCheckMs: Long? = null
+        internal set
+
+    /** After a LifeLog read ([condition] = its raw `0x28` answer, code byte first): download when [WorkoutReadTrigger] says so. */
+    fun afterRead(condition: ByteArray?, nowMs: Long = System.currentTimeMillis()) {
+        if (sink == null) return
+        val flag = condition?.getOrNull(CONDITION_POSITION)?.toInt()?.and(0xFF)
+        if (!WorkoutReadTrigger.shouldDownload(flag, lastCheckMs, nowMs)) return
+        scope.launch { download() }
+    }
+
     /** One download run; waits for the exchange lock. Returns the number of workouts stored, or null when it did not run. */
     suspend fun download(): WorkoutRunResult? {
         val store = sink ?: return null.also { Timber.w("H5600 workouts: no sink set, nothing downloaded") }
@@ -103,6 +116,7 @@ object H5600WorkoutIO {
             )
             val result = transfer.run()
             lastError = result.error
+            if (result.error == null) lastCheckMs = System.currentTimeMillis()
             if (result.error != null) Timber.w("H5600 workouts: ${result.error}")
             keepDump(log, stream.toByteArray(), result.error)
             return result

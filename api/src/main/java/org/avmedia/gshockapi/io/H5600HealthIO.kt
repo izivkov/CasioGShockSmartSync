@@ -66,6 +66,10 @@ object H5600HealthIO {
         @Volatile var lost = false
     }
 
+    /** Runs after every decoded read with its `0x28` answer: starts the workout download (it waits for the exchange lock). */
+    @Volatile
+    var afterRead: (ByteArray?) -> Unit = { H5600WorkoutIO.afterRead(it) }
+
     private val lock = Any()
     private var active: Transfer? = null
 
@@ -266,6 +270,7 @@ object H5600HealthIO {
             org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(
                 "LifeLog read done: steps ${decoded.currentDaySteps} in %.1f s".format((System.currentTimeMillis() - requestStartedMs) / 1000.0),
             )
+            runCatching { afterRead(transfer.watchCondition) }.onFailure { Timber.w(it, "H5600: the step after the read failed") }
             return AttemptOutcome(decoded, restart = false)
         } finally {
             setupWaiting = false

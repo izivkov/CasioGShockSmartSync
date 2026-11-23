@@ -66,6 +66,8 @@ data class BodyReadings(
     val breathingSessions: List<BreathingSession> = emptyList(),
     val cardio: CardioStatus? = null,
     val stairs: List<StairsRecord> = emptyList(),
+    /** Cardio load of today from the current values (0x65, group 0x5B), dated with the read; null when the watch has none. */
+    val cardioNow: CardioStatus? = null,
 )
 
 @Keep
