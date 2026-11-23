@@ -27,7 +27,9 @@ class OneLifeLogReaderTest {
 
     @Test fun theCoordinatorNeverReleasesAConnectedWatch() {
         val coordinator = sources.single { it.name == "CompanionDeviceCoordinator.kt" }.readText()
+        // The code (not the comments) between a successful connect and the first catch.
         val afterConnect = coordinator.substringAfter("repository.waitForConnection(normalizedAddress)").substringBefore("catch (")
-        assertTrue("no disconnect after a connection succeeded: $afterConnect", "disconnect" !in afterConnect && "readLifeLogInBackground" !in afterConnect)
+            .lines().filterNot { it.trimStart().startsWith("//") }.joinToString("\n")
+        assertTrue("no disconnect after a connection succeeded: $afterConnect", "disconnect(" !in afterConnect && "readLifeLogInBackground" !in afterConnect)
     }
 }
