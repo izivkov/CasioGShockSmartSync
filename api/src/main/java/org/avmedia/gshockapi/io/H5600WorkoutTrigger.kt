@@ -9,7 +9,7 @@ object WorkoutReadTrigger {
     const val CHECK_EVERY_MS = 3_600_000L
 
     /** Index 6 counts after the code byte, so it is frame position 7 (owner log 2026-11-23h 21:31:39: `28 06 17 00 00 FA 00 01 04 00` = 1). */
-    const val FLAG_POSITION = 6
+    const val FLAG_POSITION = 7
 
     /** `0x28` index 6 of a raw answer (code byte first); null when the answer is missing or short. */
     fun flagOf(condition: ByteArray?): Int? = condition?.getOrNull(FLAG_POSITION)?.toInt()?.and(0xFF)

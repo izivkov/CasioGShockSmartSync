@@ -212,6 +212,7 @@ object H5600HealthIO {
             val stepGoal = runSetup(transfer)
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
             Timber.i("H5600: setup finished, step goal=$stepGoal")
+            H5600WorkoutIO.beforeLifeLog(transfer.watchCondition, workoutsFirst)
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
 
             // The official app and the Python script write START before the first poll. The watch
