@@ -42,11 +42,12 @@ object H5600HealthIO {
     private const val BULK_LOG_EVERY = 50
     private const val HEX_PREVIEW_BYTES = 16
     private const val POLL_REPLY_TIMEOUT_MS = 1_000L
-    private const val POLL_RETRIES_PER_ATTEMPT = 5
-    private const val MAX_TRANSFER_ATTEMPTS = 3
-
-    /** Test seam (unused before the fix). */
+    /** How long an attempt waits for the watch to report ready after START (observed: 6 to 50 s). */
     @Volatile internal var readyWaitMs = 60_000L
+
+    /** What a read on a set-up link asks before START: the step goal and the watch condition, both used by the decoder. */
+    internal val QUICK_SETUP_COMMANDS: List<Int> = listOf(STEP_GOAL_COMMAND, WATCH_CONDITION_COMMAND)
+    private const val MAX_TRANSFER_ATTEMPTS = 3
 
     private class Transfer(
         val sync: H5600LifeLogSync,
@@ -91,6 +92,9 @@ object H5600HealthIO {
     fun onStatus(hex: String) = onNotification(H5600Channel.STATUS, hex)
 
     private var requestRunning = false
+
+    /** When the running request started, for the read time in the app log. */
+    @Volatile private var requestStartedMs = 0L
 
     /** Whether the connected watch has the LifeLog; a test seam. */
     @Volatile
@@ -151,6 +155,7 @@ object H5600HealthIO {
             return StepCounterData.unavailable()
         }
         lastError = null
+        requestStartedMs = System.currentTimeMillis()
         // The connection setup runs first: its requests must not queue behind ours (they would lose their answers to the transfer).
         org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
         // One exchange on the link at a time: a raw or settings read in progress finishes first.
@@ -258,7 +263,9 @@ object H5600HealthIO {
                         "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
                         "warnings=${decoded.warnings.size}",
             )
-            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read done: steps ${decoded.currentDaySteps}")
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(
+                "LifeLog read done: steps ${decoded.currentDaySteps} in %.1f s".format((System.currentTimeMillis() - requestStartedMs) / 1000.0),
+            )
             return AttemptOutcome(decoded, restart = false)
         } finally {
             setupWaiting = false
@@ -270,18 +277,21 @@ object H5600HealthIO {
     }
 
     /**
-     * Polls the watch until it reports ready. A poll that gets no reply, and a poll that gets a busy reply
-     * (00 01 xx), both count as not ready. After [POLL_RETRIES_PER_ATTEMPT] such polls in a row, the
-     * attempt is marked for restart.
+     * Polls the watch until it reports ready. A busy reply (`00 01`) and a poll without a reply both mean "still preparing": the
+     * watch answers a few polls busy, then goes silent while it prepares and answers the next poll ready (log 2026-11-23f
+     * 17:17:22 to 17:17:29: ready 6.6 s after START). Before, five such polls ended the attempt 0.2 s before the watch was ready
+     * and the second attempt replayed the whole setup (20 s lost on every read). Now the attempt ends only when the watch has not
+     * been ready for [readyWaitMs].
      */
     private suspend fun keepPolling(transfer: Transfer) {
+        val started = System.currentTimeMillis()
         var notReady = 0
         while (!transfer.finished.isCompleted) {
             val reply = withTimeoutOrNull(POLL_REPLY_TIMEOUT_MS.milliseconds) { transfer.convoyReplies.receive() }
             if (!synchronized(lock) { transfer.sync.isPolling }) break
             notReady++
-            if (notReady > POLL_RETRIES_PER_ATTEMPT) {
-                Timber.w("H5600: watch not ready after $POLL_RETRIES_PER_ATTEMPT polls; restarting the attempt")
+            if (System.currentTimeMillis() - started > readyWaitMs) {
+                Timber.w("H5600: watch not ready after ${readyWaitMs / 1000} s ($notReady polls); restarting the attempt")
                 transfer.silent = true
                 transfer.finished.complete(Unit)
                 break
@@ -296,10 +306,22 @@ object H5600HealthIO {
         }
     }
 
+    /**
+     * The setup requests of this read. On a link whose setup the watch finished (`47 01`) only the two values the decoder needs
+     * are read: Casio's app replays nothing before a transfer (notes A1), and our replay of twelve reads and six echoes cost about
+     * 13 s on the slow always-connected link (0.78 s per answer, log 2026-11-23f). Without `47 01` the full replay stays.
+     */
+    internal fun setupCommands(): List<Int> =
+        if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) QUICK_SETUP_COMMANDS else H5600LifeLogSync.SETUP_COMMANDS
+
     /** Sends each one-byte setup request and waits for its reply. Returns the step goal, if read. */
     private suspend fun runSetup(transfer: Transfer): Int? {
         var stepGoal: Int? = null
-        for (command in H5600LifeLogSync.SETUP_COMMANDS) {
+        val commands = setupCommands()
+        if (commands === QUICK_SETUP_COMMANDS) {
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog: the link is set up (47 01), only 0x43 and 0x28 are read")
+        }
+        for (command in commands) {
             if (transfer.lost) break
             Timber.d("H5600: setup 0x${command.toString(16)} -> watch")
             setupWaiting = true
