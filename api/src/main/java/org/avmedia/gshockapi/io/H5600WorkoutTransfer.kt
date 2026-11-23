@@ -38,10 +38,19 @@ class WorkoutTransfer(
     private val blockCache: MutableMap<String, ByteArray> = HashMap(),
     private val capture: (WorkoutMsg?, ByteArray?) -> Unit = { _, _ -> },
     private val replyTimeoutMs: Long = org.avmedia.gshockapi.casio.LongProcess.WORKOUT.answerMs!!,
+    // The echo of `00 1C` came 6 to 10 s after the request (owner log 2026-11-23i), so the 5 s answer limit cannot hold for it;
+    // it gets the 30 s limit of a read the user asked for (notes T2), measured from our write.
+    private val sessionTimeoutMs: Long = org.avmedia.gshockapi.casio.LongProcess.WORKOUT.totalMs!!,
     private val readTimeoutMs: Long = 10_000L,
     private val log: (String) -> Unit = {},
 ) {
     private class Fail(val text: String, val refused: Boolean = false) : Exception(text)
+
+    /** The session request went out and no end (`04 1C`) or abort (`03 1C`) yet: a failed or cancelled run aborts it. */
+    private var sessionOpen = false
+
+    /** Step 3 began: the fast interval may be set, so an abort puts the slow one back first. */
+    private var paramsSent = false
 
     suspend fun run(): WorkoutRunResult {
         var done = 0
@@ -73,32 +82,84 @@ class WorkoutTransfer(
         } catch (f: Fail) {
             finish(abort = true)
             return WorkoutRunResult(done, f.text, f.refused)
+        } finally {
+            // Cancelled or thrown: the watch must not keep the session open for the next attempt.
+            if (sessionOpen) close(abort = true)
         }
     }
 
+    /**
+     * Steps 1 to 3. The watch echoes the session request and answers the start state, in either order (owner log
+     * 2026-11-23i); it answers `04` only after its echo, so step 3 starts when both came. A fail reason (kind `03`) ends at once.
+     */
     private suspend fun start() {
-        link.drsp(request(CAT_SESSION, 0L, 0))
+        val open = request(CAT_SESSION, 0L, 0)
+        sessionOpen = true
+        drsp("step 1", open)
+        var echoed = false
         var tries = 0
-        while (true) {
-            link.bulk(byteArrayOf(0, 0, 0))
-            val reply = awaitBulk(KIND_START) ?: throw Fail("the watch did not answer the start")
-            val state = reply.getOrElse(1) { 0 }.toInt() and 0xFF
-            val reason = reply.getOrElse(2) { 0 }.toInt() and 0xFF
-            if (state == 0) break
-            when (reason) {
-                1 -> throw Fail("the watch battery is too low for the workout transfer", refused = true)
-                2 -> throw Fail("the watch is too cold for the workout transfer", refused = true)
-                else -> if (++tries >= BUSY_TRIES) throw Fail("the watch stayed busy (reason $reason)", refused = true) else delay(BUSY_RETRY_MS)
+        val ok = withTimeoutOrNull(sessionTimeoutMs) {
+            while (true) {
+                bulk("step 2", byteArrayOf(0, 0, 0))
+                val reply = withTimeoutOrNull(replyTimeoutMs) {
+                    var got: ByteArray? = null
+                    while (got == null) {
+                        val m = take()
+                        if (m.data.contentEquals(open)) {
+                            echoed = true
+                            log("Workout read: step 1 rx ${hex(m.data)} (session echo)")
+                        } else {
+                            failReason(m.data)
+                            if (m.channel == H5600Channel.CONVOY && m.data.firstOrNull()?.toInt() == KIND_START) got = m.data
+                        }
+                    }
+                    got
+                } ?: throw Fail("the watch did not answer the start")
+                log("Workout read: step 2 rx ${hex(reply)} (start state)")
+                val state = reply.getOrElse(1) { 0 }.toInt() and 0xFF
+                val reason = reply.getOrElse(2) { 0 }.toInt() and 0xFF
+                if (state == 0) break
+                when (reason) {
+                    1 -> throw Fail("the watch battery is too low for the workout transfer", refused = true)
+                    2 -> throw Fail("the watch is too cold for the workout transfer", refused = true)
+                    else -> if (++tries >= BUSY_TRIES) throw Fail("the watch stayed busy (reason $reason)", refused = true) else delay(BUSY_RETRY_MS)
+                }
             }
+            while (!echoed) {
+                val m = take()
+                failReason(m.data)
+                if (m.data.contentEquals(open)) { echoed = true; log("Workout read: step 1 rx ${hex(m.data)} (session echo)") }
+            }
+            true
         }
-        link.bulk(ByteArray(10).also { it[0] = 4 })
-        awaitBulk(KIND_PARAMS) ?: throw Fail("no answer to the connection parameters")
-        link.bulk(byteArrayOf(4, 1, 0x18, 0, 0x18, 0, 0, 0, 0xDC.toByte(), 5))
-        awaitBulk(KIND_PARAMS) ?: throw Fail("no answer to the interval")
-        link.bulk(ByteArray(14).also { it[0] = 6 })
-        val parameters = awaitBulk(KIND_SIZES) ?: throw Fail("no answer to the transfer parameters")
-        link.bulk(parameters)
-        awaitBulk(KIND_SIZES)
+        if (ok == null) throw Fail(if (echoed) "the watch did not answer the start" else "the watch did not open the session (no 00 1C echo in ${sessionTimeoutMs / 1000} s)")
+        paramsSent = true
+        bulk("step 3", ByteArray(10).also { it[0] = 4 })
+        awaitBulk("step 3", KIND_PARAMS) ?: throw Fail("no answer to the connection parameters")
+        bulk("step 3", byteArrayOf(4, 1, 0x18, 0, 0x18, 0, 0, 0, 0xDC.toByte(), 5))
+        awaitBulk("step 3", KIND_PARAMS) ?: throw Fail("no answer to the interval")
+        bulk("step 3", ByteArray(14).also { it[0] = 6 })
+        val parameters = awaitBulk("step 3", KIND_SIZES) ?: throw Fail("no answer to the transfer parameters")
+        bulk("step 3", parameters)
+        awaitBulk("step 3", KIND_SIZES)
+    }
+
+    /** Kind `03` (fail reason, A1) on either channel ends the start: owner log 21:57:55 `03 01`. */
+    private fun failReason(data: ByteArray) {
+        if (data.firstOrNull()?.toInt() == ABORTED && data.size >= 2) {
+            log("Workout read: rx ${hex(data)} (fail reason)")
+            throw Fail("the watch refused the transfer (fail reason ${data[1].toInt() and 0xFF})")
+        }
+    }
+
+    private fun drsp(step: String, data: ByteArray) {
+        log("Workout read: $step tx ${hex(data)}")
+        link.drsp(data)
+    }
+
+    private fun bulk(step: String, data: ByteArray) {
+        log("Workout read: $step tx bulk ${hex(data)}")
+        link.bulk(data)
     }
 
     private suspend fun readGroup(): ByteArray {
@@ -180,21 +241,38 @@ class WorkoutTransfer(
     private suspend fun next(timeoutMs: Long): WorkoutMsg? =
         withTimeoutOrNull(timeoutMs) { inbox.receive() }?.also { capture(it, null) }
 
-    private suspend fun awaitBulk(kind: Int): ByteArray? {
-        while (true) {
-            val m = next(replyTimeoutMs) ?: return null
-            if (m.channel == H5600Channel.CONVOY && m.data.firstOrNull()?.toInt() == kind) return m.data
+    /** The next frame without a limit of its own; the caller's limit counts from its write. */
+    private suspend fun take(): WorkoutMsg = inbox.receive().also { capture(it, null) }
+
+    /** The answer of [kind] within [replyTimeoutMs] of our write (other frames in between do not stretch it), logged with its bytes. */
+    private suspend fun awaitBulk(step: String, kind: Int): ByteArray? =
+        withTimeoutOrNull(replyTimeoutMs) {
+            var got: ByteArray? = null
+            while (got == null) {
+                val m = take()
+                if (m.channel == H5600Channel.CONVOY && m.data.firstOrNull()?.toInt() == kind) got = m.data
+            }
+            got
+        }.also { log("Workout read: $step rx " + (it?.let { b -> "bulk ${hex(b)}" } ?: "nothing in ${replyTimeoutMs / 1000} s")) }
+
+    /** Step 8. Before step 3 nothing was set, so an abort then only sends `03 1C`. */
+    private suspend fun finish(abort: Boolean) {
+        if (paramsSent) {
+            bulk("step 8", ByteArray(10).also { it[0] = 4 })
+            awaitBulk("step 8", KIND_PARAMS)
+            bulk("step 8", byteArrayOf(4, 1, 0x30, 1, 0x40, 1, 4, 0, 0xDC.toByte(), 5))
+            awaitBulk("step 8", KIND_PARAMS)
         }
+        close(abort)
     }
 
-    private suspend fun finish(abort: Boolean) {
-        link.bulk(ByteArray(10).also { it[0] = 4 })
-        awaitBulk(KIND_PARAMS)
-        link.bulk(byteArrayOf(4, 1, 0x30, 1, 0x40, 1, 4, 0, 0xDC.toByte(), 5))
-        awaitBulk(KIND_PARAMS)
-        // Abort inside the block categories names the session category, as Casio's app does.
-        link.drsp(byteArrayOf(if (abort) 0x03 else 0x04, CAT_SESSION.toByte()))
+    /** Abort inside the block categories names the session category, as Casio's app does. */
+    private fun close(abort: Boolean) {
+        sessionOpen = false
+        drsp("step 8", byteArrayOf(if (abort) 0x03 else 0x04, CAT_SESSION.toByte()))
     }
+
+    private fun hex(b: ByteArray) = b.joinToString(" ") { "%02X".format(it) }
 
     private fun request(category: Int, address: Long, length: Int): ByteArray {
         val b = ByteArray(10)
