@@ -656,6 +656,11 @@ data object WatchInfo {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun resolveModelInfo(model: WatchModel): ModelInfo = modelMap[model] ?: modelMap.getValue(WatchModel.GENERIC)
 
+    /** The model and protocol a device name resolves to (the pure part of [setNameAndModel]); for tests. */
+    @RequiresApi(Build.VERSION_CODES.O)
+    internal fun resolvedFor(name: String): Pair<WatchModel, WatchProtocol> =
+        resolveModel(name).let { it to resolveModelInfo(it).protocol }
+
     /** Look up whether a watch model is always-connected by device name. */
     @RequiresApi(Build.VERSION_CODES.O)
     fun isAlwaysConnected(watchName: String): Boolean {
