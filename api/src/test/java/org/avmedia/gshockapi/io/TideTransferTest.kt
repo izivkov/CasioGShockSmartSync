@@ -9,7 +9,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** A scripted watch for the port record transfer (notes I5). */
+/** A scripted watch for the port record transfer. */
 private class TideWatch(
     private val inbox: Channel<WorkoutMsg>,
     private val state: Int = 0,

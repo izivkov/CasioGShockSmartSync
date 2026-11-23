@@ -3,7 +3,7 @@ package org.avmedia.gshockapi.io
 import org.avmedia.gshockapi.model.WorkoutLap
 import org.avmedia.gshockapi.model.WorkoutSample
 
-/** Block chains (notes H2) and the lap and sample records cut from their payload (notes H5). */
+/** Block chains and the lap and sample records cut from their payload. */
 object WorkoutRecords {
     const val BLOCK_SIZE = 4096
     private const val PAYLOAD_FROM = 16

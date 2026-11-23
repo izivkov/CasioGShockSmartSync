@@ -153,7 +153,7 @@ object PhysicalSettingsCodec {
 }
 
 /**
- * Unit of length, bit 0 of 0x13 index 11: 0 kilometres, 1 miles (proven in the notes, round 4).
+ * Unit of length, bit 0 of 0x13 index 11: 0 kilometres, 1 miles (proven on the watch).
  */
 enum class LengthUnit(val bit: Boolean, val label: String) {
     KM(false, "Kilometres"),

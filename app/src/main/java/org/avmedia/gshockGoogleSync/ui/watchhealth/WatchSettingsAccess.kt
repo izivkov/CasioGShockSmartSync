@@ -147,7 +147,7 @@ fun SettingWriteResult.text(what: String): String =
         is SettingWriteResult.Failed -> message
     }
 
-/** What a settings read sends, and the shortest answer each known layout needs (notes D2). */
+/** What a settings read sends, and the shortest answer each known layout needs. */
 object SettingRequests {
     private const val NOTIFICATION_MANAGER = 0x3D
     private const val PROFILE = 0x45

@@ -7,7 +7,7 @@ import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.ConnectionKeepAlive
 
 /**
- * Sends a port record to a DW-H5600 through the shared exchange lock (notes I5). Routing of the watch's answers works as for
+ * Sends a port record to a DW-H5600 through the shared exchange lock. Routing of the watch's answers works as for
  * the workout transfer: while it runs, the H5600 protocol hands bulk and data request notifications to [onDrsp] and [onConvoy].
  */
 @RequiresApi(Build.VERSION_CODES.O)

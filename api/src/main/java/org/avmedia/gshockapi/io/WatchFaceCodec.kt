@@ -31,7 +31,7 @@ object WatchFaceCodec {
     private const val FIRST_ITEM_AT = 2
     private const val MIN_FRAME = FIRST_ITEM_AT + SLOTS
 
-    /** Face item names by code, 0 to 19, as in the notes. */
+    /** Face item names by code, 0 to 19. */
     val ITEM_NAMES: List<String> =
         listOf(
             "Steps", "Step goal graph", "Training status", "Monthly distance run", "Monthly distance walk",

@@ -9,8 +9,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The heart rate per 2-minute slot (section 0x52) and the cardio group of the current values (0x65, notes A4), from streams
- * built by hand. Expected values are worked out from the notes, not from the decoder.
+ * The heart rate per 2-minute slot (section 0x52) and the cardio group of the current values (0x65), from streams
+ * built by hand. Expected values are worked out from the byte layout by hand, not from the decoder.
  */
 class H5600DayCurveDecodeTest {
     private val zone = ZoneId.of("Europe/Brussels")

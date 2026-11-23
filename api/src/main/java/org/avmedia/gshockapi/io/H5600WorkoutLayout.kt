@@ -65,7 +65,7 @@ object WorkoutSportFamily {
     const val OTHER = 13
     const val INTERVAL = 14
 
-    /** The family code, or null for a sport code the notes do not list. */
+    /** The family code, or null for an unknown sport code. */
     fun of(sport: Int): Int? = when (sport) {
         1, 2, 3 -> RUNNING
         4 -> TRAIL

@@ -14,7 +14,7 @@ import org.junit.Test
 private fun frame(hex: String): ByteArray = hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 
 /**
- * Steps 1 to 3 (notes H1) with the timing of the owner's log 2026-11-23i (connection.log 2954-3050, dump notifications.txt):
+ * Steps 1 to 3 of the workout transfer with the timing of the owner's log 2026-11-23i (connection.log 2954-3050, dump notifications.txt):
  * the start state `000000` comes 1.35 s after our write, the echo `001c0000000000000000` of the session request 6 to 10 s
  * after it, and the watch answers `04` only after that echo (`04000000000000000000`, 0.8 s later). Later steps go to [FakeWatch].
  */

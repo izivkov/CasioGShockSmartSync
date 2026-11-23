@@ -6,7 +6,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockapi.casio.ConnectionKeepAlive
 import org.avmedia.gshockapi.casio.LongProcess
 
-/** The bytes of the port record transfer (notes I5, bulk category 0x23), without any I/O. */
+/** The bytes of the port record transfer (bulk category 0x23), without any I/O. */
 object TideFraming {
     const val CATEGORY = 0x23
     private const val KIND_START = 0x00
@@ -46,7 +46,7 @@ object TideFraming {
 class TideRunResult(val error: String?)
 
 /**
- * Sends one port record (notes I5, steps 3 to 7). The caller holds the exchange lock and writes `2E 02` afterwards.
+ * Sends one port record (transfer steps 3 to 7). The caller holds the exchange lock and writes `2E 02` afterwards.
  * Any failure writes the abort `03 23` and returns an error text; nothing is retried.
  */
 class TideTransfer(
@@ -67,7 +67,7 @@ class TideTransfer(
             ?: return fail("The watch did not say how big the pieces are, or said a size the app does not accept.")
         ConnectionKeepAlive.log("tide: chunk size $chunk, ${TideFraming.chunks(record, chunk).size} pieces")
         for (piece in TideFraming.chunks(record, chunk)) {
-            // The next piece goes chunkGapMs after the write result of this one (notes T4); a failed write ends the transfer.
+            // The next piece goes chunkGapMs after the write result of this one; a failed write ends the transfer.
             if (!link.bulkConfirmed(piece)) return fail("A piece of the tide data could not be sent to the watch.")
             delay(chunkGapMs)
         }

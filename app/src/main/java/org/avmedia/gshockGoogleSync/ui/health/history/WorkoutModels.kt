@@ -30,7 +30,7 @@ class WorkoutEvents(
     val onDownload: () -> Unit = {},
 )
 
-/** Pure text helpers of the workout views (units the notes mark as likely carry "unconfirmed"). */
+/** Pure text helpers of the workout views (units that are likely, not proven, carry "unconfirmed"). */
 internal object WorkoutText {
     fun duration(sec: Int?): String =
         if (sec == null) "no data" else if (sec >= 3600) "%d:%02d:%02d".format(Locale.US, sec / 3600, sec / 60 % 60, sec % 60) else "%d:%02d".format(Locale.US, sec / 60, sec % 60)

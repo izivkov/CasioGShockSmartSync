@@ -104,7 +104,7 @@ object HaSensors {
         HaSensor("breathing_exercise", "Last breathing exercise", "health.breathing_exercise_at", "timestamp", null, null, "mdi:meditation", convert = Convert.LOCAL_TO_OFFSET),
         HaSensor("stairs_up", "Floors up (unconfirmed)", "health.stairs_up", null, null, "measurement", "mdi:stairs-up"),
         HaSensor("stairs_down", "Floors down (unconfirmed)", "health.stairs_down", null, null, "measurement", "mdi:stairs-down"),
-        // Last workout (DW-H5600 activity log). Units the notes mark as likely say "unconfirmed" in the name.
+        // Last workout (DW-H5600 activity log). Units that are likely, not proven, say "unconfirmed" in the name.
         HaSensor("workout_sport", "Last workout", "workout.sport", null, null, null, "mdi:run", attributes = mapOf("unconfirmed" to "workout.unconfirmed")),
         HaSensor("workout_start", "Last workout start", "workout.start", "timestamp", null, null, "mdi:clock-start"),
         HaSensor("workout_duration", "Last workout duration", "workout.duration_seconds", "duration", "min", null, "mdi:timer", convert = Convert.SECONDS_TO_MINUTES),

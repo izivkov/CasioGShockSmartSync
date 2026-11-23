@@ -1,7 +1,7 @@
 package org.avmedia.gshockapi.io
 
 /**
- * Request 0x2E, unit 2: which tide data the watch shows (notes I1). Frame = `2E 02` + value; value index i is frame byte 2 + i.
+ * Request 0x2E, unit 2: which tide data the watch shows. Frame = `2E 02` + value; value index i is frame byte 2 + i.
  * Pure: a change copies the frame and replaces only the bytes it names. A longer value than the 6 bytes known is kept unchanged.
  */
 object TideSettingCodec {
@@ -57,7 +57,7 @@ object TideSettingCodec {
     val FEET_BYTES: Set<Int> = setOf(VALUE_AT + 5)
 }
 
-/** Request 0x2E, units 3 to 5: one of the three user points (notes I2), 15 value bytes. */
+/** Request 0x2E, units 3 to 5: one of the three user points, 15 value bytes. */
 object TideUserPointCodec {
     const val FIRST_UNIT = 3
     const val POINTS = 3

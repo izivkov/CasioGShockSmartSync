@@ -319,7 +319,7 @@ object H5600HealthIO {
 
     /**
      * The setup requests of this read. On a link whose setup the watch finished (`47 01`) only the two values the decoder needs
-     * are read: Casio's app replays nothing before a transfer (notes A1), and our replay of twelve reads and six echoes cost about
+     * are read: the watch needs no replay before a transfer, and our replay of twelve reads and six echoes cost about
      * 13 s on the slow always-connected link (0.78 s per answer, log 2026-11-23f). Without `47 01` the full replay stays.
      */
     internal fun setupCommands(): List<Int> =

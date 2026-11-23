@@ -7,7 +7,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** What a settings read sends (notes D2) and which answers are too short to decode. */
+/** What a settings read sends and which answers are too short to decode. */
 class SettingRequestsTest {
     @Test fun theNotificationManagerIsReadAs3D30AndNeverBare() {
         assertArrayEquals(byteArrayOf(0x3D, 0x30), SettingRequests.forCode(0x3D))
@@ -26,7 +26,7 @@ class SettingRequestsTest {
         assertEquals(true, short.contains("42 01 02"))
     }
 
-    // Owner's watch (2026-11-23): 3D 30 + 16 value bytes. The notes expected 17; the real answer is the minimum.
+    // Owner's watch (2026-11-23): 3D 30 + 16 value bytes. 17 were expected; the real answer is the minimum.
     @Test fun theNotificationManagerNeedsSixteenValueBytesAfterThe30() {
         val real = "3D 30 00 02 01 00 03 00 2F 28 00 28 00 28 00 FA 00 00".split(' ').map { it.toInt(16).toByte() }.toByteArray()
         assertNull(SettingRequests.tooShort(0x3D, real))

@@ -3,7 +3,7 @@ package org.avmedia.gshockapi.io
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-/** The 256 byte workout header (notes H2). */
+/** The 256 byte workout header. */
 class WorkoutHeader(
     val sport: Int,
     val flags: Int,

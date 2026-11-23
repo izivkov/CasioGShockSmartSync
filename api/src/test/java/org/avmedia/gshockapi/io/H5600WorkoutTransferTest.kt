@@ -139,7 +139,7 @@ class H5600WorkoutTransferTest {
         }
     }
 
-    // Notes I5 says start state 0 means "ok, go on" on the tide path; notes H1 step 2 says 0 means "cannot". Our code treats 0 as go
+    // On the tide path start state 0 means "ok, go on"; an earlier reading of the workout start took 0 as "cannot". Our code treats 0 as go
     // on (the one real watch run worked that way); this pins it, and pins that a non-zero state with reason 1 or 2 is refused.
     @Test
     fun startStateZeroGoesOnToTheConnectionParameters() = runTest {

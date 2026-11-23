@@ -11,7 +11,7 @@ fun linkLossFrame(level: Int): ByteArray = byteArrayOf(0x00, level.toByte())
 
 /** The writes the keep-alive and the connection setup make. A fake in the unit tests. */
 interface WatchWriter {
-    /** A write with response to the all-features characteristic (what Casio's app uses for `49 01`, `0x11`, `0x3A`). */
+    /** A write with response to the all-features characteristic (used for `49 01`, `0x11`, `0x3A`). */
     fun writeAllFeatures(bytes: ByteArray)
 
     /** A read request (one code) on the request characteristic. */
@@ -30,7 +30,7 @@ internal object ConnectionWriter : WatchWriter {
 }
 
 /**
- * The connection upkeep of the DW-H5600 family, as Casio's app does it: the watch notifies `49 00` (connection check)
+ * The connection upkeep of the DW-H5600 family: the watch notifies `49 00` (connection check)
  * and the app answers at once with `49 01`; the watch notifies `47 01` when its setup is done and `47 02` to ask for the
  * Link Loss alert level 1. Every such notification is logged with its time so a health-log share shows whether the
  * drops stop. Pure apart from the [writer].

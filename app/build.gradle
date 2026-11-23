@@ -61,7 +61,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.testApk
-            // Installs beside the official app; the label is set in src/debug/res/values/strings.xml.
+            // Installs beside the release build; the label is set in src/debug/res/values/strings.xml.
             applicationIdSuffix ".webhook"
             // The test APK build passes -PminifyTest: R8 and resource shrinking, same applicationId and key.
             // Unit tests and screenshots run without it. Remove the property from test-apk.yml to switch it off.

@@ -19,7 +19,7 @@ data class TideStation(
 )
 
 object TideConstituents {
-    /** The 60 of the 60 constituent form, in the order of the record (notes I3). */
+    /** The 60 of the 60 constituent form, in the order of the record. */
     val ORDER: List<String> = listOf(
         "Sa", "Ssa", "Mm", "MSf", "Mf", "2Q1", "sigma1", "Q1", "rho1", "O1", "MP1", "M1", "chi1", "pi1", "P1", "S1", "K1", "psi1",
         "phi1", "theta1", "J1", "SO1", "OO1", "OQ2", "MNS2", "2N2", "mu2", "N2", "nu2", "OP2", "M2", "MKS2", "lambda2", "L2", "T2",

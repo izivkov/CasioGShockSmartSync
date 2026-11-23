@@ -7,7 +7,7 @@ import org.avmedia.gshockapi.model.WorkoutUnits
 
 /** The `workout.*` variables: the newest workout stored from a DW-H5600 (null while none is stored). */
 object WorkoutVariables {
-    /** name to description, in display order. Units the notes mark as likely say "unconfirmed". */
+    /** name to description, in display order. Units that are likely, not proven, say "unconfirmed". */
     val DESCRIPTIONS: Map<String, String> = linkedMapOf(
         "workout.sport" to "Sport of the last workout, for example Running",
         "workout.start" to "Start of the last workout, ISO 8601 UTC (the watch's time zone offset is unconfirmed)",

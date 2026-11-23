@@ -24,7 +24,7 @@ data class WorkoutListUi(
     /** The activities the watch shows (0x53), in order. */
     val activities: List<Int>? = null,
     val message: String? = null,
-    /** The answer as hex when its length or contents do not match the notes: shown, never written. */
+    /** The answer as hex when its length or contents do not match the known layout: shown, never written. */
     val rawHex: String? = null,
 )
 
@@ -103,7 +103,7 @@ data class WorkoutActivityUi(
 
 /**
  * One activity's settings: 0x40, 0x41 and 0x55 through the 0x54 wrapper, 0x56 and 0x4E read with the activity.
- * Only fields the notes confirm are written; each write is read, changed in its bytes only, written and read back.
+ * Only proven fields are written; each write is read, changed in its bytes only, written and read back.
  */
 @HiltViewModel
 class WorkoutActivityViewModel @Inject constructor(private val access: WatchSettingsAccess) : ViewModel() {

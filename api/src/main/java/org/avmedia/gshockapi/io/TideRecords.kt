@@ -3,14 +3,14 @@ package org.avmedia.gshockapi.io
 import java.text.Normalizer
 
 /**
- * The port record the watch is sent (bulk category 0x23, notes I3), built from open constants (notes I6). All numbers low byte
+ * The port record the watch is sent (bulk category 0x23), built from open constants. All numbers low byte
  * first. The 4 constituent form is the first test; the 60 form is built the same way and equally unproven on a watch.
  */
 object TideRecords {
     const val FORM4_SIZE = 163
     const val FORM60_SIZE = 1009
 
-    /** Port ids the watch has seen for each form (notes I6); one slot only, so a fixed id per form. */
+    /** Port ids the watch has seen for each form; one slot only, so a fixed id per form. */
     const val FORM4_ID = 1
     const val FORM60_ID = 2405
 
@@ -33,7 +33,7 @@ object TideRecords {
     /** True when [z0Cm] is only the sum of the main amplitudes. */
     fun z0Approximate(s: TideStation): Boolean = s.z0Cm == null
 
-    /** Graph pattern as the watch reads it: the number and the letter (A = 1) as digits, `12E` = 125 (notes I4). */
+    /** Graph pattern as the watch reads it: the number and the letter (A = 1) as digits, `12E` = 125. */
     fun graphPattern(s: TideStation): Int {
         val range = MAIN.sumOf { s.constants[it]?.amplitudeCm ?: 0.0 }
         val number = Math.round(13.4 - range / 52).toInt().coerceIn(2, 14)
@@ -62,7 +62,7 @@ object TideRecords {
             putU16(out, 42 + 4 * i, wholeDegrees(c.phaseDeg))
             putU16(out, 44 + 4 * i, Math.round(c.amplitudeCm).toInt())
         }
-        // f4, F4, f6, F6: shallow water terms from M4 and M6 (notes I3); 0 when missing or not representable.
+        // f4, F4, f6, F6: shallow water terms from M4 and M6; 0 when missing or not representable.
         val m2 = s.constants.getValue("M2")
         val (f4, big4) = shallow("M4", 2, s, m2)
         val (f6, big6) = shallow("M6", 3, s, m2)
@@ -70,7 +70,7 @@ object TideRecords {
         putU16(out, 60, big4)
         putU16(out, 62, f6)
         putU16(out, 64, big6)
-        // 66 to 161: both month sets stay 0; byte 162 = 0: the phases refer to Greenwich (notes I6).
+        // 66 to 161: both month sets stay 0; byte 162 = 0: the phases refer to Greenwich.
         return out
     }
 

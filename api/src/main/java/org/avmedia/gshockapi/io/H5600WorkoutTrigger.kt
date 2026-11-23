@@ -1,7 +1,7 @@
 package org.avmedia.gshockapi.io
 
 /**
- * When a LifeLog read is followed by a workout download. The watch flags waiting workouts in `0x28` (notes G4 step 8; the
+ * When a LifeLog read is followed by a workout download. The watch flags waiting workouts in `0x28` (step 8 of the setup; the
  * flag itself is not yet seen on the watch), so a read also looks once an hour without the flag. The download skips
  * workouts already fetched, so looking costs one group header read. Pure.
  */

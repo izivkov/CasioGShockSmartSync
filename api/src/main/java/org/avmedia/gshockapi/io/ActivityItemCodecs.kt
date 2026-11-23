@@ -37,7 +37,7 @@ object ActivityModels {
 }
 
 /**
- * Activity list (0x53), notes D1: the watch has 14 slots (value index 0 to 13), 0 = unused. Casio writes the list as one `53`
+ * Activity list (0x53): the watch has 14 slots (value index 0 to 13), 0 = unused. The list is written as one `53`
  * frame, code + the value cut to 20 bytes in all (at most 19 value bytes), with response to the all-features characteristic.
  * Value bytes from index 14 on are not activities: they are sent back exactly as read.
  */
@@ -45,10 +45,10 @@ object ActivityListCodec {
     const val CODE = 0x53
     const val MAX = 14
 
-    /** Code byte plus value bytes: the longest frame Casio writes. */
+    /** Code byte plus value bytes: the longest frame the watch takes. */
     const val MAX_FRAME = 20
 
-    /** The activities the settings screen offers, in the order of the notes. */
+    /** The activities the settings screen offers, in this order. */
     val ACTIVITIES: List<Int> = listOf(1, 2, 3, 6, 7, 8, 9, 12, 13, 14)
 
     fun parse(frame: ByteArray): List<Int>? {
@@ -56,7 +56,7 @@ object ActivityListCodec {
         return frame.drop(1).take(MAX).map { it.toInt() and 0xFF }.filter { it != 0 }
     }
 
-    /** True only for the layout of the notes: code 0x53, 1 to 19 value bytes, slots 0 to 13 each a known activity or 0. The tail is not checked. */
+    /** True only for the known layout: code 0x53, 1 to 19 value bytes, slots 0 to 13 each a known activity or 0. The tail is not checked. */
     fun layoutOk(frame: ByteArray): Boolean =
         frame.size in 2..MAX_FRAME && frame[0] == CODE.toByte() &&
             frame.drop(1).take(MAX).all { val c = it.toInt() and 0xFF; c == 0 || ActivityNames.known(c) }

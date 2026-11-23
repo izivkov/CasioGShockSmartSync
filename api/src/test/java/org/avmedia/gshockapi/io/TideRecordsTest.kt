@@ -10,7 +10,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The port record builders (notes I3, I4, I6) on a fixture station, and the bundled stations. */
+/** The port record builders on a fixture station, and the bundled stations. */
 class TideRecordsTest {
     private val fixture = TideStation(
         name = "Oostende", latitude = 51.234, longitude = 2.927, zoneQuarterHours = 4,

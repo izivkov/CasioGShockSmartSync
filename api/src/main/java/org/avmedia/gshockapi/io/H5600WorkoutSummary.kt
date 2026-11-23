@@ -2,7 +2,7 @@ package org.avmedia.gshockapi.io
 
 import org.avmedia.gshockapi.model.WorkoutSummary
 
-/** Decodes the summary from workout header offset 69 (notes H4). */
+/** Decodes the summary from workout header offset 69. */
 object WorkoutSummaryDecoder {
     const val OFFSET = 69
 
@@ -51,7 +51,7 @@ object WorkoutSummaryDecoder {
         else -> null
     }
 
-    /** Summary bytes the notes list for the sport (with the float load of format 4, except swimming); null for an unknown sport. */
+    /** Summary bytes of the sport (with the float load of format 4, except swimming); null for an unknown sport. */
     fun sizeFor(sport: Int): Int? {
         val family = WorkoutSportFamily.of(sport) ?: return null
         val swim = family == WorkoutSportFamily.POOL || family == WorkoutSportFamily.OPEN_WATER

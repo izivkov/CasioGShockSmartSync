@@ -69,7 +69,7 @@ class TideViewModel @Inject constructor(
 
     fun setFeet(feet: Boolean) = run("Unit") { access.updateTide(TideSettingCodec.UNIT, TideSettingCodec.FEET_BYTES) { TideSettingCodec.withFeet(it, feet) }.text(if (feet) "Feet" else "Metres") }
 
-    /** Writes own point [n] (1 to 3), then selects it (unit 2 index 0 = n), in that order (notes I2). The name stays in the app. */
+    /** Writes own point [n] (1 to 3), then selects it (unit 2 index 0 = n), in that order. The name stays in the app. */
     fun savePoint(n: Int, name: String, point: TideUserPointCodec.Point) = run("Own point $n") {
         LocalDataStorage.put(context, nameKey(n), name.trim())
         _ui.update { it.copy(names = it.names.toMutableList().also { l -> l[n - 1] = name.trim() }) }

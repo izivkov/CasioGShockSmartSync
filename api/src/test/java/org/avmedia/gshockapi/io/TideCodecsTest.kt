@@ -8,7 +8,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Unit 2 and the own points of request 0x2E (notes I1, I2), and the text form of an own point. */
+/** Unit 2 and the own points of request 0x2E, and the text form of an own point. */
 class TideCodecsTest {
     private fun bytes(vararg v: Int) = ByteArray(v.size) { v[it].toByte() }
 

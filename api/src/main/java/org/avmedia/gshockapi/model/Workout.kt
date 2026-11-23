@@ -117,7 +117,7 @@ object WorkoutSports {
 }
 
 object WorkoutUnits {
-    /** Units or meanings the notes mark as likely or unknown. Keep "unconfirmed" in every place they are shown or sent. */
+    /** Units or meanings that are likely or unknown, not proven. Keep "unconfirmed" in every place they are shown or sent. */
     val UNCONFIRMED: Map<String, String> = mapOf(
         "distance" to "likely km, unconfirmed",
         "pace" to "likely seconds per km, unconfirmed",

@@ -83,7 +83,7 @@ private class WorkoutHoldingWatch(private val condition: ByteArray) : WatchTrans
     }
 }
 
-/** Workouts flagged in `0x28` are read before the LifeLog START (notes T4), so the read no longer hangs on such a watch. */
+/** Workouts flagged in `0x28` are read before the LifeLog START, so the read no longer hangs on such a watch. */
 class LifeLogWorkoutsFirstTest {
     private val savedQueue = WatchLink.queue
     private val savedRun = H5600HealthIO.workoutsFirst

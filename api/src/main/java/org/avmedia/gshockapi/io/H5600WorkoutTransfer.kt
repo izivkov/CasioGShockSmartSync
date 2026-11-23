@@ -26,7 +26,7 @@ class WorkoutMsg(val channel: H5600Channel, val data: ByteArray)
 class WorkoutRunResult(val downloaded: Int, val error: String?, val refused: Boolean = false)
 
 /**
- * Steps 1 to 8 of the workout transfer (notes H1) on a [WorkoutLink]. The caller holds the exchange lock.
+ * Steps 1 to 8 of the workout transfer on a [WorkoutLink]. The caller holds the exchange lock.
  * Each workout goes to [sink] first; only when the sink took it (true) is the fetched mark written for it, so a
  * workout that could not be stored stays on the watch for the next run. [capture] receives every message and the
  * decoded bytes of each read, for the raw dump. [log] gets one line per step (category, slot, result) for the connection log.
@@ -39,7 +39,7 @@ class WorkoutTransfer(
     private val capture: (WorkoutMsg?, ByteArray?) -> Unit = { _, _ -> },
     private val replyTimeoutMs: Long = org.avmedia.gshockapi.casio.LongProcess.WORKOUT.answerMs!!,
     // The echo of `00 1C` came 6 to 10 s after the request (owner log 2026-11-23i), so the 5 s answer limit cannot hold for it;
-    // it gets the 30 s limit of a read the user asked for (notes T2), measured from our write.
+    // it gets the 30 s limit of a read the user asked for, measured from our write.
     private val sessionTimeoutMs: Long = org.avmedia.gshockapi.casio.LongProcess.WORKOUT.totalMs!!,
     private val readTimeoutMs: Long = 10_000L,
     private val log: (String) -> Unit = {},
@@ -268,7 +268,7 @@ class WorkoutTransfer(
         close(abort)
     }
 
-    /** Abort inside the block categories names the session category, as Casio's app does. */
+    /** Abort inside the block categories names the session category. */
     private fun close(abort: Boolean) {
         sessionOpen = false
         drsp("step 8", byteArrayOf(if (abort) 0x03 else 0x04, CAT_SESSION.toByte()))

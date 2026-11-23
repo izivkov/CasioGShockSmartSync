@@ -126,7 +126,7 @@ class NotificationCodecsTest {
         assertFalse(NotificationManagerCodec.withLanguage(frame(0x3D, 1), 1) != null)
     }
 
-    // The checked write, with a fake watch that reports command 0x30 on every read, as the notes say it does.
+    // The checked write, with a fake watch that reports command 0x30 on every read, as the watch does.
     private class Watch(var value: ByteArray) {
         val writes = mutableListOf<ByteArray>()
 

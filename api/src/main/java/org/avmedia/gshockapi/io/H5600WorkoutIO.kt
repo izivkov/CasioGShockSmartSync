@@ -18,7 +18,7 @@ import org.avmedia.gshockapi.model.WorkoutSession
 import timber.log.Timber
 
 /**
- * Downloads the workouts of a DW-H5600 (notes H) through the shared exchange lock.
+ * Downloads the workouts of a DW-H5600 through the shared exchange lock.
  *
  * The app sets [sink] (store the workout; true when stored) and may collect [workouts] to be told about each new one.
  * Without a sink nothing is downloaded, so nothing is marked as fetched that nobody keeps. A workout is delivered
@@ -178,7 +178,7 @@ object H5600WorkoutIO {
 
     /**
      * Inside a LifeLog read (exchange lock held), before its START: when its `0x28` answer flags workouts (index 6 is 1 or 2)
-     * they are read first ([run], normally [downloadHeld]), as Casio's app does (notes T4: workouts, then the LifeLog). Owner
+     * they are read first ([run], normally [downloadHeld]): workouts first, then the LifeLog. Owner
      * log 2026-11-23h 21:31:39: the first `0x28` ever with index 6 = 1, and a START the watch did not answer for 60 s.
      */
     suspend fun beforeLifeLog(condition: ByteArray?, run: suspend () -> Unit) {
@@ -197,7 +197,7 @@ object H5600WorkoutIO {
 
     /**
      * One download run for a caller that holds [WatchExchange.mutex]: the LifeLog read runs it before its START when `0x28`
-     * flags workouts, as Casio's app does (notes T4: workouts first, then the LifeLog).
+     * flags workouts (workouts first, then the LifeLog).
      */
     suspend fun downloadHeld(userAsked: Boolean = false): WorkoutRunResult? {
         val store = sink ?: return null.also { log("Workout read not started: the app keeps no workouts") }

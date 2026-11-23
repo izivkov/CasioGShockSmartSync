@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.utils.Utils
 
 /**
- * The cheap, proven part of Casio's per-connection setup for the DW-H5600 family (notes, section G):
+ * The cheap, proven part of the per-connection setup the DW-H5600 family expects:
  * read `0x11` and write it back with byte index 4 bit 2 cleared; on a reconnect of the always-connect kind (9 or 10)
  * also read `0x3B` and write it back unchanged, then read `0x3A` and write it back with bytes index 7 and 8 set to
  * `DC 05`. The "settings data for this kind of connection" step is not traced and is left out.
@@ -154,7 +154,7 @@ object ConnectionSetup {
     }
 
     /**
-     * What Casio writes back after reading [code]: `0x11` with bit 2 of value index 4 cleared, `0x3A` with value index 7 and 8 set
+     * The value written back after reading [code]: `0x11` with bit 2 of value index 4 cleared, `0x3A` with value index 7 and 8 set
      * to `DC 05`, every other value as read. Used by the connection setup and by the LifeLog setup, so both write the same bytes.
      */
     fun writeBackValue(code: Int, reply: ByteArray): ByteArray {

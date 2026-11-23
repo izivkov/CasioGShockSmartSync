@@ -232,7 +232,7 @@ data object WatchInfo {
         val hasLongTimerKey: Boolean = false,
         val hasExerciseProfile: Boolean = false,
         // The 10-byte user area of app information (0x22) is used as a scratchpad.
-        // Disable for watches where 0x22 holds data owned by the official app.
+        // Disable for watches where 0x22 holds data of the CASIO WATCHES app.
         val hasScratchpad: Boolean = true,
         val settingsSize: Int = 17,
         val protocol: WatchProtocol = StandardProtocol,
@@ -414,7 +414,7 @@ data object WatchInfo {
                 hasPowerSavingMode = false,
             ),
             ModelInfo(
-                // Oceanus analog (upstream GShockAPI). Writing the 0x22 scratchpad makes the official app forget the watch.
+                // Oceanus analog (upstream GShockAPI). Writing the 0x22 scratchpad makes the CASIO WATCHES app forget the watch.
                 model = WatchModel.OCW_S400,
                 alarmCount = 0,
                 hasAutoLight = false,

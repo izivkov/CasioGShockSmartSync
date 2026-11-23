@@ -4,7 +4,7 @@ import java.time.LocalDate
 import org.avmedia.gshockapi.model.CardioStatus
 
 /**
- * The tagged groups of the current values section 0x65 (notes A4): each group is one tag byte and a fixed-size content.
+ * The tagged groups of the current values section 0x65: each group is one tag byte and a fixed-size content.
  * Pure. On the recording of 2026-10-28 the body starts with group 0x5B, and the heart rate group 0x5E lands at body
  * offset 87, where [H5600HealthDecoder] reads the day's heart rate: the sizes below reproduce that layout.
  */

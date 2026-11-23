@@ -55,7 +55,7 @@ object NotificationGate {
 }
 
 /**
- * Sends a notification text the way Casio's app does (notes T4): on the notification characteristic, without response, in chunks of
+ * Sends a notification text the way the watch accepts it: on the notification characteristic, without response, in chunks of
  * the MTU minus 4 bytes, the next chunk [spacingMs] after the write result of the one before, a failed write drops the rest, and
  * only while the watch allows it and no LifeLog or workout transfer runs (then the text is held back and sent after it). One text
  * at a time.

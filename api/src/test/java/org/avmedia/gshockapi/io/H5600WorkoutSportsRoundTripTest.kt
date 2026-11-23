@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * One workout per sport of notes H3, built from the notes' tables H4 and H5 (token lists written out here by hand, not
+ * One workout per known sport, built from the summary, lap and sample layouts (token lists written out here by hand, not
  * taken from the decoder), sent through header, block chains and [WorkoutSessionBuilder]: summary, laps and samples.
  */
 class H5600WorkoutSportsRoundTripTest {

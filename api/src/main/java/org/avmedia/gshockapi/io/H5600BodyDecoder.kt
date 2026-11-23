@@ -57,7 +57,7 @@ object H5600BodyDecoder {
     }
 
     /**
-     * The 9-byte cardio block at [at] (notes A4): float load ratio (0 to 9.99), u8 feedback (1 to 4), u16 strain and u16
+     * The 9-byte cardio block at [at]: float load ratio (0 to 9.99), u8 feedback (1 to 4), u16 strain and u16
      * tolerance (each up to 999). Shared by the cardio status section 0x5B and the current values 0x65. Null when every value
      * is "no data" or the block does not fit.
      */

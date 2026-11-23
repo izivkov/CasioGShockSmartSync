@@ -235,7 +235,7 @@ class ActivityItemCodecsTest {
         assertEquals(listOf(1, 3, 2, 9, 14), ActivityListCodec.move(listOf(1, 3, 2, 9, 14), 14, 1, visible))
     }
 
-    // Notes D1: 14 slots, a 20 byte frame at most, value bytes from index 14 on go back as they were read.
+    // 14 slots, a 20 byte frame at most, value bytes from index 14 on go back as they were read.
     private val tailFrame = bytes(0x53, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5)
 
     @Test
