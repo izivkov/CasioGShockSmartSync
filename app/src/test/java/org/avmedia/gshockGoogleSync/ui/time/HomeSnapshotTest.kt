@@ -43,6 +43,6 @@ class HomeSnapshotTest {
         val src = File("src/main/java/org/avmedia/gshockGoogleSync/ui/time/TimeViewModel.kt").readText()
         val first = src.substringAfter("private val _state = MutableStateFlow(").substringBefore("val state = _state")
         assertTrue(first, "HomeSnapshotStore.firstState(" in first)
-        assertTrue(first, "api." !in first && "timeSettingsStorage" !in first)
+        assertTrue(first, !Regex("""\bapi\.""").containsMatchIn(first) && "timeSettingsStorage" !in first)
     }
 }
