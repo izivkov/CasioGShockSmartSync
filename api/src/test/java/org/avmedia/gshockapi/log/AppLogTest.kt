@@ -68,4 +68,26 @@ class AppLogTest {
         assertFalse(file.exists() || AppLog.rolledFile(file).exists())
         assertTrue(AppLog.readLines().isEmpty())
     }
+
+    /** Brief 2026-11-23: the App log screen must never be empty after a connection attempt, even when the file cannot be written. */
+    @Test fun theScreenShowsTheLinesWhenTheFileCannotBeWritten() {
+        val blocker = File(tmp.root, "not-a-folder").apply { writeText("x") }
+        AppLog.logFile = File(blocker, "connection.log")
+        AppLog.log(LogSource.Watch, "Connection kind 14: setup starts")
+        assertTrue(AppLog.readLines().toString(), AppLog.readLines().any { it.endsWith("Connection kind 14: setup starts") })
+    }
+
+    @Test fun aConnectWritesTheKindLineToWhatTheScreenReads() {
+        org.avmedia.gshockapi.casio.ConnectionSetup.busy = { true }
+        try {
+            org.avmedia.gshockapi.casio.ConnectionSetup.reset()
+            org.avmedia.gshockapi.casio.ConnectionSetup.onKind("0x10 17 62 07 38 85 CD 7F 0E 03 0F FF FF FF FF 24 00 00 00")
+            val lines = AppLog.readLines()
+            assertTrue(lines.toString(), lines.any { it.contains("[Watch] Connection kind") })
+            assertTrue(file.readText().contains("Connection kind"))
+        } finally {
+            org.avmedia.gshockapi.casio.ConnectionSetup.busy = { org.avmedia.gshockapi.io.H5600HealthIO.isActive || org.avmedia.gshockapi.io.H5600WorkoutIO.isActive }
+            org.avmedia.gshockapi.casio.ConnectionSetup.reset()
+        }
+    }
 }

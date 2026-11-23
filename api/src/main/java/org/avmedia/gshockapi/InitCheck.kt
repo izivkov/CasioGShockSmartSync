@@ -18,7 +18,7 @@ object InitCheck {
      * error: init completes and one line goes to the App log. Only a connection the user started and that really failed
      * is shown as a blocking Error.
      */
-    fun decide(button: IO.WatchButton?, automatic: Boolean): Decision {
+    fun decide(button: IO.WatchButton?, automatic: Boolean, kindKnown: Boolean = true): Decision {
         val problem =
             when (button) {
                 null -> "Timed out waiting for button info from the watch"

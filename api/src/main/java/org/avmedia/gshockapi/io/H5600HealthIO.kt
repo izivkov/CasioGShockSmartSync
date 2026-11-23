@@ -89,6 +89,16 @@ object H5600HealthIO {
 
     private var requestRunning = false
 
+    /** Whether the connected watch has the LifeLog; a test seam. */
+    @Volatile
+    internal var stepCounterSupported: () -> Boolean = { WatchInfo.hasStepCounter }
+
+    /** The link dropped: a running read must end now, not run on into the next connection. */
+    fun onLinkLost() {}
+
+    /** The protocol driver of one attempt. */
+    internal fun syncFor(peek: Boolean): H5600LifeLogSync = H5600LifeLogSync(echoEnd = !(peek && TEST_PEEK_SKIPS_END))
+
     /** True while a setup request is waiting for its reply. Only then does the transfer take status notifications. */
     @Volatile
     private var setupWaiting = false
@@ -102,7 +112,7 @@ object H5600HealthIO {
      * the setup, up to [MAX_TRANSFER_ATTEMPTS] times, and [status] says so.
      */
     suspend fun request(peek: Boolean = true): StepCounterData {
-        if (!WatchInfo.hasStepCounter) {
+        if (!stepCounterSupported()) {
             Timber.i("H5600: step counter not supported on model ${WatchInfo.model}")
             return StepCounterData.unavailable()
         }
@@ -154,7 +164,7 @@ object H5600HealthIO {
     /** One attempt: setup, START, polls, then the data. restart = true when the watch stopped answering. */
     private suspend fun runAttempt(zone: ZoneId, peek: Boolean): AttemptOutcome {
         // Peek test: with peek, END is not echoed, so the watch may keep the data it has not yet been told it can drop.
-        val transfer = Transfer(H5600LifeLogSync(echoEnd = !(peek && TEST_PEEK_SKIPS_END)), zone)
+        val transfer = Transfer(syncFor(peek), zone)
         synchronized(lock) { active = transfer }
         try {
             Timber.i("H5600: LifeLog attempt start (peek=$peek, zone=$zone)")

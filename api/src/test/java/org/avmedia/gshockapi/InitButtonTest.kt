@@ -77,4 +77,18 @@ class InitButtonTest {
         val d = InitCheck.decide(IO.WatchButton.LOWER_LEFT, automatic = false)
         assertTrue(d.complete && d.error == null && d.log == null)
     }
+
+    /**
+     * Log 2026-11-23b 15:35 to 15:42: the watch answered nothing on 20 links in a row (no kind answer, no 0x10), and each
+     * one raised the blocking "Timed out waiting for button info" popup. Without a kind answer nobody knows a button was
+     * pressed: init ends quietly with one log line, the link is released and connecting goes on.
+     */
+    @Test fun aLinkWithoutAKindAnswerEndsQuietly() {
+        val d = InitCheck.decide(null, automatic = false, kindKnown = false)
+        assertFalse(d.complete)
+        assertNull(d.error)
+        assertNotNull(d.log)
+        // A known kind keeps the owner's rule: a user-started connection that failed is a blocking error.
+        assertEquals("Timed out waiting for button info from the watch", InitCheck.decide(null, automatic = false, kindKnown = true).error)
+    }
 }
