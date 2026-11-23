@@ -5,6 +5,7 @@ import org.avmedia.gshockapi.io.ActivityModels
 import org.avmedia.gshockapi.io.BasicHealthFieldsCodec
 import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.LengthUnit
+import org.avmedia.gshockapi.io.LightSettingsCodec
 import org.avmedia.gshockapi.io.NotificationManagerCodec
 import org.avmedia.gshockapi.io.NotificationSoundCodec
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
@@ -115,6 +116,10 @@ object WatchSettingRegistry {
         pick("length_unit", listOf("km", "miles"), BasicHealthFieldsCodec.CODE, BasicHealthFieldsCodec.FLAGS_BYTES,
             { f -> BasicHealthFieldsCodec.parse(f)?.unit?.let { if (it == LengthUnit.MILES) "miles" else "km" } },
             { f, v -> BasicHealthFieldsCodec.withUnit(f, if (v == "miles") LengthUnit.MILES else LengthUnit.KM) }),
+        bool("auto_light", LightSettingsCodec.CODE, LightSettingsCodec.AUTO_LIGHT_BYTES,
+            LightSettingsCodec::autoLight, LightSettingsCodec::withAutoLight),
+        pick("light_duration", LightSettingsCodec.DURATIONS, LightSettingsCodec.CODE, LightSettingsCodec.DURATION_BYTES,
+            LightSettingsCodec::duration, LightSettingsCodec::withDuration),
         number("step_goal", StepGoalCodec.MIN_STEPS..StepGoalCodec.MAX_STEPS, StepGoalCodec.CODE, StepGoalCodec.BYTES,
             read = StepGoalCodec::parse, change = StepGoalCodec::withSteps),
         number("profile_height_cm", 100..250, ProfileCodec.CODE, ProfileCodec.BYTES,

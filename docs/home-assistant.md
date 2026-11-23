@@ -44,6 +44,8 @@ Several at once: `data: {settings: {watch_face: steps, step_goal: 9000}}`.
 | `night_start, night_end` | HH:MM |
 | `step_reminder` | true, false |
 | `length_unit` | km, miles |
+| `auto_light` | true, false (which bit value means on is not confirmed on the H5600) |
+| `light_duration` | short, long |
 | `step_goal` | 100 to 200000 |
 | `profile_height_cm` | 100 to 250 |
 | `profile_weight_kg` | 20 to 300 |
