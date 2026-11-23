@@ -37,8 +37,9 @@ class H5600HealthDecoderTest {
         steps: Int,
         energy: Int,
         stepsTail: ByteArray = byteArrayOf(0, 0),
+        utc: ByteArray = byteArrayOf(26, 10, 26, 22, 18),
     ): ByteArray =
-        byteArrayOf(0x00, 0x0F, 0x00, 0x00, 0x00, 26, 10, 26, 22, 18) +
+        byteArrayOf(0x00, 0x0F, 0x00, 0x00, 0x00) + utc +
             le32(0) + le16(steps) + stepsTail + le16(energy)
 
     /**
@@ -71,6 +72,20 @@ class H5600HealthDecoderTest {
         assertEquals(3, data.hourlyIntervals.size)
         assertEquals(1263, data.h5600?.energyKcal)
         assertTrue(data.h5600?.energyIsProvisional == true)
+    }
+
+    /** Owner screenshot 2026-11-23 17:53: hour 23 had 179 steps before 18:00, yesterday's late slots counted as today's. */
+    @Test
+    fun slotsOfThePreviousDayAreNotCountedInTodaysHours() {
+        val steps = frame(0x50, listOf(record(10), record(20), record(30), record(179)))
+        val energy = frame(0x51, listOf(record(100, 0), record(200, 0), record(300, 0), record(400, 0)))
+        // 04:13 UTC on 27 October = 00:13 in Toronto: slots at 00:13, 00:08, 00:03 and 23:58 of the day before
+        val head = header(steps = 60, energy = 1263, utc = byteArrayOf(26, 10, 27, 4, 13))
+        val data = H5600HealthDecoder.decode(notifications(head, steps, energy), mapOf(0x50 to 21, 0x51 to 21), zone)!!
+        assertEquals(LocalDateTime.of(2026, 10, 27, 0, 13), data.timestamp)
+        assertEquals(60, data.hourlyByHour[0])
+        assertEquals(null, data.hourlyByHour[23])
+        assertEquals(4, data.hourlyIntervals.size)
     }
 
     @Test

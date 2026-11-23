@@ -36,6 +36,22 @@ internal object H5600Session {
             }
         }
 
+    /**
+     * Lays a new transfer over the stored day (set by the app: [org.avmedia.gshockGoogleSync.history.TodayHours] with the
+     * stored hours). Runs off the main thread in [store]; a failure keeps the transfer as it came.
+     */
+    @Volatile
+    var dayMerger: (StepCounterData) -> StepCounterData = { it }
+
+    /** Stores a new transfer merged with the stored day, so the screen, Home Assistant and the webhooks get one full day. */
+    suspend fun store(fresh: StepCounterData): StepCounterData {
+        val merged = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching { dayMerger(fresh) }.getOrDefault(fresh)
+        }
+        data = merged
+        return merged
+    }
+
     fun clear() {
         data = null
     }

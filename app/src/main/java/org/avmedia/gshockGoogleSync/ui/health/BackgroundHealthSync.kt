@@ -68,7 +68,7 @@ class BackgroundHealthSync @Inject constructor(
     private suspend fun read(): Boolean {
         val data = withTimeoutOrNull(3.minutes) { api.getStepCount() } ?: return false
         if (data.h5600 == null) return false
-        H5600Session.data = data
+        H5600Session.store(data)
         return true
     }
 

@@ -63,6 +63,8 @@ class GShockApplication : Application() {
             java.io.File(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this), org.avmedia.gshockapi.io.H5600RawDump.CONNECTION_LOG)
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.onStored =
             { org.avmedia.gshockGoogleSync.history.HistoryStore.record(applicationContext, it) }
+        org.avmedia.gshockGoogleSync.ui.health.H5600Session.dayMerger =
+            { org.avmedia.gshockGoogleSync.history.HistoryStore.mergeDay(applicationContext, it) }
         ActivityProvider.initialize(this)
         eventHandler = MainEventHandler(
             context = this,
