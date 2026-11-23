@@ -59,7 +59,7 @@ fun HistoryChart(
         val tickSizes = tickTexts.map { measurer.measure(it, style).size }
         val unit = measurer.measure(axes.yUnit, style)
         val left = (tickSizes.maxOfOrNull { it.width } ?: 0) + 6f
-        val top = unit.size.height + 4f
+        val top = unit.size.height + 4f + (tickSizes.maxOfOrNull { it.height } ?: 0) / 2f
         val bottom = if (axes.xLabels.any { it != null }) unit.size.height + 4f else 0f
         val plotW = (size.width - left).coerceAtLeast(1f)
         val plotH = (size.height - top - bottom).coerceAtLeast(1f)
