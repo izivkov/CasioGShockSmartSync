@@ -26,9 +26,6 @@ class AppLogModel(private val read: () -> List<String> = AppLog::readLines) {
 
     /** The first [limit] lines that pass [filter] (null = all sources) and [showRaw]. */
     fun page(filter: LogSource?, showRaw: Boolean, limit: Int): List<ShownLine> {
-        // RED CHECK: the old screen: read and parse again per filter, every line, raw frames always
-        load()
-        if (parsed.isNotEmpty()) return parsed.filter { filter == null || it.line.source == filter }
         val out = ArrayList<ShownLine>(minOf(limit, parsed.size))
         for (l in parsed) {
             if (out.size >= limit) break
