@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync
 
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 import android.app.AlertDialog
 import android.content.Intent
 import android.provider.Settings
@@ -99,6 +101,7 @@ class MainEventHandler(
             context.getString(R.string.apierror_ensure_the_official_g_shock_app_is_not_running)
         }
         Timber.e("Session closed with an error: $message")
+        AppLog.failure(LogSource.App, "Session closed with an error")
         AppSnackbar(message)
     }
 

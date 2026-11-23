@@ -73,6 +73,12 @@ class H5600RawDump(
                 log.inputStream().use { it.copyTo(zip) }
                 zip.closeEntry()
             }
+            // The older half of the rolling app log.
+            File(dir, CONNECTION_LOG + ".1").takeIf { it.isFile }?.let { log ->
+                zip.putNextEntry(ZipEntry(CONNECTION_LOG + ".1"))
+                log.inputStream().use { it.copyTo(zip) }
+                zip.closeEntry()
+            }
         }
         return target
     }

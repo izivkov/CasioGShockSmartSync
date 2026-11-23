@@ -1,12 +1,10 @@
 package org.avmedia.gshockapi.casio
 
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.utils.Utils
-import timber.log.Timber
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 
 /** Link Loss is written as `00 level` to the all-features characteristic, never to the standard Link Loss characteristic. */
 fun linkLossFrame(level: Int): ByteArray = byteArrayOf(0x00, level.toByte())
@@ -44,32 +42,20 @@ object ConnectionKeepAlive {
     @Volatile var writer: WatchWriter = ConnectionWriter
 
     /** Where the events are also kept (a file in the health-log folder), null keeps them in memory only. */
-    @Volatile var logFile: File? = null
+    var logFile: File?
+        get() = AppLog.logFile
+        set(v) { AppLog.logFile = v }
 
-    @Volatile var clock: () -> Long = System::currentTimeMillis
+    var clock: () -> Long
+        get() = AppLog.clock
+        set(v) { AppLog.clock = v }
 
-    private val events = ArrayDeque<String>()
-    private const val KEEP_EVENTS = 300
+    fun recentEvents(): List<String> = AppLog.recentEvents()
 
-    fun recentEvents(): List<String> = synchronized(events) { events.toList() }
+    fun clearEvents() = AppLog.clear()
 
-    fun clearEvents() = synchronized(events) { events.clear() }
-
-    fun log(text: String) {
-        val line = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date(clock())) + " " + text
-        Timber.i("Connection: $line")
-        synchronized(events) {
-            events.addLast(line)
-            while (events.size > KEEP_EVENTS) events.removeFirst()
-        }
-        runCatching { logFile?.let { f -> f.parentFile?.mkdirs(); f.appendText(line + "\n"); trim(f) } }
-    }
-
-    private fun trim(f: File) {
-        if (f.length() > MAX_FILE_BYTES) f.writeText(f.readLines().takeLast(KEEP_EVENTS).joinToString("\n") + "\n")
-    }
-
-    private const val MAX_FILE_BYTES = 64 * 1024L
+    /** The watch's connection events go to the one app log, source Watch. */
+    fun log(text: String) = AppLog.log(LogSource.Watch, text)
 
     private fun values(data: String): List<Int> = runCatching { Utils.toIntArray(data) }.getOrDefault(emptyList())
 

@@ -9,18 +9,7 @@ import org.avmedia.gshockapi.io.H5600RawDump
 import timber.log.Timber
 import java.io.File
 
-/** "Share logs": always there, on any watch, with or without a finished transfer. */
-@androidx.compose.runtime.Composable
-fun ShareLogsButton(modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    org.avmedia.gshockGoogleSync.ui.common.AppButton(
-        text = androidx.compose.ui.res.stringResource(R.string.share_health_log),
-        onClick = { HealthLogShare.share(context) },
-        modifier = modifier,
-    )
-}
-
-/** Hands the raw bytes of the last LifeLog transfer to the Android share sheet, as a zip. Nothing is uploaded. */
+/** Hands the app log and the raw bytes of the last LifeLog transfer to the Android share sheet, as a zip (Settings > App log). Nothing is uploaded. */
 internal object HealthLogShare {
     fun dir(context: Context): File = File(context.filesDir, "health-log")
 

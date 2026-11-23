@@ -206,10 +206,14 @@ fun BottomNavigationBarWithPermissions(
                     onOpenNotifications = { navController.navigate(Screens.NotificationSettings.route) },
                     onOpenWorkouts = { navController.navigate(Screens.WorkoutSettings.route) },
                     onOpenTide = { navController.navigate(Screens.Tide.route) },
+                    onOpenAppLog = { navController.navigate(Screens.AppLog.route) },
                 )
             }
             composable(Screens.WatchFace.route) {
                 WatchFaceScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.AppLog.route) {
+                org.avmedia.gshockGoogleSync.ui.settings.AppLogScreen(onBack = { navController.popBackStack() })
             }
             composable(Screens.Tide.route) {
                 TideScreen(onBack = { navController.popBackStack() })

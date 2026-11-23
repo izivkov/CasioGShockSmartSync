@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.history
 
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +21,7 @@ object HistoryStore {
                 HistoryDb.get(context).dao().upsert(HistoryMapper.map(data))
             } catch (t: Throwable) {
                 Timber.w(t, "Saving the health history failed")
+                AppLog.failure(LogSource.Health, "Saving the health history failed", t)
             }
         }
     }

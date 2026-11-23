@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync
 
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -865,6 +867,7 @@ constructor(
                 sendSettings(context, toSend)
             }.onFailure {
                 Timber.e(it, "Failed to send settings to watch")
+                AppLog.failure(LogSource.Watch, "Writing settings to the watch failed", it)
             }
         }
 
@@ -880,6 +883,7 @@ constructor(
                 true
             }.onFailure {
                 Timber.e(it, "Failed to send settings to watch")
+                AppLog.failure(LogSource.Watch, "Writing settings to the watch failed", it)
             }.getOrDefault(false)
         }
 
@@ -960,6 +964,7 @@ constructor(
 
             }.onFailure {
                 Timber.e(it, "Failed to set settings to default")
+                AppLog.failure(LogSource.Watch, "Writing the default settings failed", it)
                 AppSnackbar("Failed to set defaults")
             }
         }

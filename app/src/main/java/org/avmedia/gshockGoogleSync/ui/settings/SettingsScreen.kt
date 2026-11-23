@@ -41,6 +41,7 @@ fun SettingsScreen(
     onOpenNotifications: () -> Unit = {},
     onOpenWorkouts: () -> Unit = {},
     onOpenTide: () -> Unit = {},
+    onOpenAppLog: () -> Unit = {},
 ) {
     GShockSmartSyncTheme {
         Surface(
@@ -57,7 +58,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                 ) {
                     SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
-                    org.avmedia.gshockGoogleSync.ui.health.ShareLogsButton(Modifier.fillMaxWidth().padding(16.dp))
+                    org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "App log", value = ">", onClick = onOpenAppLog)
                 }
                 BottomRow(modifier = Modifier.fillMaxWidth())
             }

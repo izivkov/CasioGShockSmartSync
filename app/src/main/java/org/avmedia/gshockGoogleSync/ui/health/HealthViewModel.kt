@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -160,7 +162,7 @@ class HealthViewModel @Inject constructor(
             val stored = runCatching {
                 val dao = org.avmedia.gshockGoogleSync.history.HistoryDb.get(appContext).dao()
                 org.avmedia.gshockGoogleSync.history.StoredHealth.stepData(dao.allDays()) { dao.hoursOf(it) }
-            }.onFailure { Timber.w(it, "Health: reading the stored history failed") }.getOrNull() ?: return@launch
+            }.onFailure { Timber.w(it, "Health: reading the stored history failed"); AppLog.failure(LogSource.Health, "Reading the stored history failed", it) }.getOrNull() ?: return@launch
             _state.update { current ->
                 if (current.stepCounterData.h5600 != null) current
                 else current.copy(stepCounterData = stored, lifeLogLoading = false).withStepMetrics(stored).withWatchGoal(stored)
@@ -294,6 +296,7 @@ class HealthViewModel @Inject constructor(
                     val stepData = withTimeoutOrNull(timeout) { fetchStepCounter() }
                     if (stepData == null) {
                         Timber.w("Health: step fetch returned nothing (timed out or cancelled)")
+                        AppLog.failure(LogSource.Health, "LifeLog step fetch returned nothing (timed out or cancelled)")
                         _state.update { it.copy(lifeLogLoading = false) }
                         return@runCatching
                     }
@@ -316,6 +319,7 @@ class HealthViewModel @Inject constructor(
                     }
                 }.onFailure {
                     Timber.w(it, "Health: step refresh failed")
+                    AppLog.failure(LogSource.Health, "LifeLog step refresh failed", it)
                     _state.update { current -> current.copy(lifeLogLoading = false) }
                 }
             } while (stepFetchPending)

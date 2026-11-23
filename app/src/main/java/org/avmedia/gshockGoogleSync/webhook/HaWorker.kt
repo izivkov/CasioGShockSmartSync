@@ -25,7 +25,7 @@ class HaWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
             return Result.success()
         }
         val attempt = runAttemptCount + 1
-        val result = withContext(Dispatchers.IO) { HaClient(HaOkHttpTransport, store).send(job) }
+        val result = withContext(Dispatchers.IO) { HaClient(RetryingHaTransport(HaOkHttpTransport), store).send(job) }
         val retry = result is HaResult.Retry && attempt < WebhookPolicy.MAX_ATTEMPTS
         // The message holds no URL and no token.
         Timber.d("Home Assistant attempt $attempt: ${result.message}")

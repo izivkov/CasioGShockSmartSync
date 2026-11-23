@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.history
 
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 import android.content.Context
 import org.avmedia.gshockapi.model.WorkoutSession
 import timber.log.Timber
@@ -23,6 +25,7 @@ object WorkoutStore {
             true
         } catch (t: Throwable) {
             Timber.w(t, "Saving the workout failed")
+            AppLog.failure(LogSource.Health, "Saving the workout failed", t)
             false
         }
         if (ok) {

@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.webhook
 
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.OffsetDateTime
@@ -54,7 +56,7 @@ class WebhookDispatcher @Inject constructor(
     /** One Home Assistant sensor push on request of HA. Uses the values already known: no LifeLog read is started. */
     fun pushSensorsNow() {
         if (!WebhookStorage.toggles(context).isOn(ServiceToggles.Service.HOME_ASSISTANT)) return
-        scope.launch { runCatching { pushToHomeAssistant(WebhookTrigger.SYNC) }.onFailure { Timber.e(it, "Home Assistant push failed") } }
+        scope.launch { runCatching { pushToHomeAssistant(WebhookTrigger.SYNC) }.onFailure { Timber.e(it, "Home Assistant push failed"); AppLog.failure(LogSource.HomeAssistant, "Push failed", it) } }
     }
 
     fun fire(trigger: WebhookTrigger) {
@@ -74,7 +76,7 @@ class WebhookDispatcher @Inject constructor(
                         WebhookStorage.putPending(context, hook.id, rendered.text)
                         WebhookWorker.enqueue(context, hook.id)
                     }
-            }.onFailure { Timber.e(it, "Webhook dispatch failed") }
+            }.onFailure { Timber.e(it, "Webhook dispatch failed"); AppLog.failure(LogSource.Webhook, "Dispatch failed", it) }
         }
     }
 
@@ -116,7 +118,7 @@ class WebhookDispatcher @Inject constructor(
     suspend fun test(hook: Webhook): TestReport {
         val rendered = render(hook, WebhookTrigger.TEST)
         val outcome = kotlinx.coroutines.withContext(Dispatchers.IO) {
-            WebhookSender.send(hook, if (hook.method.equals("GET", true)) "" else rendered.text)
+            WebhookSender.send(hook, if (hook.method.equals("GET", true)) "" else rendered.text, retries = false)
         }
         if (rendered.failed.isNotEmpty()) {
             WebhookDiagnostics.logWarn("Variables failed: ${rendered.failed.joinToString()}")
