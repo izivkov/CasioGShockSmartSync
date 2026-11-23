@@ -19,6 +19,8 @@ class HaClient(
     private val transport: HaTransport,
     private val store: HaStore,
     private val sensors: List<HaSensor> = HaSensors.ALL,
+    /** False until the owner confirmed the watch's name ([HaStore.confirmName]); nothing is registered before. */
+    private val mayRegister: (deviceId: String) -> Boolean = { true },
 ) {
     /** Saves URL, token and the typed name and model, after GET /api/ shows that HA accepts them. Saves nothing on an error. */
     fun saveSettings(baseUrl: String, token: String, deviceName: String = "", model: String = ""): HaResult {
@@ -36,6 +38,7 @@ class HaClient(
         val cfg = store.load() ?: return@withWatchLock HaResult.Failed("Home Assistant is not set up")
         // Read inside the lock: a job that ran before us has registered the watch already.
         if (store.loadRegistration(deviceId) != null) return@withWatchLock HaResult.Ok("Already registered")
+        if (!mayRegister(deviceId)) return@withWatchLock HaResult.Failed(NAME_FIRST)
         when (val r = register(cfg, registrationBody)) {
             is Reg.Done -> {
                 store.saveRegistration(deviceId, HaRegistration(r.webhookId, registrationBody))
@@ -180,6 +183,8 @@ class HaClient(
             .getOrDefault("the watch")
 
     companion object {
+        /** Shown when a watch would register before its name was confirmed on the Home Assistant screen. */
+        const val NAME_FIRST = "Confirm the watch name on the Home Assistant screen first; nothing was registered"
         // One lock per watch for the whole process: HaWorker makes a new HaClient per run, and a replaced
         // worker's blocking HTTP call goes on after WorkManager cancelled it. Without this, jobs that overlap
         // each register the watch, and every new registration makes HA drop the sensors of the old one.

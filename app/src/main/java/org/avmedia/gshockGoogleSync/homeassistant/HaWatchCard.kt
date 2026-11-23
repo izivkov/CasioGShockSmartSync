@@ -25,10 +25,19 @@ internal fun HaWatchCard(
     changed: Boolean,
     onSave: () -> Unit,
     onRaw: (Boolean) -> Unit = {},
+    onConfirm: () -> Unit = {},
 ) {
     val context = LocalContext.current
     HaCard("This watch", R.drawable.ic_mdi_watch) {
-        OutlinedTextField(
+        if (!watch.registered) {
+            // The first registration fixes the name for good (notify action and entity ids): ask before it.
+            OutlinedTextField(
+                value = deviceName, onValueChange = onName, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                label = { Text("Watch name in Home Assistant") },
+                supportingText = { Text("Use the full model, for example GBX-H5600KI-5ER") },
+            )
+            HaNote("Sets the device, sensor and notify names in Home Assistant. It cannot be changed later.")
+        } else OutlinedTextField(
             value = deviceName, onValueChange = onName, singleLine = true, modifier = Modifier.fillMaxWidth(),
             label = { Text("Name in Home Assistant (empty: the watch name)") },
         )
@@ -40,9 +49,14 @@ internal fun HaWatchCard(
             HaNote("Set up the connection first.")
             return@HaCard
         }
-        if (changed) AppButton("Save name and model", onSave, modifier = Modifier.fillMaxWidth())
-        if (!watch.registered) HaNote("Not registered yet. Connect your watch and it appears in Home Assistant.")
-        else {
+        if (!watch.registered) {
+            when {
+                watch.suggestedName.isBlank() && watch.confirmedName == null -> HaNote("Connect your watch to name it and register it.")
+                watch.confirmedName == deviceName.trim() -> HaNote("Name confirmed: ${watch.confirmedName}. The watch registers when it is connected.")
+                else -> AppButton("Confirm name and register", onConfirm, enabled = deviceName.isNotBlank(), modifier = Modifier.fillMaxWidth())
+            }
+        } else if (changed) AppButton("Save name and model", onSave, modifier = Modifier.fillMaxWidth())
+        if (watch.registered) {
             HaNote("Registered: yes")
             HaNote("Firmware: " + (watch.firmware ?: "not known yet"))
         }

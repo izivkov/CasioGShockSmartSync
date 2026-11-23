@@ -95,11 +95,29 @@ class HaViewModel @Inject constructor(
                 lookingUpDevice = old?.watch?.lookingUpDevice ?: false,
                 notificationsSupported = store.notificationsSupported() != false,
                 rawUntil = rawSwitch.onUntilText(),
+                suggestedName = connectedId()?.let { HaPayloads.defaultModel(org.avmedia.gshockapi.WatchInfo.name) }.orEmpty(),
+                confirmedName = id?.let { store.confirmedName(it) },
             ),
             sent = HaSentUi(HaSentView.groups(sent, store.groupsOn()), sending = store.getPending() != null, failed = failed),
             actions = (old?.actions ?: HaActionsUi()).copy(chosen = store.loadAction(), lastRun = store.lastActionResult().orEmpty()),
             dash = old?.dash ?: HaDashUi(),
         )
+    }
+
+    /** The connected watch's id, null when no watch is connected. */
+    private fun connectedId(): String? {
+        val address = runCatching { org.avmedia.gshockapi.WatchInfo.getAddress() }.getOrDefault("")
+        return if (address.isNotBlank()) HaPayloads.deviceId(address) else null
+    }
+
+    /** The owner confirmed the name before the first registration: saved, then the watch registers with it at once. */
+    fun confirmName(name: String, model: String) {
+        val id = connectedId() ?: return
+        if (store.loadRegistration(id) != null) return
+        if (!store.confirmName(id, name)) return
+        store.load()?.let { store.save(it.copy(model = model.trim())) }
+        update { snapshot(it) }
+        HaPushRouter.updateSensorsHook?.invoke()
     }
 
     private fun watchId(): String? {

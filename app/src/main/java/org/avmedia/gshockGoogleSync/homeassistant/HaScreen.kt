@@ -35,6 +35,7 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
             onRawSwitch = viewModel::setRawSwitch,
             onCreateDashboard = viewModel::createDashboard,
             onCopyYaml = { viewModel.copyYaml(context) },
+            onConfirmName = viewModel::confirmName,
         ),
     )
 }
@@ -44,7 +45,10 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
 internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen: Boolean = false) {
     var url by remember { mutableStateOf(ui.form.baseUrl) }
     var token by remember { mutableStateOf(ui.form.token) }
-    var deviceName by remember { mutableStateOf(ui.form.deviceName) }
+    // Before the first registration the name field starts with the watch's own name (without "CASIO ").
+    var deviceName by remember {
+        mutableStateOf(if (ui.watch.registered) ui.form.deviceName else ui.watch.confirmedName ?: ui.form.deviceName.ifBlank { ui.watch.suggestedName })
+    }
     var model by remember { mutableStateOf(ui.form.model) }
     val save = { events.onSave(url, token, deviceName, model) }
 
@@ -58,6 +62,7 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen
             HaWatchCard(
                 ui.saved, ui.watch, deviceName, model, { deviceName = it }, { model = it },
                 changed = deviceName != ui.form.deviceName || model != ui.form.model, onSave = save, onRaw = events.onRawSwitch,
+                onConfirm = { events.onConfirmName(deviceName, model) },
             )
             HaSentCard(ui.sent, ui.saved, events.onGroup)
             HaButtonCard(ui.saved, ui.actions, events.onChoose, events.onRefreshActions, pickerOpen)

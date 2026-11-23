@@ -69,6 +69,9 @@ class HaScreenshotTest : ScreenshotTest() {
     @Test fun errorDark() = snap("ha_error", true) { Screen(failing) }
     @Test fun emptyLight() = snap("ha_empty", false) { Screen(emptyWatch.copy(find = HaFindUi.Done(emptyList()))) }
     @Test fun emptyDark() = snap("ha_empty", true) { Screen(emptyWatch.copy(find = HaFindUi.Done(emptyList()))) }
+    /** Before the first registration: the name field filled with the watch's name, the confirm button. */
+    private val naming = emptyWatch.copy(form = configured.copy(deviceName = "", model = ""), watch = emptyWatch.watch.copy(suggestedName = "GBX-H5600"))
+    @Test fun nameFirstLight() = snap("ha_name_first", false) { Screen(naming) }
     @Test fun loadingLight() = snap("ha_loading", false) { Screen(loading) }
     @Test fun loadingDark() = snap("ha_loading", true) { Screen(loading) }
     @Test fun pickerOpenLight() = snap("ha_picker", false) { Screen(working.copy(actions = working.actions.copy(chosen = null)), picker = true) }

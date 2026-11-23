@@ -29,6 +29,10 @@ data class HaWatchUi(
     val notificationsSupported: Boolean = true,
     /** "HH:mm" the raw settings switch turns itself off, null while off. */
     val rawUntil: String? = null,
+    /** The watch's name without "CASIO ", offered before the first registration; empty when no watch is connected. */
+    val suggestedName: String = "",
+    /** The name confirmed for this watch before its first registration, null while not confirmed. */
+    val confirmedName: String? = null,
 )
 
 data class HaGroupUi(val group: HaGroup, val on: Boolean, val rows: List<Pair<String, String>>)
@@ -69,4 +73,6 @@ class HaEvents(
     val onRawSwitch: (Boolean) -> Unit = {},
     val onCreateDashboard: () -> Unit = {},
     val onCopyYaml: () -> Unit = {},
+    /** Confirms the name (and model) the watch registers with; only before its first registration. */
+    val onConfirmName: (name: String, model: String) -> Unit = { _, _ -> },
 )

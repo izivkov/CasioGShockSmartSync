@@ -64,12 +64,26 @@ class HaStore(private val store: KeyValueStore) {
         if (deviceId !in ids) store.put(KEY_IDS, gson.toJson(ids + deviceId))
     }
 
+    /**
+     * The name the owner confirmed for the watch [deviceId] before its first registration. It becomes the HA device
+     * name, the sensor name prefix, the entity ids and the notify action, and is never changed after registering.
+     */
+    fun confirmedName(deviceId: String): String? = store.get(KEY_NAME + deviceId)?.takeIf { it.isNotBlank() }
+
+    /** False for a blank name. A registered watch keeps its name: confirming again changes nothing in HA. */
+    fun confirmName(deviceId: String, name: String): Boolean {
+        val n = name.trim()
+        if (n.isEmpty() || deviceId.isBlank()) return false
+        store.put(KEY_NAME + deviceId, n)
+        return true
+    }
+
     fun registeredIds(): List<String> =
         runCatching { gson.fromJson(store.get(KEY_IDS), Array<String>::class.java)?.toList() }.getOrNull().orEmpty()
 
     /** Forgets everything: the setup and every registration. The devices stay in HA until deleted there. */
     fun forgetAll() {
-        registeredIds().forEach { store.delete(KEY_REG + it) }
+        registeredIds().forEach { store.delete(KEY_REG + it); store.delete(KEY_NAME + it) }
         store.delete(KEY_IDS)
         store.delete(KEY_CONFIG)
         store.delete(KEY_PENDING)
@@ -148,6 +162,7 @@ class HaStore(private val store: KeyValueStore) {
         const val KEY_GROUP = "ha.group."
         const val KEY_CONFIG = "ha.config"
         const val KEY_REG = "ha.reg."
+        const val KEY_NAME = "ha.name."
         const val KEY_IDS = "ha.regs"
         const val KEY_PENDING = "ha.pending"
         const val KEY_RESULT = "ha.result"

@@ -39,6 +39,17 @@ object HaJobs {
         if (trigger == HaTrigger.WATCH_ACTION) mapOf("trigger" to trigger.eventName, "time" to now.toString(), "watch" to watchName)
         else null
 
+    /**
+     * The registration body for the watch at [address], with the name the owner confirmed. Null for a watch that is
+     * not registered yet and has no confirmed name: nothing may register before the owner confirmed it.
+     */
+    fun registration(store: HaStore, address: String, watchName: String, cfg: HaConfig, appVersion: String, osVersion: String): String? {
+        val id = HaPayloads.deviceId(address)
+        val confirmed = store.confirmedName(id)
+        if (confirmed == null && store.loadRegistration(id) == null) return null
+        return HaPayloads.registrationFor(address, watchName, cfg.copy(deviceName = confirmed ?: cfg.deviceName), appVersion, osVersion)
+    }
+
     /** Null when there is nothing to send (no sensor values and no event). */
     fun job(
         trigger: HaTrigger,
@@ -118,9 +129,12 @@ class HaSync @Inject constructor(
         val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
         val sensors = HaGroups.sensors(store.groupsOn())
         val values = registry.resolve(ctx, HaSensors.variablesOf(sensors))
-        val registration = HaPayloads.registrationFor(
-            address, watchName, cfg, org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME, android.os.Build.VERSION.RELEASE,
-        )
+        val registration = HaJobs.registration(
+            store, address, watchName, cfg, org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME, android.os.Build.VERSION.RELEASE,
+        ) ?: run {
+            store.saveResult(HaClient.NAME_FIRST, false)
+            return
+        }
         val job = HaJobs.job(
             trigger, now, watchName, HaSensors.states(values, sensors), HaSensors.attributes(values, sensors),
             HaPayloads.deviceId(address), registration,
