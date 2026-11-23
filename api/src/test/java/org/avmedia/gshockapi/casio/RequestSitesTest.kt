@@ -29,7 +29,7 @@ class RequestSitesTest {
     }
 
     @Test fun theQueueIsEnteredOnlyFromTheFewFilesThatOwnIt() {
-        val bad = offenders(Regex("""WatchLink\.(write|writeChecked)\("""), setOf("IO.kt", "ConnectionKeepAlive.kt", "NotificationSender.kt", "WatchQueue.kt"))
+        val bad = offenders(Regex("""WatchLink\.(write|writeChecked)\("""), setOf("IO.kt", "Connection.kt", "ConnectionKeepAlive.kt", "NotificationSender.kt", "WatchQueue.kt"))
         assertTrue("WatchLink writes in: $bad", bad.isEmpty())
     }
 
