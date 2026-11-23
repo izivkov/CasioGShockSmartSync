@@ -10,5 +10,5 @@ object WorkoutReadTrigger {
 
     /** [flag] = `0x28` index 6 (null when unknown), [lastCheckMs] = end of the last finished download (null = none yet). */
     fun shouldDownload(flag: Int?, lastCheckMs: Long?, nowMs: Long): Boolean =
-        lastCheckMs == null || nowMs < lastCheckMs || nowMs - lastCheckMs >= CHECK_EVERY_MS
+        flag == 1 || flag == 2 || lastCheckMs == null || nowMs < lastCheckMs || nowMs - lastCheckMs >= CHECK_EVERY_MS
 }

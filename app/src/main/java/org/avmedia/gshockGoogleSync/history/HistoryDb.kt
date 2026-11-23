@@ -33,6 +33,7 @@ abstract class HistoryDao {
         batch.hours.forEach { putHour(it.over(hourRow(it.date, it.hour))) }
         batch.nights.forEach { putNight(it.over(night(it.date))) }
         // A heart rate slot is a reading of its own: the newest read of the same slot replaces it, other slots stay.
+        if (batch.hrSlots.isNotEmpty()) putHrSlots(batch.hrSlots)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE) abstract fun putHrSlots(rows: List<HrSlotRow>)
@@ -64,7 +65,7 @@ abstract class HistoryDao {
     }
 
     @Query("SELECT * FROM workout ORDER BY startMs DESC") abstract fun allWorkouts(): List<WorkoutRow>
-    @Query("SELECT * FROM workout ORDER BY startMs ASC LIMIT 1") abstract fun newestWorkout(): WorkoutRow?
+    @Query("SELECT * FROM workout ORDER BY startMs DESC LIMIT 1") abstract fun newestWorkout(): WorkoutRow?
     @Query("SELECT * FROM workout ORDER BY startMs DESC") abstract fun watchWorkouts(): Flow<List<WorkoutRow>>
     @Query("SELECT * FROM workout_lap ORDER BY startMs, sport, idx") abstract fun allLaps(): List<WorkoutLapRow>
     @Query("SELECT * FROM workout_sample ORDER BY startMs, sport, idx") abstract fun allSamples(): List<WorkoutSampleRow>

@@ -54,7 +54,7 @@ object SleepVariables {
         val body = h?.body
         val spo2 = body?.spo2?.lastOrNull()
         // Today's value from the current values (0x65) when the watch has one, else the newest daily record (0x5B).
-        val cardio = body?.cardio ?: body?.cardioNow
+        val cardio = body?.cardioNow ?: body?.cardio
         val stairs = body?.stairs?.lastOrNull()
         return linkedMapOf(
             "health.sleep_date" to night?.date?.toString(),

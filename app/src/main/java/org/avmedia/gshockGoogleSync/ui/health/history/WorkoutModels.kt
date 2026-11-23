@@ -44,7 +44,7 @@ internal object WorkoutText {
 
     /** One line of the list: duration, distance, energy, average and highest heart rate. Gaps are left out, never shown as 0. */
     fun line(w: WorkoutRow): String = listOfNotNull(
-        w.totalSec?.let { duration(it) }, w.distance?.let { "%.2f km (unconfirmed)".format(Locale.US, it) },
+        w.totalSec?.let { duration(it) }, w.distance?.let { "%.2f km (unconfirmed)".format(Locale.US, it) }, w.kcal?.let { "$it kcal" },
         w.hrAvg?.let { "avg $it bpm" }, w.hrMax?.let { "max $it bpm" },
     ).joinToString(", ").ifEmpty { "no summary" }
 
