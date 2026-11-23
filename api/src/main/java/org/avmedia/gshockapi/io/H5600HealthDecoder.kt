@@ -131,8 +131,12 @@ object H5600HealthDecoder {
         for (index in 0 until slotCount) {
             val slotSteps = stepRecords[index].first
             if (slotSteps > MAX_STEPS_PER_SLOT) continue
-            val slotHour = utcTime.minusMinutes(SLOT_MINUTES * index).atZoneSameInstant(zone).hour
-            hourly[slotHour] = (hourly[slotHour] ?: 0) + slotSteps
+            val slotTime = utcTime.minusMinutes(SLOT_MINUTES * index).atZoneSameInstant(zone).toLocalDateTime()
+            // Only the slots of the read's own day go into its hours: yesterday's 23:00 slot is not today's hour 23
+            // (owner screenshot 2026-11-23 17:53: hour 23 = 179 before 18:00).
+            if (slotTime.toLocalDate() == localTime.toLocalDate()) {
+                hourly[slotTime.hour] = (hourly[slotTime.hour] ?: 0) + slotSteps
+            }
             intervals += ActivityPeriod(index = index, steps = slotSteps, intensity = IntArray(0))
         }
         if (slotCount < MIN_SLOTS_FOR_FULL_DAY) warnings += "only recent slots were transferred; hourly values are partial"

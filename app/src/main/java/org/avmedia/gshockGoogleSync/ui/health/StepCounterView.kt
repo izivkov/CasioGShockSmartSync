@@ -152,11 +152,7 @@ fun StepCounterView(
 }
 
 /** DW-H5600: the 24 bars of the day, null = no data (an empty slot, not a 0 bar). Always 24 slots, so one hour is one narrow bar. */
-internal fun dwHourlySlots(hourlySteps: List<Int?>): List<Float?> { // RED CHECK: old range, first to last hour with steps
-    val active = hourlySteps.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }
-    if (active.isEmpty()) return emptyList()
-    return (active.first()..active.last()).map { (hourlySteps.getOrNull(it) ?: 0).toFloat() }
-}
+internal fun dwHourlySlots(hourlySteps: List<Int?>): List<Float?> = List(24) { h -> hourlySteps.getOrNull(h)?.toFloat() }
 
 /**
  * DW-H5600: the shared history chart over the fixed 24 hours, x labels every 6 h, a y axis, no value label per bar. Before, the

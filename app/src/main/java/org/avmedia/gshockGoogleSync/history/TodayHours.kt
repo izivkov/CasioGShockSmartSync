@@ -12,7 +12,6 @@ import org.avmedia.gshockapi.model.StepCounterData
 object TodayHours {
     /** 24 entries for [day]: stored hours of that day, then the newest transfer (the larger value wins), nothing after [now]. */
     fun hours(newest: List<Int?>, stored: List<HourRow>, day: LocalDate, now: LocalDateTime): List<Int?> {
-        if (RED) return List(HOURS) { newest.getOrNull(it) }
         val out = MutableList<Int?>(HOURS) { null }
         stored.filter { it.date == day.toString() && it.hour in 0 until HOURS }.forEach { out[it.hour] = it.steps }
         newest.take(HOURS).forEachIndexed { h, s -> if (s != null) out[h] = out[h]?.let { maxOf(it, s) } ?: s }
@@ -34,5 +33,4 @@ object TodayHours {
     }
 
     private const val HOURS = 24
-    private const val RED = true // RED CHECK: the old behaviour (newest transfer only)
 }

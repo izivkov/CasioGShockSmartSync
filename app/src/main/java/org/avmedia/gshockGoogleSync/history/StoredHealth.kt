@@ -22,8 +22,7 @@ object StoredHealth {
     ): StepCounterData? {
         val day = days.maxByOrNull { it.date } ?: return null
         val date = runCatching { LocalDate.parse(day.date) }.getOrNull() ?: return null
-        val byHour = MutableList<Int?>(24) { null }
-        hoursOfDay(day.date).forEach { if (it.hour in 0..23) byHour[it.hour] = it.steps } // RED CHECK: old
+        val byHour = TodayHours.hours(emptyList(), hoursOfDay(day.date), date, now)
         val hr = if (day.hrRest != null || day.hrMin != null || day.hrMax != null) HeartRateSummary(day.hrMax, day.hrMin, day.hrRest) else null
         val activity = if (day.walkSec != null || day.runSec != null || day.stillSec != null || day.activeMin != null) {
             ActivitySeconds(
@@ -31,13 +30,13 @@ object StoredHealth {
                 stillSeconds = day.stillSec ?: 0, activeSeconds = (day.activeMin ?: 0) * 60,
             )
         } else null
-        val at = date.atStartOfDay() // RED CHECK: old
+        val at = last?.at?.takeIf { it.toLocalDate() == date } ?: date.atStartOfDay()
         return StepCounterData(
             timestamp = at,
             dayOfWeek = date.dayOfWeek.value, month = date.monthValue, dayOfMonth = date.dayOfMonth,
             hourlySteps = byHour, dailyHistory = emptyList(), currentDaySteps = day.steps, distanceMeters = day.distanceM,
             hourlyByHour = byHour,
-            h5600 = H5600HealthData(energyKcal = day.kcal, heartRate = hr, activity = activity, stepGoal = null) // RED CHECK: old,
+            h5600 = H5600HealthData(energyKcal = day.kcal, heartRate = hr, activity = activity, stepGoal = last?.stepGoal),
         )
     }
 

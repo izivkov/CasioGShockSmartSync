@@ -42,7 +42,7 @@ object HealthVariables {
         "health.lifelog_pending" to "True when the watch still has LifeLog data it has not transferred",
         "health.slot_minutes" to "Length of one entry of health.slots, minutes",
         "health.slots" to "Steps per 5-minute slot, newest first (entry i ends i * 5 minutes before health.recorded_at); null = slot skipped as implausible",
-        "health.steps_by_hour" to "Steps per hour of the day (24 entries, null = no data; partial when only recent slots were transferred)",
+        "health.steps_by_hour" to "Steps per hour of today (24 entries: stored hours of the day merged with the newest transfer; null = no data or after now)",
     ) + SleepVariables.DESCRIPTIONS
 
     val NAMES: List<String> = DESCRIPTIONS.keys.toList()
