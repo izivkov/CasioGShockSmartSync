@@ -148,6 +148,9 @@ data object WatchInfo {
     val hasExerciseProfile: Boolean
         @RequiresApi(Build.VERSION_CODES.O)
         get() = getState().info.hasExerciseProfile
+    val hasScratchpad: Boolean
+        @RequiresApi(Build.VERSION_CODES.O)
+        get() = getState().info.hasScratchpad
     val hasExcersiseProfile: Boolean
         @RequiresApi(Build.VERSION_CODES.O)
         get() = hasExerciseProfile
@@ -187,6 +190,7 @@ data object WatchInfo {
         GW_BX5600,
         MTG_B1000,
         MTG_B3000,
+        OCW_S400,
         GENERIC,
     }
 
@@ -227,6 +231,9 @@ data object WatchInfo {
         val hasHourlyChime: Boolean = true,
         val hasLongTimerKey: Boolean = false,
         val hasExerciseProfile: Boolean = false,
+        // The 10-byte user area of app information (0x22) is used as a scratchpad.
+        // Disable for watches where 0x22 holds data owned by the official app.
+        val hasScratchpad: Boolean = true,
         val settingsSize: Int = 17,
         val protocol: WatchProtocol = StandardProtocol,
     )
@@ -406,6 +413,24 @@ data object WatchInfo {
                 findButtonUserDefined = true,
                 hasPowerSavingMode = false,
             ),
+            ModelInfo(
+                // Oceanus analog (upstream GShockAPI). Writing the 0x22 scratchpad makes the official app forget the watch.
+                model = WatchModel.OCW_S400,
+                alarmCount = 0,
+                hasAutoLight = false,
+                hasReminders = false,
+                weekLanguageSupported = false,
+                worldCities = false,
+                hasWorldCities = false,
+                hasHomeTime = false,
+                batteryLevelLowerLimit = 14,
+                batteryLevelUpperLimit = 20,
+                hasPowerSavingMode = false,
+                hasDateFormat = false,
+                hasTimeFormat = false,
+                hasHourlyChime = false,
+                hasScratchpad = false,
+            ),
             ModelInfo(model = WatchModel.GENERIC),
         )
 
@@ -525,7 +550,7 @@ data object WatchInfo {
             // Module 5672: MTG-B3000
             put("MTG-B3000", WatchModel.MTG_B3000)
             // Module 5701: OCW-S7000
-            put("OCW-S7000", WatchModel.GENERIC)
+            put("OCW-S7000", WatchModel.OCW_S400)
             // Module 5713: GWG-B1000
             put("GWG-B1000", WatchModel.GW)
             // Module 5728: OCW-S400

@@ -4,6 +4,7 @@ import CachedIO
 import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CompletableDeferred
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.utils.Utils
 import org.avmedia.gshockapi.utils.Utils.hexToBytes
@@ -176,8 +177,9 @@ object AppInfoIO {
         // Convert received data to bytes
         lastReceivedData = Utils.toCompactString(data).hexToBytes()
 
-        // Use pure function to check if reinitialization is needed
-        if (AppInfoIOFunctional.needsReinit(lastReceivedData)) {
+        // Use pure function to check if reinitialization is needed.
+        // Never write app information on watches whose 0x22 is not used as a scratchpad.
+        if (WatchInfo.hasScratchpad && AppInfoIOFunctional.needsReinit(lastReceivedData)) {
             initScratchPad()
         }
 

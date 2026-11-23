@@ -14,6 +14,7 @@ import org.avmedia.gshockapi.ble.GShockPairingManager
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.MessageDispatcher
 import org.avmedia.gshockapi.io.AppInfoIO
+import org.avmedia.gshockapi.io.AppInfoIOFunctional
 import org.avmedia.gshockapi.io.AppNotificationIO
 import org.avmedia.gshockapi.io.ButtonPressedIO
 import org.avmedia.gshockapi.io.DstForWorldCitiesIO
@@ -451,6 +452,10 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      * @param startIndex The starting index in the scratchpad.
      */
     override suspend fun setScratchpadData(data: ByteArray) {
+        if (!WatchInfo.hasScratchpad) {
+            Timber.i("setScratchpadData: ${WatchInfo.model} has no scratchpad; not written")
+            return
+        }
         AppInfoIO.setUserData(data)
     }
 
@@ -460,6 +465,9 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      * @return The retrieved byte array.
      */
     override suspend fun getScratchpadData(): ByteArray {
+        if (!WatchInfo.hasScratchpad) {
+            return ByteArray(AppInfoIOFunctional.BUFFER_SIZE - AppInfoIOFunctional.USER_DATA_START_INDEX)
+        }
         AppInfoIO.request()
         return AppInfoIO.getUserData()
     }
@@ -470,7 +478,7 @@ class GShockAPI(private val context: Context) : IGShockAPI {
      * @return true if scratchpad was reset.
      */
     override fun isScratchpadReset(): Boolean {
-        return AppInfoIO.wasScratchpadReset
+        return !WatchInfo.hasScratchpad || AppInfoIO.wasScratchpadReset
     }
 
     /**
