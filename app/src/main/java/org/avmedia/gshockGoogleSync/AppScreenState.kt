@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync
 
+import org.avmedia.gshockGoogleSync.session.BackgroundConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -106,7 +107,9 @@ class AppScreenState @Inject constructor(
                 SessionPhase.Disconnected -> AppNavigationState(AppScreen.INITIAL)
 
                 // The pre-connection screen shows the connection progress.
-                SessionPhase.Connecting -> AppNavigationState(AppScreen.PRE_CONNECTION)
+                SessionPhase.Connecting -> AppNavigationState(
+                    if (BackgroundConnection.active) AppScreen.INITIAL else AppScreen.PRE_CONNECTION
+                )
 
                 is SessionPhase.Ready -> AppNavigationState(
                     when {
@@ -123,14 +126,18 @@ class AppScreenState @Inject constructor(
 
                 // A connection that ended normally returns to the start screen, which re-checks for
                 // paired watches. A failed attempt or an error stays on the pre-connection screen.
-                is SessionPhase.Closed -> AppNavigationState(
-                    screen = if (!phase.isError && session.button != null) {
-                        AppScreen.INITIAL
-                    } else {
-                        AppScreen.PRE_CONNECTION
-                    },
-                    errorMessage = phase.reason.takeIf { phase.isError && it.isNotBlank() }
-                )
+                is SessionPhase.Closed -> when {
+                    // A background connection never changes the screen, and its refusals are not errors
+                    BackgroundConnection.active -> AppNavigationState(AppScreen.INITIAL)
+                    else -> AppNavigationState(
+                        screen = if (!phase.isError && session.button != null) {
+                            AppScreen.INITIAL
+                        } else {
+                            AppScreen.PRE_CONNECTION
+                        },
+                        errorMessage = phase.reason.takeIf { phase.isError && it.isNotBlank() }
+                    )
+                }
             }
     }
 }

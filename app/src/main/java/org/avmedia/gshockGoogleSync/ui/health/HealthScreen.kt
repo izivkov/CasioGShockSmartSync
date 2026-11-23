@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
-import androidx.compose.material3.Button
+import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
+import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -135,15 +136,16 @@ fun HealthScreen() {
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
-                Button(
-                    onClick = { healthViewModel.onAction(HealthAction.UpdateLatest) },
-                    enabled = !state.updating,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(text = stringResource(id = R.string.update_latest))
-                }
+                ButtonsRow(
+                    buttons = listOf(
+                        ButtonData(
+                            text = stringResource(id = R.string.update_latest),
+                            onClick = { healthViewModel.onAction(HealthAction.UpdateLatest) },
+                            enabled = !state.updating
+                        )
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

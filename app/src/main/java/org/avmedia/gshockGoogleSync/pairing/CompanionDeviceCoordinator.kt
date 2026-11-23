@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.pairing
 
+import org.avmedia.gshockGoogleSync.session.BackgroundConnection
+import org.avmedia.gshockGoogleSync.ui.health.H5600Session
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.isActive
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -21,6 +25,10 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val BACKGROUND_INTERVAL_MS = 5 * 60_000L
+private const val BACKGROUND_WINDOW_MS = 60_000L
+private const val LIFELOG_BACKGROUND_TIMEOUT_MS = 3 * 60_000L
+
 @Singleton
 class CompanionDeviceCoordinator @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -29,7 +37,34 @@ class CompanionDeviceCoordinator @Inject constructor(
     private val coordinatorScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var activeScanAddresses: Set<String>? = null
 
+    /** Every interval, opens a short background window for each always-connected watch. */
+    private fun startBackgroundArming() {
+        coordinatorScope.launch {
+            while (isActive) {
+                delay(BACKGROUND_INTERVAL_MS)
+                activeScanAddresses.orEmpty().forEach { address ->
+                    val name = LocalDataStorage.getDeviceName(context, address)?.takeIf { it.isNotBlank() }
+                        ?: return@forEach
+                    if (org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)) {
+                        BackgroundReadPermission.arm(address, BACKGROUND_WINDOW_MS)
+                    }
+                }
+            }
+        }
+    }
+
+    /** A background connection: read the LifeLog into the session cache, then release the watch. */
+    private suspend fun readLifeLogInBackground(address: String) {
+        val data = withTimeoutOrNull(LIFELOG_BACKGROUND_TIMEOUT_MS) { repository.getStepCount() }
+        val ok = data?.h5600 != null
+        if (ok) H5600Session.data = data
+        Timber.i("Background LifeLog read ${if (ok) "done" else "failed"} for $address; releasing the watch")
+        BackgroundConnection.active = false
+        repository.disconnect()
+    }
+
     init {
+        startBackgroundArming()
         ProgressEvents.subscribe(
             arrayOf(
                 EventAction("DeviceAppeared") {
@@ -40,6 +75,8 @@ class CompanionDeviceCoordinator @Inject constructor(
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
                         coordinatorScope.launch {
+                            // Our own gate is gone: an always-connected watch is always admitted. A background window only marks the read.
+                            val background = BackgroundReadPermission.consume(normalizedAddress)
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
                             repository.stopScan()
                             // Only this watch counts. Any other connected watch must not block this one.
@@ -47,6 +84,8 @@ class CompanionDeviceCoordinator @Inject constructor(
                                 Timber.i("Device already connected. Skipping wait.")
                                 return@launch
                             }
+
+                            if (background) BackgroundConnection.active = true
 
                             // Like the official app: while the watch is advertising, retry quickly. A refused
                             // attempt fails within about 0.1 s, so a short interval is enough.
@@ -61,6 +100,9 @@ class CompanionDeviceCoordinator @Inject constructor(
                                     org.avmedia.gshockGoogleSync.utils.LocalDataStorage.put(
                                         context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name
                                     )
+                                    if (background) {
+                                        readLifeLogInBackground(normalizedAddress)
+                                    }
                                     return@launch
                                 } catch (cancelled: CancellationException) {
                                     throw cancelled
@@ -70,6 +112,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                                     delay(CONNECTION_RETRY_DELAY_MS)
                                 }
                             }
+                            BackgroundConnection.active = false
                             Timber.i("Advertising window closed without a connection for $normalizedAddress")
                         }
                     }

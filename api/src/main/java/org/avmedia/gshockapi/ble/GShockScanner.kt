@@ -83,6 +83,7 @@ object GShockScanner {
                                 result: ScanResult,
                             ) {
                                 val address = result.device.address ?: return
+                                BleTestLog.advertisement(result)
                                 val name = result.device.name ?: return
 
                                 if (address == lastFoundAddress) return

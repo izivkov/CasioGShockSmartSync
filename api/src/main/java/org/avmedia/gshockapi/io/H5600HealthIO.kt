@@ -32,6 +32,9 @@ import kotlin.time.Duration.Companion.milliseconds
  * `adb logcat | grep H5600`.
  */
 @RequiresApi(Build.VERSION_CODES.O)
+/** Peek test: when true, a peek read does not echo END. Set to false to restore the normal transfer. */
+private const val TEST_PEEK_SKIPS_END = true
+
 object H5600HealthIO {
     private val SETUP_REPLY_TIMEOUT_MS = org.avmedia.gshockapi.casio.LongProcess.LIFELOG.answerMs!!
     private const val OVERALL_TIMEOUT_MS = 180_000L
@@ -85,6 +88,12 @@ object H5600HealthIO {
     fun onStatus(hex: String) = onNotification(H5600Channel.STATUS, hex)
 
     private var requestRunning = false
+
+    /** True while a setup request is waiting for its reply. Only then does the transfer take status notifications. */
+    @Volatile
+    private var setupWaiting = false
+
+    fun isAwaitingSetupReply(): Boolean = setupWaiting
 
     private class AttemptOutcome(val data: StepCounterData, val restart: Boolean)
 
@@ -140,7 +149,8 @@ object H5600HealthIO {
 
     /** One attempt: setup, START, polls, then the data. restart = true when the watch stopped answering. */
     private suspend fun runAttempt(zone: ZoneId, peek: Boolean): AttemptOutcome {
-        val transfer = Transfer(H5600LifeLogSync(), zone)
+        // Peek test: with peek, END is not echoed, so the watch may keep the data it has not yet been told it can drop.
+        val transfer = Transfer(H5600LifeLogSync(echoEnd = !(peek && TEST_PEEK_SKIPS_END)), zone)
         synchronized(lock) { active = transfer }
         try {
             Timber.i("H5600: LifeLog attempt start (peek=$peek, zone=$zone)")
@@ -175,7 +185,7 @@ object H5600HealthIO {
             val snapshot = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
             Timber.i(
                 "H5600: transfer ${if (completed) "finished" else "TIMED OUT"}: " +
-                    "${snapshot.first.size} CONVOY notifications, announcements=${snapshot.second}",
+                        "${snapshot.first.size} CONVOY notifications, announcements=${snapshot.second}",
             )
 
             val decoded =
@@ -201,11 +211,12 @@ object H5600HealthIO {
             }
             Timber.i(
                 "H5600: decoded steps=${decoded.currentDaySteps} goal=$stepGoal " +
-                    "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
-                    "warnings=${decoded.warnings.size}",
+                        "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
+                        "warnings=${decoded.warnings.size}",
             )
             return AttemptOutcome(decoded, restart = false)
         } finally {
+            setupWaiting = false
             synchronized(lock) { active = null }
             org.avmedia.gshockapi.casio.ConnectionSetup.onTransferEnded()
             transfer.setupReplies.close()
@@ -245,8 +256,10 @@ object H5600HealthIO {
         var stepGoal: Int? = null
         for (command in H5600LifeLogSync.SETUP_COMMANDS) {
             Timber.d("H5600: setup 0x${command.toString(16)} -> watch")
+            setupWaiting = true
             IO.writeCmd(GetSetMode.GET, byteArrayOf(command.toByte()))
             val reply = awaitSetupReply(transfer, command)
+            setupWaiting = false
             if (reply == null) {
                 Timber.w("H5600: setup 0x${command.toString(16)}: no reply within ${SETUP_REPLY_TIMEOUT_MS} ms")
                 continue
@@ -360,8 +373,8 @@ object H5600HealthIO {
         if (bytes[2] == 0xFF.toByte()) return null
         val length =
             (bytes[3].toInt() and 0xFF) or
-                ((bytes[4].toInt() and 0xFF) shl 8) or
-                ((bytes[5].toInt() and 0xFF) shl 16)
+                    ((bytes[4].toInt() and 0xFF) shl 8) or
+                    ((bytes[5].toInt() and 0xFF) shl 16)
         return (bytes[2].toInt() and 0xFF) to length
     }
 

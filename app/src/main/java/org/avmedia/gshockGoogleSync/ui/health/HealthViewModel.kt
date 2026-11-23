@@ -150,9 +150,17 @@ class HealthViewModel @Inject constructor(
         refreshState()
         setupEventSubscription()
 
-        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) {
-            startStepCounterPolling()
-        }
+    }
+
+    /** The Health screen is on screen: poll while it stays open. */
+    fun onScreenShown() {
+        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) startStepCounterPolling()
+    }
+
+    /** The Health screen is off screen: stop polling, so no LifeLog reads start from a screen you are not viewing. */
+    fun onScreenHidden() {
+        stepPollJob?.cancel()
+        stepPollJob = null
     }
 
     /** DW-H5600: show the last stored day at once; a running or later read replaces it. Nothing stored: the screen stays as it was. */

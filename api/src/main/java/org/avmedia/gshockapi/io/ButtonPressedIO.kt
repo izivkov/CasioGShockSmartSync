@@ -105,6 +105,8 @@ object ButtonPressedIO {
 
     suspend fun request(): IO.WatchButton {
         Timber.i("Button info request started (0x10)")
+        // Always ask the watch: a value cached for an earlier watch must not answer for this one.
+        CachedIO.remove("10")
         return CachedIO.request("10") { key ->
             val shared = freshAnswer()
             if (shared != null) {
@@ -113,7 +115,11 @@ object ButtonPressedIO {
             } else {
                 val deferred = CompletableDeferred<IO.WatchButton>()
                 synchronized(this) {
+                    if (state.deferredResult != null) {
+                        Timber.w("BTN_TEST replacing a pending button request; the earlier one can no longer be answered")
+                    }
                     state = state.copy(deferredResult = deferred)
+                    Timber.i("BTN_TEST request pending=true")
                 }
                 try {
                     Timber.i("Sending button info request (0x$key)")
@@ -141,12 +147,18 @@ object ButtonPressedIO {
 
     fun onReceived(data: String) {
         Timber.i("Button info response received: $data")
+        synchronized(this) {
+            Timber.i("BTN_TEST reply received; request pending=${state.deferredResult != null}")
+        }
         // Use pure function to parse button press
         ButtonPressedIOFunctional.parseButtonPress(data)
             .fold(
                 onSuccess = { button ->
                     answer = Answer(button, clock())
                     synchronized(this) {
+                        if (state.deferredResult == null) {
+                            Timber.w("BTN_TEST reply dropped: no request was pending")
+                        }
                         state.deferredResult?.complete(button)
                         state = state.copy(deferredResult = null)
                     }

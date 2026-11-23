@@ -1,5 +1,7 @@
 package org.avmedia.gshockapi.protocols
 
+import org.avmedia.gshockapi.io.RawSettingIO
+import org.avmedia.gshockapi.io.H5600SettingsIO
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.casio.CasioConstants
@@ -55,6 +57,13 @@ interface WatchProtocol {
                 CasioConstants.CHARACTERISTICS.GW_BX5600_SP_DATA_HEADER_03.code to GwBx5600TimeIO::onReceivedStep2,
                 CasioConstants.CHARACTERISTICS.GW_BX5600_SP_DATA_HEADER_05.code to GwBx5600TimeIO::onReceivedStep1,
                 CasioConstants.CHARACTERISTICS.GW_BX5600_SP_DATA_HEADER_06.code to GwBx5600TimeIO::onReceivedStep3,
+                // DW-H5600 settings packets: each reply arrives under its packet's first byte
+                H5600SettingsIO.SOUND_MODE_CODE to RawSettingIO::onReceived,
+                H5600SettingsIO.WATCH_FACE_CODE to RawSettingIO::onReceived,
+                H5600SettingsIO.TIME_MANAGER_CODE to RawSettingIO::onReceived,
+                H5600SettingsIO.SMART_ALARM_CODE to RawSettingIO::onReceived,
+                0x45 to RawSettingIO::onReceived,
+                0x4F to RawSettingIO::onReceived,
             )
 
     fun extractKey(data: String): Int?

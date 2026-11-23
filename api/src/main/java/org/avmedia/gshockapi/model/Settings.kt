@@ -19,4 +19,8 @@ data class Settings(
     var fineAdjustment: Int = 0,
     var DnD: Boolean = false, // for always-connected watches only, like the ECB-30
     var font: String = "Standard", // "Standard" or "Classic"
+    var soundMode: String? = null, // "MUTE", "CUSTOM", or "VIBE_ONLY"
+    var watchFaceNumber: Int? = null, // 1 or 2
+    var watchFaceItem: String? = null, // e.g. "STEPS", "HEART_RATE"
+    var smartAlarm: SmartAlarm? = null,
 )

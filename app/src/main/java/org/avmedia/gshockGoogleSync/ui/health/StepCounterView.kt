@@ -71,7 +71,7 @@ fun StepCounterView(
             SectionLabel(text = stringResource(id = R.string.today))
             Spacer(modifier = Modifier.height(8.dp))
 
-            val dw = WatchInfo.model == WatchInfo.WatchModel.DW_H5600
+            val dw = WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol
             val currentSteps = state.stepCounterData.currentDaySteps ?: 0
             val gauge: @Composable () -> Unit = {
                 StepsProgressRing(

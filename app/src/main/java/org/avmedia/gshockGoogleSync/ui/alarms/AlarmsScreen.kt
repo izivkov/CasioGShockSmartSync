@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -63,16 +63,9 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
+    // Same layout as the Time and Events screens: no Scaffold inner padding, so the title lines up with them.
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(modifier = Modifier.fillMaxSize()) {
             ScreenTitle(
                 text = stringResource(id = R.string.watch_alarms),
                 modifier = Modifier
@@ -107,6 +100,8 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                 buttons = buttons,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            SnackbarHost(hostState = snackbarHostState)
         }
     }
 }

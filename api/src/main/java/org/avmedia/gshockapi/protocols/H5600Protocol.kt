@@ -33,7 +33,11 @@ object H5600Protocol : StandardProtocol() {
         if (first != null && first in UNSOLICITED_ALWAYS) return first
         if (TideTransferIO.isActive) return TideTransferIO.channelOf(data).key
         if (H5600WorkoutIO.isActive) return H5600WorkoutIO.channelOf(data).key
-        return if (H5600HealthIO.isActive) H5600HealthIO.channelOf(data).key else first
+        if (!H5600HealthIO.isActive) return first
+        val channel = H5600HealthIO.channelOf(data)
+        // A status notification belongs to the transfer only while one of its setup requests is waiting.
+        // Anything else on status (such as the button info reply) goes through the normal routing.
+        return if (channel == H5600Channel.STATUS && !H5600HealthIO.isAwaitingSetupReply()) first else channel.key
     }
 
     override suspend fun getStepCount(peek: Boolean): StepCounterData = H5600HealthIO.request(peek)
