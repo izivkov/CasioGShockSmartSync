@@ -29,6 +29,8 @@ sealed interface HaPushEvent {
 /** The JSON of the mobile_app local push channel (websocket). Pure, so it is unit tested. */
 object HaPush {
     const val APP_NAME = "Home Assistant"
+    /** Longest first field (app name) sent; the encoder refuses a field over 255 bytes. */
+    const val MAX_FIRST_FIELD_CHARS = 40
     private val gson = GsonBuilder().disableHtmlEscaping().create()
 
     /** "https://ha.example/" gives "wss://ha.example/api/websocket"; null when not an http(s) URL. */
