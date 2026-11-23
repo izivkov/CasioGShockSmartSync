@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockapi.casio.ConnectionSetup
 import org.avmedia.gshockapi.log.AppLog
 import org.junit.After
@@ -61,7 +62,7 @@ class H5600WorkoutReadGateTest {
         assertTrue(writes.toString(), writes.isEmpty())
         assertTrue(AppLog.recentEvents().any { it.contains("Workout read waits for 47 01") })
         ConnectionSetup.onWatchSetupDone()
-        val result = read.await()
+        val result = withTimeoutOrNull(15_000) { read.await() }
         assertNotNull(result)
         assertEquals("001c0000000000000000", writes.first())
     }
@@ -88,10 +89,11 @@ class H5600WorkoutReadGateTest {
         WatchExchange.mutex.lock()
         val first = async(Dispatchers.IO) { H5600WorkoutIO.download() }
         delay(300)
-        assertNull(H5600WorkoutIO.download())
+        // Bounded: queued behind the held lock it would wait for ever (that was the failure).
+        assertNull(withTimeoutOrNull(2_000) { H5600WorkoutIO.download() })
         assertTrue(AppLog.recentEvents().any { it.contains("one is already running or waiting") })
         WatchExchange.mutex.unlock()
-        assertNotNull(first.await())
+        assertNotNull(withTimeoutOrNull(15_000) { first.await() })
         assertEquals(1, writes.count { it == "001c0000000000000000" })
     }
 }
