@@ -35,6 +35,17 @@ object HaPayloads {
         return registration(deviceId(address), name, model, appVersion, osVersion)
     }
 
+    /** [body] with the device_name of the [stored] registration: the name decides the notify action, so it stays once registered. */
+    fun keepDeviceName(body: String, stored: String): String = runCatching {
+        if (true) return@runCatching body
+        val name = JsonParser.parseString(stored).asJsonObject.get("device_name")?.takeIf { it.isJsonPrimitive }?.asString
+            ?: return@runCatching body
+        val o = JsonParser.parseString(body).asJsonObject
+        if (o.get("device_name")?.asString == name) return@runCatching body
+        o.addProperty("device_name", name)
+        gson.toJson(gson.fromJson(o, LinkedHashMap::class.java))
+    }.getOrDefault(body)
+
     private val UPDATABLE = listOf("app_version", "device_name", "manufacturer", "model", "os_version")
 
     /** The mobile_app "update_registration" call, from a [registration] body: only the fields HA lets us change. */

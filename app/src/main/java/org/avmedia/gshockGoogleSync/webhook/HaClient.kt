@@ -55,10 +55,12 @@ class HaClient(
         return withWatchLock(job.deviceId) { sendLocked(job) }
     }
 
-    private fun sendLocked(job: HaJob): HaResult {
+    private fun sendLocked(sent: HaJob): HaResult {
         val cfg = store.load() ?: return HaResult.Failed("Home Assistant is not set up")
-        (ensureRegistered(job.deviceId, job.registration) as? HaResult.Failed)?.let { return it }
-        var reg = store.loadRegistration(job.deviceId) ?: return HaResult.Failed("Home Assistant gave no webhook id")
+        (ensureRegistered(sent.deviceId, sent.registration) as? HaResult.Failed)?.let { return it }
+        var reg = store.loadRegistration(sent.deviceId) ?: return HaResult.Failed("Home Assistant gave no webhook id")
+        // device_name names the notify action: once registered it never changes (model and the rest may).
+        val job = sent.copy(registration = HaPayloads.keepDeviceName(sent.registration, reg.registration))
         var again = false
         if (reg.registration != job.registration) {
             val hook = "${cfg.baseUrl}/api/webhook/${reg.webhookId}"

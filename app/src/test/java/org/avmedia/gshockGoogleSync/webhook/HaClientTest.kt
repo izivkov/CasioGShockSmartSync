@@ -120,12 +120,27 @@ class HaClientTest {
         assertEquals("https://ha.example/api/webhook/hook1", c.url)
         assertEquals("update_registration", c.type)
         val d = JsonParser.parseString(c.body).asJsonObject.getAsJsonObject("data")
-        assertEquals("My watch", d.get("device_name").asString)
+        // The name decides the notify action: it stays the one registered first. The model follows.
+        assertEquals("CASIO GBX-H5600", d.get("device_name").asString)
         assertEquals("GBX-H5600-1", d.get("model").asString)
         assertEquals(0, t.calls.count { it.url.endsWith("/registrations") })
         val saved = store.loadRegistration("gshock-1")!!
         assertEquals("hook1", saved.webhookId)
-        assertEquals(body, saved.registration)
+        assertEquals("CASIO GBX-H5600", JsonParser.parseString(saved.registration).asJsonObject.get("device_name").asString)
+    }
+
+    @Test
+    fun aReRegisterAfterANameChangeKeepsTheStoredDeviceName() {
+        val t = HaFakeTransport { c ->
+            if (c.url.endsWith("/api/webhook/hook1")) HaResponse(200, "") else haOk(c)
+        }
+        val (client, _, store) = connected(t)
+        val body = HaPayloads.registration("gshock-1", "CASIO GBX-H5600KI-5ER", "GBX-H5600KI-5ER", "1", "14")
+        assertTrue(client.send(job.copy(registration = body)) is HaResult.Ok)
+        val reg = t.calls.last { it.url.endsWith("/registrations") }
+        assertEquals("CASIO GBX-H5600", JsonParser.parseString(reg.body).asJsonObject.get("device_name").asString)
+        assertEquals("GBX-H5600KI-5ER", JsonParser.parseString(reg.body).asJsonObject.get("model").asString)
+        assertEquals("hook2", store.loadRegistration("gshock-1")?.webhookId)
     }
 
     @Test
