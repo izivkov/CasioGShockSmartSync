@@ -18,8 +18,9 @@ import timber.log.Timber
  * 0x50 (5 bytes): smart alarm: hh mm flags(01 on, 02 snooze) window(min).
  * 0x51 (6 bytes): [0]=0x51, [1]=face (1 weekday, 2 custom), [2..5]=display item (all four set).
  *
- * All reads go through [RawSettingIO] (shared requests, retries); all writes are read-modify-write
- * through [RawSettingIO.modify], so they keep unknown bytes and cannot undo each other.
+ * All reads go through [RawSettingIO] (shared requests, retries); all writes are checked read-modify-write
+ * through [RawSettingIO.modifySafe] (read, change only the target bytes, write, read back), so they keep unknown
+ * bytes and cannot undo each other. The same writer serves the app's screens and Home Assistant.
  */
 @RequiresApi(Build.VERSION_CODES.O)
 object H5600SettingsIO {
@@ -47,10 +48,23 @@ object H5600SettingsIO {
         return RawSettingIO.request(code).also { checkPacket(code, it, size) }
     }
 
-    /** Checked read-modify-write; returns the packet before the change. */
-    private suspend fun modifyChecked(code: Int, size: Int = PACKET_SIZE, transform: (IntArray) -> IntArray?): IntArray {
+    /** Checked read-modify-write of the [touched] bytes; returns the packet before the change. */
+    private suspend fun modifyChecked(
+        code: Int,
+        touched: Set<Int>,
+        size: Int = PACKET_SIZE,
+        transform: (IntArray) -> IntArray?,
+    ): IntArray {
         checkSupported()
-        return RawSettingIO.modify(code) { p -> checkPacket(code, p, size); transform(p) }
+        var before: IntArray? = null
+        val result = RawSettingIO.modifySafe(code, touched) { frame ->
+            val p = IntArray(frame.size) { frame[it].toInt() and 0xFF }
+            checkPacket(code, p, size)
+            before = p.copyOf()
+            transform(p)?.let { Utils.byteArrayOfIntArray(it) }
+        }
+        if (result is SettingWriteResult.Failed) throw IllegalStateException(result.message)
+        return checkNotNull(before) { "0x%02X was not read".format(code) }
     }
 
     // ---- Connection ----
@@ -130,7 +144,7 @@ object H5600SettingsIO {
 
     /** Sets the mode (no write if already equal). Returns the mode the watch had before. */
     suspend fun setSoundMode(mode: SoundMode): SoundMode? =
-        modifyChecked(SOUND_MODE_CODE) { p -> p.also { it[1] = mode.code } }
+        modifyChecked(SOUND_MODE_CODE, setOf(1)) { p -> p.also { it[1] = mode.code } }
             .let { SoundMode.fromCode(it[1]) }
             .also { if (it == mode) Timber.i("Sound mode already $mode, not writing") }
 
@@ -149,12 +163,12 @@ object H5600SettingsIO {
 
     suspend fun setWatchFaceNumber(face: Int) {
         require(face == 1 || face == 2) { "face must be 1 or 2" }
-        modifyChecked(WATCH_FACE_CODE) { p -> p.also { it[1] = face } }
+        modifyChecked(WATCH_FACE_CODE, setOf(1)) { p -> p.also { it[1] = face } }
     }
 
     /** Sets the display item (no write if already equal). Returns the item the watch had before. */
     suspend fun setWatchFaceItem(item: WatchFaceItem): WatchFaceItem? =
-        modifyChecked(WATCH_FACE_CODE) { p -> p.also { for (i in 2 until PACKET_SIZE) it[i] = item.code } }
+        modifyChecked(WATCH_FACE_CODE, (2 until PACKET_SIZE).toSet()) { p -> p.also { for (i in 2 until PACKET_SIZE) it[i] = item.code } }
             .let { before -> itemCode(before)?.let { WatchFaceItem.fromCode(it) } }
 
     // ---- Smart alarm (0x50) ----
@@ -167,7 +181,7 @@ object H5600SettingsIO {
     /** Writes the smart-alarm slot; other flag bits read from the watch are kept. */
     suspend fun setSmartAlarm(a: SmartAlarm) {
         require(a.hour in 0..23 && a.minute in 0..59 && a.windowMin in 0..120) { "Bad smart alarm" }
-        modifyChecked(SMART_ALARM_CODE, SMART_ALARM_SIZE) { p ->
+        modifyChecked(SMART_ALARM_CODE, setOf(1, 2, 3, 4), SMART_ALARM_SIZE) { p ->
             var flags = p[3] and 0x03.inv()
             if (a.enabled) flags = flags or 0x01
             if (a.snooze) flags = flags or 0x02

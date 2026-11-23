@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.io.AlarmsIO
 import org.avmedia.gshockapi.io.EventsIO
+import org.avmedia.gshockapi.io.RawSettingIO
 import org.avmedia.gshockapi.io.ExerciseIO
 import org.avmedia.gshockapi.io.SettingsIO
 import org.avmedia.gshockapi.io.TimeAdjustmentIO
@@ -74,6 +75,8 @@ object MessageDispatcher {
         data: String,
         protocol: WatchProtocol = StandardProtocol,
     ) {
+        // The answer to a settings read that waits goes to that read; everything else is dispatched as usual.
+        if (RawSettingIO.offer(data)) return
         val key = protocol.extractKey(data) ?: return
         Timber.d("MessageDispatcher: onReceived key: $key, data: $data")
         if (key == 0x10) {

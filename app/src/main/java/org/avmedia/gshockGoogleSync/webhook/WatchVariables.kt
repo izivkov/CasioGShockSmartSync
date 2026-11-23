@@ -47,7 +47,7 @@ object WatchVariables {
         api = api,
         features = features,
         raw = raw,
-        isH5600 = { WatchModelOverride.isH5600Family(WatchModelOverride.displayName(WatchInfo.name)) },
+        isH5600 = { WatchModelOverride.isH5600Family(WatchInfo.name) },
         phoneBattery = {
             val manager = appContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
             manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).takeIf { p -> p in 0..100 }
@@ -117,7 +117,7 @@ object WatchVariables {
             // Watch
             Variable("watch.connected", "True when the watch is connected right now") { it.watchConnected },
             Variable("watch.name", "Watch model name, for example GW-B5600") {
-                WatchModelOverride.displayName(WatchInfo.name).takeIf { n -> n.isNotBlank() }
+                WatchInfo.name.takeIf { n -> n.isNotBlank() }
             },
             Variable("watch.model", "Watch model id used by the app", needsWatch = true) {
                 WatchInfo.model.name

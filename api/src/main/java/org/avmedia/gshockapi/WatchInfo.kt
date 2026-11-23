@@ -481,7 +481,7 @@ data object WatchInfo {
             // Module 3577: GM-H5600
             put("GM-H5600", WatchModel.DW_H5600)
             // Module 3586: GBX-H5600
-            put("GBX-H5600", WatchModel.GBD)
+            put("GBX-H5600", WatchModel.DW_H5600)
             // Module 3587: GDG-B100
             put("GDG-B100", WatchModel.GBD)
             // Module 3599: GWF-300

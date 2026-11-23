@@ -95,7 +95,7 @@ class WebhookDispatcher @Inject constructor(
         val cfg = store.load() ?: return
         val address = org.avmedia.gshockapi.WatchInfo.getAddress()
         if (address.isBlank()) return
-        val watchName = org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name)
+        val watchName = org.avmedia.gshockapi.WatchInfo.name
         val now = OffsetDateTime.now().withNano(0)
         val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
         val sensors = HaGroups.sensors(store.groupsOn())
@@ -103,7 +103,7 @@ class WebhookDispatcher @Inject constructor(
         val states = HaSensors.states(values, sensors)
         val event = if (trigger == WebhookTrigger.WATCH_ACTION) {
             mapOf("trigger" to trigger.eventName, "time" to now.toString(),
-                "watch" to org.avmedia.gshockGoogleSync.session.WatchModelOverride.displayName(org.avmedia.gshockapi.WatchInfo.name))
+                "watch" to org.avmedia.gshockapi.WatchInfo.name)
         } else null
         if (states.isEmpty() && event == null) return
         val registration = HaPayloads.registrationFor(
