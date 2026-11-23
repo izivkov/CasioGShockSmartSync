@@ -108,6 +108,7 @@ object H5600WorkoutIO {
             return result
         } finally {
             inbox = null
+            org.avmedia.gshockapi.casio.ConnectionSetup.onTransferEnded()
             _status.value = null
             running.set(false)
             WatchExchange.mutex.unlock()

@@ -152,7 +152,7 @@ object CommandTable {
             rw(0x53, "activity list", min = 14, back = CHECKED),
             rw(0x54, "activity item wrapper", options = 1..8, back = CHECKED),
             rw(0x55, "setting 55", min = 14, back = CHECKED),
-            rw(0x56, "activity value 56", options = ONE, match = 1, back = CHECKED),
+            rw(0x56, "activity value 56", options = ONE, match = 0, back = CHECKED),
             rw(0x57, "stride", min = 2, back = CHECKED),
             rw(0x58, "activity value 58", options = ONE, match = 1, back = CHECKED),
         )

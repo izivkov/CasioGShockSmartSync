@@ -52,7 +52,26 @@ object ConnectionSetup {
         }
     }
 
+    /** The `0x10` answer held back because a transfer was active; run by [onTransferEnded]. */
+    @Volatile private var deferredKind: String? = null
+
+    /** The link dropped (the watch reconnects by itself, no `connect()`): the next `0x10` answer starts a new setup. */
+    fun onLinkLost() = reset()
+
+    /**
+     * A LifeLog or workout transfer ended: run the setup that was deferred while it was active.
+     * Chosen over running the setup first: the transfer already holds the exchange lock when the `0x10` answer arrives.
+     */
+    fun onTransferEnded() {
+        val data = deferredKind ?: return
+        if (busy()) return
+        deferredKind = null
+        ConnectionKeepAlive.log("transfer ended: deferred setup starts")
+        onKind(data)
+    }
+
     fun reset() {
+        deferredKind = null
         step = Step.WAIT_KIND
         reconnectKind = false
         workoutsOffered = false
@@ -64,7 +83,15 @@ object ConnectionSetup {
 
     /** The `0x10` answer: byte index 7 after the code is the kind of connection. Starts the run. */
     fun onKind(data: String) {
-        if (step != Step.WAIT_KIND || busy()) return
+        if (step != Step.WAIT_KIND) {
+            ConnectionKeepAlive.log("Connection kind answer: setup skipped, already $step")
+            return
+        }
+        if (busy()) {
+            deferredKind = data
+            ConnectionKeepAlive.log("Connection kind answer: setup deferred, a transfer is active")
+            return
+        }
         val b = bytes(data)
         val kind = b.getOrNull(8) ?: return
         reconnectKind = kind in ALWAYS_CONNECT_KINDS

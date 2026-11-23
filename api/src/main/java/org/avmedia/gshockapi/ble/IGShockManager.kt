@@ -230,6 +230,7 @@ private class GShockManagerImpl(
             Timber.i("$device onDeviceConnected — waiting for service discovery")
             ProgressEvents.onNext("ConnectionStarted")
             connectionState = ConnectionState.CONNECTING
+            org.avmedia.gshockapi.casio.ConnectionSetup.reset()
         }
 
         override fun onDeviceFailedToConnect(
@@ -277,6 +278,7 @@ private class GShockManagerImpl(
             reason: Int,
         ) {
             ProgressEvents.onNext("Disconnect", device)
+            org.avmedia.gshockapi.casio.ConnectionSetup.onLinkLost()
 
             Timber.d("Device disconnected with reason: $reason")
             when (reason) {

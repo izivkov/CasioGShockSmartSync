@@ -164,4 +164,42 @@ class ConnectionKeepAliveTest {
         receive("0x11 01 02 03 04 04 06 07 08")
         assertEquals("a finished setup does not answer a second 0x11", 2, fake.all.size)
     }
+
+    @Test fun aReconnectWithoutConnectStartsTheSetupAgain() {
+        kindFourteenUpTo39()
+        receive("0x39 04")
+        val before = fake.requests.size
+        receive("0x10 00 00 00 00 00 00 00 0E 00") // same link, setup done: skipped and logged
+        assertEquals(before, fake.requests.size)
+        assertTrue(ConnectionKeepAlive.recentEvents().last().contains("setup skipped"))
+        ConnectionSetup.onLinkLost() // the watch drops the link and reconnects by itself, no connect() call
+        receive("0x10 00 00 00 00 00 00 00 0E 00")
+        assertEquals(0x23, fake.requests.last())
+        receive("0x23 41 42 43")
+        receive("0x39 04")
+        assertEquals(listOf(0x39, 0x04), fake.all.last())
+    }
+
+    @Test fun aKindAnswerDuringATransferIsDeferredAndRunsWhenItEnds() {
+        ConnectionSetup.reset()
+        ConnectionSetup.busy = { true }
+        receive("0x10 00 00 00 00 00 00 00 0E 00")
+        assertTrue(fake.requests.isEmpty())
+        assertTrue(ConnectionKeepAlive.recentEvents().last().contains("setup deferred"))
+        ConnectionSetup.busy = { false }
+        ConnectionSetup.onTransferEnded()
+        assertEquals(listOf(0x23), fake.requests)
+        ConnectionSetup.onTransferEnded() // nothing left to run
+        assertEquals(listOf(0x23), fake.requests)
+    }
+
+    @Test fun aLostLinkDropsADeferredSetup() {
+        ConnectionSetup.reset()
+        ConnectionSetup.busy = { true }
+        receive("0x10 00 00 00 00 00 00 00 0E 00")
+        ConnectionSetup.onLinkLost()
+        ConnectionSetup.busy = { false }
+        ConnectionSetup.onTransferEnded()
+        assertTrue(fake.requests.isEmpty())
+    }
 }

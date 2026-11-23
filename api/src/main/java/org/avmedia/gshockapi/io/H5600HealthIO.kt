@@ -207,6 +207,7 @@ object H5600HealthIO {
             return AttemptOutcome(decoded, restart = false)
         } finally {
             synchronized(lock) { active = null }
+            org.avmedia.gshockapi.casio.ConnectionSetup.onTransferEnded()
             transfer.setupReplies.close()
             Timber.i("H5600: attempt end")
         }
