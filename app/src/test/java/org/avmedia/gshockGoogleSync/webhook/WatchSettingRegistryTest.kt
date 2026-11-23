@@ -21,6 +21,9 @@ class WatchSettingRegistryTest {
         0x45 to frame(0x45, 0x00, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA),
         0x50 to frame(0x50, 6, 30, 0b01, 30),
         0x42 to frame(0x42, 0b1001, 0x05, 0x01, 0x02, 0x40, 2, 0x77),
+        // Owner's watch: 3D 30, language 0 (index 1), off at night 0 (index 6), pop-up byte at index 16.
+        0x3D to frame(0x3D, 0x30, 0x00, 0x02, 0x01, 0x00, 0x03, 0x00, 0x2F, 0x28, 0x00, 0x28, 0x00, 0x28, 0x00, 0xFA, 0x00, 0x00),
+        0x53 to frame(0x53, 1, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x77),
     )
     private val frames: Map<String, ByteArray> = samples.mapKeys { RawSettings.name(it.key) }
 
@@ -45,6 +48,37 @@ class WatchSettingRegistryTest {
                 for (i in before.indices) if (i !in s.touched) assertEquals("${s.key}=$v changed byte $i", before[i], after[i])
             }
         }
+    }
+
+    @Test fun theRemainingKeysExist() {
+        for (k in listOf("notification_language", "notification_off_at_night", "activity_running", "activity_walking", "activity_gym_workout", "activity_interval_timer"))
+            assertNotNull(k, WatchSettingRegistry.find(k))
+        assertNull(WatchSettingRegistry.find("activity_pool"))
+    }
+
+    @Test fun anOutOfRangeLanguageIsRefusedWithAReason() {
+        assertTrue(refused("notification_language", 4).contains("0 to 3"))
+        assertTrue(refused("notification_off_at_night", -1).contains("0 to 3"))
+        assertTrue(refused("activity_running", "maybe").contains("true"))
+    }
+
+    @Test fun theLastActivityCannotBeSwitchedOff() {
+        val only = frame(0x53, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x77)
+        assertNull(WatchSettingRegistry.find("activity_running")!!.change(only, false))
+    }
+
+    @Test fun switchingAnActivityOnAppendsItAndKeepsTheTail() {
+        val after = WatchSettingRegistry.find("activity_interval_timer")!!.change(samples.getValue(0x53), true)!!
+        assertEquals(listOf(1, 2, 6, 14), org.avmedia.gshockapi.io.ActivityListCodec.parse(after))
+        assertEquals(0x77.toByte(), after[15])
+    }
+
+    @Test fun theNotificationManagerReadBackIgnoresTheCommandByte() {
+        val s = WatchSettingRegistry.find("notification_language")!!
+        val before = samples.getValue(0x3D)
+        val written = s.change(before, 3)!!
+        assertEquals(0x31.toByte(), written[1])
+        assertTrue(s.matches(before.copyOf().also { it[2] = 3 }, s.expectedBack(before, written)))
     }
 
     @Test fun theRegistryReadsOnlyCodesTheSyncReads() {

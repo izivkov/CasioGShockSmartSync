@@ -1,8 +1,11 @@
 package org.avmedia.gshockGoogleSync.webhook
 
+import org.avmedia.gshockapi.io.ActivityListCodec
+import org.avmedia.gshockapi.io.ActivityModels
 import org.avmedia.gshockapi.io.BasicHealthFieldsCodec
 import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.LengthUnit
+import org.avmedia.gshockapi.io.NotificationManagerCodec
 import org.avmedia.gshockapi.io.NotificationSoundCodec
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
 import org.avmedia.gshockapi.io.ProfileCodec
@@ -36,6 +39,10 @@ class WatchSetting(
     val touched: Set<Int>,
     val read: (ByteArray) -> Any?,
     val change: (ByteArray, Any) -> ByteArray?,
+    /** What the watch returns after the write (0x3D rewrites its command byte). */
+    val expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
+    /** How the read-back is compared with [expectedBack] (the activity list ignores its tail). */
+    val matches: (back: ByteArray, expected: ByteArray) -> Boolean = { back, expected -> back.contentEquals(expected) },
 ) {
     /** The value in the raw cache [frames] (code name to frame), null when the code was not read or not understood. */
     fun valueIn(frames: Map<String, ByteArray>): Any? = frames[RawSettings.name(code)]?.let(read)
@@ -72,6 +79,16 @@ object WatchSettingRegistry {
 
     private fun pick(key: String, values: List<String>, code: Int, touched: Set<Int>, read: (ByteArray) -> String?, change: (ByteArray, String) -> ByteArray?) =
         WatchSetting(key, SettingType.Choice(values), code, touched, read) { f, v -> change(f, v as String) }
+
+    /** One on/off key per activity the H5600 offers (`activity_running`, ...): a bool, because the list codec toggles one code at a time. */
+    private fun activity(code: Int) = WatchSetting(
+        "activity_" + word(ActivityModels.name(ActivityModels.H5600, code)), SettingType.Bool, ActivityListCodec.CODE, (1..ActivityListCodec.MAX).toSet(),
+        { f -> if (ActivityListCodec.layoutOk(f)) ActivityListCodec.parse(f)?.let { code in it } else null },
+        { f, v -> ActivityListCodec.parse(f)?.let { ActivityListCodec.encode(f, ActivityListCodec.toggle(it, code, v as Boolean)) } },
+        matches = ActivityListCodec::sameSlots,
+    )
+
+    private val ACTIVITY_SETTINGS: List<WatchSetting> = ActivityModels.offered(ActivityModels.H5600).map(::activity)
 
     val ALL: List<WatchSetting> = listOf(
         pick("watch_face", FACES.values.toList(), WatchFaceCodec.CODE, WatchFaceCodec.FACE_BYTES,
@@ -143,7 +160,13 @@ object WatchSettingRegistry {
         pick("notification_pattern", PATTERNS, NotificationSoundCodec.CODE, NotificationSoundCodec.PATTERN_BYTES,
             { f -> NotificationSoundCodec.parse(f)?.pattern?.let(PATTERNS::getOrNull) },
             { f, v -> NotificationSoundCodec.withPattern(f, PATTERNS.indexOf(v)) }),
-    )
+        WatchSetting("notification_language", SettingType.Whole(0..3), NotificationManagerCodec.CODE, NotificationManagerCodec.LANGUAGE_BYTES,
+            { f -> NotificationManagerCodec.parse(f)?.language },
+            { f, v -> NotificationManagerCodec.withLanguage(f, v as Int) }, NotificationManagerCodec::expectedBack),
+        WatchSetting("notification_off_at_night", SettingType.Whole(0..3), NotificationManagerCodec.CODE, NotificationManagerCodec.NIGHT_BYTES,
+            { f -> NotificationManagerCodec.parse(f)?.offAtNight },
+            { f, v -> NotificationManagerCodec.withOffAtNight(f, v as Int) }, NotificationManagerCodec::expectedBack),
+    ) + ACTIVITY_SETTINGS
 
     private val BY_KEY = ALL.associateBy { it.key }
 

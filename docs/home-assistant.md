@@ -17,7 +17,7 @@ Several at once: `data: {settings: {watch_face: steps, step_goal: 9000}}`.
 - Watch not connected: the latest value per key waits and is written after the next connection, once the watch's setup is done.
 - After a write the app reads the value back and logs `Home Assistant set watch_face to steps`.
 - Values are sent back after each connection: sensor `Watch settings (writable)` (state = how many were read, every value an attribute), plus `Watch face name` and `Custom face slot`.
-- Not settable: time, pairing, reset, firmware, light duration, home city, per-activity items, notification language and off-at-night (not read yet).
+- Not settable: time, pairing, reset, firmware, light duration, home city (the app has no setting frame for them that the H5600 read path returns).
 - The `device_name` of the registration never changes once the watch is registered, so the notify action name stays.
 
 | Key | Allowed values |
@@ -42,6 +42,8 @@ Several at once: `data: {settings: {watch_face: steps, step_goal: 9000}}`.
 | `vo2max` | 10 to 90 |
 | `notification_sound_mode, notification_vibration_mode` | off, custom_per_event, on |
 | `notification_pattern` | mute, pattern_a, pattern_b, pattern_c |
+| `notification_language, notification_off_at_night` | 0 to 3 (the meaning of the numbers is not confirmed) |
+| `activity_running, activity_walking, activity_gym_workout, activity_interval_timer` | true, false (at least one activity stays on; switching on adds it at the end of the list) |
 
 Words are case-insensitive; spaces count as `_`.
 

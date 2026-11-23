@@ -59,6 +59,13 @@ class RawWatchRequestTest {
         assertEquals(listOf("0x05 AA"), link.forwarded)
     }
 
+    @Test fun theNotificationManagerIsAskedAs3D30InTheRawRead() = runBlocking {
+        val link = FakeLink(libraryHandler)
+        link.onWrite = { link.notify("0x3D 30 00 02") }
+        RawWatchRequest(link).request(0x3D, 2_000)
+        assertEquals(listOf(listOf(0x3D, 0x30)), link.writtenBytes)
+    }
+
     @Test fun theErrorAnswerForTheCodeIsKeptToo() = runBlocking {
         val link = FakeLink(libraryHandler)
         link.onWrite = { link.notify("0xFF 41"); link.notify("0xFF 99") }

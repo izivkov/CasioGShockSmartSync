@@ -40,7 +40,7 @@ class WebhookDispatcher @Inject constructor(
         HaPushRouter.updateSensorsHook = { pushSensorsNow() }
         // Home Assistant's "command_watch_setting": checked, queued, written once the watch's setup is done.
         val commands = WatchSettingCommands(
-            write = { s, v -> access.update(s.code, s.touched, { f -> s.change(f, v) }) },
+            write = { s, v -> access.update(s.code, s.touched, { f -> s.change(f, v) }, s.expectedBack, s.matches) },
             connected = { runCatching { api.isConnected() }.getOrDefault(false) },
             afterWrites = { pushSensorsNow() },
         )

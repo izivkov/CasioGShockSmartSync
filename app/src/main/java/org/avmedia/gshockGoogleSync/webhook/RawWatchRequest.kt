@@ -12,6 +12,7 @@ import org.avmedia.gshockapi.ble.IDataReceived
 import org.avmedia.gshockapi.casio.MessageDispatcher
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.casio.ConnectionKeepAlive
+import org.avmedia.gshockGoogleSync.ui.watchhealth.SettingRequests
 import org.avmedia.gshockapi.io.WatchExchange
 
 fun interface RawRequester {
@@ -78,7 +79,7 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
         }
     }
 
-    override suspend fun request(code: Int, timeoutMs: Long): List<String> = request(byteArrayOf(code.toByte()), timeoutMs)
+    override suspend fun request(code: Int, timeoutMs: Long): List<String> = request(SettingRequests.forCode(code), timeoutMs)
 
     /** Like [request] for a request of several bytes (for example 54 00 activity class part); answers are those of the first byte. */
     suspend fun request(bytes: ByteArray, timeoutMs: Long): List<String> = mutex.withLock {
