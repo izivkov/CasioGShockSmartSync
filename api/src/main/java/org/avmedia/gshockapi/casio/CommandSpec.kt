@@ -136,7 +136,7 @@ object CommandTable {
             rw(0x3A, "connection supervision", min = 9),
             rw(0x3B, "connection debug"),
             rw(0x3D, "notification manager", min = 16, options = ONE, match = 1, fixed = 0x30, back = CHECKED, unsolicited = true),
-            rw(0x40, "activity setting 40", min = 5, back = CHECKED),
+            rw(0x40, "activity setting 40", min = 4, back = CHECKED),
             rw(0x41, "setting 41", min = 4, back = CHECKED),
             rw(0x42, "notification method", min = 5, back = CHECKED),
             rw(0x43, "step goal", min = 16, back = CHECKED),

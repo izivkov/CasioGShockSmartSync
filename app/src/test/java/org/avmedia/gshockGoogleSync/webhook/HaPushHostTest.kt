@@ -3,6 +3,8 @@ package org.avmedia.gshockGoogleSync.webhook
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -38,7 +40,8 @@ class HaPushHostTest {
 
     @Test fun aSocketJobThatEndedIsStartedAgainWhenTheWatchConnects() = runTest {
         var started = 0
-        val host = HaPushHost(backgroundScope) {
+        val scope = CoroutineScope(SupervisorJob() + UnconfinedTestDispatcher(testScheduler) + CoroutineExceptionHandler { _, _ -> })
+        val host = HaPushHost(scope) {
             started++
             HaPushHost.HostedChannel(run = { if (started == 1) error("crashed") else awaitCancellation() }, wake = {})
         }

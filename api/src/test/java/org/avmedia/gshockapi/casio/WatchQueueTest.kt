@@ -128,6 +128,7 @@ class WatchQueueTest {
     }
 
     @Test fun aRefusalWithStatus81IsLoggedOnceAsNotSupported() = runBlocking {
+        CommandTable.strict = false // 0x82 is not in the table: the watch itself refuses it
         repeat(2) {
             val read = queue.enqueue(GetSetMode.GET, b(0x82))
             waitFor("the read request") { sentCodes().size > it }

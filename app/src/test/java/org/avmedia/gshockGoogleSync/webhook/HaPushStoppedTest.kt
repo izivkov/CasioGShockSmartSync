@@ -20,11 +20,11 @@ class HaPushStoppedTest {
         HaPushRouter.updateSensorsHook = { pushed++ }
         val channel = HaPushChannel(HaStore(HaMemoryStore()), deliver = {}, log = {})
         val job = backgroundScope.launch { channel.run { "id" } }
-        testScheduler.advanceUntilIdle()
+        testScheduler.advanceTimeBy(100); testScheduler.runCurrent()
         HaPushState.set(true)
         val before = pushed
         job.cancel()
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
         assertFalse(HaPushState.connected)
         assertTrue("the off state must be sent to HA", pushed > before)
     }
