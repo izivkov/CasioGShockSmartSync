@@ -3,7 +3,6 @@ package org.avmedia.gshockapi.io
 import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.model.SmartAlarm
 import org.avmedia.gshockapi.model.SoundMode
 import org.avmedia.gshockapi.model.WatchFaceItem
@@ -25,8 +24,6 @@ import timber.log.Timber
  */
 @RequiresApi(Build.VERSION_CODES.O)
 object H5600SettingsIO {
-    private suspend fun stray(b: ByteArray) = IO.writeChecked(GetSetMode.SET, b) // RED CHECK
-    private fun stray2() = SafeSettingWrite({ null }, {})
     const val SOUND_MODE_CODE = 0x42
     const val WATCH_FACE_CODE = 0x51
     const val SMART_ALARM_CODE = 0x50
