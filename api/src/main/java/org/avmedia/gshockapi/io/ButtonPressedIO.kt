@@ -111,6 +111,9 @@ object ButtonPressedIO {
         }
     }
 
+    /** Forgets the answer kept for sharing (stub for the red check). */
+    fun forgetAnswer() {}
+
     fun get(): IO.WatchButton = state.lastKnownButton
 
     fun put(value: Any) {

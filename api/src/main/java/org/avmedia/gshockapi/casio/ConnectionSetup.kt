@@ -70,6 +70,12 @@ object ConnectionSetup {
         onKind(data)
     }
 
+    /** The kind of the last `0x10` answer of this link (stub for the red check). */
+    @Volatile var lastKind: Int? = null
+
+    /** True when the watch connected itself (kind 13 or 14): nobody pressed a button. */
+    fun isAutomaticConnect(): Boolean = false
+
     fun reset() {
         deferredKind = null
         step = Step.WAIT_KIND
