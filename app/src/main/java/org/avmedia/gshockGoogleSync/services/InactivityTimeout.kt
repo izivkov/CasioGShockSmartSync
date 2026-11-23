@@ -6,8 +6,9 @@ package org.avmedia.gshockGoogleSync.services
  * is disconnected as upstream does.
  */
 object InactivityTimeout {
-    @Suppress("UNUSED_PARAMETER") // RED CHECK: the old behaviour, undone in the next commit
     fun run(keepsLink: Boolean, goHome: () -> Unit, disconnect: () -> Unit, tellDisconnected: () -> Unit) {
+        goHome()
+        if (keepsLink) return
         disconnect()
         tellDisconnected()
     }
