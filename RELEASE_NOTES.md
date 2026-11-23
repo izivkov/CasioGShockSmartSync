@@ -2,6 +2,11 @@
 
 ## Highlights
 
+### 🏃 DW-H5600 Watch Support, Watch Face Customization & LifeLog Health
+* **DW-H5600 Model Support**: Added native support for the DW-H5600 (G-SQUAD series), including custom Watch Face layout settings, display customization dialog, and dedicated connection handling.
+* **LifeLog & Health Integration**: Integrated DW-H5600 LifeLog step counts, calories/energy expenditure estimates, heart rate data, activity times, and hourly breakdown with session caching and real-time loading feedback.
+* **Always-Connected Watch Connection Management**: Added per-watch connection control switches ("Allow connection") keyed by address and a 2-minute "Set up watch" window for background-syncing watch models.
+
 ### 🌊 Oceanus OCW-S400 Watch Support & Dynamic Feature-Gating
 * **Oceanus OCW-S400 Model Support**: Added native support for the Oceanus OCW-S400 (Manta series), including custom vector watch graphics and specific pairing instructions ("Hold (A) for 2.5 s").
 * **Capability Feature-Gating (`WatchFeatureManager`)**:
@@ -10,7 +15,7 @@
   * **Prayer Alarms Safety**: Automatically gates prayer alarm execution on watch models that do not support alarms.
 
 ### ⚡ Dependencies & Core Engine
-* **GShockAPI 1.8.6 Upgrade**: Upgraded core `gshockapi` library dependency to `1.8.6` for enhanced protocol handling and hardware synchronization stability.
+* **GShockAPI 1.9.0 Upgrade**: Upgraded core `gshockapi` library dependency to `1.9.0` for enhanced MIP/DW-H5600 protocol handling, watch face API support, and hardware synchronization stability.
 
 ---
 

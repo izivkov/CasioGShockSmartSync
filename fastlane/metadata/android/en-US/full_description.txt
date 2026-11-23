@@ -11,7 +11,7 @@ Key Features:
 Supported Watch Models:
 The app works with many Bluetooth-enabled G-Shock, Edifice, Oceanus, and Pro Trek models.
 
-- Square: GW-B5600, GMW-B5000, GW-B5000, DW-B5600, TRN-50
+- Square: GW-B5600, GMW-B5000, GW-B5000, DW-B5600, DW-H5600, TRN-50
 - CasiOak: GA-B2100, GBM-2100, GMC-B2100, MRG-B2100
 - G-Steel: GST-B100 to B1000, GST-W1000, ECB-900
 - Edifice: ECB-10 to ECB-2300, EQB-500 to EQB-2000
