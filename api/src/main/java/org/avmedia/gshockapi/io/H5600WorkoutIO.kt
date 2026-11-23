@@ -177,7 +177,6 @@ object H5600WorkoutIO {
 
     private fun log(text: String) {
         Timber.i("H5600 workouts: $text")
-        org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(text)
     }
 
     /** The two characteristics; a test seam. */

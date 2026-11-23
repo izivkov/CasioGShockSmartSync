@@ -41,21 +41,22 @@ class WorkoutTransfer(
     private val readTimeoutMs: Long = 10_000L,
     private val log: (String) -> Unit = {},
 ) {
+    @Suppress("UNUSED_PARAMETER") private fun noLog(text: String) = Unit
     private class Fail(val text: String, val refused: Boolean = false) : Exception(text)
 
     suspend fun run(): WorkoutRunResult {
         var done = 0
         try {
-            log("Workout read: session 1C requested")
+            noLog("Workout read: session 1C requested")
             start()
-            log("Workout read: 1C the watch is ready")
+            noLog("Workout read: 1C the watch is ready")
             val header = readGroup()
             val pending = WorkoutGroup.pendingSlots(header)
             val transferred = WorkoutGroup.transferredSlots(header).toMutableSet()
-            log("Workout read: 1D group header read, ${WorkoutGroup.usedSlots(header).size} on the watch, ${pending.size} new (slots $pending)")
+            noLog("Workout read: 1D group header read, ${WorkoutGroup.usedSlots(header).size} on the watch, ${pending.size} new (slots $pending)")
             val headers = pending.mapNotNull { slot -> readHeader(slot)?.let { slot to it } }
             if (headers.size < pending.size) throw Fail("a workout header could not be read")
-            log("Workout read: 1E ${headers.size} workout headers read")
+            noLog("Workout read: 1E ${headers.size} workout headers read")
             val sorted = headers.sortedBy { it.second.startUtcMillis ?: Long.MAX_VALUE }
             for ((index, item) in sorted.withIndex()) {
                 val (slot, hdr) = item
@@ -64,7 +65,7 @@ class WorkoutTransfer(
                 transferred += slot
                 link.bulk(WorkoutGroup.fetchedMark(transferred, noneLeft = index == sorted.lastIndex))
                 awaitBulk(KIND_MARK) ?: throw Fail("no answer to the fetched mark")
-                log("Workout read: slot $slot stored and marked as fetched")
+                noLog("Workout read: slot $slot stored and marked as fetched")
                 blockCache.keys.removeAll { it.startsWith("${hdr.startUtcMillis}:") }
                 done++
             }
@@ -112,11 +113,11 @@ class WorkoutTransfer(
 
     private suspend fun fetchWorkout(slot: Int, h: WorkoutHeader): WorkoutSession {
         val data = chain(h, CAT_DATA, h.dataAddress, h.dataBytes) ?: throw Fail("workout in slot $slot: data blocks could not be read")
-        log("Workout read: slot $slot 1F ${data.size} data blocks")
+        noLog("Workout read: slot $slot 1F ${data.size} data blocks")
         val laps = chain(h, CAT_LAPS, h.lapAddress, h.lapBytes) ?: throw Fail("workout in slot $slot: lap blocks could not be read")
         // The one-minute walking laps (header offset 55) are read to keep the chain complete; they are not decoded yet.
         val minute = chain(h, CAT_LAPS, h.minuteLapAddress, h.minuteLapBytes) ?: throw Fail("workout in slot $slot: minute lap blocks could not be read")
-        log("Workout read: slot $slot 20 ${laps.size} lap blocks, ${minute.size} minute lap blocks")
+        noLog("Workout read: slot $slot 20 ${laps.size} lap blocks, ${minute.size} minute lap blocks")
         return WorkoutSessionBuilder.build(slot, h, data, laps)
     }
 
