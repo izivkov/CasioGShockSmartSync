@@ -125,6 +125,7 @@ object RawSettingIO {
         val key = request.joinToString("") { "%02X".format(it) }
         // A reader of the same request waits for the answer that is already asked for.
         synchronized(lock) { current?.takeIf { it.key == key && it.deferred.isActive } }?.let { return await(it, timeoutMs, code) }
+        org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
         return sendLock.withLock {
             // A LifeLog transfer is running: it needs the link, so this read does not start.
             if (!WatchExchange.mutex.tryLock()) throw Failure("The watch is busy with a transfer.")
@@ -173,7 +174,7 @@ object RawSettingIO {
             pending.deferred.complete(ints)
         }
         // The connection setup and the button info wait for these codes too: the frame goes on to them as well.
-        return true
+        return !(ints[0] != 0xFF && ints[0] in org.avmedia.gshockapi.casio.ConnectionSetup.WATCHED_CODES)
     }
 
     /** Handler registered in WatchProtocol.dataReceivedHandlers for the codes upstream reads; answers are taken by [offer]. */
