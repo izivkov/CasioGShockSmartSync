@@ -1,7 +1,6 @@
 package org.avmedia.gshockapi
 
 import org.avmedia.gshockapi.io.WatchConditionIOFunctional
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -11,7 +10,10 @@ import org.junit.Test
  * hasBatteryLevel and filled from getBatteryLevel: both must give the value of the HA battery sensor (step * 100 / 6).
  */
 class H5600BatteryTest {
-    @After fun reset() = WatchInfo.reset()
+    private fun percent(name: String, answer: String): Int {
+        val info = WatchInfo.infoFor(name)
+        return WatchConditionIOFunctional.decode(answer, info.batteryLevelLowerLimit, info.batteryLevelUpperLimit).getOrThrow().batteryLevel
+    }
 
     @Test fun theH5600FamilyHasABatteryLevel() {
         assertTrue(WatchInfo.infoFor("CASIO GBX-H5600").hasBatteryLevel)
@@ -19,13 +21,11 @@ class H5600BatteryTest {
     }
 
     @Test fun theBatteryStepBecomesTheHaPercent() {
-        WatchInfo.setNameAndModel("CASIO GBX-H5600")
-        fun percent(step: Int) = WatchConditionIOFunctional.decode("28 %02X 15".format(step)).getOrThrow().batteryLevel
-        assertEquals(listOf(0, 17, 33, 50, 67, 83, 100), (0..6).map { percent(it) })
+        assertEquals(listOf(0, 17, 33, 50, 67, 83, 100), (0..6).map { percent("CASIO GBX-H5600", "28 %02X 15".format(it)) })
     }
 
     @Test fun otherWatchesKeepTheirScale() {
-        WatchInfo.setNameAndModel("CASIO GW-B5600")
-        assertEquals(50, WatchConditionIOFunctional.decode("28 0E 15").getOrThrow().batteryLevel)
+        assertEquals(50, percent("CASIO GW-B5600", "28 0E 15"))
+        assertEquals(100, percent("CASIO GW-B5600", "28 13 15"))
     }
 }

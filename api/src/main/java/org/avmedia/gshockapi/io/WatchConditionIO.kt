@@ -35,7 +35,11 @@ object WatchConditionIOFunctional {
      *
      * No side effects - pure extraction.
      */
-    fun decode(data: String): Result<WatchConditionValue> =
+    fun decode(
+        data: String,
+        batteryLevelLowerLimit: Int = WatchInfo.batteryLevelLowerLimit,
+        batteryLevelUpperLimit: Int = WatchInfo.batteryLevelUpperLimit,
+    ): Result<WatchConditionValue> =
         runCatching {
             val intArr = Utils.toIntArray(data)
             val bytes = Utils.byteArrayOfIntArray(intArr.drop(1).toIntArray())
@@ -47,9 +51,7 @@ object WatchConditionIOFunctional {
             val batteryRawValue = bytes[0].toInt()
             Timber.i("battery level raw value: $batteryRawValue")
 
-            // Calibrate battery level using watch-specific limits
-            val batteryLevelLowerLimit = WatchInfo.batteryLevelLowerLimit
-            val batteryLevelUpperLimit = WatchInfo.batteryLevelUpperLimit
+            // Calibrate battery level using watch-specific limits (the connected watch's unless given)
             val range = batteryLevelUpperLimit - batteryLevelLowerLimit
 
             if (range <= 0) {
