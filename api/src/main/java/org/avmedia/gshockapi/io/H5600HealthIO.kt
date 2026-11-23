@@ -120,6 +120,8 @@ object H5600HealthIO {
             return StepCounterData.unavailable()
         }
         lastError = null
+        // The connection setup runs first: its requests must not queue behind ours (they would lose their answers to the transfer).
+        org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
         // One exchange on the link at a time: a raw or settings read in progress finishes first.
         var locked = false
         try {
@@ -135,10 +137,12 @@ object H5600HealthIO {
                 val outcome = runAttempt(ZoneId.systemDefault(), peek)
                 if (!outcome.restart) return outcome.data
                 Timber.w("H5600: the watch did not answer; attempt $attempt of $MAX_TRANSFER_ATTEMPTS failed")
+                org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog attempt $attempt of $MAX_TRANSFER_ATTEMPTS failed: the watch did not answer")
             }
             lastError =
                 "LifeLog data could not be read after $MAX_TRANSFER_ATTEMPTS tries. Open the Health screen to try again."
             Timber.e("H5600: giving up after $MAX_TRANSFER_ATTEMPTS attempts")
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read failed after $MAX_TRANSFER_ATTEMPTS tries")
             return StepCounterData.unavailable()
         } finally {
             _status.value = null
@@ -154,6 +158,7 @@ object H5600HealthIO {
         synchronized(lock) { active = transfer }
         try {
             Timber.i("H5600: LifeLog attempt start (peek=$peek, zone=$zone)")
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read starts (peek=$peek)")
             val stepGoal = runSetup(transfer)
             Timber.i("H5600: setup finished, step goal=$stepGoal")
 
@@ -214,6 +219,7 @@ object H5600HealthIO {
                         "hours=${decoded.hourlyByHour.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }} " +
                         "warnings=${decoded.warnings.size}",
             )
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read done: steps ${decoded.currentDaySteps}")
             return AttemptOutcome(decoded, restart = false)
         } finally {
             setupWaiting = false

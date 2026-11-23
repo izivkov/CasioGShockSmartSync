@@ -76,6 +76,33 @@ object ConnectionSetup {
     /** True when the watch connected itself (kind 13 or 14): nobody pressed a button. */
     fun isAutomaticConnect(): Boolean = lastKind in SELF_CONNECT_KINDS
 
+    /** True while the setup's own steps wait for the watch's answers (it started and is not done). */
+    fun isRunning(): Boolean = when (step) {
+        Step.WAIT_11, Step.WAIT_3B, Step.WAIT_3A, Step.WAIT_23, Step.WAIT_39 -> true
+        else -> false
+    }
+
+    /**
+     * Waits (at most [timeoutMs]) until the setup is not running, so a LifeLog transfer or a settings read does not queue its own
+     * requests in front of the setup's and take the answers it waits for (log 2026-11-23 15:44:24: the setup got none of its answers).
+     * Returns true when the setup is idle, false when it still ran at the timeout (the caller goes on and the log says so).
+     */
+    suspend fun awaitIdle(timeoutMs: Long = SETUP_WAIT_MS, pollMs: Long = 100): Boolean {
+        if (!isRunning()) return true
+        ConnectionKeepAlive.log("waiting for the connection setup ($step) before starting")
+        val done = kotlinx.coroutines.withTimeoutOrNull(timeoutMs) {
+            while (isRunning()) kotlinx.coroutines.delay(pollMs)
+            true
+        } ?: false
+        if (!done) ConnectionKeepAlive.log("connection setup still at $step after ${timeoutMs / 1000} s, going on")
+        return done
+    }
+
+    /** Codes whose answers the setup (or the button info read) reacts to: a settings read of them must not swallow the answer. */
+    val WATCHED_CODES: Set<Int> = setOf(CODE_KIND, CODE_BLE, CODE_3A, CODE_3B, CODE_NAME, CODE_CONDITION, CODE_TIME_MANAGER)
+
+    const val SETUP_WAIT_MS = 20_000L
+
     fun reset() {
         lastKind = null
         org.avmedia.gshockapi.io.ButtonPressedIO.forgetAnswer()

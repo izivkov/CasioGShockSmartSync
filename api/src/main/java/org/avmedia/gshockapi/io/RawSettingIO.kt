@@ -172,6 +172,7 @@ object RawSettingIO {
         } else if (pending.accept(ints)) {
             pending.deferred.complete(ints)
         }
+        // The connection setup and the button info wait for these codes too: the frame goes on to them as well.
         return true
     }
 
