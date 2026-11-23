@@ -94,20 +94,69 @@ object H5600WorkoutIO {
         scope.launch { download() }
     }
 
-    /** One download run; waits for the exchange lock (and says so). Returns the number of workouts stored, or null when it did not run. */
-    suspend fun download(): WorkoutRunResult? {
-        log("Workout read asked")
+    /** After a failed read an automatic one waits this long; the button always reads (owner log 2026-11-23j: six tries in 14 min). */
+    const val RETRY_AFTER_FAIL_MS = 10 * 60_000L
+
+    /** A test seam for the back-off. */
+    @Volatile internal var clock: () -> Long = System::currentTimeMillis
+
+    /** How long a read waits for `47 01` (the watch's own setup) before it goes on anyway. */
+    @Volatile internal var setupWaitMs: Long = org.avmedia.gshockapi.casio.ConnectionSetup.SETUP_WAIT_MS
+
+    /** When the last read failed; null after a read that finished. */
+    @Volatile private var lastFailMs: Long? = null
+
+    /** An automatic read runs or waits for the link: a second automatic one is not queued behind it. */
+    private val automaticPending = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    internal fun resetBackoff() {
+        lastFailMs = null
+    }
+
+    /**
+     * One download run; waits for the exchange lock (and says so). Returns the number of workouts stored, or null when it did not run.
+     * [userAsked] = the button: it always runs; an automatic read is skipped while another one runs or waits, and for
+     * [RETRY_AFTER_FAIL_MS] after a failed one.
+     */
+    suspend fun download(userAsked: Boolean = false): WorkoutRunResult? {
+        log("Workout read asked" + if (userAsked) " (button)" else "")
         if (sink == null) return null.also { log("Workout read not started: the app keeps no workouts") }
-        if (!WatchExchange.mutex.tryLock()) {
-            log("Workout read waits: another exchange (a LifeLog or settings read) holds the link")
-            WatchExchange.mutex.lock()
-            log("Workout read: the link is free")
-        }
+        if (!userAsked && !automaticPending.compareAndSet(false, true)) return null.also { log("Workout read not started: one is already running or waiting") }
         try {
-            return downloadHeld()
+            if (!userAsked) backedOff()?.let { log(it); return null }
+            if (!WatchExchange.mutex.tryLock()) {
+                log("Workout read waits: another exchange (a LifeLog or settings read) holds the link")
+                WatchExchange.mutex.lock()
+                log("Workout read: the link is free")
+            }
+            try {
+                return downloadHeld(userAsked)
+            } finally {
+                WatchExchange.mutex.unlock()
+            }
         } finally {
-            WatchExchange.mutex.unlock()
+            if (!userAsked) automaticPending.set(false)
         }
+    }
+
+    /** The log line when an automatic read must wait after a failure, else null. */
+    private fun backedOff(): String? {
+        val failed = lastFailMs ?: return null
+        val left = failed + RETRY_AFTER_FAIL_MS - clock()
+        if (left <= 0) return null
+        return "Workout read not started: the last one failed, next automatic try in ${(left + 59_999) / 60_000} min (the button reads now)"
+    }
+
+    /** Like the LifeLog: no transfer before the watch's setup is done (`47 01`) and our own setup is idle. Owner log 2026-11-23j 22:27:39. */
+    private suspend fun awaitWatchSetup() {
+        org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
+        if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) return
+        log("Workout read waits for 47 01 (the watch's setup)")
+        val came = kotlinx.coroutines.withTimeoutOrNull(setupWaitMs) {
+            while (!org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) kotlinx.coroutines.delay(100)
+            true
+        }
+        log(if (came == true) "Workout read: 47 01 came" else "Workout read: no 47 01 in ${setupWaitMs / 1000} s, going on")
     }
 
     /**
@@ -133,9 +182,16 @@ object H5600WorkoutIO {
      * One download run for a caller that holds [WatchExchange.mutex]: the LifeLog read runs it before its START when `0x28`
      * flags workouts, as Casio's app does (notes T4: workouts first, then the LifeLog).
      */
-    suspend fun downloadHeld(): WorkoutRunResult? {
+    suspend fun downloadHeld(userAsked: Boolean = false): WorkoutRunResult? {
         val store = sink ?: return null.also { log("Workout read not started: the app keeps no workouts") }
+        if (!userAsked) backedOff()?.let { log(it); return null }
         if (!running.compareAndSet(false, true)) return null.also { log("Workout read not started: one is already running") }
+        try {
+            awaitWatchSetup()
+        } catch (t: Throwable) {
+            running.set(false)
+            throw t
+        }
         log("Workout read starts")
         val channel = Channel<WorkoutMsg>(Channel.UNLIMITED)
         val frames = mutableListOf<ByteArray>()
@@ -157,6 +213,7 @@ object H5600WorkoutIO {
             )
             val result = transfer.run()
             lastError = result.error
+            lastFailMs = if (result.error == null) null else clock()
             if (result.error == null) lastCheckMs = System.currentTimeMillis()
             log(
                 if (result.error == null) "Workout read done: ${result.downloaded} new stored"
@@ -165,6 +222,7 @@ object H5600WorkoutIO {
             keepDump(frames, stream.toByteArray(), result.error)
             return result
         } catch (t: Throwable) {
+            lastFailMs = clock()
             log("Workout read stopped: ${t.javaClass.simpleName} ${t.message.orEmpty()}")
             throw t
         } finally {

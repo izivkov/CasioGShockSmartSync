@@ -42,7 +42,7 @@ class WorkoutsViewModel @Inject constructor(
         if (_ui.value.downloading) return
         _ui.update { it.copy(downloading = true, downloadNote = "") }
         viewModelScope.launch {
-            val r = withContext(Dispatchers.IO) { runCatching { org.avmedia.gshockapi.io.H5600WorkoutIO.download() }.getOrNull() }
+            val r = withContext(Dispatchers.IO) { runCatching { org.avmedia.gshockapi.io.H5600WorkoutIO.download(userAsked = true) }.getOrNull() }
             _ui.update { it.copy(downloading = false, downloadNote = WorkoutText.downloadNote(r?.downloaded, r?.error)) }
         }
     }
