@@ -45,6 +45,7 @@ object H5600Protocol : StandardProtocol() {
                 mapOf(
                     ConnectionKeepAlive.CHECK to ConnectionKeepAlive::onCheck,
                     ConnectionKeepAlive.SETUP to ConnectionKeepAlive::onSetup,
+                    0x3D to NotificationGate::onManager,
                     0x3A to ConnectionSetup::on3a,
                     0x3B to ConnectionSetup::on3b,
                     H5600Channel.DRSP.key to { d: String -> if (TideTransferIO.isActive) TideTransferIO.onDrsp(d) else if (H5600WorkoutIO.isActive) H5600WorkoutIO.onDrsp(d) else H5600HealthIO.onDrsp(d) },

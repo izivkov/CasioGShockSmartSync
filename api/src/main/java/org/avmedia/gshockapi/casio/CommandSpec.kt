@@ -9,7 +9,7 @@ enum class WatchChannel(val handle: GetSetMode, val uuid: UUID, val withResponse
     ALL_FEATURES(GetSetMode.SET, CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID, true),
     NOTIFICATION(GetSetMode.NOTIFY, CasioConstants.CASIO_NOTIFICATION_CHARACTERISTIC_UUID, false),
     DATA_REQUEST(GetSetMode.DATA_REQUEST, CasioConstants.CASIO_DATA_REQUEST_CHARACTERISTIC_UUID, true),
-    CONVOY(GetSetMode.CONVOY, CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID, true),
+    CONVOY(GetSetMode.CONVOY, CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID, false),
     SP_REQUEST(GetSetMode.SP_REQUEST, CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID, false),
     SP_DATA(GetSetMode.SP_DATA, CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID, true),
     ;
@@ -78,7 +78,7 @@ sealed class Verdict {
  */
 object CommandTable {
     const val REQUEST_TIMEOUT_MS = 10_000L
-    const val FRAME_CUT = 21
+    const val FRAME_CUT = 20
 
     /** True in unit tests: a code that is not in the table is refused instead of passed on with a warning. */
     @Volatile var strict = false

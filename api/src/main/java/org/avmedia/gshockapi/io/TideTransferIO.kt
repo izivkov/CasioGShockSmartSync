@@ -25,6 +25,7 @@ object TideTransferIO {
      */
     fun channelOf(hex: String): H5600Channel =
         when (WatchLink.currentSource()) {
+            CasioConstants.CASIO_DATA_REQUEST_CHARACTERISTIC_UUID -> H5600Channel.DRSP
             CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID -> H5600Channel.CONVOY
             else -> H5600WorkoutIO.channelOf(hex)
         }

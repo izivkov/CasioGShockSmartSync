@@ -49,7 +49,7 @@ class WatchQueue(
     private var waiting: Waiting? = null
 
     init {
-        scope.launch { for (item in items) launch { item.done.complete(runOne(item)) } }
+        scope.launch { for (item in items) item.done.complete(runOne(item)) }
     }
 
     /** Puts the frame at the end of the queue. The result completes when the request is done. */
@@ -74,7 +74,7 @@ class WatchQueue(
         val w = synchronized(lock) { waiting } ?: return
         // Every notification that arrives while a read waits is kept in connection.log (first bytes), FF answers included.
         ConnectionKeepAlive.log("read 0x%02X waits, rx %s".format(w.frame[0].toInt() and 0xFF, bytes.take(10).joinToString(" ") { "%02X".format(it) }))
-        if (CommandTable.matches(w.frame, bytes)) w.answer.complete(bytes)
+        if (bytes[0] == 0xFF.toByte() || CommandTable.matches(w.frame, bytes)) w.answer.complete(bytes)
     }
 
     private suspend fun runOne(item: Item): Outcome =

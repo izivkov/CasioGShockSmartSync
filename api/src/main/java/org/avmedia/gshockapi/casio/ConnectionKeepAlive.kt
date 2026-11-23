@@ -9,7 +9,7 @@ import org.avmedia.gshockapi.utils.Utils
 import timber.log.Timber
 
 /** Link Loss is written as `00 level` to the all-features characteristic, never to the standard Link Loss characteristic. */
-fun linkLossFrame(level: Int): ByteArray = byteArrayOf(level.toByte(), 0x00)
+fun linkLossFrame(level: Int): ByteArray = byteArrayOf(0x00, level.toByte())
 
 /** The writes the keep-alive and the connection setup make. A fake in the unit tests. */
 interface WatchWriter {
