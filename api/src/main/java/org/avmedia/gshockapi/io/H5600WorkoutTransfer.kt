@@ -12,6 +12,12 @@ interface WorkoutLink {
 
     /** The bulk (convoy) characteristic: first byte = kind. */
     fun bulk(data: ByteArray)
+
+    /** Like [bulk], and true when the write result came (the next chunk waits for it). The default does not wait. */
+    suspend fun bulkConfirmed(data: ByteArray): Boolean {
+        bulk(data)
+        return true
+    }
 }
 
 class WorkoutMsg(val channel: H5600Channel, val data: ByteArray)
@@ -31,7 +37,7 @@ class WorkoutTransfer(
     private val sink: suspend (WorkoutSession) -> Boolean,
     private val blockCache: MutableMap<String, ByteArray> = HashMap(),
     private val capture: (WorkoutMsg?, ByteArray?) -> Unit = { _, _ -> },
-    private val replyTimeoutMs: Long = 5_000L,
+    private val replyTimeoutMs: Long = org.avmedia.gshockapi.casio.LongProcess.WORKOUT.answerMs!!,
     private val readTimeoutMs: Long = 10_000L,
 ) {
     private class Fail(val text: String, val refused: Boolean = false) : Exception(text)

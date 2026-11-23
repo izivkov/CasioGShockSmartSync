@@ -64,7 +64,10 @@ internal fun NotificationSettingsContent(
                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
                     ValueRow("Sound", s?.let { NotificationSoundCodec.MODES[it.soundMode] } ?: "-", can && s != null) { picker = Picker.SoundMode }
                     ValueRow("Vibration", s?.let { NotificationSoundCodec.MODES[it.vibrationMode] } ?: "-", can && s != null) { picker = Picker.VibrationMode }
-                    ValueRow("Sound pattern", s?.let { NotificationSoundCodec.PATTERNS[it.pattern] } ?: "-", can && s != null) { picker = Picker.Pattern }
+                    // The owner's watch sends no pattern byte: the row is hidden then (a read that failed still shows "-").
+                    if (s == null || s.pattern != null) {
+                        ValueRow("Sound pattern", s?.pattern?.let { NotificationSoundCodec.PATTERNS[it] } ?: "-", can && s != null) { picker = Picker.Pattern }
+                    }
                     AppText(text = "Events (the switches apply in Custom mode)", fontSize = 13.sp, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                     NotificationSoundCodec.EVENTS.forEachIndexed { event, name ->
                         EventRow(
@@ -79,7 +82,7 @@ internal fun NotificationSettingsContent(
                     }
                     ValueRow("Language", m?.let { "Setting ${it.language}" } ?: "-", can && m != null, note = "Meaning of the values: $NOT_CONFIRMED") { picker = Picker.Language }
                     ValueRow("Off at night", m?.let { "Setting ${it.offAtNight}" } ?: "-", can && m != null, note = "Meaning of the values: $NOT_CONFIRMED") { picker = Picker.OffAtNight }
-                    ValueRow("Pop-up size", m?.let { "Value ${it.popUpSize}" } ?: "-", enabled = false, note = "Read only")
+                    ValueRow("Pop-up size", m?.popUpSize?.let { "Value $it" } ?: "-", enabled = false, note = "Read only")
                     val text = if (ui.working) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
                 }
@@ -91,7 +94,7 @@ internal fun NotificationSettingsContent(
     when (picker) {
         Picker.SoundMode -> if (s != null) ChoiceDialog("Sound", NotificationSoundCodec.MODES, s.soundMode, { close(); viewModel.setSoundMode(it) }, close)
         Picker.VibrationMode -> if (s != null) ChoiceDialog("Vibration", NotificationSoundCodec.MODES, s.vibrationMode, { close(); viewModel.setVibrationMode(it) }, close)
-        Picker.Pattern -> if (s != null) ChoiceDialog("Sound pattern", NotificationSoundCodec.PATTERNS, s.pattern, { close(); viewModel.setPattern(it) }, close)
+        Picker.Pattern -> if (s?.pattern != null) ChoiceDialog("Sound pattern", NotificationSoundCodec.PATTERNS, s.pattern, { close(); viewModel.setPattern(it) }, close)
         Picker.Language -> if (m != null) ChoiceDialog("Language", NUMBERED, m.language, { close(); viewModel.setLanguage(it) }, close)
         Picker.OffAtNight -> if (m != null) ChoiceDialog("Off at night", NUMBERED, m.offAtNight, { close(); viewModel.setOffAtNight(it) }, close)
         null -> Unit

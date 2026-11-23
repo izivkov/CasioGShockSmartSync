@@ -7,7 +7,8 @@ package org.avmedia.gshockapi.io
  */
 object NotificationSoundCodec {
     const val CODE = 0x42
-    private const val MIN_INDEX = 5
+    /** The model of the owner's watch answers 5 value bytes (index 0 to 4): there is no sound pattern byte, so [Setting.pattern] is null. */
+    private const val MIN_INDEX = 4
     const val CUSTOM = 1
 
     val EVENTS: List<String> =
@@ -19,7 +20,7 @@ object NotificationSoundCodec {
     val MODES: List<String> = listOf("Off", "Custom (per event)", "On")
     val PATTERNS: List<String> = listOf("Mute", "Pattern A", "Pattern B", "Pattern C")
 
-    data class Setting(val soundMode: Int, val vibrationMode: Int, val soundMask: Int, val vibrationMask: Int, val pattern: Int) {
+    data class Setting(val soundMode: Int, val vibrationMode: Int, val soundMask: Int, val vibrationMask: Int, val pattern: Int?) {
         fun soundOn(event: Int): Boolean = soundMask shr event and 1 != 0
 
         fun vibrationOn(event: Int): Boolean = vibrationMask shr event and 1 != 0
@@ -30,8 +31,8 @@ object NotificationSoundCodec {
         val flags = Frame.u8(frame, 0) ?: return null
         val sound = flags and 3
         val vibration = flags shr 2 and 3
-        val pattern = Frame.u8(frame, 5) ?: return null
-        if (sound > 2 || vibration > 2 || pattern > 3) return null
+        val pattern = Frame.u8(frame, 5)
+        if (sound > 2 || vibration > 2 || (pattern != null && pattern > 3)) return null
         val soundMask = (Frame.u8(frame, 1) ?: return null) or ((Frame.u8(frame, 2) ?: return null) shl 8)
         val vibrationMask = (Frame.u8(frame, 3) ?: return null) or ((Frame.u8(frame, 4) ?: return null) shl 8)
         return Setting(sound, vibration, soundMask, vibrationMask, pattern)
@@ -60,7 +61,7 @@ object NotificationSoundCodec {
     }
 
     fun withPattern(frame: ByteArray, pattern: Int): ByteArray? {
-        if (parse(frame) == null || pattern !in PATTERNS.indices) return null
+        if (parse(frame)?.pattern == null || pattern !in PATTERNS.indices) return null
         return Frame.withBytes(frame, mapOf(5 to pattern))
     }
 
@@ -79,18 +80,19 @@ object NotificationSoundCodec {
  */
 object NotificationManagerCodec {
     const val CODE = 0x3D
-    private const val MIN_INDEX = 16
+    /** Index 6 (off at night) is the last one needed; index 16 (pop-up size) is read when the answer has it (the owner's watch sends 16 bytes after the 30, so it is there). */
+    private const val MIN_INDEX = 6
     const val READ_COMMAND = 0x30
     const val LANGUAGE_CHANGED = 0x31
     const val NIGHT_CHANGED = 0x32
 
-    data class Setting(val language: Int, val offAtNight: Int, val popUpSize: Int)
+    data class Setting(val language: Int, val offAtNight: Int, val popUpSize: Int?)
 
     fun parse(frame: ByteArray): Setting? {
         if (!Frame.hasIndex(frame, CODE, MIN_INDEX)) return null
         val lang = (Frame.u8(frame, 1) ?: return null) and 3
         val night = ((Frame.u8(frame, 6) ?: return null) shr 1) and 3
-        val popUp = (Frame.u8(frame, 16) ?: return null) and 1
+        val popUp = Frame.u8(frame, 16)?.and(1)
         return Setting(lang, night, popUp)
     }
 

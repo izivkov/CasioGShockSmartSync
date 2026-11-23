@@ -9,7 +9,7 @@ package org.avmedia.gshockapi.io
 import CachedIO
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
-import org.avmedia.gshockapi.ble.Connection
+import org.avmedia.gshockapi.casio.WatchLink
 import org.avmedia.gshockapi.ble.GetSetMode
 import java.util.UUID
 
@@ -78,8 +78,14 @@ object IO {
         handle: GetSetMode,
         bytesArray: ByteArray,
     ) {
-        Connection.write(handle, bytesArray)
+        WatchLink.write(handle, bytesArray)
     }
+
+    /** Waits for the result: true when the write result came (the watch took the frame). */
+    suspend fun writeChecked(
+        handle: GetSetMode,
+        bytesArray: ByteArray,
+    ): Boolean = WatchLink.writeChecked(handle, bytesArray)
 
     fun writeCmd(
         handle: GetSetMode,
@@ -92,7 +98,7 @@ object IO {
         handle: GetSetMode,
         bytesStr: String,
     ) {
-        Connection.write(handle, IOFunctional.toCasioCmd(bytesStr))
+        WatchLink.write(handle, IOFunctional.toCasioCmd(bytesStr))
     }
 
     fun removeFromCache(newValue: String) {

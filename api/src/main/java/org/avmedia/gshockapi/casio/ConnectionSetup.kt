@@ -80,12 +80,25 @@ object ConnectionSetup {
         ConnectionKeepAlive.writer.request(CODE_BLE)
     }
 
+    /**
+     * What Casio writes back after reading [code]: `0x11` with bit 2 of value index 4 cleared, `0x3A` with value index 7 and 8 set
+     * to `DC 05`, every other value as read. Used by the connection setup and by the LifeLog setup, so both write the same bytes.
+     */
+    fun writeBackValue(code: Int, reply: ByteArray): ByteArray {
+        val b = reply.copyOf()
+        if (code == CODE_BLE && b.size >= 6) b[5] = (b[5].toInt() and 0x04.inv()).toByte()
+        if (code == CODE_3A && b.size >= 10) {
+            b[8] = 0xDC.toByte()
+            b[9] = 0x05
+        }
+        return b
+    }
+
     fun onBle(data: String) {
         if (step != Step.WAIT_11) return
-        val b = bytes(data).toMutableList()
+        val b = bytes(data)
         if (b.size < 6 || b[0] != CODE_BLE) return
-        b[5] = b[5] and 0x04.inv()
-        ConnectionKeepAlive.writer.writeAllFeatures(b.map { it.toByte() }.toByteArray())
+        ConnectionKeepAlive.writer.writeAllFeatures(writeBackValue(CODE_BLE, b.map { it.toByte() }.toByteArray()))
         ConnectionKeepAlive.log("0x11 written with bit 2 of byte 4 cleared")
         if (reconnectKind) {
             step = Step.WAIT_3B
@@ -134,11 +147,9 @@ object ConnectionSetup {
 
     fun on3a(data: String) {
         if (step != Step.WAIT_3A) return
-        val b = bytes(data).toMutableList()
+        val b = bytes(data)
         if (b.size < 10 || b[0] != CODE_3A) return
-        b[8] = 0xDC
-        b[9] = 0x05
-        ConnectionKeepAlive.writer.writeAllFeatures(b.map { it.toByte() }.toByteArray())
+        ConnectionKeepAlive.writer.writeAllFeatures(writeBackValue(CODE_3A, b.map { it.toByte() }.toByteArray()))
         ConnectionKeepAlive.log("0x3A written with bytes 7 and 8 set to DC 05")
         nextName()
     }

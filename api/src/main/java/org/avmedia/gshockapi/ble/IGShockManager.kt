@@ -6,13 +6,17 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.os.Build
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withTimeoutOrNull
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.CommandTable
+import org.avmedia.gshockapi.casio.WatchChannel
 import timber.log.Timber
 import java.util.UUID
 
@@ -33,7 +37,6 @@ enum class GetSetMode {
     SP_REQUEST,
     SP_DATA,
     CONVOY,
-    LINK_LOSS,
 }
 
 interface GShock {
@@ -60,6 +63,12 @@ interface GShock {
         data: ByteArray,
     )
 
+    /** Like [write], and true only when Android reported the write done (the write result, for a write with response). */
+    suspend fun writeChecked(
+        handle: GetSetMode,
+        data: ByteArray,
+    ): Boolean
+
     fun isServiceSupported(handle: GetSetMode): Boolean
 }
 
@@ -77,7 +86,6 @@ private class GShockManagerImpl(
     private var writeCharacteristicHolderSPRequest: BluetoothGattCharacteristic? = null
     private var writeCharacteristicHolderSPData: BluetoothGattCharacteristic? = null
     private var writeCharacteristicHolderConvoy: BluetoothGattCharacteristic? = null
-    private var writeCharacteristicHolderLinkLoss: BluetoothGattCharacteristic? = null
 
     var dataReceivedCallback: IDataReceived? = null
     private lateinit var device: BluetoothDevice
@@ -135,7 +143,8 @@ private class GShockManagerImpl(
                             }
                         Timber.d("Notification from ${char.uuid}: $hexData")
                         org.avmedia.gshockapi.casio.NotificationSubscriptions.logNotification(char.uuid, hexData)
-                        dataReceivedCallback?.dataReceived(hexData)
+                        org.avmedia.gshockapi.casio.WatchLink.onNotification(char.uuid, hexData)
+                        org.avmedia.gshockapi.casio.WatchLink.withSource(char.uuid) { dataReceivedCallback?.dataReceived(hexData) }
                     }
                     enableNotifications(char)
                         .fail { _, status ->
@@ -190,7 +199,6 @@ private class GShockManagerImpl(
         writeCharacteristicHolderSPRequest = null
         writeCharacteristicHolderSPData = null
         writeCharacteristicHolderConvoy = null
-        writeCharacteristicHolderLinkLoss = null
         characteristicUUIDs.clear()
         org.avmedia.gshockapi.casio.NotificationSubscriptions.clear()
 
@@ -340,8 +348,6 @@ private class GShockManagerImpl(
                         CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID,
                     )
             }
-            writeCharacteristicHolderLinkLoss =
-                gatt.getService(CasioConstants.LINK_LOSS_SERVICE_UUID)?.getCharacteristic(CasioConstants.LINK_LOSS_ALERT_LEVEL_UUID)
             Timber.i("isRequiredServiceSupported returning true")
             return true
         }
@@ -435,7 +441,6 @@ private class GShockManagerImpl(
                 GetSetMode.SP_REQUEST -> CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID
                 GetSetMode.SP_DATA -> CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID
                 GetSetMode.CONVOY -> CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID
-                GetSetMode.LINK_LOSS -> CasioConstants.LINK_LOSS_ALERT_LEVEL_UUID
             }
         return characteristicUUIDs.containsKey(uuid.toString())
     }
@@ -444,17 +449,24 @@ private class GShockManagerImpl(
         handle: GetSetMode,
         data: ByteArray,
     ) {
+        writeChecked(handle, data)
+    }
+
+    override suspend fun writeChecked(
+        handle: GetSetMode,
+        data: ByteArray,
+    ): Boolean {
         if (characteristicUUIDs.isEmpty()) {
             // The link is away (an always-connected watch drops by design): wait for it, else fail plainly.
             if (!ReconnectWait.awaitLink({ characteristicUUIDs.isNotEmpty() && writeCharacteristicHolder != null })) {
                 ProgressEvents.onNext("ApiError", ReconnectWait.NOT_CONNECTED_MESSAGE)
-                return
+                return false
             }
         }
 
         if (!isServiceSupported(handle)) {
             Timber.e("${handle.name.lowercase()} feature not supported")
-            return
+            return false
         }
 
         val characteristic =
@@ -466,16 +478,14 @@ private class GShockManagerImpl(
                 GetSetMode.SP_REQUEST -> writeCharacteristicHolderSPRequest
                 GetSetMode.SP_DATA -> writeCharacteristicHolderSPData
                 GetSetMode.CONVOY -> writeCharacteristicHolderConvoy
-                GetSetMode.LINK_LOSS -> writeCharacteristicHolderLinkLoss
             }
 
+        // The write type comes from the command table: request and notification text without response, settings with response.
         val writeType =
-            if (handle == GetSetMode.GET || handle == GetSetMode.NOTIFY || handle == GetSetMode.SP_REQUEST ||
-                handle == GetSetMode.CONVOY
-            ) {
-                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-            } else {
+            if (WatchChannel.of(handle).withResponse) {
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            } else {
+                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
             }
 
         val isStartupRead = handle == GetSetMode.GET && data.firstOrNull()?.toInt()?.and(0xFF) in setOf(0x10, 0x22)
@@ -484,18 +494,25 @@ private class GShockManagerImpl(
             Timber.i("Queueing startup read: request=0x$requestHex characteristic=${characteristic?.uuid} writeType=$writeType")
         }
 
-        try {
-            val request = writeCharacteristic(characteristic, data, writeType)
-            if (isStartupRead) {
-                request
-                    .done { Timber.i("Startup read write completed: request=0x$requestHex") }
-                    .fail { _, status -> Timber.e("Startup read write failed: request=0x$requestHex status=$status") }
-            }
-            request.enqueue()
+        return try {
+            val finished = CompletableDeferred<Boolean>()
+            writeCharacteristic(characteristic, data, writeType)
+                .done {
+                    if (isStartupRead) Timber.i("Startup read write completed: request=0x$requestHex")
+                    finished.complete(true)
+                }
+                .fail { _, status ->
+                    Timber.e("Write failed: request=0x$requestHex status=$status")
+                    finished.complete(false)
+                }
+                .enqueue()
+            withTimeoutOrNull(CommandTable.REQUEST_TIMEOUT_MS) { finished.await() }
+                ?: false.also { Timber.w("No write result within ${CommandTable.REQUEST_TIMEOUT_MS} ms: request=0x$requestHex") }
         } catch (e: Exception) {
             Timber.e(e, "Error writing to characteristic ${characteristic?.uuid}")
             ProgressEvents.onNext("ApiError", "Failed to write data: ${e.message}")
             disconnect()
+            false
         }
     }
 }

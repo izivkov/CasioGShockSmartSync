@@ -6,8 +6,14 @@ sealed class SettingWriteResult {
 
     data object Done : SettingWriteResult()
 
+    /** The watch confirmed the write, but did not answer the read-back in time. Not a failure: Casio's own app never reads back. */
+    data object Written : SettingWriteResult()
+
     data class Failed(val message: String) : SettingWriteResult()
 }
+
+/** Thrown by a write function when the watch did not confirm the write (no write result, or a failed one). */
+class WriteNotConfirmed(message: String) : Exception(message)
 
 /**
  * Read, change, write, read back. Used for every write to a watch setting, because the watch is the only
@@ -15,8 +21,9 @@ sealed class SettingWriteResult {
  * 1. read the current frame of request [code];
  * 2. the caller changes only the decoded fields, and says which frame bytes it may touch ([touched]);
  * 3. any other byte that differs stops the write;
- * 4. write, wait [settle], read again, and compare the whole frame with what was written.
- * A mismatch is reported once and never retried. No code here knows a layout.
+ * 4. write (the write result must be OK), wait [settle], read again, and compare the whole frame with what was written.
+ * A read-back is only a safety check after the write result: no answer to it is not a failure ([SettingWriteResult.Written]);
+ * a different value is reported once and never retried. No code here knows a layout.
  */
 class SafeSettingWrite(
     private val read: suspend (code: Int) -> ByteArray?,
@@ -53,9 +60,13 @@ class SafeSettingWrite(
             return SettingWriteResult.Failed("The change would alter other bytes. Nothing was changed.")
         }
         if (after.contentEquals(before)) return SettingWriteResult.Unchanged
-        write(after)
+        try {
+            write(after)
+        } catch (e: WriteNotConfirmed) {
+            return SettingWriteResult.Failed("The watch did not confirm the change. Check the setting on the watch.")
+        }
         settle()
-        val back = readValue() ?: return SettingWriteResult.Failed("The watch did not answer after the change. Check the setting on the watch.")
+        val back = readValue() ?: return SettingWriteResult.Written
         return if (matches(back, expectedBack(before, after))) {
             SettingWriteResult.Done
         } else {

@@ -33,7 +33,7 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 @RequiresApi(Build.VERSION_CODES.O)
 object H5600HealthIO {
-    private const val SETUP_REPLY_TIMEOUT_MS = 5_000L
+    private val SETUP_REPLY_TIMEOUT_MS = org.avmedia.gshockapi.casio.LongProcess.LIFELOG.answerMs!!
     private const val OVERALL_TIMEOUT_MS = 180_000L
     private const val STEP_GOAL_COMMAND = 0x43
     private const val WATCH_CONDITION_COMMAND = 0x28
@@ -255,7 +255,7 @@ object H5600HealthIO {
                 stepGoal = (reply[1].toInt() and 0xFF) or ((reply[2].toInt() and 0xFF) shl 8)
             }
             if (command in H5600LifeLogSync.ECHO_REPLY_COMMANDS) {
-                IO.writeCmd(GetSetMode.SET, reply)
+                IO.writeCmd(GetSetMode.SET, org.avmedia.gshockapi.casio.ConnectionSetup.writeBackValue(command, reply))
             }
         }
         return stepGoal

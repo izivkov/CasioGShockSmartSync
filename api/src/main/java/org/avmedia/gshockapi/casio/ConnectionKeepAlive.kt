@@ -4,10 +4,12 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.utils.Utils
 import timber.log.Timber
+
+/** Link Loss is written as `00 level` to the all-features characteristic, never to the standard Link Loss characteristic. */
+fun linkLossFrame(level: Int): ByteArray = byteArrayOf(0x00, level.toByte())
 
 /** The writes the keep-alive and the connection setup make. A fake in the unit tests. */
 interface WatchWriter {
@@ -17,16 +19,16 @@ interface WatchWriter {
     /** A read request (one code) on the request characteristic. */
     fun request(code: Int)
 
-    /** Link Loss alert level (0 none, 1 mild, 2 high). */
+    /** Link Loss alert level (0 none, 1 mild, 2 high): the frame `00 level` on the all-features characteristic. */
     fun writeLinkLoss(level: Int)
 }
 
 internal object ConnectionWriter : WatchWriter {
-    override fun writeAllFeatures(bytes: ByteArray) = Connection.write(GetSetMode.SET, bytes)
+    override fun writeAllFeatures(bytes: ByteArray) = WatchLink.write(GetSetMode.SET, bytes)
 
-    override fun request(code: Int) = Connection.write(GetSetMode.GET, byteArrayOf(code.toByte()))
+    override fun request(code: Int) = WatchLink.write(GetSetMode.GET, byteArrayOf(code.toByte()))
 
-    override fun writeLinkLoss(level: Int) = Connection.write(GetSetMode.LINK_LOSS, byteArrayOf(level.toByte()))
+    override fun writeLinkLoss(level: Int) = WatchLink.write(GetSetMode.SET, linkLossFrame(level))
 }
 
 /**

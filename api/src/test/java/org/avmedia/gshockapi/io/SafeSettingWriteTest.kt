@@ -89,4 +89,21 @@ class SafeSettingWriteTest {
         assertTrue(result is SettingWriteResult.Failed)
         assertTrue(watch.writes.isEmpty())
     }
+
+    @Test
+    fun aWatchThatIsSlowToAnswerTheReadBackIsNotAFailureOfAConfirmedWrite() = runBlocking {
+        var reads = 0
+        val written = mutableListOf<ByteArray>()
+        val w = SafeSettingWrite(read = { if (reads++ == 0) original else null }, write = { written += it })
+        val result = w.update(0x4F, PhysicalSettingsCodec.BEDTIME_BYTES) { PhysicalSettingsCodec.withBedtime(it, 22, 0) }
+        assertEquals(SettingWriteResult.Written, result)
+        assertEquals(1, written.size)
+    }
+
+    @Test
+    fun aWriteTheWatchDidNotConfirmIsReported() = runBlocking {
+        val w = SafeSettingWrite(read = { original }, write = { throw WriteNotConfirmed("no write result") })
+        val result = w.update(0x4F, PhysicalSettingsCodec.BEDTIME_BYTES) { PhysicalSettingsCodec.withBedtime(it, 22, 0) }
+        assertTrue(result is SettingWriteResult.Failed)
+    }
 }

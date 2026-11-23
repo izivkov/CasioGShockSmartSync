@@ -70,7 +70,7 @@ class WatchFaceViewModel @Inject constructor(private val access: WatchSettingsAc
         viewModelScope.launch {
             _ui.update { it.copy(working = true, message = null) }
             val result = access.update(WatchFaceCodec.CODE, touched, change)
-            val hint = if (slot != null && result == SettingWriteResult.Done) " Look at the watch and note which place changed." else ""
+            val hint = if (slot != null && (result == SettingWriteResult.Done || result == SettingWriteResult.Written)) " Look at the watch and note which place changed." else ""
             _ui.update { it.copy(message = result.text(what) + hint) }
             val frame = access.read(WatchFaceCodec.CODE)
             _ui.update { it.copy(working = false, face = frame?.let { f -> WatchFaceCodec.parse(f) } ?: it.face) }

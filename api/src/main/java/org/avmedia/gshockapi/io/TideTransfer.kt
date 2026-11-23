@@ -3,6 +3,8 @@ package org.avmedia.gshockapi.io
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
+import org.avmedia.gshockapi.casio.ConnectionKeepAlive
+import org.avmedia.gshockapi.casio.LongProcess
 
 /** The bytes of the port record transfer (notes I5, bulk category 0x23), without any I/O. */
 object TideFraming {
@@ -50,23 +52,29 @@ class TideRunResult(val error: String?)
 class TideTransfer(
     private val link: WorkoutLink,
     private val inbox: Channel<WorkoutMsg>,
-    private val replyTimeoutMs: Long = 5_000L,
-    private val chunkGapMs: Long = 400L,
-    private val endTimeoutMs: Long = 70_000L,
+    private val replyTimeoutMs: Long = LongProcess.TIDE.answerMs!!,
+    private val chunkGapMs: Long = LongProcess.TIDE.chunkGapMs!!,
+    private val endTimeoutMs: Long = LongProcess.TIDE.totalMs!!,
 ) {
     suspend fun run(record: ByteArray): TideRunResult {
+        ConnectionKeepAlive.log("tide: start 00 23, record ${record.size} bytes")
         link.drsp(TideFraming.start(record.size))
         val start = awaitBulk(replyTimeoutMs) { TideFraming.parseStart(it) != null }?.let { TideFraming.parseStart(it) }
             ?: return fail("The watch did not answer the start of the transfer.")
+        ConnectionKeepAlive.log("tide: start answer state ${start.first} reason ${start.second}")
         if (start.first != 0) return fail("The watch refused the tide transfer (state ${start.first}, reason ${start.second}).")
         val chunk = awaitBulk(replyTimeoutMs) { TideFraming.parseChunkSize(it) != null }?.let { TideFraming.parseChunkSize(it) }
             ?: return fail("The watch did not say how big the pieces are, or said a size the app does not accept.")
+        ConnectionKeepAlive.log("tide: chunk size $chunk, ${TideFraming.chunks(record, chunk).size} pieces")
         for (piece in TideFraming.chunks(record, chunk)) {
-            link.bulk(piece)
+            // The next piece goes chunkGapMs after the write result of this one (notes T4); a failed write ends the transfer.
+            if (!link.bulkConfirmed(piece)) return fail("A piece of the tide data could not be sent to the watch.")
             delay(chunkGapMs)
         }
+        ConnectionKeepAlive.log("tide: all pieces sent, waiting up to ${endTimeoutMs / 1000} s for the end message")
         val end = awaitChannel(endTimeoutMs, H5600Channel.DRSP) { true }
             ?: return fail("The watch did not confirm the end of the transfer.")
+        ConnectionKeepAlive.log("tide: end message " + end.take(8).joinToString(" ") { "%02X".format(it) })
         if (end.firstOrNull()?.toInt() == 0x03) return fail("The watch aborted the transfer.")
         link.drsp(TideFraming.end())
         return TideRunResult(null)

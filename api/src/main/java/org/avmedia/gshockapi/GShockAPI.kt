@@ -627,7 +627,8 @@ class GShockAPI(private val context: Context) : IGShockAPI {
     override fun sendAppNotification(notification: AppNotification) {
         val encodedBuffer = AppNotificationIO.encodeNotificationPacket(notification)
         val encryptedBuffer = AppNotificationIO.xorEncodeBuffer(encodedBuffer)
-        writeCmd(GetSetMode.NOTIFY, encryptedBuffer)
+        org.avmedia.gshockapi.casio.NotificationSender.spacingMs = if (WatchInfo.protocol === org.avmedia.gshockapi.protocols.H5600Protocol) 2_000L else 500L
+        org.avmedia.gshockapi.casio.NotificationSender.send(encryptedBuffer)
     }
 
     /**

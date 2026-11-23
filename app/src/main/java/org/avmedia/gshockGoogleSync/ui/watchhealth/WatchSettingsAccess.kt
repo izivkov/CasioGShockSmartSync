@@ -10,11 +10,13 @@ import org.avmedia.gshockGoogleSync.webhook.RawWatchRequest
 import org.avmedia.gshockGoogleSync.webhook.WatchDecoders
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.ble.GetSetMode
+import org.avmedia.gshockapi.casio.ConnectionKeepAlive
 import org.avmedia.gshockapi.io.ActivityItemCodec
 import org.avmedia.gshockapi.io.H5600HealthIO
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.SafeSettingWrite
 import org.avmedia.gshockapi.io.SettingWriteResult
+import org.avmedia.gshockapi.io.WriteNotConfirmed
 import org.avmedia.gshockapi.io.TideSettingCodec
 
 /** True when the connected watch is of the DW-H5600 family (the one whose settings these screens know). */
@@ -30,7 +32,7 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
     private val writer =
         SafeSettingWrite(
             read = { read(it) },
-            write = { IO.writeCmd(GetSetMode.SET, it) },
+            write = { if (!IO.writeChecked(GetSetMode.SET, it)) throw WriteNotConfirmed("no write result") },
             settle = { delay(SETTLE_MS) },
         )
 
@@ -39,6 +41,13 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
 
     /** Why the last read of each code gave nothing: a refusal with its status, a timeout, or the raw bytes of an answer that is too short. */
     private val problems = java.util.concurrent.ConcurrentHashMap<Int, String>()
+
+    /** The last answer frame of each code, as hex: when a codec then does not understand it, the screen can say what the watch sent. */
+    private val lastFrames = java.util.concurrent.ConcurrentHashMap<Int, String>()
+
+    /** "0xNN answer not understood: <bytes>" when the watch answered [code] but the layout did not decode; null when nothing was read. */
+    fun explainParse(code: Int): String? =
+        lastFrames[code]?.let { "0x%02X answer not understood by the app: %s".format(code, it) }
 
     /** The plain-words reasons for the failed reads of [codes], or null when none was recorded. */
     fun explain(vararg codes: Int): String? =
@@ -58,6 +67,9 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
             problems[code] = reply.failure ?: "no answer"
             return null
         }
+        val hex = frame.take(32).joinToString(" ") { "%02X".format(it.toInt() and 0xFF) }
+        lastFrames[code] = hex
+        ConnectionKeepAlive.log("settings read 0x%02X answer: %s".format(code, hex))
         val tooShort = SettingRequests.tooShort(code, frame)
         if (tooShort != null) {
             problems[code] = tooShort
@@ -123,7 +135,7 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
     ): SettingWriteResult {
         if (isBusy) return SettingWriteResult.Failed("The watch is sending health data. Try again in a minute.")
         val result = writer.update(code, touched, expectedBack = expectedBack, matches = matches, change = change)
-        if (result == SettingWriteResult.Done) RawSettings.shared.forget(code)
+        if (result == SettingWriteResult.Done || result == SettingWriteResult.Written) RawSettings.shared.forget(code)
         return result
     }
 
@@ -137,6 +149,7 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
 fun SettingWriteResult.text(what: String): String =
     when (this) {
         SettingWriteResult.Done -> "$what saved and read back from the watch."
+        SettingWriteResult.Written -> "$what saved. The watch did not answer the check in time; look at the watch."
         SettingWriteResult.Unchanged -> "$what is already like that."
         is SettingWriteResult.Failed -> message
     }
@@ -148,7 +161,7 @@ object SettingRequests {
     private const val NOTIFICATION_SOUND = 0x42
 
     /** Shortest answer in value bytes (after the code, and after the `30` of 0x3D). */
-    private val MIN_VALUE = mapOf(PROFILE to 9, NOTIFICATION_SOUND to 6, NOTIFICATION_MANAGER to 17)
+    private val MIN_VALUE = mapOf(PROFILE to 9, NOTIFICATION_SOUND to 5, NOTIFICATION_MANAGER to 16)
 
     fun forCode(code: Int): ByteArray =
         if (code == NOTIFICATION_MANAGER) byteArrayOf(NOTIFICATION_MANAGER.toByte(), 0x30) else byteArrayOf(code.toByte())

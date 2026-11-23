@@ -17,9 +17,31 @@ import org.avmedia.gshockapi.DeviceInfo
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.MessageDispatcher
+import org.avmedia.gshockapi.casio.WatchChannel
+import org.avmedia.gshockapi.casio.WatchLink
+import org.avmedia.gshockapi.casio.WatchTransport
 import timber.log.Timber
 
 object Connection {
+    /** The queue's way to the radio: the write result of the current manager, false when there is none. */
+    private object ManagerTransport : WatchTransport {
+        override suspend fun write(
+            channel: WatchChannel,
+            frame: ByteArray,
+        ): Boolean {
+            val manager = bleManager
+            if (manager == null) {
+                ProgressEvents.onNext("ApiError", "Connection manager is not initialized")
+                return false
+            }
+            return manager.writeChecked(channel.handle, frame)
+        }
+    }
+
+    init {
+        WatchLink.setTransport(ManagerTransport)
+    }
+
     @Volatile
     private var bleManager: IGShockManager? = null
     private lateinit var appContext: Context
@@ -56,6 +78,7 @@ object Connection {
                 bleManager.also { bleManager = null }
             }
         if (manager != null) Timber.i("Releasing BLE manager; next connection will create a fresh manager")
+        WatchLink.queue.clear("The link to the watch was closed.")
         manager?.release()
     }
 
@@ -136,18 +159,12 @@ object Connection {
         requireBleManager().setDataCallback(dataCallback)
     }
 
+    /** Puts the request or write in the one queue (the command table decides what goes on the air). */
     fun write(
         handle: GetSetMode,
         data: ByteArray,
     ) {
-        scope.launch {
-            val manager = bleManager
-            if (manager == null) {
-                ProgressEvents.onNext("ApiError", "Connection manager is not initialized")
-            } else {
-                manager.write(handle, data)
-            }
-        }
+        WatchLink.write(handle, data)
     }
 
     fun isServiceSupported(handle: GetSetMode): Boolean = bleManager?.isServiceSupported(handle) == true

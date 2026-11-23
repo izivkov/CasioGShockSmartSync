@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockapi.ble.Connection
 import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.CasioTimeZoneHelper
@@ -78,7 +77,7 @@ object GwBx5600TimeIO {
             val wb1 = notif1.copyOf()
             wb1[0] = 0x02 // Command byte modification: Read (0x05) -> Write (0x02)
             Timber.d("GwBx5600TimeIO Step1 write: ${wb1.size}B ${wb1.toHexString()}")
-            Connection.write(GetSetMode.SP_DATA, wb1)
+            IO.writeCmd(GetSetMode.SP_DATA, wb1)
         } else {
             Timber.w("GwBx5600TimeIO Step1: no response from watch (timed out)")
             return
@@ -100,7 +99,7 @@ object GwBx5600TimeIO {
             wb2[0] = 0x06 // Command byte modification: Read (0x03) -> Write (0x06)
             val withCityData = wb2 + buildWorldCityRecords()
             Timber.d("GwBx5600TimeIO Step2 write: ${withCityData.size}B (expect 94) ${withCityData.toHexString()}")
-            Connection.write(GetSetMode.SP_DATA, withCityData)
+            IO.writeCmd(GetSetMode.SP_DATA, withCityData)
         } else {
             Timber.w("GwBx5600TimeIO Step2: no response from watch (timed out)")
             return
@@ -119,7 +118,7 @@ object GwBx5600TimeIO {
         val notif3 = request(step3Channel, req3, expected = 1 + (WatchInfo.worldCitiesCount * 22))
         if (notif3 != null) {
             Timber.d("GwBx5600TimeIO Step3 write: ${notif3.size}B ${notif3.toHexString()}")
-            Connection.write(GetSetMode.SP_DATA, notif3)
+            IO.writeCmd(GetSetMode.SP_DATA, notif3)
         } else {
             Timber.w("GwBx5600TimeIO Step3: no response from watch (timed out)")
             return
@@ -193,7 +192,7 @@ object GwBx5600TimeIO {
             channel.result = deferred
         }
         try {
-            Connection.write(GetSetMode.SP_REQUEST, reqPayload)
+            IO.writeCmd(GetSetMode.SP_REQUEST, reqPayload)
             return withTimeoutOrNull(5000L.milliseconds) {
                 deferred.await()
             }
@@ -240,7 +239,7 @@ object GwBx5600TimeIO {
             )
         val hexStr = timeCmd.toHexString()
         Timber.i("Step 4/4: time command: $hexStr")
-        Connection.write(GetSetMode.SET, timeCmd)
+        IO.writeCmd(GetSetMode.SET, timeCmd)
     }
 
     /**

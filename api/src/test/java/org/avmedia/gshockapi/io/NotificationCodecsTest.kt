@@ -73,7 +73,7 @@ class NotificationCodecsTest {
     fun badInputIsRefused() {
         assertNull(NotificationSoundCodec.parse(frame(0x42, 3, 0, 0, 0, 0, 1)))
         assertNull(NotificationSoundCodec.parse(frame(0x42, 0, 0, 0, 0, 0, 4)))
-        assertNull(NotificationSoundCodec.parse(frame(0x42, 0, 0, 0, 0, 0)))
+        assertNull(NotificationSoundCodec.parse(frame(0x42, 0, 0, 0, 0))) // 4 value bytes is too short; 5 is the real answer of the owner's watch
         assertNull(NotificationSoundCodec.parse(frame(0x41, 0, 0, 0, 0, 0, 1)))
         assertNull(NotificationSoundCodec.withSoundMode(sounds, 3))
         assertNull(NotificationSoundCodec.withSoundEvent(sounds, 15, true))
@@ -159,5 +159,26 @@ class NotificationCodecsTest {
         ) { NotificationManagerCodec.withLanguage(it, 2) }
         assertEquals(SettingWriteResult.Unchanged, result)
         assertTrue(watch.writes.isEmpty())
+    }
+
+    // Owner's watch (2026-11-23), exact answers.
+    @Test
+    fun theRealSoundAnswerOfFiveValueBytesParsesWithoutAPatternAndIsWrittenBackAsFive() {
+        val real = byteArrayOf(0x42, 0x0A, 0xFF.toByte(), 0x7F, 0xFF.toByte(), 0x7F)
+        val s = NotificationSoundCodec.parse(real)!!
+        assertEquals(2, s.soundMode)
+        assertEquals(2, s.vibrationMode)
+        assertEquals(0x7FFF, s.soundMask)
+        assertEquals(0x7FFF, s.vibrationMask)
+        assertEquals(null, s.pattern)
+        assertEquals(null, NotificationSoundCodec.withPattern(real, 1))
+        assertEquals(6, NotificationSoundCodec.withSoundMode(real, 0)!!.size)
+    }
+
+    @Test
+    fun theRealNotificationManagerAnswerParses() {
+        val real = "3D 30 00 02 01 00 03 00 2F 28 00 28 00 28 00 FA 00 00".split(' ').map { it.toInt(16).toByte() }.toByteArray()
+        assertEquals(true, NotificationManagerCodec.parse(real) != null)
+        assertEquals(true, NotificationManagerCodec.parse(real.copyOf(17)) != null)
     }
 }

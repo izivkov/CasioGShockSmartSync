@@ -21,9 +21,7 @@ object CasioConstants {
     val CASIO_NOTIFICATION_CHARACTERISTIC_UUID: UUID =
         UUID.fromString("26eb0030-b012-49a8-b1f8-394fb2032b0f")
 
-    /** Link Loss service and its alert level characteristic (standard Bluetooth). */
-    val LINK_LOSS_SERVICE_UUID: UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb")
-    val LINK_LOSS_ALERT_LEVEL_UUID: UUID = UUID.fromString("00002a06-0000-1000-8000-00805f9b34fb")
+    // Link Loss is the frame `00 level` on the all-features characteristic; the standard Link Loss characteristic is never written.
 
     /** Requests life-log/activity-record data; replies arrive on the convoy characteristic. */
     val CASIO_CONVOY_CHARACTERISTIC_UUID: UUID = UUID.fromString("26eb0024-b012-49a8-b1f8-394fb2032b0f")
