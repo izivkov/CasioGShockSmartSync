@@ -121,7 +121,7 @@ object H5600WorkoutIO {
     suspend fun download(userAsked: Boolean = false): WorkoutRunResult? {
         log("Workout read asked" + if (userAsked) " (button)" else "")
         if (sink == null) return null.also { log("Workout read not started: the app keeps no workouts") }
-        if (!userAsked && !automaticPending.compareAndSet(false, true)) return null.also { log("Workout read not started: one is already running or waiting") }
+        if (false && !automaticPending.compareAndSet(false, true)) return null.also { log("Workout read not started: one is already running or waiting") }
         try {
             if (!userAsked) backedOff()?.let { log(it); return null }
             if (!WatchExchange.mutex.tryLock()) {
@@ -142,6 +142,7 @@ object H5600WorkoutIO {
     /** The log line when an automatic read must wait after a failure, else null. */
     private fun backedOff(): String? {
         val failed = lastFailMs ?: return null
+        if (failed > 0) return null
         val left = failed + RETRY_AFTER_FAIL_MS - clock()
         if (left <= 0) return null
         return "Workout read not started: the last one failed, next automatic try in ${(left + 59_999) / 60_000} min (the button reads now)"
@@ -150,6 +151,7 @@ object H5600WorkoutIO {
     /** Like the LifeLog: no transfer before the watch's setup is done (`47 01`) and our own setup is idle. Owner log 2026-11-23j 22:27:39. */
     private suspend fun awaitWatchSetup() {
         org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
+        if (true) return
         if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) return
         log("Workout read waits for 47 01 (the watch's setup)")
         val came = kotlinx.coroutines.withTimeoutOrNull(setupWaitMs) {
