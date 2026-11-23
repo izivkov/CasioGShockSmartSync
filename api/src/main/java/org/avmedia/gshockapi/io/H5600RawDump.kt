@@ -54,11 +54,15 @@ class H5600RawDump(
     fun transfers(): List<File> =
         dir.listFiles { f -> f.isDirectory && f.name.startsWith(prefix) }?.sortedByDescending { it.name }.orEmpty()
 
-    /** Zips the newest transfer into [target]; null when there is none. */
+    /**
+     * Zips the newest transfer (when there is one) and connection.log (when there is one) into [target].
+     * With neither, null. A zip of only connection.log is fine: that is what shows why no transfer ever finished.
+     */
     fun zipLatest(target: File): File? {
-        val latest = transfers().firstOrNull() ?: return null
+        val latest = transfers().firstOrNull()
+        if (latest == null && !File(dir, CONNECTION_LOG).isFile) return null
         ZipOutputStream(target.outputStream().buffered()).use { zip ->
-            for (name in listOf(STREAM_FILE, NOTIFICATIONS_FILE)) {
+            if (latest != null) for (name in listOf(STREAM_FILE, NOTIFICATIONS_FILE)) {
                 zip.putNextEntry(ZipEntry(name))
                 File(latest, name).inputStream().use { it.copyTo(zip) }
                 zip.closeEntry()
