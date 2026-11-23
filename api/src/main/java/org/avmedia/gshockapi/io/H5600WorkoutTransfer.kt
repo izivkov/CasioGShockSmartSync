@@ -71,8 +71,8 @@ class WorkoutTransfer(
                 val session = fetchWorkout(slot, hdr)
                 if (!(runCatching { sink(session) }.getOrDefault(false))) throw Fail("the workout could not be stored; it stays on the watch")
                 transferred += slot
-                link.bulk(WorkoutGroup.fetchedMark(transferred, noneLeft = index == sorted.lastIndex))
-                awaitBulk(KIND_MARK) ?: throw Fail("no answer to the fetched mark")
+                bulk("step 7", WorkoutGroup.fetchedMark(transferred, noneLeft = index == sorted.lastIndex))
+                awaitBulk("step 7", KIND_MARK) ?: throw Fail("no answer to the fetched mark")
                 log("Workout read: slot $slot stored and marked as fetched")
                 blockCache.keys.removeAll { it.startsWith("${hdr.startUtcMillis}:") }
                 done++
