@@ -71,17 +71,10 @@ class HaPushTest {
     @Test
     fun notificationUsesTitleAndMessage() {
         val n = HaPush.toNotification(HaPushEvent.Push("Alarm", "Door open", "c1"), "20261122T150400")
-        assertEquals("Alarm", n.title)
+        assertEquals("Alarm", n.app)
         assertEquals("Door open", n.text)
-        assertEquals("Home Assistant", n.app)
         assertEquals("20261122T150400", n.timestamp)
         assertEquals(NotificationType.MESSAGE, n.type)
-    }
-
-    @Test
-    fun missingTitleFallsBackToTheAppName() {
-        assertEquals("Home Assistant", HaPush.toNotification(HaPushEvent.Push(null, "Hi", null), "t").title)
-        assertEquals("Home Assistant", HaPush.toNotification(HaPushEvent.Push("  ", "Hi", null), "t").title)
     }
 
     @Test

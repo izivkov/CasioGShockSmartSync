@@ -1,3 +1,18 @@
+# Notifications on the watch
+
+`notify.mobile_app_<device_name>` with `title` and `message` shows on the watch. The watch has little room: the first line
+is the frame's app name field, so it carries the title; the message is the text.
+
+| Push | First line (app name) | Title field | Text |
+|---|---|---|---|
+| `title`, `message` | title | empty | message |
+| `title`, `message`, `data: {app: HA}` | `data.app` | title | message |
+| `message` only | `HA` | empty | message |
+
+- Keep titles short: the app sends at most 40 characters in the first line; how many the watch shows is not measured yet
+  (count it on the watch and write it here).
+- The text is cut at 193 bytes (UTF-8).
+
 # Change watch settings from Home Assistant (DW-H5600)
 
 Send a notification through the companion channel with the message `command_watch_setting`. It is never shown on the watch.

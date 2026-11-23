@@ -28,7 +28,8 @@ sealed interface HaPushEvent {
 
 /** The JSON of the mobile_app local push channel (websocket). Pure, so it is unit tested. */
 object HaPush {
-    const val APP_NAME = "Home Assistant"
+    /** The first field when a push has no title and no data.app. */
+    const val SHORT_SOURCE = "HA"
     /** Longest first field (app name) sent; the encoder refuses a field over 255 bytes. */
     const val MAX_FIRST_FIELD_CHARS = 40
     private val gson = GsonBuilder().disableHtmlEscaping().create()
@@ -90,14 +91,23 @@ object HaPush {
         return m.takeIf { it.startsWith("command_") || it in COMMAND_WORDS }
     }
 
-    fun toNotification(push: HaPushEvent.Push, timestamp: String): AppNotification =
-        AppNotification.create(
+    /**
+     * The H5600 shows the app name field first and has little room, so it carries the content: the push title (or
+     * `data.app`, a short source name, when the automation sets one; the title then goes in the title field). The
+     * message is the text. No title and no `data.app`: [SHORT_SOURCE].
+     */
+    fun toNotification(push: HaPushEvent.Push, timestamp: String): AppNotification {
+        val title = push.title?.trim()?.takeIf { it.isNotEmpty() }
+        val source = (push.data["app"] as? String)?.trim()?.takeIf { it.isNotEmpty() }
+        val first = source ?: title ?: SHORT_SOURCE
+        return AppNotification.create(
             type = NotificationType.MESSAGE,
             timestamp = timestamp,
-            app = APP_NAME,
-            title = push.title?.takeIf { it.isNotBlank() } ?: APP_NAME,
+            app = first.take(MAX_FIRST_FIELD_CHARS),
+            title = if (source != null) title.orEmpty().take(MAX_FIRST_FIELD_CHARS) else "",
             text = push.message,
         )
+    }
 
     private val BACKOFF_MS = longArrayOf(0, 1_000, 2_000, 5_000, 10_000, 30_000, 60_000)
 
