@@ -127,6 +127,25 @@ class WatchQueueTest {
         assertEquals(listOf(WatchChannel.ALL_FEATURES to listOf(0x00, 0x01)), transport.sent.toList())
     }
 
+    @Test fun aRefusalWithStatus81IsLoggedOnceAsNotSupported() = runBlocking {
+        repeat(2) {
+            val read = queue.enqueue(GetSetMode.GET, b(0x82))
+            waitFor("the read request") { sentCodes().size > it }
+            queue.onNotification(allFeatures, b(0xFF, 0x81, 0x82))
+            assertFalse(read.await().ok)
+        }
+        val lines = ConnectionKeepAlive.recentEvents().filter { it.contains("0x82 is not supported") || it.contains("request 82 failed") }
+        assertEquals(lines.toString(), 1, lines.size)
+        assertTrue(lines.single().contains("not supported"))
+    }
+
+    @Test fun theSmartAlarmAnswerOfFiveBytesIsLongEnough() = runBlocking {
+        val read = queue.enqueue(GetSetMode.GET, b(0x50))
+        waitFor("the read request") { sentCodes() == listOf(0x50) }
+        queue.onNotification(allFeatures, b(0x50, 0x09, 0x00, 0x01, 0x3C))
+        assertTrue(read.await().ok)
+    }
+
     @Test fun anFFAnswerFailsAWaitingReadAndTheQueueGoesOn() = runBlocking {
         val read = queue.enqueue(GetSetMode.GET, b(0x45))
         val next = queue.enqueue(GetSetMode.SET, b(0x13, 1))
