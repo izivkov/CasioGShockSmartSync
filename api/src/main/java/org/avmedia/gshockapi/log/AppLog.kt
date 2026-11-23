@@ -8,7 +8,7 @@ import timber.log.Timber
 
 /** Who wrote a line. [label] is what the file and the screen show. */
 enum class LogSource(val label: String) {
-    Watch("Watch"), Webhook("Webhook"), HomeAssistant("Home Assistant"), Health("Health"), App("App");
+    Watch("Watch"), HomeAssistant("Home Assistant"), Health("Health"), App("App");
 
     companion object {
         fun ofLabel(label: String): LogSource? = entries.firstOrNull { it.label == label }
@@ -19,8 +19,8 @@ enum class LogSource(val label: String) {
 data class LogLine(val time: String, val source: LogSource?, val text: String)
 
 /**
- * The one app log: the connection events of the watch, webhook and Home Assistant calls, health and settings failures.
- * Lines look like `2026-11-23 10:00:00.000 [Webhook] text`. The file is rolling: when [file] passes [maxFileBytes] it
+ * The one app log: the connection events of the watch, Home Assistant calls, health and settings failures.
+ * Lines look like `2026-11-23 10:00:00.000 [Home Assistant] text`. The file is rolling: when [file] passes [maxFileBytes] it
  * becomes `<name>.1` (the older `.1` is dropped), so at most two files of that size exist. Callers never pass secrets:
  * a line holds names, hosts and short reasons only.
  */

@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import org.avmedia.gshockapi.model.StepCounterData
 
 /**
- * The one day of hourly steps that the Health screen, Home Assistant and the webhooks show: the stored hours of that day
+ * The one day of hourly steps that the Health screen, and Home Assistant show: the stored hours of that day
  * with the newest transfer laid over them. The watch sends only the slots since the last read (log 2026-11-23: one read had
  * hours 13 to 15, the next only 16), so the newest transfer alone is a partial day. Hours after now stay empty.
  */

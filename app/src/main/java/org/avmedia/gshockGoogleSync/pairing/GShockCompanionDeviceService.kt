@@ -12,7 +12,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.webhook.HaPushHost
+import org.avmedia.gshockGoogleSync.homeassistant.HaPushHost
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 

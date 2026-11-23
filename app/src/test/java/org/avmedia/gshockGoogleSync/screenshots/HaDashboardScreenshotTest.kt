@@ -8,9 +8,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.avmedia.gshockGoogleSync.webhook.DashStatus
-import org.avmedia.gshockGoogleSync.webhook.HaDashUi
-import org.avmedia.gshockGoogleSync.webhook.HaDashboardCard
+import org.avmedia.gshockGoogleSync.homeassistant.DashStatus
+import org.avmedia.gshockGoogleSync.homeassistant.HaDashUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaDashboardCard
 import org.junit.Test
 
 /** The dashboard card of the Home Assistant screen in each button state. */
@@ -31,10 +31,10 @@ class HaDashboardScreenshotTest : ScreenshotTest() {
         Card(HaDashUi(DashStatus.Ours(false), message = "Dashboard created with 8 cards.", url = "https://ha.example.com/gshock-c5951dde28df"))
     }
     @Test fun noAdminLight() = snap("ha_dash_no_admin", false) {
-        Card(HaDashUi(message = org.avmedia.gshockGoogleSync.webhook.HaDashboardService.NO_ADMIN, failed = true))
+        Card(HaDashUi(message = org.avmedia.gshockGoogleSync.homeassistant.HaDashboardService.NO_ADMIN, failed = true))
     }
     @Test fun noAdminDark() = snap("ha_dash_no_admin", true) {
-        Card(HaDashUi(message = org.avmedia.gshockGoogleSync.webhook.HaDashboardService.NO_ADMIN, failed = true))
+        Card(HaDashUi(message = org.avmedia.gshockGoogleSync.homeassistant.HaDashboardService.NO_ADMIN, failed = true))
     }
     @Test fun notRegisteredLight() = snap("ha_dash_not_registered", false) { Card(HaDashUi(), registered = false) }
 }

@@ -248,12 +248,5 @@
     <string name="health_log_none">No logs yet.</string>
     <string name="loading_lifelog_short">Loading LifeLog</string>
     <string name="update_latest">Update</string>
-    <string name="webhooks">Webhooks</string>
-    <string name="webhooks_empty">No webhooks yet. Add one to let your watch call a web service.</string>
-    <string name="webhook_add">Add</string>
-    <string name="webhook_new">New webhook</string>
-    <string name="webhook_edit">Edit webhook</string>
-    <string name="webhook_back">Back</string>
-    <string name="manage_webhooks">Manage webhooks</string>
     <string name="home_assistant">Home Assistant</string>
 </resources>

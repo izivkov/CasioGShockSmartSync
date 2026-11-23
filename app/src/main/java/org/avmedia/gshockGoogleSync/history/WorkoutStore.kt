@@ -7,15 +7,15 @@ import org.avmedia.gshockapi.model.WorkoutSession
 import timber.log.Timber
 
 /**
- * Keeps downloaded workouts in [HistoryDb] and remembers the last one for the Home Assistant sensors and the webhook
- * variables. The watch is told "fetched" only when [save] returned true, so a failed save is read again next time.
+ * Keeps downloaded workouts in [HistoryDb] and remembers the last one for the Home Assistant sensors.
+ * The watch is told "fetched" only when [save] returned true, so a failed save is read again next time.
  */
 object WorkoutStore {
     /** The newest workout of this app session; null until one was downloaded. */
     @Volatile var last: WorkoutSession? = null
         private set
 
-    /** Called after each stored workout (the "Workout downloaded" webhook trigger and the Home Assistant push). */
+    /** Called after each stored workout (starts the Home Assistant push). */
     @Volatile var onDownloaded: (() -> Unit)? = null
 
     /** Stores [session]; true when it is in the database. */

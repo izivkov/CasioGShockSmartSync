@@ -39,13 +39,13 @@ import org.avmedia.gshockGoogleSync.notifications.InstalledApps
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import AppSwitch
-import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
+import org.avmedia.gshockGoogleSync.homeassistant.AppStores
 
 /** "Phone notifications on the watch": a switch (off by default) and the apps allowed to send. */
 @Composable
 fun PhoneNotificationsCard() {
     val context = LocalContext.current
-    val settings = remember { WebhookStorage.phoneNotifications(context) }
+    val settings = remember { AppStores.phoneNotifications(context) }
     var enabled by remember { mutableStateOf(settings.enabled) }
     var allowed by remember { mutableStateOf(settings.allowed) }
     var picking by remember { mutableStateOf(false) }

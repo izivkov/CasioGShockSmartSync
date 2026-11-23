@@ -1,8 +1,8 @@
-name: Test APK (webhook)
+name: Test APK
 
 on:
   push:
-    branches: [webhook, webhook-health, home-assistant]
+    branches: [home-assistant]
   workflow_dispatch:
 
 concurrency:

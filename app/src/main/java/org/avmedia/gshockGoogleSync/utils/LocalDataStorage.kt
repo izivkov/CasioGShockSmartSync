@@ -83,6 +83,13 @@ object LocalDataStorage {
         }
     }
 
+    /** Removes every key [drop] says yes to, in one write. */
+    suspend fun deleteMatching(context: Context, drop: (String) -> Boolean) {
+        cache = context.dataStore.edit { preferences ->
+            preferences.asMap().keys.filter { drop(it.name) }.forEach { preferences.remove(it) }
+        }
+    }
+
     /**
      * Reads all key-value pairs from the DataStore and returns them as a JSONObject.
      * This is useful for backups or exporting settings.

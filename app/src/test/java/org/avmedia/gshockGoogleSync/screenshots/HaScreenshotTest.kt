@@ -1,18 +1,18 @@
 package org.avmedia.gshockGoogleSync.screenshots
 
 import androidx.compose.runtime.Composable
-import org.avmedia.gshockGoogleSync.webhook.HaAction
-import org.avmedia.gshockGoogleSync.webhook.HaActionsUi
-import org.avmedia.gshockGoogleSync.webhook.HaCheckUi
-import org.avmedia.gshockGoogleSync.webhook.HaConfig
-import org.avmedia.gshockGoogleSync.webhook.HaFindUi
-import org.avmedia.gshockGoogleSync.webhook.HaFound
-import org.avmedia.gshockGoogleSync.webhook.HaGroup
-import org.avmedia.gshockGoogleSync.webhook.HaGroupUi
-import org.avmedia.gshockGoogleSync.webhook.HaScreenContent
-import org.avmedia.gshockGoogleSync.webhook.HaSentUi
-import org.avmedia.gshockGoogleSync.webhook.HaUi
-import org.avmedia.gshockGoogleSync.webhook.HaWatchUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaAction
+import org.avmedia.gshockGoogleSync.homeassistant.HaActionsUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaCheckUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaConfig
+import org.avmedia.gshockGoogleSync.homeassistant.HaFindUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaFound
+import org.avmedia.gshockGoogleSync.homeassistant.HaGroup
+import org.avmedia.gshockGoogleSync.homeassistant.HaGroupUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaScreenContent
+import org.avmedia.gshockGoogleSync.homeassistant.HaSentUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaWatchUi
 import org.junit.Test
 
 /** Home Assistant screen: not set up, working, errors, loading and the picker. */

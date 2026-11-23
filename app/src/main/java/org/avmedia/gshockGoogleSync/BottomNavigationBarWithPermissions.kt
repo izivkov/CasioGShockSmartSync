@@ -59,7 +59,6 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
-    onOpenWebhooks: () -> Unit = {},
     onOpenHa: () -> Unit = {},
     keepsLink: () -> Boolean = { false },
 ) {
@@ -201,7 +200,6 @@ fun BottomNavigationBarWithPermissions(
                     navController,
                     destinationScreen = {
                         ActionsScreen(
-                            onOpenWebhooks = onOpenWebhooks,
                             onOpenHa = onOpenHa,
                         )
                     },

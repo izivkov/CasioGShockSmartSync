@@ -13,9 +13,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.webhook.HaGroup
-import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
-import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
+import org.avmedia.gshockGoogleSync.homeassistant.HaGroup
+import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
+import org.avmedia.gshockGoogleSync.homeassistant.AppStores
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.H5600HealthIO
@@ -27,7 +27,7 @@ import kotlin.time.Duration.Companion.minutes
 /**
  * Reads the DW-H5600 LifeLog by itself when the watch connects and then every period of the setting while it stays
  * connected (no Health screen needed).
- * The result goes to [H5600Session], which fires the health webhooks and the Home Assistant push.
+ * The result goes to [H5600Session], which starts the Home Assistant push.
  * Failures are only logged.
  */
 @Singleton
@@ -77,14 +77,12 @@ class BackgroundHealthSync @Inject constructor(
     }
 
     private fun hasConsumer(): Boolean {
-        val toggles = WebhookStorage.toggles(context)
-        val ha = WebhookStorage.haStore(context)
+        val toggles = AppStores.toggles(context)
+        val ha = AppStores.haStore(context)
         return HealthReadScheduler.hasConsumer(
             haConfigured = ha.load() != null,
             haOn = toggles.isOn(ServiceToggles.Service.HOME_ASSISTANT),
             haHealthGroupOn = HaGroup.HEALTH in ha.groupsOn(),
-            webhooksOn = toggles.isOn(ServiceToggles.Service.WEBHOOKS),
-            healthHookEnabled = WebhookStorage.loadHooks(context).any { it.enabled && it.onHealthData },
         )
     }
 

@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.notifications
 
-import org.avmedia.gshockGoogleSync.webhook.KeyValueStore
+import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
 
 /** What the policy needs to know about one posted phone notification. [importance] is -1000 when Android did not say. */
 data class PostedNotification(val packageName: String, val flags: Int, val importance: Int)

@@ -103,7 +103,6 @@ private const val GUIDELINE_LIST_TOP = 0.82f
 @Composable
 fun PreConnectionScreen(
     ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
-    onOpenWebhooks: () -> Unit = {},
     onOpenHa: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -312,16 +311,12 @@ fun PreConnectionScreen(
                             )
                         }
 
-                        // Works without a watch: the Webhooks screen and its Test button.
+                        // Works without a watch: the Home Assistant screen.
                         Column(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
                                 .padding(top = 24.dp, start = 16.dp)
                         ) {
-                            androidx.compose.material3.TextButton(onClick = onOpenWebhooks) {
-                                org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource(resourceId = R.drawable.ic_webhook, size = 20.dp)
-                                androidx.compose.material3.Text("  " + stringResource(R.string.webhooks))
-                            }
                             androidx.compose.material3.TextButton(onClick = onOpenHa) {
                                 org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource(resourceId = R.drawable.ic_home_assistant, size = 20.dp)
                                 androidx.compose.material3.Text("  " + stringResource(R.string.home_assistant))

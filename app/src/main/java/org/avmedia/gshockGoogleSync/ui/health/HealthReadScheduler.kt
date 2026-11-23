@@ -53,14 +53,9 @@ class HealthReadScheduler(
     }
 
     companion object {
-        /**
-         * Something uses the data: Home Assistant set up, on, with its Health group on; or an enabled
-         * webhook (master switch on) with the "Health data downloaded" trigger. Else no background reads.
-         */
-        fun hasConsumer(
-            haConfigured: Boolean, haOn: Boolean, haHealthGroupOn: Boolean,
-            webhooksOn: Boolean, healthHookEnabled: Boolean,
-        ): Boolean = (haConfigured && haOn && haHealthGroupOn) || (webhooksOn && healthHookEnabled)
+        /** Something uses the data: Home Assistant set up, on, with its Health group on. Else no background reads. */
+        fun hasConsumer(haConfigured: Boolean, haOn: Boolean, haHealthGroupOn: Boolean): Boolean =
+            haConfigured && haOn && haHealthGroupOn
 
 
         const val DEFAULT_INTERVAL_MS = 15 * 60_000L

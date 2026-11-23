@@ -17,8 +17,7 @@ import org.avmedia.gshockGoogleSync.session.LinkState
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
-import org.avmedia.gshockGoogleSync.webhook.HaScreen
-import org.avmedia.gshockGoogleSync.webhook.WebhooksScreen
+import org.avmedia.gshockGoogleSync.homeassistant.HaScreen
 
 @Composable
 fun AppNavigationHost(
@@ -43,18 +42,16 @@ fun AppNavigationHost(
     ) {
         when (state.screen) {
             AppScreen.INITIAL, AppScreen.PRE_CONNECTION ->
-                PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks, onOpenHa = viewModel::openHa)
+                PreConnectionScreen(onOpenHa = viewModel::openHa)
             AppScreen.CONTENT_SELECTOR -> ContentSelector(viewModel)
             AppScreen.MAIN_NAVIGATION ->
                 BottomNavigationBarWithPermissions(
                     repository = viewModel.repository,
-                    onOpenWebhooks = viewModel::openWebhooks,
                     onOpenHa = viewModel::openHa,
                     keepsLink = { viewModel.sessionState.value.keepsLink },
                 )
             AppScreen.RUN_ACTIONS -> RunActionsScreen()
-            AppScreen.ERROR -> PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks, onOpenHa = viewModel::openHa)
-            AppScreen.WEBHOOKS -> WebhooksScreen(onBack = viewModel::closeWebhooks)
+            AppScreen.ERROR -> PreConnectionScreen(onOpenHa = viewModel::openHa)
             AppScreen.HOME_ASSISTANT -> {
                 androidx.activity.compose.BackHandler(onBack = viewModel::closeHa)
                 HaScreen(viewModel = hiltViewModel(), onBack = viewModel::closeHa)
@@ -74,7 +71,6 @@ private fun ContentSelector(viewModel: AppNavigationViewModel) {
         ConnectionButton.ALWAYS_CONNECTED, ConnectionButton.NORMAL, null ->
             BottomNavigationBarWithPermissions(
                 repository = repository,
-                onOpenWebhooks = viewModel::openWebhooks,
                 onOpenHa = viewModel::openHa,
                 keepsLink = { viewModel.sessionState.value.keepsLink },
             )

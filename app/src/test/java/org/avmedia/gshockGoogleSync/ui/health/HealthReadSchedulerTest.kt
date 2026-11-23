@@ -94,12 +94,9 @@ class HealthReadSchedulerTest {
 
     @Test fun consumerRules() {
         val c = HealthReadScheduler.Companion::hasConsumer
-        assertTrue(c(true, true, true, false, false))
-        assertFalse(c(false, true, true, false, false))
-        assertFalse(c(true, false, true, false, false))
-        assertFalse(c(true, true, false, false, false))
-        assertTrue(c(false, false, false, true, true))
-        assertFalse(c(false, false, false, false, true))
-        assertFalse(c(false, false, false, true, false))
+        assertTrue(c(true, true, true))
+        assertFalse(c(false, true, true))
+        assertFalse(c(true, false, true))
+        assertFalse(c(true, true, false))
     }
 }

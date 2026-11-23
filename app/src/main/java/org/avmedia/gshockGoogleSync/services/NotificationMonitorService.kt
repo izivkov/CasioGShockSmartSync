@@ -12,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationPolicy
 import org.avmedia.gshockGoogleSync.notifications.PostedNotification
 import org.avmedia.gshockGoogleSync.session.SessionManager
-import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
+import org.avmedia.gshockGoogleSync.homeassistant.AppStores
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.NotificationType
 import org.avmedia.gshockapi.ProgressEvents
@@ -53,7 +53,7 @@ class NotificationMonitorService : NotificationListenerService() {
         if (!sessionManager.isReady) return
         // Off by default; when on, only the apps the person chose and only real, audible notifications.
         val posted = PostedNotification(sbn.packageName, sbn.notification.flags, importanceOf(sbn))
-        if (!WebhookStorage.phoneNotifications(applicationContext).allows(posted, packageName)) return
+        if (!AppStores.phoneNotifications(applicationContext).allows(posted, packageName)) return
 
         processNotification(sbn)
             .onSuccess { notificationInfo ->

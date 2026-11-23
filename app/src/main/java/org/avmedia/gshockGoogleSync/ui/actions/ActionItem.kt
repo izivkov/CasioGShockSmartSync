@@ -26,8 +26,8 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
 import org.avmedia.gshockGoogleSync.ui.common.HorizontalSeparator
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
-import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
-import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
+import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
+import org.avmedia.gshockGoogleSync.homeassistant.AppStores
 
 @Composable
 fun ActionItem(
@@ -86,7 +86,7 @@ fun ActionItem(
 @Composable
 fun ServiceToggleRow(service: ServiceToggles.Service, titleRes: Int, iconRes: Int, onConfigure: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val toggles = remember { WebhookStorage.toggles(context) }
+    val toggles = remember { AppStores.toggles(context) }
     var isOn by remember { mutableStateOf(toggles.isOn(service)) }
     ActionItem(
         title = stringResource(id = titleRes),

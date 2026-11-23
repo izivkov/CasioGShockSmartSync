@@ -22,9 +22,9 @@ import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockGoogleSync.webhook.HaPushHost
-import org.avmedia.gshockGoogleSync.webhook.WatchSettingCommands
-import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
+import org.avmedia.gshockGoogleSync.homeassistant.HaPushHost
+import org.avmedia.gshockGoogleSync.homeassistant.WatchSettingCommands
+import org.avmedia.gshockGoogleSync.homeassistant.AppStores
 import timber.log.Timber
 
 /**
@@ -71,7 +71,7 @@ class MainEventHandler(
     private suspend fun pushWhileConnected(session: Session) {
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
         if (state.phase !is SessionPhase.Ready) return
-        val haStore = WebhookStorage.haStore(context)
+        val haStore = AppStores.haStore(context)
         val supported = repository.supportsAppNotifications()
         haStore.saveNotificationsSupported(supported)
         if (!supported) return

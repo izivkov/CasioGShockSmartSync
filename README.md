@@ -232,6 +232,6 @@ Or download the installer from [wireshark.org](https://www.wireshark.org/downloa
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-The Home Assistant and Webhook icons are from Material Design Icons (Pictogrammers), Apache-2.0.
+The Home Assistant icon is from Material Design Icons (Pictogrammers), Apache-2.0.
 
 The bundled tide constants (Tide screen) come from TICON-4: Hart-Davis M., Dettmering D., Seitz F. (2025), TIdal CONstants based on GESLA-4 sea-level records, SEANOE, https://doi.org/10.17882/109129, licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). The values were rounded and reformatted for the watch.

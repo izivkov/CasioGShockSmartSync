@@ -46,7 +46,15 @@ class GShockApplication : Application() {
     @SuppressLint("NewApi")
     override fun onCreate() {
         super.onCreate()
-        org.avmedia.gshockGoogleSync.webhook.HaSentView.appContext = applicationContext
+        org.avmedia.gshockGoogleSync.homeassistant.HaSentView.appContext = applicationContext
+        // The removed HTTP calls feature: drop what it stored, once and quietly.
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                org.avmedia.gshockGoogleSync.utils.LocalDataStorage.deleteMatching(
+                    applicationContext, org.avmedia.gshockGoogleSync.homeassistant.RemovedFeatureCleanup::isRemoved,
+                )
+            }.onFailure { Timber.w(it, "Cleanup of removed settings failed") }
+        }
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
             Timber.d("Timber planted for Debug")

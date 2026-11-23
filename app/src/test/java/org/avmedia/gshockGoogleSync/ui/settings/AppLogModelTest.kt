@@ -17,7 +17,7 @@ class AppLogModelTest {
                 in 0..6 -> "2026-11-23 17:16:58.414 [Watch] rx +3s 002d: 05 9A 9C FF FF FF A4 01 00 00 00 01 01 00 01 00 9F FF FF FF FF 9D $i"
                 7 -> "2026-11-23 17:17:00.000 [Watch] read 0x28 waits, rx 28 06 1E 00 00 FA 00 00 00 00 $i"
                 8 -> "2026-11-23 17:17:01.000 [Home Assistant] Home Assistant update sensors: sent $i"
-                else -> "2026-11-23 17:17:02.000 [Webhook] Webhook 'Home': sent $i"
+                else -> "2026-11-23 17:17:02.000 [App] Session ready $i"
             }
             out += line; bytes += line.length + 1; i++
         }
@@ -50,7 +50,7 @@ class AppLogModelTest {
         val model = AppLogModel { reads++; raw }
         model.load()
         model.page(null, false, AppLogModel.PAGE)
-        model.page(LogSource.Webhook, false, AppLogModel.PAGE)
+        model.page(LogSource.App, false, AppLogModel.PAGE)
         model.page(LogSource.HomeAssistant, true, 2 * AppLogModel.PAGE)
         assertEquals(1, reads)
     }

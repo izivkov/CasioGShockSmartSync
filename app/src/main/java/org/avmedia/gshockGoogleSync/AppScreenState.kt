@@ -16,7 +16,7 @@ import org.avmedia.gshockGoogleSync.session.EntryReason
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
 import org.avmedia.gshockGoogleSync.session.SessionState
-import org.avmedia.gshockGoogleSync.webhook.WebhookScreenState
+import org.avmedia.gshockGoogleSync.homeassistant.HaScreenState
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
@@ -31,10 +31,7 @@ enum class AppScreen {
     RUN_ACTIONS,
     ERROR,
 
-    /** The Webhooks screen: shown whatever the watch connection does. */
-    WEBHOOKS,
-
-    /** The Home Assistant screen: same rule as [WEBHOOKS]. */
+    /** The Home Assistant screen: shown whatever the watch connection does. */
     HOME_ASSISTANT
 }
 
@@ -50,39 +47,37 @@ data class AppNavigationState(
 @Singleton
 class AppScreenState @Inject constructor(
     sessionManager: SessionManager,
-    webhookScreenState: WebhookScreenState,
+    haScreenState: HaScreenState,
     @ApplicationContext appContext: Context
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     val state: StateFlow<AppNavigationState> =
         combine(
-            sessionManager.sessionState, webhookScreenState.open, webhookScreenState.haOpen, AppForeground.inFront
-        ) { session, webhooksOpen, haOpen, inFront ->
-            navigationFor(session, webhooksOpen, haOpen, inFront)
+            sessionManager.sessionState, haScreenState.open, AppForeground.inFront
+        ) { session, haOpen, inFront ->
+            navigationFor(session, haOpen, inFront)
         }
             .distinctUntilChanged()
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
                 navigationFor(
-                    sessionManager.sessionState.value, webhookScreenState.open.value,
-                    webhookScreenState.haOpen.value, AppForeground.inFront.value
+                    sessionManager.sessionState.value, haScreenState.open.value, AppForeground.inFront.value
                 )
             )
 
     init {
         // An always-connected watch that connects, or is connected, while the app is in front on the first
         // page opens the main screen when its "Open when the watch connects" switch is on, or when the
-        // person tapped its name. Otherwise the app stays where it is (sync, webhooks, HA run unchanged).
+        // person tapped its name. Otherwise the app stays where it is (sync and HA run unchanged).
         scope.launch {
             combine(
-                sessionManager.sessionState, AppForeground.inFront, webhookScreenState.open,
-                webhookScreenState.haOpen, OpenOnConnect.waiting
-            ) { session, inFront, webhooksOpen, haOpen, waiting ->
+                sessionManager.sessionState, AppForeground.inFront, haScreenState.open, OpenOnConnect.waiting
+            ) { session, inFront, haOpen, waiting ->
                 val address = session.watch.address
                 OpenOnConnect.shouldOpen(
-                    session, inFront, !webhooksOpen && !haOpen,
+                    session, inFront, !haOpen,
                     OpenOnConnect.isOn(appContext, address), waiting
                 )
             }.collect { latch ->
@@ -97,12 +92,10 @@ class AppScreenState @Inject constructor(
     companion object {
         internal fun navigationFor(
             session: SessionState,
-            webhooksOpen: Boolean = false,
             haOpen: Boolean = false,
             appInForeground: Boolean = false
         ): AppNavigationState =
             if (haOpen) AppNavigationState(AppScreen.HOME_ASSISTANT)
-            else if (webhooksOpen) AppNavigationState(AppScreen.WEBHOOKS)
             else when (val phase = session.phase) {
                 SessionPhase.Disconnected -> AppNavigationState(AppScreen.INITIAL)
 

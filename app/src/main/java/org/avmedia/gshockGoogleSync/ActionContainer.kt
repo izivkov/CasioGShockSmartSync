@@ -45,8 +45,8 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.webhook.WebhookDispatcher
-import org.avmedia.gshockGoogleSync.webhook.WebhookTrigger
+import org.avmedia.gshockGoogleSync.homeassistant.HaEvents
+import org.avmedia.gshockGoogleSync.homeassistant.HaTrigger
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockapi.model.Alarm
@@ -99,7 +99,7 @@ constructor(
     private val eventStorage: EventStorage,
     private val alarmNameStorage: AlarmNameStorage,
     private val sessionManager: SessionManager,
-    private val webhookDispatcher: WebhookDispatcher
+    private val haEvents: HaEvents
 ) {
     /** Manually-created scope, since this class has no ViewModel/Activity lifecycle to tie one to. Lives as long as the process. */
     private val containerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -230,7 +230,7 @@ constructor(
                 )
             )
             add(PrayerAlarmsAction("Set Prayer Alarms", false, prayerAlarmsHelper))
-            add(WebhookAction("Call webhooks", true))
+            add(HaButtonAction(appContext.getString(R.string.home_assistant), true))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
@@ -566,31 +566,26 @@ constructor(
     }
 
     /**
-     * Fires every enabled webhook whose trigger is "a watch action" (see the Webhooks screen).
-     * The Webhooks switch on the Actions screen decides (checked in the dispatcher); no row of its own.
+     * Sends the button event to Home Assistant, which then runs the action chosen on the Home Assistant screen
+     * ([HaClient]). The Home Assistant switch on the Actions screen decides (checked in [HaEvents]); no row of its own.
      */
-    inner class WebhookAction(override var title: String, override var enabled: Boolean) :
+    inner class HaButtonAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
 
         // Button press, or the Phone Finder request of always-connected watches (they arrive here too).
+        // Listed (and run) only when Home Assistant is set up, so the run screen never names an unused service.
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.ACTION_BUTTON_PRESSED -> true
+            RunEnvironment.ACTION_BUTTON_PRESSED -> haReady()
             else -> false
         }
 
+        private fun haReady(): Boolean = runCatching {
+            org.avmedia.gshockGoogleSync.homeassistant.AppStores.haStore(appContext).load() != null
+        }.getOrDefault(false)
+
         override fun run(context: Context) {
-            webhookDispatcher.fire(WebhookTrigger.WATCH_ACTION)
+            haEvents.fire(HaTrigger.WATCH_ACTION)
         }
-
-        override suspend fun save(context: Context, actionsStorage: ActionsStorage) {
-            LocalDataStorage.put(context, ENABLED_KEY, enabled.toString())
-        }
-
-        override suspend fun load(context: Context, actionsStorage: ActionsStorage) {
-            enabled = LocalDataStorage.get(context, ENABLED_KEY, "true") != "false"
-        }
-
-        private val ENABLED_KEY = "WebhookAction.enabled"
     }
 
     inner class Separator(override var title: String, override var enabled: Boolean) :

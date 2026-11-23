@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
-import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
+import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
@@ -28,7 +28,6 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
-    onOpenWebhooks: () -> Unit = {},
     onOpenHa: () -> Unit = {},
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
@@ -45,7 +44,6 @@ fun ActionsScreen(
                 ActionsContent(
                     modifier = Modifier.weight(1f),
                     actionsViewModel = actionsViewModel,
-                    onOpenWebhooks = onOpenWebhooks,
                     onOpenHa = onOpenHa,
                 )
 
@@ -68,7 +66,6 @@ fun ActionsScreen(
 private fun ActionsContent(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel,
-    onOpenWebhooks: () -> Unit,
     onOpenHa: () -> Unit,
 ) {
     Column(
@@ -77,13 +74,12 @@ private fun ActionsContent(
                 .verticalScroll(rememberScrollState())
                 .padding(0.dp)
                 .fillMaxWidth()
-    ) { ItemList(items = createActionItems(actionsViewModel, onOpenWebhooks, onOpenHa)) }
+    ) { ItemList(items = createActionItems(actionsViewModel, onOpenHa)) }
 }
 
 @Composable
 private fun createActionItems(
     actionsViewModel: ActionsViewModel,
-    onOpenWebhooks: () -> Unit,
     onOpenHa: () -> Unit,
 ): List<Any> {
     val watchFeatureManager = LocalWatchFeatureManager.current
@@ -129,7 +125,6 @@ private fun createActionItems(
             R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
             infoRes = R.string.prayer_times_info
         ),
-        ServiceToggleRow(ServiceToggles.Service.WEBHOOKS, R.string.webhooks, R.drawable.ic_webhook, onOpenWebhooks),
         ServiceToggleRow(ServiceToggles.Service.HOME_ASSISTANT, R.string.home_assistant, R.drawable.ic_home_assistant, onOpenHa),
         SeparatorView(),
         PhoneView(actionsViewModel)

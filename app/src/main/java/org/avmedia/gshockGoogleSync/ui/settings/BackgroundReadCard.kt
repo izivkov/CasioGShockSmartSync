@@ -37,7 +37,7 @@ fun BackgroundReadContent(minutes: Int, onChoose: (Int) -> Unit) {
             AppText("Background health read", fontSize = 18.sp)
             AppText(
                 if (minutes == 0) "Off. The LifeLog is read only from the Health screen."
-                else "Every $minutes minutes while the watch is connected; Home Assistant and webhooks get the result.",
+                else "Every $minutes minutes while the watch is connected; Home Assistant gets the result.",
                 fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row {

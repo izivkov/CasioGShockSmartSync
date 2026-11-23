@@ -29,11 +29,17 @@ class AppLogTest {
     }
 
     @Test fun lineHasTimeSourceAndText() {
-        AppLog.log(LogSource.Webhook, "Webhook 'x' (example.com): failed after 4 tries: timeout")
+        AppLog.log(LogSource.HomeAssistant, "Home Assistant push: failed after 4 tries: timeout")
         val parsed = AppLog.parse(AppLog.readLines().single())
-        assertEquals(LogSource.Webhook, parsed.source)
+        assertEquals(LogSource.HomeAssistant, parsed.source)
         assertTrue(parsed.time.startsWith("2023-11-14 "))
-        assertEquals("Webhook 'x' (example.com): failed after 4 tries: timeout", parsed.text)
+        assertEquals("Home Assistant push: failed after 4 tries: timeout", parsed.text)
+    }
+
+    @Test fun aLineOfARemovedSourceStillParses() {
+        val parsed = AppLog.parse("2026-11-23 08:10:00.000 [Webhook] old line")
+        assertEquals(null, parsed.source)
+        assertEquals("old line", parsed.text)
     }
 
     @Test fun oneLineEvenWithNewlines() {

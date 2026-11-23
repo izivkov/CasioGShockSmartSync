@@ -1,4 +1,4 @@
-# Only for the webhook test APK (-PminifyTest): shrink the libraries, keep the app's own classes whole.
+# Only for the test APK (-PminifyTest): shrink the libraries, keep the app's own classes whole.
 # Gson reads fields by name (stored settings, Home Assistant jobs), Room and WorkManager create classes by name, and
 # Hilt generates classes in the app package: none of those may be renamed or removed.
 -keep class org.avmedia.gshockGoogleSync.** { *; }

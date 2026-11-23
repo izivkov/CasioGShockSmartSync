@@ -20,7 +20,7 @@ internal object H5600Session {
     fun isFresh(now: Long = System.currentTimeMillis()): Boolean =
         data != null && now - storedAtMs < FRESH_MS
 
-    /** Called when a LifeLog read has just been stored (the "health data downloaded" webhook trigger). */
+    /** Called when a LifeLog read has just been stored (starts the Home Assistant push). */
     @Volatile
     var onDownloaded: (() -> Unit)? = null
 
@@ -46,7 +46,7 @@ internal object H5600Session {
     @Volatile
     var dayMerger: (StepCounterData) -> StepCounterData = { it }
 
-    /** Stores a new transfer merged with the stored day, so the screen, Home Assistant and the webhooks get one full day. */
+    /** Stores a new transfer merged with the stored day, so the screen and Home Assistant get one full day. */
     suspend fun store(fresh: StepCounterData): StepCounterData {
         val merged = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             runCatching { dayMerger(fresh) }.getOrDefault(fresh)

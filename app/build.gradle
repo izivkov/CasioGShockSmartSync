@@ -36,9 +36,10 @@ android {
     }
 
     signingConfigs {
-        // One fixed throwaway key for the webhook test builds, so each test APK installs over the
+        // One fixed throwaway key for the test builds, so each test APK installs over the
         // previous one (a fresh key per CI run makes the phone refuse the update). Not used for release.
-        webhookTest {
+        // The file name and the ".webhook" id suffix below stay: a new id or key would not update the installed app.
+        testApk {
             storeFile file("webhook-test-debug.keystore")
             storePassword "android"
             keyAlias "androiddebugkey"
@@ -59,7 +60,7 @@ android {
 
     buildTypes {
         debug {
-            signingConfig signingConfigs.webhookTest
+            signingConfig signingConfigs.testApk
             // Installs beside the official app; the label is set in src/debug/res/values/strings.xml.
             applicationIdSuffix ".webhook"
             // The test APK build passes -PminifyTest: R8 and resource shrinking, same applicationId and key.

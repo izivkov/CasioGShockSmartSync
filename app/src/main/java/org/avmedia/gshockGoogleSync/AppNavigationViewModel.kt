@@ -6,7 +6,7 @@ import javax.inject.Inject
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
 import org.avmedia.gshockGoogleSync.session.SessionManager
-import org.avmedia.gshockGoogleSync.webhook.WebhookScreenState
+import org.avmedia.gshockGoogleSync.homeassistant.HaScreenState
 
 @HiltViewModel
 class AppNavigationViewModel @Inject constructor(
@@ -14,7 +14,7 @@ class AppNavigationViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     val repository: GShockRepository,
     val companionDeviceCoordinator: CompanionDeviceCoordinator,
-    private val webhookScreenState: WebhookScreenState
+    private val haScreenState: HaScreenState
 ) : ViewModel() {
     val state = screenState.state
     val sessionState = sessionManager.sessionState
@@ -24,8 +24,6 @@ class AppNavigationViewModel @Inject constructor(
         sessionManager.activeSession?.enterMainNavigation()
     }
 
-    fun openWebhooks() = webhookScreenState.show()
-    fun closeWebhooks() = webhookScreenState.hide()
-    fun openHa() = webhookScreenState.showHa()
-    fun closeHa() = webhookScreenState.hideHa()
+    fun openHa() = haScreenState.show()
+    fun closeHa() = haScreenState.hide()
 }
