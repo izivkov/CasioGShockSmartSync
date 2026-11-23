@@ -15,7 +15,7 @@ object TideFraming {
 
     /** `00 23` + the record length as 3 bytes, low byte first (data request characteristic). */
     fun start(length: Int): ByteArray =
-        byteArrayOf(0, CATEGORY.toByte(), length.toByte(), (length shr 8).toByte(), (length shr 16).toByte())
+        byteArrayOf(0, CATEGORY.toByte(), (length shr 16).toByte(), (length shr 8).toByte(), length.toByte())
 
     fun end(): ByteArray = byteArrayOf(0x04, CATEGORY.toByte())
 

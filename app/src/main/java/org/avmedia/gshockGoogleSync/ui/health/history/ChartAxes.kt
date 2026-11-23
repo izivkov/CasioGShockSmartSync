@@ -57,7 +57,7 @@ internal fun chartScale(range: Pair<Float, Float>?, kind: ChartKind): ChartScale
     val lo = if (kind == ChartKind.BARS) 0f else range.first
     val hi = if (range.second <= lo) lo + 1f else range.second
     val step = niceStep(hi - lo)
-    val low = if (kind == ChartKind.BARS) 0f else floor(lo / step) * step
+    val low = if (kind == ChartKind.BARS) 0f else lo
     val high = ceil(hi / step - 1e-4f) * step
     return ChartScale(low, if (high <= low) low + step else high, step)
 }

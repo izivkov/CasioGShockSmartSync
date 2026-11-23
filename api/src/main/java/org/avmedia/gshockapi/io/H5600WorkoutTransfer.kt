@@ -72,7 +72,7 @@ class WorkoutTransfer(
             val reply = awaitBulk(KIND_START) ?: throw Fail("the watch did not answer the start")
             val state = reply.getOrElse(1) { 0 }.toInt() and 0xFF
             val reason = reply.getOrElse(2) { 0 }.toInt() and 0xFF
-            if (state == 0) break
+            if (state != 0) break
             when (reason) {
                 1 -> throw Fail("the watch battery is too low for the workout transfer", refused = true)
                 2 -> throw Fail("the watch is too cold for the workout transfer", refused = true)

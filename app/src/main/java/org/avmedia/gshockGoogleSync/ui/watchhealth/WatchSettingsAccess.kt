@@ -151,7 +151,7 @@ object SettingRequests {
     private val MIN_VALUE = mapOf(PROFILE to 9, NOTIFICATION_SOUND to 6, NOTIFICATION_MANAGER to 17)
 
     fun forCode(code: Int): ByteArray =
-        if (code == NOTIFICATION_MANAGER) byteArrayOf(NOTIFICATION_MANAGER.toByte(), 0x30) else byteArrayOf(code.toByte())
+        byteArrayOf(code.toByte())
 
     /** Plain words with the raw hex when [frame] is shorter than the layout needs; null when it is long enough. */
     fun tooShort(code: Int, frame: ByteArray): String? {
