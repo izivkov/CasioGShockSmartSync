@@ -18,7 +18,11 @@ sealed interface HaPushEvent {
         val command: String? = null,
         /** The `data` object of the message (the arguments of a command), empty when none. */
         val data: Map<String, Any?> = emptyMap(),
+        /** The id of the subscription this event belongs to. */
+        val subscriptionId: Int? = null,
     ) : HaPushEvent
+    /** HA's answer to our command [id]; [code] is HA's error code when not [success]. */
+    data class Result(val id: Int, val success: Boolean, val code: String?) : HaPushEvent
     data object Ignored : HaPushEvent
 }
 
@@ -56,8 +60,14 @@ object HaPush {
                 val message = str("message")
                 val dataCommand = e.get("data")?.takeIf { it.isJsonObject }?.asJsonObject?.get("command")?.takeIf { it.isJsonPrimitive }?.asString
                 if (message.isNullOrBlank()) HaPushEvent.Ignored
-                else HaPushEvent.Push(str("title"), message, str("confirm_id"), commandOf(message, dataCommand), dataOf(e))
+                // HA's key is hass_confirm_id (mobile_app push_notification.py); "confirm_id" is only the name in the answer.
+                else HaPushEvent.Push(str("title"), message, str("hass_confirm_id"), commandOf(message, dataCommand), dataOf(e), o.get("id")?.asInt)
             }
+            "result" -> HaPushEvent.Result(
+                o.get("id")?.asInt ?: -1,
+                o.get("success")?.asBoolean == true,
+                o.get("error")?.takeIf { it.isJsonObject }?.asJsonObject?.get("code")?.asString,
+            )
             else -> HaPushEvent.Ignored
         }
     }.getOrDefault(HaPushEvent.Ignored)

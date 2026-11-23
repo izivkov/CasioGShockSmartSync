@@ -62,7 +62,7 @@ class HaPushChannel(
     private fun noteReason(reason: String) {
         if (reason == lastNote) return
         lastNote = reason
-        if (reason in NOT_UP_REASONS) log("Home Assistant: push not connected ($reason)")
+        if (reason in NOT_UP_REASONS || reason.startsWith("subscribe refused")) log("Home Assistant: push not connected ($reason)")
     }
 
     /** One connection until it ends; [up] is called when HA confirmed the subscription. Returns why it ended. */
@@ -96,7 +96,7 @@ class HaPushChannel(
                     if (cont.isActive) cont.resume(Unit)
                 }
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    reason = t.javaClass.simpleName
+                    if (reason == "closed") reason = t.javaClass.simpleName
                     if (cont.isActive) cont.resume(Unit)
                 }
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) { webSocket.close(code, null) }

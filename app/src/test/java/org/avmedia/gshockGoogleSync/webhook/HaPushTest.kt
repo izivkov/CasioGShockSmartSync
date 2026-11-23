@@ -51,19 +51,19 @@ class HaPushTest {
 
     @Test
     fun parsesAPushWithTitleAndConfirmId() {
-        val e = HaPush.parse("""{"id":2,"type":"event","event":{"message":"Door open","title":"Alarm","confirm_id":"c1"}}""")
-        assertEquals(HaPushEvent.Push("Alarm", "Door open", "c1"), e)
+        val e = HaPush.parse("""{"id":2,"type":"event","event":{"message":"Door open","title":"Alarm","hass_confirm_id":"c1"}}""")
+        assertEquals(HaPushEvent.Push("Alarm", "Door open", "c1", subscriptionId = 2), e)
     }
 
     @Test
     fun parsesAPushWithoutTitleOrConfirmId() {
         val e = HaPush.parse("""{"id":2,"type":"event","event":{"message":"Hi"}}""")
-        assertEquals(HaPushEvent.Push(null, "Hi", null), e)
+        assertEquals(HaPushEvent.Push(null, "Hi", null, subscriptionId = 2), e)
     }
 
     @Test
     fun ignoresResultsGarbageAndEmptyMessages() {
-        assertEquals(HaPushEvent.Ignored, HaPush.parse("""{"id":2,"type":"result","success":true}"""))
+        assertEquals(HaPushEvent.Result(2, true, null), HaPush.parse("""{"id":2,"type":"result","success":true}"""))
         assertEquals(HaPushEvent.Ignored, HaPush.parse("not json"))
         assertEquals(HaPushEvent.Ignored, HaPush.parse("""{"id":2,"type":"event","event":{"title":"No message"}}"""))
     }
