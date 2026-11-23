@@ -22,7 +22,7 @@ data class H5600Write(
  * poll until ready, two setup writes, echo the first 9-byte reply to 0x06, start on the second,
  * then echo each index announcement and finish, acknowledge each bulk fragment, and echo END.
  */
-class H5600LifeLogSync(private val echoEnd: Boolean = true) {
+class H5600LifeLogSync {
     private enum class Phase { IDLE, POLLING, SETUP, SETUP_WAIT, TRANSFER, DONE }
 
     private var phase = Phase.IDLE
@@ -106,8 +106,8 @@ class H5600LifeLogSync(private val echoEnd: Boolean = true) {
                 phase = Phase.DONE
                 // Echo END back to the watch, exactly as the Python script does.
                 // Without this the watch returns 0xFF 81 2D (invalid command) and drops the connection.
-                // The peek test skips this echo, to see whether the watch keeps its unsent data.
-                if (echoEnd) listOf(H5600Write(H5600Channel.DRSP, data.copyOf())) else emptyList()
+                // Every read echoes it, peek or not (log 2026-11-23e: without the echo the link dropped 16 s later).
+                listOf(H5600Write(H5600Channel.DRSP, data.copyOf()))
             }
 
             else -> emptyList()

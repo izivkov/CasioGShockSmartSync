@@ -123,10 +123,20 @@ class GShockAPI(private val context: Context) : IGShockAPI {
                 null
             }
 
-        val decision = InitCheck.decide(button, org.avmedia.gshockapi.casio.ConnectionSetup.isAutomaticConnect())
+        val decision = InitCheck.decide(
+            button,
+            org.avmedia.gshockapi.casio.ConnectionSetup.isAutomaticConnect(),
+            kindKnown = org.avmedia.gshockapi.casio.ConnectionSetup.lastKind != null,
+        )
         decision.log?.let {
             Timber.w(it)
             org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(it)
+        }
+        if (!decision.complete && decision.error == null) {
+            // A silent link: release it quietly; the watch advertises again and the next attempt starts.
+            runCatching { disconnect() }
+            ProgressEvents.onNext("ConnectionFailed")
+            return false
         }
         if (decision.error != null) {
             Timber.e(decision.error)

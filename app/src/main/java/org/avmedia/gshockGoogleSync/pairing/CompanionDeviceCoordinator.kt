@@ -1,8 +1,6 @@
 package org.avmedia.gshockGoogleSync.pairing
 
 import org.avmedia.gshockGoogleSync.session.BackgroundConnection
-import org.avmedia.gshockGoogleSync.ui.health.H5600Session
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.isActive
 import android.annotation.SuppressLint
 import android.content.Context
@@ -27,7 +25,6 @@ import javax.inject.Singleton
 
 private const val BACKGROUND_INTERVAL_MS = 5 * 60_000L
 private const val BACKGROUND_WINDOW_MS = 60_000L
-private const val LIFELOG_BACKGROUND_TIMEOUT_MS = 3 * 60_000L
 
 @Singleton
 class CompanionDeviceCoordinator @Inject constructor(
@@ -51,16 +48,6 @@ class CompanionDeviceCoordinator @Inject constructor(
                 }
             }
         }
-    }
-
-    /** A background connection: read the LifeLog into the session cache, then release the watch. */
-    private suspend fun readLifeLogInBackground(address: String) {
-        val data = withTimeoutOrNull(LIFELOG_BACKGROUND_TIMEOUT_MS) { repository.getStepCount() }
-        val ok = data?.h5600 != null
-        if (ok) H5600Session.data = data
-        Timber.i("Background LifeLog read ${if (ok) "done" else "failed"} for $address; releasing the watch")
-        BackgroundConnection.active = false
-        repository.disconnect()
     }
 
     init {
@@ -100,9 +87,9 @@ class CompanionDeviceCoordinator @Inject constructor(
                                     org.avmedia.gshockGoogleSync.utils.LocalDataStorage.put(
                                         context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name
                                     )
-                                    if (background) {
-                                        readLifeLogInBackground(normalizedAddress)
-                                    }
+                                    // No read and no release here: BackgroundHealthSync reads the LifeLog of every connection
+                                    // and the keep-alive holds the watch (log 2026-11-23b: a second reader plus a release cut the link).
+                                    BackgroundConnection.active = false
                                     return@launch
                                 } catch (cancelled: CancellationException) {
                                     throw cancelled

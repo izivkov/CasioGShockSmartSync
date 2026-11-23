@@ -66,12 +66,16 @@ object AppLog {
         if (!f.renameTo(old)) f.delete()
     }
 
-    /** Every line on disk, oldest first (older file, then the current one), else the in-memory ones. */
+    /**
+     * Every line on disk, oldest first (older file, then the current one). When the disk gives nothing (no file, a write
+     * or read that failed) the in-memory lines are shown: the screen is never empty while lines were logged.
+     */
     fun readLines(): List<String> = synchronized(events) {
         val f = logFile ?: return events.toList()
-        runCatching {
+        val disk = runCatching {
             listOf(rolledFile(f), f).filter { it.isFile }.flatMap { it.readLines() }
         }.getOrDefault(emptyList())
+        disk.ifEmpty { events.toList() }
     }
 
     fun parse(line: String): LogLine {

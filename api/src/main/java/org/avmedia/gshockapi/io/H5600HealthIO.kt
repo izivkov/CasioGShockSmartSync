@@ -32,9 +32,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * `adb logcat | grep H5600`.
  */
 @RequiresApi(Build.VERSION_CODES.O)
-/** Peek test: when true, a peek read does not echo END. Set to false to restore the normal transfer. */
-private const val TEST_PEEK_SKIPS_END = true
-
 object H5600HealthIO {
     private val SETUP_REPLY_TIMEOUT_MS = org.avmedia.gshockapi.casio.LongProcess.LIFELOG.answerMs!!
     private const val OVERALL_TIMEOUT_MS = 180_000L
@@ -60,6 +57,9 @@ object H5600HealthIO {
         var watchCondition: ByteArray? = null
         var bulkCount = 0
         var silent = false
+
+        /** The link dropped during this attempt. */
+        @Volatile var lost = false
     }
 
     private val lock = Any()
@@ -93,11 +93,24 @@ object H5600HealthIO {
     @Volatile
     internal var stepCounterSupported: () -> Boolean = { WatchInfo.hasStepCounter }
 
-    /** The link dropped: a running read must end now, not run on into the next connection. */
-    fun onLinkLost() {}
+    /**
+     * The link dropped: a running read ends now. Before, it ran on into the next link, sent its setup there and took the
+     * init's 0x10 answer (log 2026-11-23b 15:42:33).
+     */
+    fun onLinkLost() {
+        val transfer =
+            synchronized(lock) {
+                if (requestRunning) linkLostDuringRequest = true
+                active
+            } ?: return
+        transfer.lost = true
+        transfer.setupReplies.close()
+        transfer.finished.complete(Unit)
+    }
 
-    /** The protocol driver of one attempt. */
-    internal fun syncFor(peek: Boolean): H5600LifeLogSync = H5600LifeLogSync(echoEnd = !(peek && TEST_PEEK_SKIPS_END))
+    /** The protocol driver of one attempt. A peek read echoes END too: the watch drops the link without it. */
+    @Suppress("UNUSED_PARAMETER")
+    internal fun syncFor(peek: Boolean): H5600LifeLogSync = H5600LifeLogSync()
 
     /** True while a setup request is waiting for its reply. Only then does the transfer take status notifications. */
     @Volatile
@@ -105,7 +118,11 @@ object H5600HealthIO {
 
     fun isAwaitingSetupReply(): Boolean = setupWaiting
 
-    private class AttemptOutcome(val data: StepCounterData, val restart: Boolean)
+    private class AttemptOutcome(val data: StepCounterData, val restart: Boolean, val lost: Boolean = false)
+
+    /** Set when the link drops while a request runs: no further attempt starts on the next link. */
+    @Volatile
+    private var linkLostDuringRequest = false
 
     /**
      * Runs the LifeLog transfer. If the watch stops answering an attempt, that attempt is restarted from
@@ -122,6 +139,7 @@ object H5600HealthIO {
                     false
                 } else {
                     requestRunning = true
+                    linkLostDuringRequest = false
                     true
                 }
             }
@@ -144,7 +162,14 @@ object H5600HealthIO {
                     } else {
                         "LifeLog data failed, trying again (attempt $attempt of $MAX_TRANSFER_ATTEMPTS)"
                     }
-                val outcome = runAttempt(ZoneId.systemDefault(), peek)
+                val outcome =
+                    if (linkLostDuringRequest) AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
+                    else runAttempt(ZoneId.systemDefault(), peek)
+                if (outcome.lost || linkLostDuringRequest) {
+                    lastError = "The watch disconnected during the LifeLog read. It is read again at the next connection."
+                    org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read stopped: the link dropped (attempt $attempt)")
+                    return StepCounterData.unavailable()
+                }
                 if (!outcome.restart) return outcome.data
                 Timber.w("H5600: the watch did not answer; attempt $attempt of $MAX_TRANSFER_ATTEMPTS failed")
                 org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog attempt $attempt of $MAX_TRANSFER_ATTEMPTS failed: the watch did not answer")
@@ -163,13 +188,13 @@ object H5600HealthIO {
 
     /** One attempt: setup, START, polls, then the data. restart = true when the watch stopped answering. */
     private suspend fun runAttempt(zone: ZoneId, peek: Boolean): AttemptOutcome {
-        // Peek test: with peek, END is not echoed, so the watch may keep the data it has not yet been told it can drop.
         val transfer = Transfer(syncFor(peek), zone)
         synchronized(lock) { active = transfer }
         try {
             Timber.i("H5600: LifeLog attempt start (peek=$peek, zone=$zone)")
             org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read starts (peek=$peek)")
             val stepGoal = runSetup(transfer)
+            if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
             Timber.i("H5600: setup finished, step goal=$stepGoal")
 
             // The official app and the Python script write START before the first poll. The watch
@@ -188,6 +213,7 @@ object H5600HealthIO {
                 } finally {
                     watchdog.cancel()
                 }
+            if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
             if (transfer.silent) {
                 val quiet = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
                 saveRawDump(quiet.first, quiet.second, "the watch stopped answering the polls")
@@ -271,6 +297,7 @@ object H5600HealthIO {
     private suspend fun runSetup(transfer: Transfer): Int? {
         var stepGoal: Int? = null
         for (command in H5600LifeLogSync.SETUP_COMMANDS) {
+            if (transfer.lost) break
             Timber.d("H5600: setup 0x${command.toString(16)} -> watch")
             setupWaiting = true
             IO.writeCmd(GetSetMode.GET, byteArrayOf(command.toByte()))
@@ -298,7 +325,8 @@ object H5600HealthIO {
         withTimeoutOrNull(SETUP_REPLY_TIMEOUT_MS.milliseconds) {
             var reply: ByteArray? = null
             while (reply == null) {
-                val candidate = transfer.setupReplies.receive()
+                // Closed by onLinkLost: no reply will come on this link.
+                val candidate = transfer.setupReplies.receiveCatching().getOrNull() ?: break
                 if (candidate.firstOrNull() == command.toByte()) reply = candidate
             }
             reply
