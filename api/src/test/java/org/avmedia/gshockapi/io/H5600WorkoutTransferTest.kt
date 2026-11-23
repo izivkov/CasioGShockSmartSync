@@ -8,8 +8,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** A scripted watch holding one running workout in slot 0 (header at 4096, one data block at 8192, one lap block at 12288). */
-private class FakeWatch(private val inbox: Channel<WorkoutMsg>, private val corruptFirstHeader: Boolean = false) : WorkoutLink {
+/**
+ * A scripted watch holding one running workout in slot 0 (header at 4096, one data block at 8192, one lap block at 12288).
+ * It echoes the session request `00 1C` + 8 zero as the real watch does (owner dump 2026-11-23i: `001c0000000000000000`).
+ */
+internal class FakeWatch(private val inbox: Channel<WorkoutMsg>, private val corruptFirstHeader: Boolean = false) : WorkoutLink {
     val events = mutableListOf<String>()
     val marks = mutableListOf<ByteArray>()
     private var corrupted = false
@@ -42,7 +45,7 @@ private class FakeWatch(private val inbox: Channel<WorkoutMsg>, private val corr
         val cat = data[1].toInt()
         val addr = (0 until 4).sumOf { (data[2 + it].toLong() and 0xFF) shl (8 * it) }
         val len = (0 until 4).sumOf { (data[6 + it].toInt() and 0xFF) shl (8 * it) }
-        if (cat == 0x1C) return
+        if (cat == 0x1C) { inbox.trySend(WorkoutMsg(H5600Channel.CONVOY, data.copyOf())); return }
         events += "read $cat $addr"
         var raw = WorkoutTestData.chunked(store.getValue(cat to addr), if (len == 256) 256 else 512)
         if (corruptFirstHeader && cat == 0x1D && addr == 0L && !corrupted) {
@@ -126,7 +129,9 @@ class H5600WorkoutTransferTest {
     private class StartOnlyWatch(private val inbox: Channel<WorkoutMsg>, private val state: Int, private val reason: Int) : WorkoutLink {
         val bulks = mutableListOf<ByteArray>()
 
-        override fun drsp(data: ByteArray) {}
+        override fun drsp(data: ByteArray) {
+            if (data.size == 10 && data[1].toInt() == 0x1C) inbox.trySend(WorkoutMsg(H5600Channel.CONVOY, data.copyOf()))
+        }
 
         override fun bulk(data: ByteArray) {
             bulks += data
