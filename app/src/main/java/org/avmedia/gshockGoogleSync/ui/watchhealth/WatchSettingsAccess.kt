@@ -42,7 +42,7 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
 
     /** The plain-words reasons for the failed reads of [codes], or null when none was recorded. */
     fun explain(vararg codes: Int): String? =
-        codes.mapNotNull { c -> problems[c]?.let { "0x%02X: %s".format(c, it) } }.joinToString(" ").ifEmpty { null }
+        codes.toList().mapNotNull { c -> problems[c]?.let { "0x%02X: %s".format(c, it) } }.joinToString(" ").ifEmpty { null }
 
     /** The request bytes for [code]: 0x3D is read as `3D 30` and never bare; every other code is the code alone. */
     fun requestFor(code: Int): ByteArray = SettingRequests.forCode(code)
