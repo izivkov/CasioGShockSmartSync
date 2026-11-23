@@ -661,6 +661,10 @@ data object WatchInfo {
     internal fun resolvedFor(name: String): Pair<WatchModel, WatchProtocol> =
         resolveModel(name).let { it to resolveModelInfo(it).protocol }
 
+    /** The model attributes a device name resolves to; for tests. */
+    @RequiresApi(Build.VERSION_CODES.O)
+    internal fun infoFor(name: String): ModelInfo = resolveModelInfo(resolveModel(name))
+
     /** Look up whether a watch model is always-connected by device name. */
     @RequiresApi(Build.VERSION_CODES.O)
     fun isAlwaysConnected(watchName: String): Boolean {
