@@ -264,7 +264,7 @@ object StepGoalCodec {
  * index 1, 2 height and 3, 4 weight (BCD, lowest pair first), 5, 6 birth year (BCD, full year), 7 month, 8 day.
  * The pair order is still checked against a plausible height (low pair first is tried first). When nothing is
  * plausible the profile is "not recognised" and never written. Height, weight and the birth date are writable;
- * which sex is 0 is not confirmed. Height and birth date are confirmed on the owner's watch; whole kg for weight is not (shown as check on the watch).
+ * which sex is 0 is not confirmed. Height (whole cm), weight (whole kg) and birth date are confirmed on a real watch.
  */
 object ProfileCodec {
     const val CODE = 0x45

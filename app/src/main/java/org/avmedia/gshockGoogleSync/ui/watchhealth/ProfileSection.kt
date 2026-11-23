@@ -18,8 +18,8 @@ internal fun ProfileSection(ui: WatchHealthUi, edit: (Editing) -> Unit) {
     val can = !ui.working
     val p = ui.profile
     val b = ui.body
-    ValueRow("Height", p?.let { BodyUnits.heightText(it) } ?: "-", can && p != null, note = BodyUnits.CHECK) { edit(Editing.Height) }
-    ValueRow("Weight", p?.let { BodyUnits.weightText(it) } ?: "-", can && p != null, note = BodyUnits.CHECK) { edit(Editing.Weight) }
+    ValueRow("Height", p?.let { BodyUnits.heightText(it) } ?: "-", can && p != null) { edit(Editing.Height) }
+    ValueRow("Weight", p?.let { BodyUnits.weightText(it) } ?: "-", can && p != null) { edit(Editing.Weight) }
     ValueRow(
         "Birth date", birthText(p), can && p != null && p.birthYear != null,
         note = if (p != null && p.birthYear == null) "The watch's date could not be read" else null,
