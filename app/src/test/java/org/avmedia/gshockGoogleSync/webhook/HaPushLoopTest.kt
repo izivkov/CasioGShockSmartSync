@@ -95,4 +95,17 @@ class HaPushLoopTest {
         assertEquals(listOf(0L), rig.times)
         assertTrue(rig.logs.isEmpty())
     }
+
+    @Test fun aFailingStateCallbackDoesNotEndTheLoop() = runTest {
+        val times = ArrayList<Long>()
+        val loop = HaPushLoop(
+            connect = { up -> times += currentTime; if (times.size == 1) { up(); "closed 1006" } else { up(); awaitCancellation() } },
+            now = { currentTime },
+            log = {},
+            onState = { if (!it) error("hook failed") },
+        )
+        backgroundScope.launch { loop.run() }
+        advanceTimeBy(10_000); runCurrent()
+        assertEquals("the loop must connect again after the failing callback", 2, times.size)
+    }
 }

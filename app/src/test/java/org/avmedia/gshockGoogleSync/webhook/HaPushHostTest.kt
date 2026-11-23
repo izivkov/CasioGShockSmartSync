@@ -35,4 +35,19 @@ class HaPushHostTest {
         host.release(HaPushHost.SERVICE)
         assertFalse(host.running)
     }
+
+    @Test fun aSocketJobThatEndedIsStartedAgainWhenTheWatchConnects() = runTest {
+        var started = 0
+        val host = HaPushHost(backgroundScope) {
+            started++
+            HaPushHost.HostedChannel(run = { if (started == 1) error("crashed") else awaitCancellation() }, wake = {})
+        }
+        host.acquire(HaPushHost.SERVICE)
+        testScheduler.advanceUntilIdle()
+        assertFalse(host.running)
+        host.watchConnected()
+        testScheduler.advanceUntilIdle()
+        assertEquals(2, started)
+        assertTrue(host.running)
+    }
 }
