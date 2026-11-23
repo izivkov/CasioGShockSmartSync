@@ -26,7 +26,6 @@ class BleScanReceiver : BroadcastReceiver() {
         }
 
         scanResults?.forEach { result ->
-            org.avmedia.gshockapi.ble.BleTestLog.advertisement(result)
             result.device?.address?.let { address ->
                 val upperAddress = address.uppercase()
                 if (!CompanionDeviceEventGate.recordBleEvent(upperAddress, "DeviceAppeared")) {
