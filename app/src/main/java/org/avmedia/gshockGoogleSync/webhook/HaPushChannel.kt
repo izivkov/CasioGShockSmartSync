@@ -74,20 +74,21 @@ class HaPushChannel(
         val url = HaPush.wsUrl(cfg.baseUrl) ?: return "bad URL"
         var reason = "closed"
         suspendCancellableCoroutine { cont: CancellableContinuation<Unit> ->
-            var nextId = 2
+            var socket: WebSocket? = null
+            val session = HaPushSession(
+                token = cfg.token,
+                webhookId = reg.webhookId,
+                send = { socket?.send(it) ?: false },
+                up = up,
+                end = { why -> reason = why; socket?.close(1000, null) },
+                route = { runCatching { router.route(it) }.onFailure { Timber.w("HA push: not delivered") } },
+                log = log,
+            )
             val ws = client.newWebSocket(Request.Builder().url(url).build(), object : WebSocketListener() {
+                override fun onOpen(webSocket: WebSocket, response: Response) { socket = webSocket }
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    when (val e = HaPush.parse(text)) {
-                        HaPushEvent.AuthRequired -> webSocket.send(HaPush.auth(cfg.token))
-                        HaPushEvent.AuthOk -> webSocket.send(HaPush.subscribe(1, reg.webhookId))
-                        HaPushEvent.AuthInvalid -> { reason = "token refused"; webSocket.close(1000, null) }
-                        is HaPushEvent.Push -> {
-                            up()
-                            runCatching { router.route(e) }.onFailure { Timber.w("HA push: not delivered") }
-                            e.confirmId?.let { webSocket.send(HaPush.confirm(nextId++, reg.webhookId, it)) }
-                        }
-                        HaPushEvent.Ignored -> if (text.contains("\"result\"") && text.contains("\"success\":true")) up()
-                    }
+                    socket = webSocket
+                    session.onText(text)
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason2: String) {
