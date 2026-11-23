@@ -2,6 +2,12 @@ package org.avmedia.gshockGoogleSync.notifications
 
 import android.content.Context
 import android.content.Intent
+import android.util.LruCache
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class AppEntry(val packageName: String, val label: String)
 
@@ -21,5 +27,24 @@ object InstalledApps {
     fun filter(apps: List<AppEntry>, query: String): List<AppEntry> {
         val q = query.trim().lowercase()
         return if (q.isEmpty()) apps else apps.filter { q in it.label.lowercase() || q in it.packageName.lowercase() }
+    }
+}
+
+/** App icons for the picker: loaded off the main thread, kept in a small cache, null when the app has none or is gone. */
+object AppIcons {
+    private const val SIZE_PX = 96
+    private const val CACHE_ICONS = 200
+    private val cache = LruCache<String, ImageBitmap>(CACHE_ICONS)
+
+    suspend fun load(context: Context, packageName: String): ImageBitmap? {
+        cache.get(packageName)?.let { return it }
+        return withContext(Dispatchers.IO) {
+            try {
+                context.packageManager.getApplicationIcon(packageName).toBitmap(SIZE_PX, SIZE_PX).asImageBitmap()
+                    .also { cache.put(packageName, it) }
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 }

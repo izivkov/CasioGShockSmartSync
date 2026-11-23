@@ -45,6 +45,7 @@ import org.avmedia.gshockGoogleSync.ui.health.HealthScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
 import org.avmedia.gshockGoogleSync.ui.watchhealth.NotificationSettingsScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.TideScreen
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchFaceScreen
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WorkoutActivityScreen
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WorkoutSettingsListScreen
@@ -204,10 +205,14 @@ fun BottomNavigationBarWithPermissions(
                     onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
                     onOpenNotifications = { navController.navigate(Screens.NotificationSettings.route) },
                     onOpenWorkouts = { navController.navigate(Screens.WorkoutSettings.route) },
+                    onOpenTide = { navController.navigate(Screens.Tide.route) },
                 )
             }
             composable(Screens.WatchFace.route) {
                 WatchFaceScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.Tide.route) {
+                TideScreen(onBack = { navController.popBackStack() })
             }
             composable(Screens.WatchHealth.route) {
                 WatchHealthSettingsScreen(onBack = { navController.popBackStack() })

@@ -15,6 +15,7 @@ import org.avmedia.gshockapi.io.H5600HealthIO
 import org.avmedia.gshockapi.io.IO
 import org.avmedia.gshockapi.io.SafeSettingWrite
 import org.avmedia.gshockapi.io.SettingWriteResult
+import org.avmedia.gshockapi.io.TideSettingCodec
 
 /** True when the connected watch is of the DW-H5600 family (the one whose settings these screens know). */
 fun isH5600Watch(): Boolean = WatchModelOverride.isH5600Family(WatchModelOverride.displayName(WatchInfo.name))
@@ -81,6 +82,16 @@ class WatchSettingsAccess @Inject constructor(private val raw: RawWatchRequest) 
                 ActivityItemCodec.withInner(frame, now, change(ActivityItemCodec.inner(frame, now)))
             }
         }
+    }
+
+    /** A 0x2E value (tide setting or own point): the answer must name the same unit. */
+    suspend fun readTide(unit: Int): ByteArray? =
+        readRequest(byteArrayOf(TideSettingCodec.CODE.toByte(), unit.toByte())) { it.size > 2 && (it[1].toInt() and 0xFF) == unit }
+
+    /** Read, change only [touched] bytes of the 0x2E value of [unit], write, read back. */
+    suspend fun updateTide(unit: Int, touched: Set<Int>, change: (ByteArray) -> ByteArray?): SettingWriteResult {
+        if (isBusy) return SettingWriteResult.Failed("The watch is sending health data. Try again in a minute.")
+        return writer.updateWith(TideSettingCodec.CODE, { readTide(unit) }, touched, change = change)
     }
 
     suspend fun update(

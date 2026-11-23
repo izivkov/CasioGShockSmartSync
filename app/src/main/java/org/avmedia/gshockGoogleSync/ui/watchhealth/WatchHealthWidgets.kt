@@ -185,8 +185,10 @@ fun WatchHealthLinks(
     onOpenWatchHealth: () -> Unit,
     onOpenNotifications: () -> Unit = {},
     onOpenWorkouts: () -> Unit = {},
+    onOpenTide: () -> Unit = {},
 ) {
     ValueRow(title = "Watch face", value = ">", onClick = onOpenWatchFace)
+    ValueRow(title = "Tide", value = ">", onClick = onOpenTide)
     ValueRow(title = "Watch health settings", value = ">", onClick = onOpenWatchHealth)
     ValueRow(title = "Notification settings", value = ">", onClick = onOpenNotifications)
     ValueRow(title = "Activity settings", value = ">", onClick = onOpenWorkouts)

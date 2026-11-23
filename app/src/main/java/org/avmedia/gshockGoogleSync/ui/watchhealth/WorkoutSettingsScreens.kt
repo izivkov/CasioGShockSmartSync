@@ -34,7 +34,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockapi.io.ActivityFaceCodec
 import org.avmedia.gshockapi.io.ActivityListCodec
-import org.avmedia.gshockapi.io.ActivityNames
+import org.avmedia.gshockapi.io.ActivityModels
 import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.TrainingAlertCodec
 
@@ -58,22 +58,24 @@ internal fun WorkoutSettingsListContent(
     onEnable: (Int, Boolean) -> Unit = { _, _ -> },
     onMove: (Int, Int) -> Unit = { _, _ -> },
 ) {
+    val family = ActivityModels.H5600
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
                 ScreenTitle("Activity settings", Modifier)
                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
-                    val on = ui.activities
-                    if (on != null) {
+                    val all = ui.activities
+                    if (all != null) {
+                        val on = ActivityModels.visible(family, all)
                         Section("Activities on the watch")
                         on.forEachIndexed { i, code ->
                             ActivityOnRow(code, i + 1, i > 0, i < on.size - 1, !ui.working, onEnable, onMove)
                         }
-                        ActivityListCodec.ACTIVITIES.filter { it !in on }.forEach { code ->
+                        ActivityModels.offered(family).filter { it !in on }.forEach { code ->
                             ActivityOnRow(code, null, false, false, !ui.working, onEnable, onMove)
                         }
                         Section("Settings of one activity")
-                        on.forEach { code -> ValueRow(ActivityNames.name(code), ">", !ui.working) { onOpen(code) } }
+                        on.forEach { code -> ValueRow(ActivityModels.name(family, code), ">", !ui.working) { onOpen(code) } }
                     }
                     if (ui.rawHex != null) ValueRow("Raw answer", ui.rawHex, false, note = "Read only")
                     val text = if (ui.working) "Talking to the watch..." else ui.message
@@ -112,7 +114,7 @@ internal fun WorkoutActivityContent(
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
-                ScreenTitle(ActivityNames.name(ui.activity), Modifier)
+                ScreenTitle(ActivityModels.name(ActivityModels.H5600, ui.activity), Modifier)
                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
                     Section("Auto lap and pause")
                     val run = ui.run
@@ -192,7 +194,7 @@ private fun ActivityOnRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AppTextLarge(text = if (place != null) "$place. ${ActivityNames.name(code)}" else ActivityNames.name(code), modifier = Modifier.weight(1f))
+            AppTextLarge(text = if (place != null) "$place. ${ActivityModels.name(ActivityModels.H5600, code)}" else ActivityModels.name(ActivityModels.H5600, code), modifier = Modifier.weight(1f))
             if (place != null) {
                 TextButton(onClick = { onMove(code, -1) }, enabled = enabled && canUp) { Text("Up") }
                 TextButton(onClick = { onMove(code, 1) }, enabled = enabled && canDown) { Text("Down") }

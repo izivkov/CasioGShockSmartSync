@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.io.ActivityFaceCodec
 import org.avmedia.gshockapi.io.ActivityItemCodec
 import org.avmedia.gshockapi.io.ActivityListCodec
+import org.avmedia.gshockapi.io.ActivityModels
 import org.avmedia.gshockapi.io.HeartRateFlagsCodec
 import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.RunMeasurementCodec
@@ -56,7 +57,7 @@ class WorkoutSettingsListViewModel @Inject constructor(private val access: Watch
 
     fun setEnabled(code: Int, on: Boolean) = change("Activity list") { ActivityListCodec.toggle(it, code, on) }
 
-    fun move(code: Int, delta: Int) = change("Activity order") { ActivityListCodec.move(it, code, delta) }
+    fun move(code: Int, delta: Int) = change("Activity order") { ActivityListCodec.move(it, code, delta) { c -> c in ActivityModels.offered(ActivityModels.H5600) } }
 
     private fun change(what: String, edit: (List<Int>) -> List<Int>) {
         val now = _ui.value

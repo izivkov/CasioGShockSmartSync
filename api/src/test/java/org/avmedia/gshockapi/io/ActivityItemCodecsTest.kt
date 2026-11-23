@@ -207,4 +207,31 @@ class ActivityItemCodecsTest {
         assertTrue(result is SettingWriteResult.Failed)
         assertTrue(watch.writes.isEmpty())
     }
+
+    @Test
+    fun theH5600OffersOnlyTheFourActivitiesOfItsManual() {
+        assertEquals(listOf(1, 2, 6, 14), ActivityModels.offered(ActivityModels.H5600))
+        assertEquals(
+            listOf("Running", "Walking", "Gym workout", "Interval timer"),
+            ActivityModels.offered(ActivityModels.H5600).map { ActivityModels.name(ActivityModels.H5600, it) },
+        )
+        assertEquals(ActivityListCodec.ACTIVITIES, ActivityModels.offered("other model"))
+    }
+
+    @Test
+    fun otherCodesTheWatchReportsAreHiddenButKeptInTheWrittenList() {
+        val reported = listOf(1, 3, 2, 9, 14)
+        assertEquals(listOf(1, 2, 14), ActivityModels.visible(ActivityModels.H5600, reported))
+        val frame = bytes(0x53, 1, 3, 2, 9, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        val off = ActivityListCodec.toggle(reported, 2, false)
+        assertArrayEquals(bytes(0x53, 1, 3, 9, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), ActivityListCodec.encode(frame, off)!!)
+    }
+
+    @Test
+    fun movingStepsOverHiddenActivitiesAndLeavesThemInPlace() {
+        val visible = { c: Int -> c in ActivityModels.offered(ActivityModels.H5600) }
+        assertEquals(listOf(3, 2, 1, 9, 14), ActivityListCodec.move(listOf(1, 3, 2, 9, 14), 1, 1, visible))
+        assertEquals(listOf(1, 3, 14, 2, 9), ActivityListCodec.move(listOf(1, 3, 2, 9, 14), 14, -1, visible))
+        assertEquals(listOf(1, 3, 2, 9, 14), ActivityListCodec.move(listOf(1, 3, 2, 9, 14), 14, 1, visible))
+    }
 }

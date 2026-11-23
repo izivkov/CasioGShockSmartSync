@@ -15,6 +15,27 @@ object ActivityNames {
     fun known(code: Int): Boolean = code in NAMES
 }
 
+/**
+ * Which activities a watch family offers, with the names of its manual. One table: add a family here.
+ * Codes the watch reports that are not offered stay in the list, untouched and hidden.
+ */
+object ActivityModels {
+    /** DW-H5600 / GBX-H5600, module 3586: its manual lists exactly RUNNING, WALKING, GYM WORKOUT and INTERVAL TIMER. */
+    const val H5600 = "H5600"
+
+    private val OFFERED: Map<String, List<Int>> = mapOf(H5600 to listOf(1, 2, 6, 14))
+    private val NAMES: Map<String, Map<Int, String>> =
+        mapOf(H5600 to mapOf(1 to "Running", 2 to "Walking", 6 to "Gym workout", 14 to "Interval timer"))
+
+    /** The codes offered for [family]; a family not in the table gets the general list. */
+    fun offered(family: String?): List<Int> = OFFERED[family] ?: ActivityListCodec.ACTIVITIES
+
+    fun name(family: String?, code: Int): String = NAMES[family]?.get(code) ?: ActivityNames.name(code)
+
+    /** The enabled codes a person sees: the offered ones, in the order of the watch. */
+    fun visible(family: String?, enabled: List<Int>): List<Int> = enabled.filter { it in offered(family) }
+}
+
 /** Activity list (0x53): up to 15 activity codes in order, 0 = unused. Read, and written as the same length. */
 object ActivityListCodec {
     const val CODE = 0x53
@@ -46,11 +67,17 @@ object ActivityListCodec {
     fun toggle(enabled: List<Int>, code: Int, on: Boolean): List<Int> =
         if (on) (if (code in enabled) enabled else enabled + code) else enabled - code
 
-    /** Moves [code] by [delta] places among the enabled activities; unchanged at either end. */
-    fun move(enabled: List<Int>, code: Int, delta: Int): List<Int> {
+    /**
+     * Moves [code] by [delta] (-1 or 1) places among the enabled activities that are [visible]; hidden ones keep their places
+     * and are stepped over. Unchanged at either end.
+     */
+    fun move(enabled: List<Int>, code: Int, delta: Int, visible: (Int) -> Boolean = { true }): List<Int> {
         val from = enabled.indexOf(code)
-        val to = from + delta
-        if (from < 0 || to !in enabled.indices) return enabled
+        if (from < 0 || delta == 0) return enabled
+        val step = if (delta > 0) 1 else -1
+        var to = from + step
+        while (to in enabled.indices && !visible(enabled[to])) to += step
+        if (to !in enabled.indices) return enabled
         return enabled.toMutableList().also { it.add(to, it.removeAt(from)) }
     }
 

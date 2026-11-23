@@ -40,6 +40,7 @@ fun SettingsScreen(
     onOpenWatchHealth: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
     onOpenWorkouts: () -> Unit = {},
+    onOpenTide: () -> Unit = {},
 ) {
     GShockSmartSyncTheme {
         Surface(
@@ -55,7 +56,7 @@ fun SettingsScreen(
                         .padding(0.dp)
                         .fillMaxWidth()
                 ) {
-                    SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts)
+                    SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
                 }
                 BottomRow(modifier = Modifier.fillMaxWidth())
             }
@@ -69,12 +70,13 @@ fun SettingsList(
     onOpenWatchHealth: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
     onOpenWorkouts: () -> Unit = {},
+    onOpenTide: () -> Unit = {},
 ) {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     Column {
         // The watch face and the health settings of the DW-H5600 family open from the top of Settings.
-        if (isH5600Watch()) WatchHealthLinks(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts)
+        if (isH5600Watch()) WatchHealthLinks(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
         WatchFeature(id = "locale_card") {
             Locale(settingsViewModel::onSettingUpdated)
         }

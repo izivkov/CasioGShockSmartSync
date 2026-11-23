@@ -29,6 +29,8 @@ class WorkoutSettingsScreenshotTest : ScreenshotTest() {
 
     @Test fun listLight() = snap("workout_settings_list", false) { WorkoutSettingsListContent(WorkoutListUi(activities = listOf(1, 2, 3, 6, 7, 8, 9, 12, 13, 14)), {}, {}, {}) }
     @Test fun listDark() = snap("workout_settings_list", true) { WorkoutSettingsListContent(WorkoutListUi(activities = listOf(1, 2, 3, 6, 7)), {}, {}, {}) }
+    /** The watch also reports Biking (3) and Pool (7): hidden, never shown, only the four of the manual are offered. */
+    @Test fun listHiddenCodesLight() = snap("workout_settings_list_hidden", false) { WorkoutSettingsListContent(WorkoutListUi(activities = listOf(1, 3, 2, 7, 14)), {}, {}, {}) }
     @Test fun listNoAnswerLight() = snap("workout_settings_list_no_answer", false) {
         WorkoutSettingsListContent(WorkoutListUi(message = "The watch did not answer. Connect the watch and try again."), {}, {}, {})
     }

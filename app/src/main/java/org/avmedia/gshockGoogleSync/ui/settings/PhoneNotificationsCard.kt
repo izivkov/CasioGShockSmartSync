@@ -3,7 +3,15 @@ package org.avmedia.gshockGoogleSync.ui.settings
 import AppText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import org.avmedia.gshockGoogleSync.notifications.AppEntry
+import org.avmedia.gshockGoogleSync.notifications.AppIcons
 import org.avmedia.gshockGoogleSync.notifications.InstalledApps
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
@@ -46,7 +55,7 @@ fun PhoneNotificationsCard() {
     if (picking) {
         Dialog(onDismissRequest = { picking = false }) {
             Surface(Modifier.fillMaxSize().padding(vertical = 24.dp), shape = MaterialTheme.shapes.large) {
-                AppPickerContent(apps, allowed, { pkg, on -> settings.setAllowed(pkg, on); allowed = settings.allowed }, { picking = false })
+                AppPickerContent(apps, allowed, { pkg, on -> settings.setAllowed(pkg, on); allowed = settings.allowed }, { picking = false }, iconLoader = { AppIcons.load(context, it) })
             }
         }
     }
@@ -82,7 +91,7 @@ fun PhoneNotificationsContent(enabled: Boolean, appCount: Int, onEnabled: (Boole
 
 /** The installed apps with a checkbox each and a search field. */
 @Composable
-fun AppPickerContent(apps: List<AppEntry>, selected: Set<String>, onToggle: (String, Boolean) -> Unit, onDone: () -> Unit, initialQuery: String = "") {
+fun AppPickerContent(apps: List<AppEntry>, selected: Set<String>, onToggle: (String, Boolean) -> Unit, onDone: () -> Unit, initialQuery: String = "", iconLoader: (suspend (String) -> ImageBitmap?)? = null) {
     var query by remember { mutableStateOf(initialQuery) }
     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         AppText("Apps that may send notifications", fontSize = 18.sp)
@@ -91,7 +100,8 @@ fun AppPickerContent(apps: List<AppEntry>, selected: Set<String>, onToggle: (Str
             items(InstalledApps.filter(apps, query), key = { it.packageName }) { app ->
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(app.packageName in selected, { onToggle(app.packageName, it) })
-                    Column {
+                    AppIcon(app.packageName, iconLoader)
+                    Column(Modifier.padding(start = 8.dp)) {
                         AppText(app.label, fontSize = 15.sp)
                         AppText(app.packageName, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -99,5 +109,19 @@ fun AppPickerContent(apps: List<AppEntry>, selected: Set<String>, onToggle: (Str
             }
         }
         AppButton("Done", onDone, Modifier.fillMaxWidth())
+    }
+}
+
+/** The icon of one app: a grey placeholder of the same size until it is loaded, and when there is none. */
+@Composable
+private fun AppIcon(packageName: String, loader: (suspend (String) -> ImageBitmap?)?) {
+    var icon by remember(packageName) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(packageName) { icon = loader?.invoke(packageName) }
+    val shape = RoundedCornerShape(8.dp)
+    val shown = icon
+    if (shown != null) {
+        Image(shown, null, Modifier.size(32.dp).clip(shape))
+    } else {
+        Box(Modifier.size(32.dp).clip(shape).background(MaterialTheme.colorScheme.surfaceVariant))
     }
 }

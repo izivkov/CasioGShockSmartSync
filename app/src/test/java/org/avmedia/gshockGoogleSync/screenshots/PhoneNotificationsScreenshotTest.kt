@@ -9,6 +9,8 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.notifications.AppEntry
 import org.avmedia.gshockGoogleSync.ui.settings.AppPickerContent
 import org.avmedia.gshockGoogleSync.ui.settings.PhoneNotificationsContent
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import org.junit.Test
 
 /** The phone notification setting: off, on without apps, on with apps, and the app picker. */
@@ -18,6 +20,17 @@ class PhoneNotificationsScreenshotTest : ScreenshotTest() {
         AppEntry("org.thoughtcrime.securesms", "Signal"), AppEntry("com.spotify.music", "Spotify"), AppEntry("com.android.chrome", "Chrome"),
     )
 
+    /** Plain coloured squares as stand-in icons; Spotify stays on the placeholder (still loading). */
+    private val icons: suspend (String) -> ImageBitmap? = { pkg ->
+        if (pkg == "com.spotify.music") {
+            null
+        } else {
+            val bitmap = android.graphics.Bitmap.createBitmap(96, 96, android.graphics.Bitmap.Config.ARGB_8888)
+            android.graphics.Canvas(bitmap).drawColor(android.graphics.Color.rgb(40 + (pkg.length * 29) % 180, 60 + (pkg.hashCode() and 0x7F), 100 + (pkg.length * 53) % 120))
+            bitmap.asImageBitmap()
+        }
+    }
+
     @Composable private fun Card(enabled: Boolean, count: Int) =
         Column(Modifier.fillMaxSize().padding(top = 16.dp)) { PhoneNotificationsContent(enabled, count, {}, {}) }
 
@@ -26,9 +39,9 @@ class PhoneNotificationsScreenshotTest : ScreenshotTest() {
     @Test fun onNoAppsLight() = snap("phone_notifications_on_empty", false) { Card(true, 0) }
     @Test fun onAppsLight() = snap("phone_notifications_on", false) { Card(true, 2) }
     @Test fun pickerLight() = snap("phone_notifications_picker", false) {
-        AppPickerContent(apps, setOf("com.whatsapp", "com.google.android.gm"), { _, _ -> }, {})
+        AppPickerContent(apps, setOf("com.whatsapp", "com.google.android.gm"), { _, _ -> }, {}, iconLoader = icons)
     }
     @Test fun pickerSearchDark() = snap("phone_notifications_picker_search", true) {
-        AppPickerContent(apps, setOf("com.google.android.gm"), { _, _ -> }, {}, initialQuery = "goo")
+        AppPickerContent(apps, setOf("com.google.android.gm"), { _, _ -> }, {}, initialQuery = "goo", iconLoader = icons)
     }
 }

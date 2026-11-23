@@ -108,4 +108,37 @@ class H5600WorkoutTransferTest {
         assertEquals(1, result.downloaded)
         assertEquals(2, watch.events.count { it == "read 29 0" })
     }
+
+    /** Answers only the start message, with the given state and reason; records what the transfer writes. */
+    private class StartOnlyWatch(private val inbox: Channel<WorkoutMsg>, private val state: Int, private val reason: Int) : WorkoutLink {
+        val bulks = mutableListOf<ByteArray>()
+
+        override fun drsp(data: ByteArray) {}
+
+        override fun bulk(data: ByteArray) {
+            bulks += data
+            if (data[0].toInt() == 0) inbox.trySend(WorkoutMsg(H5600Channel.CONVOY, byteArrayOf(0, state.toByte(), reason.toByte())))
+        }
+    }
+
+    // Notes I5 says start state 0 means "ok, go on" on the tide path; notes H1 step 2 says 0 means "cannot". Our code treats 0 as go
+    // on (the one real watch run worked that way); this pins it, and pins that a non-zero state with reason 1 or 2 is refused.
+    @Test
+    fun startStateZeroGoesOnToTheConnectionParameters() = runTest {
+        val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)
+        val watch = StartOnlyWatch(inbox, state = 0, reason = 0)
+        val result = WorkoutTransfer(watch, inbox, sink = { true }).run()
+        assertTrue(watch.bulks.any { it[0].toInt() == 4 })
+        assertTrue(result.error!!.contains("connection parameters"))
+        assertTrue(!result.refused)
+    }
+
+    @Test
+    fun aNonZeroStartStateWithReasonOneIsARefusalForTheBattery() = runTest {
+        val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)
+        val watch = StartOnlyWatch(inbox, state = 1, reason = 1)
+        val result = WorkoutTransfer(watch, inbox, sink = { true }).run()
+        assertTrue(result.refused)
+        assertTrue(result.error!!.contains("battery"))
+    }
 }
