@@ -6,7 +6,7 @@ import org.junit.Test
 
 class BodyUnitsTest {
     private fun p(imperial: Boolean, lb: Boolean) =
-        ProfileCodec.Profile(70, 180, 1985, 3, 14, true, imperialLength = imperial, weightNotKg = lb)
+        ProfileCodec.Profile(70, 180, 1990, 1, 1, true, imperialLength = imperial, weightNotKg = lb)
 
     @Test fun metricFlagsShowCmAndKg() {
         assertEquals("70 cm", BodyUnits.heightText(p(false, false)))

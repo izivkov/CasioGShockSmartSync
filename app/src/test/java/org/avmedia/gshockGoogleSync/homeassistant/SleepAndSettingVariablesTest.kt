@@ -127,7 +127,7 @@ class SleepAndSettingVariablesTest {
         "0x4F" to "4F 03 17 0F 06 2D 01 BE 3C 2D",
         "0x13" to "13 01 02 00 01 00 00 00 00 00 03 00 22 16 1E 06 0F",
         "0x43" to "43 10 27 00 09",
-        "0x45" to "45 00 8A FE 7D FF 7A E6 FC EB",
+        "0x45" to "45 00 8F FE 8F FF 6F E6 FE FE",
         "0x50" to "50 06 1E 03 1E",
     )
 
@@ -152,8 +152,8 @@ class SleepAndSettingVariablesTest {
         assertEquals(true, value("watch.step_reminder"))
         assertEquals("km", value("watch.length_unit"))
         assertEquals(10000, value("watch.step_goal"))
-        assertEquals(175, value("watch.profile_height_cm"))
-        assertEquals(82, value("watch.profile_weight_kg"))
+        assertEquals(170, value("watch.profile_height_cm"))
+        assertEquals(70, value("watch.profile_weight_kg"))
         assertEquals("06:30", value("watch.smart_alarm_time"))
         assertEquals(true, value("watch.smart_alarm_on"))
         assertEquals(30, value("watch.smart_alarm_window_min"))

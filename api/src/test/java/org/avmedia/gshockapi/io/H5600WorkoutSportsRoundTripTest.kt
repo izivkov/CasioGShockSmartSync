@@ -72,7 +72,7 @@ class H5600WorkoutSportsRoundTripTest {
             "stride", "vert" -> b.u16(90)
             "laps" -> b.u16(lapCount)
             "CAL" -> b.pad(17)
-            "PROF" -> b.u8(40).u16(1986).u8(3).u8(4).u8(1).u16(180).u16(750).u8(0)
+            "PROF" -> b.u8(40).u16(1990).u8(1).u8(1).u8(1).u16(170).u16(700).u8(0)
             "TAIL" -> b.pad(8, 1)
             "loadf" -> b.f(77.5f)
             "SWIM" -> b.u32(900).u32(18).u16(40).u16(35).pad(68)
@@ -128,7 +128,7 @@ class H5600WorkoutSportsRoundTripTest {
             if ("climb" in spec) assertEquals(m, 55L, s.summary.ascent) else assertNull(m, s.summary.ascent)
             if ("loadf" in spec) assertEquals(m, 77.5, s.summary.cardioLoadFloat!!, 1e-6) else assertNull(m, s.summary.cardioLoadFloat)
             if ("SWIM" in spec) assertEquals(m, 900L, s.summary.swim["strokes"])
-            assertEquals(m, 180, s.summary.profile["height"])
+            assertEquals(m, 170, s.summary.profile["height"])
             assertEquals(m, if (kind.lap != null) 2 else 0, s.summary.lapCount)
             if (kind.lap == null) {
                 assertTrue(m, s.laps.isEmpty())

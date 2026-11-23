@@ -29,7 +29,7 @@ object WorkoutTestData {
         val b = Bytes().u8(0x81).hms(0, 31, 5).f(5.25f).ms(5, 54).ms(5, 10).ms(7, 2)
             .u32(412).u8(60).u8(10).u8(30).u16(88).u8(3).u8(34).u8(1).u8(150).u8(178).u8(92)
             .u16(120).u16(95).u32(40).u32(38).u16(170).u16(182).u16(95).u16(7).u16(4)
-            .pad(17).u8(30).u16(1990).u8(5).u8(14).u8(1).u16(180).u16(752).u8(0)
+            .pad(17).u8(30).u16(1990).u8(1).u8(1).u8(1).u16(170).u16(700).u8(0)
             .u8(2).u8(23).u8(0).u8(7).u8(0).u8(190).u8(52).u8(48)
         if (withLoadFloat) b.f(88.5f)
         return b.bytes()
@@ -67,7 +67,7 @@ object WorkoutTestData {
 
     fun runningSample(t: Int, hr: Int): ByteArray {
         val b = Bytes().u8(1).u8(0).bcd(t / 60).bcd(t % 60).u8(0).hms(0, 0, 0)
-            .ms(5, 30).u8(hr).u8(3).u16(25).u16(170).d(52.5).d(4.9).f(t * 3f).u16(95)
+            .ms(5, 30).u8(hr).u8(3).u16(25).u16(170).d(45.0).d(10.0).f(t * 3f).u16(95)
             .f(0.5f).f(0.3f).f(0.2f).u32(1000).pad(34).u8(1)
         return b.bytes()
     }

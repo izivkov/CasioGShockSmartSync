@@ -63,7 +63,7 @@ class H5600WorkoutDecoderTest {
         assertEquals(170, s.cadenceAvg)
         assertEquals(4, s.lapCount)
         assertEquals(1990, s.profile["birthYear"])
-        assertEquals(752, s.profile["weight"])
+        assertEquals(700, s.profile["weight"])
         assertEquals(88.5, s.cardioLoadFloat!!, 1e-6)
     }
 
@@ -93,7 +93,7 @@ class H5600WorkoutDecoderTest {
     @Test
     fun swimSummary() {
         val b = Bytes().u8(0x89).hms(0, 20, 0).f(0.75f).ms(2, 10).ms(1, 50).ms(2, 40).u32(150).u16(12)
-            .u8(30).u16(1990).u8(5).u8(14).u8(1).u16(180).u16(752).u8(0)
+            .u8(30).u16(1990).u8(1).u8(1).u8(1).u16(170).u16(700).u8(0)
             .u8(2).u8(23).u8(0).u8(7).u8(0).u8(190).u8(52).u8(48)
             .u32(300).u32(25).u16(40).u16(35)
         for (i in 0 until 4) b.u32(100L * (i + 1)).hms(0, 5, 0).u32(30).u32(20).u16(40 + i)
@@ -152,8 +152,8 @@ class H5600WorkoutDecoderTest {
         assertEquals(5, samples[1].elapsedSeconds)
         assertEquals(121, samples[1].heartRate)
         assertEquals(25, samples[0].altitude)
-        assertEquals(52.5, samples[0].latitude!!, 1e-9)
-        assertEquals(4.9, samples[0].longitude!!, 1e-9)
+        assertEquals(45.0, samples[0].latitude!!, 1e-9)
+        assertEquals(10.0, samples[0].longitude!!, 1e-9)
         assertEquals(330, samples[0].pace)
         assertEquals(0.5, samples[0].extras["fuelC"]!!, 1e-6)
         assertEquals(1.0, samples[0].extras["formStatus"]!!, 0.0)

@@ -184,33 +184,33 @@ class WatchSettingCodecsTest {
 
     @Test
     fun readsTheProfileWithTheLowByteFirst() {
-        // height 175 = 75 01, weight 82 = 82 00, year 1985 = 85 19, month 3, day 14
-        val p = ProfileCodec.parse(profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14))!!
-        assertEquals(175, p.heightCm)
-        assertEquals(82, p.weightKg)
-        assertEquals(1985, p.birthYear)
-        assertEquals(3, p.birthMonth)
-        assertEquals(14, p.birthDay)
+        // made-up values: height 170 = 70 01, weight 70 = 70 00, year 1990 = 90 19, month 1, day 1
+        val p = ProfileCodec.parse(profile(0x00, 0x70, 0x01, 0x70, 0x00, 0x90, 0x19, 0x01, 0x01))!!
+        assertEquals(170, p.heightCm)
+        assertEquals(70, p.weightKg)
+        assertEquals(1990, p.birthYear)
+        assertEquals(1, p.birthMonth)
+        assertEquals(1, p.birthDay)
         assertEquals(true, p.lowByteFirst)
     }
 
     @Test
     fun readsTheProfileWithTheHighByteFirstWhenOnlyThatIsPlausible() {
-        val p = ProfileCodec.parse(profile(0x00, 0x01, 0x75, 0x00, 0x82, 0x19, 0x85, 0x03, 0x14))!!
-        assertEquals(175, p.heightCm)
-        assertEquals(82, p.weightKg)
+        val p = ProfileCodec.parse(profile(0x00, 0x01, 0x70, 0x00, 0x70, 0x19, 0x90, 0x01, 0x01))!!
+        assertEquals(170, p.heightCm)
+        assertEquals(70, p.weightKg)
         assertEquals(false, p.lowByteFirst)
     }
 
     @Test
     fun aProfileWriteChangesOnlyHeightAndWeight() {
-        val before = profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14, 0xAA)
-        val after = ProfileCodec.withHeightAndWeight(before, 180, 79)!!
+        val before = profile(0x00, 0x70, 0x01, 0x70, 0x00, 0x90, 0x19, 0x01, 0x01, 0xAA)
+        val after = ProfileCodec.withHeightAndWeight(before, 160, 60)!!
         assertTrue(ProfileCodec.BYTES.containsAll(changed(before, after)))
         val p = ProfileCodec.parse(after)!!
-        assertEquals(180, p.heightCm)
-        assertEquals(79, p.weightKg)
-        assertEquals(1985, p.birthYear)
+        assertEquals(160, p.heightCm)
+        assertEquals(60, p.weightKg)
+        assertEquals(1990, p.birthYear)
         assertEquals(0xAA, after[10].toInt() and 0xFF)
     }
 
@@ -246,10 +246,10 @@ class WatchSettingCodecsTest {
 
     @Test
     fun anUnrecognisedProfileIsNeverWritten() {
-        val odd = profile(0x00, 0x12, 0x34, 0x56, 0x78, 0x85, 0x19, 0x03, 0x14)
+        val odd = profile(0x00, 0x12, 0x34, 0x56, 0x78, 0x90, 0x19, 0x01, 0x01)
         assertNull(ProfileCodec.parse(odd))
-        assertNull(ProfileCodec.withHeightAndWeight(odd, 180, 79))
-        assertNotNull(ProfileCodec.parse(profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14)))
+        assertNull(ProfileCodec.withHeightAndWeight(odd, 160, 60))
+        assertNotNull(ProfileCodec.parse(profile(0x00, 0x70, 0x01, 0x70, 0x00, 0x90, 0x19, 0x01, 0x01)))
     }
 
     // 0x50 smart alarm
@@ -297,18 +297,18 @@ class WatchSettingCodecsTest {
 
     @Test
     fun aBirthDateWriteChangesOnlyTheDateBytes() {
-        val before = profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14, 0xAA)
+        val before = profile(0x00, 0x70, 0x01, 0x70, 0x00, 0x90, 0x19, 0x01, 0x01, 0xAA)
         val after = ProfileCodec.withBirthDate(before, 1990, 7, 9)!!
         assertTrue(ProfileCodec.BIRTH_BYTES.containsAll(changed(before, after)))
         val p = ProfileCodec.parse(after)!!
         assertEquals(listOf(1990, 7, 9), listOf(p.birthYear, p.birthMonth, p.birthDay))
-        assertEquals(175, p.heightCm)
+        assertEquals(170, p.heightCm)
         assertEquals(0xAA.toByte(), after[10])
     }
 
     @Test
     fun anImpossibleBirthDateIsRefused() {
-        val before = profile(0x00, 0x75, 0x01, 0x82, 0x00, 0x85, 0x19, 0x03, 0x14)
+        val before = profile(0x00, 0x70, 0x01, 0x70, 0x00, 0x90, 0x19, 0x01, 0x01)
         assertNull(ProfileCodec.withBirthDate(before, 1990, 2, 30))
         assertNull(ProfileCodec.withBirthDate(before, 1990, 13, 1))
         assertNull(ProfileCodec.withBirthDate(before, 1850, 1, 1))
@@ -355,27 +355,27 @@ class WatchSettingCodecsTest {
 
     @Test
     fun theProfileFlagsAndImperialUnitsAreRead() {
-        val p = ProfileCodec.parse(profile(0b0001_1101, 0x69, 0x00, 0x74, 0x01, 0x85, 0x19, 0x03, 0x14))!!
+        val p = ProfileCodec.parse(profile(0b0001_1101, 0x67, 0x00, 0x54, 0x01, 0x90, 0x19, 0x01, 0x01))!!
         assertEquals(true, p.female)
         assertEquals(true, p.imperialLength)
         assertEquals(true, p.weightNotKg)
         assertEquals(true, p.energyNotKcal)
-        assertEquals(69, p.height)
-        assertEquals(174, p.weight)
-        assertEquals(175, p.heightCm)
-        assertEquals(79, p.weightKg)
+        assertEquals(67, p.height)
+        assertEquals(154, p.weight)
+        assertEquals(170, p.heightCm)
+        assertEquals(70, p.weightKg)
     }
 
     @Test
     fun aWriteInInchesAndPoundsKeepsTheFlagByteAndOnlyChangesItsBytes() {
-        val before = profile(0b0000_1100, 0x69, 0x00, 0x74, 0x01, 0x85, 0x19, 0x03, 0x14)
-        val after = ProfileCodec.withHeightAndWeight(before, 70, 180)!!
+        val before = profile(0b0000_1100, 0x67, 0x00, 0x54, 0x01, 0x90, 0x19, 0x01, 0x01)
+        val after = ProfileCodec.withHeightAndWeight(before, 66, 150)!!
         assertTrue(ProfileCodec.BYTES.containsAll(changed(before, after)))
         assertEquals(0b0000_1100, after[1].toInt())
-        assertEquals(70, ProfileCodec.parse(after)!!.height)
-        assertEquals(180, ProfileCodec.parse(after)!!.weight)
-        assertNull(ProfileCodec.withHeightAndWeight(before, 175, 180))
-        assertNull(ProfileCodec.withHeightAndWeight(before, 70, 30))
+        assertEquals(66, ProfileCodec.parse(after)!!.height)
+        assertEquals(150, ProfileCodec.parse(after)!!.weight)
+        assertNull(ProfileCodec.withHeightAndWeight(before, 175, 150))
+        assertNull(ProfileCodec.withHeightAndWeight(before, 66, 30))
     }
 
     @Test
