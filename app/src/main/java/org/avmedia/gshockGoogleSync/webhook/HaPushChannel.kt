@@ -39,15 +39,30 @@ class HaPushChannel(
     fun wake(drop: Boolean) { loop?.wake(drop) }
 
     suspend fun run(deviceId: () -> String) {
+        log("Home Assistant: push loop started")
         val l = HaPushLoop(
-            connect = { up -> if (enabled()) connectOnce(deviceId(), up) else "off" },
+            connect = { up -> if (enabled()) connectOnce(deviceId(), up).also(::noteReason) else "off".also(::noteReason) },
             now = System::currentTimeMillis,
             log = log,
             onState = { HaPushState.set(it); HaPushRouter.updateSensorsHook?.invoke() },
             onUp = { since, at -> runCatching { catchUp(deviceId(), since, at) }.onFailure { Timber.w("HA push: catch-up failed") } },
         )
         loop = l
-        try { l.run() } finally { loop = null; HaPushState.set(false) }
+        try { l.run() } finally {
+            loop = null
+            // Stopped (service gone, owners released): the state is off and HA is told, as far as the process still can.
+            HaPushState.set(false)
+            runCatching { HaPushRouter.updateSensorsHook?.invoke() }
+        }
+    }
+
+    private var lastNote: String? = null
+
+    /** Why the socket is not up, once per change of reason (not per retry): an empty log made a dead push invisible (2026-11-23). */
+    private fun noteReason(reason: String) {
+        if (reason == lastNote) return
+        lastNote = reason
+        if (reason in NOT_UP_REASONS) log("Home Assistant: push not connected ($reason)")
     }
 
     /** One connection until it ends; [up] is called when HA confirmed the subscription. Returns why it ended. */
@@ -88,6 +103,10 @@ class HaPushChannel(
             cont.invokeOnCancellation { ws.cancel() }
         }
         return reason
+    }
+
+    private companion object {
+        val NOT_UP_REASONS = setOf("off", "not set up", "not registered", "push not registered yet", "bad URL", "token refused")
     }
 
     private fun now(): String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"))

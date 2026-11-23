@@ -85,7 +85,7 @@ class WatchQueue(
                     Outcome.failed(verdict.reason)
                 }
                 is Verdict.Send -> send(WatchChannel.of(item.handle), verdict).also {
-                    if (!it.ok) ConnectionKeepAlive.log("request %02X failed: %s".format(item.data[0].toInt() and 0xFF, it.reason))
+                    if (!it.ok) logFailure(item.data[0].toInt() and 0xFF, it.reason)
                 }
             }
         } catch (t: Throwable) {
@@ -93,6 +93,17 @@ class WatchQueue(
             Timber.e(t, "Watch request failed")
             Outcome.failed(t.message ?: "error")
         }
+
+    private val unsupportedLogged = java.util.concurrent.ConcurrentHashMap.newKeySet<Int>()
+
+    /** A refusal with status 81 means this watch does not have that code: one quiet line per code, not one per ask. */
+    private fun logFailure(code: Int, reason: String?) {
+        if (reason != null && reason.endsWith("(status 81).")) {
+            if (unsupportedLogged.add(code)) ConnectionKeepAlive.log("0x%02X is not supported by this watch (FF 81)".format(code))
+            return
+        }
+        ConnectionKeepAlive.log("request %02X failed: %s".format(code, reason))
+    }
 
     private suspend fun send(channel: WatchChannel, verdict: Verdict.Send): Outcome {
         if (channel != WatchChannel.READ_REQUEST) {

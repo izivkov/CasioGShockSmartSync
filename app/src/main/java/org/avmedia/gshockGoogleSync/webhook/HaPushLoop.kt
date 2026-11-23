@@ -54,9 +54,16 @@ class HaPushLoop(
             }
             if (up.get()) {
                 downSince = now()
-                log("Home Assistant: push connection lost ($reason)")
-                onState(false)
                 attempt = 0
+                // A failing log or state callback must never end the loop: a dead loop is a socket that never comes back.
+                try {
+                    log("Home Assistant: push connection lost ($reason)")
+                    onState(false)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    runCatching { log("Home Assistant: push state not reported (${t.javaClass.simpleName})") }
+                }
             } else {
                 attempt++
             }

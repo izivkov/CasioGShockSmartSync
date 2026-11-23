@@ -112,6 +112,9 @@ object WatchVariables {
             },
 
             Variable("app.ha_push_connected", "True while the Home Assistant push socket is up") { HaPushState.connected },
+            Variable("app.ha_push_heartbeat", "Now, ISO 8601: Home Assistant can treat a stale value as 'the app is gone', since a dead app cannot send 'off'") {
+                java.time.OffsetDateTime.now().withNano(0).toString()
+            },
             Variable("app.ha_push_changed_at", "When the Home Assistant push socket last went up or down, ISO 8601") { HaPushState.changedAt.takeIf { it.isNotEmpty() } },
 
             // Watch

@@ -44,9 +44,17 @@ class HaPushHost(
         channel = null
     }
 
-    @Synchronized fun networkChanged() { channel?.wake(true) }
+    @Synchronized fun networkChanged() { ensureRunning(); channel?.wake(true) }
 
-    @Synchronized fun watchConnected() { channel?.wake(false) }
+    @Synchronized fun watchConnected() { ensureRunning(); channel?.wake(false) }
+
+    /** An owner holds the host but the socket's job ended (a crash): start it again. */
+    private fun ensureRunning() {
+        if (owners.isEmpty() || job?.isActive == true) return
+        val ch = startChannel(scope)
+        channel = ch
+        job = scope.launch { ch.run() }
+    }
 
     companion object {
         const val SERVICE = "service"
