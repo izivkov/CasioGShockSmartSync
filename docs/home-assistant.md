@@ -1,16 +1,18 @@
 # Notifications on the watch
 
-`notify.mobile_app_<device_name>` with `title` and `message` shows on the watch. The watch has little room: the first line
-is the frame's app name field, so it carries the title; the message is the text.
+`notify.mobile_app_<device_name>` with `title` and `message` shows on the watch. The pop-up shows the frame's app name
+field, the list and the detail view show the title field, so the title goes in both; the message is the text.
 
-| Push | First line (app name) | Title field | Text |
+| Push | Pop-up (app name) | List and detail title | Text |
 |---|---|---|---|
-| `title`, `message` | title | empty | message |
+| `title`, `message` | title | title | message |
 | `title`, `message`, `data: {app: HA}` | `data.app` | title | message |
 | `message` only | `HA` | empty | message |
 
 - Keep titles to 32 characters (32 bytes in UTF-8; accents count 2): the app cuts the first line there, as Gadgetbridge's
-  Casio support does. How many the watch shows at once is not measured yet (count it on the watch and write it here).
+  Casio support does. Measured on the GBX-H5600 (owner, 2026-11-23): the pop-up shows about 10 characters of the first
+  field; the detail view shows the title line and then the text wrapped at about 14 characters per line, over several
+  lines. Short titles (10 characters or fewer) show whole in the pop-up.
 - The text is cut at 193 bytes (UTF-8).
 
 # Change watch settings from Home Assistant (DW-H5600)

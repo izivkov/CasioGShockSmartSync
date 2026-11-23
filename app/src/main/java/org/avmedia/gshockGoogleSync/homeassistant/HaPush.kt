@@ -105,9 +105,9 @@ object HaPush {
     }
 
     /**
-     * The H5600 shows the app name field first and has little room, so it carries the content: the push title (or
-     * `data.app`, a short source name, when the automation sets one; the title then goes in the title field). The
-     * message is the text. No title and no `data.app`: [SHORT_SOURCE].
+     * The H5600 pop-up shows the app name field (about 10 characters), the list and detail view the title field: the
+     * push title goes in both (the app name is `data.app` instead when the automation sets one). The message is the
+     * text. No title and no `data.app`: [SHORT_SOURCE] as the app name, an empty title.
      */
     fun toNotification(push: HaPushEvent.Push, timestamp: String): AppNotification {
         val title = push.title?.trim()?.takeIf { it.isNotEmpty() }
@@ -117,7 +117,7 @@ object HaPush {
             type = NotificationType.MESSAGE,
             timestamp = timestamp,
             app = cutUtf8(first, MAX_FIRST_FIELD_BYTES),
-            title = if (source != null) cutUtf8(title.orEmpty(), MAX_FIRST_FIELD_BYTES) else "",
+            title = cutUtf8(title.orEmpty(), MAX_FIRST_FIELD_BYTES),
             text = push.message,
         )
     }

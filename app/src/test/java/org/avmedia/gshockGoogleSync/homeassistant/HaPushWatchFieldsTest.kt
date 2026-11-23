@@ -25,9 +25,12 @@ class HaPushWatchFieldsTest {
     }
 
     @Test
-    fun theTitleIsNotRepeatedInTheNextField() {
+    fun theTitleIsInBothThePopUpAndTheListField() {
+        // Owner 2026-11-23: with the title only in the app name field the list and detail view showed an empty title.
         val n = decoded(HaPushEvent.Push("Charge watch", "Battery 25%", null))
-        assertEquals("", n.title)
+        assertEquals("Charge watch", n.app)
+        assertEquals("Charge watch", n.title)
+        assertEquals("Battery 25%", n.text)
     }
 
     @Test
