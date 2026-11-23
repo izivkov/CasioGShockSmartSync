@@ -38,7 +38,7 @@ class HaPushHost(
 
     @Synchronized fun release(owner: String) {
         owners -= owner
-        
+        if (owners.isNotEmpty()) return
         job?.cancel()
         job = null
         channel = null

@@ -90,5 +90,5 @@ object HaPush {
     private val BACKOFF_MS = longArrayOf(0, 1_000, 2_000, 5_000, 10_000, 30_000, 60_000)
 
     /** Wait before reconnect try [attempt]: 0 = at once (right after a drop), then 1, 2, 5, 10, 30 s, then 60 s. */
-    fun backoffMs(attempt: Int): Long = (2_000L shl attempt.coerceIn(0, 5)).coerceAtMost(60_000L)
+    fun backoffMs(attempt: Int): Long = BACKOFF_MS[attempt.coerceIn(0, BACKOFF_MS.size - 1)]
 }

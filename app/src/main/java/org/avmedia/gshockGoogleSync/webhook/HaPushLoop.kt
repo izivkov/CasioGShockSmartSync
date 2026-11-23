@@ -52,9 +52,9 @@ class HaPushLoop(
                     }
                 }
             }
-            log("Home Assistant: push connection lost ($reason)")
             if (up.get()) {
                 downSince = now()
+                log("Home Assistant: push connection lost ($reason)")
                 onState(false)
                 attempt = 0
             } else {
@@ -72,7 +72,7 @@ class HaPushLoop(
         val k = launch {
             while (true) {
                 wakes.receive()
-                if (dropRequested.getAndSet(false)) { break }
+                if (dropRequested.getAndSet(false)) { c.cancel(CancellationException("network changed")); break }
             }
         }
         c.join()

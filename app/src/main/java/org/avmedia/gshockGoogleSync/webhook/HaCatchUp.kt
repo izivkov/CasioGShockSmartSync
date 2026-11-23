@@ -27,7 +27,7 @@ class HaCatchUp(
         if (r.status == null || r.status !in 200..299) return
         val text = runCatching { JsonParser.parseString(r.body).asJsonObject.get("t").asString }.getOrNull()?.trim() ?: return
         if (text.isEmpty() || text.lowercase() in ABSENT) return
-        
+        if (text == store.loadAppliedSettings()) return
         store.saveAppliedSettings(text)
         val map = runCatching {
             JsonParser.parseString(text).asJsonObject.entrySet().associate { (k, v) ->
