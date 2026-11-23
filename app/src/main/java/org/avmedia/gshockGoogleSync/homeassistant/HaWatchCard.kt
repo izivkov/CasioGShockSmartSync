@@ -38,8 +38,9 @@ internal fun HaWatchCard(
             )
             HaNote("Sets the device, sensor and notify names in Home Assistant. It cannot be changed later.")
         } else OutlinedTextField(
-            value = deviceName, onValueChange = onName, singleLine = true, modifier = Modifier.fillMaxWidth(),
-            label = { Text("Name in Home Assistant (empty: the watch name)") },
+            value = deviceName, onValueChange = {}, readOnly = true, singleLine = true, modifier = Modifier.fillMaxWidth(),
+            label = { Text("Name in Home Assistant") },
+            supportingText = { Text("fixed at registration") },
         )
         OutlinedTextField(
             value = model, onValueChange = onModel, singleLine = true, modifier = Modifier.fillMaxWidth(),

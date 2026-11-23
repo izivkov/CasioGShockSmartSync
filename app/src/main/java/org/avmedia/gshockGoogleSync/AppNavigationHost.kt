@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -82,7 +83,8 @@ private fun ContentSelector(viewModel: AppNavigationViewModel) {
 internal fun LinkBar(link: LinkState, modifier: Modifier = Modifier) {
     if (link == LinkState.UP) return
     androidx.compose.material3.Surface(
-        modifier = modifier,
+        // Edge to edge: below the status bar, not under it.
+        modifier = modifier.statusBarsPadding(),
         color = androidx.compose.material3.MaterialTheme.colorScheme.secondaryContainer,
         shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
     ) {

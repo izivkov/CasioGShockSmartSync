@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -52,7 +53,8 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen
     var model by remember { mutableStateOf(ui.form.model) }
     val save = { events.onSave(url, token, deviceName, model) }
 
-    Column(Modifier.fillMaxSize()) {
+    // The app draws edge to edge: keep the title out of the status bar and the buttons out of the navigation bar.
+    Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         HaTitle("Home Assistant")
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 8.dp),
