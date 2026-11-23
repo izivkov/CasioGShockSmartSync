@@ -123,10 +123,13 @@ class HaClient(
         if (reg.sensorsHash != fingerprint) {
             // register_sensor carries a state and HA shows it: a null would turn a known value to unknown.
             // So: the value of this job, else the last one sent (persisted), else null for a sensor never sent.
-            val lastSent = store.loadSent().states
+            // The attributes come with the value they belong to: HA replaces them too (log 2026-11-23 21:26, steps_by_hour).
+            val lastSent = store.loadSent()
             for (s in sensors) {
-                val state = job.states[s.uniqueId] ?: lastSent[s.uniqueId]
-                val r = transport.post(hook, HaPayloads.registerSensor(s, state, job.attributes?.get(s.uniqueId)), null)
+                val fresh = job.states[s.uniqueId]
+                val state = fresh ?: lastSent.states[s.uniqueId]
+                val attributes = if (fresh != null) job.attributes?.get(s.uniqueId) else lastSent.attributes?.get(s.uniqueId)
+                val r = transport.post(hook, HaPayloads.registerSensor(s, state, attributes), null)
                 if (gone(r, hook)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }
             }
