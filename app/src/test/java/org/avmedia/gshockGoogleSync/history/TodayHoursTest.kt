@@ -2,6 +2,7 @@ package org.avmedia.gshockGoogleSync.history
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import org.avmedia.gshockGoogleSync.homeassistant.HaSensors
 import org.avmedia.gshockGoogleSync.homeassistant.HealthVariables
 import org.avmedia.gshockapi.model.H5600HealthData
 import org.avmedia.gshockapi.model.StepCounterData
@@ -60,6 +61,18 @@ class TodayHoursTest {
         val merged = TodayHours.merge(transfer(now, 16 to 122), rows, now)
         val screen = StoredHealth.stepData(listOf(DayRow(day.toString(), steps = 2445)), now = now) { stored(merged) }!!
         assertEquals(HealthVariables.values(merged)["health.steps_by_hour"], screen.hourlySteps)
+    }
+
+    /** Log 2026-11-23 21:26: a read with no new hourly slots must still send the whole stored day with steps_today. */
+    @Test fun aReadWithNoNewHoursStillSendsTheStoredDay() {
+        val first = TodayHours.merge(transfer(day.atTime(20, 15), 13 to 242, 14 to 518, 20 to 18), emptyList(), day.atTime(20, 15))
+        val now = day.atTime(21, 26)
+        val empty = TodayHours.merge(transfer(now), stored(first), now)
+        val values = HealthVariables.values(empty)
+        val states = HaSensors.states(values)
+        val attrs = HaSensors.attributes(values)
+        assertTrue("steps_today" in states)
+        assertEquals(first.hourlyByHour.subList(0, 21), (attrs.getValue("steps_today").getValue("steps_by_hour") as List<*>).subList(0, 21))
     }
 
     @Test fun theStoredDayKeepsTheLastGoalAndTime() {

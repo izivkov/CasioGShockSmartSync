@@ -45,4 +45,35 @@ class HaRegisterKeepsValuesTest {
         assertTrue(never, never.contains("\"state\":null"))
         assertEquals(0, t.bodies.count { it.contains("update_sensor_states") })
     }
+
+    /**
+     * Log 2026-11-23: the first push after installing a build with a changed sensor set (21:26:05, no LifeLog read yet in
+     * the new app session) re-registered steps_today with the last sent value 3184 but no attributes, and HA dropped
+     * `steps_by_hour` (register_sensor replaces the attributes like an update does). Same for the heart rate curve.
+     */
+    @Test
+    fun reRegisteringWithTheLastSentValueKeepsItsAttributes() {
+        val store = HaStore(MapStore())
+        val t = Recorder()
+        assertTrue(HaClient(t, store).saveSettings("https://ha.example", "tok") is HaResult.Ok)
+        val hours = List(24) { if (it in 13..16) 100 + it else null }
+        val first = HaJob(
+            mapOf("steps_today" to 3184, "hr_recent_avg" to 72),
+            attributes = mapOf("steps_today" to mapOf("steps_by_hour" to hours), "hr_recent_avg" to mapOf("hr_curve_max" to 131)),
+            deviceId = "gshock-1", registration = reg, h5600 = true,
+        )
+        assertTrue(HaClient(t, store).send(first) is HaResult.Ok)
+        store.saveSent(first, 1L) // the worker does this after a good send
+        // A later send of other values only must not forget them.
+        store.saveSent(HaJob(mapOf("battery" to 80), deviceId = "gshock-1", registration = reg), 2L)
+        val old = store.loadRegistration("gshock-1")!!
+        store.saveRegistration("gshock-1", old.copy(sensorsHash = "old"))
+        t.bodies.clear()
+        assertTrue(HaClient(t, store).send(HaJob(mapOf("battery" to 79), deviceId = "gshock-1", registration = reg, h5600 = true)) is HaResult.Ok)
+        val steps = t.bodies.first { it.contains("register_sensor") && it.contains("\"unique_id\":\"steps_today\"") }
+        assertTrue(steps, steps.contains("\"state\":3184"))
+        assertTrue(steps, steps.contains("\"steps_by_hour\":[null,null,null,null,null,null,null,null,null,null,null,null,null,113,114,115,116,null"))
+        val hr = t.bodies.first { it.contains("register_sensor") && it.contains("\"unique_id\":\"hr_recent_avg\"") }
+        assertTrue(hr, hr.contains("\"hr_curve_max\":131"))
+    }
 }

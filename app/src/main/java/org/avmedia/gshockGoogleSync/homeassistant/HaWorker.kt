@@ -30,7 +30,7 @@ class HaWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
         // The message holds no URL and no token.
         Timber.d("Home Assistant attempt $attempt: ${result.message}")
         store.saveResult("${result.message} at ${java.time.OffsetDateTime.now().withNano(0)}" + if (retry) " (retrying)" else "", result is HaResult.Ok)
-        if (result is HaResult.Ok) store.saveSent(job.states, System.currentTimeMillis())
+        if (result is HaResult.Ok) store.saveSent(job, System.currentTimeMillis())
         if (retry) return Result.retry()
         store.clearPending()
         return if (result is HaResult.Ok) Result.success() else Result.failure()

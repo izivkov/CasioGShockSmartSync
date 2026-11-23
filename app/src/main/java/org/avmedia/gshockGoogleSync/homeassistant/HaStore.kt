@@ -38,9 +38,16 @@ data class HaRegistration(
     val sensorsHash: String = "",
 )
 
-/** Sensor values last sent to HA and the time (epoch millis, 0 = never). */
+/**
+ * Sensor values last sent to HA, their attributes and the time (epoch millis, 0 = never). [attributes] is null in a
+ * value stored by an older version.
+ */
 @Keep
-data class HaSent(val states: Map<String, Any> = emptyMap(), val at: Long = 0)
+data class HaSent(
+    val states: Map<String, Any> = emptyMap(),
+    val at: Long = 0,
+    val attributes: Map<String, Map<String, Any?>>? = null,
+)
 
 /** The Home Assistant setup, one registration per watch and the newest unsent job, on a [KeyValueStore]. Android-free. */
 class HaStore(private val store: KeyValueStore) {
@@ -122,10 +129,16 @@ class HaStore(private val store: KeyValueStore) {
     fun lastResultOk(): Boolean? = store.get(KEY_RESULT_OK)?.let { it == "yes" }
 
     /** The values of the last good send (merged over earlier ones) and when it was, for the screen. */
-    fun saveSent(states: Map<String, Any>, atMillis: Long) {
-        val merged = loadSent().states + states
-        store.put(KEY_SENT, gson.toJson(HaSent(merged, atMillis)))
+    fun saveSent(states: Map<String, Any>, atMillis: Long, attributes: Map<String, Map<String, Any?>> = emptyMap()) {
+        val old = loadSent()
+        // HA replaces a sensor's attributes with each update: a sensor sent without attributes has none there now.
+        val sentAttributes = attributes.filterKeys { it in states }.filterValues { it.isNotEmpty() }
+        val keptAttributes = old.attributes.orEmpty().filterKeys { it !in states } + sentAttributes
+        store.put(KEY_SENT, gson.toJson(HaSent(old.states + states, atMillis, keptAttributes)))
     }
+
+    /** After a good send of [job]: its values and attributes, for a later register_sensor that has no fresh ones. */
+    fun saveSent(job: HaJob, atMillis: Long) = saveSent(job.states, atMillis, job.attributes.orEmpty())
 
     fun loadSent(): HaSent =
         runCatching { gson.fromJson(store.get(KEY_SENT), HaSent::class.java) }.getOrNull() ?: HaSent()
