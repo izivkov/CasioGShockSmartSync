@@ -54,15 +54,21 @@ object CachedIO {
     ): T =
         when {
             state.cacheOff ->
-                compute(key).also { value ->
+                gatedCompute(key, compute).also { value ->
                     state = state.copy(cache = state.cache + (key.uppercase() to value))
                 }
 
             else ->
-                state.cache[key.uppercase()]?.let { it as T } ?: compute(key).also { value ->
+                state.cache[key.uppercase()]?.let { it as T } ?: gatedCompute(key, compute).also { value ->
                     state = state.copy(cache = state.cache + (key.uppercase() to value))
                 }
         }
+
+    /** A read from the watch never goes out while a transfer runs (owner log 2026-11-23_2309: `0x11` every 4 to 5 s during a workout read). */
+    private suspend fun <T : Any> gatedCompute(key: String, compute: suspend (String) -> T): T {
+        org.avmedia.gshockapi.io.WatchExchange.awaitNoTransfer()
+        return compute(key)
+    }
 
     fun set(
         key: String,

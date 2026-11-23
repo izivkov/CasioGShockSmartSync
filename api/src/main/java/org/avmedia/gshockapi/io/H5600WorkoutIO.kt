@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.avmedia.gshockapi.ble.GetSetMode
+import org.avmedia.gshockapi.casio.CasioConstants
+import org.avmedia.gshockapi.casio.WatchLink
 import org.avmedia.gshockapi.model.WorkoutSession
 import timber.log.Timber
 
@@ -52,9 +54,20 @@ object H5600WorkoutIO {
 
     val isActive: Boolean get() = inbox != null
 
-    /** Which characteristic a message belongs to while a workout transfer runs. Single bytes are never bulk. */
-    fun channelOf(hex: String): H5600Channel = channelOf(H5600HealthIO.bytesOf(hex))
+    /**
+     * Which characteristic a message belongs to while a workout or tide transfer runs. The characteristic it came on decides;
+     * the guess from the bytes is only the fallback when the connection code did not say. Owner log 2026-11-23_2309: the
+     * watch's `09 1D` (all sent) is longer than 2 bytes, the guess called it a status frame and the read never answered it.
+     */
+    fun channelOf(hex: String): H5600Channel =
+        when (WatchLink.currentSource()) {
+            CasioConstants.CASIO_DATA_REQUEST_CHARACTERISTIC_UUID -> H5600Channel.DRSP
+            CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID -> H5600Channel.CONVOY
+            null -> channelOf(H5600HealthIO.bytesOf(hex))
+            else -> H5600Channel.STATUS
+        }
 
+    /** The guess from the bytes alone (no characteristic known). Single bytes are never bulk. */
     fun channelOf(data: ByteArray): H5600Channel {
         val first = data.firstOrNull()?.toInt()?.and(0xFF) ?: return H5600Channel.STATUS
         return when {
@@ -69,7 +82,11 @@ object H5600WorkoutIO {
     fun onConvoy(hex: String) = push(H5600Channel.CONVOY, hex)
 
     private fun push(channel: H5600Channel, hex: String) {
-        inbox?.trySend(WorkoutMsg(channel, H5600HealthIO.bytesOf(hex)))
+        val box = inbox ?: return
+        val data = H5600HealthIO.bytesOf(hex)
+        // Every frame whole: the raw rx line shows only two bytes, too few to see a chunk or an end message.
+        log("workout rx " + (if (channel == H5600Channel.CONVOY) "bulk " else "drsp ") + data.joinToString(" ") { "%02X".format(it) })
+        box.trySend(WorkoutMsg(channel, data))
     }
 
     /** After the connection setup: `0x28` index 6 (one byte after the code, so list position 7) is 1 or 2 when the watch holds workouts. */

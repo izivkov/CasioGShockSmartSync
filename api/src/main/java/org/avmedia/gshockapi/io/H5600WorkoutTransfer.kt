@@ -201,10 +201,11 @@ class WorkoutTransfer(
     private suspend fun read(category: Int, address: Long, length: Int, chunk: Int): ByteArray? {
         repeat(2) {
             val asm = WorkoutChunkAssembler(length, chunk)
-            link.drsp(request(category, address, length))
+            val step = "read %02X".format(category)
+            drsp(step, request(category, address, length))
             var bad = 0
             while (true) {
-                val m = next(readTimeoutMs) ?: return null
+                val m = next(readTimeoutMs) ?: return null.also { log("Workout read: $step rx nothing in ${readTimeoutMs / 1000} s (${asm.receivedBytes} of $length bytes)") }
                 if (m.channel == H5600Channel.CONVOY) {
                     if (m.data.size > 1 && m.data[0] == BULK_DATA) asm.feed(m.data.copyOfRange(1, m.data.size))
                     continue
@@ -212,23 +213,24 @@ class WorkoutTransfer(
                 when (m.data.firstOrNull()?.toInt()) {
                     SECTOR_END ->
                         if (asm.endSector()) {
-                            link.drsp(byteArrayOf(SECTOR_END.toByte(), category.toByte()))
+                            drsp(step, byteArrayOf(SECTOR_END.toByte(), category.toByte()))
                         } else {
                             if (++bad >= 2) return null
                             asm.dropSector()
-                            link.drsp(byteArrayOf(0x08, category.toByte()))
-                            link.drsp(byteArrayOf(0x06, category.toByte()))
+                            drsp(step, byteArrayOf(0x08, category.toByte()))
+                            drsp(step, byteArrayOf(0x06, category.toByte()))
                         }
                     DROP_SECTOR -> asm.dropSector()
                     ALL_SENT -> {
-                        link.drsp(byteArrayOf(ALL_SENT.toByte(), category.toByte()))
-                        link.drsp(byteArrayOf(0x04, category.toByte()))
+                        drsp(step, byteArrayOf(ALL_SENT.toByte(), category.toByte()))
+                        drsp(step, byteArrayOf(0x04, category.toByte()))
                         val result = asm.result()
                         if (result != null) {
                             capture(null, result)
                             return result
                         }
-                        link.drsp(byteArrayOf(0x03, category.toByte()))
+                        log("Workout read: $step incomplete (${asm.receivedBytes} of $length bytes, ${asm.partialBytes} in an open chunk)")
+                        drsp(step, byteArrayOf(0x03, category.toByte()))
                         return@repeat
                     }
                     ABORTED -> return null

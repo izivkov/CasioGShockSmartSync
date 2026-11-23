@@ -31,8 +31,11 @@ object H5600Protocol : StandardProtocol() {
         // The watch's own connection check and setup notices are answered even in the middle of a transfer.
         val first = super.extractKey(data)
         if (first != null && first in UNSOLICITED_ALWAYS) return first
-        if (TideTransferIO.isActive) return TideTransferIO.channelOf(data).key
-        if (H5600WorkoutIO.isActive) return H5600WorkoutIO.channelOf(data).key
+        // A transfer takes the frames of its two characteristics; the rest (a settings answer such as `11 00 ...`) keeps its own handler.
+        if (TideTransferIO.isActive || H5600WorkoutIO.isActive) {
+            val channel = TideTransferIO.channelOf(data)
+            return if (channel == H5600Channel.STATUS) first else channel.key
+        }
         if (!H5600HealthIO.isActive) return first
         val channel = H5600HealthIO.channelOf(data)
         // A status notification belongs to the transfer only while one of its setup requests is waiting.

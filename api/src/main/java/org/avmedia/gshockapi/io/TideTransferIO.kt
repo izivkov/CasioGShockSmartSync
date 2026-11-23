@@ -4,9 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.channels.Channel
 import org.avmedia.gshockapi.ble.GetSetMode
-import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.ConnectionKeepAlive
-import org.avmedia.gshockapi.casio.WatchLink
 
 /**
  * Sends a port record to a DW-H5600 through the shared exchange lock (notes I5). Routing of the watch's answers works as for
@@ -18,17 +16,8 @@ object TideTransferIO {
 
     val isActive: Boolean get() = inbox != null
 
-    /**
-     * The channel a message belongs to. The characteristic it came on decides (data request, bulk) when the connection code says so;
-     * the guess from the first byte is only the fallback. The end message of the transfer comes on the data request characteristic
-     * and its first byte is not known, so a guess could drop it ("the watch did not confirm the end").
-     */
-    fun channelOf(hex: String): H5600Channel =
-        when (WatchLink.currentSource()) {
-            CasioConstants.CASIO_DATA_REQUEST_CHARACTERISTIC_UUID -> H5600Channel.DRSP
-            CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID -> H5600Channel.CONVOY
-            else -> H5600WorkoutIO.channelOf(hex)
-        }
+    /** The channel a message belongs to: the characteristic decides, as for the workouts ([H5600WorkoutIO.channelOf]). */
+    fun channelOf(hex: String): H5600Channel = H5600WorkoutIO.channelOf(hex)
 
     fun onDrsp(hex: String) = push(H5600Channel.DRSP, hex)
 

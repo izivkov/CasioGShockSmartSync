@@ -40,8 +40,8 @@ class H5600WorkoutGroupHeaderTest {
     private fun deliver(char: UUID, frame: ByteArray) =
         WatchLink.withSource(char) { MessageDispatcher.onReceived(hex(frame), H5600Protocol) }
 
-    /** The 256 data bytes of the first group header chunk as received (before inversion): `01` and `07` at 12, the rest 0. */
-    private val groupChunk = ByteArray(256).also { it[0] = 1; it[12] = 7 }
+    /** The 256 data bytes of the first group header chunk as received (before inversion): `01` and `07` at 13, the rest 0. */
+    private val groupChunk = ByteArray(256).also { it[0] = 1; it[13] = 7 }
 
     private fun bulkFrames(): List<ByteArray> {
         val crc = WorkoutCodec.crc16Kermit(groupChunk, 0, 256)
