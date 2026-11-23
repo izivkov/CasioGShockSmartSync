@@ -34,9 +34,9 @@ class HealthReadScheduler(
     suspend fun onConnection(isH5600: Boolean, hasConsumer: Boolean, read: suspend () -> Boolean): Outcome {
         if (!isH5600) return Outcome.SKIPPED_MODEL
         if (!hasConsumer) return Outcome.NO_CONSUMER
-        // RED CHECK: no off
+        if (intervalMs() <= 0L) return Outcome.OFF
         if (!isDue()) return Outcome.NOT_DUE
-        // RED CHECK: busy ignored
+        if (busy()) return Outcome.BUSY
         if (!inFlight.compareAndSet(false, true)) return Outcome.BUSY
         try {
             val ok = runCatching { read() }.getOrDefault(false)
@@ -63,7 +63,7 @@ class HealthReadScheduler(
         ): Boolean = (haConfigured && haOn && haHealthGroupOn) || (webhooksOn && healthHookEnabled)
 
 
-        const val DEFAULT_INTERVAL_MS = 2 * 60 * 60_000L // RED CHECK: old period
+        const val DEFAULT_INTERVAL_MS = 15 * 60_000L
         const val RETRY_MS = 5 * 60_000L
 
         /** The choices of the setting, in minutes; 0 = off. */
