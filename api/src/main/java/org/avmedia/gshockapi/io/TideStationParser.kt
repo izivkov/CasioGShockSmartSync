@@ -45,7 +45,7 @@ object TideStationParser {
                     if (amp == null || pha == null) return Result.Error("Line ${index + 1}: expected a constituent, its amplitude (cm) and its phase lag (degrees).")
                     if (amp < 0 || amp > 2000) return Result.Error("Line ${index + 1}: the amplitude of ${parts[0]} is outside 0 to 2000 cm.")
                     val canonical = TideConstituents.canonical(parts[0])
-                    if (canonical == null) ignored += parts[0] else constants[canonical] = TideConstant(amp, pha)
+                    if (canonical == null) ignored += parts[0] else if (canonical in constants) return Result.Error("Line ${index + 1}: ${parts[0]} twice.") else constants[canonical] = TideConstant(amp, pha)
                 }
             }
         }

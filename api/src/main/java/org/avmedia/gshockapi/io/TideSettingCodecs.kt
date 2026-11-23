@@ -119,7 +119,7 @@ object TideUserPointCodec {
     val TOUCHED: Set<Int> = (VALUE_AT until VALUE_AT + VALUE_SIZE).toSet()
 
     private fun putInt(b: ByteArray, at: Int, v: Int) {
-        for (i in 0 until 4) b[at + i] = (v shr (8 * i)).toByte()
+        for (i in 0 until 4) b[at + i] = (v shr (8 * (3 - i))).toByte()
     }
 
     private fun getInt(b: ByteArray, at: Int): Int =

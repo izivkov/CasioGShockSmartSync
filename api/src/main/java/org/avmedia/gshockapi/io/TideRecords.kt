@@ -76,7 +76,7 @@ object TideRecords {
 
     fun build60(s: TideStation): ByteArray? {
         if (!can60(s)) return null
-        val out = head(s, 2, s.longitude)
+        val out = head(s, 2, -s.longitude)
         putDouble(out, 38, z0Cm(s))
         putU16(out, 46, graphPattern(s))
         TideConstituents.ORDER.forEachIndexed { i, name ->
@@ -88,7 +88,7 @@ object TideRecords {
         return out
     }
 
-    private fun wholeDegrees(d: Double): Int = Math.round(d).toInt()
+    private fun wholeDegrees(d: Double): Int = Math.round(((d % 360) + 360) % 360).toInt() % 360
 
     /** (f in degrees, F x 1000) for the shallow constituent [name] of order [order]; both 0 when it is missing or does not fit 16 bits. */
     private fun shallow(name: String, order: Int, s: TideStation, m2: TideConstant): Pair<Int, Int> {

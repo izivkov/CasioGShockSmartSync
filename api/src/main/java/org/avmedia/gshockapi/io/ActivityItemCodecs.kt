@@ -23,7 +23,7 @@ object ActivityModels {
     /** DW-H5600 / GBX-H5600, module 3586: its manual lists exactly RUNNING, WALKING, GYM WORKOUT and INTERVAL TIMER. */
     const val H5600 = "H5600"
 
-    private val OFFERED: Map<String, List<Int>> = mapOf(H5600 to listOf(1, 2, 3, 6, 14))
+    private val OFFERED: Map<String, List<Int>> = mapOf(H5600 to listOf(1, 2, 6, 14))
     private val NAMES: Map<String, Map<Int, String>> =
         mapOf(H5600 to mapOf(1 to "Running", 2 to "Walking", 6 to "Gym workout", 14 to "Interval timer"))
 
@@ -43,7 +43,7 @@ object ActivityModels {
  */
 object ActivityListCodec {
     const val CODE = 0x53
-    const val MAX = 15
+    const val MAX = 14
 
     /** Code byte plus value bytes: the longest frame Casio writes. */
     const val MAX_FRAME = 20

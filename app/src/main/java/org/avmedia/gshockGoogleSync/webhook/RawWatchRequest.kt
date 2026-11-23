@@ -153,11 +153,11 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
         fun answersTo(data: String, code: Int): Boolean {
             val b = WatchDecoders.bytes(data) ?: return false
             // Any FF notification while a read waits means that read failed (notes D2); the byte after it is the status.
-            return b.firstOrNull() == code
+            return b.firstOrNull() == code || b.firstOrNull() == 0xFF
         }
 
         /** Casio waits up to 10 s for the answer to a settings read. */
-        const val READ_TIMEOUT_MS = 2_000L
+        const val READ_TIMEOUT_MS = 10_000L
 
         private const val LOG_BYTES = 8
 
