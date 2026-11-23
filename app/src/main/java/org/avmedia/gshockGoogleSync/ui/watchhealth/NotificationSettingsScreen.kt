@@ -94,7 +94,7 @@ internal fun NotificationSettingsContent(
     when (picker) {
         Picker.SoundMode -> if (s != null) ChoiceDialog("Sound", NotificationSoundCodec.MODES, s.soundMode, { close(); viewModel.setSoundMode(it) }, close)
         Picker.VibrationMode -> if (s != null) ChoiceDialog("Vibration", NotificationSoundCodec.MODES, s.vibrationMode, { close(); viewModel.setVibrationMode(it) }, close)
-        Picker.Pattern -> if (s?.pattern != null) ChoiceDialog("Sound pattern", NotificationSoundCodec.PATTERNS, s.pattern, { close(); viewModel.setPattern(it) }, close)
+        Picker.Pattern -> s?.pattern?.let { current -> ChoiceDialog("Sound pattern", NotificationSoundCodec.PATTERNS, current, { close(); viewModel.setPattern(it) }, close) } ?: Unit
         Picker.Language -> if (m != null) ChoiceDialog("Language", NUMBERED, m.language, { close(); viewModel.setLanguage(it) }, close)
         Picker.OffAtNight -> if (m != null) ChoiceDialog("Off at night", NUMBERED, m.offAtNight, { close(); viewModel.setOffAtNight(it) }, close)
         null -> Unit
