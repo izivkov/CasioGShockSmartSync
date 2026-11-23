@@ -96,24 +96,23 @@ class H5600WorkoutGroupHeaderTest {
     }
 
     @Test fun theGroupHeaderIsAnsweredAndAllFourPartsAreRead() = runBlocking {
-        val read = async(Dispatchers.IO) { H5600WorkoutIO.download(userAsked = true) }
+        val read = async(Dispatchers.IO) { runCatching { H5600WorkoutIO.download(userAsked = true) } }
         // Bounded: the broken routing waits 10 s per try for a `09 1D` that never reaches the read.
-        val reachedHeaders = withTimeoutOrNull(8_000) {
-            while (writes.none { it.startsWith("001e") }) delay(20)
-            true
-        }
+        val outcome = withTimeoutOrNull(15_000) { read.await() }
         read.cancel()
-        withTimeoutOrNull(5_000) { runCatching { read.await() } }
         val drsp = writes.filter { !it.startsWith("bulk") }
-        assertEquals(drsp.toString(), true, reachedHeaders)
+        val events = AppLog.recentEvents().filter { it.contains("Workout read") || it.contains("workout rx") }.takeLast(30)
+        val why = "outcome ${outcome?.map { it?.error }} drsp $drsp log $events"
+        assertTrue("group header read: $why", events.any { it.contains("1D group header read") })
         for (addr in listOf("00000000", "00010000", "00020000", "00030000")) {
             val at = drsp.indexOf("001d${addr}00010000")
-            assertTrue("request at $addr in $drsp", at >= 0)
-            assertEquals("answer to the read at $addr", listOf("091d", "041d"), drsp.subList(at + 1, at + 3))
+            assertTrue("request at $addr: $why", at >= 0)
+            assertEquals("answer to the read at $addr: $why", listOf("091d", "041d"), drsp.subList(at + 1, at + 3))
         }
-        assertTrue(drsp.toString(), drsp.none { it == "031d" })
-        assertTrue(keysOfSettingsAnswers.toString(), keysOfSettingsAnswers.isNotEmpty() && keysOfSettingsAnswers.all { it == 0x11 })
+        assertTrue("no abort of a read: $why", drsp.none { it == "031d" })
+        assertTrue("0x11 keeps its key: $keysOfSettingsAnswers", keysOfSettingsAnswers.isNotEmpty() && keysOfSettingsAnswers.all { it == 0x11 })
         // The next log must show every bulk frame whole, not the first two bytes.
-        assertTrue(AppLog.recentEvents().any { it.contains("workout rx bulk " + bulkFrames()[1].joinToString(" ") { b -> "%02X".format(b) }) })
+        val whole = "workout rx bulk " + bulkFrames()[1].joinToString(" ") { b -> "%02X".format(b) }
+        assertTrue("whole bulk frame logged: $why", AppLog.recentEvents().any { it.contains(whole) })
     }
 }
