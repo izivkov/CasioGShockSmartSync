@@ -51,7 +51,7 @@ object NotificationGate {
     fun allowed(): Boolean = command !in STOPPED
 
     /** The bytes per chunk: the MTU minus 4, and 20 until the watch condition was read. */
-    fun chunkSize(): Int = if (mtu > 0) mtu - 4 else 20
+    fun chunkSize(): Int = if (mtu > 0) mtu - 3 else 20
 }
 
 /**
