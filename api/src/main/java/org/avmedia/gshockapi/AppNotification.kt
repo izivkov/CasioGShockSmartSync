@@ -21,6 +21,8 @@ data class AppNotification(
     val title: String,
     val text: String,
     val shortText: String = "",
+    /** The watch's notification id (frame bytes 0-3, low byte first); 0 = not set yet, [NotificationIds.assign] gives one. */
+    val id: Int = 0,
 ) {
     companion object {
         private const val MAX_TEXT_BYTES = 193
@@ -86,5 +88,6 @@ data class AppNotification(
             "title" to title,
             "text" to text,
             "short_text" to shortText,
+            "id" to id,
         )
 }

@@ -162,30 +162,16 @@ class NotificationMonitorService : NotificationListenerService() {
         }
 
         fun createAppNotification(info: NotificationInfo): AppNotification {
-            fun Long.toFormattedDateTime(): String {
-                val calendar = java.util.Calendar.getInstance().apply {
-                    timeInMillis = this@toFormattedDateTime
-                }
-
-                return String.format(
-                    java.util.Locale.US,
-                    "%04d%02d%02dT%02d%02d%2d",
-                    calendar.get(java.util.Calendar.YEAR),
-                    calendar.get(java.util.Calendar.MONTH) + 1,
-                    calendar.get(java.util.Calendar.DAY_OF_MONTH),
-                    calendar.get(java.util.Calendar.HOUR_OF_DAY),
-                    calendar.get(java.util.Calendar.MINUTE),
-                    calendar.get(java.util.Calendar.SECOND)
-                )
-            }
-
             return AppNotification(
                 title = info.title,
                 text = info.text,
                 shortText = info.shortText,
                 app = info.appName,
                 type = info.type,
-                timestamp = info.timestamp.toFormattedDateTime()
+                // The time zero padded: "%2d" put a space in the seconds below 10 (a broken frame time).
+                timestamp = org.avmedia.gshockapi.NotificationIds.timestamp(
+                    java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(info.timestamp), java.time.ZoneId.systemDefault())
+                )
             )
         }
     }

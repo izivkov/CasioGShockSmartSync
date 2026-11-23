@@ -84,13 +84,15 @@ object AppNotificationIOFunctional {
      * Pure decoder: Decodes notification packet from byte array.
      *
      * Parses protocol buffer format:
-     * - Header (6 bytes): 00 00 00 00 00 01
+     * - Header (6 bytes): id (4, low byte first), 00, 01
      * - Type (1 byte), Timestamp (15 bytes), then 4 length-prefixed strings
      * No side effects - pure transformation.
      */
     fun decodeNotificationPacket(buf: ByteArray): AppNotification {
         var offset = 0
         require(buf.size >= 6) { "Buffer too short" }
+        val id = (buf[0].toInt() and 0xFF) or ((buf[1].toInt() and 0xFF) shl 8) or
+            ((buf[2].toInt() and 0xFF) shl 16) or ((buf[3].toInt() and 0xFF) shl 24)
         offset += 6
 
         val typeByte = buf[offset++].toInt()
@@ -113,6 +115,7 @@ object AppNotificationIOFunctional {
             title = title,
             shortText = shortText,
             text = text,
+            id = id,
         )
     }
 
@@ -141,9 +144,16 @@ object AppNotificationIOFunctional {
      *
      * @throws IllegalArgumentException if any encoded string exceeds 255 bytes
      */
+    fun idBytes(id: Int): ByteArray =
+        byteArrayOf(id.toByte(), (id shr 8).toByte(), (id shr 16).toByte(), (id shr 24).toByte())
+
     fun encodeNotificationPacket(data: AppNotification): ByteArray =
         buildList {
-            addAll(byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x01).toList())
+            // Bytes 0-3: the notification id, low byte first (the watch keeps notifications in its list by id; every
+            // frame had id 0). Byte 4: 0 = add (2 = delete). Byte 5: 1 = alert. Field meaning learned from Gadgetbridge's GBX-100 behaviour; unproven on the H5600.
+            addAll(idBytes(0).toList()) // RED CHECK: id 0 as before
+            add(0x00)
+            add(0x01)
             add(data.type.value.toByte())
             addAll(data.timestamp.toByteArray(Charsets.US_ASCII).toList())
             addAll(writeLengthPrefixedString(data.app).toList())
@@ -170,6 +180,9 @@ object AppNotificationIO {
     ): String = AppNotificationIOFunctional.xorEncodeBufferStr(decodedBytes, key)
 
     fun decodeNotificationPacket(buf: ByteArray): AppNotification = AppNotificationIOFunctional.decodeNotificationPacket(buf)
+
+    fun idBytes(id: Int): ByteArray =
+        byteArrayOf(id.toByte(), (id shr 8).toByte(), (id shr 16).toByte(), (id shr 24).toByte())
 
     fun encodeNotificationPacket(data: AppNotification): ByteArray = AppNotificationIOFunctional.encodeNotificationPacket(data)
 }

@@ -1,7 +1,6 @@
 package org.avmedia.gshockGoogleSync.webhook
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -110,5 +109,5 @@ class HaPushChannel(
         val NOT_UP_REASONS = setOf("off", "not set up", "not registered", "push not registered yet", "bad URL", "token refused")
     }
 
-    private fun now(): String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"))
+    private fun now(): String = org.avmedia.gshockapi.NotificationIds.timestamp(LocalDateTime.now())
 }
