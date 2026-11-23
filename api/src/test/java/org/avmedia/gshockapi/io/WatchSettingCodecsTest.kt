@@ -179,7 +179,8 @@ class WatchSettingCodecsTest {
 
     // 0x45 profile
 
-    private fun profile(vararg v: Int) = frame(0x45, *v)
+    /** Builds a raw frame from decoded values: indices 1 to 8 bit-inverted as the watch sends them. */
+    private fun profile(vararg v: Int) = ProfileCodec.flip(frame(0x45, *v))
 
     @Test
     fun readsTheProfileWithTheLowByteFirst() {
@@ -211,6 +212,25 @@ class WatchSettingCodecsTest {
         assertEquals(79, p.weightKg)
         assertEquals(1985, p.birthYear)
         assertEquals(0xAA, after[10].toInt() and 0xFF)
+    }
+
+    @Test
+    fun readsARawInvertedProfileFromTheWire() {
+        // made-up values: height 168 (68 01), weight 64 (64 00), 1990-07-09; raw bytes are the XOR FF of these
+        val raw = frame(0x45, 0x00, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA)
+        val p = ProfileCodec.parse(raw)!!
+        assertEquals(listOf(168, 64, 1990, 7, 9), listOf(p.heightCm, p.weightKg, p.birthYear, p.birthMonth, p.birthDay))
+    }
+
+    @Test
+    fun aProfileWriteKeepsTheFlagByteAndIndexNineAndInvertsTheValues() {
+        val raw = frame(0x45, 0x05, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA)
+        val after = ProfileCodec.withHeightAndWeight(raw, 170, 70)!!
+        assertEquals(raw.size, after.size)
+        assertEquals(0x05, after[1].toInt() and 0xFF)
+        assertEquals(0xAA, after[10].toInt() and 0xFF)
+        assertEquals(listOf(0x8F, 0xFE, 0x8F, 0xFF), (2..5).map { after[it].toInt() and 0xFF })
+        assertEquals(170, ProfileCodec.parse(after)!!.heightCm)
     }
 
     @Test

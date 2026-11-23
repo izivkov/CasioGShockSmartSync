@@ -260,11 +260,11 @@ object StepGoalCodec {
 }
 
 /**
- * Profile (0x45): index 0 flags (bit 0 sex field, bit 2 imperial length, bit 3 weight not kg, bit 4 energy not kcal),
+ * Profile (0x45), value indices 1 to 8 bit-inverted on the wire (see [flip]): index 0 flags (bit 0 sex field, bit 2 imperial length, bit 3 weight not kg, bit 4 energy not kcal),
  * index 1, 2 height and 3, 4 weight (BCD, lowest pair first), 5, 6 birth year (BCD, full year), 7 month, 8 day.
  * The pair order is still checked against a plausible height (low pair first is tried first). When nothing is
  * plausible the profile is "not recognised" and never written. Height, weight and the birth date are writable;
- * which sex is 0 and the scale of height and weight are not confirmed.
+ * which sex is 0 is not confirmed. Height and birth date are confirmed on the owner's watch; whole kg for weight is not (shown as check on the watch).
  */
 object ProfileCodec {
     const val CODE = 0x45
@@ -300,7 +300,16 @@ object ProfileCodec {
         val weightKg: Int get() = if (weightNotKg) Math.round(weight / 2.2046226).toInt() else weight
     }
 
-    fun parse(frame: ByteArray): Profile? {
+    /**
+     * The watch stores value indices 1 to 8 bit-inverted (XOR FF); index 0 (flags) and index 9 on are as they are.
+     * The same call decodes a raw frame and encodes a decoded one.
+     */
+    fun flip(frame: ByteArray): ByteArray =
+        frame.copyOf().also { out -> for (i in 2..minOf(9, out.size - 1)) out[i] = out[i] }
+
+    fun parse(frame: ByteArray): Profile? = parseDecoded(flip(frame))
+
+    private fun parseDecoded(frame: ByteArray): Profile? {
         if (!Frame.hasIndex(frame, CODE, 8)) return null
         for (lowFirst in listOf(true, false)) {
             val height = bcd(frame, HEIGHT_INDEX, lowFirst) ?: continue
@@ -321,10 +330,11 @@ object ProfileCodec {
         height: Int,
         weight: Int,
     ): ByteArray? {
-        val current = parse(frame) ?: return null
+        val plain = flip(frame)
+        val current = parseDecoded(plain) ?: return null
         if (height !in heightRange(current.imperialLength) || weight !in weightRange(current.weightNotKg)) return null
         val changes = pair(HEIGHT_INDEX, height, current.lowByteFirst) + pair(WEIGHT_INDEX, weight, current.lowByteFirst)
-        return Frame.withBytes(frame, changes)
+        return flip(Frame.withBytes(plain, changes))
     }
 
     /** The birth date (index 5, 6 year, 7 month, 8 day, BCD): only a real calendar date from 1900 to 2100 is written. */
@@ -334,10 +344,11 @@ object ProfileCodec {
         month: Int,
         day: Int,
     ): ByteArray? {
-        val current = parse(frame) ?: return null
+        val plain = flip(frame)
+        val current = parseDecoded(plain) ?: return null
         val valid = year in 1900..2100 && runCatching { java.time.LocalDate.of(year, month, day) }.isSuccess
         if (!valid) return null
-        return Frame.withBytes(frame, pair(YEAR_INDEX, year, current.lowByteFirst) + mapOf(7 to toBcd(month), 8 to toBcd(day)))
+        return flip(Frame.withBytes(plain, pair(YEAR_INDEX, year, current.lowByteFirst) + mapOf(7 to toBcd(month), 8 to toBcd(day))))
     }
 
     private fun pair(
