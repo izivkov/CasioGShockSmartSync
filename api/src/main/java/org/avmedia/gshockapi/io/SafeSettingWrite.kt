@@ -27,8 +27,9 @@ class SafeSettingWrite(
         code: Int,
         touched: Set<Int>,
         expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
+        matches: (back: ByteArray, expected: ByteArray) -> Boolean = { back, expected -> back.contentEquals(expected) },
         change: (ByteArray) -> ByteArray?,
-    ): SettingWriteResult = updateWith(code, { read(code) }, touched, expectedBack, change)
+    ): SettingWriteResult = updateWith(code, { read(code) }, touched, expectedBack, matches, change)
 
     /**
      * Same as [update] for a value that is read with its own request ([readValue]), such as the per-activity
@@ -40,6 +41,7 @@ class SafeSettingWrite(
         readValue: suspend () -> ByteArray?,
         touched: Set<Int>,
         expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
+        matches: (back: ByteArray, expected: ByteArray) -> Boolean = { back, expected -> back.contentEquals(expected) },
         change: (ByteArray) -> ByteArray?,
     ): SettingWriteResult {
         val before = readValue()
@@ -54,7 +56,7 @@ class SafeSettingWrite(
         write(after)
         settle()
         val back = readValue() ?: return SettingWriteResult.Failed("The watch did not answer after the change. Check the setting on the watch.")
-        return if (back.contentEquals(expectedBack(before, after))) {
+        return if (matches(back, expectedBack(before, after))) {
             SettingWriteResult.Done
         } else {
             SettingWriteResult.Failed("The watch did not keep the change. Check the setting on the watch.")

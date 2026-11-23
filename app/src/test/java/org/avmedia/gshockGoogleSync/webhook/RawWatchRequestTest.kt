@@ -1,6 +1,8 @@
 package org.avmedia.gshockGoogleSync.webhook
 
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gshockapi.ble.IDataReceived
@@ -61,8 +63,9 @@ class RawWatchRequestTest {
         val link = FakeLink(libraryHandler)
         link.onWrite = { link.notify("0xFF 41"); link.notify("0xFF 99") }
         val answers = RawWatchRequest(link).request(0x41, 2_000)
-        assertEquals(listOf("0xFF 41"), answers)
-        assertEquals(listOf("0xFF 99"), link.forwarded)
+        // Notes D2: any FF answer while a read waits is that read's failure, so both are kept.
+        assertEquals(listOf("0xFF 41", "0xFF 99"), answers)
+        assertEquals(emptyList<String>(), link.forwarded)
     }
 
     @Test fun theHandlerThatWasInstalledIsPutBackNotANewOne() = runBlocking {
@@ -102,5 +105,37 @@ class RawWatchRequestTest {
         assertTrue(RawWatchRequest.answersTo("41 01", 0x41))
         assertFalse(RawWatchRequest.answersTo("0x05 41", 0x41))
         assertFalse(RawWatchRequest.answersTo("junk", 0x41))
+    }
+
+    @Test fun aReplyAfterFiveSecondsIsStillAccepted() = runBlocking {
+        val link = FakeLink(libraryHandler)
+        val raw = RawWatchRequest(link)
+        link.onWrite = {
+            kotlinx.coroutines.GlobalScope.launch { delay(5_000); link.notify("0x45 01 02 03 04 05 06 07 08 09") }
+        }
+        val reply = raw.read(byteArrayOf(0x45))
+        assertTrue(reply.failure, reply.frame != null)
+        assertEquals(10, reply.frame!!.size)
+    }
+
+    @Test fun theReadWaitsTenSecondsAsCasioDoes() {
+        assertEquals(10_000L, RawWatchRequest.READ_TIMEOUT_MS)
+    }
+
+    @Test fun anFFAnswerIsAFailureCarryingItsStatus() = runBlocking {
+        val link = FakeLink(libraryHandler)
+        link.onWrite = { link.notify("0xFF 0A") }
+        val reply = RawWatchRequest(link).read(byteArrayOf(0x42), 2_000)
+        assertEquals(null, reply.frame)
+        assertTrue(reply.failure!!, reply.failure!!.contains("status 0A"))
+        assertEquals(0x0A, RawWatchRequest.failureStatus("0xFF 42 0A", 0x42))
+        assertEquals(0x0A, RawWatchRequest.failureStatus("0xFF 0A", 0x42))
+        assertEquals(null, RawWatchRequest.failureStatus("0x42 01", 0x42))
+    }
+
+    @Test fun noAnswerAtAllIsReportedWithTheWaitingTime() = runBlocking {
+        val reply = RawWatchRequest(FakeLink(libraryHandler)).read(byteArrayOf(0x42), 300)
+        assertEquals(null, reply.frame)
+        assertTrue(reply.failure!!.contains("did not answer"))
     }
 }

@@ -36,10 +36,17 @@ object ActivityModels {
     fun visible(family: String?, enabled: List<Int>): List<Int> = enabled.filter { it in offered(family) }
 }
 
-/** Activity list (0x53): up to 15 activity codes in order, 0 = unused. Read, and written as the same length. */
+/**
+ * Activity list (0x53), notes D1: the watch has 14 slots (value index 0 to 13), 0 = unused. Casio writes the list as one `53`
+ * frame, code + the value cut to 20 bytes in all (at most 19 value bytes), with response to the all-features characteristic.
+ * Value bytes from index 14 on are not activities: they are sent back exactly as read.
+ */
 object ActivityListCodec {
     const val CODE = 0x53
-    const val MAX = 15
+    const val MAX = 14
+
+    /** Code byte plus value bytes: the longest frame Casio writes. */
+    const val MAX_FRAME = 20
 
     /** The activities the settings screen offers, in the order of the notes. */
     val ACTIVITIES: List<Int> = listOf(1, 2, 3, 6, 7, 8, 9, 12, 13, 14)
@@ -49,20 +56,26 @@ object ActivityListCodec {
         return frame.drop(1).take(MAX).map { it.toInt() and 0xFF }.filter { it != 0 }
     }
 
-    /** True only for the layout of the notes: code 0x53, 1 to 15 value bytes, each a known activity or 0. */
+    /** True only for the layout of the notes: code 0x53, 1 to 19 value bytes, slots 0 to 13 each a known activity or 0. The tail is not checked. */
     fun layoutOk(frame: ByteArray): Boolean =
-        frame.size in 2..(MAX + 1) && frame[0] == CODE.toByte() &&
-            frame.drop(1).all { val c = it.toInt() and 0xFF; c == 0 || ActivityNames.known(c) }
+        frame.size in 2..MAX_FRAME && frame[0] == CODE.toByte() &&
+            frame.drop(1).take(MAX).all { val c = it.toInt() and 0xFF; c == 0 || ActivityNames.known(c) }
 
-    /** The frame for [enabled] (in order, at least one, no repeats, all known), padded with 0 to the length of [frame]; null if refused. */
+    /**
+     * The frame for [enabled] (in order, at least one, no repeats, all known): slots 0 to 13 rewritten (padded with 0), every
+     * byte from value index 14 on and the length of [frame] unchanged; null if refused.
+     */
     fun encode(frame: ByteArray, enabled: List<Int>): ByteArray? {
-        if (!layoutOk(frame) || enabled.isEmpty() || enabled.size > frame.size - 1) return null
+        if (!layoutOk(frame) || enabled.isEmpty() || enabled.size > minOf(MAX, frame.size - 1)) return null
         if (enabled.distinct().size != enabled.size || enabled.any { !ActivityNames.known(it) }) return null
-        val out = ByteArray(frame.size)
-        out[0] = CODE.toByte()
-        enabled.forEachIndexed { i, c -> out[i + 1] = c.toByte() }
+        val out = frame.copyOf()
+        for (i in 1..minOf(MAX, frame.size - 1)) out[i] = (enabled.getOrNull(i - 1) ?: 0).toByte()
         return out
     }
+
+    /** True when [a] and [b] agree on the code and slots 0 to 13 (what the read-back is compared on; the tail may differ). */
+    fun sameSlots(a: ByteArray, b: ByteArray): Boolean =
+        a.size >= 2 && b.size >= 2 && a[0] == b[0] && a.copyOfRange(0, minOf(a.size, MAX + 1)).contentEquals(b.copyOfRange(0, minOf(b.size, MAX + 1)))
 
     fun toggle(enabled: List<Int>, code: Int, on: Boolean): List<Int> =
         if (on) (if (code in enabled) enabled else enabled + code) else enabled - code

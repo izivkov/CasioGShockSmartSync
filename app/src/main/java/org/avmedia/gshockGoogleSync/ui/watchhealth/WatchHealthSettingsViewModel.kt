@@ -64,7 +64,7 @@ class WatchHealthSettingsViewModel @Inject constructor(private val access: Watch
         _ui.update {
             it.copy(
                 heartRate = hr, sleep = sleep, body = body, basic = basic, stepGoal = goal, profile = profile, alarm = alarm,
-                message = if (none) "The watch did not answer. Connect the watch and try again." else it.message,
+                message = if (none) (access.explain(ProfileCodec.CODE) ?: "The watch did not answer. Connect the watch and try again.") else (if (profile == null) access.explain(ProfileCodec.CODE) else null) ?: it.message,
             )
         }
     }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.casio.ConnectionKeepAlive
 import org.avmedia.gshockapi.io.ActivityFaceCodec
 import org.avmedia.gshockapi.io.ActivityItemCodec
 import org.avmedia.gshockapi.io.ActivityListCodec
@@ -72,7 +73,16 @@ class WorkoutSettingsListViewModel @Inject constructor(private val access: Watch
         viewModelScope.launch {
             _ui.update { it.copy(working = true, message = null) }
             val touched = (1..ActivityListCodec.MAX).toSet()
-            val result = access.update(ActivityListCodec.CODE, touched, { frame -> ActivityListCodec.encode(frame, wanted) })
+            val result = access.update(
+                ActivityListCodec.CODE, touched,
+                { frame ->
+                    ActivityListCodec.encode(frame, wanted).also { out ->
+                        ConnectionKeepAlive.log("0x53 read ${ActivityListCodec.hex(frame)}; to write ${out?.let { ActivityListCodec.hex(it) } ?: "nothing (refused)"}")
+                    }
+                },
+                matches = ActivityListCodec::sameSlots,
+            )
+            ConnectionKeepAlive.log("0x53 result: $result")
             readList(result.text(what))
         }
     }

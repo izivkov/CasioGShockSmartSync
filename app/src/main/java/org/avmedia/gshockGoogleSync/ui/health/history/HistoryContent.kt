@@ -58,17 +58,24 @@ fun HistoryContent(ui: HistoryUi, events: HistoryEvents, modifier: Modifier = Mo
         val rest = HistorySeries.days(ui.days, ui.today, n) { it.hrRest }
         val max = HistorySeries.days(ui.days, ui.today, n) { it.hrMax }
         val sleep = HistorySeries.nights(ui.nights, ui.today, n) { it.totalMin }
+        val dayLabels = ChartLabels.days(ui.today, n)
         ChartCard("Steps", summary(steps, "steps"), ui, n) {
-            HistoryChart(listOf(ChartSeries(steps, MaterialTheme.colorScheme.primary)), ChartKind.BARS, grid = grid, gapColor = gap)
+            HistoryChart(listOf(ChartSeries(steps, MaterialTheme.colorScheme.primary)), ChartKind.BARS, ChartAxes("steps", dayLabels), grid = grid, gapColor = gap)
         }
         ChartCard("Heart rate", summary(rest, "bpm resting"), ui, n) {
-            HistoryChart(
-                listOf(ChartSeries(max, MaterialTheme.colorScheme.error), ChartSeries(rest, MaterialTheme.colorScheme.primary)),
-                ChartKind.LINES, grid = grid, gapColor = gap,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                ChartLegend(listOf("Resting" to MaterialTheme.colorScheme.primary, "Max" to MaterialTheme.colorScheme.error))
+                HistoryChart(
+                    listOf(ChartSeries(max, MaterialTheme.colorScheme.error), ChartSeries(rest, MaterialTheme.colorScheme.primary)),
+                    ChartKind.LINES, ChartAxes("bpm", dayLabels), grid = grid, gapColor = gap,
+                )
+            }
         }
         ChartCard("Sleep", summary(sleep.map { it?.div(60f) }, "h", decimals = 1), ui, n) {
-            HistoryChart(listOf(ChartSeries(sleep, MaterialTheme.colorScheme.tertiary)), ChartKind.BARS, grid = grid, gapColor = gap)
+            HistoryChart(
+                listOf(ChartSeries(sleep.map { it?.div(60f) }, MaterialTheme.colorScheme.tertiary)), ChartKind.BARS,
+                ChartAxes("h", dayLabels), grid = grid, gapColor = gap,
+            )
         }
         CalendarCard(ui, events)
         ui.selected?.let { DetailCard(it, ui, events) }
@@ -168,7 +175,7 @@ private fun DetailCard(date: LocalDate, ui: HistoryUi, events: HistoryEvents) {
                 val hours = List(24) { h -> ui.selectedHours.firstOrNull { it.hour == h }?.steps?.toFloat() }
                 AppText("Steps per hour", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 HistoryChart(
-                    listOf(ChartSeries(hours, MaterialTheme.colorScheme.primary)), ChartKind.BARS,
+                    listOf(ChartSeries(hours, MaterialTheme.colorScheme.primary)), ChartKind.BARS, ChartAxes("steps", ChartLabels.hours()),
                     grid = MaterialTheme.colorScheme.outlineVariant, gapColor = MaterialTheme.colorScheme.outline,
                 )
             }

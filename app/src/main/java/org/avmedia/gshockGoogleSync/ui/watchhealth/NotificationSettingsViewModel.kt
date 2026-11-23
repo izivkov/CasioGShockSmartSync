@@ -47,7 +47,7 @@ class NotificationSettingsViewModel @Inject constructor(private val access: Watc
             it.copy(
                 sounds = sounds,
                 manager = manager,
-                message = if (sounds == null && manager == null) "The watch did not answer. Connect the watch and try again." else it.message,
+                message = if (sounds == null && manager == null) (access.explain(NotificationSoundCodec.CODE, NotificationManagerCodec.CODE) ?: "The watch did not answer. Connect the watch and try again.") else (access.explain(NotificationSoundCodec.CODE, NotificationManagerCodec.CODE) ?: it.message),
             )
         }
     }

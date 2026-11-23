@@ -11,6 +11,7 @@ import org.avmedia.gshockapi.ble.GetSetMode
 import org.avmedia.gshockapi.ble.IDataReceived
 import org.avmedia.gshockapi.casio.MessageDispatcher
 import org.avmedia.gshockapi.io.IO
+import org.avmedia.gshockapi.casio.ConnectionKeepAlive
 import org.avmedia.gshockapi.io.WatchExchange
 
 fun interface RawRequester {
@@ -67,6 +68,8 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
 
     private val collector = IDataReceived { data ->
         if (data == null) return@IDataReceived
+        // Every notification that arrives while a read waits is logged (first bytes only), so a refused or lost answer can be seen.
+        if (waiting) ConnectionKeepAlive.log("read 0x%02X rx %s".format(code, data.trim().split(' ').take(LOG_BYTES).joinToString(" ")))
         if (waiting && answersTo(data, code)) {
             synchronized(buffer) { buffer.add(data) }
             lastRxMillis = System.currentTimeMillis()
@@ -101,6 +104,7 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
         }
         waiting = true
         try {
+            ConnectionKeepAlive.log("read tx " + bytes.joinToString(" ") { "%02X".format(it.toInt() and 0xFF) } + " (waits up to ${timeoutMs / 1000} s)")
             if (bytes.size == 1) link.write(code) else link.writeBytes(bytes)
             val start = System.currentTimeMillis()
             while (System.currentTimeMillis() - start < timeoutMs) {
@@ -116,14 +120,56 @@ class RawWatchRequest internal constructor(private val link: RawLink) : RawReque
             } catch (ignored: Throwable) {
             }
         }
-        return synchronized(buffer) { buffer.toList() }
+        val answers = synchronized(buffer) { buffer.toList() }
+        if (answers.isEmpty()) ConnectionKeepAlive.log("read 0x%02X: no answer within %d ms".format(code, timeoutMs))
+        return answers
+    }
+
+    /** The result of a settings read: the [frame] (code first) the [accept] check took, or the plain-words [failure]. */
+    class Reply(val frame: ByteArray?, val failure: String?)
+
+    /**
+     * One settings read: sends [request], waits up to [timeoutMs] (Casio waits 10 s), and returns the first answer that begins with
+     * the code and that [accept] takes. An `FF` answer is a refusal and its status is named; nothing is retried.
+     */
+    suspend fun read(request: ByteArray, timeoutMs: Long = READ_TIMEOUT_MS, accept: (ByteArray) -> Boolean = { true }): Reply {
+        val code = request[0].toInt() and 0xFF
+        val answers = request(request, timeoutMs)
+        for (a in answers) {
+            val b = WatchDecoders.bytes(a) ?: continue
+            if (b.size > 1 && b[0] == code) {
+                val frame = ByteArray(b.size) { b[it].toByte() }
+                if (accept(frame)) return Reply(frame, null)
+            }
+        }
+        answers.firstNotNullOfOrNull { failureStatus(it, code) }?.let { st ->
+            return Reply(null, if (st < 0) "watch refused: no status" else "watch refused: status %02X".format(st))
+        }
+        return Reply(null, if (answers.isEmpty()) "The watch did not answer within ${timeoutMs / 1000} s." else "The watch answered with something else.")
     }
 
     companion object {
         /** True for the answer to [code]: first byte is the code, or 0xFF followed by the code (the error answer). */
         fun answersTo(data: String, code: Int): Boolean {
             val b = WatchDecoders.bytes(data) ?: return false
-            return b.firstOrNull() == code || (b.size >= 2 && b[0] == 0xFF && b[1] == code)
+            // Any FF notification while a read waits means that read failed (notes D2); the byte after it is the status.
+            return b.firstOrNull() == code || b.firstOrNull() == 0xFF
+        }
+
+        /** Casio waits up to 10 s for the answer to a settings read. */
+        const val READ_TIMEOUT_MS = 10_000L
+
+        private const val LOG_BYTES = 8
+
+        /** The status of an `FF` answer: `FF status`, or `FF code status` (-1 when there is none); null when [data] is not an FF answer. */
+        fun failureStatus(data: String, code: Int): Int? {
+            val b = WatchDecoders.bytes(data) ?: return null
+            if (b.firstOrNull() != 0xFF) return null
+            return when {
+                b.size >= 3 && b[1] == code -> b[2]
+                b.size >= 2 && b[1] != code -> b[1]
+                else -> -1
+            }
         }
     }
 }

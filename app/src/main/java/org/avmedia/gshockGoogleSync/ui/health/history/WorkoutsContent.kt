@@ -69,15 +69,19 @@ private fun WorkoutDetailCard(d: WorkoutDetail, ui: WorkoutsUi, events: WorkoutE
                     AppText(v, fontSize = 14.sp)
                 }
             }
+            val xLabels = ChartLabels.elapsed(WorkoutText.series(d.samples) { it.elapsedSec }.map { it?.toInt() })
             val hr = WorkoutText.series(d.samples) { it.hr }
             if (hr.any { it != null }) {
                 AppText("Heart rate (bpm)", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                HistoryChart(listOf(ChartSeries(hr, MaterialTheme.colorScheme.error)), ChartKind.LINES, grid = grid, gapColor = gap)
+                HistoryChart(listOf(ChartSeries(hr, MaterialTheme.colorScheme.error)), ChartKind.LINES, ChartAxes("bpm", xLabels), grid = grid, gapColor = gap)
             }
             val pace = WorkoutText.series(d.samples) { it.pace }
             if (pace.any { it != null }) {
                 AppText("Pace (seconds per km, unconfirmed)", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                HistoryChart(listOf(ChartSeries(pace, MaterialTheme.colorScheme.primary)), ChartKind.LINES, grid = grid, gapColor = gap)
+                HistoryChart(
+                    listOf(ChartSeries(pace, MaterialTheme.colorScheme.primary)), ChartKind.LINES,
+                    ChartAxes("min/km", xLabels, yFormat = { v, _ -> paceText(v) }), grid = grid, gapColor = gap,
+                )
             }
             if (d.laps.isNotEmpty()) {
                 AppText("Laps", fontSize = 14.sp, color = MaterialTheme.colorScheme.tertiary)

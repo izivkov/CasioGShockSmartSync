@@ -152,7 +152,7 @@ class ActivityItemCodecsTest {
     fun aFrameOutsideTheNotesIsNotWritten() {
         assertTrue(!ActivityListCodec.layoutOk(bytes(0x54, 1, 2)))
         assertTrue(!ActivityListCodec.layoutOk(bytes(0x53)))
-        assertTrue(!ActivityListCodec.layoutOk(ByteArray(17) { if (it == 0) 0x53 else 1 }))
+        assertTrue(!ActivityListCodec.layoutOk(ByteArray(21) { if (it == 0) 0x53 else 1 }))
         assertTrue(!ActivityListCodec.layoutOk(bytes(0x53, 1, 77)))
         assertNull(ActivityListCodec.encode(bytes(0x53, 1, 77, 0), listOf(1)))
         assertEquals("53 01 0A", ActivityListCodec.hex(bytes(0x53, 1, 10)))
@@ -233,5 +233,47 @@ class ActivityItemCodecsTest {
         assertEquals(listOf(3, 2, 1, 9, 14), ActivityListCodec.move(listOf(1, 3, 2, 9, 14), 1, 1, visible))
         assertEquals(listOf(1, 3, 14, 2, 9), ActivityListCodec.move(listOf(1, 3, 2, 9, 14), 14, -1, visible))
         assertEquals(listOf(1, 3, 2, 9, 14), ActivityListCodec.move(listOf(1, 3, 2, 9, 14), 14, 1, visible))
+    }
+
+    // Notes D1: 14 slots, a 20 byte frame at most, value bytes from index 14 on go back as they were read.
+    private val tailFrame = bytes(0x53, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5)
+
+    @Test
+    fun aNineteenByteAnswerKeepsItsTailBytesFourteenToEighteen() {
+        assertEquals(20, tailFrame.size)
+        assertTrue(ActivityListCodec.layoutOk(tailFrame))
+        assertEquals(listOf(1, 2), ActivityListCodec.parse(tailFrame))
+        assertArrayEquals(tailFrame, ActivityListCodec.encode(tailFrame, listOf(1, 2))!!)
+        val out = ActivityListCodec.encode(tailFrame, listOf(1, 2, 14))!!
+        assertArrayEquals(tailFrame.copyOfRange(15, 20), out.copyOfRange(15, 20))
+    }
+
+    @Test
+    fun enablingSixWritesItInTheThirdSlotAndLeavesTheTailAlone() {
+        val on = ActivityListCodec.toggle(ActivityListCodec.parse(tailFrame)!!, 6, true)
+        assertArrayEquals(bytes(0x53, 1, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5), ActivityListCodec.encode(tailFrame, on)!!)
+    }
+
+    @Test
+    fun theFrameIsNeverLongerThanTwentyBytesAndThereAreFourteenSlots() {
+        assertEquals(14, ActivityListCodec.MAX)
+        assertTrue(ActivityListCodec.encode(tailFrame, listOf(1, 2, 3, 6, 7, 8, 9, 12, 13, 14))!!.size <= 20)
+        assertTrue(!ActivityListCodec.layoutOk(ByteArray(21) { if (it == 0) 0x53 else 0 }))
+        assertNull(ActivityListCodec.encode(tailFrame, List(15) { 1 + it % 3 }))
+    }
+
+    @Test
+    fun aByteFromIndexFourteenOnIsNeverAnActivity() {
+        val frame = bytes(0x53, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0xEE)
+        assertEquals(listOf(1), ActivityListCodec.parse(frame))
+        assertTrue(ActivityListCodec.layoutOk(frame))
+    }
+
+    @Test
+    fun theReadBackIsComparedOnTheSlotsOnly() {
+        val written = tailFrame
+        val back = tailFrame.copyOf().also { it[17] = 0x00 }
+        assertTrue(ActivityListCodec.sameSlots(back, written))
+        assertTrue(!ActivityListCodec.sameSlots(tailFrame.copyOf().also { it[3] = 6 }, written))
     }
 }
