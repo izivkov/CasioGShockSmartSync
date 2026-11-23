@@ -44,8 +44,29 @@ fun WatchFace(
 ) {
     val state by settingsViewModel.state.collectAsState()
     val setting = state.settingsMap[SettingsViewModel.WatchFace::class.java] as? SettingsViewModel.WatchFace
-        ?: return
     var showDialog by remember { mutableStateOf(false) }
+
+    if (setting == null) {
+        // Shown even when the watch face could not be read, so the row is never missing
+        AppCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppTextLarge(
+                    text = stringResource(id = R.string.watch_face),
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = "Not read from watch",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+        return
+    }
 
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -81,14 +102,17 @@ fun WatchFace(
                         selected = setting.face == 2,
                     ) { onUpdate(setting.copy(face = 2, item = setting.item ?: WatchFaceItem.STEPS)) }
 
-                    Text(
-                        text = stringResource(id = R.string.watch_face_item),
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                    FACE_ITEMS.forEach { (item, label) ->
-                        choice(label = label, selected = setting.item == item) {
-                            onUpdate(setting.copy(item = item))
+                    // The display item only applies to Face 2
+                    if (setting.face == 2) {
+                        Text(
+                            text = stringResource(id = R.string.watch_face_item),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                        FACE_ITEMS.forEach { (item, label) ->
+                            choice(label = label, selected = setting.item == item) {
+                                onUpdate(setting.copy(item = item))
+                            }
                         }
                     }
                 }
