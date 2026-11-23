@@ -65,6 +65,7 @@ object HaSensors {
         HaSensor("run_minutes", "Running today", "health.run_seconds", "duration", "min", "total_increasing", "mdi:run-fast", convert = Convert.SECONDS_TO_MINUTES),
         HaSensor("still_minutes", "Still today", "health.still_seconds", "duration", "min", "total_increasing", "mdi:seat", convert = Convert.SECONDS_TO_MINUTES),
         HaSensor("health_recorded_at", "Health data recorded", "health.recorded_at", "timestamp", null, null, "mdi:clock-check", "diagnostic", convert = Convert.LOCAL_TO_OFFSET),
+        HaSensor("ha_push_connected", "Home Assistant push connected", "app.ha_push_connected", "connectivity", null, null, "mdi:lan-connect", "diagnostic", kind = "binary_sensor", attributes = mapOf("last_change" to "app.ha_push_changed_at")),
         HaSensor("connected", "Watch connected", "watch.connected", "connectivity", null, null, "mdi:watch-vibrate", "diagnostic", kind = "binary_sensor"),
         HaSensor("home_city", "Home city", "watch.home_city", null, null, null, "mdi:city"),
         HaSensor("home_dst", "Home daylight saving", "watch.dst.home", null, null, null, "mdi:weather-sunny", kind = "binary_sensor"),

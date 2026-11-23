@@ -22,9 +22,7 @@ import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockGoogleSync.webhook.HaPayloads
-import org.avmedia.gshockGoogleSync.webhook.HaPushChannel
-import org.avmedia.gshockGoogleSync.webhook.ServiceToggles
+import org.avmedia.gshockGoogleSync.webhook.HaPushHost
 import org.avmedia.gshockGoogleSync.webhook.WatchSettingCommands
 import org.avmedia.gshockGoogleSync.webhook.WebhookStorage
 import timber.log.Timber
@@ -79,18 +77,16 @@ class MainEventHandler(
         if (!supported) return
         val address = runCatching { WatchInfo.getAddress() }.getOrDefault("")
         if (address.isBlank()) return
-        val toggles = WebhookStorage.toggles(context)
-        val channel = HaPushChannel(
-            haStore,
-            deliver = { n -> scope.launch { repository.sendAppNotification(n) } },
-            enabled = { toggles.isOn(ServiceToggles.Service.HOME_ASSISTANT) },
-        )
-        val job = scope.launch(Dispatchers.IO) { channel.run(HaPayloads.deviceId(address)) }
+        // The socket belongs to the host (kept alive by the companion service), not to this session.
+        HaPushHost.deliver = { n -> scope.launch { repository.sendAppNotification(n) } }
+        val host = HaPushHost.get(context)
+        host.acquire(HaPushHost.SESSION)
+        host.watchConnected()
         WatchSettingCommands.shared?.flushLater()
         try {
             session.state.first { it.phase is SessionPhase.Closed }
         } finally {
-            job.cancel()
+            HaPushHost.get(context).release(HaPushHost.SESSION)
             WatchSettingCommands.shared?.onDisconnected()
         }
     }

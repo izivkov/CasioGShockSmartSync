@@ -86,9 +86,7 @@ class HaPushTest {
 
     @Test
     fun backoffGrowsAndIsCapped() {
-        assertEquals(2_000L, HaPush.backoffMs(0))
-        assertEquals(4_000L, HaPush.backoffMs(1))
-        assertTrue(HaPush.backoffMs(3) > HaPush.backoffMs(2))
+        assertEquals(listOf(0L, 1_000L, 2_000L, 5_000L, 10_000L, 30_000L, 60_000L), (0..6).map { HaPush.backoffMs(it) })
         assertEquals(60_000L, HaPush.backoffMs(40))
     }
 

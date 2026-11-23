@@ -12,12 +12,24 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.webhook.HaPushHost
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.S)
 @AndroidEntryPoint
 class GShockCompanionDeviceService : CompanionDeviceService() {
+
+    // The Home Assistant push socket lives as long as this foreground service does.
+    override fun onCreate() {
+        super.onCreate()
+        HaPushHost.get(applicationContext).acquire(HaPushHost.SERVICE)
+    }
+
+    override fun onDestroy() {
+        HaPushHost.get(applicationContext).release(HaPushHost.SERVICE)
+        super.onDestroy()
+    }
 
     @Deprecated("Deprecated in Java")
     override fun onDeviceAppeared(address: String) {

@@ -79,7 +79,13 @@ class HaStore(private val store: KeyValueStore) {
         store.delete(KEY_SENT)
         store.delete(KEY_DEVICE)
         store.delete(KEY_PUSH_OK)
+        store.delete(KEY_SETTINGS_APPLIED)
     }
+
+    /** The `input_text.gshock_settings` value last applied to the watch; null = never. */
+    fun loadAppliedSettings(): String? = store.get(KEY_SETTINGS_APPLIED)
+
+    fun saveAppliedSettings(value: String) = store.put(KEY_SETTINGS_APPLIED, value)
 
     /** The newest job replaces a waiting one; a waiting button event is kept until it is sent. */
     fun putPending(job: HaJob) {
@@ -138,6 +144,7 @@ class HaStore(private val store: KeyValueStore) {
 
     private companion object {
         const val KEY_PUSH_OK = "ha.push.ok"
+        const val KEY_SETTINGS_APPLIED = "ha.settings.applied"
         const val KEY_GROUP = "ha.group."
         const val KEY_CONFIG = "ha.config"
         const val KEY_REG = "ha.reg."

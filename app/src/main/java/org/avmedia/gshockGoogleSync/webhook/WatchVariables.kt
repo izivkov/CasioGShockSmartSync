@@ -111,6 +111,9 @@ object WatchVariables {
                 env.lastSync()
             },
 
+            Variable("app.ha_push_connected", "True while the Home Assistant push socket is up") { HaPushState.connected },
+            Variable("app.ha_push_changed_at", "When the Home Assistant push socket last went up or down, ISO 8601") { HaPushState.changedAt.takeIf { it.isNotEmpty() } },
+
             // Watch
             Variable("watch.connected", "True when the watch is connected right now") { it.watchConnected },
             Variable("watch.name", "Watch model name, for example GW-B5600") {

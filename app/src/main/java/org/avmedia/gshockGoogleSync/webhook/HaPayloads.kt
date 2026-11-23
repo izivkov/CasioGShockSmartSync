@@ -120,4 +120,9 @@ object HaPayloads {
             "data" to linkedMapOf("event_type" to EVENT_TYPE, "event_data" to eventData),
         )
     )
+
+    /** The mobile_app webhook call that renders one template; HA answers {"t": "<result>"}. */
+    fun renderTemplate(template: String): String = gson.toJson(
+        linkedMapOf("type" to "render_template", "data" to linkedMapOf("t" to linkedMapOf("template" to template)))
+    )
 }

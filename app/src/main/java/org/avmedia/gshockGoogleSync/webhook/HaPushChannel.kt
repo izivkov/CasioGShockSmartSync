@@ -4,9 +4,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -14,18 +11,21 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.avmedia.gshockapi.AppNotification
+import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockapi.log.LogSource
 import timber.log.Timber
 import kotlin.coroutines.resume
 
 /**
- * Keeps one websocket to Home Assistant open (mobile_app local push) and hands each message to [deliver].
- * Quiet by design: every failure only logs and reconnects with a growing wait. The caller cancels [run]
- * when the watch disconnects. Never logs the URL, the token or the message text.
+ * One websocket to Home Assistant (mobile_app local push); each message goes to [deliver]. [HaPushLoop] keeps it up:
+ * reconnect at once, then with a growing wait, and at once on [wake]. Never logs the URL, the token or the message text.
  */
 class HaPushChannel(
     private val store: HaStore,
     private val deliver: (AppNotification) -> Unit,
     private val enabled: () -> Boolean = { true },
+    private val catchUp: (deviceId: String, downSince: Long?, upAt: Long) -> Unit = { _, _, _ -> },
+    private val log: (String) -> Unit = { AppLog.log(LogSource.App, it) },
 ) {
     private val router = HaPushRouter(deliver, now = ::now)
 
@@ -33,23 +33,31 @@ class HaPushChannel(
         OkHttpClient.Builder().pingInterval(30, TimeUnit.SECONDS).readTimeout(0, TimeUnit.SECONDS).build()
     }
 
-    suspend fun run(deviceId: String) {
-        var attempt = 0
-        while (currentCoroutineContext().isActive) {
-            val reached = runCatching { if (enabled()) connectOnce(deviceId) else false }.getOrDefault(false)
-            attempt = if (reached) 0 else attempt + 1
-            delay(HaPush.backoffMs(attempt))
-        }
+    @Volatile private var loop: HaPushLoop? = null
+
+    /** Cuts the wait before the next try; with [drop] a live connection is ended too (the network changed). */
+    fun wake(drop: Boolean) { loop?.wake(drop) }
+
+    suspend fun run(deviceId: () -> String) {
+        val l = HaPushLoop(
+            connect = { up -> if (enabled()) connectOnce(deviceId(), up) else "off" },
+            now = System::currentTimeMillis,
+            log = log,
+            onState = { HaPushState.set(it); HaPushRouter.updateSensorsHook?.invoke() },
+            onUp = { since, at -> runCatching { catchUp(deviceId(), since, at) }.onFailure { Timber.w("HA push: catch-up failed") } },
+        )
+        loop = l
+        try { l.run() } finally { loop = null; HaPushState.set(false) }
     }
 
-    /** One connection until it ends. True when the subscription was confirmed by HA. */
-    private suspend fun connectOnce(deviceId: String): Boolean {
-        val cfg = store.load() ?: return false
-        val reg = store.loadRegistration(deviceId) ?: return false
+    /** One connection until it ends; [up] is called when HA confirmed the subscription. Returns why it ended. */
+    private suspend fun connectOnce(deviceId: String, up: () -> Unit): String {
+        val cfg = store.load() ?: return "not set up"
+        val reg = store.loadRegistration(deviceId) ?: return "not registered"
         // The registration that carries the push flag is saved by the next sensor update; wait for it.
-        if (!reg.registration.contains("push_websocket_channel")) return false
-        val url = HaPush.wsUrl(cfg.baseUrl) ?: return false
-        var subscribed = false
+        if (!reg.registration.contains("push_websocket_channel")) return "push not registered yet"
+        val url = HaPush.wsUrl(cfg.baseUrl) ?: return "bad URL"
+        var reason = "closed"
         suspendCancellableCoroutine { cont: CancellableContinuation<Unit> ->
             var nextId = 2
             val ws = client.newWebSocket(Request.Builder().url(url).build(), object : WebSocketListener() {
@@ -57,26 +65,29 @@ class HaPushChannel(
                     when (val e = HaPush.parse(text)) {
                         HaPushEvent.AuthRequired -> webSocket.send(HaPush.auth(cfg.token))
                         HaPushEvent.AuthOk -> webSocket.send(HaPush.subscribe(1, reg.webhookId))
-                        HaPushEvent.AuthInvalid -> webSocket.close(1000, null)
+                        HaPushEvent.AuthInvalid -> { reason = "token refused"; webSocket.close(1000, null) }
                         is HaPushEvent.Push -> {
-                            subscribed = true
+                            up()
                             runCatching { router.route(e) }.onFailure { Timber.w("HA push: not delivered") }
                             e.confirmId?.let { webSocket.send(HaPush.confirm(nextId++, reg.webhookId, it)) }
                         }
-                        HaPushEvent.Ignored -> if (text.contains("\"result\"") && text.contains("\"success\":true")) subscribed = true
+                        HaPushEvent.Ignored -> if (text.contains("\"result\"") && text.contains("\"success\":true")) up()
                     }
                 }
 
-                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) { if (cont.isActive) cont.resume(Unit) }
+                override fun onClosed(webSocket: WebSocket, code: Int, reason2: String) {
+                    if (reason == "closed") reason = "closed $code"
+                    if (cont.isActive) cont.resume(Unit)
+                }
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    Timber.d("HA push: connection ended")
+                    reason = t.javaClass.simpleName
                     if (cont.isActive) cont.resume(Unit)
                 }
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) { webSocket.close(code, null) }
             })
             cont.invokeOnCancellation { ws.cancel() }
         }
-        return subscribed
+        return reason
     }
 
     private fun now(): String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"))
