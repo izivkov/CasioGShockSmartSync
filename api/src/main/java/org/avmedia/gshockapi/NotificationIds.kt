@@ -18,10 +18,10 @@ object NotificationIds {
     }
 
     /** [n] with an id of its own when it has none. */
-    fun assign(n: AppNotification): AppNotification = n // RED CHECK: no id
+    fun assign(n: AppNotification): AppNotification = if (n.id != 0) n else n.copy(id = next())
 
     private val TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss")
 
     /** The 15-character frame time, e.g. 20261123T183005 (zero padded). */
-    fun timestamp(t: LocalDateTime): String = String.format(java.util.Locale.US, "%04d%02d%02dT%02d%02d%2d", t.year, t.monthValue, t.dayOfMonth, t.hour, t.minute, t.second) // RED CHECK: old phone format
+    fun timestamp(t: LocalDateTime): String = t.format(TIME)
 }

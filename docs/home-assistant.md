@@ -9,8 +9,8 @@ is the frame's app name field, so it carries the title; the message is the text.
 | `title`, `message`, `data: {app: HA}` | `data.app` | title | message |
 | `message` only | `HA` | empty | message |
 
-- Keep titles short: the app sends at most 40 characters in the first line; how many the watch shows is not measured yet
-  (count it on the watch and write it here).
+- Keep titles to 32 characters (32 bytes in UTF-8; accents count 2): the app cuts the first line there, as Gadgetbridge's
+  Casio support does. How many the watch shows at once is not measured yet (count it on the watch and write it here).
 - The text is cut at 193 bytes (UTF-8).
 
 # Change watch settings from Home Assistant (DW-H5600)

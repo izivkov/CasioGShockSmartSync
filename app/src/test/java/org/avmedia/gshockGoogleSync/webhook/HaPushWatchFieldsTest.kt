@@ -49,6 +49,7 @@ class HaPushWatchFieldsTest {
     @Test
     fun aVeryLongTitleStillMakesAFrame() {
         val n = decoded(HaPushEvent.Push("x".repeat(400), "Battery 25%", null))
-        assertEquals(HaPush.MAX_FIRST_FIELD_CHARS, n.app.length)
+        assertEquals(HaPush.MAX_FIRST_FIELD_BYTES, n.app.toByteArray().size)
+        assertEquals("é".repeat(16), decoded(HaPushEvent.Push("é".repeat(40), "m", null)).app)
     }
 }

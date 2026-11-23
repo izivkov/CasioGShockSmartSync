@@ -151,7 +151,7 @@ object AppNotificationIOFunctional {
         buildList {
             // Bytes 0-3: the notification id, low byte first (the watch keeps notifications in its list by id; every
             // frame had id 0). Byte 4: 0 = add (2 = delete). Byte 5: 1 = alert. Field meaning learned from Gadgetbridge's GBX-100 behaviour; unproven on the H5600.
-            addAll(idBytes(0).toList()) // RED CHECK: id 0 as before
+            addAll(idBytes(data.id).toList())
             add(0x00)
             add(0x01)
             add(data.type.value.toByte())

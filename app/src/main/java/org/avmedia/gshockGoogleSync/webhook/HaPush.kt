@@ -30,8 +30,21 @@ sealed interface HaPushEvent {
 object HaPush {
     /** The first field when a push has no title and no data.app. */
     const val SHORT_SOURCE = "HA"
-    /** Longest first field (app name) sent; the encoder refuses a field over 255 bytes. */
-    const val MAX_FIRST_FIELD_CHARS = 40
+    /** Longest app name and title field sent, in UTF-8 bytes (Gadgetbridge's Casio support cuts both at 32). */
+    const val MAX_FIRST_FIELD_BYTES = 32
+
+    /** [s] cut to at most [max] UTF-8 bytes, never inside a character. */
+    fun cutUtf8(s: String, max: Int): String {
+        var bytes = 0
+        val out = StringBuilder()
+        for (ch in s.codePoints().toArray()) {
+            val n = String(Character.toChars(ch)).toByteArray(Charsets.UTF_8).size
+            if (bytes + n > max) break
+            bytes += n
+            out.appendCodePoint(ch)
+        }
+        return out.toString()
+    }
     private val gson = GsonBuilder().disableHtmlEscaping().create()
 
     /** "https://ha.example/" gives "wss://ha.example/api/websocket"; null when not an http(s) URL. */
@@ -103,8 +116,8 @@ object HaPush {
         return AppNotification.create(
             type = NotificationType.MESSAGE,
             timestamp = timestamp,
-            app = first.take(MAX_FIRST_FIELD_CHARS),
-            title = if (source != null) title.orEmpty().take(MAX_FIRST_FIELD_CHARS) else "",
+            app = cutUtf8(first, MAX_FIRST_FIELD_BYTES),
+            title = if (source != null) cutUtf8(title.orEmpty(), MAX_FIRST_FIELD_BYTES) else "",
             text = push.message,
         )
     }
