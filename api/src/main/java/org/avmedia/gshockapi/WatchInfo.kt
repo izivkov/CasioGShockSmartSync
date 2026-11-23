@@ -365,7 +365,9 @@ data object WatchInfo {
                 vibrate = true, chimeInSettings = true,
                 findButtonUserDefined = true,
                 shortLightDuration = "1.5s", longLightDuration = "5s",
-                hasBatteryLevel = false, alwaysConnected = true, hasDateFormat = false,
+                // 0x28 index 0 is a battery step 0..6 (the HA sensor's source): shown on the main screen as step * 100 / 6.
+                hasBatteryLevel = true, batteryLevelLowerLimit = 0, batteryLevelUpperLimit = 6,
+                alwaysConnected = true, hasDateFormat = false,
                 weekLanguageSupported = false,
                 hasStepCounter = true,
                 protocol = H5600Protocol,

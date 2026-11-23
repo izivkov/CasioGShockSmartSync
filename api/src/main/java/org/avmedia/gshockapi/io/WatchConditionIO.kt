@@ -58,9 +58,9 @@ object WatchConditionIOFunctional {
                 throw IllegalArgumentException("Invalid battery limit range: $range")
             }
 
-            val multiplier: Int = (100.0 / range).roundToInt()
+            // Exact scaling: the same as a rounded multiplier for the 10 and 100 step ranges, right for the H5600's 6 steps.
             val batteryLevel = (batteryRawValue - batteryLevelLowerLimit)
-            val batteryLevelPercent: Int = (batteryLevel * multiplier).coerceIn(0, 100)
+            val batteryLevelPercent: Int = (batteryLevel * 100.0 / range).roundToInt().coerceIn(0, 100)
             val temperature: Int = bytes[1].toInt()
 
             WatchConditionValue(batteryLevelPercent, temperature)

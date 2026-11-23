@@ -1,11 +1,15 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
 import androidx.compose.foundation.Canvas
+import AppText
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -31,9 +35,23 @@ import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 @Composable
 fun Battery(timeModel: TimeViewModel = hiltViewModel()) {
     val state by timeModel.state.collectAsState()
-    val batteryLevel = state.batteryLevel.coerceIn(0, 100)
     val watchFeatureManager = LocalWatchFeatureManager.current
     if (!watchFeatureManager.isFeatureSupported("time.battery")) return
+    BatteryIcon(state.batteryLevel)
+}
+
+/** The battery icon filled to [level] percent, with the percent beside it. */
+@Composable
+fun BatteryIcon(level: Int) {
+    val batteryLevel = level.coerceIn(0, 100)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        BatteryCanvas(batteryLevel)
+        AppText(text = "$batteryLevel%", modifier = Modifier.padding(start = 6.dp))
+    }
+}
+
+@Composable
+private fun BatteryCanvas(batteryLevel: Int) {
     val description = stringResource(R.string.battery_level)
     val stripes = ImageBitmap.imageResource(R.drawable.stripes)
 
