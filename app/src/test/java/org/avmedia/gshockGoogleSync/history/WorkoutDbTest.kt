@@ -46,6 +46,14 @@ class WorkoutDbTest {
         assertEquals(6, dao.allLaps().size)
     }
 
+    /** The Home Assistant sensors read this: before, only a workout of the running app session was sent. */
+    @Test fun theNewestStoredWorkoutIsFoundWithoutADownloadInThisSession() {
+        assertNull(dao.newestWorkout())
+        dao.upsert(WorkoutMapper.map(WorkoutTestData.session(start = WorkoutTestData.START), 1L))
+        dao.upsert(WorkoutMapper.map(WorkoutTestData.session(start = WorkoutTestData.START + 86_400_000, kcal = 600), 1L))
+        assertEquals(600L, dao.newestWorkout()!!.kcal)
+    }
+
     @Test fun aGapStaysNullNotZero() {
         dao.upsert(WorkoutMapper.map(WorkoutTestData.session(kcal = null, hrAvg = null, distance = null), 1L))
         val w = dao.allWorkouts().single()

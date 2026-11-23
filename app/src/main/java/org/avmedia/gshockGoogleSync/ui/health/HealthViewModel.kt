@@ -171,7 +171,7 @@ class HealthViewModel @Inject constructor(
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val stored = runCatching {
                 val dao = org.avmedia.gshockGoogleSync.history.HistoryDb.get(appContext).dao()
-                org.avmedia.gshockGoogleSync.history.StoredHealth.stepData(dao.allDays(), org.avmedia.gshockGoogleSync.history.LastReadStore.load(appContext)) { dao.hoursOf(it) }
+                org.avmedia.gshockGoogleSync.history.StoredHealth.stepData(dao.allDays(), org.avmedia.gshockGoogleSync.history.LastReadStore.load(appContext), hrOfDay = { dao.hrSlotsOf(it) }) { dao.hoursOf(it) }
             }.onFailure { Timber.w(it, "Health: reading the stored history failed"); AppLog.failure(LogSource.Health, "Reading the stored history failed", it) }.getOrNull() ?: return@launch
             _state.update { current ->
                 if (current.stepCounterData.h5600 != null) current

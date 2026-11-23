@@ -21,6 +21,9 @@ data class ChartSeries(val values: List<Float?>, val color: Color)
 
 enum class ChartKind { BARS, LINES }
 
+/** A point of a line chart picked out with a ring and a label above it (the day's highest and lowest heart rate). */
+data class ChartMark(val index: Int, val value: Float, val label: String, val color: Color)
+
 /** Where a value falls on the chart: 0 at the bottom, 1 at the top. Shared by the drawing and its test. */
 internal fun chartFraction(value: Float, min: Float, max: Float): Float =
     if (max <= min) 0.5f else ((value - min) / (max - min)).coerceIn(0f, 1f)
@@ -48,6 +51,9 @@ fun HistoryChart(
     grid: Color,
     gapColor: Color,
     labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    /** False draws a line without a dot per value (a day of 5-minute values). */
+    dots: Boolean = true,
+    marks: List<ChartMark> = emptyList(),
 ) {
     val measurer = rememberTextMeasurer()
     val style = TextStyle(fontSize = 10.sp, color = labelColor)
@@ -108,9 +114,17 @@ fun HistoryChart(
                     if (v == null) { prev = null; return@forEachIndexed }
                     val p = Offset(cx(i), y(v))
                     prev?.let { drawLine(ser.color, it, p, strokeWidth = 4f, cap = StrokeCap.Round) }
-                    drawCircle(ser.color, radius = 4f, center = p)
+                    if (dots) drawCircle(ser.color, radius = 4f, center = p)
                     prev = p
                 }
+            }
+            marks.filter { it.index in 0 until n }.forEach { m ->
+                val p = Offset(cx(m.index), y(m.value))
+                drawCircle(m.color, radius = 7f, center = p, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f))
+                val t = measurer.measure(m.label, style.copy(color = m.color))
+                val tx = (p.x - t.size.width / 2f).coerceIn(left, (size.width - t.size.width).coerceAtLeast(left))
+                val ty = (p.y - 10f - t.size.height).let { if (it < 0f) p.y + 10f else it }
+                drawText(t, topLeft = Offset(tx, ty))
             }
         }
     }

@@ -27,6 +27,8 @@ fun WorkoutsContent(ui: WorkoutsUi, events: WorkoutEvents, modifier: Modifier = 
         val open = ui.selected
         if (open != null) WorkoutDetailCard(open, ui, events)
         else {
+            AppButton(if (ui.downloading) "Reading workouts..." else "Read workouts from the watch", events.onDownload, Modifier.fillMaxWidth())
+            if (ui.downloadNote.isNotBlank()) AppText(ui.downloadNote, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (ui.workouts.isEmpty()) AppText("No workout downloaded yet.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ui.workouts.take(50).forEach { WorkoutRowCard(it, ui, events) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -91,6 +91,12 @@ object ChartLabels {
     /** 24 hourly slots: 0h, 6h, 12h and 18h. */
     fun hours(slots: Int = 24, every: Int = 6): List<String?> = List(slots) { if (it % every == 0) "${it}h" else null }
 
+    /** A day of [slots] equal slots from midnight: a label every [everyHours] hours (0h, 6h, 12h, 18h). */
+    fun daySlots(slots: Int, everyHours: Int = 6): List<String?> {
+        val perHour = slots / 24
+        return List(slots) { if (perHour > 0 && it % (perHour * everyHours) == 0) "${it / perHour}h" else null }
+    }
+
     /** Four labels spread over a workout: minutes when it lasted less than an hour, else h:mm. Needs the elapsed seconds of each slot. */
     fun elapsed(elapsedSec: List<Int?>): List<String?> {
         val total = elapsedSec.filterNotNull().maxOrNull() ?: return emptyList()

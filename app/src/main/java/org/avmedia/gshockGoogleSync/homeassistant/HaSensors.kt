@@ -60,7 +60,13 @@ object HaSensors {
         HaSensor("last_sync", "Last sync", "app.last_sync", "timestamp", null, null, "mdi:sync", "diagnostic"),
         HaSensor("step_goal", "Step goal", "health.step_goal", null, "steps", null, "mdi:flag-checkered"),
         HaSensor("hr_min", "Min heart rate", "health.hr_min", null, "bpm", "measurement", "mdi:heart-pulse"),
-        HaSensor("hr_recent_avg", "Recent heart rate", "health.hr_recent_avg", null, "bpm", "measurement", "mdi:heart-pulse"),
+        HaSensor(
+            "hr_recent_avg", "Recent heart rate", "health.hr_recent_avg", null, "bpm", "measurement", "mdi:heart-pulse",
+            attributes = mapOf(
+                "hr_by_slot" to "health.hr_by_slot", "hr_max_at" to "health.hr_max_at", "hr_min_at" to "health.hr_min_at",
+                "hr_curve_max" to "health.hr_curve_max", "hr_curve_min" to "health.hr_curve_min",
+            ),
+        ),
         HaSensor("walk_minutes", "Walking today", "health.walk_seconds", "duration", "min", "total_increasing", "mdi:walk", convert = Convert.SECONDS_TO_MINUTES),
         HaSensor("run_minutes", "Running today", "health.run_seconds", "duration", "min", "total_increasing", "mdi:run-fast", convert = Convert.SECONDS_TO_MINUTES),
         HaSensor("still_minutes", "Still today", "health.still_seconds", "duration", "min", "total_increasing", "mdi:seat", convert = Convert.SECONDS_TO_MINUTES),
@@ -93,7 +99,7 @@ object HaSensors {
         HaSensor("spo2", "Blood oxygen", "health.spo2", null, "%", "measurement", "mdi:water-percent", attributes = mapOf("measured_at" to "health.spo2_at")),
         HaSensor(
             "cardio_load", "Cardio load ratio", "health.cardio_load_ratio", null, null, "measurement", "mdi:heart-flash",
-            attributes = mapOf("feedback" to "health.cardio_feedback", "strain" to "health.cardio_strain", "tolerance" to "health.cardio_tolerance"),
+            attributes = mapOf("feedback" to "health.cardio_feedback", "strain" to "health.cardio_strain", "tolerance" to "health.cardio_tolerance", "date" to "health.cardio_date"),
         ),
         HaSensor("breathing_exercise", "Last breathing exercise", "health.breathing_exercise_at", "timestamp", null, null, "mdi:meditation", convert = Convert.LOCAL_TO_OFFSET),
         HaSensor("stairs_up", "Floors up (unconfirmed)", "health.stairs_up", null, null, "measurement", "mdi:stairs-up"),
@@ -126,6 +132,13 @@ object HaSensors {
         ),
         HaSensor("watch_settings", "Watch settings", "watch.settings.time_format", null, null, null, "mdi:cog", "diagnostic", attributes = SETTINGS_ATTRIBUTES),
     )
+
+    /** True for a sensor whose value only the DW-H5600 family has: sleep, blood oxygen, cardio, breathing, stairs, heart rate curve, workouts. */
+    fun h5600Only(s: HaSensor): Boolean =
+        s.variable.startsWith("workout.") || s.variable in SleepVariables.DESCRIPTIONS || s.variable in HeartRateDayVariables.DESCRIPTIONS
+
+    /** [sensors] for a watch of the H5600 family ([h5600]) or another model, which has none of the [h5600Only] values. */
+    fun forModel(sensors: List<HaSensor>, h5600: Boolean): List<HaSensor> = if (h5600) sensors else sensors.filterNot(::h5600Only)
 
     /** The variables to resolve for an update: the states and the attributes. */
     val VARIABLES: Set<String> = variablesOf(ALL)

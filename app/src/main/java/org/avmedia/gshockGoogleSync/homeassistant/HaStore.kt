@@ -14,6 +14,8 @@ data class HaJob(
     /** The watch this job is for ([HaPayloads.deviceId]) and the registration body to use for it. */
     val deviceId: String = "",
     val registration: String = "",
+    /** True for the DW-H5600 family: only then are its own sensors (sleep, cardio, workouts, ...) registered. Null in an older job = all. */
+    val h5600: Boolean? = null,
 )
 
 /** The Home Assistant setup, entered once: where HA is, how to get in, and the optional name and model typed by the owner. */

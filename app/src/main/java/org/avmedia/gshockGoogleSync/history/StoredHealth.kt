@@ -18,6 +18,7 @@ object StoredHealth {
         days: List<DayRow>,
         last: LastRead? = null,
         now: LocalDateTime = LocalDateTime.now(),
+        hrOfDay: (String) -> List<HrSlotRow> = { emptyList() },
         hoursOfDay: (String) -> List<HourRow>,
     ): StepCounterData? {
         val day = days.maxByOrNull { it.date } ?: return null
@@ -36,7 +37,10 @@ object StoredHealth {
             dayOfWeek = date.dayOfWeek.value, month = date.monthValue, dayOfMonth = date.dayOfMonth,
             hourlySteps = byHour, dailyHistory = emptyList(), currentDaySteps = day.steps, distanceMeters = day.distanceM,
             hourlyByHour = byHour,
-            h5600 = H5600HealthData(energyKcal = day.kcal, heartRate = hr, activity = activity, stepGoal = last?.stepGoal),
+            h5600 = H5600HealthData(
+                energyKcal = day.kcal, heartRate = hr, activity = activity, stepGoal = last?.stepGoal,
+                heartRateSlots = DayHeartRate.merge(emptyList(), hrOfDay(day.date), date, now),
+            ),
         )
     }
 

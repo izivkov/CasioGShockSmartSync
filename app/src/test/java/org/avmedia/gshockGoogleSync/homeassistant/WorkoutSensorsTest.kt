@@ -20,7 +20,7 @@ class WorkoutSensorsTest {
     }
 
     @Test fun aWorkoutBecomesStatesAndTheUnconfirmedAttribute() {
-        val values = WorkoutVariables.values(WorkoutTestData.session())
+        val values = WorkoutVariables.values(org.avmedia.gshockGoogleSync.history.WorkoutMapper.map(WorkoutTestData.session()).workout)
         val states = HaSensors.states(values)
         assertEquals("Running", states["workout_sport"])
         assertEquals("2025-11-22T08:26:40Z", states["workout_start"])
@@ -44,7 +44,7 @@ class WorkoutSensorsTest {
 
     @Test fun noWorkoutOrAMissingValueSendsNothingNeverZero() {
         assertTrue(HaSensors.states(WorkoutVariables.values(null)).keys.none { it in ids })
-        val states = HaSensors.states(WorkoutVariables.values(WorkoutTestData.session(kcal = null, hrAvg = null)))
+        val states = HaSensors.states(WorkoutVariables.values(org.avmedia.gshockGoogleSync.history.WorkoutMapper.map(WorkoutTestData.session(kcal = null, hrAvg = null)).workout))
         assertFalse("workout_kcal" in states)
         assertFalse("workout_hr_avg" in states)
         assertTrue("workout_hr_max" in states)

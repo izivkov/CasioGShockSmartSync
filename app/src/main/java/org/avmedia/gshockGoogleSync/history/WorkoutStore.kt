@@ -7,13 +7,15 @@ import org.avmedia.gshockapi.model.WorkoutSession
 import timber.log.Timber
 
 /**
- * Keeps downloaded workouts in [HistoryDb] and remembers the last one for the Home Assistant sensors.
+ * Keeps downloaded workouts in [HistoryDb]; the Home Assistant sensors read the newest stored one ([newest]).
  * The watch is told "fetched" only when [save] returned true, so a failed save is read again next time.
  */
 object WorkoutStore {
-    /** The newest workout of this app session; null until one was downloaded. */
-    @Volatile var last: WorkoutSession? = null
-        private set
+    /** The newest stored workout (also one read in an earlier app session); null when none is stored or the database fails. */
+    suspend fun newest(context: Context): WorkoutRow? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        runCatching { HistoryDb.get(context).dao().newestWorkout() }
+            .onFailure { Timber.w(it, "Reading the newest workout failed") }.getOrNull()
+    }
 
     /** Called after each stored workout (starts the Home Assistant push). */
     @Volatile var onDownloaded: (() -> Unit)? = null
@@ -28,10 +30,7 @@ object WorkoutStore {
             AppLog.failure(LogSource.Health, "Saving the workout failed", t)
             false
         }
-        if (ok) {
-            if (last == null || (session.startUtcMillis ?: 0L) >= (last?.startUtcMillis ?: 0L)) last = session
-            runCatching { onDownloaded?.invoke() }
-        }
+        if (ok) runCatching { onDownloaded?.invoke() }
         return ok
     }
 }

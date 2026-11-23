@@ -35,7 +35,17 @@ class WorkoutsViewModel @Inject constructor(
         onExportCsv = { export(json = false) },
         onExportJson = { export(json = true) },
         onShareRaw = { HealthLogShare.shareWorkout(context) },
+        onDownload = ::download,
     )
+
+    private fun download() {
+        if (_ui.value.downloading) return
+        _ui.update { it.copy(downloading = true, downloadNote = "") }
+        viewModelScope.launch {
+            val r = withContext(Dispatchers.IO) { runCatching { org.avmedia.gshockapi.io.H5600WorkoutIO.download() }.getOrNull() }
+            _ui.update { it.copy(downloading = false, downloadNote = WorkoutText.downloadNote(r?.downloaded, r?.error)) }
+        }
+    }
 
     private fun select(w: WorkoutRow?) {
         if (w == null) { _ui.update { it.copy(selected = null) }; return }

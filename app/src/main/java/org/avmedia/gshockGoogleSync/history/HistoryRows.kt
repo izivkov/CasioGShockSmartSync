@@ -53,6 +53,14 @@ data class HourRow(
         if (old == null) this else HourRow(date, hour, big(steps, old.steps), hr ?: old.hr)
 }
 
+/** One heart rate value of section 0x52: [date] and the start of its 2-minute slot as minutes after midnight (watch local time). */
+@Entity(tableName = "hr_slot", primaryKeys = ["date", "minute"])
+data class HrSlotRow(
+    val date: String,
+    val minute: Int,
+    val bpm: Int,
+)
+
 /** One night, key = ISO date the night belongs to. [stages] is the timeline as "ISO time,stage" lines, null = none read. */
 @Entity(tableName = "night")
 data class NightRow(

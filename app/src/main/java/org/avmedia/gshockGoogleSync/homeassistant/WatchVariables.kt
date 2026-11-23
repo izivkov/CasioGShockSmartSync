@@ -10,7 +10,7 @@ import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockapi.IGShockAPI
 import org.avmedia.gshockapi.model.StepCounterData
-import org.avmedia.gshockapi.model.WorkoutSession
+import org.avmedia.gshockGoogleSync.history.WorkoutRow
 import org.avmedia.gshockGoogleSync.history.WorkoutStore
 import org.avmedia.gshockGoogleSync.ui.health.H5600Session
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
@@ -36,8 +36,8 @@ object WatchVariables {
         val lastSync: () -> String?,
         /** The last DW-H5600 LifeLog transfer, or null when none was read this session. */
         val healthData: () -> StepCounterData? = { null },
-        /** The last DW-H5600 workout downloaded this session, or null. */
-        val lastWorkout: () -> WorkoutSession? = { null },
+        /** The newest stored DW-H5600 workout (any app session), or null. */
+        val lastWorkout: suspend () -> WorkoutRow? = { null },
         /** The "Read raw watch settings" switch; off reads only the decoded codes. */
         val rawOn: () -> Boolean = { false },
     )
@@ -53,7 +53,7 @@ object WatchVariables {
         },
         lastSync = { LocalDataStorage.get(appContext, AppStores.KEY_LAST_SYNC) },
         healthData = { H5600Session.data },
-        lastWorkout = { WorkoutStore.last },
+        lastWorkout = { WorkoutStore.newest(appContext) },
         rawOn = { AppStores.rawSwitch(appContext).isOn() },
     )
 
@@ -242,9 +242,11 @@ object WatchVariables {
             list += Variable(name, HealthVariables.DESCRIPTIONS.getValue(name)) { HealthVariables.values(env.healthData())[name] }
         }
 
-        // DW-H5600 workouts: the last one downloaded, never a new read here.
+        // DW-H5600 workouts: the newest stored one (read once per call), never a new read here.
         for (name in WorkoutVariables.NAMES) {
-            list += Variable(name, WorkoutVariables.DESCRIPTIONS.getValue(name)) { WorkoutVariables.values(env.lastWorkout())[name] }
+            list += Variable(name, WorkoutVariables.DESCRIPTIONS.getValue(name)) { ctx ->
+                WorkoutVariables.values(ctx.cached("workout.newest") { env.lastWorkout() })[name]
+            }
         }
 
         // One variable per raw code, from the table: adding a code is one entry in RawSettings.CODES.

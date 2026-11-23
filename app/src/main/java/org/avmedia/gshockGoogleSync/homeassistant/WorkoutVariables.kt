@@ -2,9 +2,10 @@ package org.avmedia.gshockGoogleSync.homeassistant
 
 import java.time.Instant
 import java.time.ZoneOffset
-import org.avmedia.gshockapi.model.WorkoutSession
+import org.avmedia.gshockGoogleSync.history.WorkoutRow
+import org.avmedia.gshockapi.model.WorkoutUnits
 
-/** The `workout.*` variables: the last workout downloaded from a DW-H5600 (null until one was read this session). */
+/** The `workout.*` variables: the newest workout stored from a DW-H5600 (null while none is stored). */
 object WorkoutVariables {
     /** name to description, in display order. Units the notes mark as likely say "unconfirmed". */
     val DESCRIPTIONS: Map<String, String> = linkedMapOf(
@@ -20,14 +21,14 @@ object WorkoutVariables {
 
     val NAMES: List<String> = DESCRIPTIONS.keys.toList()
 
-    fun values(s: WorkoutSession?): Map<String, Any?> = linkedMapOf(
-        "workout.sport" to s?.sportName,
-        "workout.start" to s?.startUtcMillis?.let { Instant.ofEpochMilli(it).atOffset(ZoneOffset.UTC).withNano(0).toString() },
-        "workout.duration_seconds" to s?.summary?.totalSeconds,
-        "workout.distance" to s?.summary?.distance,
-        "workout.kcal" to s?.summary?.kcal,
-        "workout.hr_avg" to s?.summary?.hrAvg,
-        "workout.hr_max" to s?.summary?.hrMax,
-        "workout.unconfirmed" to s?.unconfirmed?.entries?.joinToString("; ") { "${it.key}: ${it.value}" },
+    fun values(w: WorkoutRow?): Map<String, Any?> = linkedMapOf(
+        "workout.sport" to w?.sportName,
+        "workout.start" to w?.startMs?.takeIf { it > 0 }?.let { Instant.ofEpochMilli(it).atOffset(ZoneOffset.UTC).withNano(0).toString() },
+        "workout.duration_seconds" to w?.totalSec,
+        "workout.distance" to w?.distance,
+        "workout.kcal" to w?.kcal,
+        "workout.hr_avg" to w?.hrAvg,
+        "workout.hr_max" to w?.hrMax,
+        "workout.unconfirmed" to w?.let { WorkoutUnits.UNCONFIRMED.entries.joinToString("; ") { e -> "${e.key}: ${e.value}" } },
     )
 }

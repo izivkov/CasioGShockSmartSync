@@ -34,7 +34,8 @@ object SleepVariables {
         "health.spo2" to "Latest blood oxygen reading, percent",
         "health.spo2_at" to "When the latest blood oxygen reading was taken, watch local time, ISO 8601 without offset",
         "health.breathing_exercise_at" to "Start of the latest breathing exercise, watch local time, ISO 8601 without offset",
-        "health.cardio_load_ratio" to "Cardio load ratio of the latest cardio status (0 to 9.99)",
+        "health.cardio_load_ratio" to "Cardio load ratio of the latest cardio status (0 to 9.99): today's current value when the watch has one, else the newest daily record",
+        "health.cardio_date" to "Date of the cardio status in health.cardio_*, ISO 8601 date",
         "health.cardio_feedback" to "Cardio status feedback of the latest cardio status, 1 to 4",
         "health.cardio_strain" to "Strain of the latest cardio status, 0 to 999",
         "health.cardio_tolerance" to "Tolerance of the latest cardio status, 0 to 999",
@@ -52,7 +53,8 @@ object SleepVariables {
             .takeIf { it.isNotEmpty() }
         val body = h?.body
         val spo2 = body?.spo2?.lastOrNull()
-        val cardio = body?.cardio
+        // Today's value from the current values (0x65) when the watch has one, else the newest daily record (0x5B).
+        val cardio = body?.cardioNow ?: body?.cardio
         val stairs = body?.stairs?.lastOrNull()
         return linkedMapOf(
             "health.sleep_date" to night?.date?.toString(),
@@ -73,6 +75,7 @@ object SleepVariables {
             "health.spo2_at" to iso(spo2?.time),
             "health.breathing_exercise_at" to iso(body?.breathingSessions?.lastOrNull()?.time),
             "health.cardio_load_ratio" to cardio?.loadRatio,
+            "health.cardio_date" to cardio?.date?.toString(),
             "health.cardio_feedback" to cardio?.feedback,
             "health.cardio_strain" to cardio?.strain,
             "health.cardio_tolerance" to cardio?.tolerance,

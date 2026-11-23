@@ -9,7 +9,7 @@ import org.junit.Test
 
 class WorkoutVariablesTest {
     @Test fun mapsTheLastWorkoutToWorkoutVariables() {
-        val v = WorkoutVariables.values(WorkoutTestData.session())
+        val v = WorkoutVariables.values(org.avmedia.gshockGoogleSync.history.WorkoutMapper.map(WorkoutTestData.session()).workout)
         assertEquals("Running", v["workout.sport"])
         assertEquals("2025-11-22T08:26:40Z", v["workout.start"])
         assertEquals(1800, v["workout.duration_seconds"])
@@ -27,7 +27,7 @@ class WorkoutVariablesTest {
     }
 
     @Test fun aMissingValueIsNullAndEveryNameHasADescription() {
-        assertNull(WorkoutVariables.values(WorkoutTestData.session(kcal = null))["workout.kcal"])
+        assertNull(WorkoutVariables.values(org.avmedia.gshockGoogleSync.history.WorkoutMapper.map(WorkoutTestData.session(kcal = null)).workout)["workout.kcal"])
         assertEquals(WorkoutVariables.NAMES.toSet(), WorkoutVariables.DESCRIPTIONS.keys)
         assertTrue(WorkoutVariables.DESCRIPTIONS.getValue("workout.distance").contains("UNCONFIRMED"))
     }
@@ -40,7 +40,7 @@ class WorkoutVariablesTest {
     @Test fun registryResolvesTheVariablesFromTheLastWorkout() {
         val env = WatchVariables.Env(
             api = io.mockk.mockk(relaxed = true), features = io.mockk.mockk(relaxed = true), raw = io.mockk.mockk(relaxed = true),
-            isH5600 = { true }, phoneBattery = { 50 }, lastSync = { null }, lastWorkout = { WorkoutTestData.session() },
+            isH5600 = { true }, phoneBattery = { 50 }, lastSync = { null }, lastWorkout = { org.avmedia.gshockGoogleSync.history.WorkoutMapper.map(WorkoutTestData.session()).workout },
         )
         val registry = WatchVariables.registry(env)
         assertTrue(WorkoutVariables.NAMES.all { it in registry.names })

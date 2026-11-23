@@ -32,4 +32,18 @@ class WorkoutTextTest {
         assertNull(s[1])
         assertTrue(WorkoutText.series(emptyList()) { it.hr }.isEmpty())
     }
+
+    @Test fun theListLineHasEnergyAndBothHeartRates() {
+        val line = WorkoutText.line(WorkoutMapper.map(WorkoutTestData.session(), 1L).workout)
+        assertTrue(line, line.contains("410 kcal"))
+        assertTrue(line, line.contains("avg 142 bpm"))
+        assertTrue(line, line.contains("max 171 bpm"))
+    }
+
+    @Test fun theReadNoteSaysWhatCame() {
+        assertEquals("No new workout on the watch.", WorkoutText.downloadNote(0, null))
+        assertEquals("2 new workouts stored.", WorkoutText.downloadNote(2, null))
+        assertTrue(WorkoutText.downloadNote(1, "no answer").startsWith("Stopped: no answer"))
+        assertTrue(WorkoutText.downloadNote(null, null).contains("already running"))
+    }
 }

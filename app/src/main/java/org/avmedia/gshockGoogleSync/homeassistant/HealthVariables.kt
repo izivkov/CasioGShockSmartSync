@@ -43,7 +43,7 @@ object HealthVariables {
         "health.slot_minutes" to "Length of one entry of health.slots, minutes",
         "health.slots" to "Steps per 5-minute slot, newest first (entry i ends i * 5 minutes before health.recorded_at); null = slot skipped as implausible",
         "health.steps_by_hour" to "Steps per hour of today (24 entries: stored hours of the day merged with the newest transfer; null = no data or after now)",
-    ) + SleepVariables.DESCRIPTIONS
+    ) + HeartRateDayVariables.DESCRIPTIONS + SleepVariables.DESCRIPTIONS
 
     val NAMES: List<String> = DESCRIPTIONS.keys.toList()
 
@@ -59,7 +59,7 @@ object HealthVariables {
                 (0..intervals.maxOf { it.index }).map { byIndex[it] }
             }
         }
-        return base(data, h, hr, recent, act, slots) + SleepVariables.values(data)
+        return base(data, h, hr, recent, act, slots) + HeartRateDayVariables.values(data) + SleepVariables.values(data)
     }
 
     private fun base(

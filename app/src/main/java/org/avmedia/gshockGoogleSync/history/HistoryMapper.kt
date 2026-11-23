@@ -47,7 +47,7 @@ object HistoryMapper {
             .filter { !it.isEmpty }
             .map { n -> night(n, stages.takeIf { n.date == sleep?.night?.date }) }
 
-        return HistoryBatch(days.groupBy { it.date }.values.map { rs -> rs.reduce { old, new -> new.over(old) } }, hours.values.toList(), nights.groupBy { it.date }.values.map { rs -> rs.reduce { old, new -> new.over(old) } })
+        return HistoryBatch(days.groupBy { it.date }.values.map { rs -> rs.reduce { old, new -> new.over(old) } }, hours.values.toList(), nights.groupBy { it.date }.values.map { rs -> rs.reduce { old, new -> new.over(old) } }, DayHeartRate.rows(h.heartRateSlots))
     }
 
     private fun night(n: SleepNight, stages: String?) = NightRow(

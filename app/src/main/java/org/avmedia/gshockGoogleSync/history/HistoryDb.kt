@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 /** What one decoded transfer adds to the history. */
-class HistoryBatch(val days: List<DayRow>, val hours: List<HourRow>, val nights: List<NightRow>)
+class HistoryBatch(val days: List<DayRow>, val hours: List<HourRow>, val nights: List<NightRow>, val hrSlots: List<HrSlotRow> = emptyList())
 
 @Dao
 abstract class HistoryDao {
@@ -32,7 +32,12 @@ abstract class HistoryDao {
         batch.days.forEach { putDay(it.over(day(it.date))) }
         batch.hours.forEach { putHour(it.over(hourRow(it.date, it.hour))) }
         batch.nights.forEach { putNight(it.over(night(it.date))) }
+        // A heart rate slot is a reading of its own: the newest read of the same slot replaces it, other slots stay.
+        if (batch.hrSlots.isNotEmpty()) putHrSlots(batch.hrSlots)
     }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE) abstract fun putHrSlots(rows: List<HrSlotRow>)
+    @Query("SELECT * FROM hr_slot WHERE date = :date ORDER BY minute") abstract fun hrSlotsOf(date: String): List<HrSlotRow>
 
     @Query("SELECT * FROM day ORDER BY date") abstract fun allDays(): List<DayRow>
     @Query("SELECT * FROM hour ORDER BY date, hour") abstract fun allHours(): List<HourRow>
@@ -60,6 +65,7 @@ abstract class HistoryDao {
     }
 
     @Query("SELECT * FROM workout ORDER BY startMs DESC") abstract fun allWorkouts(): List<WorkoutRow>
+    @Query("SELECT * FROM workout ORDER BY startMs DESC LIMIT 1") abstract fun newestWorkout(): WorkoutRow?
     @Query("SELECT * FROM workout ORDER BY startMs DESC") abstract fun watchWorkouts(): Flow<List<WorkoutRow>>
     @Query("SELECT * FROM workout_lap ORDER BY startMs, sport, idx") abstract fun allLaps(): List<WorkoutLapRow>
     @Query("SELECT * FROM workout_sample ORDER BY startMs, sport, idx") abstract fun allSamples(): List<WorkoutSampleRow>
@@ -68,8 +74,8 @@ abstract class HistoryDao {
 }
 
 @Database(
-    entities = [DayRow::class, HourRow::class, NightRow::class, WorkoutRow::class, WorkoutLapRow::class, WorkoutSampleRow::class],
-    version = 2, exportSchema = false,
+    entities = [DayRow::class, HourRow::class, NightRow::class, WorkoutRow::class, WorkoutLapRow::class, WorkoutSampleRow::class, HrSlotRow::class],
+    version = 3, exportSchema = false,
 )
 abstract class HistoryDb : RoomDatabase() {
     abstract fun dao(): HistoryDao
@@ -86,10 +92,17 @@ abstract class HistoryDb : RoomDatabase() {
             }
         }
 
+        /** Version 3 adds the heart rate per 2-minute slot; everything else is left as it is. */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `hr_slot` (`date` TEXT NOT NULL, `minute` INTEGER NOT NULL, `bpm` INTEGER NOT NULL, PRIMARY KEY(`date`, `minute`))")
+            }
+        }
+
         @Volatile private var instance: HistoryDb? = null
 
         fun get(context: Context): HistoryDb = instance ?: synchronized(this) {
-            instance ?: Room.databaseBuilder(context.applicationContext, HistoryDb::class.java, NAME).addMigrations(MIGRATION_1_2).build().also { instance = it }
+            instance ?: Room.databaseBuilder(context.applicationContext, HistoryDb::class.java, NAME).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
         }
     }
 }

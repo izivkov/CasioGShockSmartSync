@@ -16,6 +16,9 @@ data class WorkoutsUi(
     val workouts: List<WorkoutRow> = emptyList(),
     val selected: WorkoutDetail? = null,
     val exportNote: String = "",
+    /** What the last "Read workouts" did; blank before. */
+    val downloadNote: String = "",
+    val downloading: Boolean = false,
     val zone: ZoneId = ZoneId.systemDefault(),
 )
 
@@ -24,6 +27,7 @@ class WorkoutEvents(
     val onExportCsv: () -> Unit = {},
     val onExportJson: () -> Unit = {},
     val onShareRaw: () -> Unit = {},
+    val onDownload: () -> Unit = {},
 )
 
 /** Pure text helpers of the workout views (units the notes mark as likely carry "unconfirmed"). */
@@ -38,17 +42,27 @@ internal object WorkoutText {
     fun start(ms: Long, zone: ZoneId): String =
         if (ms <= 0) "time unknown" else DateTimeFormatter.ofPattern("EEE d MMM HH:mm", Locale.getDefault()).format(Instant.ofEpochMilli(ms).atZone(zone))
 
-    /** One line of the list: duration, distance, heart rate. Gaps are left out, never shown as 0. */
+    /** One line of the list: duration, distance, energy, average and highest heart rate. Gaps are left out, never shown as 0. */
     fun line(w: WorkoutRow): String = listOfNotNull(
-        w.totalSec?.let { duration(it) }, w.distance?.let { "%.2f km (unconfirmed)".format(Locale.US, it) }, w.hrAvg?.let { "avg $it bpm" },
+        w.totalSec?.let { duration(it) }, w.distance?.let { "%.2f km (unconfirmed)".format(Locale.US, it) }, w.kcal?.let { "$it kcal" },
+        w.hrAvg?.let { "avg $it bpm" }, w.hrMax?.let { "max $it bpm" },
     ).joinToString(", ").ifEmpty { "no summary" }
+
+    /** The note after "Read workouts": how many came, or why it stopped. */
+    fun downloadNote(downloaded: Int?, error: String?): String = when {
+        downloaded == null -> "A workout read is already running, or the app keeps no workouts."
+        error != null -> "Stopped: $error" + if (downloaded > 0) " ($downloaded stored before)" else ""
+        downloaded == 0 -> "No new workout on the watch."
+        downloaded == 1 -> "1 new workout stored."
+        else -> "$downloaded new workouts stored."
+    }
 
     /** The summary lines of the detail view. */
     fun lines(w: WorkoutRow): List<Pair<String, String>> = listOfNotNull(
         w.totalSec?.let { "Duration" to duration(it) }, w.distance?.let { "Distance" to distance(it) }, w.avgPace?.let { "Average pace" to pace(it) },
         w.avgSpeed?.let { "Average speed" to "%.1f km/h (unconfirmed)".format(Locale.US, it) }, w.kcal?.let { "Energy" to "$it kcal" },
         w.hrAvg?.let { "Average heart rate" to "$it bpm" }, w.hrMax?.let { "Highest heart rate" to "$it bpm" }, w.hrMin?.let { "Lowest heart rate" to "$it bpm" },
-        w.ascent?.let { "Ascent" to "$it" }, w.descent?.let { "Descent" to "$it" }, w.cadenceAvg?.let { "Cadence" to "$it (unit unknown, unconfirmed)" },
+        w.ascent?.let { "Ascent" to "$it m" }, w.descent?.let { "Descent" to "$it m" }, w.cadenceAvg?.let { "Cadence" to "$it (unit unknown, unconfirmed)" },
     )
 
     fun lapLine(l: WorkoutLapRow): String = listOfNotNull(

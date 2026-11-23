@@ -14,10 +14,11 @@ import timber.log.Timber
 object HistoryStore {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    /** [data] laid over the stored hours of its day ([TodayHours]); blocking, call off the main thread. */
+    /** [data] laid over the stored hours and heart rate slots of its day ([TodayHours], [DayHeartRate]); blocking, call off the main thread. */
     fun mergeDay(context: Context, data: StepCounterData): StepCounterData {
         val day = data.timestamp?.toLocalDate() ?: return data
-        return TodayHours.merge(data, HistoryDb.get(context).dao().hoursOf(day.toString()))
+        val dao = HistoryDb.get(context).dao()
+        return DayHeartRate.merge(TodayHours.merge(data, dao.hoursOf(day.toString())), dao.hrSlotsOf(day.toString()))
     }
 
     /** Called after each stored LifeLog transfer. */

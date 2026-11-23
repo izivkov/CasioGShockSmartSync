@@ -59,10 +59,11 @@ object HaJobs {
         attributes: Map<String, Map<String, Any?>>,
         deviceId: String,
         registration: String,
+        h5600: Boolean? = null,
     ): HaJob? {
         val event = event(trigger, now, watchName)
         if (states.isEmpty() && event == null) return null
-        return HaJob(states, event, attributes, deviceId, registration)
+        return HaJob(states, event, attributes, deviceId, registration, h5600)
     }
 }
 
@@ -127,7 +128,8 @@ class HaSync @Inject constructor(
         val watchName = org.avmedia.gshockapi.WatchInfo.name
         val now = OffsetDateTime.now().withNano(0)
         val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
-        val sensors = HaGroups.sensors(store.groupsOn())
+        val h5600 = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isH5600Family(watchName)
+        val sensors = HaSensors.forModel(HaGroups.sensors(store.groupsOn()), h5600)
         val values = registry.resolve(ctx, HaSensors.variablesOf(sensors))
         val registration = HaJobs.registration(
             store, address, watchName, cfg, org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME, android.os.Build.VERSION.RELEASE,
@@ -137,7 +139,7 @@ class HaSync @Inject constructor(
         }
         val job = HaJobs.job(
             trigger, now, watchName, HaSensors.states(values, sensors), HaSensors.attributes(values, sensors),
-            HaPayloads.deviceId(address), registration,
+            HaPayloads.deviceId(address), registration, h5600,
         ) ?: return
         store.putPending(job)
         HaWorker.enqueue(context)

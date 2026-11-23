@@ -117,6 +117,7 @@ class HaClient(
     }
 
     private fun push(cfg: HaConfig, reg: HaRegistration, job: HaJob): Push {
+        val sensors = HaSensors.forModel(this.sensors, job.h5600 ?: true)
         val hook = "${cfg.baseUrl}/api/webhook/${reg.webhookId}"
         val fingerprint = HaSensors.fingerprint(sensors)
         if (reg.sensorsHash != fingerprint) {
