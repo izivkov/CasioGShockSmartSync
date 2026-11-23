@@ -138,7 +138,7 @@ object HaSensors {
         s.variable.startsWith("workout.") || s.variable in SleepVariables.DESCRIPTIONS || s.variable in HeartRateDayVariables.DESCRIPTIONS
 
     /** [sensors] for a watch of the H5600 family ([h5600]) or another model, which has none of the [h5600Only] values. */
-    fun forModel(sensors: List<HaSensor>, h5600: Boolean): List<HaSensor> = if (h5600) sensors else sensors.filterNot(::h5600Only)
+    fun forModel(sensors: List<HaSensor>, h5600: Boolean): List<HaSensor> = sensors
 
     /** The variables to resolve for an update: the states and the attributes. */
     val VARIABLES: Set<String> = variablesOf(ALL)

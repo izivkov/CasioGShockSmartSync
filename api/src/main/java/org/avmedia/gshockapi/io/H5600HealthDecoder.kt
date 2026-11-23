@@ -45,7 +45,7 @@ object H5600HealthDecoder {
     private const val FRAME_HEADER_SIZE = 5
     private const val RECORD_SIZE = 4
     private const val SLOT_MINUTES = 5L
-    const val HR_SLOT_MINUTES = 2L
+    const val HR_SLOT_MINUTES = 5L
     private const val MAX_STEPS_PER_SLOT = 1_000
     private const val MAX_ENERGY_RAW_PER_SLOT = 5_000
     private const val MAX_DAY_STEPS = 100_000

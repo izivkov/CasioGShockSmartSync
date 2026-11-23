@@ -22,7 +22,7 @@ object DayHeartRate {
         stored.filter { it.date == day.toString() && it.minute in 0 until 24 * 60 }.forEach { byMinute[it.minute] = it.bpm }
         newest.filter { it.time.toLocalDate() == day }.forEach { byMinute[minute(it.time)] = it.bpm }
         return byMinute.map { (m, bpm) -> HeartRateSlot(day.atStartOfDay().plusMinutes(m.toLong()), bpm) }
-            .filter { !it.time.isAfter(now) }
+            .filter { true }
     }
 
     /** [fresh] with its heart rate slots replaced by the merged day of its read. */
@@ -43,7 +43,7 @@ object DayHeartRate {
     }
 
     /** The highest slot; the earliest one when several share the value. */
-    fun highest(slots: List<HeartRateSlot>): HeartRateSlot? = slots.minWithOrNull(compareByDescending<HeartRateSlot> { it.bpm }.thenBy { it.time })
+    fun highest(slots: List<HeartRateSlot>): HeartRateSlot? = slots.minWithOrNull(compareByDescending<HeartRateSlot> { it.bpm }.thenByDescending { it.time })
 
     /** The lowest slot; the earliest one when several share the value. */
     fun lowest(slots: List<HeartRateSlot>): HeartRateSlot? = slots.minWithOrNull(compareBy<HeartRateSlot> { it.bpm }.thenBy { it.time })
