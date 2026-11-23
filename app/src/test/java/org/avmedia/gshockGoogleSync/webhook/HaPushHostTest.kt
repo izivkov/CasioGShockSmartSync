@@ -7,6 +7,8 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -52,5 +54,45 @@ class HaPushHostTest {
         testScheduler.advanceUntilIdle()
         assertEquals(2, started)
         assertTrue(host.running)
+    }
+
+    /**
+     * Owner hint 2026-11-23: the app returns to its main screen after 3 min without input and the inactivity handler
+     * disconnects the watch (the session ends). The HA push subscription must stay: same socket, no new subscribe,
+     * sensor still on, while the companion service holds the host.
+     */
+    @Test fun anInactivityDisconnectLeavesTheSubscriptionActive() = runTest {
+        var subscribes = 0
+        var ends = 0
+        val states = ArrayList<Boolean>()
+        val host = HaPushHost(backgroundScope) {
+            val loop = HaPushLoop(
+                connect = { up ->
+                    val s = HaPushSession("tok", "hook1",
+                        send = { if (it.contains("push_notification_channel")) subscribes++; true },
+                        up = up, end = { ends++ }, route = {}, log = {})
+                    s.onText("""{"type":"auth_required"}""")
+                    s.onText("""{"type":"auth_ok"}""")
+                    s.onText("""{"id":1,"type":"result","success":true,"result":null}""")
+                    awaitCancellation()
+                },
+                now = { testScheduler.currentTime },
+                log = {},
+                onState = { states += it },
+            )
+            HaPushHost.HostedChannel(run = { loop.run() }, wake = loop::wake)
+        }
+        host.acquire(HaPushHost.SERVICE)
+        host.acquire(HaPushHost.SESSION)
+        runCurrent()
+        // Inactivity: repository.disconnect() closes the watch session, which releases its hold.
+        host.release(HaPushHost.SESSION)
+        advanceTimeBy(10 * 60_000L); runCurrent()
+        host.acquire(HaPushHost.SESSION); host.watchConnected()
+        runCurrent()
+        assertTrue(host.running)
+        assertEquals("subscribed once, never torn down by the screen or the session", 1, subscribes)
+        assertEquals(0, ends)
+        assertEquals(listOf(true), states)
     }
 }

@@ -38,7 +38,7 @@ class HaPushHost(
 
     @Synchronized fun release(owner: String) {
         owners -= owner
-        if (owners.isNotEmpty()) return
+        // RED CHECK mutation: any release ends the socket (as if the subscription followed the screen or session)
         job?.cancel()
         job = null
         channel = null
