@@ -45,7 +45,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                 activeScanAddresses.orEmpty().forEach { address ->
                     val name = LocalDataStorage.getDeviceName(context, address)?.takeIf { it.isNotBlank() }
                         ?: return@forEach
-                    if (org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)) {
+                    if (org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)) {
                         BackgroundReadPermission.arm(address, BACKGROUND_WINDOW_MS)
                     }
                 }
