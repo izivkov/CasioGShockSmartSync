@@ -33,6 +33,7 @@ import org.avmedia.gshockapi.ProgressEvents
 import javax.inject.Inject
 
 private const val FEATURE_HOME_TIME = "time.home_time"
+private const val FEATURE_TIMER = "time.timer"
 
 data class TimeState(
     val timer: Int = 0,
@@ -224,7 +225,7 @@ class TimeViewModel @Inject constructor(
             val option = timeSettingsStorage.getTimeZoneOption()
             val offset = calculateOffset(option)
 
-            val timer = api.getTimer()
+            val timer = if (watchFeatureManager.isFeatureSupported(FEATURE_TIMER)) api.getTimer() else 0
             timerChanges.setBaseline(timer, timer)
             val homeTime = if (watchFeatureManager.isFeatureSupported(FEATURE_HOME_TIME)) api.getHomeTime() else ""
             val batteryLevel = api.getBatteryLevel()

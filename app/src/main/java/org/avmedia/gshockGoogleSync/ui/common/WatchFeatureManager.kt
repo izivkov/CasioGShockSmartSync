@@ -48,8 +48,8 @@ class WatchFeatureManager @Inject constructor(
         "settings.power_saving" to { WatchInfo.hasPowerSavingMode },
         "settings.multiple_fonts" to { WatchInfo.hasMultipleFonts },
         "light.auto_light" to { WatchInfo.hasAutoLight },
-        "light.duration" to { true },
-        "operation_tone.sound" to { true },
+        "light.duration" to { WatchInfo.hasLight },
+        "operation_tone.sound" to { WatchInfo.hasOperationTone },
         "operation_tone.vibrate" to { WatchInfo.vibrate },
         "time.battery" to { WatchInfo.hasBatteryLevel },
         "time.world_cities" to { WatchInfo.hasWorldCities },
@@ -60,7 +60,12 @@ class WatchFeatureManager @Inject constructor(
         "time.step_counter" to { WatchInfo.hasStepCounter },
         "alarms.chime" to { WatchInfo.chimeInSettings },
         "time_adjustment.supported" to { WatchInfo.hasTimeAdjustment },
-        "time_adjustment.always_connected" to { WatchInfo.alwaysConnected }
+        "time_adjustment.always_connected" to { WatchInfo.alwaysConnected },
+        "time_adjustment.minutes" to { WatchInfo.hasTimeAdjustmentMinutes },
+        "time.timer" to { WatchInfo.hasTimer },
+        "alarms" to { WatchInfo.alarmCount > 0 },
+        "actions.configurable" to { WatchInfo.hasScratchpad },
+        "settings.watch_settings" to { WatchInfo.hasWatchSettings }
     )
 
     // To support a new WatchInfo string field: add one line here.

@@ -42,15 +42,17 @@ data class BottomNavigationItem(
             )
         }
 
-        baseItems.add(
-            BottomNavigationItem(
-                label = Utils.shortenString(
-                    stringResource(R.string.alarms), 7
-                ),
-                icon = ImageVector.vectorResource(id = R.drawable.ic_alarm_black_24dp),
-                route = Screens.Alarms.route,
+        if (watchFeatureManager.isFeatureSupported("alarms")) {
+            baseItems.add(
+                BottomNavigationItem(
+                    label = Utils.shortenString(
+                        stringResource(R.string.alarms), 7
+                    ),
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_alarm_black_24dp),
+                    route = Screens.Alarms.route,
+                )
             )
-        )
+        }
 
         if (watchFeatureManager.isFeatureSupported("actions.reminders")) {
             baseItems.add(
@@ -64,23 +66,26 @@ data class BottomNavigationItem(
             )
         }
 
-        // Add remaining items
-        baseItems.addAll(
-            listOf(
+        // Actions are stored on the watch, so they can only be configured where it has room for them.
+        if (watchFeatureManager.isFeatureSupported("actions.configurable")) {
+            baseItems.add(
                 BottomNavigationItem(
                     label = Utils.shortenString(
                         stringResource(R.string.actions), 7
                     ),
                     icon = ImageVector.vectorResource(id = R.drawable.generic_action_item),
                     route = Screens.Actions.route
-                ),
-                BottomNavigationItem(
-                    label = Utils.shortenString(
-                        stringResource(R.string.settings), 7
-                    ),
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
-                    route = Screens.Settings.route
                 )
+            )
+        }
+
+        baseItems.add(
+            BottomNavigationItem(
+                label = Utils.shortenString(
+                    stringResource(R.string.settings), 7
+                ),
+                icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
+                route = Screens.Settings.route
             )
         )
 
