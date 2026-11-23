@@ -305,7 +305,7 @@ object ProfileCodec {
      * The same call decodes a raw frame and encodes a decoded one.
      */
     fun flip(frame: ByteArray): ByteArray =
-        frame.copyOf().also { out -> for (i in 2..minOf(9, out.size - 1)) out[i] = out[i] }
+        frame.copyOf().also { out -> for (i in 2..minOf(9, out.size - 1)) out[i] = (out[i].toInt() xor 0xFF).toByte() }
 
     fun parse(frame: ByteArray): Profile? = parseDecoded(flip(frame))
 
