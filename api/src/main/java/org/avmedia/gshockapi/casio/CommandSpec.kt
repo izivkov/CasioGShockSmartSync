@@ -146,7 +146,7 @@ object CommandTable {
             CommandSpec(0x49, "connection check", write = WriteSpec(), unsolicited = true),
             rw(0x4E, "activity value", options = ONE, match = 1, back = CHECKED),
             rw(0x4F, "physical settings", min = 9, back = CHECKED),
-            rw(0x50, "setting 50 (smart alarm)", min = 5, back = CHECKED),
+            rw(0x50, "setting 50 (smart alarm)", min = 4, back = CHECKED),
             rw(0x51, "watch face", min = 5, back = CHECKED),
             rw(0x52, "widgets", back = CHECKED),
             rw(0x53, "activity list", min = 14, back = CHECKED),
