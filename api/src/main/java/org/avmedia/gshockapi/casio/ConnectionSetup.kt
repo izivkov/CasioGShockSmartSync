@@ -70,13 +70,15 @@ object ConnectionSetup {
         onKind(data)
     }
 
-    /** The kind of the last `0x10` answer of this link (stub for the red check). */
+    /** The kind of the last `0x10` answer of this link, noted before anything is deferred or skipped. */
     @Volatile var lastKind: Int? = null
 
     /** True when the watch connected itself (kind 13 or 14): nobody pressed a button. */
-    fun isAutomaticConnect(): Boolean = false
+    fun isAutomaticConnect(): Boolean = lastKind in SELF_CONNECT_KINDS
 
     fun reset() {
+        lastKind = null
+        org.avmedia.gshockapi.io.ButtonPressedIO.forgetAnswer()
         deferredKind = null
         step = Step.WAIT_KIND
         reconnectKind = false
@@ -89,6 +91,7 @@ object ConnectionSetup {
 
     /** The `0x10` answer: byte index 7 after the code is the kind of connection. Starts the run. */
     fun onKind(data: String) {
+        bytes(data).getOrNull(8)?.let { lastKind = it }
         if (step != Step.WAIT_KIND) {
             ConnectionKeepAlive.log("Connection kind answer: setup skipped, already $step")
             return

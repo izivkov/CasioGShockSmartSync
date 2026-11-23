@@ -87,21 +87,43 @@ object ButtonPressedIO {
 
     private var state = State()
 
+    /** The last valid 0x10 answer and when it came. The connection setup and init read the same answer: one read, both use it. */
+    private data class Answer(val button: IO.WatchButton, val at: Long)
+
+    @Volatile private var answer: Answer? = null
+
+    @Volatile var clock: () -> Long = System::currentTimeMillis
+
+    /** An answer this old is not shared any more: init asks again. */
+    const val SHARE_WINDOW_MS = 30_000L
+
+    fun forgetAnswer() {
+        answer = null
+    }
+
+    private fun freshAnswer(): IO.WatchButton? = answer?.takeIf { clock() - it.at in 0..SHARE_WINDOW_MS }?.button
+
     suspend fun request(): IO.WatchButton {
         Timber.i("Button info request started (0x10)")
         return CachedIO.request("10") { key ->
-            val deferred = CompletableDeferred<IO.WatchButton>()
-            synchronized(this) {
-                state = state.copy(deferredResult = deferred)
-            }
-            try {
-                Timber.i("Sending button info request (0x$key)")
-                IO.request(key)
-                deferred.await()
-            } finally {
+            val shared = freshAnswer()
+            if (shared != null) {
+                Timber.i("Button info already received on this link: $shared")
+                shared
+            } else {
+                val deferred = CompletableDeferred<IO.WatchButton>()
                 synchronized(this) {
-                    if (state.deferredResult === deferred) {
-                        state = state.copy(deferredResult = null)
+                    state = state.copy(deferredResult = deferred)
+                }
+                try {
+                    Timber.i("Sending button info request (0x$key)")
+                    IO.request(key)
+                    deferred.await()
+                } finally {
+                    synchronized(this) {
+                        if (state.deferredResult === deferred) {
+                            state = state.copy(deferredResult = null)
+                        }
                     }
                 }
             }
@@ -110,9 +132,6 @@ object ButtonPressedIO {
             Timber.i("Button info request completed: $button")
         }
     }
-
-    /** Forgets the answer kept for sharing (stub for the red check). */
-    fun forgetAnswer() {}
 
     fun get(): IO.WatchButton = state.lastKnownButton
 
@@ -126,6 +145,7 @@ object ButtonPressedIO {
         ButtonPressedIOFunctional.parseButtonPress(data)
             .fold(
                 onSuccess = { button ->
+                    answer = Answer(button, clock())
                     synchronized(this) {
                         state.deferredResult?.complete(button)
                         state = state.copy(deferredResult = null)

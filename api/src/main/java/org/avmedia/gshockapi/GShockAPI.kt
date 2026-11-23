@@ -113,7 +113,7 @@ class GShockAPI(private val context: Context) : IGShockAPI {
         val button =
             try {
                 Timber.i("Requesting watch button info")
-                withTimeoutOrNull(INITIALIZATION_REQUEST_TIMEOUT_MS) { getPressedButton() }
+                withTimeoutOrNull(InitCheck.BUTTON_TIMEOUT_MS) { getPressedButton() }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -121,15 +121,14 @@ class GShockAPI(private val context: Context) : IGShockAPI {
                 null
             }
 
-        if (button == null || button == IO.WatchButton.INVALID) {
-            val message =
-                if (button == null) {
-                    "Timed out waiting for button info from the watch"
-                } else {
-                    "Received invalid button info from the watch"
-                }
-            Timber.e(message)
-            ProgressEvents.onNext("Error", message)
+        val decision = InitCheck.decide(button, org.avmedia.gshockapi.casio.ConnectionSetup.isAutomaticConnect())
+        decision.log?.let {
+            Timber.w(it)
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(it)
+        }
+        if (decision.error != null) {
+            Timber.e(decision.error)
+            ProgressEvents.onNext("Error", decision.error)
             return false
         }
 
