@@ -247,6 +247,6 @@
     <string name="activity_summary">Walk / cycle / active</string>
     <string name="health_log_none">No logs yet.</string>
     <string name="loading_lifelog_short">Loading LifeLog</string>
-    <string name="update_latest">Update</string>
+    <string name="updating">Updating...</string>
     <string name="home_assistant">Home Assistant</string>
 </resources>

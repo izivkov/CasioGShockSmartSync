@@ -1,0 +1,50 @@
+package org.avmedia.gshockGoogleSync.ui.time
+
+import com.google.gson.Gson
+import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
+import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
+
+/**
+ * The last values the home screen showed for one watch, so the next open draws at once from them (marked as
+ * updating) instead of waiting for the scratchpad, timer, home time, battery and temperature reads.
+ */
+data class HomeSnapshot(
+    val timer: Int = 0,
+    val homeTime: String = "",
+    val batteryLevel: Int = 0,
+    val temperature: Int = 0,
+    val watchName: String = "",
+    val timeZoneOption: String = TimeSettingsStorage.TimeZoneOption.SYSTEM.name,
+)
+
+/** Keeps one [HomeSnapshot] per watch address. Android-free. */
+class HomeSnapshotStore(private val store: KeyValueStore) {
+    private val gson = Gson()
+
+    fun load(address: String): HomeSnapshot? =
+        if (address.isBlank()) null
+        else runCatching { gson.fromJson(store.get(KEY + address), HomeSnapshot::class.java) }.getOrNull()
+
+    fun save(address: String, snapshot: HomeSnapshot) {
+        if (address.isNotBlank()) store.put(KEY + address, gson.toJson(snapshot))
+    }
+
+    companion object {
+        private const val KEY = "home.snapshot."
+
+        /** The first state of the screen: the stored values (none: the defaults), marked as updating. No watch request. */
+        fun firstState(snapshot: HomeSnapshot?, base: TimeState = TimeState()): TimeState {
+            val s = snapshot ?: return base.copy(updating = true)
+            val option = TimeSettingsStorage.TimeZoneOption.entries.firstOrNull { it.name == s.timeZoneOption }
+                ?: TimeSettingsStorage.TimeZoneOption.SYSTEM
+            return base.copy(
+                timer = s.timer, homeTime = s.homeTime, batteryLevel = s.batteryLevel, temperature = s.temperature,
+                watchName = s.watchName, timeZoneOption = option, updating = true,
+            )
+        }
+
+        fun of(state: TimeState) = HomeSnapshot(
+            state.timer, state.homeTime, state.batteryLevel, state.temperature, state.watchName, state.timeZoneOption.name,
+        )
+    }
+}

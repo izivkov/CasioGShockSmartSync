@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,6 +22,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 fun TimeScreen(
     timeViewModel: TimeViewModel = hiltViewModel(),
 ) {
+    val state by timeViewModel.state.collectAsState()
 
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -28,6 +31,14 @@ fun TimeScreen(
                     stringResource(id = R.string.time),
                     Modifier
                 )
+                // The stored values are on screen; the watch's come in the background.
+                if (state.updating) {
+                    androidx.compose.material3.Text(
+                        text = stringResource(id = R.string.updating),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                }
 
                 LocalTimeView(
                     Modifier

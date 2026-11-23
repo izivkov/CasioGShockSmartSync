@@ -46,6 +46,8 @@ data class TimeState(
     val isVoiceCommandSupported: Boolean = false,
     val isVoiceVerbose: Boolean = true,
     val isSendingTime: Boolean = false,
+    /** True while the values shown are the stored ones and the watch is being read. */
+    val updating: Boolean = false,
 )
 
 sealed interface TimeAction {
@@ -72,8 +74,18 @@ class TimeViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TimeState())
+    private val snapshots = HomeSnapshotStore(org.avmedia.gshockGoogleSync.homeassistant.AppStores.LocalKeyValueStore(appContext))
+
+    // The first frame comes from the stored values; the watch is read in the background ([refreshState]).
+    private val _state = MutableStateFlow(
+        HomeSnapshotStore.firstState(
+            runCatching { snapshots.load(org.avmedia.gshockapi.WatchInfo.getAddress()) }.getOrNull(),
+            TimeState(isVoiceVerbose = runCatching { LocalDataStorage.getVoiceVerbose(appContext) }.getOrDefault(true)),
+        )
+    )
     val state = _state.asStateFlow()
+    private val openedAt = System.currentTimeMillis()
+    private var firstReadLogged = false
 
     // Compares the timer with the value last read from, or sent to, the watch.
     private val timerChanges = ChangeTracker<Int>(ComponentId.TIMER, sessionManager)
@@ -222,6 +234,7 @@ class TimeViewModel @Inject constructor(
     }
 
     private suspend fun readState(silent: Boolean = false) {
+        _state.update { it.copy(updating = true) }
         runCatching {
             timeSettingsStorage.load()
             val option = timeSettingsStorage.getTimeZoneOption()
@@ -246,10 +259,23 @@ class TimeViewModel @Inject constructor(
                     timeZoneOption = option,
                     timeOffset = offset,
                     isVoiceCommandSupported = isVoiceCommandSupported,
-                    isVoiceVerbose = isVoiceVerbose
+                    isVoiceVerbose = isVoiceVerbose,
+                    updating = false,
+                )
+            }
+            val address = org.avmedia.gshockapi.WatchInfo.getAddress()
+            val snapshot = HomeSnapshotStore.of(_state.value)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { runCatching { snapshots.save(address, snapshot) } }
+            if (!firstReadLogged) {
+                firstReadLogged = true
+                // The time the stored values were on screen before the watch's came in (the first frame waits for none).
+                org.avmedia.gshockapi.log.AppLog.log(
+                    org.avmedia.gshockapi.log.LogSource.App,
+                    "Home screen: watch values after ${System.currentTimeMillis() - openedAt} ms, stored values shown at once",
                 )
             }
         }.onFailure {
+            _state.update { s -> s.copy(updating = false) }
             if (silent) timber.log.Timber.w(it, "Time screen refresh failed") else AppSnackbar("Api Error")
         }
     }
