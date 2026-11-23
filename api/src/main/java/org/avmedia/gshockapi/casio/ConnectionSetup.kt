@@ -103,7 +103,17 @@ object ConnectionSetup {
 
     const val SETUP_WAIT_MS = 20_000L
 
+    /** True once the watch sent `47 01` on this link: its setup is done and a LifeLog read needs no setup replay. */
+    @Volatile var watchSetupDone = false
+        private set
+
+    /** `47 01` came (called by [ConnectionKeepAlive.onSetup]). */
+    fun onWatchSetupDone() {
+        watchSetupDone = true
+    }
+
     fun reset() {
+        watchSetupDone = false
         lastKind = null
         org.avmedia.gshockapi.io.ButtonPressedIO.forgetAnswer()
         deferredKind = null

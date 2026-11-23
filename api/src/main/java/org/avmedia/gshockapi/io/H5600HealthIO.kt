@@ -45,6 +45,9 @@ object H5600HealthIO {
     private const val POLL_RETRIES_PER_ATTEMPT = 5
     private const val MAX_TRANSFER_ATTEMPTS = 3
 
+    /** Test seam (unused before the fix). */
+    @Volatile internal var readyWaitMs = 60_000L
+
     private class Transfer(
         val sync: H5600LifeLogSync,
         val zone: ZoneId,

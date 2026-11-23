@@ -78,6 +78,7 @@ object ConnectionKeepAlive {
         when (val value = values(data).getOrNull(1)) {
             1 -> {
                 log("47 01 received: the watch's setup is done")
+                ConnectionSetup.onWatchSetupDone()
                 runCatching { onSetupDone() }
             }
             2 -> {
