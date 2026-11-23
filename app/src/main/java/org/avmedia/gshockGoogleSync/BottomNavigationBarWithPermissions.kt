@@ -37,6 +37,7 @@ import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockGoogleSync.services.InactivityHandler
+import org.avmedia.gshockGoogleSync.services.InactivityTimeout
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
 import org.avmedia.gshockGoogleSync.ui.alarms.AlarmsScreen
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -60,6 +61,7 @@ fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
     onOpenWebhooks: () -> Unit = {},
     onOpenHa: () -> Unit = {},
+    keepsLink: () -> Boolean = { false },
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -75,8 +77,17 @@ fun BottomNavigationBarWithPermissions(
 
     val inactivityHandler = remember {
         InactivityHandler(timeout = (3 * 60).seconds) {
-            repository.disconnect()
-            AppSnackbar(appContext.getString(R.string.disconnected_due_to_inactivity))
+            InactivityTimeout.run(
+                keepsLink = keepsLink(),
+                goHome = {
+                    navController.navigate(Screens.Time.route) {
+                        popUpTo(navController.graph.findStartDestination().id)
+                        launchSingleTop = true
+                    }
+                },
+                disconnect = { repository.disconnect() },
+                tellDisconnected = { AppSnackbar(appContext.getString(R.string.disconnected_due_to_inactivity)) },
+            )
         }
     }
 

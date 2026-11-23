@@ -49,7 +49,8 @@ fun AppNavigationHost(
                 BottomNavigationBarWithPermissions(
                     repository = viewModel.repository,
                     onOpenWebhooks = viewModel::openWebhooks,
-                    onOpenHa = viewModel::openHa
+                    onOpenHa = viewModel::openHa,
+                    keepsLink = { viewModel.sessionState.value.keepsLink },
                 )
             AppScreen.RUN_ACTIONS -> RunActionsScreen()
             AppScreen.ERROR -> PreConnectionScreen(onOpenWebhooks = viewModel::openWebhooks, onOpenHa = viewModel::openHa)
@@ -74,7 +75,8 @@ private fun ContentSelector(viewModel: AppNavigationViewModel) {
             BottomNavigationBarWithPermissions(
                 repository = repository,
                 onOpenWebhooks = viewModel::openWebhooks,
-                onOpenHa = viewModel::openHa
+                onOpenHa = viewModel::openHa,
+                keepsLink = { viewModel.sessionState.value.keepsLink },
             )
     }
 }

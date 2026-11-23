@@ -225,7 +225,7 @@ class SessionManager @Inject constructor(
     private fun keepsAcrossDrops(session: Session): Boolean {
         val state = session.state.value
         if (state.phase !is SessionPhase.Ready) return false
-        return state.isAlwaysConnected || WatchModelOverride.isAlwaysConnected(state.watch.name)
+        return state.keepsLink
     }
 
     private fun isForDifferentDevice(session: Session, device: BluetoothDevice?): Boolean {
