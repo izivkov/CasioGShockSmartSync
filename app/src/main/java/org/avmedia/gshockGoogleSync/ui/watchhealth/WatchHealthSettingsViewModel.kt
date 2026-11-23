@@ -93,6 +93,7 @@ class WatchHealthSettingsViewModel @Inject constructor(private val access: Watch
 
     fun setAlarmWindow(minutes: Int) = write(SmartAlarmCodec.CODE, "Smart alarm wake window", SmartAlarmCodec.WINDOW_BYTES) { SmartAlarmCodec.withWindow(it, minutes) }
 
+    fun setFemale(female: Boolean) = write(ProfileCodec.CODE, "Sex", ProfileCodec.SEX_BYTES) { ProfileCodec.withFemale(it, female) }
     fun setBirthDate(year: Int, month: Int, day: Int) = write(ProfileCodec.CODE, "Birth date", ProfileCodec.BIRTH_BYTES) { ProfileCodec.withBirthDate(it, year, month, day) }
 
     fun setTrainingBackground(value: Int) = write(PhysicalSettingsCodec.CODE, "Training background", PhysicalSettingsCodec.BACKGROUND_BYTES) { PhysicalSettingsCodec.withTrainingBackground(it, value) }

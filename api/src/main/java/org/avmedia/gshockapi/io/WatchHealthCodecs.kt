@@ -264,7 +264,7 @@ object StepGoalCodec {
  * index 1, 2 height and 3, 4 weight (BCD, lowest pair first), 5, 6 birth year (BCD, full year), 7 month, 8 day.
  * The pair order is still checked against a plausible height (low pair first is tried first). When nothing is
  * plausible the profile is "not recognised" and never written. Height, weight and the birth date are writable;
- * which sex is 0 is not confirmed. Height (whole cm), weight (whole kg) and birth date are confirmed on a real watch.
+ * bit 0 of the flags is 0 male, 1 female (confirmed). Height (whole cm), weight (whole kg) and birth date are confirmed on a real watch.
  */
 object ProfileCodec {
     const val CODE = 0x45
@@ -282,7 +282,7 @@ object ProfileCodec {
 
     /**
      * [height] and [weight] are the numbers in the frame: inches and pounds with the imperial flags, else cm and kg
-     * (the scale is likely, not confirmed). [sexBit] is the first value of the sex field; which sex is 0 is not known.
+     * (the scale is likely, not confirmed). [female] is bit 0 of the flag byte: 0 male, 1 female.
      */
     data class Profile(
         val height: Int,
@@ -291,7 +291,7 @@ object ProfileCodec {
         val birthMonth: Int?,
         val birthDay: Int?,
         val lowByteFirst: Boolean,
-        val sexBit: Boolean = false,
+        val female: Boolean = false,
         val imperialLength: Boolean = false,
         val weightNotKg: Boolean = false,
         val energyNotKcal: Boolean = false,
@@ -323,6 +323,19 @@ object ProfileCodec {
         }
         return null
     }
+
+    /** Index 0 bit 0: 0 male, 1 female (confirmed on a real watch). Only that bit changes; flag byte is not inverted. */
+    fun withFemale(
+        frame: ByteArray,
+        female: Boolean,
+    ): ByteArray? {
+        if (parse(frame) == null) return null
+        val flags = Frame.u8(frame, 0) ?: return null
+        return Frame.withBytes(frame, mapOf(0 to Frame.bits(flags, 1, !female)))
+    }
+
+    /** Frame bytes that [withFemale] may change. */
+    val SEX_BYTES: Set<Int> = setOf(1)
 
     /** Height and weight as the numbers in the frame's own units (see [Profile]); the flag byte stays. */
     fun withHeightAndWeight(

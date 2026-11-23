@@ -37,6 +37,7 @@ internal sealed class Editing {
     data object StepGoal : Editing()
     data object Height : Editing()
     data object Weight : Editing()
+    data object Sex : Editing()
     data object BirthDate : Editing()
     data object Background : Editing()
     data object MaxHr : Editing()
@@ -152,6 +153,10 @@ private fun EditDialogs(
         Editing.Weight ->
             if (profile != null) {
                 NumberDialog("Weight, ${BodyUnits.weightUnit(profile)}", profile.weight, BodyUnits.weightRange(profile), { v -> close(); viewModel.setHeightAndWeight(profile.height, v) }, close)
+            }
+        Editing.Sex ->
+            if (profile != null) {
+                ChoiceDialog("Sex", listOf("Male", "Female"), if (profile.female) 1 else 0, { close(); viewModel.setFemale(it == 1) }, close)
             }
         Editing.BirthDate -> if (profile != null) BirthDateDialog(profile, close, viewModel)
         Editing.AlarmTime ->

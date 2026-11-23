@@ -24,10 +24,7 @@ internal fun ProfileSection(ui: WatchHealthUi, edit: (Editing) -> Unit) {
         "Birth date", birthText(p), can && p != null && p.birthYear != null,
         note = if (p != null && p.birthYear == null) "The watch's date could not be read" else null,
     ) { edit(Editing.BirthDate) }
-    ValueRow(
-        "Sex", p?.let { "Value ${if (it.sexBit) 1 else 0}" } ?: "-", enabled = false,
-        note = "Read from the watch. Which sex is 0: ${BodyUnits.CHECK.lowercase()}",
-    )
+    ValueRow("Sex", p?.let { if (it.female) "Female" else "Male" } ?: "-", can && p != null) { edit(Editing.Sex) }
     ValueRow("Training background", b?.let { PhysicalSettingsCodec.TRAINING_BACKGROUNDS[it.trainingBackground] } ?: "-", can && b != null) { edit(Editing.Background) }
     ValueRow(
         "Highest heart rate", b?.let { "${it.maxHr} bpm" } ?: "-", can && b != null,

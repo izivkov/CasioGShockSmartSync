@@ -234,6 +234,17 @@ class WatchSettingCodecsTest {
     }
 
     @Test
+    fun sexIsBitZeroOfTheFlagsZeroMaleOneFemale() {
+        val male = frame(0x45, 0x00, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA)
+        assertEquals(false, ProfileCodec.parse(male)!!.female)
+        val female = ProfileCodec.withFemale(frame(0x45, 0x0C, 0x97, 0xFE, 0x9B, 0xFF, 0x6F, 0xE6, 0xF8, 0xF6, 0xAA), true)!!
+        assertEquals(0x0D, female[1].toInt() and 0xFF)
+        assertEquals(true, ProfileCodec.parse(female)!!.female)
+        assertEquals(setOf(1), changed(male, ProfileCodec.withFemale(male, true)!!).toSet())
+        assertEquals(168, ProfileCodec.parse(female)!!.heightCm)
+    }
+
+    @Test
     fun anUnrecognisedProfileIsNeverWritten() {
         val odd = profile(0x00, 0x12, 0x34, 0x56, 0x78, 0x85, 0x19, 0x03, 0x14)
         assertNull(ProfileCodec.parse(odd))
@@ -345,7 +356,7 @@ class WatchSettingCodecsTest {
     @Test
     fun theProfileFlagsAndImperialUnitsAreRead() {
         val p = ProfileCodec.parse(profile(0b0001_1101, 0x69, 0x00, 0x74, 0x01, 0x85, 0x19, 0x03, 0x14))!!
-        assertEquals(true, p.sexBit)
+        assertEquals(true, p.female)
         assertEquals(true, p.imperialLength)
         assertEquals(true, p.weightNotKg)
         assertEquals(true, p.energyNotKcal)
