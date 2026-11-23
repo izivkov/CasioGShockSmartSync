@@ -69,16 +69,16 @@ object WatchSettingRegistry {
     private val PATTERNS = NotificationSoundCodec.PATTERNS.map(::word)
 
     private fun number(key: String, range: IntRange, code: Int, touched: Set<Int>, only: Set<Int>? = null, read: (ByteArray) -> Int?, change: (ByteArray, Int) -> ByteArray?) =
-        WatchSetting(key, SettingType.Whole(range, only), code, touched, read) { f, v -> change(f, v as Int) }
+        WatchSetting(key, SettingType.Whole(range, only), code, touched, read, { f, v -> change(f, v as Int) })
 
     private fun bool(key: String, code: Int, touched: Set<Int>, read: (ByteArray) -> Boolean?, change: (ByteArray, Boolean) -> ByteArray?) =
-        WatchSetting(key, SettingType.Bool, code, touched, read) { f, v -> change(f, v as Boolean) }
+        WatchSetting(key, SettingType.Bool, code, touched, read, { f, v -> change(f, v as Boolean) })
 
     private fun clock(key: String, code: Int, touched: Set<Int>, read: (ByteArray) -> Pair<Int, Int>?, change: (ByteArray, Int, Int) -> ByteArray?) =
-        WatchSetting(key, SettingType.Time, code, touched, { hhmm(read(it)) }) { f, v -> time(v).let { (h, m) -> change(f, h, m) } }
+        WatchSetting(key, SettingType.Time, code, touched, { hhmm(read(it)) }, { f, v -> time(v).let { (h, m) -> change(f, h, m) } })
 
     private fun pick(key: String, values: List<String>, code: Int, touched: Set<Int>, read: (ByteArray) -> String?, change: (ByteArray, String) -> ByteArray?) =
-        WatchSetting(key, SettingType.Choice(values), code, touched, read) { f, v -> change(f, v as String) }
+        WatchSetting(key, SettingType.Choice(values), code, touched, read, { f, v -> change(f, v as String) })
 
     /** One on/off key per activity the H5600 offers (`activity_running`, ...): a bool, because the list codec toggles one code at a time. */
     private fun activity(code: Int) = WatchSetting(
