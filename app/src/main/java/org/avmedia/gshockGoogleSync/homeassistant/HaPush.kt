@@ -109,12 +109,30 @@ object HaPush {
      * push title goes in both (the app name is `data.app` instead when the automation sets one). The message is the
      * text. No title and no `data.app`: [SHORT_SOURCE] as the app name, an empty title.
      */
-    fun toNotification(push: HaPushEvent.Push, timestamp: String): AppNotification {
+    /** `data.type` of a push: the watch's icon. Absent: message. */
+    val TYPES: Map<String, NotificationType> = linkedMapOf(
+        "message" to NotificationType.MESSAGE,
+        "calendar" to NotificationType.CALENDAR,
+        "email" to NotificationType.EMAIL,
+        "call" to NotificationType.PHONE_CALL,
+        "generic" to NotificationType.GENERIC,
+    )
+
+    /** The type for [push]; an unknown `data.type` is written to the app log once and gives message. */
+    fun typeOf(push: HaPushEvent.Push, log: (String) -> Unit = { org.avmedia.gshockapi.log.AppLog.log(org.avmedia.gshockapi.log.LogSource.HomeAssistant, it) }): NotificationType {
+        val raw = push.data["type"] ?: return NotificationType.MESSAGE
+        val word = (raw as? String)?.trim()?.lowercase()
+        return TYPES[word] ?: NotificationType.MESSAGE.also {
+            log("Notification type '${raw.toString().take(20)}' is not known (allowed: ${TYPES.keys.joinToString()}); sent as message")
+        }
+    }
+
+    fun toNotification(push: HaPushEvent.Push, timestamp: String, log: ((String) -> Unit)? = null): AppNotification {
         val title = push.title?.trim()?.takeIf { it.isNotEmpty() }
         val source = (push.data["app"] as? String)?.trim()?.takeIf { it.isNotEmpty() }
         val first = source ?: title ?: SHORT_SOURCE
         return AppNotification.create(
-            type = NotificationType.MESSAGE,
+            type = if (log != null) typeOf(push, log) else typeOf(push),
             timestamp = timestamp,
             app = cutUtf8(first, MAX_FIRST_FIELD_BYTES),
             title = cutUtf8(title.orEmpty(), MAX_FIRST_FIELD_BYTES),

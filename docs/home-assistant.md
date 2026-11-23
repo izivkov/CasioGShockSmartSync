@@ -14,6 +14,9 @@ field, the list and the detail view show the title field, so the title goes in b
   field; the detail view shows the title line and then the text wrapped at about 14 characters per line, over several
   lines. Short titles (10 characters or fewer) show whole in the pop-up.
 - The text is cut at 193 bytes (UTF-8).
+- `data: {type: ...}` picks the kind of notification, which sets the icon on the watch: `message` (the default, speech
+  bubble), `calendar`, `email`, `call`, `generic`. The icons other than the speech bubble are not checked on the
+  GBX-H5600 yet. An unknown value is sent as `message` and leaves one line in the App log.
 
 # Change watch settings from Home Assistant (DW-H5600)
 

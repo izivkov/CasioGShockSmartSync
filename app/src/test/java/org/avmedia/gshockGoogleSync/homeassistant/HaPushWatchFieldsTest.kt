@@ -3,6 +3,8 @@ package org.avmedia.gshockGoogleSync.homeassistant
 import org.avmedia.gshockapi.io.AppNotificationIO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.avmedia.gshockapi.NotificationType
 import org.junit.Test
 
 /**
@@ -39,6 +41,21 @@ class HaPushWatchFieldsTest {
         assertEquals("HA", n.app)
         assertEquals("Charge watch", n.title)
         assertEquals("Battery 25%", n.text)
+    }
+
+    /** The type byte of the frame (the watch's icon) follows data.type; unknown values are logged and give message. */
+    @Test
+    fun dataTypeSetsTheFramesTypeByte() {
+        val push = HaPushEvent.Push("Dentist", "10:30", null)
+        assertEquals(NotificationType.MESSAGE, decoded(push).type)
+        mapOf("message" to NotificationType.MESSAGE, "calendar" to NotificationType.CALENDAR, "email" to NotificationType.EMAIL,
+            "call" to NotificationType.PHONE_CALL, "generic" to NotificationType.GENERIC, " Calendar " to NotificationType.CALENDAR,
+        ).forEach { (word, type) -> assertEquals(word, type, decoded(push.copy(data = mapOf("type" to word))).type) }
+        val logged = ArrayList<String>()
+        val n = HaPush.toNotification(push.copy(data = mapOf("type" to "fax")), "20261123T180000") { logged += it }
+        assertEquals(NotificationType.MESSAGE, AppNotificationIO.decodeNotificationPacket(AppNotificationIO.encodeNotificationPacket(n)).type)
+        assertEquals(1, logged.size)
+        assertTrue(logged.single(), logged.single().contains("fax"))
     }
 
     @Test
