@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.pairing
 
+import org.avmedia.gshockGoogleSync.session.BackgroundConnection
+import org.avmedia.gshockGoogleSync.ui.health.H5600Session
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.isActive
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -21,6 +25,10 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val BACKGROUND_INTERVAL_MS = 5 * 60_000L
+private const val BACKGROUND_WINDOW_MS = 60_000L
+private const val LIFELOG_BACKGROUND_TIMEOUT_MS = 3 * 60_000L
+
 @Singleton
 class CompanionDeviceCoordinator @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -29,7 +37,34 @@ class CompanionDeviceCoordinator @Inject constructor(
     private val coordinatorScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var activeScanAddresses: Set<String>? = null
 
+    /** Every interval, opens a short background window for each always-connected watch. */
+    private fun startBackgroundArming() {
+        coordinatorScope.launch {
+            while (isActive) {
+                delay(BACKGROUND_INTERVAL_MS)
+                activeScanAddresses.orEmpty().forEach { address ->
+                    val name = LocalDataStorage.getDeviceName(context, address)?.takeIf { it.isNotBlank() }
+                        ?: return@forEach
+                    if (org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)) {
+                        BackgroundReadPermission.arm(address, BACKGROUND_WINDOW_MS)
+                    }
+                }
+            }
+        }
+    }
+
+    /** A background connection: read the LifeLog into the session cache, then release the watch. */
+    private suspend fun readLifeLogInBackground(address: String) {
+        val data = withTimeoutOrNull(LIFELOG_BACKGROUND_TIMEOUT_MS) { repository.getStepCount() }
+        val ok = data?.h5600 != null
+        if (ok) H5600Session.data = data
+        Timber.i("Background LifeLog read ${if (ok) "done" else "failed"} for $address; releasing the watch")
+        BackgroundConnection.active = false
+        repository.disconnect()
+    }
+
     init {
+        startBackgroundArming()
         ProgressEvents.subscribe(
             arrayOf(
                 EventAction("DeviceAppeared") {
@@ -40,30 +75,62 @@ class CompanionDeviceCoordinator @Inject constructor(
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
                         coordinatorScope.launch {
+                            // The watch's own stored name only. Falling back to LastDeviceName would treat every
+                            // unknown watch as the last one connected, and block it.
+                            val deviceName = LocalDataStorage.getDeviceName(context, normalizedAddress)?.takeIf { it.isNotBlank() } ?: ""
+                            val background = BackgroundReadPermission.consume(normalizedAddress)
+                            if (org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(deviceName) &&
+                                !AlwaysConnectedPermission.isGranted(normalizedAddress) &&
+                                !BackgroundReadPermission.isArmed(normalizedAddress)
+                            ) {
+                                Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($deviceName): press Allow connection first")
+                                return@launch
+                            }
+                            val admittedBy = when {
+                                background -> "background window"
+                                AlwaysConnectedPermission.isGranted(normalizedAddress) -> "Allow connection switch"
+                                else -> "not always-connected"
+                            }
+                            Timber.i("ADMIT $normalizedAddress ($deviceName) by $admittedBy; switch=${AlwaysConnectedPermission.isGranted(normalizedAddress)} alwaysConnected=${org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(deviceName)}")
                             Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
                             repository.stopScan()
-                            if (repository.isConnected()) {
+                            // Only this watch counts. Any other connected watch must not block this one.
+                            if (repository.isConnectedTo(normalizedAddress)) {
                                 Timber.i("Device already connected. Skipping wait.")
                                 return@launch
                             }
 
-                            repeat(CONNECTION_ATTEMPTS) { attempt ->
+                            if (background) BackgroundConnection.active = true
+
+                            // Like the official app: while the watch is advertising, retry quickly. A refused
+                            // attempt fails within about 0.1 s, so a short interval is enough.
+                            val windowEnd = System.currentTimeMillis() + CONNECTION_WINDOW_MS
+                            var attempt = 0
+                            while (System.currentTimeMillis() < windowEnd && !repository.isConnectedTo(normalizedAddress)) {
+                                attempt++
                                 try {
-                                    Timber.i("$normalizedAddress waitForConnection attempt ${attempt + 1}/$CONNECTION_ATTEMPTS")
+                                    Timber.i("$normalizedAddress connection attempt $attempt")
                                     repository.waitForConnection(normalizedAddress)
+                                    // The watch that just connected is the one the screen shows after it disconnects.
+                                    org.avmedia.gshockGoogleSync.utils.LocalDataStorage.put(
+                                        context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name
+                                    )
+                                    AlwaysConnectedPermission.use(normalizedAddress)
+                                    if (background) {
+                                        readLifeLogInBackground(normalizedAddress)
+                                    }
+                                    // A manual connection stays open; the watch's inactivity timeout ends it.
                                     return@launch
                                 } catch (cancelled: CancellationException) {
                                     throw cancelled
                                 } catch (error: Exception) {
-                                    if (attempt == CONNECTION_ATTEMPTS - 1) {
-                                        Timber.e(error, "Connection attempts exhausted for $normalizedAddress")
-                                    } else {
-                                        Timber.w(error, "Connection attempt failed for $normalizedAddress; retrying shortly")
-                                        repository.disconnect()
-                                        delay(CONNECTION_RETRY_DELAY_MS)
-                                    }
+                                    Timber.w("Attempt $attempt refused for $normalizedAddress: ${error.message}")
+                                    repository.disconnect()
+                                    delay(CONNECTION_RETRY_DELAY_MS)
                                 }
                             }
+                            BackgroundConnection.active = false
+                            Timber.i("Advertising window closed without a connection for $normalizedAddress")
                         }
                     }
                 },
@@ -226,8 +293,8 @@ class CompanionDeviceCoordinator @Inject constructor(
     }
 
     private companion object {
-        const val CONNECTION_ATTEMPTS = 2
-        const val CONNECTION_RETRY_DELAY_MS = 1_000L
+        const val CONNECTION_RETRY_DELAY_MS = 200L
+        const val CONNECTION_WINDOW_MS = 120_000L
     }
 }
 

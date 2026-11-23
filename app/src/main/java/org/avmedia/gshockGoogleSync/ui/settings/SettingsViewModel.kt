@@ -1,5 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
+import kotlin.jvm.Transient
+import org.avmedia.gshockapi.model.WatchFaceItem
+import org.avmedia.gshockapi.WatchInfo
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
@@ -123,10 +126,24 @@ constructor(
             Timber.i("Settings from watch: autoLight=%s, lightDuration=%s", settings.autoLight, settings.lightDuration)
             val settingsJson = Gson().toJsonTree(settings).asJsonObject
             val settingStr = Gson().toJson(settingsJson)
-            updateSettingsAndMap(fromJson(settingStr))
+            val watchFace = watchFaceSetting()
+            updateSettingsAndMap(ArrayList(fromJson(settingStr) + listOfNotNull(watchFace)))
             // The values were just re-read from the watch: this is the new baseline.
             snapshot().let { changes.setBaseline(it, it) }
         }
+    }
+
+    /** DW-H5600 only: reads the watch face from the watch, so the settings list can show it. */
+    private suspend fun watchFaceSetting(): SettingsViewModel.WatchFace? {
+        if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) return null
+        // Read only while the watch is connected and set up; otherwise reloadOnSetupComplete reads it later.
+        if (!sessionManager.sessionState.value.isSetupComplete) {
+            Timber.i("Watch face: not connected yet; it is read when the watch is set up")
+            return null
+        }
+        return runCatching {
+            WatchFace(api.getH5600WatchFaceNumber() ?: 1, api.getWatchFaceItem(), api)
+        }.onFailure { Timber.w(it, "Watch face not read") }.getOrNull()
     }
 
     private fun updateSettingsAndMap(newSettings: ArrayList<Setting>) {
@@ -202,6 +219,22 @@ constructor(
         override suspend fun save() {
             LocalDataStorage.setTimeAdjustmentNotification(appContext, timeAdjustmentNotifications)
             LocalDataStorage.setFineTimeAdjustment(appContext, fineAdjustment)
+        }
+    }
+
+    /**
+     * DW-H5600 watch face: face 1 (weekday) or face 2 (customisable, showing [item]). Saved with the other
+     * settings. [api] is not part of the saved values.
+     */
+    data class WatchFace(
+        val face: Int = 1,
+        val item: WatchFaceItem? = null,
+        @Transient private val api: GShockRepository? = null,
+    ) : Setting("Watch face") {
+        override suspend fun save() {
+            val repo = api ?: return
+            repo.setH5600WatchFaceNumber(face)
+            item?.let { repo.setWatchFaceItem(it) }
         }
     }
 

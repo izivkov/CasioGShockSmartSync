@@ -80,6 +80,9 @@ fun SettingsList() {
         WatchFeature(id = "time_adjustment_card") {
             TimeAdjustment(settingsViewModel::onSettingUpdated)
         }
+        if (org.avmedia.gshockapi.WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol) {
+            WatchFace(settingsViewModel::onSettingUpdated)
+        }
     }
 }
 

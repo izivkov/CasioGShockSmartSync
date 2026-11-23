@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -103,6 +107,8 @@ fun WatchImageWithOverlay(
     }
 }
 
+private val REMINDER_BLOCK_HEIGHT = 80.dp
+
 @Composable
 fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
@@ -110,24 +116,35 @@ fun WatchImageWithOverlayAlwaysConnected(
     instructionResId: Int = R.string.find_phone_instruction,
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val screenHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
-        val textOffsetPx = screenHeightPx * 0.75f // Position text 3/4 down the screen
+        val painter = painterResource(id = imageResId)
 
-        // Background watch image
+        // The picture is drawn centred ("Fit"), so its top edge depends on its proportions.
+        // Work it out, so the reminder can sit directly above it without moving the picture.
+        val intrinsic = painter.intrinsicSize
+        val drawnHeight: Dp =
+            if (intrinsic.width > 0f && intrinsic.height > 0f) {
+                minOf(maxHeight.value, maxWidth.value * intrinsic.height / intrinsic.width).dp
+            } else {
+                maxHeight
+            }
+        val pictureTop = (maxHeight - drawnHeight) / 2
+
+        // Background watch image, exactly as before
         Image(
-            painter = painterResource(id = imageResId),
+            painter = painter,
             contentDescription = "Watch Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
         )
 
-        // Centered text overlay
+        // Reminder, bottom-aligned in a block that ends where the picture starts
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .padding(top = with(LocalDensity.current) { textOffsetPx.toDp() }),
-            contentAlignment = Alignment.TopCenter
+                .fillMaxWidth()
+                .height(REMINDER_BLOCK_HEIGHT)
+                .offset(y = pictureTop - REMINDER_BLOCK_HEIGHT)
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.BottomCenter
         ) {
             Text(
                 text = stringResource(instructionResId),

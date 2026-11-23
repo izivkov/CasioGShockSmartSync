@@ -1,5 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import org.avmedia.gshockapi.model.StepCounterData
+import androidx.compose.foundation.layout.width
+import org.avmedia.gshockapi.WatchInfo
 import AppText
 import AppTextLarge
 import androidx.compose.foundation.Canvas
@@ -53,7 +56,7 @@ fun StepCounterView(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             // Card title
@@ -68,54 +71,99 @@ fun StepCounterView(
             SectionLabel(text = stringResource(id = R.string.today))
             Spacer(modifier = Modifier.height(8.dp))
 
+            val dw = WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol
             val currentSteps = state.stepCounterData.currentDaySteps ?: 0
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            val gauge: @Composable () -> Unit = {
                 StepsProgressRing(
-                    modifier = Modifier.size(160.dp),
+                    modifier = Modifier.size(120.dp),
                     currentSteps = currentSteps,
                     goal = state.stepGoal,
                     distanceKm = state.distanceKm,
-                    calories = state.calories
+                    calories = state.stepCounterData.h5600?.energyKcal?.toFloat() ?: state.calories
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionDivider()
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ── HOURLY section ─────────────────────────────────────────
-            SectionLabel(text = stringResource(id = R.string.hourly))
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(10)
-            if (hourly.isEmpty() || hourly.all { it == 0 }) {
-                EmptyHistory()
+            if (dw) {
+                // DW-H5600: the gauge on the left, the hourly steps on the right, in one panel
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        gauge()
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        SectionLabel(text = stringResource(id = R.string.hourly))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        DwHourlyBars(data = state.stepCounterData)
+                    }
+                }
             } else {
-                StepsBarChart(values = hourly, labels = hourlyTimeLabels(hourly.size))
-            }
+                // ── TODAY section (ABL-100) ──
+                SectionLabel(text = stringResource(id = R.string.today))
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    gauge()
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionDivider()
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                SectionDivider()
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // ── DAILY section ──────────────────────────────────────────
-            SectionLabel(text = stringResource(id = R.string.daily))
-            Spacer(modifier = Modifier.height(8.dp))
+                // ── HOURLY section (ABL-100) ──
+                SectionLabel(text = stringResource(id = R.string.hourly))
+                Spacer(modifier = Modifier.height(8.dp))
+                val hourly = state.stepCounterData.hourlySteps.filterNotNull().takeLast(10)
+                if (hourly.isEmpty() || hourly.all { it == 0 }) {
+                    EmptyHistory()
+                } else {
+                    StepsBarChart(values = hourly, labels = hourlyTimeLabels(hourly.size))
+                }
 
-            val dailyHistory = state.stepCounterData.dailyHistory.filterNotNull().takeLast(6)
-            val daily = dailyHistory + (state.stepCounterData.currentDaySteps ?: 0)
-            if (daily.isEmpty()) {
-                EmptyHistory()
-            } else {
-                StepsBarChart(values = daily, labels = dailyLabels(daily.size))
+                Spacer(modifier = Modifier.height(16.dp))
+                SectionDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ── DAILY section: shown only when there is history to show ──
+                val dailyHistory = state.stepCounterData.dailyHistory.filterNotNull().takeLast(6)
+                if (dailyHistory.isNotEmpty()) {
+                    val daily = dailyHistory + (state.stepCounterData.currentDaySteps ?: 0)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SectionDivider()
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SectionLabel(text = stringResource(id = R.string.daily))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    StepsBarChart(values = daily, labels = dailyLabels(daily.size))
+                }
             }
         }
     }
+}
+
+/** DW-H5600: the hours from the first to the last hour with steps, as bars. */
+@Composable
+private fun DwHourlyBars(data: StepCounterData) {
+    val active = data.hourlySteps.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }
+    if (active.isEmpty()) {
+        EmptyHistory()
+        return
+    }
+    val hours = (active.first()..active.last()).toList()
+    StepsBarChart(
+        values = hours.map { data.hourlySteps.getOrNull(it) ?: 0 },
+        labels = hours.map { String.format(Locale.US, "%02d", it) }
+    )
 }
 
 @Composable

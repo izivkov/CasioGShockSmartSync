@@ -406,7 +406,6 @@ constructor(
         }
     }
 
-
     inner class StartVoiceAssistAction(
         override var title: String,
         override var enabled: Boolean,

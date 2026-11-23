@@ -3,7 +3,9 @@ package org.avmedia.gshockGoogleSync.session
 enum class EntryReason {
     NORMAL,
     CONTENT_SELECTOR,
-    RUN_ACTIONS;
+    RUN_ACTIONS,
+    /** An always-connected watch connected by itself. The app stays on the initial screen. */
+    BACKGROUND;
 
     companion object {
         /**
@@ -12,8 +14,9 @@ enum class EntryReason {
          */
         fun forButton(button: ConnectionButton): EntryReason = when (button) {
             ConnectionButton.NORMAL -> NORMAL
+            ConnectionButton.ALWAYS_CONNECTED -> BACKGROUND
             ConnectionButton.FROM_ACTION, ConnectionButton.AUTOMATIC_SYNC -> RUN_ACTIONS
-            ConnectionButton.FIND, ConnectionButton.ALWAYS_CONNECTED -> CONTENT_SELECTOR
+            ConnectionButton.FIND -> CONTENT_SELECTOR
         }
     }
 }

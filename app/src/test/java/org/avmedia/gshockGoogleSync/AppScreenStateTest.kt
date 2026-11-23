@@ -91,7 +91,7 @@ class AppScreenStateTest {
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.FROM_ACTION))
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.AUTOMATIC_SYNC))
         assertEquals(EntryReason.CONTENT_SELECTOR, EntryReason.forButton(ConnectionButton.FIND))
-        assertEquals(EntryReason.CONTENT_SELECTOR, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
+        assertEquals(EntryReason.BACKGROUND, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
     }
 
     @Test
@@ -107,5 +107,10 @@ class AppScreenStateTest {
         val expected = (5306f * 0.76f) / 1000f
 
         assertEquals(expected, actual, 0.05f)
+    }
+
+    @Test
+    fun alwaysConnectedConnectionStaysOnTheInitialScreen() {
+        assertEquals(AppScreen.INITIAL, screenFor(ready(EntryReason.BACKGROUND)).screen)
     }
 }

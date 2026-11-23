@@ -1,5 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
+import org.avmedia.gshockGoogleSync.pairing.AlwaysConnectedPermission
+import kotlinx.coroutines.delay
+import org.avmedia.gshockGoogleSync.session.SetupWindow
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -50,7 +53,12 @@ constructor(
     private val _triggerPairing = MutableStateFlow(false)
     val triggerPairing: StateFlow<Boolean> = _triggerPairing
 
-    data class DeviceItem(val name: String, val address: String, val isLastUsed: Boolean)
+    data class DeviceItem(
+        val name: String,
+        val address: String,
+        val isLastUsed: Boolean,
+        val isAlwaysConnected: Boolean = false
+    )
 
     @Inject lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
 
@@ -137,6 +145,32 @@ constructor(
         }
     }
 
+    /** "Set up watch": the next connection opens the main navigation. */
+    private val _waitingForWatch = MutableStateFlow(false)
+    val waitingForWatch: StateFlow<Boolean> = _waitingForWatch
+
+    /** The switch on an always-connected watch: on allows one connection; off withdraws it. */
+    val grantedAddresses: StateFlow<Set<String>> = AlwaysConnectedPermission.granted
+
+    fun setAllowConnection(address: String, allow: Boolean) {
+        if (allow) {
+            startWatchSetUp(address)
+        } else {
+            AlwaysConnectedPermission.use(address)
+            SetupWindow.cancel(address)
+        }
+    }
+
+    fun startWatchSetUp(address: String) {
+        SetupWindow.open(address)
+        AlwaysConnectedPermission.grant(address)
+        viewModelScope.launch {
+            _waitingForWatch.value = true
+            delay(2 * 60_000L)
+            _waitingForWatch.value = false
+        }
+    }
+
     fun loadPairedDevices() {
         val associations = api.getAssociationsWithNames(appContext)
         val lastAddress = LocalDataStorage.get(appContext, KEY_LAST_DEVICE_ADDRESS, "")
@@ -151,7 +185,8 @@ constructor(
             val name = association?.name?.takeIf { it.isNotBlank() }
                 ?: LocalDataStorage.getDeviceName(appContext, address)
                 ?: noWatchString
-            DeviceItem(name, address, isLastUsed)
+            val isAlwaysConnected = org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)
+            DeviceItem(name, address, isLastUsed, isAlwaysConnected)
         }
 
         _pairedDevices.value = formatDeviceNames(items)

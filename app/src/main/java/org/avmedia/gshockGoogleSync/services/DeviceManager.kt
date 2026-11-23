@@ -35,6 +35,9 @@ class DeviceManager @Inject constructor(
                 .collect { watch ->
                     persistName(watch.name)
                     persistAddress(watch.address)
+                    if (watch.address.isNotEmpty() && watch.name.isNotEmpty()) {
+                        LocalDataStorage.setDeviceName(appContext, watch.address, watch.name)
+                    }
                 }
         }
     }

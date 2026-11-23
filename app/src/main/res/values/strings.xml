@@ -218,4 +218,34 @@
     <string name="exercise_profile_read_failed">Couldn\'t read the watch\'s exercise profile. Change not saved.</string>
     <string name="health">Health</string>
     <string name="alarm_send_failed" translatable="false">Couldn\'t save alarms to the watch.</string>
+    <string name="lifelog">LifeLog</string>
+    <string name="synced_at">Synced at</string>
+    <string name="steps_today">Steps today</string>
+    <string name="goal">Goal</string>
+    <string name="energy_estimate">Energy (estimate)</string>
+    <string name="heart_rate_day">Heart rate (day)</string>
+    <string name="resting_heart_rate">Resting heart rate</string>
+    <string name="heart_rate_recent">Recent heart rate</string>
+    <string name="lifelog_status">LifeLog</string>
+    <string name="workouts_status">Workouts</string>
+    <string name="new_data_waiting">New data waiting</string>
+    <string name="up_to_date">Up to date</string>
+    <string name="steps_by_hour">Steps by hour</string>
+    <string name="notes">Notes</string>
+    <string name="walking">Walking</string>
+    <string name="cycling">Cycling</string>
+    <string name="active_time">Active time</string>
+    <string name="loading_lifelog">Loading LifeLog from the watch…</string>
+    <string name="set_up_watch">Allow connection</string>
+    <string name="allow_connection_info">Turn this on to allow the watch to connect. The switch turns off again after one connection, because this watch tries to connect all the time. To connect, choose Connect from the watch menu. Some watches connect automatically once the switch is on, and that can take a while.</string>
+    <string name="card_steps">Steps</string>
+    <string name="card_activity">Energy and activity</string>
+    <string name="card_heart_rate">Heart rate</string>
+    <string name="card_status">Watch status</string>
+    <string name="activity_summary">Walk / cycle / active</string>
+    <string name="loading_lifelog_short">Loading LifeLog</string>
+    <string name="update_latest">Update</string>
+    <string name="watch_face">Watch face</string>
+    <string name="watch_face_item">Display item (face 2)</string>
+    <string name="done">Done</string>
 </resources>

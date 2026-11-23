@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.ActionContainer
@@ -21,6 +21,7 @@ import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.model.ExerciseProfile
 import org.avmedia.gshockapi.model.StepCounterData
+import timber.log.Timber
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -35,6 +36,16 @@ enum class StepDataOption {
 private const val FEATURE_STEP_COUNTER = "time.step_counter"
 private val STEP_POLL_INTERVAL = 5.minutes
 private val STEP_FETCH_TIMEOUT = 8.seconds
+// A DW-H5600 LifeLog transfer takes 30 to 100 seconds, so it needs a longer timeout and a
+// slower poll than the ABL-100 step read.
+private val LIFELOG_FETCH_TIMEOUT = 3.minutes
+private val LIFELOG_POLL_INTERVAL = 15.minutes
+// The DW-H5600 does not use the ABL-100 exercise profile. These average values stand in until
+// the watch's own profile is decoded. The step goal comes from the watch, not from this profile.
+private val H5600_AVERAGE_PROFILE = ExerciseProfile(stepGoal = 8000, height = 170, weight = 70)
+
+// The exercise profile is read after the steps, and must not hold up the screen.
+private val PROFILE_READ_TIMEOUT = 10.seconds
 private val IMPERIAL_COUNTRIES = setOf("US", "CA")
 
 internal fun resolveDistanceKm(stepData: StepCounterData, strideMeters: Float = 0.73f): Float {
@@ -62,6 +73,10 @@ internal fun calculateStepMetrics(stepData: StepCounterData, weightKg: Int): Pai
     return distanceKm to distanceKm * weightKg * 1.036f
 }
 
+/** The DW-H5600 step goal comes from the watch and overrides the profile value. */
+internal fun HealthState.withWatchGoal(stepData: StepCounterData): HealthState =
+    stepData.h5600?.stepGoal?.let { copy(stepGoal = it) } ?: this
+
 internal fun HealthState.withStepMetrics(stepData: StepCounterData, weightKg: Int = weight): HealthState {
     val (distanceKm, calories) = calculateStepMetrics(stepData, weightKg)
     return copy(distanceKm = distanceKm, calories = calories)
@@ -69,6 +84,10 @@ internal fun HealthState.withStepMetrics(stepData: StepCounterData, weightKg: In
 
 data class HealthState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
+    /** True while the DW-H5600 LifeLog is being read from the watch. */
+    val lifeLogLoading: Boolean = false,
+    /** True while the latest data is being read; the Update button is disabled meanwhile. */
+    val updating: Boolean = false,
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val stepGoal: Int = 10000,
     val weight: Int = 70, // kg
@@ -86,6 +105,7 @@ sealed interface HealthAction {
     data class SetHeightInches(val inches: Double) : HealthAction
     data object ClearStepHistory : HealthAction
     data object RefreshState : HealthAction
+    data object UpdateLatest : HealthAction
 }
 
 internal fun applyExerciseProfileState(
@@ -125,9 +145,17 @@ class HealthViewModel @Inject constructor(
         refreshState()
         setupEventSubscription()
 
-        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) {
-            startStepCounterPolling()
-        }
+    }
+
+    /** The Health screen is on screen: poll while it stays open. */
+    fun onScreenShown() {
+        if (WatchInfo.hasStepCounter || WatchInfo.hasStepCounterMock) startStepCounterPolling()
+    }
+
+    /** The Health screen is off screen: stop polling, so no LifeLog reads start from a screen you are not viewing. */
+    fun onScreenHidden() {
+        stepPollJob?.cancel()
+        stepPollJob = null
     }
 
     private fun setupEventSubscription() {
@@ -146,10 +174,11 @@ class HealthViewModel @Inject constructor(
     }
 
     suspend fun readExerciseProfile(): ExerciseProfile? =
-        runCatching { api.getExerciseProfile() }.getOrNull()
+        if (isDwH5600()) H5600_AVERAGE_PROFILE
+        else runCatching { api.getExerciseProfile() }.getOrNull()
 
     suspend fun saveExerciseProfile(profile: ExerciseProfile): Boolean =
-        runCatching {
+        if (isDwH5600()) false else runCatching {
             val setProfileAction =
                 actionContainer.getAction(ActionContainer.SetExerciseProfileAction::class.java)
             if (!setProfileAction.shouldRun(ActionContainer.RunEnvironment.DIRECT_INVOCATION)) {
@@ -172,6 +201,8 @@ class HealthViewModel @Inject constructor(
 
     fun onAction(action: HealthAction) {
         when (action) {
+            HealthAction.UpdateLatest -> startUpdate()
+
             is HealthAction.SetStepDataOption -> _state.update {
                 it.copy(selectedStepDataOption = action.option)
             }
@@ -213,40 +244,74 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchStepCounter(): StepCounterData =
-        if (WatchInfo.hasStepCounterMock) generateMockStepData() else api.getStepCount()
+    private suspend fun fetchStepCounter(): StepCounterData {
+        if (WatchInfo.hasStepCounterMock) return generateMockStepData()
+        if (!isDwH5600()) return api.getStepCount()
+        // DW-H5600: the LifeLog is read once per session and then served from the session cache.
+        H5600Session.data?.let { return it }
+        return api.getStepCount().also { if (it.h5600 != null) H5600Session.data = it }
+    }
+
+    /** The Update button: read the latest data again (the LifeLog for the DW-H5600, the steps for the ABL-100). */
+    private fun startUpdate() {
+        if (isDwH5600()) H5600Session.clear()
+        requestStepRefresh()
+    }
 
     private fun requestStepRefresh() {
+        Timber.i("Health: step refresh requested (running=${stepFetchJob?.isActive == true}, dwH5600=${isDwH5600()})")
         if (stepFetchJob?.isActive == true) {
             stepFetchPending = true
             return
         }
+        _state.update { it.copy(updating = true) }
         stepFetchJob = viewModelScope.launch {
             do {
                 stepFetchPending = false
                 runCatching {
-                    val stepData = withTimeoutOrNull(STEP_FETCH_TIMEOUT) { fetchStepCounter() }
-                        ?: return@runCatching
-                    val profile = readExerciseProfile()
-
+                    val timeout = if (isDwH5600()) LIFELOG_FETCH_TIMEOUT else STEP_FETCH_TIMEOUT
+                    val needsWatch = isDwH5600() && H5600Session.data == null
+                    if (needsWatch) _state.update { it.copy(lifeLogLoading = true) }
+                    Timber.i("Health: fetching step data (timeout=$timeout, fromWatch=$needsWatch)")
+                    val stepData = withTimeoutOrNull(timeout) { fetchStepCounter() }
+                    if (stepData == null) {
+                        Timber.w("Health: step fetch returned nothing (timed out or cancelled)")
+                        _state.update { it.copy(lifeLogLoading = false) }
+                        return@runCatching
+                    }
+                    Timber.i("Health: step data received, steps=${stepData.currentDaySteps}, h5600=${stepData.h5600 != null}")
+                    // Show the step data first. The exercise profile is read afterwards, with a
+                    // timeout: after a DW-H5600 transfer the watch may not answer that request, and
+                    // the screen must not wait for it.
                     _state.update { current ->
-                        val withSteps = current.copy(stepCounterData = stepData)
-                        if (profile != null) {
-                            applyExerciseProfileState(withSteps, profile, stepData = stepData)
-                        } else {
-                            withSteps.withStepMetrics(stepData)
+                        current.copy(stepCounterData = stepData, lifeLogLoading = false)
+                            .withStepMetrics(stepData)
+                            .withWatchGoal(stepData)
+                    }
+
+                    val profile = withTimeoutOrNull(PROFILE_READ_TIMEOUT) { readExerciseProfile() }
+                    if (profile != null) {
+                        _state.update { current ->
+                            applyExerciseProfileState(current, profile, stepData = stepData)
+                                .withWatchGoal(stepData)
                         }
                     }
+                }.onFailure {
+                    Timber.w(it, "Health: step refresh failed")
+                    _state.update { current -> current.copy(lifeLogLoading = false) }
                 }
             } while (stepFetchPending)
+            _state.update { it.copy(updating = false) }
         }
     }
+
+    private fun isDwH5600(): Boolean = WatchInfo.model == WatchInfo.WatchModel.DW_H5600
 
     private fun startStepCounterPolling() {
         stepPollJob?.cancel()
         stepPollJob = viewModelScope.launch {
             while (isActive) {
-                delay(STEP_POLL_INTERVAL)
+                delay(if (isDwH5600()) LIFELOG_POLL_INTERVAL else STEP_POLL_INTERVAL)
                 if (watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)) {
                     requestStepRefresh()
                 }
@@ -256,7 +321,9 @@ class HealthViewModel @Inject constructor(
 
     private fun refreshState() {
         viewModelScope.launch {
-            if (WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)) {
+            val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
+            Timber.i("Health: refreshState (hasStepCounter=${WatchInfo.hasStepCounter}, feature supported=$supported)")
+            if (supported) {
                 requestStepRefresh()
             }
         }
