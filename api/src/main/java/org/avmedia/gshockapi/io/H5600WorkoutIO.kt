@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -209,19 +210,16 @@ object H5600WorkoutIO {
             return null
         }
         log("Workout read starts")
-        val channel = Channel<WorkoutMsg>(Channel.UNLIMITED)
         try {
             _status.value = "Downloading workouts"
             lastError = null
-            inbox = channel
-            val transfer = WorkoutTransfer(
-                link = link,
-                inbox = channel,
-                sink = { s -> store(s).also { ok -> if (ok) _workouts.emit(s) } },
-                blockCache = blockCache,
-                log = ::log,
-            )
-            val result = transfer.run()
+            var result = runOnce(store)
+            if (result.failReason != null) {
+                // `03 01` at the start came while the watch ran another exchange: once more after it ended.
+                log("Workout read: the watch refused the start (fail reason ${result.failReason}), trying once more after the exchange")
+                delay(START_RETRY_MS)
+                result = runOnce(store)
+            }
             lastError = result.error
             lastFailMs = if (result.error == null) null else clock()
             if (result.error == null) lastCheckMs = System.currentTimeMillis()
@@ -238,6 +236,27 @@ object H5600WorkoutIO {
             _status.value = null
             running.set(false)
         }
+    }
+
+    /** Pause before the one repeat of a refused start. */
+    internal const val START_RETRY_MS = 2_000L
+
+    /**
+     * One transfer run. It starts only when no settings or time exchange runs (a start during one was refused or answered
+     * busy); while it waits the link is free for them ([inbox] is null, so they do not wait for us).
+     */
+    private suspend fun runOnce(store: suspend (WorkoutSession) -> Boolean): WorkoutRunResult {
+        inbox = null
+        WatchExchange.awaitNoSettingsExchange()
+        val channel = Channel<WorkoutMsg>(Channel.UNLIMITED)
+        inbox = channel
+        return WorkoutTransfer(
+            link = link,
+            inbox = channel,
+            sink = { s -> store(s).also { ok -> if (ok) _workouts.emit(s) } },
+            blockCache = blockCache,
+            log = ::log,
+        ).run()
     }
 
     private fun log(text: String) {

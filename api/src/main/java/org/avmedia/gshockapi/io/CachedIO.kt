@@ -67,7 +67,7 @@ object CachedIO {
     /** A read from the watch never goes out while a transfer runs (else `0x11` goes out every 4 to 5 s during a workout read). */
     private suspend fun <T : Any> gatedCompute(key: String, compute: suspend (String) -> T): T {
         org.avmedia.gshockapi.io.WatchExchange.awaitNoTransfer()
-        return compute(key)
+        return org.avmedia.gshockapi.io.WatchExchange.settingsExchange { compute(key) }
     }
 
     fun set(

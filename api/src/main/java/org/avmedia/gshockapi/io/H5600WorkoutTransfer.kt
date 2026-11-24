@@ -23,7 +23,7 @@ interface WorkoutLink {
 class WorkoutMsg(val channel: H5600Channel, val data: ByteArray)
 
 /** What one run did. [error] null = finished (also with nothing to fetch). */
-class WorkoutRunResult(val downloaded: Int, val error: String?, val refused: Boolean = false)
+class WorkoutRunResult(val downloaded: Int, val error: String?, val refused: Boolean = false, val failReason: Int? = null)
 
 /**
  * Steps 1 to 8 of the workout transfer on a [WorkoutLink]. The caller holds the exchange lock.
@@ -44,7 +44,7 @@ class WorkoutTransfer(
     private val readTimeoutMs: Long = 10_000L,
     private val log: (String) -> Unit = {},
 ) {
-    private class Fail(val text: String, val refused: Boolean = false) : Exception(text)
+    private class Fail(val text: String, val refused: Boolean = false, val failReason: Int? = null) : Exception(text)
 
     /** The session request went out and no end (`04 1C`) or abort (`03 1C`) yet: a failed or cancelled run aborts it. */
     private var sessionOpen = false
@@ -81,7 +81,7 @@ class WorkoutTransfer(
             return WorkoutRunResult(done, null)
         } catch (f: Fail) {
             finish(abort = true)
-            return WorkoutRunResult(done, f.text, f.refused)
+            return WorkoutRunResult(done, f.text, f.refused, f.failReason)
         } finally {
             // Cancelled or thrown: the watch must not keep the session open for the next attempt.
             if (sessionOpen) close(abort = true)
@@ -98,8 +98,16 @@ class WorkoutTransfer(
         drsp("step 1", open)
         var echoed = false
         var tries = 0
-        val ok = withTimeoutOrNull(sessionTimeoutMs) {
+        val ok = withTimeoutOrNull(sessionTimeoutMs + BUSY_TRIES * BUSY_RETRY_MS) {
             while (true) {
+                // One answer per write: a busy watch repeats `00 01 04` about every 60 ms; the frames queued since the last
+                // write are dropped (the session echo and a fail reason among them still count).
+                while (true) {
+                    val m = inbox.tryReceive().getOrNull() ?: break
+                    capture(m, null)
+                    if (m.data.contentEquals(open)) { echoed = true; log("Workout read: step 1 rx ${hex(m.data)} (session echo)") }
+                    else failReason(m.data)
+                }
                 bulk("step 2", byteArrayOf(0, 0, 0))
                 val reply = withTimeoutOrNull(replyTimeoutMs) {
                     var got: ByteArray? = null
@@ -148,7 +156,7 @@ class WorkoutTransfer(
     private fun failReason(data: ByteArray) {
         if (data.firstOrNull()?.toInt() == ABORTED && data.size >= 2) {
             log("Workout read: rx ${hex(data)} (fail reason)")
-            throw Fail("the watch refused the transfer (fail reason ${data[1].toInt() and 0xFF})")
+            throw Fail("the watch refused the transfer (fail reason ${data[1].toInt() and 0xFF})", failReason = data[1].toInt() and 0xFF)
         }
     }
 
@@ -309,7 +317,8 @@ class WorkoutTransfer(
         private const val DROP_SECTOR = 0x06
         private const val ALL_SENT = 0x09
         private const val ABORTED = 0x03
-        private const val BUSY_TRIES = 5
+        /** Busy (state not 0, reason other than 1 or 2): tried again every [BUSY_RETRY_MS] for about 30 s. */
+        private const val BUSY_TRIES = 15
         private const val BUSY_RETRY_MS = 2_000L
         private const val MAX_BLOCKS = 2_048
     }

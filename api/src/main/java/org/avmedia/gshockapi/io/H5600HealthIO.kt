@@ -164,22 +164,23 @@ object H5600HealthIO {
         }
         lastError = null
         requestStartedMs = System.currentTimeMillis()
-        // The connection setup runs first and the watch's own setup ends with `47 01`: before that no transfer and no setup
-        // reads of ours (they took the setup's answers). Without `47 01` the read is left out on this link.
-        if (!org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) {
-            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read waits for 47 01 (the watch's setup)")
-        }
-        if (!org.avmedia.gshockapi.casio.ConnectionSetup.awaitWatchSetup()) {
-            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(
-                "LifeLog read left out: no 47 01 in ${org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupWaitMs / 1000} s on this link",
-            )
-            lastError = "The watch has not finished its setup on this connection. The LifeLog is read at the next connection."
-            synchronized(lock) { requestRunning = false }
-            return StepCounterData.unavailable()
-        }
-        // One exchange on the link at a time: a raw or settings read in progress finishes first.
         var locked = false
         try {
+            // The connection setup runs first and the watch's own setup ends with `47 01`: before that no transfer and no setup
+            // reads of ours (they took the setup's answers). Without `47 01` the read is left out on this link.
+            if (!org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) {
+                org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read waits for 47 01 (the watch's setup)")
+            }
+            if (!org.avmedia.gshockapi.casio.ConnectionSetup.awaitWatchSetup()) {
+                org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(
+                    "LifeLog read left out: no 47 01 in ${org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupWaitMs / 1000} s on this link",
+                )
+                lastError = "The watch has not finished its setup on this connection. The LifeLog is read at the next connection."
+                return StepCounterData.unavailable()
+            }
+            // No START in the middle of a time or settings exchange (the reads of the time exchange are counted one by one).
+            WatchExchange.awaitNoSettingsExchange()
+            // One exchange on the link at a time: a raw or settings read in progress finishes first.
             WatchExchange.mutex.lock()
             locked = true
             for (attempt in 1..MAX_TRANSFER_ATTEMPTS) {
