@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.LogSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

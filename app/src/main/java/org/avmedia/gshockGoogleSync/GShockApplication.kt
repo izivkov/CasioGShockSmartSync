@@ -68,8 +68,10 @@ class GShockApplication : Application() {
         // Workouts: a workout is marked fetched on the watch only after it is stored.
         org.avmedia.gshockapi.io.H5600WorkoutIO.sink =
             { org.avmedia.gshockGoogleSync.history.WorkoutStore.save(applicationContext, it) }
-        org.avmedia.gshockapi.casio.ConnectionKeepAlive.logFile =
-            java.io.File(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this), org.avmedia.gshockapi.log.AppLog.FILE_NAME)
+        // The App log: the app's lines and the library's (its log hook) in one rolling file.
+        org.avmedia.gshockGoogleSync.log.AppLog.install(
+            java.io.File(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this), org.avmedia.gshockGoogleSync.log.AppLog.FILE_NAME),
+        )
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.onStored =
             { org.avmedia.gshockGoogleSync.history.HistoryStore.record(applicationContext, it) }
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.dayMerger =

@@ -10,8 +10,8 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.avmedia.gshockapi.AppNotification
-import org.avmedia.gshockapi.log.AppLog
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 import timber.log.Timber
 import kotlin.coroutines.resume
 

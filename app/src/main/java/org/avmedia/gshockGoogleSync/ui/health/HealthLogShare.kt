@@ -5,7 +5,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockapi.log.AppLog
+import org.avmedia.gshockGoogleSync.log.AppLog
 import timber.log.Timber
 import java.io.File
 

@@ -3,7 +3,7 @@ package org.avmedia.gshockGoogleSync.homeassistant
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.LogSource
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -25,7 +25,7 @@ class CallRetryTest {
 
     @After fun restore() {
         CallRetry.sleeper = { Thread.sleep(it) }
-        CallRetry.writer = org.avmedia.gshockapi.log.AppLog::log
+        CallRetry.writer = org.avmedia.gshockGoogleSync.log.AppLog::log
         CallRetry.clock = System::currentTimeMillis
     }
 

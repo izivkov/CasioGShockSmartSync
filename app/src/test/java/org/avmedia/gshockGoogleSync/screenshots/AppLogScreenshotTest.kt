@@ -3,7 +3,7 @@ package org.avmedia.gshockGoogleSync.screenshots
 import androidx.compose.runtime.Composable
 import org.avmedia.gshockGoogleSync.ui.settings.AppLogContent
 import org.avmedia.gshockGoogleSync.ui.settings.visibleLogLines
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.LogSource
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

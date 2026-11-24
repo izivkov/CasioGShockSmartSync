@@ -5,8 +5,8 @@ import java.net.ConnectException
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
-import org.avmedia.gshockapi.log.AppLog
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 
 /**
  * The one retry rule for outgoing Home Assistant calls: a network error, a timeout, HTTP 408, 429 or

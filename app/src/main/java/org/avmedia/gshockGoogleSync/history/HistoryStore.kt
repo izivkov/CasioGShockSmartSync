@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.history
 
-import org.avmedia.gshockapi.log.AppLog
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

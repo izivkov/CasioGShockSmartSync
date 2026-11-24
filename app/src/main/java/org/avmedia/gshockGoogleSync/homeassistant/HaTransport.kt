@@ -5,7 +5,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.LogSource
 
 /** [status] is null when no response arrived (offline, timeout). */
 data class HaResponse(val status: Int?, val body: String)

@@ -18,7 +18,7 @@ class RetryingHaTransportTest {
 
     @After fun restore() {
         CallRetry.sleeper = { Thread.sleep(it) }
-        CallRetry.writer = org.avmedia.gshockapi.log.AppLog::log
+        CallRetry.writer = org.avmedia.gshockGoogleSync.log.AppLog::log
     }
 
     private class Fake(val answers: List<HaResponse>) : HaTransport {

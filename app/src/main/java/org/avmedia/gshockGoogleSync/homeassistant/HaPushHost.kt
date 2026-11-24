@@ -73,7 +73,7 @@ class HaPushHost(
             val host = HaPushHost { _ ->
                 val store = AppStores.haStore(app)
                 val toggles = AppStores.toggles(app)
-                val catchUp = HaCatchUp(RetryingHaTransport(HaOkHttpTransport), store, log = { org.avmedia.gshockapi.log.AppLog.log(org.avmedia.gshockapi.log.LogSource.App, it) })
+                val catchUp = HaCatchUp(RetryingHaTransport(HaOkHttpTransport), store, log = { org.avmedia.gshockGoogleSync.log.AppLog.log(org.avmedia.gshockGoogleSync.log.LogSource.App, it) })
                 val ch = HaPushChannel(
                     store,
                     deliver = { n -> deliver(n) },

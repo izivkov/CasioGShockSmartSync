@@ -1,8 +1,8 @@
 package org.avmedia.gshockGoogleSync.ui.settings
 
-import org.avmedia.gshockapi.log.AppLog
-import org.avmedia.gshockapi.log.LogLine
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogLine
+import org.avmedia.gshockGoogleSync.log.LogSource
 
 /** One shown line; [id] is its place in the log (oldest = 0), a stable key for the list. */
 data class ShownLine(val id: Int, val line: LogLine, val rawFrame: Boolean)

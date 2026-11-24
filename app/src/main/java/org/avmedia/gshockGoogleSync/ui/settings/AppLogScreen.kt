@@ -33,9 +33,9 @@ import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.ui.health.HealthLogShare
-import org.avmedia.gshockapi.log.AppLog
-import org.avmedia.gshockapi.log.LogLine
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogLine
+import org.avmedia.gshockGoogleSync.log.LogSource
 
 /** The lines to show: newest first, only [filter]'s source when one is chosen (all lines, raw frames included). */
 fun visibleLogLines(raw: List<String>, filter: LogSource?): List<LogLine> =

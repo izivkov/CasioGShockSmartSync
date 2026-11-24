@@ -119,7 +119,7 @@ object HaPush {
     )
 
     /** The type for [push]; an unknown `data.type` is written to the app log once and gives message. */
-    fun typeOf(push: HaPushEvent.Push, log: (String) -> Unit = { org.avmedia.gshockapi.log.AppLog.log(org.avmedia.gshockapi.log.LogSource.HomeAssistant, it) }): NotificationType {
+    fun typeOf(push: HaPushEvent.Push, log: (String) -> Unit = { org.avmedia.gshockGoogleSync.log.AppLog.log(org.avmedia.gshockGoogleSync.log.LogSource.HomeAssistant, it) }): NotificationType {
         val raw = push.data["type"] ?: return NotificationType.MESSAGE
         val word = (raw as? String)?.trim()?.lowercase()
         return TYPES[word] ?: NotificationType.MESSAGE.also {

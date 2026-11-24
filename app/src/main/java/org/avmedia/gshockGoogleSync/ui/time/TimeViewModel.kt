@@ -274,8 +274,8 @@ class TimeViewModel @Inject constructor(
             if (!firstReadLogged) {
                 firstReadLogged = true
                 // The time the stored values were on screen before the watch's came in (the first frame waits for none).
-                org.avmedia.gshockapi.log.AppLog.log(
-                    org.avmedia.gshockapi.log.LogSource.App,
+                org.avmedia.gshockGoogleSync.log.AppLog.log(
+                    org.avmedia.gshockGoogleSync.log.LogSource.App,
                     "Home screen: watch values after ${System.currentTimeMillis() - openedAt} ms, stored values shown at once",
                 )
             }

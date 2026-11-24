@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync
 
-import org.avmedia.gshockapi.log.AppLog
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context

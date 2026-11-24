@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
-import org.avmedia.gshockapi.log.AppLog
-import org.avmedia.gshockapi.log.LogSource
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.OffsetDateTime
