@@ -215,19 +215,24 @@ class HealthReadWorkoutsTest {
         H5600WorkoutIO.sink = { true }
         H5600HealthIO.readyWaitMs = 1_500L
         lifeLog.silentAttempts = 1
-        val sessions = CopyOnWriteArrayList<String>()
         H5600WorkoutIO.link = object : WorkoutLink {
-            override fun drsp(data: ByteArray) {
-                if (data.size == 10 && data[1].toInt() == 0x1C) sessions += "00 1C"
-            }
+            override fun drsp(data: ByteArray) {}
 
             override fun bulk(data: ByteArray) {
                 if (data.size == 3 && data.all { it.toInt() == 0 }) H5600WorkoutIO.onDrsp("03 01")
             }
         }
-        val data = H5600HealthIO.request(peek = true)
-        assertTrue("the LifeLog was restarted: ${lifeLog.attempts} attempts", lifeLog.attempts >= 2)
-        assertNotNull("the second attempt read the LifeLog", data.h5600)
-        assertEquals("one workout read in one Health read: $sessions", 1, sessions.size)
+        val marker = "test marker ${System.nanoTime()}"
+        AppLog.log(LogSource.App, marker)
+        try {
+            val data = H5600HealthIO.request(peek = true)
+            val lines = linesAfter(marker)
+            assertTrue("the LifeLog was restarted: ${lifeLog.attempts} attempts", lifeLog.attempts >= 2)
+            assertNotNull("the second attempt read the LifeLog: $lines", data.h5600)
+            assertEquals("one workout read in one Health read: $lines", 1, lines.count { it.contains("Workout read starts") })
+        } finally {
+            // Its restart line ("LifeLog attempt 1 of 3 failed") must not reach the tests that read the whole App log.
+            AppLog.clear()
+        }
     }
 }
