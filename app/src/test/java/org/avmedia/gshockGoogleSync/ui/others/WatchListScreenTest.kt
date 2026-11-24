@@ -43,14 +43,14 @@ class WatchListScreenTest {
 
     @Test fun theFirstPageHasNoBackButton() {
         rule.setContent { WatchListHeader(onBack = null, onOpenLog = {}) }
-        rule.onNodeWithText("Back").assertDoesNotExist()
+        rule.onNodeWithText("Back", substring = true).assertDoesNotExist()
         rule.onNodeWithText("App log").assertIsDisplayed()
     }
 
     @Test fun fromTheConnectedScreensWithAWatchConnectedTheBackButtonShows() {
         var back = 0
         rule.setContent { WatchListHeader(onBack = { back++ }, onOpenLog = {}) }
-        rule.onNodeWithText("Back").performClick()
+        rule.onNodeWithText("Back", substring = true).performClick()
         assertEquals(1, back)
     }
 

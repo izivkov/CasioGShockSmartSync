@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.session.ConnectionButton
 import org.avmedia.gshockGoogleSync.session.LinkState
+import org.avmedia.gshockGoogleSync.session.WatchList
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
@@ -53,7 +54,12 @@ fun AppNavigationHost(
             }
             AppScreen.WATCH_LIST -> {
                 androidx.activity.compose.BackHandler(onBack = viewModel::closeWatchList)
-                PreConnectionScreen(onBack = viewModel::closeWatchList, watchSwitch = viewModel.watchSwitch)
+                // Back only while a watch is still connected; with none it is the first page (Back still closes it).
+                val connected = sessionState.phase is org.avmedia.gshockGoogleSync.session.SessionPhase.Ready
+                PreConnectionScreen(
+                    onBack = if (WatchList.showsBack(openedFromConnectedScreens = true, watchConnected = connected)) viewModel::closeWatchList else null,
+                    watchSwitch = viewModel.watchSwitch,
+                )
             }
         }
     }

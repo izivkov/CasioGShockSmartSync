@@ -18,8 +18,12 @@ object WatchList {
 
     fun show() { _open.value = true }
 
-    /** Whether the list shows a Back button. */
-    fun showsBack(openedFromConnectedScreens: Boolean, watchConnected: Boolean): Boolean = openedFromConnectedScreens
+    /**
+     * Whether the list shows a Back button: only when it was opened from the connected screens (Watches button, back
+     * gesture) and a watch is still connected. The first page (app start, no connection) has none.
+     */
+    fun showsBack(openedFromConnectedScreens: Boolean, watchConnected: Boolean): Boolean =
+        openedFromConnectedScreens && watchConnected
 
     fun hide() {
         _open.value = false
