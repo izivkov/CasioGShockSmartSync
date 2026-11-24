@@ -52,7 +52,7 @@ class HomeSnapshotStore(private val store: KeyValueStore, private val clock: () 
         }
 
         /** The watch did not answer: the stored values stay marked as stored ([mark]), never silently fresh. */
-        fun afterFailedRead(state: TimeState): TimeState = state.copy(updating = false, fromStore = false)
+        fun afterFailedRead(state: TimeState): TimeState = state.copy(updating = false)
 
         /** The mark of the shown values ([org.avmedia.gshockGoogleSync.watch.StoredValue.mark]); null once the watch confirmed them. */
         fun mark(state: TimeState, nowMs: Long): String? =
