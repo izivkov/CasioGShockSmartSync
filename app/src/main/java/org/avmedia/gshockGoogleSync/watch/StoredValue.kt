@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.watch
 
 /**
- * THE helper for a value kept for one watch (owner rule 2026-11-24, "apply that globally"): the value, the watch it
+ * THE helper for a value kept for one watch: the value, the watch it
  * belongs to (a [WatchKeys] key), when it was stored and whether the watch confirmed it on this link. Screens, cards and
  * Home Assistant take a stored value only through [forWatch], so another watch's value never reaches them, and show
  * [mark] next to it until the watch confirmed it. A second implementation of this is a defect.

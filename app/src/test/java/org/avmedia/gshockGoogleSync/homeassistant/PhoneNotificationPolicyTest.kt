@@ -19,7 +19,7 @@ private class NotifMemoryStore : KeyValueStore {
 }
 
 /**
- * Owner 2026-11-24: one choice per watch, "All apps" / "Only selected apps" / "Off". "All apps" is the default and
+ * One choice per watch, "All apps" / "Only selected apps" / "Off". "All apps" is the default and
  * behaves like upstream (it replaced the earlier "off by default" switch, which the owner decided against).
  */
 class PhoneNotificationPolicyTest {

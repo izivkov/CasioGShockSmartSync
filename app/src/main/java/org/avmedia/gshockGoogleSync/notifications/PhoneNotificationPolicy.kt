@@ -6,7 +6,7 @@ import org.avmedia.gshockGoogleSync.watch.WatchStore
 /** What the policy needs to know about one posted phone notification. [importance] is -1000 when Android did not say. */
 data class PostedNotification(val packageName: String, val flags: Int, val importance: Int)
 
-/** "Phone notifications on the watch", one choice per watch (owner 2026-11-24). */
+/** "Phone notifications on the watch", one choice per watch. */
 enum class PhoneNotificationMode(val label: String) {
     /** Like upstream Smart Sync: every notification while a watch session is ready, the same classification. */
     ALL("All apps"),

@@ -14,7 +14,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Owner 2026-11-24: after re-pairing, phone notifications stopped and the App log said nothing at all. Each forwarded
+ * After re-pairing, phone notifications stopped and the App log said nothing at all. Each forwarded
  * notification now has one line; a watch without notifications gets none; lost notification access is shown.
  */
 class PhoneNotificationForwarderTest {
@@ -87,7 +87,7 @@ class PhoneNotificationForwarderTest {
         assertNull(access.warning(PhoneNotificationMode.ALL))
     }
 
-    /** Owner 2026-11-24: "Choose apps" froze the screen for seconds; the list is read off the main thread, once. */
+    /** "Choose apps" froze the screen for seconds; the list is read off the main thread, once. */
     @Test fun theAppListIsReadOffTheCallersThreadAndOncePerSession() = runBlocking {
         val io = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
         var loads = 0

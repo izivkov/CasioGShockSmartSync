@@ -17,7 +17,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Owner 2026-11-24: with the OCW-S7000 connected, Home Assistant still showed health data, even calories. One HA device
+ * With the OCW-S7000 connected, Home Assistant still showed health data, even calories. One HA device
  * per watch, each with only the sensors its model has; the GBX registration stays exactly as it was.
  */
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -14,7 +14,7 @@ import org.junit.Test
 class SettingsEntriesScreenshotTest : ScreenshotTest() {
     @Composable private fun Top() = Column(Modifier.fillMaxSize().padding(top = 16.dp)) {
         WatchHealthLinks({}, {})
-        PhoneNotificationsContent(false, 0, {}, {})
+        PhoneNotificationsContent(org.avmedia.gshockGoogleSync.notifications.PhoneNotificationMode.ALL, 0, {}, {})
     }
 
     @Test fun topLight() = snap("settings_entries", false) { Top() }

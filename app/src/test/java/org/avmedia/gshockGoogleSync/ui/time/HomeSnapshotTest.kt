@@ -25,7 +25,7 @@ class HomeSnapshotTest {
         assertEquals(shown.copy(updating = true, fromStore = true, storedAtMs = 1_000L), first)
     }
 
-    /** Owner 2026-11-24: a stored value without a fresh answer stays marked; it never passes for fresh. */
+    /** A stored value without a fresh answer stays marked; it never passes for fresh. */
     @Test fun storedValuesStayMarkedWhenTheWatchDoesNotAnswer() {
         val hour = 3_600_000L
         val store = HomeSnapshotStore(Mem(), clock = { 10 * hour })

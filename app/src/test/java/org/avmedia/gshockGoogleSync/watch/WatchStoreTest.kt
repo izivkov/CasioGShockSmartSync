@@ -8,7 +8,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Owner 2026-11-24: "the cache also isn't device specific". Every stored value is kept per watch. */
+/** Every stored value is kept per watch: switching watches never shows the other watch's values. */
 class WatchStoreTest {
     private class Mem : KeyValueStore {
         val m = HashMap<String, String>()
@@ -86,7 +86,7 @@ class WatchStoreTest {
         assertNotEquals("no watch never opens a watch's history", HistoryDb.NAME, HistoryDb.fileFor(store, "", legacyFileExists = true))
     }
 
-    /** Owner 2026-11-24, "apply that globally": a value stored for A never reaches B, and stays marked until confirmed. */
+    /** One helper everywhere: a value stored for A never reaches B, and stays marked until confirmed. */
     @Test fun aStoredValueReachesOnlyItsOwnWatchAndStaysMarkedUntilConfirmed() {
         val v = StoredValue("83", a, atMs = 0L)
         assertNull(StoredValue.valueFor(v, b))

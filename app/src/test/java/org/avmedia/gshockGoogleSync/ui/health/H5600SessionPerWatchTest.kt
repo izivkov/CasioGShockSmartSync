@@ -6,7 +6,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Test
 
-/** Owner 2026-11-24: the OCW-S7000 showed the GBX's health data. The last transfer belongs to the watch it came from. */
+/** The OCW-S7000 showed the GBX's health data. The last transfer belongs to the watch it came from. */
 class H5600SessionPerWatchTest {
     private var watch = "gshock-aaaaaaaaaa01"
 
