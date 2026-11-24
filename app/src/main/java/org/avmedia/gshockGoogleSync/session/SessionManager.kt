@@ -240,7 +240,7 @@ class SessionManager @Inject constructor(
     }
 
     /** Whether the active session's watch keeps its link (inactivity, drops), by its reported or its link's address. */
-    fun keepsLinkNow(): Boolean = activeSession?.state?.value?.keepsLink ?: false // RED CHECK stub
+    fun keepsLinkNow(): Boolean = activeSession?.let(::keepsLink) ?: false
 
     private fun keepsLink(session: Session): Boolean =
         session.state.value.keepsLink || KeepConnected.holds(session.device?.address)

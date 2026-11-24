@@ -110,17 +110,6 @@ class KeepConnectedTest {
     }
 
     @Test
-    fun offTheBackgroundReadIsFollowedByARelease() = runBlocking {
-        val calls = mutableListOf<String>()
-        KeepConnected.afterBackgroundConnect(a, read = { calls += "read" }, disconnect = { calls += "disconnect" })
-        assertEquals(listOf("read", "disconnect"), calls)
-        calls.clear()
-        KeepConnected.set(context, a, true)
-        KeepConnected.afterBackgroundConnect(a, read = { calls += "read" }, disconnect = { calls += "disconnect" })
-        assertEquals(emptyList<String>(), calls)
-    }
-
-    @Test
     fun offALinkDropEndsTheVisitOnTheTheLinkWaits() = runBlocking {
         val device = mockk<BluetoothDevice> { every { address } returns a }
         fun dropped(): Boolean {

@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.session.KeepConnected
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
-import org.avmedia.gshockGoogleSync.ui.health.BackgroundHealthSync
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
@@ -32,8 +31,7 @@ private const val BACKGROUND_WINDOW_MS = 60_000L
 @Singleton
 class CompanionDeviceCoordinator @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val repository: GShockRepository,
-    private val backgroundHealthSync: dagger.Lazy<BackgroundHealthSync>,
+    private val repository: GShockRepository
 ) {
     private val coordinatorScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var activeScanAddresses: Set<String>? = null
@@ -74,8 +72,8 @@ class CompanionDeviceCoordinator @Inject constructor(
                             // The watch list is open for a pairing or another watch: this one waits.
                             Timber.i("Watch list open: $normalizedAddress does not connect now")
                         } else if (!KeepConnected.admits(name, normalizedAddress, background, OpenOnConnect.waiting.value)) {
-                            // Upstream's rule without Keep connected: a tap on the watch's card first.
-                            Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($name): Keep connected is off, tap the watch first")
+                            // Without Keep connected (as upstream), or while another watch is chosen: a tap on its card first.
+                            Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($name): Keep connected is off or another watch is chosen; a tap on its card connects it")
                         } else {
                             coordinatorScope.launch { connectWithRetries(normalizedAddress, background) }
                         }
@@ -137,19 +135,8 @@ class CompanionDeviceCoordinator @Inject constructor(
                 repository.waitForConnection(normalizedAddress)
                 // The watch that just connected is the one the screen shows after it disconnects.
                 LocalDataStorage.put(context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name)
-                // With Keep connected: no read and no release here, BackgroundHealthSync reads the LifeLog of every
-                // connection and the keep-alive holds the watch (a second reader plus a release cuts the link).
-                // Without it, a background window ends after its read, as upstream.
-                if (background) {
-                    KeepConnected.afterBackgroundConnect(
-                        normalizedAddress,
-                        read = { backgroundHealthSync.get().readNowAndWait() },
-                        disconnect = {
-                            Timber.i("Background read done for $normalizedAddress; Keep connected is off, releasing the watch")
-                            repository.disconnect()
-                        },
-                    )
-                }
+                // No read and no release here: BackgroundHealthSync reads the LifeLog of every connection
+                // and the keep-alive holds the watch (a second reader plus a release cuts the link).
                 BackgroundConnection.active = false
                 return
             } catch (cancelled: CancellationException) {

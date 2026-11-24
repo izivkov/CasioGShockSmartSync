@@ -70,17 +70,6 @@ class BackgroundHealthSync @Inject constructor(
         scope.launch { runIfDue() }
     }
 
-    /**
-     * A background-window connection without Keep connected: the read if it is due (or the one the connection
-     * already started), then it returns so the watch can be let go.
-     */
-    suspend fun readNowAndWait() {
-        runIfDue()
-        withTimeoutOrNull(4.minutes) {
-            while (H5600Session.inFlight.get() || H5600HealthIO.isActive) delay(1_000L)
-        }
-    }
-
     private suspend fun runIfDue() {
         val outcome = scheduler.onConnection(WatchInfo.model == WatchInfo.WatchModel.DW_H5600, hasConsumer()) { read() }
         if (outcome == HealthReadScheduler.Outcome.NOT_DUE || outcome == HealthReadScheduler.Outcome.OFF) return

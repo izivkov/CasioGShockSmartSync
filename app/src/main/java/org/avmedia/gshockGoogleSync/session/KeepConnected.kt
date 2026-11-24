@@ -11,7 +11,7 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
  * - On: the watch's own reconnects are admitted (also after an app restart), no disconnect on inactivity, the link
  *   waits across drops and the periodic LifeLog read keeps running.
  * - Off, as upstream: an always-connected watch connects only on request (a tap on its card) or in a short
- *   background window, which ends after the LifeLog read; the inactivity timeout disconnects it.
+ *   background window; the inactivity timeout disconnects it and a dropped link ends the session.
  */
 object KeepConnected {
     const val KEY = "KeepConnectedAddress"
@@ -36,7 +36,11 @@ object KeepConnected {
             return
         }
         val last = LocalDataStorage.get(context, KEY_LAST_ADDRESS, "").orEmpty()
-        val choice = migrationChoice(last, LocalDataStorage.getDeviceAddresses(context)) { address ->
+        val registeredIds = runCatching {
+            org.avmedia.gshockGoogleSync.homeassistant.AppStores.haStore(context).registeredIds().toSet()
+        }.getOrDefault(emptySet())
+        val registered = { address: String -> org.avmedia.gshockGoogleSync.watch.WatchKeys.of(address) in registeredIds }
+        val choice = migrationChoice(last, LocalDataStorage.getDeviceAddresses(context), registered) { address ->
             LocalDataStorage.getDeviceName(context, address)?.takeIf { it.isNotBlank() }
                 ?: if (address.equals(last, ignoreCase = true)) LocalDataStorage.get(context, KEY_LAST_NAME, "").orEmpty() else ""
         } ?: return
@@ -44,7 +48,10 @@ object KeepConnected {
         LocalDataStorage.put(context, KEY, choice.uppercase())
     }
 
-    /** First start: the most recently connected always-connected watch keeps it on, the others get off. */
+    /**
+     * First start: among the always-connected watches (never an OCW) the one with a Home Assistant registration, the
+     * most recently connected first; else the most recently connected one. The others get off.
+     */
     fun migrationChoice(
         lastAddress: String,
         known: List<String>,
@@ -52,7 +59,9 @@ object KeepConnected {
         nameOf: (String) -> String,
     ): String? {
         val candidates = known.filter { WatchModelOverride.isAlwaysConnected(nameOf(it)) }
-        return candidates.firstOrNull { it.equals(lastAddress, ignoreCase = true) } ?: candidates.firstOrNull()
+        val inHa = candidates.filter(registered)
+        val last = { list: List<String> -> list.firstOrNull { it.equals(lastAddress, ignoreCase = true) } }
+        return last(inHa) ?: inHa.lastOrNull() ?: last(candidates) ?: candidates.firstOrNull()
     }
 
     /** On for [address] (off for the watch that had it) or off. Returns the other watch that lost it, if any. */
@@ -104,13 +113,6 @@ object KeepConnected {
         val active = (session.phase is SessionPhase.Ready || session.phase is SessionPhase.Connecting) &&
             OpenOnConnect.sameAddress(session.watch.address, chosen)
         if (!active && !OpenOnConnect.sameAddress(waitingFor, chosen)) _pausedFor.value = null
-    }
-
-    /** After a background-window connection: without Keep connected the watch is read, then let go (upstream). */
-    suspend fun afterBackgroundConnect(address: String, read: suspend () -> Unit, disconnect: () -> Unit) {
-        if (holds(address)) return
-        read()
-        disconnect()
     }
 
     internal fun resetForTest(holder: String? = null) {

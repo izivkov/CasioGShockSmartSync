@@ -31,6 +31,7 @@ class WatchListTest {
     @Before fun setUp() {
         Dispatchers.setMain(dispatcher)
         WatchList.hide()
+        KeepConnected.resetForTest("AA:BB:CC:DD:EE:01") // the GBX has "Keep connected in background" (migration)
     }
 
     @After fun tearDown() {
