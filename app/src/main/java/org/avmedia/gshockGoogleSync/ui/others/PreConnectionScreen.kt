@@ -267,8 +267,11 @@ fun PreConnectionScreen(
                                     else -> R.drawable.gw_b5600
                                 },
                             isAlwaysConnected = "DW-H5600" in watchName || "ECB" in watchName,
-                            instructionResId =
-                                if ("OCW-S400" in watchName) R.string.ocw_s400_connect_instruction else null
+                            instructionResId = when {
+                                "OCW-S400" in watchName -> R.string.ocw_s400_connect_instruction
+                                "OCW-S7000" in watchName -> R.string.ocw_s7000_connect_instruction
+                                else -> null
+                            }
                         )
 
                         if (waitingForWatch) {
