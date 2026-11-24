@@ -45,7 +45,7 @@ What the recorded data shows:
   worn. So empty is the expected content, and no recording with real sleep exists yet.
 - Short transfer (4.7 hours, evening): no `0x53`, `0x5A`, `0x5B`, `0x63` at all. The per-day frames only come in a sync that
   crosses a day boundary. Likely, not proven.
-- Unknown: whether our own transfer marks the LifeLog as read, so that the CASIO WATCHES app no longer gets that night.
+- Unknown: whether our own transfer marks the LifeLog as read, so that the phone app no longer gets that night.
 - Unknown: whether the GBX-H5600 uses exactly the same frames. Likely (same platform, same manual text).
 
 ### Found on the way: the stream is put together wrongly (affects today's values)
@@ -79,9 +79,9 @@ The last two bytes of the `06 ..` setup reply (`00 02` = 512) are likely the chu
 | Order | Step | Who |
 |---|---|---|
 | 1 | Fix the chunk reassembly (guard: a test on the long recorded transfer, red with the current rule) and write the raw notifications of each transfer to a file. | agent |
-| 2 | Wear the watch for a night: heart rate measurement ON, bedtime and wake-up time set in the CASIO WATCHES app. | owner |
-| 3 | In the morning, one to two hours after getting up, when the watch shows its sleep result: capture one sync. Either a Bluetooth HCI snoop log while the CASIO WATCHES app syncs (Developer options, "Enable Bluetooth HCI snoop log", Bluetooth off and on, open CASIO WATCHES, wait for the sync, open My Watch, LIFE LOG, Sleep, screenshot it, then a bug report), or the raw dump from our app from step 1. | owner |
+| 2 | Wear the watch for a night: heart rate measurement ON, bedtime and wake-up time set in the phone app. | owner |
+| 3 | In the morning, one to two hours after getting up, when the watch shows its sleep result: capture one sync. Either a Bluetooth HCI snoop log while the phone app syncs (Developer options, "Enable Bluetooth HCI snoop log", Bluetooth off and on, open the phone app, wait for the sync, open My Watch, LIFE LOG, Sleep, screenshot it, then a bug report), or the raw dump from our app from step 1. | owner |
 | 4 | Note what the watch and the app show: bedtime, wake time, time per stage, sleep score. That is the truth the bytes are matched against. | owner |
 
-The snoop log of the CASIO WATCHES app is the safer first capture: it cannot lose a night if our own read turns out to consume the data,
+The snoop log of the phone app is the safer first capture: it cannot lose a night if our own read turns out to consume the data,
 and it comes with the app's numbers. Scores need three measured nights; times and stages may come after the first.

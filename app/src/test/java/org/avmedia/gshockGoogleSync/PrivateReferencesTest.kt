@@ -14,6 +14,9 @@ class PrivateReferencesTest {
         listOf(
             """notes?,? section""", """\(notes""", """\bnotes [A-Z][0-9]?\b""", """the notes""", """casio-protocol-notes""",
             """Casio.s app""", """official app""", """decompil""", """jadx""", """\bDart\b""",
+            // Say what the watch does, not what another app does.
+            """\bCasio('|’)?s? (own |official )?(app|setup|does|waits|writes)""", """CASIO WATCHES""", """\bas Casio\b""",
+            """AsCasio""", """\bCasio:""",
         ).joinToString("|"),
         RegexOption.IGNORE_CASE,
     )
@@ -22,6 +25,8 @@ class PrivateReferencesTest {
     private val upstream = setOf(
         "README.md" to "The app communicates directly with the watch via BLE. Connection is typically much faster than the official app (~3.5s vs 12s).",
         "fastlane/metadata/android/en-US/full_description.txt" to "1. Connection Screen: Handles the Bluetooth connection via BLE. Connection is typically much faster than the official app (~3.5s vs 12s).",
+        "README.md" to "It offers a faster, privacy-focused, and more powerful alternative to the official Casio app.",
+        "fastlane/metadata/android/en-US/full_description.txt" to "G-Shock Smart Sync is an unofficial, open-source Android app for G-Shock, Edifice, and Pro Trek watches. It allows you to control your watch, sync data, and configure settings without a Casio ID. It offers a faster, privacy-focused, and more powerful alternative to the official Casio app.",
         "app/src/main/java/org/avmedia/gshockGoogleSync/pairing/CompanionDeviceCoordinator.kt" to "// Like the official app: while the watch is advertising, retry quickly. A refused",
     )
 
