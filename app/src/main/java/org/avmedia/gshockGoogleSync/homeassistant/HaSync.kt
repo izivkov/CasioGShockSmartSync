@@ -124,8 +124,11 @@ class HaSync @Inject constructor(
 
     /** Records "now" as the last connection, then pushes the sensors. */
     fun onSync() {
-        LocalDataStorage.put(context, AppStores.KEY_LAST_SYNC, OffsetDateTime.now().withNano(0).toString())
-        fire(HaTrigger.SYNC)
+        val watch = org.avmedia.gshockGoogleSync.watch.CurrentWatch.key()
+        scope.launch {
+            runCatching { AppStores.watchStore(context).put(watch, AppStores.KEY_LAST_SYNC, OffsetDateTime.now().withNano(0).toString()) }
+            fire(HaTrigger.SYNC)
+        }
     }
 
     /** One Home Assistant sensor push on request of HA. Uses the values already known: no LifeLog read is started. */

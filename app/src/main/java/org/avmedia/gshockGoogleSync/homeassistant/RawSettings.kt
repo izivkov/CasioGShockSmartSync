@@ -50,7 +50,6 @@ class RawSettingsReader(
 
     /** Another watch is connected: nothing of the last one is kept or shown. */
     private fun sameWatch() {
-        if (readFor.isEmpty()) return
         val now = watch()
         synchronized(hex) {
             if (now == readFor) return

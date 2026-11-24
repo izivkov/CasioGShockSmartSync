@@ -130,7 +130,7 @@ abstract class HistoryDb : RoomDatabase() {
          * own. No watch yet: an empty file of its own, never a watch's history.
          */
         fun fileFor(store: org.avmedia.gshockGoogleSync.watch.WatchStore, watch: String, legacyFileExists: Boolean): String {
-            if (watch.isNotBlank() || legacyFileExists || !legacyFileExists) return NAME
+            if (watch.isBlank()) return "health_history-none.db"
             store.get(watch, FILE)?.value?.let { return it }
             val name = if (legacyFileExists && store.isLegacyOwner(watch)) NAME else "health_history-$watch.db"
             store.put(watch, FILE, name)

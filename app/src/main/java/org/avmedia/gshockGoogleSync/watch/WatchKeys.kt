@@ -11,7 +11,7 @@ object WatchKeys {
     fun of(address: String): String = if (address.isBlank()) "" else HaPayloads.deviceId(address)
 
     /** The store key of [name] for [watch]: "name@gshock-aabbccddeeff". */
-    fun scoped(name: String, watch: String): String = name
+    fun scoped(name: String, watch: String): String = "$name@$watch"
 
     /** True for a store key that belongs to [watch]. */
     fun belongsTo(storeKey: String, watch: String): Boolean = watch.isNotBlank() && storeKey.endsWith("@$watch")

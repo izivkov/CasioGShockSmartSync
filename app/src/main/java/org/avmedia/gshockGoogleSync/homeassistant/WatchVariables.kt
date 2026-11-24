@@ -14,7 +14,6 @@ import org.avmedia.gshockGoogleSync.history.WorkoutRow
 import org.avmedia.gshockGoogleSync.history.WorkoutStore
 import org.avmedia.gshockGoogleSync.ui.health.H5600Session
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
-import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.IO
 
@@ -51,7 +50,8 @@ object WatchVariables {
             val manager = appContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
             manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).takeIf { p -> p in 0..100 }
         },
-        lastSync = { LocalDataStorage.get(appContext, AppStores.KEY_LAST_SYNC) },
+        // The connected watch's own last connection, never another watch's.
+        lastSync = { AppStores.watchStore(appContext).get(org.avmedia.gshockGoogleSync.watch.CurrentWatch.key(), AppStores.KEY_LAST_SYNC, AppStores.KEY_LAST_SYNC)?.value },
         healthData = { H5600Session.data },
         lastWorkout = { WorkoutStore.newest(appContext) },
         rawOn = { AppStores.rawSwitch(appContext).isOn() },

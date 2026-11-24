@@ -38,7 +38,7 @@ internal object H5600Session {
 
     /** The last transfer of the connected watch; null for none or when another watch is connected now. */
     var data: StepCounterData?
-        get() = stored?.value
+        get() = org.avmedia.gshockGoogleSync.watch.StoredValue.valueFor(stored, watch())
         set(value) {
             val now = System.currentTimeMillis()
             stored = value?.let { org.avmedia.gshockGoogleSync.watch.StoredValue(it, watch(), now, confirmed = true) }

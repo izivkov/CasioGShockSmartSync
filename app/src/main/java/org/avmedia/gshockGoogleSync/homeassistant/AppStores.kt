@@ -8,7 +8,7 @@ import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
  * workers can use it without dependency injection.
  */
 object AppStores {
-    /** The time of the last watch connection, the `app.last_sync` variable. */
+    /** The time of each watch's last connection, the `app.last_sync` variable (per watch). */
     const val KEY_LAST_SYNC = "app.lastSync"
 
     internal class LocalKeyValueStore(private val context: Context) : KeyValueStore {
