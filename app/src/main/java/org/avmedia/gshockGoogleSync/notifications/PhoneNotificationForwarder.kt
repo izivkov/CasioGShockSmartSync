@@ -31,12 +31,13 @@ class PhoneNotificationForwarder(
         toldUnsupported = null
         val why = settings.skipReason(w, n, ownPackage)
         if (why == null) {
+            log("Phone notification from $appName: sent")
             return true
         }
         val key = "${n.packageName}|$why"
         val now = clock()
         val last = lastSkip[key]
-        if (last == null && false) {
+        if (last == null || now - last >= quietMs) {
             lastSkip[key] = now
             log("Phone notification from $appName: skipped ($why)")
         }
@@ -59,7 +60,6 @@ class NotificationAccessCheck(private val granted: () -> Boolean, private val lo
 
     /** The warning to show, or null when access is on or phone notifications are off. */
     fun warning(mode: PhoneNotificationMode): String? {
-        if (!told) return null
         if (mode == PhoneNotificationMode.OFF || granted()) {
             told = false
             return null
