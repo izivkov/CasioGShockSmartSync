@@ -157,7 +157,7 @@ class PluginAccessTest {
         assertEquals("GBX-H5600 (all features)", s.getValue("Works with").line)
     }
 
-    // Owner 2026-11-24: a plugin that maps everything shows one line, not every kind.
+    // A plugin that maps everything shows one line, not every kind.
     @Test fun everythingIsOneLine() {
         val ha = org.avmedia.smartsync.homeassistant.HomeAssistantPlugin()
         val s = PluginDetails.sections(ha, emptyList()).associateBy { it.title }

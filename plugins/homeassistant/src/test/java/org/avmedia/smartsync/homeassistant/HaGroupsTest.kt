@@ -29,7 +29,7 @@ class HaGroupsTest {
         assertTrue(HaGroups.sensors(emptySet()).isEmpty())
     }
 
-    // Owner 2026-11-24: one health switch; everything else is always sent. The old health group switch keeps its state.
+    // One health switch; everything else is always sent. The old health group switch keeps its state.
     @Test fun onlyHealthCanBeSwitchedOffAndItsOldStateStays() {
         val mem = HaMemoryStore()
         assertEquals(HaGroup.entries.toSet(), HaStore(mem).groupsOn())
@@ -40,6 +40,6 @@ class HaGroupsTest {
         HaStore(mem).setHealthOn(true)
         assertTrue(HaStore(mem).healthOn())
         val owner = HaMemoryStore().apply { put("group.HEALTH", "on") }
-        assertTrue("the owner's health group was on: the switch is on", HaStore(owner).healthOn())
+        assertTrue("a health group that was on: the switch is on", HaStore(owner).healthOn())
     }
 }

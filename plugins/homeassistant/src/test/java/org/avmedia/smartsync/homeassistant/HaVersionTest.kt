@@ -20,7 +20,7 @@ class HaVersionTest {
     @Test fun theDeclarationCoversWhatThePluginUses() {
         val access = HomeAssistantPlugin().access
         assertEquals(DataUse.entries.toSet() - DataUse.PHONE_LOCATION, access.reads)
-        assertEquals("it maps everything (owner 2026-11-24)", Control.ALL, access.controls)
+        assertEquals("it maps everything", Control.ALL, access.controls)
         assertEquals(listOf("your Home Assistant server"), access.sendsTo)
     }
 

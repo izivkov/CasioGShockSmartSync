@@ -53,7 +53,7 @@ class PluginsScreenshotTest : ScreenshotTest() {
     @Test fun detailsOffLight() = snap("plugin_details_off", false, content = details(on = false))
     @Test fun detailsOffDark() = snap("plugin_details_off", true, content = details(on = false))
 
-    // Owner 2026-11-24: what it does, whether it is on, what it needs and the guide; the rest behind "Details".
+    // What it does, whether it is on, what it needs and the guide; the rest behind "Details".
     @Test fun thePageReadsInSecondsAndTheRestIsOneTapAway() {
         composeRule.setContent { details(on = true)() }
         listOf(ha.description, "Connected", "Needs: ${ha.setupNeeds}", "Guide", "Details", "Delete its data").forEach { composeRule.onNodeWithText(it).assertExists() }

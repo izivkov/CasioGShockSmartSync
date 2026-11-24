@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Owner 2026-11-24: "Share health data with Home Assistant" off disables the health sensors in HA and sends no health value. */
+/** "Share health data with Home Assistant" off disables the health sensors in HA and sends no health value. */
 class HaHealthSwitchTest {
     private class Recorder : HaTransport {
         val bodies = mutableListOf<String>()

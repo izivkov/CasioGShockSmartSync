@@ -73,7 +73,7 @@ class HaScreenshotTest : ScreenshotTest() {
     @Test fun healthOffLight() = snap("ha_health_off", false) { Screen(healthOff) }
     @Test fun healthOffDark() = snap("ha_health_off", true) { Screen(healthOff) }
 
-    // Owner 2026-11-24 ("a whole book written"): at most one short line per item, the rest behind an (i) tap.
+    // The short-text rule: at most one short line per item, the rest behind an (i) tap.
     @Test fun everyLineOfEveryStateIsShort() {
         var shown by androidx.compose.runtime.mutableStateOf(HaUi())
         composeRule.setContent { Screen(shown) }

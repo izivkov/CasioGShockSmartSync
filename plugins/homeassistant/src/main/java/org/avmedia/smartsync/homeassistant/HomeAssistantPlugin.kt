@@ -49,7 +49,7 @@ class HomeAssistantPlugin : WatchPlugin {
     // Home Assistant gets every watch value as a sensor, shows its notifications, changes settings and the face, and
     // runs its chosen action on a button press.
     override val access: PluginAccess = PluginAccess(
-        // It maps everything to an entity (owner decision 2026-11-24: "everything"), so a kind added later is shared
+        // It maps everything to an entity (declared as everything), so a kind added later is shared
         // too; only the phone's location is left out: no Home Assistant sensor uses it.
         reads = DataUse.ALL - DataUse.PHONE_LOCATION,
         controls = Control.ALL,
