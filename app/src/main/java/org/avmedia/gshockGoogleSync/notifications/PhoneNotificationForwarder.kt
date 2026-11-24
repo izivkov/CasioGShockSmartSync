@@ -49,6 +49,11 @@ class PhoneNotificationForwarder(
     fun newSession() {
         toldUnsupported = null
     }
+
+    companion object {
+        /** The connected watch shows phone notifications ([serviceFound]: it lists the notification characteristic). */
+        fun watchShows(serviceFound: Boolean): Boolean = serviceFound
+    }
 }
 
 /**
@@ -72,9 +77,6 @@ class NotificationAccessCheck(private val granted: () -> Boolean, private val lo
     }
 
     companion object {
-        /** The connected watch shows phone notifications ([serviceFound]: it lists the notification characteristic). */
-        fun watchShows(serviceFound: Boolean): Boolean = serviceFound
-
         const val WARNING = "Notification access is off: phone notifications cannot reach the watch. Turn it on for this app in Android settings."
     }
 }
