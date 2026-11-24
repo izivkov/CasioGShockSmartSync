@@ -33,7 +33,8 @@ class AppLogModelTest {
         val ms = (System.nanoTime() - t0) / 1_000_000
         assertEquals(AppLogModel.PAGE, first.size)
         assertTrue("first page took $ms ms", ms < 3_000)
-        assertEquals(raw.size - 1, first.first().id)
+        // The newest line that is not a raw frame (those are hidden) comes first.
+        assertEquals(raw.indices.last { ": rx +" !in raw[it] }, first.first().id)
         assertTrue(first.first().line.text.endsWith(" ${raw.size - 1}") || first.first().id > first.last().id)
     }
 
