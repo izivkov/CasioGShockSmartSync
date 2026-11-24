@@ -31,7 +31,7 @@ class PluginSwitchboard(
     /** The person's switch. On again also clears a failure and its count. */
     suspend fun set(id: String, on: Boolean) {
         toggles.set(id, on)
-        if (!on) { runtime.deactivate(id); open(id) }
+        if (!on) runtime.deactivate(id)
         else if (activate(id)) {
             afterTurnOn(id)
             if (runCatching { opensOnTurnOn(id) }.getOrDefault(false)) open(id)

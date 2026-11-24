@@ -143,7 +143,7 @@ class HaClient(
                 if (gone(r, hook)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }
             }
-            for (s in removed.take(0)) {
+            for (s in removed) {
                 val r = transport.post(hook, HaPayloads.registerSensor(s, lastSent.states[s.uniqueId], disabled = true), null)
                 if (gone(r, hook)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }

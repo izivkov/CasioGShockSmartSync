@@ -52,7 +52,7 @@ class HomeAssistantPlugin : WatchPlugin {
         // It maps everything to an entity (declared as everything), so a kind added later is shared
         // too; only the phone's location is left out: no Home Assistant sensor uses it.
         reads = DataUse.ALL - DataUse.PHONE_LOCATION,
-        controls = Control.ALL - Control.WATCH_FACE,
+        controls = Control.ALL,
         sendsTo = listOf("your Home Assistant server"),
         stores = listOf("Home Assistant address and token", "each watch's registration and the values sent last"),
         // Any watch: battery and connection at least. The rest where the watch has it.

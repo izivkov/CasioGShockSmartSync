@@ -45,7 +45,7 @@ object PluginDetails {
     fun reads(access: PluginAccess): DetailSection {
         val all = access.reads.sortedBy { it.ordinal }.map { AccessGuard.words(it) }
         // Everything the watch gives: one line; each kind (also the phone's) behind the tap.
-        if (false) return DetailSection("Reads", EVERYTHING, all)
+        if (access.reads.containsAll(DataUse.WATCH)) return DetailSection("Reads", EVERYTHING, all)
         val (line, more) = short(all, "nothing")
         return DetailSection("Reads", line, more)
     }
@@ -96,7 +96,7 @@ object PluginDetails {
     fun needs(plugin: WatchPlugin): String? = runCatching { plugin.setupNeeds }.getOrDefault("").takeIf { it.isNotBlank() }?.let { "Needs: $it" }
 
     /** The guide link, only an http(s) one. */
-    fun guide(plugin: WatchPlugin): String? = runCatching { plugin.sourceUrl }.getOrNull()?.takeIf { it.startsWith("https://") || it.startsWith("http://") }
+    fun guide(plugin: WatchPlugin): String? = runCatching { plugin.infoUrl }.getOrNull()?.takeIf { it.startsWith("https://") || it.startsWith("http://") }
 }
 
 /**
@@ -138,7 +138,7 @@ internal fun FoldRow(title: String, line: String, more: List<String>, modifier: 
 /** "Details": everything about data and permissions, folded; a tap opens the sections, each folded again. */
 @Composable
 internal fun PluginDetailSections(sections: List<DetailSection>) {
-    var open by rememberSaveable { mutableStateOf(true) }
+    var open by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().clickable { open = !open }.padding(vertical = 8.dp),

@@ -30,7 +30,7 @@ object PluginPermissions {
     fun missing(
         required: List<AndroidPermission>, granted: (String) -> Boolean, ownCheck: Set<String>? = null, own: Set<String> = emptySet(),
     ): List<AndroidPermission> =
-        required.filter { p -> if (ownCheck != null) p.name in ownCheck else !granted(p.name) }
+        required.filter { p -> if (ownCheck != null && p.name in own) p.name in ownCheck else !granted(p.name) }
 
     /** "Needs permission: the phone's coarse location"; null when nothing is missing. */
     fun line(missing: List<AndroidPermission>): String? =
@@ -67,7 +67,7 @@ class PluginPermissionCache(
         else withTimeoutOrNull(timeoutMs) {
             try { Result.success(ownCheck(id)) } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Throwable) { Result.failure(e) }
         }
-        if (answer == null) return emptyList<AndroidPermission>().also { keep(id, it) } // over the limit: the answer before stays
+        if (answer == null) return of(id) // over the limit: the answer before stays
         val result = PluginPermissions.missing(required, granted, answer.getOrNull(), own)
         keep(id, result)
         return result
@@ -86,7 +86,7 @@ class PermissionQueue<T> {
     /** Queues [r]; returns it when nothing is open (ask it now), else null. */
     @Synchronized fun offer(r: T): T? {
         waiting.addLast(r)
-        return r
+        return r.takeIf { waiting.size == 1 }
     }
 
     /** The open request was answered: it, and the next one to ask now (null for none). */

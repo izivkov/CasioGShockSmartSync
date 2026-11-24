@@ -282,8 +282,8 @@ class PluginRuntime(
     /** [slot]'s needs as far as its declaration covers them. */
     private fun covered(s: Slot): PluginNeeds = s.needs.copy(
         buttonPress = s.needs.buttonPress && Control.BUTTON_PRESS in s.access.controls,
-        values = ((s.needs.values ?: allKeys().toSet()) + (emptyList<String>()))
-            .filter { s.needs.values == null || AccessGuard.mayRead(s.access, uses, it) }.toSet(),
+        values = ((s.needs.values ?: allKeys().toSet()) + (if (s.needs.settings) settingKeys() else emptyList()))
+            .filter { AccessGuard.mayRead(s.access, uses, it) }.toSet(),
         settings = s.needs.settings && (DataUse.WATCH_SETTINGS in s.access.reads || DataUse.BODY_PROFILE in s.access.reads),
         healthReads = s.needs.healthReads && AccessGuard.readsHealth(s.access),
         wakeEveryMinutes = s.needs.wakeEveryMinutes?.coerceAtLeast(MIN_WAKE_MINUTES),
@@ -315,6 +315,7 @@ class PluginRuntime(
     suspend fun wakeAndWait(nowMillis: Long, timeoutMs: Long = 60_000): List<String> {
         val waits = ArrayList<kotlinx.coroutines.CompletableDeferred<Unit>>()
         val woken = wake(nowMillis, waits)
+        withTimeoutOrNull(timeoutMs) { waits.forEach { it.await() } }
         return woken
     }
 
