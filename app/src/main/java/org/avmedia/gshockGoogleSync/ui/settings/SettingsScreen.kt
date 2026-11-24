@@ -28,6 +28,7 @@ import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
+import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthLinks
@@ -109,6 +110,9 @@ fun SettingsList(
 @Composable
 fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltViewModel()) {
     val isModified by settingsViewModel.isModified.collectAsState()
+    // AUTO fills in basic watch settings (language, formats, light...), so it is only offered
+    // on watches that have them.
+    val hasWatchSettings = LocalWatchFeatureManager.current.isFeatureSupported("settings.watch_settings")
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Bottom,
@@ -124,24 +128,25 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
                     .fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                InfoButton(infoText = stringResource(id = R.string.auto_fill_help))
+                if (hasWatchSettings) {
+                    InfoButton(infoText = stringResource(id = R.string.auto_fill_help))
+                }
             }
 
-            val buttons = listOf(
-                ButtonData(
-                    text = Utils.shortenStringNewLine(
-                        stringResource(id = R.string.auto_configure_settings),
-                        15,
-                        "AUTO"
-                    ),
-                    onClick = settingsViewModel::setSmartDefaults
+            val autoButton = ButtonData(
+                text = Utils.shortenStringNewLine(
+                    stringResource(id = R.string.auto_configure_settings),
+                    15,
+                    "AUTO"
                 ),
-                ButtonData(
-                    text = stringResource(id = R.string.send_to_watch),
-                    onClick = settingsViewModel::sendToWatch,
-                    enabled = isModified
-                )
+                onClick = settingsViewModel::setSmartDefaults
             )
+            val sendButton = ButtonData(
+                text = stringResource(id = R.string.send_to_watch),
+                onClick = settingsViewModel::sendToWatch,
+                enabled = isModified
+            )
+            val buttons = if (hasWatchSettings) listOf(autoButton, sendButton) else listOf(sendButton)
 
             ButtonsRow(buttons = buttons, modifier = Modifier.weight(2.5f))
             Spacer(modifier = Modifier.weight(.5f))

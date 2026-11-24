@@ -23,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
 
 @Composable
 fun TimeScreen(
@@ -50,11 +51,13 @@ fun TimeScreen(
                         .padding(vertical = 0.dp)
                 )
 
-                TimerView(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                )
+                WatchFeature(id = "time.timer") {
+                    TimerView(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                    )
+                }
 
                 WatchNameView(
                     modifier =

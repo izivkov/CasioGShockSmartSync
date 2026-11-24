@@ -9,13 +9,14 @@ Key Features:
 - Phone Finder: Trigger a loud alarm on your phone to find it.
 
 Supported Watch Models:
-The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
+The app works with many Bluetooth-enabled G-Shock, Edifice, Oceanus, and Pro Trek models.
 
-- Square: GW-B5600, GMW-B5000, GW-B5000, DW-B5600, TRN-50
+- Square: GW-B5600, GMW-B5000, GW-B5000, DW-B5600, DW-H5600, TRN-50
 - CasiOak: GA-B2100, GBM-2100, GMC-B2100, MRG-B2100
 - G-Steel: GST-B100 to B1000, GST-W1000, ECB-900
 - Edifice: ECB-10 to ECB-2300, EQB-500 to EQB-2000
 - MT-G / MR-G: MTG-B1000/B3000/B3100, MRG-B5000/B2100
+- Oceanus: OCW-S400
 - Others: ABL-100WE, GBD-100/200, GBD-H1000/H2000, GPR-B1000
 
 Note: While these watches connect, not all specific hardware features may be fully supported yet.

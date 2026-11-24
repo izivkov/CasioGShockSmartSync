@@ -113,6 +113,7 @@ private val REMINDER_BLOCK_HEIGHT = 80.dp
 fun WatchImageWithOverlayAlwaysConnected(
     modifier: Modifier = Modifier,
     imageResId: Int = R.drawable.gw_b5600,
+    instructionResId: Int = R.string.find_phone_instruction,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val painter = painterResource(id = imageResId)
@@ -146,7 +147,7 @@ fun WatchImageWithOverlayAlwaysConnected(
             contentAlignment = Alignment.BottomCenter
         ) {
             Text(
-                text = stringResource(R.string.find_phone_instruction),
+                text = stringResource(instructionResId),
                 color = Color.Red,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,

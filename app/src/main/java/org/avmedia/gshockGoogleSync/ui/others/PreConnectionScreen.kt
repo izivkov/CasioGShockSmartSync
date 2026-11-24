@@ -273,9 +273,11 @@ fun PreConnectionScreen(
                                         R.drawable.dw_b5600
 
                                     "ECB" in watchName -> R.drawable.ecb_30d
+                                    "OCW-S400" in watchName -> R.drawable.ocw_s400
                                     else -> R.drawable.gw_b5600
                                 },
-                            isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName)
+                            isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName),
+                            instructionResId = connectInstructionResId(watchName)
                         )
 
 
@@ -558,10 +560,23 @@ fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: B
     }
 }
 
+/** The connection instruction shown over the watch picture, for watches that need their own. */
+fun connectInstructionResId(watchName: String): Int? = when {
+    "OCW-S400" in watchName -> R.string.ocw_s400_connect_instruction
+    else -> null
+}
+
 @Composable
-fun WatchScreen(imageResId: Int, isAlwaysConnected: Boolean, modifier: Modifier = Modifier) {
+fun WatchScreen(
+    imageResId: Int,
+    isAlwaysConnected: Boolean,
+    modifier: Modifier = Modifier,
+    instructionResId: Int? = null
+) {
     Box(modifier = modifier) {
-        if (isAlwaysConnected) {
+        if (instructionResId != null) {
+            WatchImageWithOverlayAlwaysConnected(Modifier, imageResId, instructionResId)
+        } else if (isAlwaysConnected) {
             WatchImageWithOverlayAlwaysConnected(Modifier, imageResId)
         } else {
             WatchImageWithOverlay(Modifier, imageResId, 0.55f)

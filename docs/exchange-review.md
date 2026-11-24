@@ -3,7 +3,7 @@
 Rules: one queue for reads and writes, 10 s per request, write result awaited, `FF` fails a waiting read only, write frame cut to
 20 bytes, answers matched by the first bytes, unasked 28/39/3D/47/49 accepted at any time. All rules live in one table:
 `api/.../casio/CommandSpec.kt` (`CommandTable`); every request goes through `WatchLink` (`WatchQueue.kt`).
-Status: fixed = guard exists; open = not changed, reason given. Guards are in `api/src/test/.../casio` and `.../io/TideChannelTest.kt`.
+Status: fixed = guard exists; open = not changed, reason given. Guards are in the library (ExcuseMi/GShockAPI, `gshockapi` submodule): `api/src/test/.../casio` and `.../io/TideChannelTest.kt`.
 
 | # | Command or area | What we did | What it should be | Sev | State |
 |---|---|---|---|---|---|

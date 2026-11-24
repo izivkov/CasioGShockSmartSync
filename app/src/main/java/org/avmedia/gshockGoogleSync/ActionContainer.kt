@@ -519,16 +519,20 @@ constructor(
 
         private var lastSet: Long? = null
 
-        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.NORMAL_CONNECTION,
-            RunEnvironment.ACTION_BUTTON_PRESSED,
-            RunEnvironment.AUTO_TIME_ADJUSTMENT,
-            RunEnvironment.VOICE_COMMAND -> enabled
-            RunEnvironment.ALWAYS_CONNECTED ->
-                enabled &&
-                        watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
-                        isOlderThan(lastSet, SIX_HOURS_MS)
-            else -> false
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when {
+            // Prayer times are written to the watch's alarms.
+            !watchFeatureManager.isFeatureSupported("alarms") -> false
+            else -> when (runEnvironment) {
+                RunEnvironment.NORMAL_CONNECTION,
+                RunEnvironment.ACTION_BUTTON_PRESSED,
+                RunEnvironment.AUTO_TIME_ADJUSTMENT,
+                RunEnvironment.VOICE_COMMAND -> enabled
+                RunEnvironment.ALWAYS_CONNECTED ->
+                    enabled &&
+                            watchFeatureManager.isFeatureSupported("time_adjustment.always_connected") &&
+                            isOlderThan(lastSet, SIX_HOURS_MS)
+                else -> false
+            }
         }
 
         override fun run(context: Context) {

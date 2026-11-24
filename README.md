@@ -4,7 +4,7 @@
   <a href="https://f-droid.org/en/packages/org.avmedia.gshockGoogleSync/"><img src="https://img.shields.io/badge/F--Droid-Available-brightgreen" alt="F-Droid"></a>
   <a href="https://play.google.com/store/apps/details?id=org.avmedia.gshockGoogleSync"><img src="https://img.shields.io/badge/Google%20Play-Get%20it%20on-blue?logo=google-play&logoColor=white" alt="Google Play"></a>
   <a href="https://github.com/izivkov/CasioGShockSmartSync"><img src="https://img.shields.io/badge/GitHub-Source-blue" alt="GitHub"></a>
-  <a href="https://github.com/izivkov/CasioGShockSmartSync/releases"><img src="https://img.shields.io/badge/version-42.9.11-blue" alt="Version"></a>
+  <a href="https://github.com/izivkov/CasioGShockSmartSync/releases"><img src="https://img.shields.io/badge/version-42.9.30-blue" alt="Version"></a>
   <a href="#"><img src="https://img.shields.io/badge/Connection-Fast-green" alt="Connection Speed"></a>
 </p>
 
@@ -23,13 +23,13 @@ It offers a faster, privacy-focused, and more powerful alternative to the offici
 - **Remote Control**: Use your watch buttons to take photos, control music, or launch voice assistants.
 - **Alarm & Timer Sync**: Configure watch alarms and timers easily from your phone.
 - **Phone Finder**: Trigger a loud alarm on your phone to find it.
-- **Health Integration**: View step counts and fitness metrics for supported models.
+- **Health & LifeLog Integration**: View step counts, energy expenditure, heart rate, and activity metrics for supported models (DW-H5600, GBD, ABL series).
 
 ---
 
 ## Supported Watch Models
 
-The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
+The app works with many Bluetooth-enabled G-Shock, Edifice, Oceanus, and Pro Trek models.
 
 <p align="center">
   <img src="images/gw_b5600.png" width="150" alt="GW-B5600" style="margin: 10px;">
@@ -40,11 +40,12 @@ The app works with many Bluetooth-enabled G-Shock, Edifice, and Pro Trek models.
 
 | Series | Compatible Models (Examples) | Note |
 |:---|:---|:---|
-| **Square** | GW-B5600, GMW-B5000, GW-B5000, DW-B5600, TRN-50 | Classic square design support |
+| **Square** | GW-B5600, GMW-B5000, GW-B5000, DW-B5600, DW-H5600, TRN-50 | Classic & G-SQUAD square design support |
 | **CasiOak** | GA-B2100, GBM-2100, GMC-B2100, MRG-B2100 | Octagonal bezel models |
 | **G-Steel** | GST-B100 to B1000, GST-W1000, ECB-900 | Metal series |
 | **Edifice** | ECB-10 to ECB-2300, EQB-500 to EQB-2000 | Bluetooth Edifice series |
 | **MT-G / MR-G** | MTG-B1000/B3000/B3100, MRG-B5000/B2100 | Premium metal and carbon models |
+| **Oceanus** | OCW-S400 | Manta S400 series |
 | **Others** | ABL-100WE, GBD-100/200, GBD-H1000/H2000, GPR-B1000 | Step trackers, GPS, and sensors |
 
 ---

@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          submodules: recursive
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -23,8 +25,16 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Unit tests (app and api; the api tests did not run before)
-        run: ./gradlew --continue testGithubDebugUnitTest :api:testDebugUnitTest
+      # The library tests run in its own repository (ExcuseMi/GShockAPI, branch smartsync).
+      - name: Unit tests (app)
+        run: ./gradlew --continue testGithubDebugUnitTest
+
+      - name: The library comes from the gshockapi submodule, not JitPack
+        run: |
+          ./gradlew -q app:dependencies --configuration githubDebugRuntimeClasspath > lib-source.txt
+          grep -E "com.github.izivkov:GShockAPI.* -> project :[A-Za-z]+:api" lib-source.txt | head -1
+          if grep -E "com.github.izivkov:GShockAPI:[^ ]+$" lib-source.txt; then echo "GShockAPI resolved from a repository"; exit 1; fi
+          grep -qE "GShockAPI.* -> project :[A-Za-z]+:api" lib-source.txt
 
       # Records pictures of the screens (never compares, so a changed screen does not fail the run;
       # a screen that no longer compiles or renders does).

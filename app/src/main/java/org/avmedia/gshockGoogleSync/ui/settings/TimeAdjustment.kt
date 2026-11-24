@@ -111,56 +111,58 @@ fun TimeAdjustment(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp, end = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    AppText(
-                        text = stringResource(
-                            id = R.string.adjustment_time_minutes
-                        ),
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(end = 6.dp)
-                    )
-                    InfoButton(
-                        infoText = stringResource(
-                            id = R.string.adjustment_time_info
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    var showDialog by remember { mutableStateOf(false) }
-
-                    AppTextLink(
-                        text = "$adjustmentMinutes m",
+                WatchFeature(id = "time_adjustment.minutes") {
+                    Row(
                         modifier = Modifier
-                            .clickable { showDialog = true }
-                            .padding(6.dp),
-                    )
-                    if (showDialog) {
-                        ValueSelectionDialog(
-                            initialValue = adjustmentMinutes.toInt(),
-                            range = 0..59,
-                            onDismiss = { showDialog = false },
-                            onConfirm = { newValue ->
-                                showDialog = false
-                                onUpdate(
-                                    timeAdjustmentSetting.copy(
-                                        adjustmentTimeMinutes = newValue
-                                    )
-                                )
-                            },
-                            title = stringResource(
-                                R.string.when_to_run
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AppText(
+                            text = stringResource(
+                                id = R.string.adjustment_time_minutes
                             ),
-                            label = stringResource(
-                                R.string.minutes_between_0_and_59
-                            ),
-                            unit = "m"
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(end = 6.dp)
                         )
+                        InfoButton(
+                            infoText = stringResource(
+                                id = R.string.adjustment_time_info
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        var showDialog by remember { mutableStateOf(false) }
+
+                        AppTextLink(
+                            text = "$adjustmentMinutes m",
+                            modifier = Modifier
+                                .clickable { showDialog = true }
+                                .padding(6.dp),
+                        )
+                        if (showDialog) {
+                            ValueSelectionDialog(
+                                initialValue = adjustmentMinutes.toInt(),
+                                range = 0..59,
+                                onDismiss = { showDialog = false },
+                                onConfirm = { newValue ->
+                                    showDialog = false
+                                    onUpdate(
+                                        timeAdjustmentSetting.copy(
+                                            adjustmentTimeMinutes = newValue
+                                        )
+                                    )
+                                },
+                                title = stringResource(
+                                    R.string.when_to_run
+                                ),
+                                label = stringResource(
+                                    R.string.minutes_between_0_and_59
+                                ),
+                                unit = "m"
+                            )
+                        }
                     }
                 }
                 FineAdjustmentRow(
