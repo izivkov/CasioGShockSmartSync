@@ -25,6 +25,15 @@ object KeepConnected {
 
     fun holds(address: String?): Boolean = OpenOnConnect.sameAddress(_holder.value, address)
 
+    @Volatile private var loaded = false
+
+    /**
+     * Reads the stored setting once in this process if nothing did yet: a process started by the system for the
+     * watch (Companion device service after a reboot, a killed app, Bluetooth off/on) admits the kept watch without
+     * any screen or ViewModel.
+     */
+    fun ensureLoaded(context: Context) {} // RED CHECK stub
+
     /**
      * Reads the holder (app start). Before the first choice was stored, the most recently connected always-connected
      * watch gets it ([migrationChoice]); with no such watch known yet nothing is stored and the next start asks again.
@@ -115,8 +124,10 @@ object KeepConnected {
         if (!active && !OpenOnConnect.sameAddress(waitingFor, chosen)) _pausedFor.value = null
     }
 
+    /** A fresh process with [holder] already read; null: a fresh process that has read nothing yet. */
     internal fun resetForTest(holder: String? = null) {
         _holder.value = holder
+        loaded = holder != null
         _pausedFor.value = null
     }
 }

@@ -64,6 +64,19 @@ class KeepConnectedTest {
     }
 
     @Test
+    fun aFreshProcessWithTheSettingStoredAdmitsOnlyTheKeptWatch() = runBlocking {
+        KeepConnected.set(context, a, true)
+        KeepConnected.resetForTest() // the system starts the process for the watch: no screen, nothing read yet
+        KeepConnected.ensureLoaded(context)
+        assertTrue(KeepConnected.admits(h5600, a, background = false, waitingFor = null))
+        assertFalse(KeepConnected.admits("CASIO DW-H5600", b, background = false, waitingFor = null))
+        // The coordinator reads the setting itself before it decides on a DeviceAppeared.
+        val coordinator = java.io.File("src/main/java/org/avmedia/gshockGoogleSync/pairing/CompanionDeviceCoordinator.kt").readText()
+        val appeared = coordinator.substringAfter("EventAction(\"DeviceAppeared\")").substringBefore("KeepConnected.admits(")
+        assertTrue(appeared.contains("KeepConnected.ensureLoaded(context)"))
+    }
+
+    @Test
     fun migrationGivesItToTheMostRecentlyConnectedAlwaysConnectedWatch() {
         val names = mapOf(a to "CASIO GBX-H5600", b to "CASIO DW-H5600", "CC" to "CASIO GW-B5600")
         val known = listOf(a, b, "CC")

@@ -66,6 +66,8 @@ class CompanionDeviceCoordinator @Inject constructor(
                     } else {
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
+                        // No screen may have run in this process (reboot, killed app): the stored setting decides.
+                        KeepConnected.ensureLoaded(context)
                         val name = LocalDataStorage.getDeviceName(context, normalizedAddress).orEmpty()
                         val background = BackgroundReadPermission.consume(normalizedAddress)
                         if (!org.avmedia.gshockGoogleSync.session.WatchList.admits(normalizedAddress)) {
