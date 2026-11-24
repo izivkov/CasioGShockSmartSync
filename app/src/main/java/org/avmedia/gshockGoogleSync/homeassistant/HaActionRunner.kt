@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.Diagnostics
+
 /** What HA offers to run; [error] is plain words when the list could not be loaded. */
 data class HaActionList(val items: List<HaAction>, val error: String? = null)
 
