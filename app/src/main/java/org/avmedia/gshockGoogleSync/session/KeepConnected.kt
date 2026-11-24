@@ -86,13 +86,20 @@ object KeepConnected {
     val pausedFor: StateFlow<String?> = _pausedFor
 
     /** The person tapped [address]: another watch than the holder pauses the holder's reconnects; the holder resumes them. */
-    fun chosen(address: String) {} // RED CHECK stub
+    fun chosen(address: String) {
+        _pausedFor.value = if (holds(address)) null else address.uppercase()
+    }
 
     /**
      * Follows the session and the wait: once the chosen watch has no session (it disconnected, the inactivity timeout
      * ended it) and nobody waits for it (Cancel, two minutes ran out), the holder may reconnect by itself again.
      */
-    fun updatePause(session: SessionState, waitingFor: String?) {} // RED CHECK stub
+    fun updatePause(session: SessionState, waitingFor: String?) {
+        val chosen = _pausedFor.value ?: return
+        val active = (session.phase is SessionPhase.Ready || session.phase is SessionPhase.Connecting) &&
+            OpenOnConnect.sameAddress(session.watch.address, chosen)
+        if (!active && !OpenOnConnect.sameAddress(waitingFor, chosen)) _pausedFor.value = null
+    }
 
     /** After a background-window connection: without Keep connected the watch is read, then let go (upstream). */
     suspend fun afterBackgroundConnect(address: String, read: suspend () -> Unit, disconnect: () -> Unit) {
