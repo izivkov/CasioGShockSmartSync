@@ -58,6 +58,8 @@ class WatchSwitch(
     private val connectedAddress: () -> String?,
     private val disconnectCurrent: () -> Unit,
     private val connect: (String) -> Unit,
+    /** The connected watch's card was tapped: the list closes and its screens show again (the list has no Back button). */
+    private val backToConnected: () -> Unit = {},
 ) {
     fun choose(address: String) {
         WatchList.choose(address)

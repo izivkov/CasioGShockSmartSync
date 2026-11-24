@@ -116,12 +116,21 @@ class WatchListTest {
         assertTrue(WatchList.admits("aa:bb:cc:dd:ee:02"))
     }
 
-    @Test fun choosingTheConnectedWatchChangesNothing() {
+    @Test fun choosingTheConnectedWatchKeepsTheLinkAndGoesBackToItsScreens() {
         val calls = mutableListOf<String>()
-        val switch = WatchSwitch({ "AA:BB:CC:DD:EE:01" }, { calls += "disconnect" }, { calls += "connect $it" })
+        val switch = WatchSwitch({ "AA:BB:CC:DD:EE:01" }, { calls += "disconnect" }, { calls += "connect $it" }, backToConnected = { calls += "back" })
         WatchList.show()
         switch.choose("aa:bb:cc:dd:ee:01")
-        assertEquals(emptyList<String>(), calls)
+        // The list has no Back button: the connected watch's card is the way back (the back gesture too).
+        assertEquals(listOf("back"), calls)
+    }
+
+    @Test fun choosingAnotherWatchDoesNotGoBack() {
+        val calls = mutableListOf<String>()
+        val switch = WatchSwitch({ "AA:BB:CC:DD:EE:01" }, { calls += "disconnect" }, { calls += "connect $it" }, backToConnected = { calls += "back" })
+        WatchList.show()
+        switch.choose("AA:BB:CC:DD:EE:02")
+        assertEquals(listOf("disconnect", "connect AA:BB:CC:DD:EE:02"), calls)
     }
 
     @Test fun noWatchConnectsOverAPairingInProgress() {
