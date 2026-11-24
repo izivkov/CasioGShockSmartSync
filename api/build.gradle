@@ -48,6 +48,10 @@ android {
     }
     testOptions {
         targetSdk 36
+        unitTests {
+            // A failing test prints its assertion message in the CI log (the reports are not uploaded).
+            all { testLogging { exceptionFormat = 'full'; events 'failed' } }
+        }
     }
 }
 

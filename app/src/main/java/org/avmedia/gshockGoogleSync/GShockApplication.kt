@@ -60,15 +60,16 @@ class GShockApplication : Application() {
             Timber.d("Timber planted for Debug")
         }
 
-        org.avmedia.gshockapi.io.H5600HealthIO.rawDump =
-            org.avmedia.gshockapi.io.H5600RawDump(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this))
-        // Workouts: the raw bytes of every transfer are kept (failed or not); a workout is marked fetched on the watch only after it is stored.
-        org.avmedia.gshockapi.io.H5600WorkoutIO.rawDump =
-            org.avmedia.gshockapi.io.H5600RawDump(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this), prefix = "workout-")
+        // The App log is the only log: the transfer exports of earlier versions are removed.
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching { org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dropOldExports(applicationContext) }
+                .onFailure { Timber.w(it, "Removing the old transfer exports failed") }
+        }
+        // Workouts: a workout is marked fetched on the watch only after it is stored.
         org.avmedia.gshockapi.io.H5600WorkoutIO.sink =
             { org.avmedia.gshockGoogleSync.history.WorkoutStore.save(applicationContext, it) }
         org.avmedia.gshockapi.casio.ConnectionKeepAlive.logFile =
-            java.io.File(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this), org.avmedia.gshockapi.io.H5600RawDump.CONNECTION_LOG)
+            java.io.File(org.avmedia.gshockGoogleSync.ui.health.HealthLogShare.dir(this), org.avmedia.gshockapi.log.AppLog.FILE_NAME)
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.onStored =
             { org.avmedia.gshockGoogleSync.history.HistoryStore.record(applicationContext, it) }
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.dayMerger =

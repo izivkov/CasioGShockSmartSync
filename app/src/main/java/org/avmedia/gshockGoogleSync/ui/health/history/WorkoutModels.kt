@@ -11,23 +11,23 @@ import org.avmedia.gshockGoogleSync.history.WorkoutSampleRow
 /** One opened workout with its laps and samples. */
 data class WorkoutDetail(val workout: WorkoutRow, val laps: List<WorkoutLapRow>, val samples: List<WorkoutSampleRow>)
 
-/** What the Workouts views show. [selected] is the workout opened from the list. */
+/**
+ * What the Workouts views show. The Health screen shows the "Last workout" card; a tap opens the list ([listOpen]),
+ * [selected] is the workout opened from the list. Workouts come with every Health read: no read button here.
+ */
 data class WorkoutsUi(
     val workouts: List<WorkoutRow> = emptyList(),
     val selected: WorkoutDetail? = null,
+    val listOpen: Boolean = false,
     val exportNote: String = "",
-    /** What the last "Read workouts" did; blank before. */
-    val downloadNote: String = "",
-    val downloading: Boolean = false,
     val zone: ZoneId = ZoneId.systemDefault(),
 )
 
 class WorkoutEvents(
     val onSelect: (WorkoutRow?) -> Unit = {},
+    val onOpenList: (Boolean) -> Unit = {},
     val onExportCsv: () -> Unit = {},
     val onExportJson: () -> Unit = {},
-    val onShareRaw: () -> Unit = {},
-    val onDownload: () -> Unit = {},
 )
 
 /** Pure text helpers of the workout views (units that are likely, not proven, carry "unconfirmed"). */
@@ -48,14 +48,10 @@ internal object WorkoutText {
         w.hrAvg?.let { "avg $it bpm" }, w.hrMax?.let { "max $it bpm" },
     ).joinToString(", ").ifEmpty { "no summary" }
 
-    /** The note after "Read workouts": how many came, or why it stopped. */
-    fun downloadNote(downloaded: Int?, error: String?): String = when {
-        downloaded == null -> "A workout read is already running, or the app keeps no workouts."
-        error != null -> "Stopped: $error" + if (downloaded > 0) " ($downloaded stored before)" else ""
-        downloaded == 0 -> "No new workout on the watch."
-        downloaded == 1 -> "1 new workout stored."
-        else -> "$downloaded new workouts stored."
-    }
+    /** The "Last workout" card: duration, energy, average and highest heart rate. Gaps are left out, never shown as 0. */
+    fun lastLine(w: WorkoutRow): String = listOfNotNull(
+        w.totalSec?.let { duration(it) }, w.kcal?.let { "$it kcal" }, w.hrAvg?.let { "avg $it bpm" }, w.hrMax?.let { "max $it bpm" },
+    ).joinToString(", ").ifEmpty { "no summary" }
 
     /** The summary lines of the detail view. */
     fun lines(w: WorkoutRow): List<Pair<String, String>> = listOfNotNull(

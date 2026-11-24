@@ -85,6 +85,27 @@ object AppLog {
 
     private val LINE = Regex("""(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) \[([^\]]+)] (.*)""")
 
+    /** The file name the app gives [logFile]. */
+    const val FILE_NAME = "connection.log"
+
+    /**
+     * The app log for sharing: the older file and the current one in a zip at [target], nothing else (the log is the only
+     * record the app keeps of a connection or a transfer). Null when there is no file.
+     */
+    fun zipTo(target: File): File? = synchronized(events) {
+        val f = logFile ?: return null
+        val parts = listOf(rolledFile(f), f).filter { it.isFile }
+        if (parts.isEmpty()) return null
+        java.util.zip.ZipOutputStream(target.outputStream().buffered()).use { zip ->
+            for (part in parts) {
+                zip.putNextEntry(java.util.zip.ZipEntry(part.name))
+                part.inputStream().use { it.copyTo(zip) }
+                zip.closeEntry()
+            }
+        }
+        target
+    }
+
     fun clear() = synchronized(events) {
         events.clear()
         logFile?.let { runCatching { it.delete(); rolledFile(it).delete() } }

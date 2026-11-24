@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.avmedia.gshockGoogleSync.history.HistoryDb
 import org.avmedia.gshockGoogleSync.history.WorkoutRow
-import org.avmedia.gshockGoogleSync.ui.health.HealthLogShare
 
 @HiltViewModel
 class WorkoutsViewModel @Inject constructor(
@@ -32,20 +31,10 @@ class WorkoutsViewModel @Inject constructor(
 
     val events = WorkoutEvents(
         onSelect = ::select,
+        onOpenList = { open -> _ui.update { it.copy(listOpen = open, selected = null) } },
         onExportCsv = { export(json = false) },
         onExportJson = { export(json = true) },
-        onShareRaw = { HealthLogShare.shareWorkout(context) },
-        onDownload = ::download,
     )
-
-    private fun download() {
-        if (_ui.value.downloading) return
-        _ui.update { it.copy(downloading = true, downloadNote = "") }
-        viewModelScope.launch {
-            val r = withContext(Dispatchers.IO) { runCatching { org.avmedia.gshockapi.io.H5600WorkoutIO.download(userAsked = true) }.getOrNull() }
-            _ui.update { it.copy(downloading = false, downloadNote = WorkoutText.downloadNote(r?.downloaded, r?.error)) }
-        }
-    }
 
     private fun select(w: WorkoutRow?) {
         if (w == null) { _ui.update { it.copy(selected = null) }; return }

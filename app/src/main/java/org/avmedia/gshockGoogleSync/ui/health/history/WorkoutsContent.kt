@@ -19,24 +19,44 @@ import org.avmedia.gshockGoogleSync.history.WorkoutRow
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 
-/** Workouts of the DW-H5600: the list, and one opened workout with laps and a heart-rate and pace chart. */
+/**
+ * Workouts of the DW-H5600 on the Health screen: one "Last workout" card while a workout is stored (nothing before);
+ * a tap opens the list, a row opens one workout with laps and a heart-rate and pace chart.
+ */
 @Composable
 fun WorkoutsContent(ui: WorkoutsUi, events: WorkoutEvents, modifier: Modifier = Modifier) {
+    val last = ui.workouts.firstOrNull() ?: return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        AppText("Workouts", fontSize = 20.sp)
         val open = ui.selected
-        if (open != null) WorkoutDetailCard(open, ui, events)
-        else {
-            AppButton(if (ui.downloading) "Reading workouts..." else "Read workouts from the watch", events.onDownload, Modifier.fillMaxWidth())
-            if (ui.downloadNote.isNotBlank()) AppText(ui.downloadNote, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if (ui.workouts.isEmpty()) AppText("No workout downloaded yet.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            ui.workouts.take(50).forEach { WorkoutRowCard(it, ui, events) }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AppButton("Export CSV", events.onExportCsv, Modifier.weight(1f))
-                AppButton("Export JSON", events.onExportJson, Modifier.weight(1f))
+        when {
+            open != null -> WorkoutDetailCard(open, ui, events)
+            ui.listOpen -> {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AppText("Workouts", fontSize = 20.sp, modifier = Modifier.weight(1f))
+                    TextButton(onClick = { events.onOpenList(false) }) { Text("Close") }
+                }
+                ui.workouts.take(50).forEach { WorkoutRowCard(it, ui, events) }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AppButton("Export CSV", events.onExportCsv, Modifier.weight(1f))
+                    AppButton("Export JSON", events.onExportJson, Modifier.weight(1f))
+                }
+                if (ui.exportNote.isNotBlank()) AppText(ui.exportNote, fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
             }
-            AppButton("Share raw workout log", events.onShareRaw, Modifier.fillMaxWidth())
-            if (ui.exportNote.isNotBlank()) AppText(ui.exportNote, fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
+            else -> LastWorkoutCard(last, ui, events)
+        }
+    }
+}
+
+@Composable
+private fun LastWorkoutCard(w: WorkoutRow, ui: WorkoutsUi, events: WorkoutEvents) {
+    AppCard(Modifier.fillMaxWidth().clickable { events.onOpenList(true) }) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            AppText("Last workout", fontSize = 14.sp, color = MaterialTheme.colorScheme.tertiary)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AppText(w.sportName, fontSize = 18.sp, modifier = Modifier.weight(1f))
+                AppText(WorkoutText.start(w.startMs, ui.zone), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            AppText(WorkoutText.lastLine(w), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -94,7 +114,6 @@ private fun WorkoutDetailCard(d: WorkoutDetail, ui: WorkoutsUi, events: WorkoutE
                     }
                 }
             }
-            AppText("Units marked unconfirmed are the likely ones from the watch's data format, not checked on the watch.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

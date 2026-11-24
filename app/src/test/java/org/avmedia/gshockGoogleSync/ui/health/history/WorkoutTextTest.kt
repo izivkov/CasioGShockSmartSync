@@ -40,10 +40,8 @@ class WorkoutTextTest {
         assertTrue(line, line.contains("max 171 bpm"))
     }
 
-    @Test fun theReadNoteSaysWhatCame() {
-        assertEquals("No new workout on the watch.", WorkoutText.downloadNote(0, null))
-        assertEquals("2 new workouts stored.", WorkoutText.downloadNote(2, null))
-        assertTrue(WorkoutText.downloadNote(1, "no answer").startsWith("Stopped: no answer"))
-        assertTrue(WorkoutText.downloadNote(null, null).contains("already running"))
+    @Test fun theLastWorkoutLineHasDurationEnergyAndBothHeartRatesOnly() {
+        assertEquals("30:00, 410 kcal, avg 142 bpm, max 171 bpm", WorkoutText.lastLine(WorkoutMapper.map(WorkoutTestData.session(), 1L).workout))
+        assertEquals("30:00, max 171 bpm", WorkoutText.lastLine(WorkoutMapper.map(WorkoutTestData.session(kcal = null, hrAvg = null), 1L).workout))
     }
 }

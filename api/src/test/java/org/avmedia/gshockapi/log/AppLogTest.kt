@@ -96,4 +96,19 @@ class AppLogTest {
             org.avmedia.gshockapi.casio.ConnectionSetup.reset()
         }
     }
+
+    /** Share gives the App log only: both halves of the rolling file, no transfer dumps beside it. */
+    @Test fun theShareZipHoldsTheTwoLogFilesOnly() {
+        AppLog.maxFileBytes = 300L
+        repeat(20) { AppLog.log(LogSource.Workouts, "Workout read stopped: " + "x".repeat(40)) }
+        File(tmp.root, "lifelog-20261124-001700-000").mkdirs()
+        val zip = AppLog.zipTo(File(tmp.root, "share.zip"))!!
+        val names = java.util.zip.ZipFile(zip).use { z -> z.entries().toList().map { it.name } }
+        assertEquals(listOf("connection.log.1", "connection.log"), names)
+    }
+
+    @Test fun nothingLoggedSharesNothing() {
+        AppLog.clear()
+        assertEquals(null, AppLog.zipTo(File(tmp.root, "share.zip")))
+    }
 }

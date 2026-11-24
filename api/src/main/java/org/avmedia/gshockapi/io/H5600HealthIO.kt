@@ -233,8 +233,6 @@ object H5600HealthIO {
                 }
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
             if (transfer.silent) {
-                val quiet = synchronized(lock) { transfer.notifications.toList() to transfer.announcements.toMap() }
-                saveRawDump(quiet.first, quiet.second, "the watch stopped answering the polls")
                 return AttemptOutcome(StepCounterData.unavailable(), restart = true)
             }
             if (!completed) {
@@ -255,17 +253,10 @@ object H5600HealthIO {
                     stepGoal = stepGoal,
                     watchCondition = transfer.watchCondition,
                 )
-            saveRawDump(
-                snapshot.first, snapshot.second,
-                when {
-                    !completed -> "the transfer did not finish in time"
-                    decoded == null -> "no LifeLog header in the stream"
-                    else -> null
-                },
-            )
             if (decoded == null) {
                 val stream = H5600HealthDecoder.lifeLogStream(snapshot.first, snapshot.second)
                 Timber.w("H5600: no LifeLog header in ${stream.size} stream bytes; first bytes ${hex(stream, 20)}")
+                org.avmedia.gshockapi.log.AppLog.log(org.avmedia.gshockapi.log.LogSource.Health, "LifeLog read: no LifeLog header in ${stream.size} stream bytes; first bytes ${hex(stream, 20)}")
                 return AttemptOutcome(StepCounterData.unavailable(), restart = false)
             }
             Timber.i(
@@ -425,24 +416,6 @@ object H5600HealthIO {
             H5600Channel.CONVOY -> IO.writeCmd(GetSetMode.CONVOY, write.data)
             H5600Channel.DRSP -> IO.writeCmd(GetSetMode.DATA_REQUEST, write.data)
             H5600Channel.STATUS -> IO.writeCmd(GetSetMode.SET, write.data)
-        }
-    }
-
-    /** Where the raw bytes of each transfer are kept (set by the app); null keeps nothing. */
-    @Volatile
-    var rawDump: H5600RawDump? = null
-
-    private fun saveRawDump(
-        notifications: List<ByteArray>,
-        announcements: Map<Int, Int>,
-        failure: String? = null,
-    ) {
-        val dump = rawDump ?: return
-        try {
-            val stream = H5600HealthDecoder.lifeLogStream(notifications, announcements)
-            dump.save(H5600Capture(notifications, announcements, stream, failure), System.currentTimeMillis())
-        } catch (t: Throwable) {
-            Timber.w(t, "H5600: could not keep the raw transfer")
         }
     }
 

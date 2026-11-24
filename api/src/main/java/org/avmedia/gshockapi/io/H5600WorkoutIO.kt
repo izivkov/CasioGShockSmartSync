@@ -30,10 +30,6 @@ object H5600WorkoutIO {
     @Volatile
     var sink: (suspend (WorkoutSession) -> Boolean)? = null
 
-    /** Raw bytes of every workout transfer, failed or not (folder prefix "workout-"); null keeps nothing. */
-    @Volatile
-    var rawDump: H5600RawDump? = null
-
     private val _workouts = MutableSharedFlow<WorkoutSession>(extraBufferCapacity = 64)
 
     /** Each workout after the sink took it. A notice only; storing is the sink's job. */
@@ -213,8 +209,6 @@ object H5600WorkoutIO {
         }
         log("Workout read starts")
         val channel = Channel<WorkoutMsg>(Channel.UNLIMITED)
-        val frames = mutableListOf<ByteArray>()
-        val stream = java.io.ByteArrayOutputStream()
         try {
             _status.value = "Downloading workouts"
             lastError = null
@@ -224,10 +218,6 @@ object H5600WorkoutIO {
                 inbox = channel,
                 sink = { s -> store(s).also { ok -> if (ok) _workouts.emit(s) } },
                 blockCache = blockCache,
-                capture = { m, bytes ->
-                    m?.let { frames += it.data }
-                    bytes?.let { stream.write(it) }
-                },
                 log = ::log,
             )
             val result = transfer.run()
@@ -236,7 +226,6 @@ object H5600WorkoutIO {
             if (result.error == null) lastCheckMs = System.currentTimeMillis()
             if (result.error == null) log("Workout read done: ${result.downloaded} new stored")
             else problem("Workout read stopped: ${result.error}" + if (result.downloaded > 0) " (${result.downloaded} stored before)" else "")
-            keepDump(frames, stream.toByteArray(), result.error)
             return result
         } catch (t: Throwable) {
             lastFailMs = clock()
@@ -267,15 +256,6 @@ object H5600WorkoutIO {
         override fun drsp(data: ByteArray) = IO.writeCmd(GetSetMode.DATA_REQUEST, data)
 
         override fun bulk(data: ByteArray) = IO.writeCmd(GetSetMode.CONVOY, data)
-    }
-
-    private fun keepDump(log: List<ByteArray>, stream: ByteArray, failure: String?) {
-        val dump = rawDump ?: return
-        try {
-            dump.save(H5600Capture(log, emptyMap(), stream, failure), System.currentTimeMillis())
-        } catch (t: Throwable) {
-            Timber.w(t, "H5600 workouts: could not keep the raw transfer")
-        }
     }
 
     private val DRSP_FIRST = setOf(0x00, 0x03, 0x04, 0x06, 0x07, 0x08, 0x09)

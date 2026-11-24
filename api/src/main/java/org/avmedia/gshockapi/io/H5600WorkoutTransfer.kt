@@ -29,7 +29,7 @@ class WorkoutRunResult(val downloaded: Int, val error: String?, val refused: Boo
  * Steps 1 to 8 of the workout transfer on a [WorkoutLink]. The caller holds the exchange lock.
  * Each workout goes to [sink] first; only when the sink took it (true) is the fetched mark written for it, so a
  * workout that could not be stored stays on the watch for the next run. [capture] receives every message and the
- * decoded bytes of each read, for the raw dump. [log] gets one line per step (category, slot, result) for the connection log.
+ * decoded bytes of each read (a test seam; the frames themselves are App log lines). [log] gets one line per step (category, slot, result) for the connection log.
  */
 class WorkoutTransfer(
     private val link: WorkoutLink,
