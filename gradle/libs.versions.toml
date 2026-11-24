@@ -23,13 +23,13 @@ timber = "5.0.1"
 sunrisesunset = "1.2"
 hiltNavigationCompose = "1.4.0"
 gshockapi = "1.9.0"
-# ExcuseMi/smartsync-plugins through JitPack, by commit: fb0339080d is homeassistant-v0.1.1 and healthconnect-v0.1.1
-# (plugin-api and trmnl unchanged since their 0.1.0 tags). JitPack keeps a failed first build of a tag name until it
+# ExcuseMi/smartsync-plugins through JitPack, by commit: ee85cc3c6d is homeassistant 0.1.2 (healthconnect 0.1.1,
+# plugin-api and trmnl unchanged since their tags). JitPack keeps a failed first build of a tag name until it
 # is rebuilt from jitpack.io, so the commit stands for the tags (the same files).
-smartsyncPluginApi = "fb0339080d"
-smartsyncHomeassistant = "fb0339080d"
-smartsyncHealthconnect = "fb0339080d"
-smartsyncTrmnl = "fb0339080d"
+smartsyncPluginApi = "ee85cc3c6d"
+smartsyncHomeassistant = "ee85cc3c6d"
+smartsyncHealthconnect = "ee85cc3c6d"
+smartsyncTrmnl = "ee85cc3c6d"
 lifecycle = "2.11.0"
 datastore = "1.3.0"
 okhttp = "4.12.0"
