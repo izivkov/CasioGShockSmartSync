@@ -135,8 +135,7 @@ object HaSensors {
 
     /** Only the sensors a watch with [caps] has a value for ([WatchCaps.needs]): an OCW registers no health sensor. */
     fun forCaps(sensors: List<HaSensor>, caps: Set<WatchCap>): List<HaSensor> =
-        if (WatchCap.H5600 in caps) sensors
-        else sensors.filterNot { it.variable.startsWith("workout.") || it.variable in SleepVariables.DESCRIPTIONS || it.variable in HeartRateDayVariables.DESCRIPTIONS }
+        sensors.filter { s -> WatchCaps.needs(s)?.let { it in caps } ?: true }
 
     /** The variables to resolve for an update: the states and the attributes. */
     val VARIABLES: Set<String> = variablesOf(ALL)

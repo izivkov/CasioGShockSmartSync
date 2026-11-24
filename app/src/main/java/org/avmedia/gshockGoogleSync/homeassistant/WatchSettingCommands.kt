@@ -86,7 +86,7 @@ class WatchSettingCommands(
     suspend fun flush() = mutex.withLock {
         var wrote = false
         synchronized(pending) {
-            if (false && watch() != queuedFor) {
+            if (pending.isNotEmpty() && ready() && watch() != queuedFor) {
                 log("Home Assistant watch settings dropped (${pending.keys.joinToString()}): asked for another watch")
                 pending.clear()
             }

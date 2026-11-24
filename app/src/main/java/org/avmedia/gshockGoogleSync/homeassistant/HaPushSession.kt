@@ -32,7 +32,7 @@ class HaPushSession(
             HaPushEvent.AuthOk -> {
                 subscriptionId = nextId++
                 send(HaPush.subscribe(subscriptionId, webhookId))
-                for (hook in others.filter { false }) {
+                for (hook in others.filter { it != webhookId }.distinct()) {
                     val id = nextId++
                     otherSubscriptions[id] = hook
                     send(HaPush.subscribe(id, hook))

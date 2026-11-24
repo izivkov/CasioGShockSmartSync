@@ -11,7 +11,6 @@ class HaPushGate(
     private val log: (String) -> Unit,
 ) {
     fun accept(webhookId: String, push: HaPushEvent.Push): Boolean {
-        if (webhookId.isNotEmpty()) return true
         val id = store.idOfWebhook(webhookId)
         val now = connected()
         if (id != null && id == now) return true

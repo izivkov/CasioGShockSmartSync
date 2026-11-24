@@ -56,7 +56,7 @@ object HaJobs {
         }
         val confirmed = store.confirmedName(id)
         // The model is this watch's own (typed for it, or the one it registered with), never another watch's.
-        return HaPayloads.registrationFor(address, watchName, cfg.copy(deviceName = confirmed ?: cfg.deviceName, model = cfg.model), appVersion, osVersion)
+        return HaPayloads.registrationFor(address, watchName, cfg.copy(deviceName = confirmed ?: cfg.deviceName, model = store.modelFor(id)), appVersion, osVersion)
     }
 
     /** Null when there is nothing to send (no sensor values and no event). */
