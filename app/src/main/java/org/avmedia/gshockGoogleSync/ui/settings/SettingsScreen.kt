@@ -83,6 +83,9 @@ fun SettingsList() {
         if (org.avmedia.gshockapi.WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol) {
             WatchFace(settingsViewModel::onSettingUpdated)
         }
+        if (settingsViewModel.supportsAppNotifications()) {
+            PhoneNotifications()
+        }
     }
 }
 

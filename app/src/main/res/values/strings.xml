@@ -248,4 +248,15 @@
     <string name="watch_face">Watch face</string>
     <string name="watch_face_item">Display item (face 2)</string>
     <string name="done">Done</string>
+    <string name="phone_notifications">Phone notifications on the watch</string>
+    <string name="phone_notifications_all">All apps</string>
+    <string name="phone_notifications_selected">Only selected apps</string>
+    <string name="phone_notifications_off">Off</string>
+    <string name="phone_notifications_all_info">Every phone notification is sent while the watch is connected.</string>
+    <string name="phone_notifications_selected_info">Only the apps you choose are sent. Ongoing, silent and group summary notifications are not.</string>
+    <string name="phone_notifications_off_info">No phone notification is sent to the watch.</string>
+    <string name="phone_notifications_choose_apps">Choose apps (%1$d selected)</string>
+    <string name="phone_notifications_none_selected">No app is selected, so nothing is sent.</string>
+    <string name="phone_notifications_search">Search apps</string>
+    <string name="phone_notifications_loading">Loading apps…</string>
 </resources>
