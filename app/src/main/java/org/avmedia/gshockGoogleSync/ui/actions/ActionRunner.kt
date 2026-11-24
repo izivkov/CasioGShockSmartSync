@@ -17,7 +17,6 @@ import org.avmedia.gshockGoogleSync.session.ConnectionButton
 import org.avmedia.gshockGoogleSync.session.Session
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
-import org.avmedia.gshockGoogleSync.homeassistant.HaSync
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,7 +26,7 @@ class ActionRunner @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sessionManager: SessionManager,
     private val actionContainer: ActionContainer,
-    private val haSync: HaSync,
+    private val pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub,
     private val backgroundHealthSync: org.avmedia.gshockGoogleSync.ui.health.BackgroundHealthSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -49,8 +48,8 @@ class ActionRunner @Inject constructor(
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
         if (state.phase !is SessionPhase.Ready) return
 
-        // Home Assistant gets the sensor values after each connection.
-        haSync.onSync()
+        // The plugins (Home Assistant, ...) get the watch values after each connection.
+        pluginHub.onSync()
         backgroundHealthSync.onConnection()
 
         when (state.button) {

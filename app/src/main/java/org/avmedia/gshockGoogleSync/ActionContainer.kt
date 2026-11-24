@@ -45,8 +45,6 @@ import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.events.CalendarEvents
 import org.avmedia.gshockGoogleSync.ui.events.EventsModel
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.homeassistant.HaSync
-import org.avmedia.gshockGoogleSync.homeassistant.HaTrigger
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.utils.CyrillicToLatin
 import org.avmedia.gshockapi.model.Alarm
@@ -99,7 +97,7 @@ constructor(
     private val eventStorage: EventStorage,
     private val alarmNameStorage: AlarmNameStorage,
     private val sessionManager: SessionManager,
-    private val haSync: HaSync
+    private val pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub
 ) {
     /** Manually-created scope, since this class has no ViewModel/Activity lifecycle to tie one to. Lives as long as the process. */
     private val containerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -230,7 +228,7 @@ constructor(
                 )
             )
             add(PrayerAlarmsAction("Set Prayer Alarms", false, prayerAlarmsHelper))
-            add(HaButtonAction(appContext.getString(R.string.home_assistant), true))
+            add(PluginButtonAction("Plugins", true))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
@@ -570,25 +568,22 @@ constructor(
     }
 
     /**
-     * Sends the button event to Home Assistant, which then runs the action chosen on the Home Assistant screen
-     * ([HaClient]). The Home Assistant switch on the Actions screen decides (checked in [HaSync]); no row of its own.
+     * Gives the button press to the plugins that asked for it (Home Assistant runs the action chosen on its screen).
+     * Each plugin's switch decides; no row of its own.
      */
-    inner class HaButtonAction(override var title: String, override var enabled: Boolean) :
+    inner class PluginButtonAction(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
 
         // Button press, or the Phone Finder request of always-connected watches (they arrive here too).
-        // Listed (and run) only when Home Assistant is set up, so the run screen never names an unused service.
+        // Listed (and run) only when a plugin that is on wants the press, so the run screen never names an unused one.
         override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
-            RunEnvironment.ACTION_BUTTON_PRESSED -> haReady()
+            RunEnvironment.ACTION_BUTTON_PRESSED -> runCatching { pluginHub.buttonPluginNames() }.getOrDefault(emptyList())
+                .also { names -> if (names.isNotEmpty()) title = names.joinToString() }.isNotEmpty()
             else -> false
         }
 
-        private fun haReady(): Boolean = runCatching {
-            org.avmedia.gshockGoogleSync.watch.AppStores.haStore(appContext).load() != null
-        }.getOrDefault(false)
-
         override fun run(context: Context) {
-            haSync.fire(HaTrigger.WATCH_ACTION)
+            pluginHub.buttonPressed()
         }
     }
 

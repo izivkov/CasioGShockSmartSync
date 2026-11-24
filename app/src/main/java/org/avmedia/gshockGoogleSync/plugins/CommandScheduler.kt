@@ -6,7 +6,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.avmedia.smartsync.plugin.api.CommandResult
+import org.avmedia.smartsync.plugin.api.Delivered
+import org.avmedia.smartsync.plugin.api.FailReason
+import org.avmedia.smartsync.plugin.api.PluginResult
 import org.avmedia.smartsync.plugin.api.Delivery
 import org.avmedia.smartsync.plugin.api.WatchId
 
@@ -17,6 +19,9 @@ import org.avmedia.smartsync.plugin.api.WatchId
  * through the library's watch queue. A write for a watch that is not connected waits for its next connection when it
  * asked for [Delivery.NextConnection], in memory, until it expires. Android-free.
  */
+/** What a queued write gives. */
+typealias WriteResult = PluginResult<Delivered>
+
 class CommandScheduler(
     scope: CoroutineScope,
     private val connected: (WatchId) -> Boolean,
@@ -33,9 +38,10 @@ class CommandScheduler(
         val watch: WatchId,
         val delivery: Delivery,
         val what: String,
-        val work: suspend () -> CommandResult,
+        val timeoutMs: Long,
+        val work: suspend () -> WriteResult,
     ) {
-        val result = CompletableDeferred<CommandResult>()
+        val result = CompletableDeferred<WriteResult>()
         var expiresAt: Long = Long.MAX_VALUE
         /** Taken out of the parking: its caller already got Queued, a later result is only logged. */
         var replayed = false
@@ -52,8 +58,11 @@ class CommandScheduler(
     }
 
     /** Queues [work] for [watch]; the result comes when it ran (or was parked, or refused). [what] names it in log lines. */
-    suspend fun submit(pluginId: String, watch: WatchId, delivery: Delivery, what: String, work: suspend () -> CommandResult): CommandResult {
-        val item = Item(pluginId, watch, delivery, what, work)
+    suspend fun submit(
+        pluginId: String, watch: WatchId, delivery: Delivery, what: String, timeoutMs: Long = commandTimeoutMs,
+        work: suspend () -> WriteResult,
+    ): WriteResult {
+        val item = Item(pluginId, watch, delivery, what, timeoutMs, work)
         enqueue(item)
         return item.result.await()
     }
@@ -82,7 +91,7 @@ class CommandScheduler(
             parked.removeAll(p.toSet())
             q + p
         }
-        gone.forEach { it.result.complete(CommandResult.Failed("the plugin stopped")) }
+        gone.forEach { it.result.complete(PluginResult.Failed(FailReason.INTERNAL, "the plugin stopped")) }
     }
 
     /** The watch's data is gone: its parked writes too. */
@@ -109,31 +118,31 @@ class CommandScheduler(
         while (true) {
             val item = next() ?: return
             val result = run(item)
-            if (item.replayed && result !is CommandResult.Done && result !is CommandResult.Queued) {
+            if (item.replayed && result is PluginResult.Failed) {
                 log(item.pluginId, "${item.what} at the next connection: ${describe(result)}")
             }
             item.result.complete(result)
         }
     }
 
-    private suspend fun run(item: Item): CommandResult {
+    private suspend fun run(item: Item): WriteResult {
         if (!connected(item.watch)) return park(item)
         if (transferRunning()) {
             val free = withTimeoutOrNull(busyLimitMs) { while (transferRunning()) delay(pollMs); true }
-            if (free == null) return CommandResult.Busy
+            if (free == null) return PluginResult.Failed(FailReason.BUSY, "a transfer held the watch")
             if (!connected(item.watch)) return park(item)
         }
         return try {
-            withTimeoutOrNull(commandTimeoutMs) { item.work() } ?: CommandResult.Failed("no answer within ${commandTimeoutMs / 1000} s")
+            withTimeoutOrNull(item.timeoutMs) { item.work() } ?: PluginResult.Failed(FailReason.TIMEOUT, "no answer within ${item.timeoutMs / 1000} s")
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Throwable) {
-            CommandResult.Failed(e.javaClass.simpleName)
+            PluginResult.Failed(FailReason.INTERNAL, e.javaClass.simpleName)
         }
     }
 
-    private fun park(item: Item): CommandResult {
-        val d = item.delivery as? Delivery.NextConnection ?: return CommandResult.NotConnected
+    private fun park(item: Item): WriteResult {
+        val d = item.delivery as? Delivery.NextConnection ?: return NOT_CONNECTED
         synchronized(lock) {
             if (d.key != null) parked.removeAll { it.pluginId == item.pluginId && it.watch == item.watch && (it.delivery as? Delivery.NextConnection)?.key == d.key }
             val mine = parked.filter { it.pluginId == item.pluginId }
@@ -144,18 +153,17 @@ class CommandScheduler(
             item.expiresAt = clock() + d.keepMillis
             parked += item
         }
-        return CommandResult.Queued
+        return QUEUED
     }
 
     companion object {
-        fun describe(r: CommandResult): String = when (r) {
-            CommandResult.Done -> "done"
-            CommandResult.Queued -> "waits for the next connection"
-            CommandResult.NotConnected -> "the watch is not connected"
-            CommandResult.Busy -> "the watch was busy"
-            is CommandResult.NotSupported -> "not supported (${r.reason})"
-            is CommandResult.Refused -> "refused (${r.reason})"
-            is CommandResult.Failed -> "failed (${r.reason})"
+        val DONE: WriteResult = PluginResult.Ok(Delivered.NOW)
+        val QUEUED: WriteResult = PluginResult.Ok(Delivered.AT_NEXT_CONNECTION)
+        val NOT_CONNECTED: WriteResult = PluginResult.Failed(FailReason.NOT_CONNECTED, "the watch is not connected")
+
+        fun describe(r: PluginResult<*>): String = when (r) {
+            is PluginResult.Ok -> if (r.value == Delivered.AT_NEXT_CONNECTION) "waits for the next connection" else "done"
+            is PluginResult.Failed -> "${r.reason.name.lowercase().replace('_', ' ')}: ${r.message}"
         }
     }
 }

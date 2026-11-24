@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockGoogleSync.watchvalues.HealthVariables
 import org.avmedia.gshockGoogleSync.watchvalues.SleepVariables
 import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingVariables
@@ -23,6 +25,14 @@ import org.junit.Test
 
 /** Sleep, body and decoded setting variables and their Home Assistant sensors. */
 class SleepAndSettingVariablesTest {
+    init {
+        // What the app gives the Home Assistant plugin when it starts: its raw codes and writable settings.
+        HaSensors.hostKeys = HaSensors.HostKeys(
+            org.avmedia.gshockGoogleSync.watchvalues.RawSettings.CODES.map(org.avmedia.gshockGoogleSync.watchvalues.RawSettings::name),
+            org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry.ALL.map { it.key },
+        )
+    }
+
     private val start = LocalDateTime.of(2026, 11, 21, 23, 10)
 
     private val night = SleepNight(

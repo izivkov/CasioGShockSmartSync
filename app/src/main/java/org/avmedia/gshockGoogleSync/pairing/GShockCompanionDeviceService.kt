@@ -12,7 +12,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.homeassistant.HaPushHost
 import org.avmedia.gshockapi.ProgressEvents
 import timber.log.Timber
 
@@ -20,14 +19,16 @@ import timber.log.Timber
 @AndroidEntryPoint
 class GShockCompanionDeviceService : CompanionDeviceService() {
 
-    // The Home Assistant push socket lives as long as this foreground service does.
+    @javax.inject.Inject lateinit var pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub
+
+    // The plugins' own links (the Home Assistant push socket) live as long as this foreground service does.
     override fun onCreate() {
         super.onCreate()
-        HaPushHost.get(applicationContext).acquire(HaPushHost.SERVICE)
+        pluginHub.backgroundStarted()
     }
 
     override fun onDestroy() {
-        HaPushHost.get(applicationContext).release(HaPushHost.SERVICE)
+        pluginHub.backgroundStopped()
         super.onDestroy()
     }
 

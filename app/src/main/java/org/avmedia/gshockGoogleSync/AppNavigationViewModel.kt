@@ -10,7 +10,7 @@ import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.WatchList
 import org.avmedia.gshockGoogleSync.session.WatchSwitch
-import org.avmedia.gshockGoogleSync.homeassistant.HaScreenState
+import org.avmedia.gshockGoogleSync.plugins.PluginScreenState
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 
 @HiltViewModel
@@ -19,7 +19,7 @@ class AppNavigationViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     val repository: GShockRepository,
     val companionDeviceCoordinator: CompanionDeviceCoordinator,
-    private val haScreenState: HaScreenState,
+    private val pluginScreenState: PluginScreenState,
     @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
     val state = screenState.state
@@ -33,9 +33,12 @@ class AppNavigationViewModel @Inject constructor(
         sessionManager.activeSession?.enterMainNavigation()
     }
 
-    fun openHa() = haScreenState.show()
+    fun openPlugin(id: String) = pluginScreenState.show(id)
 
-    fun closeHa() = haScreenState.hide()
+    fun closePlugin() = pluginScreenState.hide()
+
+    /** The plugin whose screen is open, null for none. */
+    val openPlugin = pluginScreenState.open
 
     /** The watch list from the connected screens; the link stays up. */
     fun openWatchList() = WatchList.show()

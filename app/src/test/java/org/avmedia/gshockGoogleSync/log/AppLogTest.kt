@@ -1,135 +1,117 @@
 package org.avmedia.gshockGoogleSync.log
 
 import java.io.File
+import java.util.Collections
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import timber.log.Timber
 
+/** The App log: every line through Timber with its source as tag; the screen and Share read the app's own logcat. */
 class AppLogTest {
     @get:Rule val tmp = TemporaryFolder()
-    private lateinit var file: File
+
+    private val seen: MutableList<Triple<Int, String?, String>> = Collections.synchronizedList(mutableListOf())
+    private val tree = object : Timber.Tree() {
+        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) { seen += Triple(priority, tag, message) }
+    }
 
     @Before fun install() {
-        file = File(tmp.root, "connection.log")
-        AppLog.logFile = file
         AppLog.clock = { 1_700_000_000_000L }
-        AppLog.maxFileBytes = 1024L * 1024L
         AppLog.clear()
+        AppLog.clearedAt = 0
+        Timber.plant(tree)
     }
 
     @After fun restore() {
+        Timber.uproot(tree)
         org.avmedia.gshockapi.log.LibraryLog.sink = org.avmedia.gshockapi.log.LibraryLog.TIMBER
-        AppLog.logFile = null
         AppLog.clock = System::currentTimeMillis
-        AppLog.maxFileBytes = 1024L * 1024L
     }
 
-    @Test fun lineHasTimeSourceAndText() {
-        AppLog.log(LogSource.HomeAssistant, "Home Assistant push: failed after 4 tries: timeout")
-        val parsed = AppLog.parse(AppLog.readLines().single())
-        assertEquals(LogSource.HomeAssistant, parsed.source)
-        assertTrue(parsed.time.startsWith("2023-11-14 "))
-        assertEquals("Home Assistant push: failed after 4 tries: timeout", parsed.text)
-    }
-
-    @Test fun aLineOfARemovedSourceStillParses() {
-        val parsed = AppLog.parse("2026-11-23 08:10:00.000 [Webhook] old line")
-        assertEquals(null, parsed.source)
-        assertEquals("old line", parsed.text)
+    @Test fun aLineGoesToTimberTaggedWithItsSource() {
+        AppLog.log(LogSource.HomeAssistant, "push sent")
+        assertEquals(Triple(android.util.Log.INFO, "Home Assistant", "push sent"), seen.single())
     }
 
     @Test fun oneLineEvenWithNewlines() {
         AppLog.log(LogSource.App, "a\nb")
-        assertEquals(1, AppLog.readLines().size)
+        assertEquals("a b", seen.single().third)
     }
 
     @Test fun failureNamesTheClassNotTheMessage() {
-        AppLog.failure(LogSource.Health, "Saving failed", IllegalStateException("token=SECRET"))
-        val line = AppLog.readLines().single()
-        assertTrue(line, line.endsWith("Saving failed (IllegalStateException)"))
-        assertFalse(line.contains("SECRET"))
+        AppLog.failure(LogSource.Health, "LifeLog read failed", IllegalStateException("https://secret.example/?token=x"))
+        val (priority, tag, text) = seen.single()
+        assertEquals(android.util.Log.WARN, priority)
+        assertEquals("Health", tag)
+        assertEquals("LifeLog read failed (IllegalStateException)", text)
     }
 
-    @Test fun theLogIsBoundedAndTheOldestIsDropped() {
-        AppLog.maxFileBytes = 2_000L
-        for (i in 1..200) AppLog.log(LogSource.Watch, "line %04d ".format(i) + "x".repeat(40))
-        val lines = AppLog.readLines()
-        assertTrue("files stay near the cap", file.length() <= 2_000L && AppLog.rolledFile(file).length() <= 2_000L)
-        assertTrue(lines.size < 200)
-        assertTrue(lines.last().contains("line 0200"))
-        assertFalse(lines.any { it.contains("line 0001 ") })
-        // Older lines come before newer ones.
-        assertEquals(lines.sorted(), lines)
-    }
-
-    @Test fun clearRemovesBothFiles() {
-        AppLog.maxFileBytes = 300L
-        repeat(20) { AppLog.log(LogSource.App, "x".repeat(50)) }
-        assertTrue(AppLog.rolledFile(file).isFile)
-        AppLog.clear()
-        assertFalse(file.exists() || AppLog.rolledFile(file).exists())
-        assertTrue(AppLog.readLines().isEmpty())
-    }
-
-    /** The App log screen must never be empty after a connection attempt, even when the file cannot be written. */
-    @Test fun theScreenShowsTheLinesWhenTheFileCannotBeWritten() {
-        val blocker = File(tmp.root, "not-a-folder").apply { writeText("x") }
-        AppLog.logFile = File(blocker, "connection.log")
-        AppLog.log(LogSource.Watch, "Connection kind 14: setup starts")
-        assertTrue(AppLog.readLines().toString(), AppLog.readLines().any { it.endsWith("Connection kind 14: setup starts") })
-    }
-
-    @Test fun aConnectWritesTheKindLineToWhatTheScreenReads() {
-        AppLog.install(file)
-        org.avmedia.gshockapi.casio.ConnectionSetup.busy = { true }
-        try {
-            org.avmedia.gshockapi.casio.ConnectionSetup.reset()
-            org.avmedia.gshockapi.casio.ConnectionSetup.onKind("0x10 17 62 07 38 85 CD 7F 0E 03 0F FF FF FF FF 24 00 00 00")
-            val lines = AppLog.readLines()
-            assertTrue(lines.toString(), lines.any { it.contains("[Watch] Connection kind") })
-            assertTrue(file.readText().contains("Connection kind"))
-        } finally {
-            org.avmedia.gshockapi.casio.ConnectionSetup.busy = { org.avmedia.gshockapi.io.H5600HealthIO.isActive || org.avmedia.gshockapi.io.H5600WorkoutIO.isActive }
-            org.avmedia.gshockapi.casio.ConnectionSetup.reset()
-        }
-    }
-
-    /** Share gives the App log only: both halves of the rolling file, no transfer dumps beside it. */
-    @Test fun theShareZipHoldsTheTwoLogFilesOnly() {
-        AppLog.maxFileBytes = 300L
-        repeat(20) { AppLog.log(LogSource.Workouts, "Workout read stopped: " + "x".repeat(40)) }
-        File(tmp.root, "lifelog-20261124-001700-000").mkdirs()
-        val zip = AppLog.zipTo(File(tmp.root, "share.zip"))!!
-        val names = java.util.zip.ZipFile(zip).use { z -> z.entries().toList().map { it.name } }
-        assertEquals(listOf("connection.log.1", "connection.log"), names)
-    }
-
-    @Test fun nothingLoggedSharesNothing() {
-        AppLog.clear()
-        assertEquals(null, AppLog.zipTo(File(tmp.root, "share.zip")))
+    @Test fun repeatedLinesCollapse() {
+        repeat(5) { AppLog.log(LogSource.Watch, "link lost") }
+        AppLog.log(LogSource.Watch, "link up")
+        assertEquals(listOf("link lost", "(the line before repeated 4 times)", "link up"), seen.map { it.third })
     }
 
     @Test fun libraryLinesKeepTheirSource() {
-        AppLog.install(file)
+        AppLog.install()
         org.avmedia.gshockapi.log.LibraryLog.log(org.avmedia.gshockapi.log.LibraryLog.Source.Workouts, "Workout read: 1C the watch is ready")
         org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("49 00 received, 49 01 written")
-        val lines = AppLog.readLines().map { AppLog.parse(it) }
-        assertEquals(listOf(LogSource.Workouts, LogSource.Watch), lines.map { it.source })
-        assertEquals("49 00 received, 49 01 written", lines.last().text)
+        assertEquals(listOf("Workouts", "Watch"), seen.map { it.second })
+        assertEquals("49 00 received, 49 01 written", seen.last().third)
     }
 
-    /** A rolled file that cannot be removed (a folder in its place): the log goes on, nothing is thrown. */
-    @Test fun aRotationThatCannotDeleteKeepsLogging() {
-        AppLog.maxFileBytes = 300L
-        File(tmp.root, "connection.log.1").mkdirs()
-        File(tmp.root, "connection.log.1/keep").writeText("x")
-        repeat(20) { AppLog.log(LogSource.App, "x".repeat(50)) }
-        assertTrue(AppLog.readLines().isNotEmpty())
+    @Test fun theLogcatCommandReadsOnlyOurLinesWithDates() {
+        assertEquals(listOf("logcat", "-d", "-v", "threadtime", "-v", "year", "--uid=10234"), Logcat.command(sdk = 34, uid = 10234, pid = 999))
+        assertEquals("before Android 9 there is no --uid", listOf("logcat", "-d", "-v", "threadtime", "-v", "year", "--pid=999"), Logcat.command(sdk = 26, uid = 10234, pid = 999))
+    }
+
+    @Test fun aLogcatLineBecomesSourceAndText() {
+        val l = Logcat.parse("2026-11-24 12:00:00.123  1234  1250 I Home Assistant: push sent: 3 sensors")!!
+        assertEquals("2026-11-24 12:00:00.123", l.time)
+        assertEquals(LogSource.HomeAssistant, l.source)
+        assertEquals("push sent: 3 sensors", l.text)
+        assertEquals("a plugin's id is its source", LogSource.HomeAssistant, Logcat.parse("2026-11-24 12:00:00.123  1234  1250 W home_assistant: x")!!.source)
+        assertEquals(LogSource.Watch, Logcat.parse("2026-11-24 12:00:00.123  1234  1250 I Watch   : 49 00 received")!!.source)
+        assertNull("another tag is no source", Logcat.parse("2026-11-24 12:00:00.123  1234  1250 D OpenGLRenderer: x")!!.source)
+        assertNull("a header line is no line", Logcat.parse("--------- beginning of main"))
+    }
+
+    @Test fun theScreenShowsTheLastLinesInMemoryWhenLogcatGivesNothing() {
+        AppLog.log(LogSource.Watch, "Connection kind 14: setup starts")
+        val model = org.avmedia.gshockGoogleSync.ui.settings.AppLogModel { AppLog.recentLines() }
+        model.load()
+        assertEquals("Connection kind 14: setup starts", model.page(null, true, 10).single().line.text)
+    }
+
+    @Test fun shareZipsAHeaderAndTheLines() {
+        val header = linkedMapOf("App version" to "42.9.30", "Watch model" to "CASIO GBX-H5600", "Android" to "15 (API 35)")
+        val zip = Logcat.zip(File(tmp.root, "share.zip"), header, listOf("line 1", "line 2"))!!
+        java.util.zip.ZipFile(zip).use { z ->
+            assertEquals(listOf("header.txt", "logcat.txt"), z.entries().toList().map { it.name })
+            val head = z.getInputStream(z.getEntry("header.txt")).bufferedReader().readText()
+            assertTrue(head, head.contains("App version: 42.9.30") && head.contains("Watch model: CASIO GBX-H5600") && head.contains("Android: 15 (API 35)"))
+            assertEquals("line 1\nline 2\n", z.getInputStream(z.getEntry("logcat.txt")).bufferedReader().readText())
+        }
+    }
+
+    @Test fun nothingLoggedSharesNothing() {
+        assertNull(Logcat.zip(File(tmp.root, "share.zip"), emptyMap(), emptyList()))
+        assertFalse(File(tmp.root, "share.zip").exists())
+    }
+
+    @Test fun clearHidesWhatWasLoggedBefore() {
+        val line = "2023-11-14 22:13:20.000  1  1 I Watch: old"
+        AppLog.clock = { 1_800_000_000_000L }
         AppLog.clear()
+        val model = org.avmedia.gshockGoogleSync.ui.settings.AppLogModel { listOf(line) }
+        model.load()
+        assertTrue(model.page(null, true, 10).isEmpty())
     }
 }

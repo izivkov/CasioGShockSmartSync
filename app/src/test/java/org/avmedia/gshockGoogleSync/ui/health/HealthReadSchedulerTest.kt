@@ -101,12 +101,4 @@ class HealthReadSchedulerTest {
     @Test fun noConsumerNoRead() = runTest {
         assertEquals(Outcome.NO_CONSUMER, connect(consumer = false)); assertEquals(0, reads)
     }
-
-    @Test fun consumerRules() {
-        val c = HealthReadScheduler.Companion::hasConsumer
-        assertTrue(c(true, true, true))
-        assertFalse(c(false, true, true))
-        assertFalse(c(true, false, true))
-        assertFalse(c(true, true, false))
-    }
 }

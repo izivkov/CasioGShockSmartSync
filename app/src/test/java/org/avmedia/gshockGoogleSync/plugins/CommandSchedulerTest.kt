@@ -11,7 +11,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import org.avmedia.smartsync.plugin.api.CommandResult
+import org.avmedia.gshockGoogleSync.plugins.CommandScheduler.Companion.DONE
+import org.avmedia.gshockGoogleSync.plugins.CommandScheduler.Companion.NOT_CONNECTED
+import org.avmedia.gshockGoogleSync.plugins.CommandScheduler.Companion.QUEUED
+import org.avmedia.smartsync.plugin.api.FailReason
+import org.avmedia.smartsync.plugin.api.PluginResult
 import org.avmedia.smartsync.plugin.api.Delivery
 import org.avmedia.smartsync.plugin.api.WatchId
 import org.junit.After
@@ -43,20 +47,20 @@ class CommandSchedulerTest {
         var overlap = false
         val order: MutableList<String> = Collections.synchronizedList(mutableListOf())
         val gate = CompletableDeferred<Unit>()
-        fun work(name: String): suspend () -> CommandResult = {
+        fun work(name: String): suspend () -> WriteResult = {
             if (running.incrementAndGet() > 1) overlap = true
             if (name == "a1") gate.await()
             delay(5)
             order += name
             running.decrementAndGet()
-            CommandResult.Done
+            DONE
         }
         val first = async(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { s.submit("a", w, Delivery.Now, "a1", work("a1")) }
         delay(50) // a1 runs and holds the queue
         val rest = listOf("a2", "a3", "b1", "b2", "b3").map { n -> async(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { s.submit(n.take(1), w, Delivery.Now, n, work(n)) } }
         delay(50)
         gate.complete(Unit)
-        (rest + first).awaitAll().forEach { assertEquals(CommandResult.Done, it) }
+        (rest + first).awaitAll().forEach { assertEquals(DONE, it) }
         assertTrue("two writes ran at once", !overlap)
         assertEquals(listOf("a1", "b1", "a2", "b2", "a3", "b3"), order.toList())
     }
@@ -64,31 +68,31 @@ class CommandSchedulerTest {
     @Test fun nothingRunsDuringATransferAndALongTransferGivesBusy() = runBlocking {
         var transfer = true
         val s = scheduler(transfer = { transfer }, busyMs = 100)
-        assertEquals(CommandResult.Busy, s.submit("a", w, Delivery.Now, "x") { CommandResult.Done })
-        val ran = async { s.submit("a", w, Delivery.Now, "y") { CommandResult.Done } }
+        assertEquals(FailReason.BUSY, (s.submit("a", w, Delivery.Now, "x") { DONE } as PluginResult.Failed).reason)
+        val ran = async { s.submit("a", w, Delivery.Now, "y") { DONE } }
         delay(30)
         transfer = false
-        assertEquals(CommandResult.Done, ran.await())
+        assertEquals(DONE, ran.await())
     }
 
     @Test fun aWatchThatIsNotConnectedGivesNotConnected() = runBlocking {
         val s = scheduler(connected = { false })
         var ran = false
-        assertEquals(CommandResult.NotConnected, s.submit("a", w, Delivery.Now, "x") { ran = true; CommandResult.Done })
+        assertEquals(NOT_CONNECTED, s.submit("a", w, Delivery.Now, "x") { ran = true; DONE })
         assertTrue(!ran)
     }
 
     @Test fun aWriteThatHangsEndsWithAFailureAndTheNextOneStillRuns() = runBlocking {
         val s = scheduler(timeoutMs = 50)
         val r = s.submit("a", w, Delivery.Now, "x") { awaitCancellation() }
-        assertTrue(r is CommandResult.Failed)
-        assertEquals(CommandResult.Done, s.submit("b", w, Delivery.Now, "y") { CommandResult.Done })
+        assertTrue(r is PluginResult.Failed)
+        assertEquals(DONE, s.submit("b", w, Delivery.Now, "y") { DONE })
     }
 
     @Test fun aThrowingWriteIsAFailureNotACrash() = runBlocking {
         val s = scheduler()
-        assertTrue(s.submit("a", w, Delivery.Now, "x") { error("boom") } is CommandResult.Failed)
-        assertEquals(CommandResult.Done, s.submit("a", w, Delivery.Now, "y") { CommandResult.Done })
+        assertTrue(s.submit("a", w, Delivery.Now, "x") { error("boom") } is PluginResult.Failed)
+        assertEquals(DONE, s.submit("a", w, Delivery.Now, "y") { DONE })
     }
 
     @Test fun nextConnectionWritesWaitForTheirWatchAndRunWhenItConnects() = runBlocking {
@@ -96,10 +100,10 @@ class CommandSchedulerTest {
         val s = scheduler(connected = { it in up })
         val ran: MutableList<String> = Collections.synchronizedList(mutableListOf())
         val later = Delivery.NextConnection(key = "face")
-        assertEquals(CommandResult.Queued, s.submit("a", w, later, "face 1") { ran += "face 1"; CommandResult.Done })
-        assertEquals(CommandResult.Queued, s.submit("a", w, later, "face 2") { ran += "face 2"; CommandResult.Done })
-        assertEquals(CommandResult.Queued, s.submit("a", w, Delivery.NextConnection(), "note") { ran += "note"; CommandResult.Done })
-        assertEquals(CommandResult.Queued, s.submit("a", other, Delivery.NextConnection(), "other") { ran += "other"; CommandResult.Done })
+        assertEquals(QUEUED, s.submit("a", w, later, "face 1") { ran += "face 1"; DONE })
+        assertEquals(QUEUED, s.submit("a", w, later, "face 2") { ran += "face 2"; DONE })
+        assertEquals(QUEUED, s.submit("a", w, Delivery.NextConnection(), "note") { ran += "note"; DONE })
+        assertEquals(QUEUED, s.submit("a", other, Delivery.NextConnection(), "other") { ran += "other"; DONE })
         up += w
         s.onConnected(w)
         withTimeout(2_000) { while (ran.size < 2) delay(5) }
@@ -113,7 +117,7 @@ class CommandSchedulerTest {
         val up = mutableSetOf<WatchId>()
         val s = scheduler(connected = { it in up }, clock = { now })
         var ran = false
-        s.submit("a", w, Delivery.NextConnection(keepMillis = 1_000), "note") { ran = true; CommandResult.Done }
+        s.submit("a", w, Delivery.NextConnection(keepMillis = 1_000), "note") { ran = true; DONE }
         now = 5_000
         up += w
         s.onConnected(w)
@@ -124,7 +128,7 @@ class CommandSchedulerTest {
 
     @Test fun aStoppedPluginsWritesAreDropped() = runBlocking {
         val s = scheduler(connected = { false })
-        s.submit("a", w, Delivery.NextConnection(), "note") { CommandResult.Done }
+        s.submit("a", w, Delivery.NextConnection(), "note") { DONE }
         s.drop("a")
         assertEquals(0, s.parkedCount("a"))
     }

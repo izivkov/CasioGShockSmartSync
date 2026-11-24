@@ -142,9 +142,9 @@ class HaScreenStateTest {
     @Test
     fun homeAssistantScreenStaysWhateverTheWatchDoes() {
         val closed = ready.copy(phase = SessionPhase.Closed("Watch disconnected"))
-        assertEquals(AppScreen.HOME_ASSISTANT, AppScreenState.navigationFor(ready, haOpen = true).screen)
-        assertEquals(AppScreen.HOME_ASSISTANT, AppScreenState.navigationFor(closed, haOpen = true).screen)
-        assertEquals(AppScreen.HOME_ASSISTANT, AppScreenState.navigationFor(SessionState(), haOpen = true).screen)
-        assertEquals(AppScreen.MAIN_NAVIGATION, AppScreenState.navigationFor(ready, haOpen = false).screen)
+        assertEquals(AppScreen.PLUGIN, AppScreenState.navigationFor(ready, pluginOpen = true).screen)
+        assertEquals(AppScreen.PLUGIN, AppScreenState.navigationFor(closed, pluginOpen = true).screen)
+        assertEquals(AppScreen.PLUGIN, AppScreenState.navigationFor(SessionState(), pluginOpen = true).screen)
+        assertEquals(AppScreen.MAIN_NAVIGATION, AppScreenState.navigationFor(ready, pluginOpen = false).screen)
     }
 }

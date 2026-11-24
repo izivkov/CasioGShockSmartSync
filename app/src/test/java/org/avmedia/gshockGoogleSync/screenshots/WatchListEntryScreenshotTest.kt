@@ -3,8 +3,6 @@ package org.avmedia.gshockGoogleSync.screenshots
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import org.avmedia.gshockGoogleSync.LinkBarLayout
-import org.avmedia.gshockGoogleSync.homeassistant.HaSettingsEntryContent
-import org.avmedia.gshockGoogleSync.homeassistant.HaStatus
 import org.avmedia.gshockGoogleSync.session.LinkState
 import org.avmedia.gshockGoogleSync.ui.time.TimeTitleRow
 import org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow
@@ -15,7 +13,7 @@ class WatchListEntryScreenshotTest : ScreenshotTest() {
     @Composable private fun Top(link: LinkState) = LinkBarLayout(link) {
         Column {
             TimeTitleRow {}
-            HaSettingsEntryContent(HaStatus.CONNECTED) {}
+            org.avmedia.gshockGoogleSync.plugins.PluginCard(org.avmedia.gshockGoogleSync.plugins.FakePlugin(), "Connected", on = true, onSwitch = {}, onOpen = {})
             ValueRow("Target zone", "Zone 2, 120 to 150 bpm and a long text that needs several lines", false, note = "Read only")
         }
     }

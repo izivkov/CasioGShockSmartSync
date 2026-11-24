@@ -8,20 +8,24 @@ import org.avmedia.gshockGoogleSync.log.LogSource
 data class ShownLine(val id: Int, val line: LogLine, val rawFrame: Boolean)
 
 /**
- * The App log screen's data: the files are read and parsed once per [load] (off the main thread), newest first; filters
+ * The App log screen's data: the app's logcat is read and parsed once per [load] (off the main thread), newest first; filters
  * and pages work on the parsed lines only. Raw `rx/tx +Ns` frame lines of the watch are most of the volume and are
  * hidden unless asked for.
  */
-class AppLogModel(private val read: () -> List<String> = AppLog::readLines) {
+class AppLogModel(private val read: () -> List<String> = ::ownLines) {
     @Volatile private var parsed: List<ShownLine> = emptyList()
 
+    /** Our own logcat lines (or, when logcat gives nothing, the last lines in memory): only our sources, after Clear. */
     fun load() {
         val raw = read()
-        parsed = List(raw.size) { i ->
-            val id = raw.size - 1 - i
-            val line = AppLog.parse(raw[id])
-            ShownLine(id, line, isRawFrame(line))
+        val out = ArrayList<ShownLine>(raw.size)
+        for (id in raw.indices.reversed()) {
+            val line = org.avmedia.gshockGoogleSync.log.Logcat.parse(raw[id]) ?: continue
+            if (line.source == null) continue
+            if (AppLog.clearedAt > 0 && org.avmedia.gshockGoogleSync.log.Logcat.millisOf(line.time) < AppLog.clearedAt) continue
+            out += ShownLine(id, line, isRawFrame(line))
         }
+        parsed = out
     }
 
     /** The first [limit] lines that pass [filter] (null = all sources) and [showRaw]. */
@@ -38,6 +42,8 @@ class AppLogModel(private val read: () -> List<String> = AppLog::readLines) {
 
     companion object {
         const val PAGE = 500
+
+        fun ownLines(): List<String> = org.avmedia.gshockGoogleSync.log.Logcat.read().ifEmpty { AppLog.recentLines() }
         private val RAW = Regex("""^(rx|tx) \+\d+s\b.*""")
         fun isRawFrame(l: LogLine): Boolean = l.source == LogSource.Watch && RAW.matches(l.text)
     }

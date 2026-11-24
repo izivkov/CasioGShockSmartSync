@@ -15,6 +15,7 @@ android {
 
     defaultConfig {
         minSdk = 26
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     compileOptions {
@@ -43,6 +44,8 @@ dependencies {
     // Only what the interface names: Context (Android) and @Composable.
     api(platform(libs.androidx.compose.bom))
     api(libs.compose.runtime)
+    // ImageVector for a plugin's icon.
+    api(libs.compose.ui)
     testImplementation(libs.junit)
 }
 

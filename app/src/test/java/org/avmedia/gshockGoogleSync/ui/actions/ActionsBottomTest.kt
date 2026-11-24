@@ -14,9 +14,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.avmedia.gshockGoogleSync.ActionContainer
-import org.avmedia.gshockGoogleSync.homeassistant.HaAction
-import org.avmedia.gshockGoogleSync.homeassistant.HaActionsUi
-import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionContent
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.junit.Assert.assertTrue
@@ -42,14 +39,13 @@ class ActionsBottomTest {
         every { phoneNumber() } returns "555-123-4567"
     }
     private val features: IWatchFeatureManager = mockk(relaxed = true) { every { isFeatureSupported(any()) } returns true }
-    private val lights = HaAction("script", "script.lights", "Lights")
 
     @Test fun theLastLinesScrollAboveTheSaveBar() {
         rule.setContent {
             CompositionLocalProvider(LocalWatchFeatureManager provides features) {
                 ActionsScreen(
                     actionsViewModel = viewModel,
-                    haRow = { HaButtonActionContent(true, true, {}, HaActionsUi(items = listOf(lights), chosen = lights), {}, {}, {}) },
+                    pluginRows = { org.avmedia.gshockGoogleSync.plugins.PluginActionCard(org.avmedia.gshockGoogleSync.plugins.FakePlugin(actionLine = "Watch button: Lights"), true, {}, {}) },
                 )
             }
         }

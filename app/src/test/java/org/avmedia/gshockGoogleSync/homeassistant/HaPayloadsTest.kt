@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockGoogleSync.watchvalues.RawSettings
 import org.avmedia.gshockGoogleSync.watchvalues.WatchDecoders
 import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
@@ -10,6 +12,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HaPayloadsTest {
+    init {
+        // What the app gives the Home Assistant plugin when it starts: its raw codes and writable settings.
+        HaSensors.hostKeys = HaSensors.HostKeys(
+            org.avmedia.gshockGoogleSync.watchvalues.RawSettings.CODES.map(org.avmedia.gshockGoogleSync.watchvalues.RawSettings::name),
+            org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry.ALL.map { it.key },
+        )
+    }
+
     private fun obj(json: String) = JsonParser.parseString(json).asJsonObject
 
     @Test
@@ -124,7 +134,8 @@ class HaPayloadsTest {
     @Test
     fun everySensorReadsAVariableOfTheRegistry() {
         val names = WatchVariables.registry(fakeEnv()).names
-        HaSensors.ALL.forEach { assertTrue("${it.variable} is not a variable", it.variable in names) }
+        // The push socket's values are the plugin's own; every other sensor reads a value the app has.
+        HaSensors.ALL.filter { it.variable !in HaRuntime.PLUGIN_VALUES }.forEach { assertTrue("${it.variable} is not a variable", it.variable in names) }
         assertEquals(HaSensors.ALL.size, HaSensors.ALL.map { it.uniqueId }.toSet().size)
     }
 

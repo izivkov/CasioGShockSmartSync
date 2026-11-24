@@ -25,7 +25,7 @@ object NotificationAccess {
     fun warning(context: Context, watch: String = CurrentWatch.keyOrLast(context)): String? = when {
         watch.isBlank() -> null
         // A watch that cannot show notifications (the OCW-S7000) needs no access.
-        AppStores.haStore(context).notificationsSupported(watch) == false -> null
+        org.avmedia.gshockGoogleSync.plugins.WatchCapabilities.notificationsSupported(context, watch) == false -> null
         else -> check(context).warning(AppStores.phoneNotifications(context).mode(watch))
     }
 

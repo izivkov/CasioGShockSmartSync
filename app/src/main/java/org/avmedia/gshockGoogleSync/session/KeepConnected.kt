@@ -49,7 +49,7 @@ object KeepConnected {
         }
         val last = LocalDataStorage.get(context, KEY_LAST_ADDRESS, "").orEmpty()
         val registeredIds = runCatching {
-            org.avmedia.gshockGoogleSync.watch.AppStores.haStore(context).registeredIds().toSet()
+            org.avmedia.gshockGoogleSync.watch.LegacyHaKeys.registeredIds(org.avmedia.gshockGoogleSync.watch.AppStores.LocalKeyValueStore(context.applicationContext)).toSet()
         }.getOrDefault(emptySet())
         val registered = { address: String -> org.avmedia.gshockGoogleSync.watch.WatchKeys.of(address) in registeredIds }
         val choice = migrationChoice(last, LocalDataStorage.getDeviceAddresses(context), registered) { address ->

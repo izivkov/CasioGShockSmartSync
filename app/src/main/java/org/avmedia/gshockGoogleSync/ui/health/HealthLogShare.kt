@@ -5,11 +5,10 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.log.AppLog
 import timber.log.Timber
 import java.io.File
 
-/** Hands the App log to the Android share sheet as a zip (Settings > App log); it is the only log the app keeps. Nothing is uploaded. */
+/** Hands the App log (the app's own logcat) to the Android share sheet as a zip with a short header. Nothing is uploaded. */
 internal object HealthLogShare {
     fun dir(context: Context): File = File(context.filesDir, "health-log")
 
@@ -22,7 +21,14 @@ internal object HealthLogShare {
     fun share(context: Context) {
         try {
             val folder = File(context.cacheDir, "health-log-share").apply { mkdirs() }
-            val zip = AppLog.zipTo(File(folder, "app-log.zip"))
+            val header = linkedMapOf(
+                "App version" to org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME,
+                "Watch model" to org.avmedia.gshockapi.WatchInfo.name.ifBlank { "none connected" },
+                "Android" to "${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})",
+            )
+            val zip = org.avmedia.gshockGoogleSync.log.Logcat.zip(
+                File(folder, "app-log.zip"), header, org.avmedia.gshockGoogleSync.ui.settings.AppLogModel.ownLines(),
+            )
             if (zip == null) {
                 Toast.makeText(context, R.string.health_log_none, Toast.LENGTH_LONG).show()
                 return

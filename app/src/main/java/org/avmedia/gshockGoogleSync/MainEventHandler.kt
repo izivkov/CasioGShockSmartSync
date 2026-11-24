@@ -22,9 +22,6 @@ import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
-import org.avmedia.gshockGoogleSync.homeassistant.HaPushHost
-import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands
-import org.avmedia.gshockGoogleSync.watch.AppStores
 import timber.log.Timber
 
 /**
@@ -34,7 +31,8 @@ import timber.log.Timber
 class MainEventHandler(
     private val context: GShockApplication,
     private val repository: GShockRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -55,7 +53,7 @@ class MainEventHandler(
             sessionManager.currentSession.filterNotNull().collect { session ->
                 launch { startNotificationServiceWhenReady(session) }
                 launch { reportErrorWhenClosed(session) }
-                launch { pushWhileConnected(session) }
+                launch { pluginEvents(session) }
             }
         }
     }
@@ -68,31 +66,16 @@ class MainEventHandler(
         }
     }
 
-    /** Home Assistant notifications to the watch: only for a watch that shows them, only while it is connected. */
-    private suspend fun pushWhileConnected(session: Session) {
+    /** The plugins hear when a watch is ready and when its session ends (they send to it only in between). */
+    private suspend fun pluginEvents(session: Session) {
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
         if (state.phase !is SessionPhase.Ready) return
-        val haStore = AppStores.haStore(context)
-        val supported = repository.supportsAppNotifications()
-        val address = runCatching { WatchInfo.getAddress() }.getOrDefault("")
-        if (address.isBlank()) return
-        haStore.saveNotificationsSupported(org.avmedia.gshockGoogleSync.watch.WatchKeys.of(address), supported)
-        // The socket belongs to the host (kept alive by the companion service), not to this session. It may still
-        // deliver while another watch is connected later: a watch without notifications never gets a write.
-        HaPushHost.deliver = { n ->
-            if (repository.supportsAppNotifications()) scope.launch { repository.sendAppNotification(n) }
-            else AppLog.log(LogSource.HomeAssistant, "Home Assistant notification not sent: the connected watch cannot show notifications")
-        }
-        if (!supported) return
-        val host = HaPushHost.get(context)
-        host.acquire(HaPushHost.SESSION)
-        host.watchConnected()
-        WatchSettingCommands.shared?.flushLater()
+        val key = runCatching { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() }.getOrDefault("")
+        pluginHub.onSessionReady(state.cause)
         try {
             session.state.first { it.phase is SessionPhase.Closed }
         } finally {
-            HaPushHost.get(context).release(HaPushHost.SESSION)
-            WatchSettingCommands.shared?.onDisconnected()
+            pluginHub.onSessionClosed(key)
         }
     }
 

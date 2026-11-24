@@ -12,8 +12,19 @@ sealed interface WatchEvent {
 
     data class Disconnected(override val watch: WatchId) : WatchEvent
 
-    /** The host read values of [watch] ([PluginNeeds.values]); [values] is the whole last-known set after this read. */
-    data class ValuesUpdated(override val watch: WatchId, val values: WatchValues, val cause: ValueCause) : WatchEvent
+    /**
+     * The host read values of [watch] ([PluginNeeds.values]). [values] is the whole last-known set after this read;
+     * [readNow] the keys this read returned a value for (a value the watch did not give now keeps its older one).
+     */
+    data class ValuesUpdated(
+        override val watch: WatchId,
+        val values: WatchValues,
+        val cause: ValueCause,
+        val readNow: Set<String> = values.values.keys,
+    ) : WatchEvent {
+        /** Only the values read now. */
+        fun fresh(): Map<String, Any?> = values.values.filterKeys { it in readNow }
+    }
 
     /** A health log transfer of [watch] was stored; [range] is what it covered, [kinds] what it carried. */
     data class HealthRead(override val watch: WatchId, val range: HistoryRange, val kinds: Set<DataKind<*>>) : WatchEvent

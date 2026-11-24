@@ -57,7 +57,7 @@ import org.avmedia.gshockGoogleSync.watch.CurrentWatch
 fun PhoneNotificationsCard() {
     val context = LocalContext.current
     val watch = remember { CurrentWatch.key() }
-    val supported = remember(watch) { AppStores.haStore(context).notificationsSupported(watch) != false }
+    val supported = remember(watch) { org.avmedia.gshockGoogleSync.plugins.WatchCapabilities.notificationsSupported(context, watch) != false }
     if (watch.isBlank() || !supported) return
     val settings = remember { AppStores.phoneNotifications(context) }
     var mode by remember(watch) { mutableStateOf(settings.mode(watch)) }

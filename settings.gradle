@@ -23,6 +23,8 @@ def jitpack = System.getenv("JITPACK") == "true"
 include ':plugin-api'
 if (!jitpack) {
     include ':app'
+    // The Home Assistant plugin, on the plugin interface only (moves to its own repository next).
+    include ':plugins:homeassistant'
 
     // The GShockAPI library is the ExcuseMi/GShockAPI fork (branch smartsync), checked out as the
     // gshockapi submodule and built with the app, so a library change needs no JitPack release.

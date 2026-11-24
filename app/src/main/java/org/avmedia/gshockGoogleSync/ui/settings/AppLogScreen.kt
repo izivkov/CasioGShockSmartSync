@@ -41,7 +41,10 @@ import org.avmedia.gshockGoogleSync.log.LogSource
 fun visibleLogLines(raw: List<String>, filter: LogSource?): List<LogLine> =
     AppLogModel { raw }.apply { load() }.page(filter, showRaw = true, limit = Int.MAX_VALUE).map { it.line }
 
-/** Settings > App log: the whole app log, newest first in pages, a filter by source, raw frames on demand, Share and Clear. */
+/** What the screen can show: the app's own logcat. */
+internal const val LOG_LIMIT_NOTE = "Shows the last hours; a phone restart clears it."
+
+/** Settings > About > App log: the app's own logcat, newest first in pages, a filter by source, raw frames on demand, Share and Clear. */
 @Composable
 fun AppLogScreen(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -96,6 +99,7 @@ internal fun AppLogContent(
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
                 ScreenTitle("App log", Modifier)
+                AppText(text = LOG_LIMIT_NOTE, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
                 Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp)) {
                     FilterChip(selected = filter == null, onClick = { onFilter(null) }, label = { Text("All") }, modifier = Modifier.padding(end = 6.dp))
                     LogSource.entries.forEach { s ->

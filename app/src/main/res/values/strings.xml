@@ -258,5 +258,4 @@
     <string name="health_log_none">No logs yet.</string>
     <string name="loading_lifelog_short">Loading LifeLog</string>
     <string name="updating">Updating...</string>
-    <string name="home_assistant">Home Assistant</string>
 </resources>

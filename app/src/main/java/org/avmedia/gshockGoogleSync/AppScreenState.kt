@@ -16,7 +16,7 @@ import org.avmedia.gshockGoogleSync.session.EntryReason
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.session.SessionPhase
 import org.avmedia.gshockGoogleSync.session.SessionState
-import org.avmedia.gshockGoogleSync.homeassistant.HaScreenState
+import org.avmedia.gshockGoogleSync.plugins.PluginScreenState
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.session.KeepConnected
@@ -34,7 +34,7 @@ enum class AppScreen {
     ERROR,
 
     /** The Home Assistant screen: shown whatever the watch connection does. */
-    HOME_ASSISTANT,
+    PLUGIN,
 
     /** The watch list opened from the connected screens: shown whatever the watch connection does, until left. */
     WATCH_LIST
@@ -52,23 +52,23 @@ data class AppNavigationState(
 @Singleton
 class AppScreenState @Inject constructor(
     sessionManager: SessionManager,
-    haScreenState: HaScreenState,
+    pluginScreenState: PluginScreenState,
     @ApplicationContext appContext: Context
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     val state: StateFlow<AppNavigationState> =
         combine(
-            sessionManager.sessionState, haScreenState.open, AppForeground.inFront, WatchList.open
-        ) { session, haOpen, inFront, listOpen ->
-            navigationFor(session, haOpen, inFront, listOpen)
+            sessionManager.sessionState, pluginScreenState.open, AppForeground.inFront, WatchList.open
+        ) { session, plugin, inFront, listOpen ->
+            navigationFor(session, plugin != null, inFront, listOpen)
         }
             .distinctUntilChanged()
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
                 navigationFor(
-                    sessionManager.sessionState.value, haScreenState.open.value, AppForeground.inFront.value,
+                    sessionManager.sessionState.value, pluginScreenState.open.value != null, AppForeground.inFront.value,
                     WatchList.open.value
                 )
             )
@@ -79,10 +79,10 @@ class AppScreenState @Inject constructor(
         // person tapped its name. Otherwise the app stays where it is (sync and HA run unchanged).
         scope.launch {
             combine(
-                sessionManager.sessionState, AppForeground.inFront, haScreenState.open, OpenOnConnect.waiting,
+                sessionManager.sessionState, AppForeground.inFront, pluginScreenState.open, OpenOnConnect.waiting,
                 WatchList.open
-            ) { session, inFront, haOpen, waiting, listOpen ->
-                OpenOnConnect.shouldOpen(session, inFront, !haOpen && !listOpen, waiting)
+            ) { session, inFront, plugin, waiting, listOpen ->
+                OpenOnConnect.shouldOpen(session, inFront, plugin == null && !listOpen, waiting)
             }.collect { latch ->
                 if (latch) sessionManager.activeSession?.let {
                     OpenOnConnect.consumed(it.state.value.watch.address)
@@ -110,12 +110,12 @@ class AppScreenState @Inject constructor(
     companion object {
         internal fun navigationFor(
             session: SessionState,
-            haOpen: Boolean = false,
+            pluginOpen: Boolean = false,
             appInForeground: Boolean = false,
             watchListOpen: Boolean = false
         ): AppNavigationState =
             if (watchListOpen) AppNavigationState(AppScreen.WATCH_LIST)
-            else if (haOpen) AppNavigationState(AppScreen.HOME_ASSISTANT)
+            else if (pluginOpen) AppNavigationState(AppScreen.PLUGIN)
             else when (val phase = session.phase) {
                 SessionPhase.Disconnected -> AppNavigationState(AppScreen.INITIAL)
 

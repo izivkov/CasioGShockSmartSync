@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockGoogleSync.watchvalues.HealthVariables
 import java.time.LocalDate
 import org.avmedia.gshockapi.model.BodyReadings
@@ -15,6 +17,14 @@ import org.junit.Test
 
 /** The day's heart rate curve as attributes of the recent heart rate sensor, today's cardio load, and the sensors per model. */
 class HeartRateCurveAndModelTest {
+    init {
+        // What the app gives the Home Assistant plugin when it starts: its raw codes and writable settings.
+        HaSensors.hostKeys = HaSensors.HostKeys(
+            org.avmedia.gshockGoogleSync.watchvalues.RawSettings.CODES.map(org.avmedia.gshockGoogleSync.watchvalues.RawSettings::name),
+            org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry.ALL.map { it.key },
+        )
+    }
+
     private val day = LocalDate.of(2026, 11, 23)
 
     private fun data(h: H5600HealthData) = StepCounterData(

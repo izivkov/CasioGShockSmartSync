@@ -23,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
-import org.avmedia.gshockGoogleSync.homeassistant.HaSettingsEntry
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
@@ -38,7 +37,7 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SettingsScreen(
-    onOpenHa: () -> Unit = {},
+    onOpenPlugin: (String) -> Unit = {},
     onOpenWatchFace: () -> Unit = {},
     onOpenWatchHealth: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
@@ -60,10 +59,10 @@ fun SettingsScreen(
                         .padding(0.dp)
                         .fillMaxWidth()
                 ) {
-                    // Home Assistant has its one home here, first.
-                    HaSettingsEntry(onOpen = onOpenHa)
+                    // The plugins (Home Assistant, ...) have their one home here, first: switch and screen.
+                    org.avmedia.gshockGoogleSync.plugins.PluginSettingsEntries(onOpen = onOpenPlugin)
                     SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
-                    org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "App log", value = ">", onClick = onOpenAppLog)
+                    AboutSection(onOpenAppLog)
                 }
                 BottomRow(modifier = Modifier.fillMaxWidth())
             }
@@ -158,4 +157,18 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
 @Composable
 fun PreviewSettingsScreen() {
     SettingsScreen()
+}
+
+/** The bottom of Settings: the app's and the library's version, and the App log (its screen has Share). */
+@Composable
+fun AboutSection(onOpenAppLog: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+        androidx.compose.material3.Text(
+            "About", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+        )
+        org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "App version", value = org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME)
+        org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "Library version", value = org.avmedia.gshockGoogleSync.BuildConfig.LIBRARY_VERSION)
+        org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "App log", value = ">", onClick = onOpenAppLog)
+    }
 }

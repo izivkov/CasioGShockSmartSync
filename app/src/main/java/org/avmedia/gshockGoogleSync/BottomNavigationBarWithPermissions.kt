@@ -60,7 +60,7 @@ import kotlinx.coroutines.flow.first
 @Composable
 fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
-    onOpenHa: () -> Unit = {},
+    onOpenPlugin: (String) -> Unit = {},
     onOpenWatchList: () -> Unit = {},
     keepsLink: () -> Boolean = { false },
 ) {
@@ -70,7 +70,7 @@ fun BottomNavigationBarWithPermissions(
 
     TimeTabBack(currentDestination?.route, onOpenWatchList)
     // Home Assistant opened from Settings (or the Actions link) comes back to Settings.
-    val openHaFromSettings = { MainTabReturn.set(Screens.Settings.route); onOpenHa() }
+    val openPluginFromSettings = { id: String -> MainTabReturn.set(Screens.Settings.route); onOpenPlugin(id) }
     LaunchedEffect(navController) {
         MainTabReturn.take()?.let { route ->
             // The graph is set once the NavHost has composed: its first back stack entry says so.
@@ -216,7 +216,7 @@ fun BottomNavigationBarWithPermissions(
                     navController,
                     destinationScreen = {
                         ActionsScreen(
-                            onOpenHaSetup = openHaFromSettings,
+                            onOpenPluginSetup = openPluginFromSettings,
                         )
                     },
                     stringResource(
@@ -226,7 +226,7 @@ fun BottomNavigationBarWithPermissions(
             }
             composable(Screens.Settings.route) {
                 SettingsScreen(
-                    onOpenHa = openHaFromSettings,
+                    onOpenPlugin = openPluginFromSettings,
                     onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
                     onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
                     onOpenNotifications = { navController.navigate(Screens.NotificationSettings.route) },

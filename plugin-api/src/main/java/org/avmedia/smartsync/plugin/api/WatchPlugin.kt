@@ -21,6 +21,15 @@ interface WatchPlugin {
     /** The interface version this plugin was built against: write `override val apiVersion = PluginApi.VERSION`. */
     val apiVersion: String
 
+    /** The plugin's own version, shown in Settings > Plugins ("0.1.0"). */
+    val version: String
+
+    /** What the plugin reads, controls, sends where and keeps ([PluginAccess]); the host keeps it to that. */
+    val access: PluginAccess
+
+    /** Its icon in Settings, its Actions card and the App log; null: the host's plugin icon. */
+    val icon: PluginIcon? get() = null
+
     /** Starts the plugin. [host] stays valid until [deactivate]. Declare [PluginHost.declareNeeds] here. */
     suspend fun activate(host: PluginHost)
 
@@ -34,22 +43,26 @@ interface WatchPlugin {
     val ui: PluginUi? get() = null
 }
 
-/** The places in the app a plugin may fill. Each is optional. */
+/**
+ * What a plugin shows in the app. The host lists it in Settings > Plugins (icon, name, version, [statusLine], the on/off
+ * switch, a details sheet with its [PluginAccess]; its screen opens from there) and, with [hasActionsRow], in the Actions tab (icon, name, the same switch, and
+ * below it [ActionsRow] while the plugin is on). Screens run in the app's theme.
+ */
 interface PluginUi {
-    /** A row in the Settings tab (name, status); [onOpen] opens [SettingsScreen]. */
+    /** One short line under the name in Settings, for example "Connected" or "Not set up". */
     @Composable
-    fun SettingsEntry(onOpen: () -> Unit)
+    fun statusLine(): String
 
     /** The plugin's own screen, full size; [onBack] closes it (the back gesture does too). */
     @Composable
     fun SettingsScreen(onBack: () -> Unit)
 
-    /** A row in the Actions tab (what a watch button press does in this plugin); [onOpenSettings] opens [SettingsScreen]. */
+    /** True: the plugin has a card in the Actions tab. */
+    val hasActionsRow: Boolean get() = false
+
+    /** The plugin's part of its Actions card (what a watch button press does); [onOpenSettings] opens [SettingsScreen]. */
     @Composable
     fun ActionsRow(onOpenSettings: () -> Unit) {}
-
-    /** False: no Actions row is shown. */
-    val hasActionsRow: Boolean get() = false
 }
 
 /**
@@ -59,7 +72,7 @@ interface PluginUi {
 data class PluginNeeds(
     /** Value keys ([WatchValues]) the host should read for this plugin; empty = none, null = every key it knows. */
     val values: Set<String>? = emptySet(),
-    /** The plugin wants [WatchEvent.ButtonPressed]: it is listed among the actions a watch button press runs. */
+    /** The plugin wants [WatchEvent.ButtonPressed] (needs [Control.BUTTON_PRESS]): it is listed among the actions a press runs. */
     val buttonPress: Boolean = false,
     /** The plugin uses health data: the host reads the watch's health log in the background as well. */
     val healthReads: Boolean = false,

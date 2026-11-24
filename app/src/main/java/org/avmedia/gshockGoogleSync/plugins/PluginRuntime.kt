@@ -44,14 +44,21 @@ data class PluginLimits(
 class PluginRuntime(
     private val scope: CoroutineScope,
     private val hostFor: (WatchPlugin) -> PluginHost,
-    private val log: (pluginName: String, line: String) -> Unit,
+    private val log: (pluginId: String, line: String) -> Unit,
     private val limits: PluginLimits = PluginLimits(),
     private val hostApiVersion: String = PluginApi.VERSION,
     /** A plugin was turned off after failures: kept, so it stays off after a restart until the person turns it on. */
     private val onFailed: (id: String, reason: String) -> Unit = { _, _ -> },
     private val dropCommands: (id: String) -> Unit = {},
+    /** A callback threw or took too long ([text]: what and why), and the next one that worked. */
+    private val onCaught: (id: String, text: String) -> Unit = { _, _ -> },
+    private val onRecovered: (id: String) -> Unit = {},
+    /** What a watch can do (its capabilities at its last connection), to keep each plugin to the watches it works with. */
+    private val capsOf: (org.avmedia.smartsync.plugin.api.WatchId) -> Set<org.avmedia.smartsync.plugin.api.Capability> = { emptySet() },
 ) {
     private class Slot(val plugin: WatchPlugin) {
+        val access: org.avmedia.smartsync.plugin.api.PluginAccess =
+            runCatching { plugin.access }.getOrDefault(org.avmedia.smartsync.plugin.api.PluginAccess())
         var state: PluginState = PluginState.Off
         var queue: PluginEventQueue? = null
         var job: Job? = null
@@ -84,17 +91,16 @@ class PluginRuntime(
     suspend fun activate(id: String): Boolean = lifecycle.withLock {
         val slot = synchronized(slots) { slots[id] } ?: return false
         if (slot.state == PluginState.Active) return true
-        val name = nameOf(slot)
         val version = runCatching { slot.plugin.apiVersion }.getOrDefault("")
         if (!PluginApi.compatible(version, hostApiVersion)) {
             setState(slot, PluginState.Incompatible(version))
-            log(name, "not started: built for plugin interface $version, this app has $hostApiVersion")
+            log(id, "not started: built for plugin interface $version, this app has $hostApiVersion")
             return false
         }
         slot.failures = 0
         slot.loggedFailure = false
         slot.needs = PluginNeeds()
-        val queue = PluginEventQueue(limits.queueSize) { log(name, it) }
+        val queue = PluginEventQueue(limits.queueSize) { log(id, it) }
         slot.queue = queue
         val started = guarded(slot, "start") { withTimeout(limits.activateTimeoutMs) { slot.plugin.activate(hostFor(slot.plugin)) } }
         if (!started) {
@@ -133,8 +139,25 @@ class PluginRuntime(
         val targets = synchronized(slots) { slots.values.filter { it.state == PluginState.Active } }
         for (slot in targets) {
             if (event is WatchEvent.ButtonPressed && !slot.needs.buttonPress) continue
-            slot.queue?.offer(event)
+            // Only what the plugin declared ([org.avmedia.smartsync.plugin.api.PluginAccess]).
+            val seen = AccessGuard.event(slot.access, event) ?: continue
+            if (!servesWatch(slot, event)) continue
+            slot.queue?.offer(seen)
         }
+    }
+
+    /** Puts [event] in the queue of [id] only (what a plugin that just started missed). */
+    fun dispatchTo(id: String, event: WatchEvent) {
+        val slot = synchronized(slots) { slots[id]?.takeIf { it.state == PluginState.Active } } ?: return
+        if (!servesWatch(slot, event)) return
+        AccessGuard.event(slot.access, event)?.let { slot.queue?.offer(it) }
+    }
+
+    /** A watch the plugin cannot work with (a required capability missing) gets nothing. */
+    private fun servesWatch(slot: Slot, event: WatchEvent): Boolean {
+        val w = event.watch ?: return true
+        return org.avmedia.smartsync.plugin.api.WatchSupport.of(slot.access, runCatching { capsOf(w) }.getOrDefault(emptySet())) !is
+            org.avmedia.smartsync.plugin.api.WatchSupport.NotSupported
     }
 
     fun declareNeeds(id: String, needs: PluginNeeds) {
@@ -144,7 +167,15 @@ class PluginRuntime(
 
     /** What the active plugins need together. */
     fun needs(): PluginNeeds {
-        val active = synchronized(slots) { slots.values.filter { it.state == PluginState.Active }.map { it.needs } }
+        val active = synchronized(slots) {
+            slots.values.filter { it.state == PluginState.Active }.map { s ->
+                // A need the declaration does not cover counts for nothing.
+                s.needs.copy(
+                    buttonPress = s.needs.buttonPress && org.avmedia.smartsync.plugin.api.Control.BUTTON_PRESS in s.access.controls,
+                    values = s.needs.values?.filter { AccessGuard.mayRead(s.access, it) }?.toSet(),
+                )
+            }
+        }
         val values: Set<String>? = if (active.any { it.values == null }) null else active.flatMap { it.values.orEmpty() }.toSet()
         return PluginNeeds(
             values = values,
@@ -156,7 +187,11 @@ class PluginRuntime(
     }
 
     /** The needs of [id] while it is active. */
-    fun needsOf(id: String): PluginNeeds? = synchronized(slots) { slots[id]?.takeIf { it.state == PluginState.Active }?.needs }
+    fun needsOf(id: String): PluginNeeds? = synchronized(slots) {
+        slots[id]?.takeIf { it.state == PluginState.Active }?.let { s ->
+            s.needs.copy(buttonPress = s.needs.buttonPress && org.avmedia.smartsync.plugin.api.Control.BUTTON_PRESS in s.access.controls)
+        }
+    }
 
     private suspend fun consume(slot: Slot, queue: PluginEventQueue) {
         while (true) {
@@ -166,7 +201,7 @@ class PluginRuntime(
             }
             if (!ok && slot.failures >= limits.maxFailures) {
                 val reason = "turned off after ${slot.failures} failures in a row"
-                log(nameOf(slot), reason)
+                log(slot.plugin.id, reason)
                 onFailed(slot.plugin.id, reason)
                 // Not in the lifecycle lock: this coroutine is the one stop() cancels.
                 scope.launch { lifecycle.withLock { if (slot.state == PluginState.Active) stop(slot, PluginState.Failed(reason)) } }
@@ -179,6 +214,7 @@ class PluginRuntime(
     private suspend fun guarded(slot: Slot, what: String, count: Boolean = true, block: suspend () -> Unit): Boolean =
         try {
             block()
+            if (slot.loggedFailure) runCatching { onRecovered(slot.plugin.id) }
             slot.failures = 0
             slot.loggedFailure = false
             true
@@ -186,10 +222,12 @@ class PluginRuntime(
             val timedOut = e is kotlinx.coroutines.TimeoutCancellationException
             if (e is CancellationException && !timedOut) throw e
             if (count) slot.failures++
+            // The class only: a message can hold a URL or a value.
+            val why = if (timedOut) "took too long" else e.javaClass.simpleName
+            runCatching { onCaught(slot.plugin.id, "$what failed ($why)") }
             if (!slot.loggedFailure) {
                 slot.loggedFailure = true
-                val why = if (timedOut) "took too long" else "${e.javaClass.simpleName}: ${e.message.orEmpty().take(120)}"
-                log(nameOf(slot), "$what failed ($why)")
+                log(slot.plugin.id, "$what failed ($why)")
             }
             false
         }

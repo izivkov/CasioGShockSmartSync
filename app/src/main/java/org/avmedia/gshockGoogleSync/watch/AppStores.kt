@@ -1,14 +1,11 @@
 package org.avmedia.gshockGoogleSync.watch
 
-import org.avmedia.gshockGoogleSync.homeassistant.HaStore
-import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
-import org.avmedia.gshockGoogleSync.watchvalues.RawReadSwitch
 import android.content.Context
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 
 /**
- * The stores of Home Assistant and the app switches, on the app's [LocalDataStorage]. Plain object so background
- * workers can use it without dependency injection.
+ * The app's stores on its [LocalDataStorage]. Plain object so background workers can use it without dependency
+ * injection.
  */
 object AppStores {
     /** The time of each watch's last connection, the `app.last_sync` variable (per watch). */
@@ -22,19 +19,12 @@ object AppStores {
         override fun keys(): Set<String> = LocalDataStorage.toJsonObject(context).keys().asSequence().toSet()
     }
 
-    /** Every per-watch value; the values of older versions belong to the registered H5600 watch ([HaStore.legacyOwnerCandidate]). */
-    fun watchStore(context: Context): org.avmedia.gshockGoogleSync.watch.WatchStore {
+    /** Every per-watch value; the values of older versions belong to the registered H5600 watch ([LegacyHaKeys]). */
+    fun watchStore(context: Context): WatchStore {
         val kv = LocalKeyValueStore(context.applicationContext)
-        return org.avmedia.gshockGoogleSync.watch.WatchStore(kv, pickLegacyOwner = { HaStore(kv).legacyOwnerCandidate() })
+        return WatchStore(kv, pickLegacyOwner = { LegacyHaKeys.legacyOwnerCandidate(kv) })
     }
-
-    /** The Home Assistant link. */
-    fun haStore(context: Context): HaStore = HaStore(LocalKeyValueStore(context.applicationContext))
-
-    fun rawSwitch(context: Context): RawReadSwitch = RawReadSwitch(LocalKeyValueStore(context.applicationContext))
 
     fun phoneNotifications(context: Context): org.avmedia.gshockGoogleSync.notifications.PhoneNotificationSettings =
         org.avmedia.gshockGoogleSync.notifications.PhoneNotificationSettings(LocalKeyValueStore(context.applicationContext), watchStore(context))
-
-    fun toggles(context: Context): ServiceToggles = ServiceToggles(LocalKeyValueStore(context.applicationContext))
 }

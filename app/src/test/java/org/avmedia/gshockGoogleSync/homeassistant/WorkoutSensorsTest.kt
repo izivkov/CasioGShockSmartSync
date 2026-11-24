@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockGoogleSync.watchvalues.WorkoutVariables
 import com.google.gson.JsonParser
 import org.avmedia.gshockGoogleSync.history.WorkoutTestData
@@ -10,6 +12,14 @@ import org.junit.Test
 
 /** The "last workout" Home Assistant sensors: what is sent for a workout, and nothing for a missing value. */
 class WorkoutSensorsTest {
+    init {
+        // What the app gives the Home Assistant plugin when it starts: its raw codes and writable settings.
+        HaSensors.hostKeys = HaSensors.HostKeys(
+            org.avmedia.gshockGoogleSync.watchvalues.RawSettings.CODES.map(org.avmedia.gshockGoogleSync.watchvalues.RawSettings::name),
+            org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry.ALL.map { it.key },
+        )
+    }
+
     private val ids = listOf("workout_sport", "workout_start", "workout_duration", "workout_distance", "workout_kcal", "workout_hr_avg", "workout_hr_max")
 
     @Test fun theSevenSensorsExistAndBelongToTheHealthGroup() {

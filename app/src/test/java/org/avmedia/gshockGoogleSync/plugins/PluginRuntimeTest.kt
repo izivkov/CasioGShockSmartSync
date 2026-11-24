@@ -38,6 +38,10 @@ class PluginRuntimeTest {
         val handle: suspend (WatchEvent) -> Unit = {},
     ) : WatchPlugin {
         override val name: String get() = id
+        override val version: String = "1"
+        override val access = org.avmedia.smartsync.plugin.api.PluginAccess(
+            reads = org.avmedia.smartsync.plugin.api.DataUse.entries.toSet(), controls = org.avmedia.smartsync.plugin.api.Control.entries.toSet(),
+        )
         val seen: MutableList<WatchEvent> = Collections.synchronizedList(mutableListOf())
         var host: PluginHost? = null
         var deactivated = 0
@@ -188,10 +192,18 @@ class PluginRuntimeTest {
         q.offer(values)
         q.offer(WatchEvent.Connected(w, org.avmedia.smartsync.plugin.api.ConnectionKind.USER))
         q.offer(WatchEvent.ButtonPressed(w, java.time.Instant.EPOCH))
-        q.offer(WatchEvent.WatchRemoved(w))
         assertEquals(3, q.size())
         val left = runBlocking { List(3) { q.take()!! } }
-        assertEquals(listOf(WatchEvent.Connected::class, WatchEvent.ButtonPressed::class, WatchEvent.WatchRemoved::class), left.map { it::class })
+        // The values (a newer read replaces them) go; the older disconnect stays.
+        assertEquals(listOf(WatchEvent.Disconnected::class, WatchEvent.Connected::class, WatchEvent.ButtonPressed::class), left.map { it::class })
+        assertEquals(1, lines.size)
+    }
+
+    @Test fun aLongOverflowIsOneLogLine() {
+        val q = PluginEventQueue(2) { lines += it }
+        repeat(5) { q.offer(WatchEvent.SettingChanged(w, "k$it", it)) }
+        q.offer(WatchEvent.Disconnected(w))
+        assertEquals(2, q.size())
         assertEquals(1, lines.size)
     }
 }

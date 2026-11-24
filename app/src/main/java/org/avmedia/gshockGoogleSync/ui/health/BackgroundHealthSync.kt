@@ -13,8 +13,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.homeassistant.HaGroup
-import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
 import org.avmedia.gshockGoogleSync.watch.AppStores
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
@@ -35,6 +33,7 @@ import org.avmedia.gshockGoogleSync.watch.CurrentWatch
 class BackgroundHealthSync @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val api: GShockRepository,
+    private val pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -79,15 +78,8 @@ class BackgroundHealthSync @Inject constructor(
         }
     }
 
-    private fun hasConsumer(): Boolean {
-        val toggles = AppStores.toggles(context)
-        val ha = AppStores.haStore(context)
-        return HealthReadScheduler.hasConsumer(
-            haConfigured = ha.load() != null,
-            haOn = toggles.isOn(ServiceToggles.Service.HOME_ASSISTANT),
-            haHealthGroupOn = HaGroup.HEALTH in ha.groupsOn(),
-        )
-    }
+    /** A plugin that is on uses the health data (Home Assistant with its Health group on, ...). Else no background reads. */
+    private fun hasConsumer(): Boolean = pluginHub.runtime.needs().healthReads
 
     private suspend fun read(): Boolean {
         val data = withTimeoutOrNull(3.minutes) { api.getStepCount() } ?: return false

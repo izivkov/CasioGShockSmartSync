@@ -13,13 +13,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
-import org.avmedia.gshockGoogleSync.homeassistant.HA_SET_UP_LINK
-import org.avmedia.gshockGoogleSync.homeassistant.HaAction
-import org.avmedia.gshockGoogleSync.homeassistant.HaActionsUi
-import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionContent
-import org.avmedia.gshockGoogleSync.homeassistant.HaSettingsEntryContent
-import org.avmedia.gshockGoogleSync.homeassistant.HaStatus
 import org.avmedia.gshockGoogleSync.session.LinkState
 import org.avmedia.gshockGoogleSync.ui.time.TimeTitleRow
 import org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow
@@ -114,31 +110,26 @@ class MainScreensUiTest {
         assertTrue("the title keeps its width next to a long value ($long vs $alone)", long.right - long.left >= alone.right - alone.left - 1.dp)
     }
 
-    @Test fun settingsListsHomeAssistantWithItsStatus() {
+    @Test fun settingsListsEachPluginWithItsStatusAndSwitch() {
         var opened = 0
-        rule.setContent { HaSettingsEntryContent(HaStatus.NOT_SET_UP, onOpen = { opened++ }) }
+        var switched: Boolean? = null
+        val p = org.avmedia.gshockGoogleSync.plugins.FakePlugin(status = "Not set up")
+        rule.setContent { org.avmedia.gshockGoogleSync.plugins.PluginCard(p, "Not set up", on = true, onSwitch = { switched = it }, onOpen = { opened++ }) }
         rule.onNodeWithText("Home Assistant").assertIsDisplayed()
         rule.onNodeWithText("Not set up").assertIsDisplayed()
         rule.onNodeWithText("Home Assistant").performClick()
         assertEquals(1, opened)
-        assertEquals("Connected", HaStatus.text(saved = true, lastOk = null))
-        assertEquals("Not set up", HaStatus.text(saved = false, lastOk = true))
+        rule.onNode(androidx.compose.ui.test.isToggleable()).performClick()
+        assertEquals(false, switched)
     }
 
-    @Test fun theActionsRowOnlyChoosesTheButtonAction() {
-        val actions = HaActionsUi(items = listOf(HaAction("script", "script.lights", "Lights")))
-        rule.setContent { HaButtonActionContent(true, true, {}, actions, {}, {}, {}) }
+    @Test fun theActionsCardShowsThePluginsLineOnlyWhileOn() {
+        val p = org.avmedia.gshockGoogleSync.plugins.FakePlugin()
+        var on by androidx.compose.runtime.mutableStateOf(true)
+        rule.setContent { org.avmedia.gshockGoogleSync.plugins.PluginActionCard(p, on, onSwitch = { on = it }, onOpenSettings = {}) }
         rule.onNodeWithText("Watch button:", substring = true).assertExists()
-        listOf("Token", "Address", "Forget", "Dashboard", "Find").forEach {
-            rule.onNodeWithText(it, substring = true).assertDoesNotExist()
-        }
-    }
-
-    @Test fun theActionsRowLinksToSettingsWhenNotSetUp() {
-        var setup = 0
-        rule.setContent { HaButtonActionContent(false, true, {}, HaActionsUi(), {}, {}, { setup++ }) }
+        on = false
+        rule.waitForIdle()
         rule.onNodeWithText("Watch button:", substring = true).assertDoesNotExist()
-        rule.onNodeWithText(HA_SET_UP_LINK).performClick()
-        assertEquals(1, setup)
     }
 }

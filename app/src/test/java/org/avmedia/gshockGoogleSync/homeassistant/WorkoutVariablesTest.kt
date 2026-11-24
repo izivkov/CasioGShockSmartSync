@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockGoogleSync.watchvalues.VariableContext
 import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
 import org.avmedia.gshockGoogleSync.watchvalues.WorkoutVariables

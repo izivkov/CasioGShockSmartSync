@@ -9,10 +9,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.avmedia.gshockGoogleSync.ActionContainer
-import org.avmedia.gshockGoogleSync.homeassistant.HaAction
-import org.avmedia.gshockGoogleSync.homeassistant.HaActionPickerContent
-import org.avmedia.gshockGoogleSync.homeassistant.HaActionsUi
-import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionContent
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
@@ -37,18 +33,15 @@ class ActionsScreenshotTest : ScreenshotTest() {
         every { isFeatureSupported(any()) } returns true
     }
 
-    private val goodnight = HaAction("script", "script.goodnight_and_all_lights_off_downstairs", "Goodnight and all lights off downstairs")
-    private val items = listOf(
-        HaAction("automation", "automation.front_door", "Front door camera"), goodnight,
-        HaAction("scene", "scene.movie", "Movie night"), HaAction("script", "script.find_keys", "Find keys"),
-    )
-
     @Composable
     private fun Screen(allOn: Boolean, saved: Boolean = true) {
         CompositionLocalProvider(LocalWatchFeatureManager provides features()) {
             ActionsScreen(
                 actionsViewModel = viewModel(allOn),
-                haRow = { HaButtonActionContent(saved, allOn, {}, HaActionsUi(items = items, chosen = goodnight), {}, {}, {}) },
+                pluginRows = {
+                    val line = if (saved) "Watch button: Goodnight and all lights off downstairs" else "Set up in Settings > Home Assistant"
+                    org.avmedia.gshockGoogleSync.plugins.PluginActionCard(org.avmedia.gshockGoogleSync.plugins.FakePlugin(actionLine = line), allOn, {}, {})
+                },
             )
         }
     }
@@ -64,10 +57,4 @@ class ActionsScreenshotTest : ScreenshotTest() {
     @Test fun bottomLight() = snap("actions_bottom", dark = false, before = toBottom) { Screen(allOn = true) }
     @Config(qualifiers = "w360dp-h560dp-420dpi")
     @Test fun bottomDark() = snap("actions_bottom", dark = true, before = toBottom) { Screen(allOn = true) }
-
-    @Test fun pickerLight() = snap("button_action_picker", dark = false) { HaActionPickerContent(HaActionsUi(items = items, chosen = goodnight), {}, {}, {}) }
-    @Test fun pickerDark() = snap("button_action_picker", dark = true) { HaActionPickerContent(HaActionsUi(items = items, chosen = goodnight), {}, {}, {}) }
-    @Test fun pickerSearchLight() = snap("button_action_picker_search", dark = false) {
-        HaActionPickerContent(HaActionsUi(items = items, chosen = goodnight), {}, {}, {}, initialQuery = "night")
-    }
 }

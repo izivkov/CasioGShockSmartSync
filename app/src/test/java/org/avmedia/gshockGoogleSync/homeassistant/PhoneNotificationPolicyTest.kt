@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationMode as M
 import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationPolicy as P
@@ -99,7 +101,7 @@ class PhoneNotificationPolicyTest {
 
     /** The Home Assistant path hands messages straight to the watch: nothing in it asks this setting. */
     @Test fun theHomeAssistantPathDoesNotUseThisSetting() {
-        val src = java.io.File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant/HaPushChannel.kt").readText()
+        val src = java.io.File("../plugins/homeassistant/src/main/java/org/avmedia/smartsync/homeassistant/HaPushChannel.kt").readText()
         assertFalse(src.contains("PhoneNotification"))
         val handler = java.io.File("src/main/java/org/avmedia/gshockGoogleSync/MainEventHandler.kt").readText()
         assertFalse(handler.contains("PhoneNotification"))

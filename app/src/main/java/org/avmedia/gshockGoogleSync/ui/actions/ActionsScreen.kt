@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
-import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionRow
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
@@ -28,9 +27,9 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
-    onOpenHaSetup: () -> Unit = {},
+    onOpenPluginSetup: (String) -> Unit = {},
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
-    haRow: @Composable () -> Unit = { HaButtonActionRow(onOpenHaSetup) },
+    pluginRows: @Composable () -> Unit = { org.avmedia.gshockGoogleSync.plugins.PluginActionRows(onOpenPluginSetup) },
 ) {
     val isModified by actionsViewModel.isModified.collectAsState()
 
@@ -45,7 +44,7 @@ fun ActionsScreen(
                 ActionsContent(
                     modifier = Modifier.weight(1f),
                     actionsViewModel = actionsViewModel,
-                    haRow = haRow,
+                    pluginRows = pluginRows,
                 )
 
                 ButtonsRow(
@@ -67,7 +66,7 @@ fun ActionsScreen(
 private fun ActionsContent(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel,
-    haRow: @Composable () -> Unit,
+    pluginRows: @Composable () -> Unit,
 ) {
     Column(
         modifier =
@@ -76,13 +75,13 @@ private fun ActionsContent(
                 // Room under the last row: scrolled to the end, nothing sits against or behind the Save bar.
                 .padding(bottom = 16.dp)
                 .fillMaxWidth()
-    ) { ItemList(items = createActionItems(actionsViewModel, haRow)) }
+    ) { ItemList(items = createActionItems(actionsViewModel, pluginRows)) }
 }
 
 @Composable
 private fun createActionItems(
     actionsViewModel: ActionsViewModel,
-    haRow: @Composable () -> Unit,
+    pluginRows: @Composable () -> Unit,
 ): List<Any> {
     val watchFeatureManager = LocalWatchFeatureManager.current
 
@@ -127,7 +126,7 @@ private fun createActionItems(
             R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
             infoRes = R.string.prayer_times_info
         ),
-        haRow(),
+        pluginRows(),
         SeparatorView(),
         PhoneView(actionsViewModel)
     )

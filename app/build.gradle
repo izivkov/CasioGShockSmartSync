@@ -27,6 +27,12 @@ android {
         targetSdk = 37
         versionCode = 42930
         versionName = "42.9.30"
+        // Settings > About: the library is the gshockapi submodule (its commit).
+        def libRev = providers.exec {
+            commandLine 'git', '-C', rootProject.file('gshockapi').path, 'rev-parse', '--short', 'HEAD'
+            ignoreExitValue = true
+        }.standardOutput.asText.map { it.trim() }.getOrElse("")
+        buildConfigField "String", "LIBRARY_VERSION", "\"GShockAPI ${libs.versions.gshockapi.get()}${libRev ? ' (' + libRev + ')' : ''}\""
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -111,6 +117,8 @@ dependencies {
     implementation(libs.gshockapi)
     // The plugin interface (its own version, published from this repository); plugins depend on it only.
     implementation(project(':plugin-api'))
+    // Plugins shipped with the app (found by ServiceLoader at start).
+    implementation(project(':plugins:homeassistant'))
     // The library comes from the gshockapi submodule (settings.gradle, includeBuild).
 
     implementation(libs.androidx.core.ktx)

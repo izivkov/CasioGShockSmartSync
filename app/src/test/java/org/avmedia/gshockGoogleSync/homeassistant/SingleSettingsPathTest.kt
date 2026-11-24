@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockGoogleSync.watchvalues.RawWatchRequest
 import java.io.File
 import kotlinx.coroutines.runBlocking
@@ -91,16 +93,17 @@ class SingleSettingsPathTest {
         }
 
     @Test fun onlyTheOneIoBuildsTheCheckedWriterAndWritesChecked() {
-        val all = sources("src/main/java", "../api/src/main/java")
+        val all = sources("src/main/java", "../api/src/main/java", "../plugins")
         assertEquals(emptyList<String>(), offenders(all, "SafeSettingWrite(", setOf("RawSettingIO.kt", "SafeSettingWrite.kt")))
         assertEquals(emptyList<String>(), offenders(all, "writeChecked(GetSetMode.SET", setOf("RawSettingIO.kt")))
     }
 
     @Test fun theFaceScreenAndHomeAssistantWriteThroughTheSameAccess() {
         val face = File("src/main/java/org/avmedia/gshockGoogleSync/ui/watchhealth/WatchFaceViewModel.kt").readText()
-        val ha = File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant/HaSync.kt").readText()
+        // Plugins (Home Assistant's command_watch_setting) write through the hub's settings writer.
+        val ha = File("src/main/java/org/avmedia/gshockGoogleSync/plugins/PluginHub.kt").readText()
         assertTrue("the face screen writes through access.update", "access.update(WatchFaceCodec.CODE" in face)
         assertTrue("Home Assistant commands write through access.update", "access.update(s.code" in ha)
-        assertTrue("the registry's watch_face entry names the face code", "pick(\"watch_face\"" in File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant/WatchSettingRegistry.kt").readText())
+        assertTrue("the registry's watch_face entry names the face code", "pick(\"watch_face\"" in File("src/main/java/org/avmedia/gshockGoogleSync/watchvalues/WatchSettingRegistry.kt").readText())
     }
 }

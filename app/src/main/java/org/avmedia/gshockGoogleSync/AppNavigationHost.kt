@@ -23,7 +23,7 @@ import org.avmedia.gshockGoogleSync.session.LinkState
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
-import org.avmedia.gshockGoogleSync.homeassistant.HaScreen
+import org.avmedia.gshockGoogleSync.plugins.PluginScreen
 
 @Composable
 fun AppNavigationHost(
@@ -47,9 +47,10 @@ fun AppNavigationHost(
             AppScreen.CONTENT_SELECTOR -> ContentSelector(viewModel)
             AppScreen.MAIN_NAVIGATION -> MainScreens(viewModel)
             AppScreen.RUN_ACTIONS -> RunActionsScreen()
-            AppScreen.HOME_ASSISTANT -> {
-                androidx.activity.compose.BackHandler(onBack = viewModel::closeHa)
-                HaScreen(viewModel = hiltViewModel(), onBack = viewModel::closeHa)
+            AppScreen.PLUGIN -> {
+                val id by viewModel.openPlugin.collectAsState()
+                androidx.activity.compose.BackHandler(onBack = viewModel::closePlugin)
+                id?.let { PluginScreen(it, onBack = viewModel::closePlugin) }
             }
             AppScreen.WATCH_LIST -> {
                 // No Back button: the back gesture, or a tap on the connected watch's card, returns to its screens.
@@ -64,7 +65,7 @@ fun AppNavigationHost(
 private fun MainScreens(viewModel: AppNavigationViewModel) =
     BottomNavigationBarWithPermissions(
         repository = viewModel.repository,
-        onOpenHa = viewModel::openHa,
+        onOpenPlugin = viewModel::openPlugin,
         onOpenWatchList = viewModel::openWatchList,
         keepsLink = viewModel::keepsLink,
     )

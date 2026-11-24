@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.smartsync.homeassistant.*
+
 import org.avmedia.gshockapi.io.AppNotificationIO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

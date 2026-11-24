@@ -53,9 +53,6 @@ class HealthReadScheduler(
     }
 
     companion object {
-        /** Something uses the data: Home Assistant set up, on, with its Health group on. Else no background reads. */
-        fun hasConsumer(haConfigured: Boolean, haOn: Boolean, haHealthGroupOn: Boolean): Boolean =
-            haConfigured && haOn && haHealthGroupOn
 
 
         const val DEFAULT_INTERVAL_MS = 15 * 60_000L

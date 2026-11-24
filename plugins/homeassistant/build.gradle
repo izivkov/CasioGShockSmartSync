@@ -1,0 +1,60 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.roborazzi)
+}
+
+// The Home Assistant plugin of Smart Sync. It depends on the plugin interface only (no app or library classes).
+version = '0.1.0'
+
+android {
+    namespace = 'org.avmedia.smartsync.homeassistant'
+    compileSdk = 37
+
+    defaultConfig {
+        minSdk = 26
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    testOptions {
+        unitTests {
+            // Robolectric (the screenshot and UI tests) needs the merged resources.
+            includeAndroidResources = true
+            all { testLogging { exceptionFormat = 'full'; events 'failed' } }
+        }
+    }
+}
+
+dependencies {
+    implementation(project(':plugin-api'))
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.material3)
+    implementation(libs.compose.ui)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.okhttp)
+    implementation(libs.gson)
+    implementation(libs.timber)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.compose.ui.test.manifest)
+}

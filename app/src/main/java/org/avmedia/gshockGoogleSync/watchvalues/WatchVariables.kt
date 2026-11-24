@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.watchvalues
 
-import org.avmedia.gshockGoogleSync.homeassistant.HaPushState
 import org.avmedia.gshockGoogleSync.watch.AppStores
 import android.content.Context
 import android.os.BatteryManager
@@ -20,7 +19,7 @@ import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.IO
 
 /**
- * THE list of variables the Home Assistant sensors read ([HaSensors]). To add one, add one [Variable] here.
+ * THE list of watch values the plugins read (Home Assistant's sensors among them). To add one, add one [Variable] here.
  * Names are dotted (`watch.*`, `health.*`, `app.*`).
  *
  * A value the connected watch does not support returns null and is simply left out.
@@ -43,7 +42,7 @@ object WatchVariables {
         val rawOn: () -> Boolean = { false },
     )
 
-    fun androidEnv(appContext: Context, api: GShockRepository, features: IWatchFeatureManager, raw: RawRequester) = Env(
+    fun androidEnv(appContext: Context, api: GShockRepository, features: IWatchFeatureManager, raw: RawRequester, rawOn: () -> Boolean) = Env(
         api = api,
         features = features,
         raw = raw,
@@ -56,7 +55,7 @@ object WatchVariables {
         lastSync = { AppStores.watchStore(appContext).get(org.avmedia.gshockGoogleSync.watch.CurrentWatch.key(), AppStores.KEY_LAST_SYNC, AppStores.KEY_LAST_SYNC)?.value },
         healthData = { H5600Session.data },
         lastWorkout = { WorkoutStore.newest(appContext) },
-        rawOn = { AppStores.rawSwitch(appContext).isOn() },
+        rawOn = rawOn,
     )
 
     fun registry(env: Env): VariableRegistry {
@@ -111,12 +110,6 @@ object WatchVariables {
             Variable("app.last_sync", "When the app last connected to the watch, ISO 8601") {
                 env.lastSync()
             },
-
-            Variable("app.ha_push_connected", "True while the Home Assistant push socket is up") { HaPushState.connected },
-            Variable("app.ha_push_heartbeat", "Now, ISO 8601: Home Assistant can treat a stale value as 'the app is gone', since a dead app cannot send 'off'") {
-                java.time.OffsetDateTime.now().withNano(0).toString()
-            },
-            Variable("app.ha_push_changed_at", "When the Home Assistant push socket last went up or down, ISO 8601") { HaPushState.changedAt.takeIf { it.isNotEmpty() } },
 
             // Watch
             Variable("watch.connected", "True when the watch is connected right now") { it.watchConnected },

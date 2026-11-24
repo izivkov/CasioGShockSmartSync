@@ -7,14 +7,16 @@ import org.avmedia.gshockGoogleSync.log.LogSource
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Settings > App log with sample lines of every source, newest first. */
+/** Settings > About > App log with sample logcat lines of every source, newest first. */
 class AppLogScreenshotTest : ScreenshotTest() {
+    // As `logcat -v threadtime -v year` prints them; the last one is not ours and is not shown.
     private val raw = listOf(
-        "2026-11-23 08:01:02.100 [Watch] 49 00 received, 49 01 written",
-        "2026-11-23 08:05:10.250 [Health] LifeLog step refresh failed (TimeoutException)",
-        "2026-11-23 08:10:00.000 [Home Assistant] Home Assistant push: failed after 4 tries: host not reachable",
-        "2026-11-23 08:10:31.400 [Home Assistant] Home Assistant update sensors: sent after 2 tries",
-        "2026-11-23 08:12:00.000 [App] Session closed with an error",
+        "2026-11-23 08:01:02.100  4321  4350 I Watch   : 49 00 received, 49 01 written",
+        "2026-11-23 08:05:10.250  4321  4351 W Health  : LifeLog step refresh failed (TimeoutException)",
+        "2026-11-23 08:10:00.000  4321  4352 W home_assistant: Home Assistant push: failed after 4 tries: host not reachable",
+        "2026-11-23 08:10:31.400  4321  4352 I Home Assistant: Home Assistant update sensors: sent after 2 tries",
+        "2026-11-23 08:12:00.000  4321  4321 W App     : Session closed with an error",
+        "2026-11-23 08:12:00.500  4321  4330 D OpenGLRenderer: not one of ours",
     )
 
     @Composable private fun Screen(filter: LogSource? = null) =
