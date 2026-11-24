@@ -48,7 +48,7 @@ class CommandScheduler(
     private val signal = Channel<Unit>(Channel.CONFLATED)
 
     init {
-        repeat(2) { scope.launch { while (true) { signal.receive(); drain() } } } // RED CHECK
+        scope.launch { while (true) { signal.receive(); drain() } }
     }
 
     /** Queues [work] for [watch]; the result comes when it ran (or was parked, or refused). [what] names it in log lines. */

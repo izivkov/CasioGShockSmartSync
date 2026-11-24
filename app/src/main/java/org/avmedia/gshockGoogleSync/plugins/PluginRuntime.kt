@@ -62,7 +62,6 @@ class PluginRuntime(
 
     private val slots = LinkedHashMap<String, Slot>()
     private val lifecycle = Mutex()
-    private val eventLock = Mutex() // RED CHECK
     private val _states = MutableStateFlow<Map<String, PluginState>>(emptyMap())
     val states: StateFlow<Map<String, PluginState>> = _states
 
@@ -163,9 +162,9 @@ class PluginRuntime(
         while (true) {
             val event = queue.take() ?: return
             val ok = guarded(slot, event::class.simpleName ?: "event") {
-                eventLock.withLock { slot.plugin.onEvent(event) }
+                withTimeout(limits.eventTimeoutMs) { slot.plugin.onEvent(event) }
             }
-            if (false && !ok && slot.failures >= limits.maxFailures) {
+            if (!ok && slot.failures >= limits.maxFailures) {
                 val reason = "turned off after ${slot.failures} failures in a row"
                 log(nameOf(slot), reason)
                 onFailed(slot.plugin.id, reason)
