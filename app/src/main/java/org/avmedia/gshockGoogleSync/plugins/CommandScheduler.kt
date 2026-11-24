@@ -32,6 +32,8 @@ class CommandScheduler(
     private val busyLimitMs: Long = 120_000,
     private val pollMs: Long = 200,
     private val maxParkedPerPlugin: Int = 50,
+    /** Writes one plugin may have waiting in the queue; one more gives [FailReason.BUSY] at once. */
+    private val maxQueuedPerPlugin: Int = 32,
 ) {
     private class Item(
         val pluginId: String,
@@ -63,9 +65,20 @@ class CommandScheduler(
         work: suspend () -> WriteResult,
     ): WriteResult {
         val item = Item(pluginId, watch, delivery, what, timeoutMs, work)
+        val full = synchronized(lock) { pluginId != HOST && (queues[pluginId]?.size ?: 0) >= maxQueuedPerPlugin }
+        if (full) return PluginResult.Failed(FailReason.BUSY, "too many writes queued ($maxQueuedPerPlugin)")
         enqueue(item)
-        return item.result.await()
+        return try {
+            item.result.await()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            // The caller is gone: a write that has not started is taken out, never written later with nobody waiting.
+            synchronized(lock) { queues[pluginId]?.remove(item); if (queues[pluginId]?.isEmpty() == true) queues.remove(pluginId) }
+            throw e
+        }
     }
+
+    /** Writes [pluginId] has waiting in the queue now (not parked). */
+    fun queuedCount(pluginId: String): Int = synchronized(lock) { queues[pluginId]?.size ?: 0 }
 
     private fun enqueue(item: Item) {
         synchronized(lock) { queues.getOrPut(item.pluginId) { ArrayDeque() }.addLast(item) }
@@ -91,7 +104,7 @@ class CommandScheduler(
             parked.removeAll(p.toSet())
             q + p
         }
-        gone.forEach { it.result.complete(PluginResult.Failed(FailReason.INTERNAL, "the plugin stopped")) }
+        gone.forEach { it.result.complete(PluginResult.Failed(FailReason.STOPPED, "the plugin stopped")) }
     }
 
     /** The watch's data is gone: its parked writes too. */
@@ -150,13 +163,17 @@ class CommandScheduler(
                 parked.remove(mine.first())
                 log(item.pluginId, "too many writes waiting for a connection: the oldest is dropped")
             }
-            item.expiresAt = clock() + d.keepMillis
+            // A huge keepMillis would overflow and expire at once: at most a week.
+            item.expiresAt = clock() + d.keepMillis.coerceIn(0, MAX_KEEP_MS)
             parked += item
         }
         return QUEUED
     }
 
     companion object {
+        /** The host's own queue (its value reads): not bounded like a plugin's. */
+        const val HOST = "app"
+        const val MAX_KEEP_MS = 7 * 24 * 3_600_000L
         val DONE: WriteResult = PluginResult.Ok(Delivered.NOW)
         val QUEUED: WriteResult = PluginResult.Ok(Delivered.AT_NEXT_CONNECTION)
         val NOT_CONNECTED: WriteResult = PluginResult.Failed(FailReason.NOT_CONNECTED, "the watch is not connected")

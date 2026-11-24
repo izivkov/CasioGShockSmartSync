@@ -83,6 +83,14 @@ object LocalDataStorage {
         }
     }
 
+    /** Writes [values] in one write: a null value removes its key. */
+    suspend fun putAllAndWait(context: Context, values: Map<String, String?>) {
+        if (values.isEmpty()) return
+        cache = context.dataStore.edit { preferences ->
+            for ((k, v) in values) if (v == null) preferences.remove(stringPreferencesKey(k)) else preferences[stringPreferencesKey(k)] = v
+        }
+    }
+
     /** Removes every key [drop] says yes to, in one write. */
     suspend fun deleteMatching(context: Context, drop: (String) -> Boolean) {
         cache = context.dataStore.edit { preferences ->

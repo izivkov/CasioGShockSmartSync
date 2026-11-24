@@ -17,6 +17,7 @@ object AppStores {
         override fun put(key: String, value: String) = kotlinx.coroutines.runBlocking { LocalDataStorage.putAndWait(context, key, value) }
         override fun delete(key: String) = kotlinx.coroutines.runBlocking { LocalDataStorage.deleteAsync(context, key) }
         override fun keys(): Set<String> = LocalDataStorage.toJsonObject(context).keys().asSequence().toSet()
+        override fun putAll(values: Map<String, String?>) = kotlinx.coroutines.runBlocking { LocalDataStorage.putAllAndWait(context, values) }
     }
 
     /** Every per-watch value; the values of older versions belong to the registered H5600 watch ([LegacyHaKeys]). */

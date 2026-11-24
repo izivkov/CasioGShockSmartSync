@@ -4,8 +4,10 @@ import kotlinx.coroutines.channels.Channel
 import org.avmedia.smartsync.plugin.api.WatchEvent
 
 /**
- * One plugin's events, in order, bounded. When full, the oldest event that a newer one makes stale (values, condition,
- * a setting) is dropped, else the oldest of all; one log line per overflow until the queue has drained. Android-free.
+ * One plugin's events, in order, bounded. When full, the oldest event that a newer one makes stale (values, a
+ * setting) is dropped, else the oldest of all, and [WatchEvent.EventsLost] takes the place of the first dropped one
+ * (it does not count against [capacity] and is never dropped itself), so the plugin knows to read the state again.
+ * One log line per overflow until the queue has drained. Android-free.
  */
 class PluginEventQueue(
     private val capacity: Int,
@@ -20,9 +22,11 @@ class PluginEventQueue(
     fun offer(event: WatchEvent): Boolean {
         synchronized(items) {
             if (closed) return false
-            if (items.size >= capacity) {
+            if (items.count { it != WatchEvent.EventsLost } >= capacity) {
                 val stale = items.indexOfFirst { !isCritical(it) }
-                val dropped = if (stale >= 0) items.removeAt(stale) else items.removeFirst()
+                val at = if (stale >= 0) stale else items.indexOfFirst { it != WatchEvent.EventsLost }
+                val dropped = items[at]
+                if (WatchEvent.EventsLost in items) items.removeAt(at) else items[at] = WatchEvent.EventsLost
                 if (!overflowing) {
                     overflowing = true
                     log("events queue full ($capacity): dropped ${dropped::class.simpleName} and newer stale events")
@@ -50,6 +54,9 @@ class PluginEventQueue(
 
     fun size(): Int = synchronized(items) { items.size }
 
+    /** A copy of what is queued, oldest first (tests). */
+    fun snapshot(): List<WatchEvent> = synchronized(items) { items.toList() }
+
     /** Drops everything queued; [take] returns null from now on. */
     fun close() {
         synchronized(items) {
@@ -60,9 +67,9 @@ class PluginEventQueue(
     }
 
     companion object {
-        /** Events that a later one never replaces: they are dropped last. */
+        /** Events that a later one never replaces: they are dropped last. [WatchEvent.EventsLost] is never dropped. */
         fun isCritical(e: WatchEvent): Boolean = when (e) {
-            is WatchEvent.ValuesUpdated, is WatchEvent.Condition, is WatchEvent.SettingChanged -> false
+            is WatchEvent.ValuesUpdated, is WatchEvent.SettingChanged, WatchEvent.Wake -> false
             else -> true
         }
     }

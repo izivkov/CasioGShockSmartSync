@@ -11,17 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Extension
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -33,6 +28,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.HorizontalSeparator
+import org.avmedia.smartsync.plugin.api.PluginAccess
 import org.avmedia.smartsync.plugin.api.PluginIcon
 import org.avmedia.smartsync.plugin.api.WatchPlugin
 
@@ -41,19 +37,25 @@ import org.avmedia.smartsync.plugin.api.WatchPlugin
 class PluginsViewModel @Inject constructor(private val hub: PluginHub) : ViewModel() {
     val states = hub.runtime.states
     val health = hub.health.health
-    fun plugins(): List<WatchPlugin> = hub.runtime.plugins()
+    fun plugins(): List<WatchPlugin> = hub.runtime.ids().mapNotNull { hub.runtime.plugin(it) }
+    fun ids(): List<String> = hub.runtime.ids()
+    fun plugin(id: String): WatchPlugin? = hub.runtime.plugin(id)
     fun setEnabled(id: String, on: Boolean) = hub.setEnabled(id, on)
     fun accessShown(id: String) = hub.accessShown(id)
     fun markAccessShown(id: String) = hub.markAccessShown(id)
     fun watchRemoved(address: String) = hub.watchRemoved(address)
+    fun clearData(id: String) = hub.clearData(id)
+    fun leftOver(): Set<String> = hub.leftOverPlugins()
+    fun missingPermissions(id: String) = hub.missingPermissions(id)
+    fun requestPermissions(id: String) = hub.requestPermissions(id)
 
     /** "Home Assistant (all features)" for each plugin that is offered for the watch at [address]. */
     fun pluginsFor(address: String): List<String> {
         val id = org.avmedia.smartsync.plugin.api.WatchId(org.avmedia.gshockGoogleSync.watch.WatchKeys.of(address))
         val caps = hub.capsOf(id)
-        return hub.runtime.plugins().mapNotNull { p ->
-            val s = org.avmedia.smartsync.plugin.api.WatchSupport.of(runCatching { p.access }.getOrDefault(org.avmedia.smartsync.plugin.api.PluginAccess()), caps)
-            if (s is org.avmedia.smartsync.plugin.api.WatchSupport.NotSupported) null else AccessGuard.worksWith(listOf(p.name to s)).single()
+        return plugins().mapNotNull { p ->
+            val s = WatchSupport.of(runCatching { p.access }.getOrDefault(PluginAccess()), caps)
+            if (s is WatchSupport.NotSupported) null else AccessGuard.worksWith(listOf(p.name to s)).single()
         }
     }
 
@@ -67,6 +69,47 @@ internal fun offLine(state: PluginState?): String? = when (state) {
     PluginState.Active -> null
     is PluginState.Failed -> "Turned off: ${state.reason}"
     is PluginState.Incompatible -> "Off: this app needs a newer plugin"
+}
+
+/**
+ * The status line of a plugin: off, else the text of its last [org.avmedia.smartsync.plugin.api.PluginStatus.Ok]; then
+ * "Needs permission: ..." while one is missing ([missing], [PluginPermissions.line]); then its last error.
+ */
+internal fun statusText(
+    state: PluginState?, health: PluginHealth?, missing: List<org.avmedia.smartsync.plugin.api.AndroidPermission> = emptyList(),
+    time: (Long) -> String = ::shortTime,
+): String {
+    val base = offLine(state) ?: health?.okText?.takeIf { it.isNotBlank() } ?: "On"
+    val needs = PluginPermissions.line(missing)?.takeIf { state == PluginState.Active }
+    val error = health?.let { h -> PluginHealthBoard.line(h, time) }
+    return listOfNotNull(base, needs, error).joinToString("\n")
+}
+
+/** "2 on", "none on", "1 on of 3" for the Plugins row of Settings. */
+internal fun onSummary(states: Map<String, PluginState>, count: Int): String {
+    if (count == 0) return "none found"
+    val on = states.values.count { it == PluginState.Active }
+    return "$on on"
+}
+
+/**
+ * Opens a plugin's screen once it is active after the person turned it on (every turn-on, not only the first), for a
+ * plugin that asks for that ([org.avmedia.smartsync.plugin.api.PluginUi.opensOnTurnOn]). Android-free.
+ */
+class OpenOnTurnOn {
+    private var waiting: String? = null
+
+    fun turnedOn(id: String, opens: Boolean) { if (opens) waiting = id }
+
+    /** The id to open now, once: when [states] show it active. A plugin that failed to start opens nothing. */
+    fun take(states: Map<String, PluginState>): String? {
+        val id = waiting ?: return null
+        return when (states[id]) {
+            PluginState.Active -> { waiting = null; id }
+            is PluginState.Failed, is PluginState.Incompatible -> { waiting = null; null }
+            else -> null
+        }
+    }
 }
 
 /** A plugin's icon, 28 dp in the app's accent; the host's plugin icon when it gives none. */
@@ -83,67 +126,17 @@ internal fun PluginIconView(icon: PluginIcon?, modifier: Modifier = Modifier) {
 /** The icon shown for a plugin: its own, else [FALLBACK_ICON]. */
 internal fun iconOf(icon: PluginIcon?): PluginIcon = icon ?: PluginIcon.Vector(FALLBACK_ICON)
 
-/** The icon of a plugin that has none. */
+/** The icon of a plugin that has none, and of the Plugins row in Settings. */
 internal val FALLBACK_ICON = Icons.Filled.Extension
-
-/**
- * Settings > Plugins: every plugin found, with its icon, name, version, status and switch. A tap opens its details
- * (what it uses, its screen); switching one on for the first time shows what it uses before it starts.
- */
-@Composable
-fun PluginSettingsEntries(onOpen: (String) -> Unit, vm: PluginsViewModel = hiltViewModel()) {
-    val states by vm.states.collectAsState()
-    val health by vm.health.collectAsState()
-    val plugins = vm.plugins()
-    var details by remember { mutableStateOf<String?>(null) }
-    var asking by remember { mutableStateOf<String?>(null) }
-    val switch = { id: String, on: Boolean -> if (on && !vm.accessShown(id)) asking = id else vm.setEnabled(id, on) }
-    if (plugins.isEmpty()) return
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle("Plugins")
-        for (p in plugins) {
-            val state = states[p.id]
-            PluginCard(p, statusOf(p, state, health[p.id]), on = state == PluginState.Active, onSwitch = { switch(p.id, it) }, onOpen = { details = p.id })
-        }
-    }
-    plugins.firstOrNull { it.id == details }?.let { p ->
-        PluginDetails(
-            plugin = p, on = states[p.id] == PluginState.Active, status = statusOf(p, states[p.id], health[p.id]), worksWith = vm.worksWith(p),
-            onSwitch = { switch(p.id, it) }, onOpenScreen = if (p.ui != null) ({ details = null; onOpen(p.id) }) else null,
-            onDismiss = { details = null },
-        )
-    }
-    plugins.firstOrNull { it.id == asking }?.let { p ->
-        FirstOnDialog(p, onTurnOn = {
-            vm.markAccessShown(p.id); vm.setEnabled(p.id, true); asking = null
-            // A plugin that asks for permissions when it is turned on gets its screen at once.
-            if (p.ui?.opensOnTurnOn == true) onOpen(p.id)
-        }, onCancel = { asking = null })
-    }
-}
-
-@Composable
-private fun statusOf(p: WatchPlugin, state: PluginState?, health: PluginHealth?): String {
-    val base = offLine(state) ?: (p.ui?.statusLine() ?: "On")
-    val error = health?.let { h -> PluginHealthBoard.line(h) { ms -> shortTime(ms) } }
-    return listOfNotNull(base, error).joinToString("\n")
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-    )
-}
 
 /** One card per plugin with an Actions row: icon, name, the same switch, and the plugin's own line while it is on. */
 @Composable
 fun PluginActionRows(onOpenSettings: (String) -> Unit, vm: PluginsViewModel = hiltViewModel()) {
     val states by vm.states.collectAsState()
-    for (p in vm.plugins()) {
+    for (id in vm.ids()) {
+        val p = vm.plugin(id) ?: continue
         if (p.ui?.hasActionsRow != true) continue
-        PluginActionCard(p, on = states[p.id] == PluginState.Active, onSwitch = { vm.setEnabled(p.id, it) }, onOpenSettings = { onOpenSettings(p.id) })
+        PluginActionCard(p, on = states[id] == PluginState.Active, onSwitch = { vm.setEnabled(id, it) }, onOpenSettings = { onOpenSettings(id) })
     }
 }
 
@@ -163,6 +156,7 @@ internal fun PluginActionCard(plugin: WatchPlugin, on: Boolean, onSwitch: (Boole
     }
 }
 
+/** One plugin in the Plugins screen: icon, name, version and status, its switch; a tap opens its details page. */
 @Composable
 internal fun PluginCard(plugin: WatchPlugin, status: String, on: Boolean, onSwitch: (Boolean) -> Unit, onOpen: (() -> Unit)?) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
@@ -181,12 +175,12 @@ internal fun PluginCard(plugin: WatchPlugin, status: String, on: Boolean, onSwit
     }
 }
 
-private fun versionOf(p: WatchPlugin): String = runCatching { p.version }.getOrDefault("").let { if (it.isBlank()) "" else "v$it" }
+internal fun versionOf(p: WatchPlugin): String = runCatching { p.version }.getOrDefault("").let { if (it.isBlank()) "" else "v$it" }
 
 /** What a plugin reads, controls, sends where and keeps, in plain words. */
 @Composable
 internal fun AccessLines(plugin: WatchPlugin) {
-    val access = runCatching { plugin.access }.getOrNull() ?: org.avmedia.smartsync.plugin.api.PluginAccess()
+    val access = runCatching { plugin.access }.getOrNull() ?: PluginAccess()
     for ((title, text) in AccessGuard.lines(access)) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             AppText(text = title, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -195,57 +189,10 @@ internal fun AccessLines(plugin: WatchPlugin) {
     }
 }
 
-/** A plugin's details: icon, name, version, status, the switch, what it uses, and its screen. */
-@Composable
-internal fun PluginDetails(
-    plugin: WatchPlugin, on: Boolean, status: String, onSwitch: (Boolean) -> Unit, onOpenScreen: (() -> Unit)?, onDismiss: () -> Unit,
-    worksWith: List<String> = emptyList(),
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { PluginIconView(plugin.icon) },
-        title = { Text(plugin.name) },
-        text = { PluginDetailsContent(plugin, on, status, worksWith, onSwitch) },
-        confirmButton = { if (onOpenScreen != null) TextButton(onClick = onOpenScreen) { Text("Open") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } },
-    )
-}
-
-/** The body of the details: version and status with the switch, what the plugin uses, the watches it works with. */
-@Composable
-internal fun PluginDetailsContent(plugin: WatchPlugin, on: Boolean, status: String, worksWith: List<String>, onSwitch: (Boolean) -> Unit) {
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            AppText(text = listOf(versionOf(plugin), status).filter { it.isNotBlank() }.joinToString("  ·  "), fontSize = 12.sp, modifier = Modifier.weight(1f))
-            AppSwitch(checked = on, onCheckedChange = onSwitch)
-        }
-        AccessLines(plugin)
-        if (worksWith.isNotEmpty()) {
-            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                AppText(text = "Works with", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                worksWith.forEach { AppText(text = it, fontSize = 14.sp) }
-            }
-        }
-    }
-}
-
-/** Before a plugin is turned on the first time: what it uses. */
-@Composable
-internal fun FirstOnDialog(plugin: WatchPlugin, onTurnOn: () -> Unit, onCancel: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onCancel,
-        icon = { PluginIconView(plugin.icon) },
-        title = { Text("Turn on ${plugin.name}?") },
-        text = { Column { AccessLines(plugin) } },
-        confirmButton = { TextButton(onClick = onTurnOn) { Text("Turn on") } },
-        dismissButton = { TextButton(onClick = onCancel) { Text("Cancel") } },
-    )
-}
-
 /** The open plugin's own screen. */
 @Composable
 fun PluginScreen(id: String, onBack: () -> Unit, vm: PluginsViewModel = hiltViewModel()) {
-    val ui = vm.plugins().firstOrNull { it.id == id }?.ui
+    val ui = vm.plugin(id)?.ui
     if (ui == null) androidx.compose.runtime.LaunchedEffect(id) { onBack() } else ui.SettingsScreen(onBack)
 }
 

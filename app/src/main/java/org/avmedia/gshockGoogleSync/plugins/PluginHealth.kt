@@ -5,14 +5,14 @@ import kotlinx.coroutines.flow.StateFlow
 import org.avmedia.smartsync.plugin.api.PluginStatus
 
 /** A plugin's health for its Settings card: the last error and when, and the failures counted since the last success. */
-data class PluginHealth(val lastError: String? = null, val atMillis: Long = 0, val failures: Int = 0)
+data class PluginHealth(val lastError: String? = null, val atMillis: Long = 0, val failures: Int = 0, val okText: String = "")
 
 /**
- * The plugins' health. Two kinds of failure: one the host caught (a throw, a time limit), cleared by the next callback
+ * The plugins' health and their status line (the text of their last [PluginStatus.Ok]). Two kinds of failure: one the host caught (a throw, a time limit), cleared by the next callback
  * that works; one the plugin reported ([PluginStatus.Error]), cleared by its next [PluginStatus.Ok]. Android-free.
  */
 class PluginHealthBoard(private val clock: () -> Long = System::currentTimeMillis) {
-    private data class Entry(val caught: String? = null, val caughtAt: Long = 0, val reported: String? = null, val reportedAt: Long = 0, val failures: Int = 0)
+    private data class Entry(val caught: String? = null, val caughtAt: Long = 0, val reported: String? = null, val reportedAt: Long = 0, val failures: Int = 0, val okText: String = "")
 
     private val entries = HashMap<String, Entry>()
     private val _health = MutableStateFlow<Map<String, PluginHealth>>(emptyMap())
@@ -25,7 +25,7 @@ class PluginHealthBoard(private val clock: () -> Long = System::currentTimeMilli
     @Synchronized fun reported(id: String, status: PluginStatus) = update(id) {
         when (status) {
             is PluginStatus.Error -> it.copy(reported = status.text.take(120), reportedAt = clock(), failures = it.failures + 1)
-            is PluginStatus.Ok -> it.copy(reported = null, failures = if (it.caught == null) 0 else it.failures)
+            is PluginStatus.Ok -> it.copy(reported = null, failures = if (it.caught == null) 0 else it.failures, okText = status.text.take(60))
         }
     }
 
@@ -37,7 +37,7 @@ class PluginHealthBoard(private val clock: () -> Long = System::currentTimeMilli
         val e = change(entries[id] ?: Entry())
         entries[id] = e
         val latest = listOfNotNull(e.caught?.let { it to e.caughtAt }, e.reported?.let { it to e.reportedAt }).maxByOrNull { it.second }
-        _health.value = _health.value + (id to PluginHealth(latest?.first, latest?.second ?: 0, e.failures))
+        _health.value = _health.value + (id to PluginHealth(latest?.first, latest?.second ?: 0, e.failures, e.okText))
     }
 
     companion object {

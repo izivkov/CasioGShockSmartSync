@@ -50,12 +50,13 @@ object HistoryRecords {
         is WorkoutRecord -> r.start.toString()
     }
 
-    private fun inDays(d: LocalDate, range: HistoryRange) = !d.isBefore(range.from.toLocalDate()) && !d.isAfter(range.to.toLocalDate())
+    /** A day record is in [range] when its day overlaps it ([HistoryRange.to] is exclusive). */
+    fun inDays(d: LocalDate, range: HistoryRange) = range.from.isBefore(range.to) && d.atStartOfDay().isBefore(range.to) && d.plusDays(1).atStartOfDay().isAfter(range.from)
 
     private fun datesOf(range: HistoryRange): List<LocalDate> {
         val out = ArrayList<LocalDate>()
         var d = range.from.toLocalDate()
-        while (!d.isAfter(range.to.toLocalDate()) && out.size < 400) { out += d; d = d.plusDays(1) }
+        while (d.atStartOfDay().isBefore(range.to) && out.size < 401) { out += d; d = d.plusDays(1) }
         return out
     }
 

@@ -8,4 +8,9 @@ interface KeyValueStore {
 
     /** Every key in the store; per-watch values move with it when a watch is re-paired ([org.avmedia.gshockGoogleSync.watch.WatchStore.move]). */
     fun keys(): Set<String> = emptySet()
+
+    /** Writes [values] (null deletes); a store with one file writes them at once. */
+    fun putAll(values: Map<String, String?>) {
+        for ((k, v) in values) if (v == null) delete(k) else put(k, v)
+    }
 }

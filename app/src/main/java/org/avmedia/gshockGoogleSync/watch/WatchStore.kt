@@ -22,6 +22,12 @@ class WatchStore(
         kv.put(WatchKeys.scoped(name, watch), gson.toJson(Envelope(value, atMs)))
     }
 
+    /** Several values of [watch] in one store write; a null value deletes its name. */
+    fun putAll(watch: String, values: Map<String, String?>, atMs: Long = clock()) {
+        if (watch.isBlank()) return
+        kv.putAll(values.entries.associate { (name, v) -> WatchKeys.scoped(name, watch) to v?.let { gson.toJson(Envelope(it, atMs)) } })
+    }
+
     /**
      * The value of [name] for [watch]; null for none. With [legacyKey], a value an older version kept there (for one
      * watch only) becomes the legacy owner's, once; any other watch never sees it.
