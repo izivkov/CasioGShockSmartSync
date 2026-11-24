@@ -32,13 +32,16 @@ object KeepConnected {
      * watch (Companion device service after a reboot, a killed app, Bluetooth off/on) admits the kept watch without
      * any screen or ViewModel.
      */
-    fun ensureLoaded(context: Context) {} // RED CHECK stub
+    fun ensureLoaded(context: Context) {
+        if (!loaded) load(context)
+    }
 
     /**
      * Reads the holder (app start). Before the first choice was stored, the most recently connected always-connected
      * watch gets it ([migrationChoice]); with no such watch known yet nothing is stored and the next start asks again.
      */
     fun load(context: Context) {
+        loaded = true
         val stored = LocalDataStorage.get(context, KEY)
         if (stored != null) {
             _holder.value = stored.ifBlank { null }
