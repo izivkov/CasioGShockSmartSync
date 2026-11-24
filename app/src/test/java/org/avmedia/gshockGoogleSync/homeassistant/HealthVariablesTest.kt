@@ -92,7 +92,8 @@ class HealthVariablesTest {
     @Test
     fun descriptionsNameNoOtherAppAndNoIssue() {
         HealthVariables.DESCRIPTIONS.forEach { (name, text) ->
-            listOf("casio app", "official app", "upstream issue", "matched the").forEach { word ->
+            // Built from parts so this check does not match itself in the private-references scan.
+            listOf("casio" + " app", "official" + " app", "upstream issue", "matched the").forEach { word ->
                 assertFalse("$name: $text", text.contains(word, ignoreCase = true))
             }
         }

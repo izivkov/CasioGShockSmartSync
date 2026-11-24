@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -101,12 +102,15 @@ class MainScreensUiTest {
     @Test fun aLongValueDoesNotSqueezeTheTitle() {
         rule.setContent {
             Column(Modifier.width(360.dp)) {
+                ValueRow("Target zone", ">", false, note = "Read only")
                 ValueRow("Target zone", "Zone 2, 120 to 150 bpm and a long text that needs several lines", false, note = "Read only")
             }
         }
-        val title = rule.onNodeWithText("Target zone").getBoundsInRoot()
-        assertTrue("the title stays on one line ($title)", title.right - title.left > title.bottom - title.top)
-        assertTrue("the title keeps its width ($title)", title.right - title.left > 80.dp)
+        val titles = rule.onAllNodesWithText("Target zone")
+        val alone = titles[0].getBoundsInRoot()
+        val long = titles[1].getBoundsInRoot()
+        assertTrue("the title stays on one line ($long)", long.right - long.left > long.bottom - long.top)
+        assertTrue("the title keeps its width next to a long value ($long vs $alone)", long.right - long.left >= alone.right - alone.left - 1.dp)
     }
 
     @Test fun settingsListsHomeAssistantWithItsStatus() {
