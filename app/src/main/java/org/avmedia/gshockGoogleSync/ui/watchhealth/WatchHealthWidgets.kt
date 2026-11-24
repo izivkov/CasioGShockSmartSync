@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -49,20 +50,28 @@ fun ValueRow(
     onClick: (() -> Unit)? = null,
 ) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alpha(if (enabled) 1f else 0.5f)
-                .then(if (enabled && onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                AppTextLarge(text = title)
-                if (note != null) AppText(text = note, fontSize = 12.sp)
+        androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            // A long value wraps within half the row: it never squeezes the title into a narrow column.
+            val valueMax = maxWidth / 2
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(if (enabled) 1f else 0.5f)
+                    .then(if (enabled && onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    AppTextLarge(text = title)
+                    if (note != null) AppText(text = note, fontSize = 12.sp)
+                }
+                AppTextLarge(
+                    text = value,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                    modifier = Modifier.widthIn(max = valueMax * 4).padding(start = 8.dp),
+                )
             }
-            AppTextLarge(text = value, modifier = Modifier.padding(start = 8.dp))
         }
     }
 }

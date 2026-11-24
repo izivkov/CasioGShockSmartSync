@@ -55,16 +55,32 @@ import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
     onOpenHa: () -> Unit = {},
+    onOpenWatchList: () -> Unit = {},
     keepsLink: () -> Boolean = { false },
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    TimeTabBack(currentDestination?.route, onOpenWatchList)
+    // Home Assistant opened from Settings (or the Actions link) comes back to Settings.
+    val openHaFromSettings = { MainTabReturn.set(Screens.Settings.route); onOpenHa() }
+    LaunchedEffect(navController) {
+        MainTabReturn.take()?.let { route ->
+            // The graph is set once the NavHost has composed: its first back stack entry says so.
+            navController.currentBackStackEntryFlow.first()
+            navController.navigate(route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+            }
+        }
+    }
 
     val localContext = LocalContext.current.applicationContext
     val appContext = remember {
@@ -166,7 +182,7 @@ fun BottomNavigationBarWithPermissions(
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Time.route) {
-                TimeScreen()
+                TimeScreen(onOpenWatchList = onOpenWatchList)
             }
             composable(Screens.Health.route) {
                 HealthScreen()
@@ -200,7 +216,7 @@ fun BottomNavigationBarWithPermissions(
                     navController,
                     destinationScreen = {
                         ActionsScreen(
-                            onOpenHa = onOpenHa,
+                            onOpenHaSetup = openHaFromSettings,
                         )
                     },
                     stringResource(
@@ -210,6 +226,7 @@ fun BottomNavigationBarWithPermissions(
             }
             composable(Screens.Settings.route) {
                 SettingsScreen(
+                    onOpenHa = openHaFromSettings,
                     onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
                     onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
                     onOpenNotifications = { navController.navigate(Screens.NotificationSettings.route) },

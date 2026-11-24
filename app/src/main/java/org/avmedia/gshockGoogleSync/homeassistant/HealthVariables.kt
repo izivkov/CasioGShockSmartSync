@@ -14,7 +14,7 @@ import org.avmedia.gshockapi.model.StepCounterData
 object HealthVariables {
     private const val UNCONFIRMED_KCAL =
         "UNCONFIRMED: the watch's header energy read as kcal; it matched the Casio app within 1 kcal on two days, the scale is not verified (upstream issue 155)"
-    private const val UNCONFIRMED_STEPS = "header step total, not verified against the app on every day"
+    private const val UNCONFIRMED_STEPS = "UNCONFIRMED: header step total, not verified on every day"
 
     /** name to description, in display order. */
     val DESCRIPTIONS: Map<String, String> = linkedMapOf(

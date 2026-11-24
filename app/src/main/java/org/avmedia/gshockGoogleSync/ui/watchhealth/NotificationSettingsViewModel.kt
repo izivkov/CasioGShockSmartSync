@@ -9,19 +9,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.avmedia.gshockapi.io.NotificationManagerCodec
 import org.avmedia.gshockapi.io.NotificationSoundCodec
 
 data class NotificationSettingsUi(
     val working: Boolean = false,
     val message: String? = null,
     val sounds: NotificationSoundCodec.Setting? = null,
-    val manager: NotificationManagerCodec.Setting? = null,
 )
 
 /**
- * The Notification settings screen. Reads 0x42 and 0x3D; every write is read, changed in its decoded fields only,
- * written and read back by [WatchSettingsAccess]. 0x3D is written only when language or off-at-night changes.
+ * The Notification settings screen. Reads 0x42; every write is read, changed in its decoded fields only, written
+ * and read back by [WatchSettingsAccess].
  */
 @HiltViewModel
 class NotificationSettingsViewModel @Inject constructor(private val access: WatchSettingsAccess) : ViewModel() {
@@ -42,12 +40,10 @@ class NotificationSettingsViewModel @Inject constructor(private val access: Watc
 
     private suspend fun readAll() {
         val sounds = access.read(NotificationSoundCodec.CODE)?.let { NotificationSoundCodec.parse(it) }
-        val manager = access.read(NotificationManagerCodec.CODE)?.let { NotificationManagerCodec.parse(it) }
         _ui.update {
             it.copy(
                 sounds = sounds,
-                manager = manager,
-                message = if (sounds == null && manager == null) (access.explain(NotificationSoundCodec.CODE, NotificationManagerCodec.CODE) ?: "The watch did not answer. Connect the watch and try again.") else (access.explain(NotificationSoundCodec.CODE, NotificationManagerCodec.CODE) ?: it.message),
+                message = if (sounds == null) (access.explain(NotificationSoundCodec.CODE) ?: "The watch did not answer. Connect the watch and try again.") else it.message,
             )
         }
     }
@@ -64,21 +60,11 @@ class NotificationSettingsViewModel @Inject constructor(private val access: Watc
 
     fun setPattern(pattern: Int) = sound("Sound pattern", NotificationSoundCodec.PATTERN_BYTES) { NotificationSoundCodec.withPattern(it, pattern) }
 
-    fun setLanguage(language: Int) =
-        write(NotificationManagerCodec.CODE, "Notification language", NotificationManagerCodec.LANGUAGE_BYTES) { NotificationManagerCodec.withLanguage(it, language) }
-
-    fun setOffAtNight(value: Int) =
-        write(NotificationManagerCodec.CODE, "Off at night", NotificationManagerCodec.NIGHT_BYTES) { NotificationManagerCodec.withOffAtNight(it, value) }
-
-    private fun sound(what: String, touched: Set<Int>, change: (ByteArray) -> ByteArray?) = write(NotificationSoundCodec.CODE, what, touched, change)
-
-    private fun write(code: Int, what: String, touched: Set<Int>, change: (ByteArray) -> ByteArray?) {
+    private fun sound(what: String, touched: Set<Int>, change: (ByteArray) -> ByteArray?) {
         if (_ui.value.working) return
         viewModelScope.launch {
             _ui.update { it.copy(working = true, message = null) }
-            val back: (ByteArray, ByteArray) -> ByteArray =
-                if (code == NotificationManagerCodec.CODE) NotificationManagerCodec::expectedBack else { _, written -> written }
-            val result = access.update(code, touched, change, back)
+            val result = access.update(NotificationSoundCodec.CODE, touched, change)
             readAll()
             _ui.update { it.copy(working = false, message = result.text(what)) }
         }

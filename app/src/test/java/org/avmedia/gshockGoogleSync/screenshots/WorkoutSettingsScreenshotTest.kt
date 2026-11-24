@@ -20,7 +20,6 @@ class WorkoutSettingsScreenshotTest : ScreenshotTest() {
         heartRate = HeartRateSettingCodec.Setting(1, 2, 120, 150),
         heartRateFlags = HeartRateFlagsCodec.Flags(true, false, true),
         alerts = TrainingAlertCodec.Setting(300, 600, 1, 1000, 2000, 2, 50, 0, 100),
-        formAlert = "01 02 03 00",
         screens = listOf(listOf(2, 3, 7), listOf(11, 19, 0)),
         message = "Auto pause saved and read back from the watch.",
     )
@@ -35,7 +34,7 @@ class WorkoutSettingsScreenshotTest : ScreenshotTest() {
         WorkoutSettingsListContent(WorkoutListUi(message = "The watch did not answer. Connect the watch and try again."), {}, {}, {})
     }
     @Test fun listRawLight() = snap("workout_settings_list_raw", false) {
-        WorkoutSettingsListContent(WorkoutListUi(message = "The activity list is not in the layout the app knows. It will not be changed.", rawHex = "53 01 4D 00"), {}, {}, {})
+        WorkoutSettingsListContent(WorkoutListUi(message = "The activity list is not in the layout the app knows. It will not be changed."), {}, {}, {})
     }
     @Test fun activityLight() = snap("workout_settings_activity", false) { Activity(running) }
     @Test fun activityDark() = snap("workout_settings_activity", true) { Activity(running) }

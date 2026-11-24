@@ -6,6 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.avmedia.gshockGoogleSync.ActionContainer
+import org.avmedia.gshockGoogleSync.homeassistant.HaActionsUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionContent
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsViewModel
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
@@ -29,7 +31,10 @@ class ActionsScreenshotTest : ScreenshotTest() {
     @Composable
     private fun Screen(allOn: Boolean) {
         CompositionLocalProvider(LocalWatchFeatureManager provides features()) {
-            ActionsScreen(actionsViewModel = viewModel(allOn))
+            ActionsScreen(
+                actionsViewModel = viewModel(allOn),
+                haRow = { HaButtonActionContent(allOn, allOn, {}, HaActionsUi(), {}, {}, {}) },
+            )
         }
     }
 

@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.avmedia.gshockapi.io.SettingWriteResult
 import org.avmedia.gshockapi.io.WatchFaceCodec
 
 data class WatchFaceUi(
@@ -44,25 +43,14 @@ class WatchFaceViewModel @Inject constructor(private val access: WatchSettingsAc
     }
 
     /** Faces 1 to 4 only: [WatchFaceCodec.withFace] refuses anything else, so nothing is written for it. */
-    fun setFace(face: Int) = write(WatchFaceCodec.faceName(face), null, WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFace(it, face) }
+    fun setFace(face: Int) = write(WatchFaceCodec.faceName(face), WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFace(it, face) }
 
     /** The top-right item of the custom face (slot 3). Slots 1, 2 and 4 are never written from the screen. */
     fun setTopRight(item: Int) =
-        write("Top right (${WatchFaceCodec.itemName(item)})", null, WatchFaceCodec.TOP_RIGHT_BYTES) { WatchFaceCodec.withTopRight(it, item) }
-
-    /** Decoding only (Details): any face index. */
-    fun setFaceRaw(face: Int) = write("Face index $face", null, WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFaceRaw(it, face) }
-
-    fun setItem(
-        slot: Int,
-        item: Int,
-    ) = write("Slot $slot (${WatchFaceCodec.itemName(item)})", slot, WatchFaceCodec.itemBytes(slot)) {
-        WatchFaceCodec.withItem(it, slot, item)
-    }
+        write("Top right (${WatchFaceCodec.itemName(item)})", WatchFaceCodec.TOP_RIGHT_BYTES) { WatchFaceCodec.withTopRight(it, item) }
 
     private fun write(
         what: String,
-        slot: Int?,
         touched: Set<Int>,
         change: (ByteArray) -> ByteArray?,
     ) {
@@ -70,8 +58,7 @@ class WatchFaceViewModel @Inject constructor(private val access: WatchSettingsAc
         viewModelScope.launch {
             _ui.update { it.copy(working = true, message = null) }
             val result = access.update(WatchFaceCodec.CODE, touched, change)
-            val hint = if (slot != null && (result == SettingWriteResult.Done || result == SettingWriteResult.Written)) " Look at the watch and note which place changed." else ""
-            _ui.update { it.copy(message = result.text(what) + hint) }
+            _ui.update { it.copy(message = result.text(what)) }
             val frame = access.read(WatchFaceCodec.CODE)
             _ui.update { it.copy(working = false, face = frame?.let { f -> WatchFaceCodec.parse(f) } ?: it.face) }
         }

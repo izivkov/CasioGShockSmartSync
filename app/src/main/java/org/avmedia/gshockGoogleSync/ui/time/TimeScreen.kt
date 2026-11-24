@@ -1,6 +1,12 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -20,6 +26,7 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 
 @Composable
 fun TimeScreen(
+    onOpenWatchList: () -> Unit = {},
     timeViewModel: TimeViewModel = hiltViewModel(),
 ) {
     val state by timeViewModel.state.collectAsState()
@@ -27,10 +34,7 @@ fun TimeScreen(
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
-                ScreenTitle(
-                    stringResource(id = R.string.time),
-                    Modifier
-                )
+                TimeTitleRow(onOpenWatchList)
                 // The stored values are on screen; the watch's come in the background.
                 if (state.updating) {
                     androidx.compose.material3.Text(
@@ -66,6 +70,21 @@ fun TimeScreen(
                 )
 
             }
+        }
+    }
+}
+
+/** The title row of the Time tab: the watch list button top left ("Watches"), the title in the middle. */
+@Composable
+internal fun TimeTitleRow(onOpenWatchList: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        ScreenTitle(stringResource(id = R.string.time), Modifier.align(Alignment.Center))
+        IconButton(onClick = onOpenWatchList, modifier = Modifier.align(Alignment.CenterStart)) {
+            Icon(
+                imageVector = Icons.Filled.Watch,
+                contentDescription = stringResource(id = R.string.watches),
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }

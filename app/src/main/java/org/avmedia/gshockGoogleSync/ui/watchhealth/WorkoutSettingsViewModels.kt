@@ -24,8 +24,6 @@ data class WorkoutListUi(
     /** The activities the watch shows (0x53), in order. */
     val activities: List<Int>? = null,
     val message: String? = null,
-    /** The answer as hex when its length or contents do not match the known layout: shown, never written. */
-    val rawHex: String? = null,
 )
 
 /** The Workout settings list: the activities the watch shows (0x53), which can be switched and put in order. */
@@ -50,8 +48,11 @@ class WorkoutSettingsListViewModel @Inject constructor(private val access: Watch
         _ui.value =
             when {
                 frame == null -> WorkoutListUi(message = "The watch did not answer. Connect the watch and try again.")
-                !ActivityListCodec.layoutOk(frame) ->
-                    WorkoutListUi(message = "The activity list is not in the layout the app knows. It will not be changed.", rawHex = ActivityListCodec.hex(frame))
+                !ActivityListCodec.layoutOk(frame) -> {
+                    // The bytes are for the App log only.
+                    ConnectionKeepAlive.log("0x53 answer not understood by the app: ${ActivityListCodec.hex(frame)}")
+                    WorkoutListUi(message = "The activity list is not in the layout the app knows. It will not be changed.")
+                }
                 else -> WorkoutListUi(activities = ActivityListCodec.parse(frame), message = message)
             }
     }
@@ -96,13 +97,11 @@ data class WorkoutActivityUi(
     val heartRate: HeartRateSettingCodec.Setting? = null,
     val heartRateFlags: HeartRateFlagsCodec.Flags? = null,
     val alerts: TrainingAlertCodec.Setting? = null,
-    /** Form alert (0x56): layout not confirmed, shown as bytes. */
-    val formAlert: String? = null,
     val screens: List<List<Int>>? = null,
 )
 
 /**
- * One activity's settings: 0x40, 0x41 and 0x55 through the 0x54 wrapper, 0x56 and 0x4E read with the activity.
+ * One activity's settings: 0x40, 0x41 and 0x55 through the 0x54 wrapper, and 0x4E read with the activity.
  * Only proven fields are written; each write is read, changed in its bytes only, written and read back.
  */
 @HiltViewModel
@@ -135,7 +134,6 @@ class WorkoutActivityViewModel @Inject constructor(private val access: WatchSett
         val run = inner(activity, ActivityItemCodec.RUN)?.let { RunMeasurementCodec.parse(it) }
         val hrFrame = inner(activity, ActivityItemCodec.HEART_RATE)
         val alerts = inner(activity, ActivityItemCodec.TRAINING_ALERT)?.let { TrainingAlertCodec.parse(it) }
-        val form = access.readForActivity(ActivityItemCodec.FORM_ALERT, activity)
         val screens = access.readForActivity(ActivityFaceCodec.CODE, activity)?.let { ActivityFaceCodec.parse(it, activity) }
         _ui.update {
             it.copy(
@@ -143,9 +141,8 @@ class WorkoutActivityViewModel @Inject constructor(private val access: WatchSett
                 heartRate = hrFrame?.let { f -> HeartRateSettingCodec.parse(f) },
                 heartRateFlags = hrFrame?.let { f -> HeartRateFlagsCodec.parse(f) },
                 alerts = alerts,
-                formAlert = form?.drop(2)?.joinToString(" ") { b -> "%02X".format(b) },
                 screens = screens,
-                message = if (listOf(run, hrFrame, alerts, form, screens).all { v -> v == null }) "The watch did not answer for this activity." else it.message,
+                message = if (listOf(run, hrFrame, alerts, screens).all { v -> v == null }) "The watch did not answer for this activity." else it.message,
             )
         }
     }

@@ -78,6 +78,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
+import org.avmedia.gshockGoogleSync.session.WatchList
+import org.avmedia.gshockGoogleSync.session.WatchSwitch
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.R
@@ -103,7 +106,9 @@ private const val GUIDELINE_LIST_TOP = 0.82f
 @Composable
 fun PreConnectionScreen(
     ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
-    onOpenHa: () -> Unit = {},
+    /** Set when the list is opened from the connected screens: a back button, and [watchSwitch] for the choice. */
+    onBack: (() -> Unit)? = null,
+    watchSwitch: WatchSwitch? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -122,6 +127,8 @@ fun PreConnectionScreen(
 
         val name = device.name ?: ""
         ptrConnectionViewModel.setDevice(device.address, name)
+        // From the connected screens: the new watch is the chosen one (the old one was let go for the pairing).
+        watchSwitch?.choose(device.address)
     }
 
     // BroadcastReceiver for ROMs like IodeOS where CDM intent returns null data
@@ -158,6 +165,7 @@ fun PreConnectionScreen(
                                 BOND_STATE_NONE ->
                                     if (prevBondState == BOND_STATE_BONDING) {
                                         timeoutJob.value?.cancel()
+                                        WatchList.pairingEnded()
                                     }
                             }
                         }
@@ -204,12 +212,14 @@ fun PreConnectionScreen(
                     timeoutJob.value = scope.launch {
                         delay(PAIRING_TIMEOUT_MS)
                         Timber.w("Pairing timed out")
+                        WatchList.pairingEnded()
                         // Handle UI timeout state here if needed
                     }
                 }
             }
         } else {
             Timber.i("CDM Association cancelled by user")
+            WatchList.pairingEnded()
         }
     }
 
@@ -284,8 +294,10 @@ fun PreConnectionScreen(
                                         Utils.sanitizeMacAddress(device.address),
                                         device.name
                                     )
-                                    if (device.isAlwaysConnected) {
-                                        ptrConnectionViewModel.openWhenConnected(device.address)
+                                    when {
+                                        // From the connected screens: let the connected watch go, connect this one.
+                                        watchSwitch != null -> watchSwitch.choose(Utils.sanitizeMacAddress(device.address))
+                                        device.isAlwaysConnected -> ptrConnectionViewModel.openWhenConnected(device.address)
                                     }
                                 },
                                 waitingAddress = waitingAddress,
@@ -311,17 +323,12 @@ fun PreConnectionScreen(
                             )
                         }
 
-                        // Works without a watch: the Home Assistant screen.
-                        Column(
+                        WatchListHeader(
+                            onBack = onBack,
                             modifier = Modifier
                                 .align(Alignment.TopStart)
                                 .padding(top = 24.dp, start = 16.dp)
-                        ) {
-                            androidx.compose.material3.TextButton(onClick = onOpenHa) {
-                                org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource(resourceId = R.drawable.ic_home_assistant, size = 20.dp)
-                                androidx.compose.material3.Text("  " + stringResource(R.string.home_assistant))
-                            }
-                        }
+                        )
 
                         Box(
                             modifier =
@@ -345,6 +352,7 @@ fun PreConnectionScreen(
                                     .padding(bottom = 30.dp, end = 30.dp),
                             isFlashing = pairedDevices.isEmpty(),
                             onClick = {
+                                watchSwitch?.startPairing()
                                 ptrConnectionViewModel.associateWithUi(
                                     context,
                                     object : ICDPDelegate {
@@ -361,6 +369,7 @@ fun PreConnectionScreen(
 
                                         override fun onError(error: String) {
                                             Timber.i(error)
+                                            WatchList.pairingEnded()
                                         }
                                     }
                                 )
@@ -374,6 +383,19 @@ fun PreConnectionScreen(
 }
 
 // --- Composable Components ---
+
+/** Top left of the watch list: Back when it was opened from the connected screens, else nothing. */
+@Composable
+fun WatchListHeader(onBack: (() -> Unit)?, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        androidx.compose.material3.TextButton(onClick = {}) { Text(stringResource(R.string.home_assistant)) }
+        if (onBack == null) return@Column
+        androidx.compose.material3.TextButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(20.dp))
+            Text("  " + stringResource(R.string.back_to_watch))
+        }
+    }
+}
 
 @Composable
 fun PairedDeviceList(

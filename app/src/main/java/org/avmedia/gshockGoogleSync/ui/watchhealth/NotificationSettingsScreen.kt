@@ -32,12 +32,9 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
-import org.avmedia.gshockapi.io.NotificationManagerCodec
 import org.avmedia.gshockapi.io.NotificationSoundCodec
 
-private enum class Picker { Pattern, Language, OffAtNight }
-
-private val NUMBERED = (0..3).map { "Setting $it" }
+private enum class Picker { Pattern }
 
 /** Sound and vibration mode, per-event switches and the sound pattern (0x42); language and off at night (0x3D). */
 @Composable
@@ -58,7 +55,6 @@ internal fun NotificationSettingsContent(
     var picker by remember { mutableStateOf<Picker?>(null) }
     val can = !ui.working
     val s = ui.sounds
-    val m = ui.manager
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -87,9 +83,6 @@ internal fun NotificationSettingsContent(
                             )
                         }
                     }
-                    ValueRow("Language", m?.let { "Setting ${it.language}" } ?: "-", can && m != null, note = "Meaning of the values: $NOT_CONFIRMED") { picker = Picker.Language }
-                    ValueRow("Off at night", m?.let { "Setting ${it.offAtNight}" } ?: "-", can && m != null, note = "Meaning of the values: $NOT_CONFIRMED") { picker = Picker.OffAtNight }
-                    ValueRow("Pop-up size", m?.popUpSize?.let { "Value $it" } ?: "-", enabled = false, note = "Read only")
                     val text = if (ui.working) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
                 }
@@ -100,8 +93,6 @@ internal fun NotificationSettingsContent(
     val close = { picker = null }
     when (picker) {
         Picker.Pattern -> s?.pattern?.let { current -> ChoiceDialog("Sound pattern", NotificationSoundCodec.PATTERNS, current, { close(); viewModel.setPattern(it) }, close) } ?: Unit
-        Picker.Language -> if (m != null) ChoiceDialog("Language", NUMBERED, m.language, { close(); viewModel.setLanguage(it) }, close)
-        Picker.OffAtNight -> if (m != null) ChoiceDialog("Off at night", NUMBERED, m.offAtNight, { close(); viewModel.setOffAtNight(it) }, close)
         null -> Unit
     }
 }

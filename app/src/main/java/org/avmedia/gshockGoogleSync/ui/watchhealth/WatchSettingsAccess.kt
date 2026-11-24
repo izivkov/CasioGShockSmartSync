@@ -18,6 +18,9 @@ import org.avmedia.gshockapi.io.TideSettingCodec
 /** True when the connected watch is of the DW-H5600 family (the one whose settings these screens know). */
 fun isH5600Watch(): Boolean = WatchModelOverride.isH5600Family(WatchInfo.name)
 
+/** What a screen says when the watch's answer is not in the layout the app knows (the bytes are in the App log). */
+const val NOT_UNDERSTOOD = "The watch's answer is not in the layout the app knows. The App log has the details."
+
 /**
  * Reads and writes watch settings for the Watch face and Watch health settings screens.
  * Every write goes through [SafeSettingWrite] (read, change only the decoded fields, write, read back).
@@ -37,9 +40,15 @@ class WatchSettingsAccess @Inject constructor() {
     /** The last answer frame of each code, as hex: when a codec then does not understand it, the screen can say what the watch sent. */
     private val lastFrames = java.util.concurrent.ConcurrentHashMap<Int, String>()
 
-    /** "0xNN answer not understood: <bytes>" when the watch answered [code] but the layout did not decode; null when nothing was read. */
+    /**
+     * The watch answered [code] but the layout did not decode: the bytes go to the App log only, the screen gets a
+     * plain sentence. Null when nothing was read.
+     */
     fun explainParse(code: Int): String? =
-        lastFrames[code]?.let { "0x%02X answer not understood by the app: %s".format(code, it) }
+        lastFrames[code]?.let {
+            ConnectionKeepAlive.log("0x%02X answer not understood by the app: %s".format(code, it))
+            NOT_UNDERSTOOD
+        }
 
     /** The plain-words reasons for the failed reads of [codes], or null when none was recorded. */
     fun explain(vararg codes: Int): String? =
@@ -64,7 +73,9 @@ class WatchSettingsAccess @Inject constructor() {
         ConnectionKeepAlive.log("settings read 0x%02X answer: %s".format(code, hex))
         val tooShort = SettingRequests.tooShort(code, frame)
         if (tooShort != null) {
-            problems[code] = tooShort
+            // The bytes are for the App log; the screen says it in words.
+            ConnectionKeepAlive.log("settings read 0x%02X: %s".format(code, tooShort))
+            problems[code] = "the answer is shorter than the app knows"
             return null
         }
         return frame

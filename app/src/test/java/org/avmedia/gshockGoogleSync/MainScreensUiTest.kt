@@ -1,0 +1,148 @@
+package org.avmedia.gshockGoogleSync
+
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.dp
+import org.avmedia.gshockGoogleSync.homeassistant.HA_NOT_SET_UP
+import org.avmedia.gshockGoogleSync.homeassistant.HA_SET_UP_LINK
+import org.avmedia.gshockGoogleSync.homeassistant.HaAction
+import org.avmedia.gshockGoogleSync.homeassistant.HaActionsUi
+import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionContent
+import org.avmedia.gshockGoogleSync.homeassistant.HaSettingsEntryContent
+import org.avmedia.gshockGoogleSync.homeassistant.HaStatus
+import org.avmedia.gshockGoogleSync.session.LinkState
+import org.avmedia.gshockGoogleSync.ui.others.WatchListHeader
+import org.avmedia.gshockGoogleSync.ui.time.TimeTitleRow
+import org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchFaceContent
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchFaceUi
+import org.avmedia.gshockapi.io.WatchFaceCodec
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+/** The way to the watch list, the link bar, Home Assistant's entries and the removed decoding aids. */
+@RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "w412dp-h915dp-420dpi")
+class MainScreensUiTest {
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    private fun pressBack() {
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.waitForIdle()
+    }
+
+    @Test fun backOnTheTimeTabOpensTheWatchList() {
+        var opened = 0
+        rule.setContent { TimeTabBack(Screens.Time.route) { opened++ } }
+        pressBack()
+        assertEquals(1, opened)
+    }
+
+    @Test fun backOnAnotherTabStillGoesToTime() {
+        var opened = 0
+        var toTime = 0
+        rule.setContent {
+            BackHandler { toTime++ } // stands for the NavHost popping back to Time
+            TimeTabBack(Screens.Settings.route) { opened++ }
+        }
+        pressBack()
+        assertEquals("the watch list does not open", 0, opened)
+        assertEquals(1, toTime)
+    }
+
+    @Test fun theTimeTabHasAWatchesButtonTopLeft() {
+        var opened = 0
+        rule.setContent { TimeTitleRow { opened++ } }
+        val button = rule.onNodeWithContentDescription("Watches")
+        button.assertIsDisplayed()
+        rule.onNodeWithText("Time").assertIsDisplayed()
+        assertTrue("the button sits top left", button.getBoundsInRoot().left < 24.dp)
+        button.performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test fun theLinkBarAndTheTitleBothShow() {
+        rule.setContent { LinkBarLayout(LinkState.RECONNECTING) { Text("Time") } }
+        val bar = rule.onNodeWithText("Reconnecting...")
+        val title = rule.onNodeWithText("Time")
+        bar.assertIsDisplayed()
+        title.assertIsDisplayed()
+        assertTrue(
+            "the bar sits above the title, not over it",
+            bar.getBoundsInRoot().bottom <= title.getBoundsInRoot().top,
+        )
+    }
+
+    @Test fun theWatchFaceScreenHasNoDetailsControl() {
+        val ui = WatchFaceUi(face = WatchFaceCodec.Face(2, listOf(0, 10, 12, 19)))
+        rule.setContent { WatchFaceContent(ui, {}, {}, {}) }
+        rule.onNodeWithText("Face").assertExists()
+        rule.onNodeWithText("Details").assertDoesNotExist()
+        rule.onNodeWithText("Hide details").assertDoesNotExist()
+        rule.onNodeWithText("For decoding only", substring = true).assertDoesNotExist()
+    }
+
+    @Test fun aLongValueDoesNotSqueezeTheTitle() {
+        rule.setContent {
+            Column(Modifier.width(360.dp)) {
+                ValueRow("Target zone", "Zone 2, 120 to 150 bpm and a long text that needs several lines", false, note = "Read only")
+            }
+        }
+        val title = rule.onNodeWithText("Target zone").getBoundsInRoot()
+        assertTrue("the title stays on one line ($title)", title.right - title.left > title.bottom - title.top)
+        assertTrue("the title keeps its width ($title)", title.right - title.left > 80.dp)
+    }
+
+    @Test fun settingsListsHomeAssistantWithItsStatus() {
+        var opened = 0
+        rule.setContent { HaSettingsEntryContent(HaStatus.NOT_SET_UP, onOpen = { opened++ }) }
+        rule.onNodeWithText("Home Assistant").assertIsDisplayed()
+        rule.onNodeWithText("Not set up").assertIsDisplayed()
+        rule.onNodeWithText("Home Assistant").performClick()
+        assertEquals(1, opened)
+        assertEquals("Connected", HaStatus.text(saved = true, lastOk = null))
+        assertEquals("Not set up", HaStatus.text(saved = false, lastOk = true))
+    }
+
+    @Test fun theWatchListHasNoHomeAssistantLink() {
+        var back = 0
+        rule.setContent { WatchListHeader(onBack = { back++ }) }
+        rule.onNodeWithText("Home Assistant", substring = true).assertDoesNotExist()
+        rule.onNodeWithText("Back", substring = true).performClick()
+        assertEquals(1, back)
+    }
+
+    @Test fun theActionsRowOnlyChoosesTheButtonAction() {
+        val actions = HaActionsUi(items = listOf(HaAction("script", "script.lights", "Lights")))
+        rule.setContent { HaButtonActionContent(true, true, {}, actions, {}, {}, {}) }
+        rule.onNodeWithText("A press of the watch button runs").assertExists()
+        listOf("Token", "Address", "Forget", "Dashboard", "Find").forEach {
+            rule.onNodeWithText(it, substring = true).assertDoesNotExist()
+        }
+    }
+
+    @Test fun theActionsRowLinksToSettingsWhenNotSetUp() {
+        var setup = 0
+        rule.setContent { HaButtonActionContent(false, true, {}, HaActionsUi(), {}, {}, { setup++ }) }
+        rule.onNodeWithText(HA_NOT_SET_UP).assertIsDisplayed()
+        rule.onNodeWithText("A press of the watch button runs").assertDoesNotExist()
+        rule.onNodeWithText(HA_SET_UP_LINK).performClick()
+        assertEquals(1, setup)
+    }
+}

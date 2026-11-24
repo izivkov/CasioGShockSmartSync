@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import org.avmedia.gshockGoogleSync.ActionContainer
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
-import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
+import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionRow
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
 import org.avmedia.gshockGoogleSync.ui.common.ItemList
@@ -28,8 +28,9 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
-    onOpenHa: () -> Unit = {},
+    onOpenHaSetup: () -> Unit = {},
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    haRow: @Composable () -> Unit = { HaButtonActionRow(onOpenHaSetup) },
 ) {
     val isModified by actionsViewModel.isModified.collectAsState()
 
@@ -44,7 +45,7 @@ fun ActionsScreen(
                 ActionsContent(
                     modifier = Modifier.weight(1f),
                     actionsViewModel = actionsViewModel,
-                    onOpenHa = onOpenHa,
+                    haRow = haRow,
                 )
 
                 ButtonsRow(
@@ -66,7 +67,7 @@ fun ActionsScreen(
 private fun ActionsContent(
     modifier: Modifier = Modifier,
     actionsViewModel: ActionsViewModel,
-    onOpenHa: () -> Unit,
+    haRow: @Composable () -> Unit,
 ) {
     Column(
         modifier =
@@ -74,13 +75,13 @@ private fun ActionsContent(
                 .verticalScroll(rememberScrollState())
                 .padding(0.dp)
                 .fillMaxWidth()
-    ) { ItemList(items = createActionItems(actionsViewModel, onOpenHa)) }
+    ) { ItemList(items = createActionItems(actionsViewModel, haRow)) }
 }
 
 @Composable
 private fun createActionItems(
     actionsViewModel: ActionsViewModel,
-    onOpenHa: () -> Unit,
+    haRow: @Composable () -> Unit,
 ): List<Any> {
     val watchFeatureManager = LocalWatchFeatureManager.current
 
@@ -125,7 +126,7 @@ private fun createActionItems(
             R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
             infoRes = R.string.prayer_times_info
         ),
-        ServiceToggleRow(ServiceToggles.Service.HOME_ASSISTANT, R.string.home_assistant, R.drawable.ic_home_assistant, onOpenHa),
+        haRow(),
         SeparatorView(),
         PhoneView(actionsViewModel)
     )

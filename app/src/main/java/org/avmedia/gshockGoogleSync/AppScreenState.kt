@@ -20,6 +20,7 @@ import org.avmedia.gshockGoogleSync.homeassistant.HaScreenState
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
+import org.avmedia.gshockGoogleSync.session.WatchList
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,7 +33,10 @@ enum class AppScreen {
     ERROR,
 
     /** The Home Assistant screen: shown whatever the watch connection does. */
-    HOME_ASSISTANT
+    HOME_ASSISTANT,
+
+    /** The watch list opened from the connected screens: shown whatever the watch connection does, until left. */
+    WATCH_LIST
 }
 
 data class AppNavigationState(
@@ -54,16 +58,17 @@ class AppScreenState @Inject constructor(
 
     val state: StateFlow<AppNavigationState> =
         combine(
-            sessionManager.sessionState, haScreenState.open, AppForeground.inFront
-        ) { session, haOpen, inFront ->
-            navigationFor(session, haOpen, inFront)
+            sessionManager.sessionState, haScreenState.open, AppForeground.inFront, WatchList.open
+        ) { session, haOpen, inFront, listOpen ->
+            navigationFor(session, haOpen, inFront, listOpen)
         }
             .distinctUntilChanged()
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
                 navigationFor(
-                    sessionManager.sessionState.value, haScreenState.open.value, AppForeground.inFront.value
+                    sessionManager.sessionState.value, haScreenState.open.value, AppForeground.inFront.value,
+                    WatchList.open.value
                 )
             )
 
@@ -73,11 +78,12 @@ class AppScreenState @Inject constructor(
         // person tapped its name. Otherwise the app stays where it is (sync and HA run unchanged).
         scope.launch {
             combine(
-                sessionManager.sessionState, AppForeground.inFront, haScreenState.open, OpenOnConnect.waiting
-            ) { session, inFront, haOpen, waiting ->
+                sessionManager.sessionState, AppForeground.inFront, haScreenState.open, OpenOnConnect.waiting,
+                WatchList.open
+            ) { session, inFront, haOpen, waiting, listOpen ->
                 val address = session.watch.address
                 OpenOnConnect.shouldOpen(
-                    session, inFront, !haOpen,
+                    session, inFront, !haOpen && !listOpen,
                     OpenOnConnect.isOn(appContext, address), waiting
                 )
             }.collect { latch ->
@@ -93,7 +99,8 @@ class AppScreenState @Inject constructor(
         internal fun navigationFor(
             session: SessionState,
             haOpen: Boolean = false,
-            appInForeground: Boolean = false
+            appInForeground: Boolean = false,
+            watchListOpen: Boolean = false
         ): AppNavigationState =
             if (haOpen) AppNavigationState(AppScreen.HOME_ASSISTANT)
             else when (val phase = session.phase) {

@@ -1,6 +1,11 @@
 package org.avmedia.gshockGoogleSync
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -36,45 +41,52 @@ fun AppNavigationHost(
 
     val sessionState by viewModel.sessionState.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding)
-    ) {
+    LinkBarLayout(sessionState.link, Modifier.fillMaxSize().padding(contentPadding)) {
         when (state.screen) {
-            AppScreen.INITIAL, AppScreen.PRE_CONNECTION ->
-                PreConnectionScreen(onOpenHa = viewModel::openHa)
+            AppScreen.INITIAL, AppScreen.PRE_CONNECTION, AppScreen.ERROR -> PreConnectionScreen()
             AppScreen.CONTENT_SELECTOR -> ContentSelector(viewModel)
-            AppScreen.MAIN_NAVIGATION ->
-                BottomNavigationBarWithPermissions(
-                    repository = viewModel.repository,
-                    onOpenHa = viewModel::openHa,
-                    keepsLink = { viewModel.sessionState.value.keepsLink },
-                )
+            AppScreen.MAIN_NAVIGATION -> MainScreens(viewModel)
             AppScreen.RUN_ACTIONS -> RunActionsScreen()
-            AppScreen.ERROR -> PreConnectionScreen(onOpenHa = viewModel::openHa)
             AppScreen.HOME_ASSISTANT -> {
                 androidx.activity.compose.BackHandler(onBack = viewModel::closeHa)
                 HaScreen(viewModel = hiltViewModel(), onBack = viewModel::closeHa)
             }
+            AppScreen.WATCH_LIST -> {
+                androidx.activity.compose.BackHandler(onBack = viewModel::closeWatchList)
+                PreConnectionScreen(onBack = viewModel::closeWatchList, watchSwitch = viewModel.watchSwitch)
+            }
         }
-        LinkBar(sessionState.link, Modifier.align(Alignment.TopCenter))
+    }
+}
+
+@Composable
+private fun MainScreens(viewModel: AppNavigationViewModel) =
+    BottomNavigationBarWithPermissions(
+        repository = viewModel.repository,
+        onOpenHa = viewModel::openHa,
+        onOpenWatchList = viewModel::openWatchList,
+        keepsLink = { viewModel.sessionState.value.keepsLink },
+    )
+
+/**
+ * The screen with the link bar on top while the watch's link is away. The bar is its own row and pushes the
+ * screen down (it takes the status bar inset), so it never covers the screen's title.
+ */
+@Composable
+internal fun LinkBarLayout(link: LinkState, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Box(modifier = modifier) {
+        content()
+        LinkBar(link, Modifier.align(Alignment.TopCenter))
     }
 }
 
 @Composable
 private fun ContentSelector(viewModel: AppNavigationViewModel) {
-    val repository = viewModel.repository
     val sessionState by viewModel.sessionState.collectAsState()
     when (sessionState.button) {
         ConnectionButton.FROM_ACTION, ConnectionButton.AUTOMATIC_SYNC -> RunActionsScreen()
         ConnectionButton.FIND -> RunFindPhoneScreen()
-        ConnectionButton.ALWAYS_CONNECTED, ConnectionButton.NORMAL, null ->
-            BottomNavigationBarWithPermissions(
-                repository = repository,
-                onOpenHa = viewModel::openHa,
-                keepsLink = { viewModel.sessionState.value.keepsLink },
-            )
+        ConnectionButton.ALWAYS_CONNECTED, ConnectionButton.NORMAL, null -> MainScreens(viewModel)
     }
 }
 

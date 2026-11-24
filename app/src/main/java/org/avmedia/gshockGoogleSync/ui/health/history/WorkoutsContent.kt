@@ -94,7 +94,6 @@ private fun WorkoutDetailCard(d: WorkoutDetail, ui: WorkoutsUi, events: WorkoutE
                     }
                 }
             }
-            if (w.warnings != null) AppText("Decoder notes: ${w.warnings}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             AppText("Units marked unconfirmed are the likely ones from the watch's data format, not checked on the watch.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

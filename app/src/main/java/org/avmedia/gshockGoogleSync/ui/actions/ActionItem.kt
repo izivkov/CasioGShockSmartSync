@@ -26,8 +26,6 @@ import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.AppIconFromResource
 import org.avmedia.gshockGoogleSync.ui.common.HorizontalSeparator
 import org.avmedia.gshockGoogleSync.ui.common.InfoButton
-import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
-import org.avmedia.gshockGoogleSync.homeassistant.AppStores
 
 @Composable
 fun ActionItem(
@@ -80,21 +78,6 @@ fun ActionItem(
             }
         }
     }
-}
-
-/** An [ActionItem] for a service master switch: saved at once, with a configure button that opens its screen. */
-@Composable
-fun ServiceToggleRow(service: ServiceToggles.Service, titleRes: Int, iconRes: Int, onConfigure: () -> Unit) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val toggles = remember { AppStores.toggles(context) }
-    var isOn by remember { mutableStateOf(toggles.isOn(service)) }
-    ActionItem(
-        title = stringResource(id = titleRes),
-        resourceId = iconRes,
-        isEnabled = isOn,
-        onEnabledChange = { isOn = it; toggles.set(service, it) },
-        onConfigure = onConfigure,
-    )
 }
 
 /**

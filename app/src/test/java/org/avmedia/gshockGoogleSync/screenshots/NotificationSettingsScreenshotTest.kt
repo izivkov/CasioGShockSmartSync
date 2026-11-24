@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import io.mockk.mockk
 import org.avmedia.gshockGoogleSync.ui.watchhealth.NotificationSettingsContent
 import org.avmedia.gshockGoogleSync.ui.watchhealth.NotificationSettingsUi
-import org.avmedia.gshockapi.io.NotificationManagerCodec
 import org.avmedia.gshockapi.io.NotificationSoundCodec
 import org.junit.Test
 
@@ -12,7 +11,6 @@ import org.junit.Test
 class NotificationSettingsScreenshotTest : ScreenshotTest() {
     private fun ui(mode: Int, vibration: Int = mode) = NotificationSettingsUi(
         sounds = NotificationSoundCodec.Setting(mode, vibration, 0x0105, 0x4002, 2),
-        manager = NotificationManagerCodec.Setting(2, 1, 1),
         message = "Sound pattern saved and read back from the watch.",
     )
 

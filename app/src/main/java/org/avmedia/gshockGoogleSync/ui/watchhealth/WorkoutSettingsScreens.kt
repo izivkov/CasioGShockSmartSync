@@ -77,7 +77,6 @@ internal fun WorkoutSettingsListContent(
                         Section("Settings of one activity")
                         on.forEach { code -> ValueRow(ActivityModels.name(family, code), ">", !ui.working) { onOpen(code) } }
                     }
-                    if (ui.rawHex != null) ValueRow("Raw answer", ui.rawHex, false, note = "Read only")
                     val text = if (ui.working) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
                 }
@@ -121,8 +120,6 @@ internal fun WorkoutActivityContent(
                     SwitchRow("Auto pause", run?.autoPause ?: false, can && run != null) { viewModel.setAutoPause(it) }
                     SwitchRow("Auto run detection", run?.autoRunDetection ?: false, can && run != null) { viewModel.setAutoRunDetection(it) }
                     SwitchRow("Use the phone's location", run?.phoneLocation ?: false, can && run != null) { viewModel.setPhoneLocation(it) }
-                    ValueRow("Auto lap distance", run?.lapDistanceRaw?.toString() ?: NO_ANSWER, false, note = "Read only, unit $NOT_CONFIRMED")
-                    ValueRow("Auto lap screen", run?.lapScreen?.toString() ?: NO_ANSWER, false, note = "Read only, meaning $NOT_CONFIRMED")
                     Section("Heart rate")
                     val hr = ui.heartRate
                     val flags = ui.heartRateFlags
@@ -136,14 +133,6 @@ internal fun WorkoutActivityContent(
                     ValueRow("Distance alert", alerts?.let { TrainingAlertCodec.REPEATS[it.distanceRepeat] } ?: NO_ANSWER, can && alerts != null) { picker = "distance" }
                     ValueRow("Calories alert", alerts?.let { TrainingAlertCodec.REPEATS[it.caloriesRepeat] } ?: NO_ANSWER, can && alerts != null) { picker = "calories" }
                     ValueRow("Altitude alert", alerts?.let { TrainingAlertCodec.REPEATS[it.altitudeRepeat] } ?: NO_ANSWER, can && alerts != null) { picker = "altitude" }
-                    ValueRow(
-                        "Intervals",
-                        alerts?.let { "time ${it.time1}, ${it.time2}; distance ${it.distance1}, ${it.distance2}; calories ${it.caloriesInterval}; altitude ${it.altitudeInterval}" } ?: NO_ANSWER,
-                        false,
-                        note = "Read only, units $NOT_CONFIRMED",
-                    )
-                    Section("Form alert")
-                    ValueRow("Value", ui.formAlert ?: NO_ANSWER, false, note = "Read only, layout $NOT_CONFIRMED")
                     Section("Screens")
                     val screens = ui.screens
                     if (screens == null) {

@@ -60,6 +60,9 @@ sealed interface TimeAction {
     data object StartVoiceCommand : TimeAction
 }
 
+/** The longest the Time screen waits for the watch values before it stops showing "Updating...". */
+internal const val READ_LIMIT_MS = 30_000L
+
 @HiltViewModel
 class TimeViewModel @Inject constructor(
     private val api: GShockRepository,
@@ -235,7 +238,8 @@ class TimeViewModel @Inject constructor(
 
     private suspend fun readState(silent: Boolean = false) {
         _state.update { it.copy(updating = true) }
-        runCatching {
+        // A read that waits for a link that is away gives up after a while: "Updating..." never stays.
+        runCatching { kotlinx.coroutines.withTimeout(READ_LIMIT_MS) {
             timeSettingsStorage.load()
             val option = timeSettingsStorage.getTimeZoneOption()
             val offset = calculateOffset(option)
@@ -274,7 +278,8 @@ class TimeViewModel @Inject constructor(
                     "Home screen: watch values after ${System.currentTimeMillis() - openedAt} ms, stored values shown at once",
                 )
             }
-        }.onFailure {
+            Unit
+        } }.onFailure {
             _state.update { s -> s.copy(updating = false) }
             if (silent) timber.log.Timber.w(it, "Time screen refresh failed") else AppSnackbar("Api Error")
         }

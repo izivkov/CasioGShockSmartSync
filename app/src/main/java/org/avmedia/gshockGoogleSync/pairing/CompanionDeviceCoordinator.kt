@@ -34,6 +34,9 @@ class CompanionDeviceCoordinator @Inject constructor(
     private val coordinatorScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var activeScanAddresses: Set<String>? = null
 
+    /** Addresses with an attempt loop running: a second request for the same watch joins the first. */
+    private val connecting = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
     /** Every interval, opens a short background window for each always-connected watch. */
     private fun startBackgroundArming() {
         coordinatorScope.launch {
@@ -61,46 +64,11 @@ class CompanionDeviceCoordinator @Inject constructor(
                     } else {
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
-                        coordinatorScope.launch {
-                            // Our own gate is gone: an always-connected watch is always admitted. A background window only marks the read.
-                            val background = BackgroundReadPermission.consume(normalizedAddress)
-                            Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
-                            repository.stopScan()
-                            // Only this watch counts. Any other connected watch must not block this one.
-                            if (repository.isConnectedTo(normalizedAddress)) {
-                                Timber.i("Device already connected. Skipping wait.")
-                                return@launch
-                            }
-
-                            if (background) BackgroundConnection.active = true
-
-                            // Like the official app: while the watch is advertising, retry quickly. A refused
-                            // attempt fails within about 0.1 s, so a short interval is enough.
-                            val windowEnd = System.currentTimeMillis() + CONNECTION_WINDOW_MS
-                            var attempt = 0
-                            while (System.currentTimeMillis() < windowEnd && !repository.isConnectedTo(normalizedAddress)) {
-                                attempt++
-                                try {
-                                    Timber.i("$normalizedAddress connection attempt $attempt")
-                                    repository.waitForConnection(normalizedAddress)
-                                    // The watch that just connected is the one the screen shows after it disconnects.
-                                    org.avmedia.gshockGoogleSync.utils.LocalDataStorage.put(
-                                        context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name
-                                    )
-                                    // No read and no release here: BackgroundHealthSync reads the LifeLog of every connection
-                                    // and the keep-alive holds the watch (a second reader plus a release cuts the link).
-                                    BackgroundConnection.active = false
-                                    return@launch
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
-                                } catch (error: Exception) {
-                                    Timber.w("Attempt $attempt refused for $normalizedAddress: ${error.message}")
-                                    repository.disconnect()
-                                    delay(CONNECTION_RETRY_DELAY_MS)
-                                }
-                            }
-                            BackgroundConnection.active = false
-                            Timber.i("Advertising window closed without a connection for $normalizedAddress")
+                        if (!org.avmedia.gshockGoogleSync.session.WatchList.admits(normalizedAddress)) {
+                            // The watch list is open for a pairing or another watch: this one waits.
+                            Timber.i("Watch list open: $normalizedAddress does not connect now")
+                        } else {
+                            coordinatorScope.launch { connectWithRetries(normalizedAddress, BackgroundReadPermission.consume(normalizedAddress)) }
                         }
                     }
                 },
@@ -114,6 +82,66 @@ class CompanionDeviceCoordinator @Inject constructor(
                 }
             )
         )
+    }
+
+    /** Connects [address] now (a watch chosen from the watch list), retrying while it advertises. */
+    fun connectNow(address: String) {
+        coordinatorScope.launch { connectWithRetries(address.uppercase(), background = false) }
+    }
+
+    private suspend fun connectWithRetries(normalizedAddress: String, background: Boolean) {
+        if (!connecting.add(normalizedAddress)) {
+            Timber.i("Already connecting to $normalizedAddress")
+            return
+        }
+        try {
+            attemptConnection(normalizedAddress, background)
+        } finally {
+            connecting.remove(normalizedAddress)
+        }
+    }
+
+    private suspend fun attemptConnection(normalizedAddress: String, background: Boolean) {
+        // Our own gate is gone: an always-connected watch is always admitted. A background window only marks the read.
+        Timber.i("Stopping foreground BLE discovery before connecting to $normalizedAddress")
+        repository.stopScan()
+        // Only this watch counts. Any other connected watch must not block this one.
+        if (repository.isConnectedTo(normalizedAddress)) {
+            Timber.i("Device already connected. Skipping wait.")
+            return
+        }
+
+        if (background) BackgroundConnection.active = true
+
+        // Like the official app: while the watch is advertising, retry quickly. A refused
+        // attempt fails within about 0.1 s, so a short interval is enough.
+        val windowEnd = System.currentTimeMillis() + CONNECTION_WINDOW_MS
+        var attempt = 0
+        while (System.currentTimeMillis() < windowEnd && !repository.isConnectedTo(normalizedAddress)) {
+            if (!org.avmedia.gshockGoogleSync.session.WatchList.admits(normalizedAddress)) {
+                Timber.i("Watch list open: stopping the attempts for $normalizedAddress")
+                break
+            }
+            attempt++
+            try {
+                Timber.i("$normalizedAddress connection attempt $attempt")
+                repository.waitForConnection(normalizedAddress)
+                // The watch that just connected is the one the screen shows after it disconnects.
+                LocalDataStorage.put(context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name)
+                // No read and no release here: BackgroundHealthSync reads the LifeLog of every connection
+                // and the keep-alive holds the watch (a second reader plus a release cuts the link).
+                BackgroundConnection.active = false
+                return
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Timber.w("Attempt $attempt refused for $normalizedAddress: ${error.message}")
+                repository.disconnect()
+                delay(CONNECTION_RETRY_DELAY_MS)
+            }
+        }
+        BackgroundConnection.active = false
+        Timber.i("Advertising window closed without a connection for $normalizedAddress")
     }
 
     suspend fun init() {

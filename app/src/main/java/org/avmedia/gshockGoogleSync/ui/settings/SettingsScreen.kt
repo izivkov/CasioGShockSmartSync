@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.R
+import org.avmedia.gshockGoogleSync.homeassistant.HaSettingsEntry
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
@@ -36,6 +37,7 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SettingsScreen(
+    onOpenHa: () -> Unit = {},
     onOpenWatchFace: () -> Unit = {},
     onOpenWatchHealth: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
@@ -57,6 +59,8 @@ fun SettingsScreen(
                         .padding(0.dp)
                         .fillMaxWidth()
                 ) {
+                    // Home Assistant has its one home here, first.
+                    HaSettingsEntry(onOpen = onOpenHa)
                     SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
                     org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "App log", value = ">", onClick = onOpenAppLog)
                 }

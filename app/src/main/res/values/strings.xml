@@ -176,6 +176,8 @@
     <string name="open_when_watch_connects" translatable="false">Open when the watch connects</string>
     <string name="waiting_for_watch" translatable="false">Waiting for the watch...</string>
     <string name="link_reconnecting" translatable="false">Reconnecting...</string>
+    <string name="watches" translatable="false">Watches</string>
+    <string name="back_to_watch" translatable="false">Back</string>
     <string name="link_lost" translatable="false">Watch disconnected</string>
     <string name="when_found_lift_phone_to_stop_ringing">When found, lift phone to stop ringing</string>
     <string name="voice_assistant_not_available_on_this_device">Voice Assistant not available on this device!</string>

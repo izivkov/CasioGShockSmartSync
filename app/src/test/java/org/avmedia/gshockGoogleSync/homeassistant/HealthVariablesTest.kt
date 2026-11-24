@@ -90,6 +90,16 @@ class HealthVariablesTest {
     }
 
     @Test
+    fun descriptionsNameNoOtherAppAndNoIssue() {
+        HealthVariables.DESCRIPTIONS.forEach { (name, text) ->
+            listOf("casio app", "official app", "upstream issue", "matched the").forEach { word ->
+                assertFalse("$name: $text", text.contains(word, ignoreCase = true))
+            }
+        }
+        assertTrue(HealthVariables.DESCRIPTIONS.getValue("health.kcal_today").contains("UNCONFIRMED: scale not verified"))
+    }
+
+    @Test
     fun distanceIsTheWatchValueWhenPlausibleElseTheStepEstimate() {
         // 5306 steps: the watch sends no distance, so the Health screen's estimate (0.73 m a step) is used
         assertEquals(3873, HealthVariables.values(data)["health.distance_m"])
