@@ -18,7 +18,7 @@ import org.junit.Test
 
 /** Settings > Plugins: the Plugins screen (on, off, failed, data of a removed plugin) and a plugin's details page. */
 class PluginsScreenshotTest : ScreenshotTest() {
-    private val ha = FakePlugin(id = "home_assistant_mqtt", name = "Home Assistant")
+    private val ha = org.avmedia.smartsync.plugin.homeassistant.HomeAssistantPlugin()
     private val other = object : org.avmedia.smartsync.plugin.api.WatchPlugin by FakePlugin(id = "trmnl", name = "TRMNL") {
         override val icon: org.avmedia.smartsync.plugin.api.PluginIcon? = null
     }

@@ -77,7 +77,7 @@ class AppLogTest {
         assertEquals("2026-11-24 12:00:00.123", l.time)
         assertEquals(LogSource.HomeAssistant, l.source)
         assertEquals("push sent: 3 sensors", l.text)
-        assertEquals("a plugin's id is its source", LogSource.HomeAssistant, Logcat.parse("2026-11-24 12:00:00.123  1234  1250 W home_assistant: x")!!.source)
+        assertEquals("a plugin's id is its source", LogSource.HomeAssistant, Logcat.parse("2026-11-24 12:00:00.123  1234  1250 W home_assistant_mqtt: x")!!.source)
         assertEquals(LogSource.Watch, Logcat.parse("2026-11-24 12:00:00.123  1234  1250 I Watch   : 49 00 received")!!.source)
         assertNull("another tag is no source", Logcat.parse("2026-11-24 12:00:00.123  1234  1250 D OpenGLRenderer: x")!!.source)
         assertNull("a header line is no line", Logcat.parse("--------- beginning of main"))
