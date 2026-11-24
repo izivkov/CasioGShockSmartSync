@@ -125,11 +125,17 @@ class LifeLogReadSpeedTest {
         assertTrue("read took $seconds s", seconds < 22.0)
     }
 
-    @Test fun withoutTheWatchsSetupDoneTheFullSetupIsReplayed() = runBlocking {
+    /** Without `47 01` the read is left out on this link: no setup replay (it took the connection setup's answers). */
+    @Test fun withoutTheWatchsSetupDoneNothingIsReadOrReplayed() = runBlocking {
         val watch = SlowLinkWatch(prepMs = 0)
         install(watch)
-        H5600HealthIO.request(peek = true)
-        assertEquals(H5600LifeLogSync.SETUP_COMMANDS, watch.reads.toList())
+        ConnectionSetup.watchSetupWaitMs = 500
+        try {
+            assertEquals(null, H5600HealthIO.request(peek = true).h5600)
+        } finally {
+            ConnectionSetup.watchSetupWaitMs = ConnectionSetup.SETUP_WAIT_MS
+        }
+        assertEquals(emptyList<Int>(), watch.reads.toList())
     }
 
     @Test fun aWatchThatNeverGetsReadyStillEndsTheRead() = runBlocking {

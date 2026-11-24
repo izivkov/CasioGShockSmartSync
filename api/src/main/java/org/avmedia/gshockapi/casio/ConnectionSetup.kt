@@ -110,6 +110,20 @@ object ConnectionSetup {
     @Volatile var watchSetupDone = false
         private set
 
+    /**
+     * Before a LifeLog or workout transfer, on every kind of connection: our setup idle and the watch's `47 01` in. True when
+     * both are so within [timeoutMs]; false: the transfer is left out on this link (a transfer started without `47 01` on a
+     * first connection after pairing got no answer and the watch dropped the link). Waiting holds nothing: settings reads go on.
+     */
+    suspend fun awaitWatchSetup(timeoutMs: Long = watchSetupWaitMs): Boolean {
+        awaitIdle()
+        if (watchSetupDone) return true
+        return kotlinx.coroutines.withTimeoutOrNull(timeoutMs) {
+            while (!watchSetupDone) kotlinx.coroutines.delay(100)
+            true
+        } ?: false
+    }
+
     /** `47 01` came (called by [ConnectionKeepAlive.onSetup]). */
     fun onWatchSetupDone() {
         watchSetupDone = true

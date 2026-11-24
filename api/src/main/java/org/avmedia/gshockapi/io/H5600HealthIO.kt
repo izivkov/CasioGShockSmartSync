@@ -164,8 +164,19 @@ object H5600HealthIO {
         }
         lastError = null
         requestStartedMs = System.currentTimeMillis()
-        // The connection setup runs first: its requests must not queue behind ours (they would lose their answers to the transfer).
-        org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
+        // The connection setup runs first and the watch's own setup ends with `47 01`: before that no transfer and no setup
+        // reads of ours (they took the setup's answers). Without `47 01` the read is left out on this link.
+        if (!org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) {
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog read waits for 47 01 (the watch's setup)")
+        }
+        if (!org.avmedia.gshockapi.casio.ConnectionSetup.awaitWatchSetup()) {
+            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(
+                "LifeLog read left out: no 47 01 in ${org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupWaitMs / 1000} s on this link",
+            )
+            lastError = "The watch has not finished its setup on this connection. The LifeLog is read at the next connection."
+            synchronized(lock) { requestRunning = false }
+            return StepCounterData.unavailable()
+        }
         // One exchange on the link at a time: a raw or settings read in progress finishes first.
         var locked = false
         try {
@@ -310,20 +321,17 @@ object H5600HealthIO {
     }
 
     /**
-     * The setup requests of this read. On a link whose setup the watch finished (`47 01`) only the two values the decoder needs
-     * are read: the watch needs no replay before a transfer, and our replay of twelve reads and six echoes cost about
-     * 13 s on the slow always-connected link (0.78 s per answer). Without `47 01` the full replay stays.
+     * The setup requests of this read: only the two values the decoder needs. A read starts only after `47 01` (the watch
+     * finished its setup), so the watch needs no replay; the old replay of twelve reads cost about 13 s on the slow link and,
+     * run before `47 01`, took the connection setup's answers.
      */
-    internal fun setupCommands(): List<Int> =
-        if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) QUICK_SETUP_COMMANDS else H5600LifeLogSync.SETUP_COMMANDS
+    internal fun setupCommands(): List<Int> = QUICK_SETUP_COMMANDS
 
     /** Sends each one-byte setup request and waits for its reply. Returns the step goal, if read. */
     private suspend fun runSetup(transfer: Transfer): Int? {
         var stepGoal: Int? = null
         val commands = setupCommands()
-        if (commands === QUICK_SETUP_COMMANDS) {
-            org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog: the link is set up (47 01), only 0x43 and 0x28 are read")
-        }
+        org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog: the link is set up (47 01), only 0x43 and 0x28 are read")
         for (command in commands) {
             if (transfer.lost) break
             Timber.d("H5600: setup 0x${command.toString(16)} -> watch")

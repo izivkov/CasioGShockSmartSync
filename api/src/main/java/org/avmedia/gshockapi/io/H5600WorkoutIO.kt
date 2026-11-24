@@ -160,16 +160,13 @@ object H5600WorkoutIO {
         return "Workout read not started: the last one failed, next automatic try in ${(left + 59_999) / 60_000} min (the button reads now)"
     }
 
-    /** Like the LifeLog: no transfer before the watch's setup is done (`47 01`) and our own setup is idle. */
-    private suspend fun awaitWatchSetup() {
-        org.avmedia.gshockapi.casio.ConnectionSetup.awaitIdle()
-        if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) return
+    /** Like the LifeLog: no transfer before the watch's setup is done (`47 01`) and our own setup is idle. False: left out on this link. */
+    private suspend fun awaitWatchSetup(): Boolean {
+        if (org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) return org.avmedia.gshockapi.casio.ConnectionSetup.awaitWatchSetup(setupWaitMs)
         log("Workout read waits for 47 01 (the watch's setup)")
-        val came = kotlinx.coroutines.withTimeoutOrNull(setupWaitMs) {
-            while (!org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone) kotlinx.coroutines.delay(100)
-            true
-        }
-        log(if (came == true) "Workout read: 47 01 came" else "Workout read: no 47 01 in ${setupWaitMs / 1000} s, going on")
+        val came = org.avmedia.gshockapi.casio.ConnectionSetup.awaitWatchSetup(setupWaitMs)
+        log(if (came) "Workout read: 47 01 came" else "Workout read left out: no 47 01 in ${setupWaitMs / 1000} s on this link")
+        return came
     }
 
     /**
@@ -201,11 +198,15 @@ object H5600WorkoutIO {
         val store = sink ?: return null.also { log("Workout read not started: the app keeps no workouts") }
         if (!userAsked) backedOff()?.let { log(it); return null }
         if (!running.compareAndSet(false, true)) return null.also { log("Workout read not started: one is already running") }
-        try {
+        val ready = try {
             awaitWatchSetup()
         } catch (t: Throwable) {
             running.set(false)
             throw t
+        }
+        if (!ready) {
+            running.set(false)
+            return null
         }
         log("Workout read starts")
         val channel = Channel<WorkoutMsg>(Channel.UNLIMITED)

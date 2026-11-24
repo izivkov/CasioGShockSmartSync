@@ -35,6 +35,7 @@ class LifeLogLinkTest {
     @Before fun install() {
         H5600HealthIO.stepCounterSupported = { true }
         ConnectionSetup.reset()
+        ConnectionSetup.onWatchSetupDone()
     }
 
     @After fun restore() {
