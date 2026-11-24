@@ -14,7 +14,6 @@ import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.LengthUnit
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
 import org.avmedia.gshockapi.io.ProfileCodec
-import org.avmedia.gshockapi.io.SmartAlarmCodec
 import org.avmedia.gshockapi.io.StepGoalCodec
 
 data class WatchHealthUi(
@@ -26,12 +25,11 @@ data class WatchHealthUi(
     val stepGoal: Int? = null,
     val profile: ProfileCodec.Profile? = null,
     val body: PhysicalSettingsCodec.Body? = null,
-    val alarm: SmartAlarmCodec.Setting? = null,
 )
 
 /**
- * The Watch health settings screen. Reads 0x41, 0x4F, 0x13, 0x43, 0x45 and 0x50; writes all but 0x50
- * (the smart alarm layout is not confirmed). A write is read, changed in its decoded fields only, written
+ * The Watch health settings screen. Reads and writes 0x41, 0x4F, 0x13, 0x43 and 0x45 (the smart alarm, 0x50, is the
+ * Alarms tab's [org.avmedia.gshockGoogleSync.ui.alarms.SmartAlarmViewModel]). A write is read, changed in its decoded fields only, written
  * and read back by [WatchSettingsAccess]; a failure is shown once and never retried.
  */
 @HiltViewModel
@@ -59,11 +57,10 @@ class WatchHealthSettingsViewModel @Inject constructor(private val access: Watch
         val basic = access.read(BasicHealthFieldsCodec.CODE)?.let { BasicHealthFieldsCodec.parse(it) }
         val goal = access.read(StepGoalCodec.CODE)?.let { StepGoalCodec.parse(it) }
         val profile = access.read(ProfileCodec.CODE)?.let { ProfileCodec.parse(it) }
-        val alarm = access.read(SmartAlarmCodec.CODE)?.let { SmartAlarmCodec.parse(it) }
-        val none = listOf(hr, sleep, basic, goal, profile, alarm).all { it == null }
+        val none = listOf(hr, sleep, basic, goal, profile).all { it == null }
         _ui.update {
             it.copy(
-                heartRate = hr, sleep = sleep, body = body, basic = basic, stepGoal = goal, profile = profile, alarm = alarm,
+                heartRate = hr, sleep = sleep, body = body, basic = basic, stepGoal = goal, profile = profile,
                 message = if (none) (access.explain(ProfileCodec.CODE) ?: "The watch did not answer. Connect the watch and try again.") else (if (profile == null) (access.explain(ProfileCodec.CODE) ?: access.explainParse(ProfileCodec.CODE)) else null) ?: it.message,
             )
         }
@@ -85,13 +82,6 @@ class WatchHealthSettingsViewModel @Inject constructor(private val access: Watch
 
     fun setHeightAndWeight(heightCm: Int, weightKg: Int) = write(ProfileCodec.CODE, "Profile", ProfileCodec.BYTES) { ProfileCodec.withHeightAndWeight(it, heightCm, weightKg) }
 
-    fun setAlarmTime(hour: Int, minute: Int) = write(SmartAlarmCodec.CODE, "Smart alarm time", SmartAlarmCodec.TIME_BYTES) { SmartAlarmCodec.withTime(it, hour, minute) }
-
-    fun setAlarmOn(on: Boolean) = write(SmartAlarmCodec.CODE, "Smart alarm", SmartAlarmCodec.FLAG_BYTES) { SmartAlarmCodec.withOn(it, on) }
-
-    fun setAlarmSnooze(on: Boolean) = write(SmartAlarmCodec.CODE, "Smart alarm snooze", SmartAlarmCodec.FLAG_BYTES) { SmartAlarmCodec.withSnooze(it, on) }
-
-    fun setAlarmWindow(minutes: Int) = write(SmartAlarmCodec.CODE, "Smart alarm wake window", SmartAlarmCodec.WINDOW_BYTES) { SmartAlarmCodec.withWindow(it, minutes) }
 
     fun setFemale(female: Boolean) = write(ProfileCodec.CODE, "Sex", ProfileCodec.SEX_BYTES) { ProfileCodec.withFemale(it, female) }
     fun setBirthDate(year: Int, month: Int, day: Int) = write(ProfileCodec.CODE, "Birth date", ProfileCodec.BIRTH_BYTES) { ProfileCodec.withBirthDate(it, year, month, day) }

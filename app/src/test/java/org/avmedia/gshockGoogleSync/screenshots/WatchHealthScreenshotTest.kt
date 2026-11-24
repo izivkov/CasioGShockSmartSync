@@ -9,7 +9,6 @@ import org.avmedia.gshockapi.io.HeartRateSettingCodec
 import org.avmedia.gshockapi.io.LengthUnit
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
 import org.avmedia.gshockapi.io.ProfileCodec
-import org.avmedia.gshockapi.io.SmartAlarmCodec
 import org.junit.Test
 
 /** Watch health settings: the Profile section first, in kilometres and in miles, and the unit shown as a choice. */
@@ -21,7 +20,6 @@ class WatchHealthScreenshotTest : ScreenshotTest() {
         basic = BasicHealthFieldsCodec.Fields(unit, true, 22 to 30, 6 to 15),
         stepGoal = 8000,
         profile = ProfileCodec.Profile(170, 70, 1990, 1, 1, true, imperialLength = unit == LengthUnit.MILES),
-        alarm = SmartAlarmCodec.Setting(6, 30, true, false, 30),
     )
 
     @Composable private fun Screen(ui: WatchHealthUi) = WatchHealthSettingsContent(ui, {}, mockk(relaxed = true))

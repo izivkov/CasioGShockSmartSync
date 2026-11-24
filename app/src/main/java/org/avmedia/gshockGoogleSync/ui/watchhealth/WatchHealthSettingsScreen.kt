@@ -43,13 +43,11 @@ internal sealed class Editing {
     data object MaxHr : Editing()
     data object RestingHr : Editing()
     data object Vo2 : Editing()
-    data object AlarmTime : Editing()
-    data object AlarmWindow : Editing()
 }
 
 internal val HEART_RATE_MODES = listOf("Off", "Only during activities", "Always")
 
-/** Heart-rate measurement, sleep times, night window, step reminder, unit, step goal, profile; smart alarm shown only. */
+/** Heart-rate measurement, sleep times, night window, step reminder, unit, step goal, profile. The smart alarm is on the Alarms tab. */
 @Composable
 fun WatchHealthSettingsScreen(
     onBack: () -> Unit,
@@ -88,11 +86,6 @@ internal fun WatchHealthSettingsContent(
                         enabled = can && basic != null,
                     ) { editing = Editing.LengthUnit }
                     ValueRow("Step goal", ui.stepGoal?.toString() ?: "-", can && ui.stepGoal != null) { editing = Editing.StepGoal }
-                    val alarm = ui.alarm
-                    ValueRow("Smart alarm time", alarm?.let { hhmm(it.hour to it.minute) } ?: "-", can && alarm != null) { editing = Editing.AlarmTime }
-                    SwitchRow("Smart alarm on", alarm?.on ?: false, can && alarm != null) { viewModel.setAlarmOn(it) }
-                    SwitchRow("Smart alarm snooze", alarm?.snooze ?: false, can && alarm != null && alarm.on) { viewModel.setAlarmSnooze(it) }
-                    ValueRow("Smart alarm wake window", alarm?.let { "${it.windowMinutes} min" } ?: "-", can && alarm != null) { editing = Editing.AlarmWindow }
                     val text = if (ui.working) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
                 }
@@ -159,13 +152,6 @@ private fun EditDialogs(
                 ChoiceDialog("Sex", listOf("Male", "Female"), if (profile.female) 1 else 0, { close(); viewModel.setFemale(it == 1) }, close)
             }
         Editing.BirthDate -> if (profile != null) BirthDateDialog(profile, close, viewModel)
-        Editing.AlarmTime ->
-            ui.alarm?.let { a -> TimeDialog(a.hour, a.minute, { h, m -> close(); viewModel.setAlarmTime(h, m) }, close) }
-        Editing.AlarmWindow ->
-            ui.alarm?.let { a ->
-                val windows = org.avmedia.gshockapi.io.SmartAlarmCodec.WINDOWS
-                ChoiceDialog("Wake window", windows.map { "$it min" }, windows.indexOf(a.windowMinutes), { close(); viewModel.setAlarmWindow(windows[it]) }, close)
-            }
         Editing.Background ->
             if (body != null) {
                 ChoiceDialog("Training background", PhysicalSettingsCodec.TRAINING_BACKGROUNDS, body.trainingBackground, { close(); viewModel.setTrainingBackground(it) }, close)

@@ -77,6 +77,8 @@ fun AlarmsScreen(alarmViewModel: AlarmViewModel = hiltViewModel()) {
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
             ) {
+                // The H5600 family's smart alarm, as its own card above the normal alarms.
+                if (smartAlarmShownFor(org.avmedia.gshockapi.WatchInfo.name)) SmartAlarmSection()
                 AlarmList()
                 AlarmChimeSwitch(
                     onUpdate = { isChecked -> alarmViewModel.toggleHourlyChime(isChecked) }
