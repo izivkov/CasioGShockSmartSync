@@ -189,8 +189,7 @@ class PluginHub @Inject constructor(
     private val switches by lazy {
         PluginSwitchboard(
             toggles, runtime,
-            // Home Assistant set up before the plugin interface stays on: its switch was on by default.
-            legacyOn = { id -> id == "home_assistant" && kv.get("ha.config") != null },
+            legacyOn = { id -> legacyOn(id, kv) },
             afterActivate = { id ->
                 // What the plugin missed while it was off: the background service, the watch connected now and its values.
                 if (backgroundActive) runtime.dispatchTo(id, WatchEvent.BackgroundStarted)
@@ -523,6 +522,13 @@ class PluginHub @Inject constructor(
 
     companion object {
         const val KEY_CAPS = "plugins.caps"
+
+        /**
+         * A plugin's switch before the person set it: on only for the app's own Home Assistant plugin where it was set up
+         * before the plugin interface (its switch was on by default). Every other plugin found starts off.
+         */
+        fun legacyOn(id: String, kv: org.avmedia.gshockGoogleSync.watch.KeyValueStore): Boolean =
+            id == "home_assistant" && kv.get("ha.config") != null
 
         /** The watch a button press is for: the watch whose values were read, else the current one (the press is never lost). */
         fun pressTarget(read: WatchEvent.ValuesUpdated?, currentKey: String): WatchId? =

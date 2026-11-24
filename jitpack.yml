@@ -1,5 +1,0 @@
-# JitPack builds only the plugin interface from this repository (tag plugin-api-v<version>).
-jdk:
-  - openjdk21
-install:
-  - ./gradlew :plugin-api:publishReleasePublicationToMavenLocal -x lint

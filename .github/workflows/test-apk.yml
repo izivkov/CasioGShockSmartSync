@@ -26,8 +26,8 @@ jobs:
           java-version: '21'
 
       # The library tests run in its own repository (ExcuseMi/GShockAPI, branch smartsync).
-      - name: Unit tests (app and plugin interface)
-        run: ./gradlew --continue testGithubDebugUnitTest :plugin-api:testDebugUnitTest :plugins:homeassistant:testDebugUnitTest
+      - name: Unit tests (app and its own plugin; plugin-api and the other plugins are tested in smartsync-plugins)
+        run: ./gradlew --continue testGithubDebugUnitTest :plugins:homeassistant:testDebugUnitTest
 
       - name: The library comes from the gshockapi submodule, not JitPack
         run: |
@@ -35,6 +35,20 @@ jobs:
           grep -iE "gshockapi" lib-source.txt | sort -u | head -10 || true
           if grep -E "GShockAPI:[0-9][^ ]*( \(\*\))?$" lib-source.txt; then echo "GShockAPI resolved from a repository"; exit 1; fi
           grep -iE "gshockapi" lib-source.txt | grep -q -- "project ':"
+
+      - name: The plugins come from JitPack, or from a smartsync-plugins checkout with -PsmartsyncPluginsDir
+        run: |
+          set -o pipefail
+          ./gradlew -q app:dependencies --configuration githubDebugRuntimeClasspath > plugins-jitpack.txt
+          for m in plugin-api homeassistant healthconnect trmnl; do
+            grep -qE "com.github.ExcuseMi.smartsync-plugins:$m:[0-9a-zA-Z.-]+( \(\*\))?$" plugins-jitpack.txt || { echo "$m not from JitPack"; exit 1; }
+          done
+          git clone -q --depth 1 https://github.com/ExcuseMi/smartsync-plugins.git "$RUNNER_TEMP/smartsync-plugins"
+          ./gradlew -q -PsmartsyncPluginsDir="$RUNNER_TEMP/smartsync-plugins" app:dependencies --configuration githubDebugRuntimeClasspath > plugins-local.txt
+          grep -E "smartsync-plugins:" plugins-local.txt | sort -u | head -8
+          for m in plugin-api homeassistant healthconnect trmnl; do
+            grep -qE "com.github.ExcuseMi.smartsync-plugins:$m:[^ ]+ -> project " plugins-local.txt || { echo "$m not from the checkout"; exit 1; }
+          done
 
       # Records pictures of the screens (never compares, so a changed screen does not fail the run;
       # a screen that no longer compiles or renders does).

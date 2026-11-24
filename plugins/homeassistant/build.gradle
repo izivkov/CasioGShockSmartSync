@@ -36,7 +36,7 @@ android {
 }
 
 dependencies {
-    implementation(project(':plugin-api'))
+    implementation(libs.smartsync.plugin.api)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.material3)

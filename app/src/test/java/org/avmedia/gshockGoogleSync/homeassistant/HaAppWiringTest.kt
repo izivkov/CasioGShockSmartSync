@@ -18,7 +18,7 @@ class HaAppWiringTest {
     @Test fun nothingOfTheRemovedFeatureIsLeft() {
         val gone = listOf("WebhookSender", "WebhookDispatcher", "WebhookWorker", "WebhooksScreen", "WebhookStorage",
             "TemplateRenderer", "R.string.webhook", "ic_webhook", "LogSource.Webhook", "Service.WEBHOOKS", "onOpenWebhooks")
-        val roots = listOf(File("src/main/java"), File("../api/src/main/java"), File("../plugins"), File("../plugin-api/src"))
+        val roots = listOf(File("src/main/java"), File("../api/src/main/java"), File("../plugins"))
         val hits = roots.flatMap { r -> r.walk().filter { it.extension == "kt" }.toList() }
             .flatMap { f -> f.readText().let { text -> gone.filter { it in text }.map { "${f.name}: $it" } } }
         assertEquals(emptyList<String>(), hits)

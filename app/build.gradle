@@ -115,9 +115,10 @@ android {
 
 dependencies {
     implementation(libs.gshockapi)
-    // The plugin interface (its own version, published from this repository); plugins depend on it only.
-    implementation(project(':plugin-api'))
-    // Plugins shipped with the app (found by ServiceLoader at start).
+    // The plugin interface (ExcuseMi/smartsync-plugins, JitPack); plugins depend on it only.
+    implementation(libs.smartsync.plugin.api)
+    // Plugins shipped with the app (found by ServiceLoader at start; off until the person turns one on, except the
+    // app's own Home Assistant plugin where it was set up before).
     implementation(project(':plugins:homeassistant'))
     // The library comes from the gshockapi submodule (settings.gradle, includeBuild).
 

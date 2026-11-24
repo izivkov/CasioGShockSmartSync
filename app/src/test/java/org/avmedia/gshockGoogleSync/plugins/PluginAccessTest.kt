@@ -131,7 +131,7 @@ class PluginAccessTest {
     @Test fun homeAssistantSetUpBeforeThePluginsStaysOn() = runBlocking {
         val kv = Mem()
         kv.m["ha.config"] = """{"baseUrl":"https://ha.example","token":"t"}"""
-        val legacy = { id: String -> id == "home_assistant" && kv.get("ha.config") != null }
+        val legacy = { id: String -> PluginHub.legacyOn(id, kv) }
         val rt = PluginRuntime(scope, hostFor = { mockk(relaxed = true) }, log = { _, _ -> })
         rt.register(listOf(plugin("home_assistant", PluginAccess()), plugin("other", PluginAccess())))
         PluginSwitchboard(PluginToggles(kv), rt, legacyOn = legacy).startAll()
