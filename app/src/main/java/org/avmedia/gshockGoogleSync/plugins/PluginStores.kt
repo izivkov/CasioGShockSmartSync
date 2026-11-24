@@ -8,9 +8,9 @@ import org.avmedia.smartsync.plugin.api.PluginStorage
 /** Where each plugin's keys live in the app's store. Android-free. */
 object PluginNamespaces {
     /**
-     * Plugins that existed inside the app before the plugin interface keep their keys where they were, so a stored
-     * setup (Home Assistant: URL, token, registrations, per-watch values) is read as it is, with nothing to migrate.
-     * Their layout predates the key rule ([StorageRules]), so it is not applied to them.
+     * Plugins that existed inside the app before the plugin interface keep their keys where they were. The old Home
+     * Assistant (mobile app) plugin is gone from the app: its keys stay on the phone until the person deletes them
+     * (Settings > Plugins lists them as left over, [leftOver]). Their layout predates the key rule ([StorageRules]).
      */
     private val KEPT = mapOf("home_assistant" to "ha.")
 
@@ -27,7 +27,8 @@ object PluginNamespaces {
 
     /** Plugin ids that still have data in [keys] but are not in [present] (a plugin no longer in this build). */
     fun leftOver(keys: Set<String>, present: Set<String>): Set<String> =
-        keys.filter { it.startsWith("plugin.") }.map { it.removePrefix("plugin.").substringBefore('.') }
+        (keys.filter { it.startsWith("plugin.") }.map { it.removePrefix("plugin.").substringBefore('.') } +
+            KEPT.filter { (id, prefix) -> id !in present && keys.any { it.startsWith(prefix) } }.keys)
             .filter { it.isNotBlank() && it !in present }.toSet()
 }
 

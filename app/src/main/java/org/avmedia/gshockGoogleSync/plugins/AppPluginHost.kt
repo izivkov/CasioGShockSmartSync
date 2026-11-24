@@ -41,7 +41,6 @@ class AppPluginHost(private val hub: PluginHub, private val plugin: WatchPlugin,
 
     override fun revoke() {
         revoked = true
-        settingsWriterOrNull?.let(hub::removeSettingsWriter)
     }
 
     private val stopped = PluginResult.Failed(FailReason.STOPPED, "the plugin was stopped")
@@ -92,7 +91,7 @@ class AppPluginHost(private val hub: PluginHub, private val plugin: WatchPlugin,
                 // All or nothing: one unknown key or bad value and nothing is written.
                 is SettingsCheck.Refused -> PluginResult.Failed(c.reason, c.message)
                 is SettingsCheck.Ok -> hub.scheduler.submit(id, watch, delivery, "settings ${c.values.keys.joinToString()}", timeoutMs = 60_000) {
-                    hub.writeSettings(this, watch, c.values)
+                    hub.writeSettings(name, watch, c.values)
                 }
             }
         }
@@ -129,12 +128,6 @@ class AppPluginHost(private val hub: PluginHub, private val plugin: WatchPlugin,
     override fun declareNeeds(needs: PluginNeeds) { if (!revoked) hub.declareNeeds(id, needs) }
 
     override fun status(status: PluginStatus) { if (!revoked) hub.health.reported(id, status) }
-
-    @Volatile private var settingsWriterOrNull: org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands? = null
-
-    /** The settings writer of this plugin (its log lines carry the plugin's name); removed from the hub at [revoke]. */
-    internal val settingsWriter: org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands
-        get() = settingsWriterOrNull ?: synchronized(this) { settingsWriterOrNull ?: hub.newSettingsWriter(name).also { settingsWriterOrNull = it } }
 
     /** A read: nothing once revoked, the fallback when the app's call throws. */
     private inline fun <T> read(fallback: T, block: () -> T): T = if (revoked) fallback else try { block() } catch (e: Throwable) {

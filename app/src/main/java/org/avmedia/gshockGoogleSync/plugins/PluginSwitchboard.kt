@@ -2,13 +2,11 @@ package org.avmedia.gshockGoogleSync.plugins
 
 /**
  * Each plugin's on/off switch: stored by [toggles] (it survives restarts), On activates, Off deactivates. A plugin found
- * for the first time is off, except Home Assistant for a phone where it was set up before the plugin interface
- * ([legacyOn]). Android-free.
+ * for the first time is off. Android-free.
  */
 class PluginSwitchboard(
     private val toggles: PluginToggles,
     private val runtime: PluginRuntime,
-    private val legacyOn: (String) -> Boolean = { false },
     /** After a plugin started: what it missed (the background service, the connected watch). */
     private val afterActivate: suspend (String) -> Unit = {},
     /** The person turned it on and it started (not at app start): ask for what it needs. */
@@ -21,7 +19,7 @@ class PluginSwitchboard(
      */
     private val open: (String) -> Unit = {},
 ) {
-    fun isOn(id: String): Boolean = toggles.isOn(id, default = legacyOn(id))
+    fun isOn(id: String): Boolean = toggles.isOn(id, default = false)
 
     /** At app start: every plugin that is switched on. */
     suspend fun startAll() {

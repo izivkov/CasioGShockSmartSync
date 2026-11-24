@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
-import org.avmedia.smartsync.homeassistant.*
 
 import org.avmedia.gshockGoogleSync.watchvalues.HealthVariables
 import org.avmedia.gshockGoogleSync.watchvalues.SleepVariables
@@ -25,14 +24,6 @@ import org.junit.Test
 
 /** Sleep, body and decoded setting variables and their Home Assistant sensors. */
 class SleepAndSettingVariablesTest {
-    init {
-        // What the app gives the Home Assistant plugin when it starts: its raw codes and writable settings.
-        HaSensors.hostKeys = HaSensors.HostKeys(
-            org.avmedia.gshockGoogleSync.watchvalues.RawSettings.CODES.map(org.avmedia.gshockGoogleSync.watchvalues.RawSettings::name),
-            org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry.ALL.map { it.key },
-        )
-    }
-
     private val start = LocalDateTime.of(2026, 11, 21, 23, 10)
 
     private val night = SleepNight(
@@ -104,36 +95,6 @@ class SleepAndSettingVariablesTest {
         assertEquals(HealthVariables.NAMES.toSet(), HealthVariables.DESCRIPTIONS.keys)
     }
 
-    @Test
-    fun sleepSensorsCarryStatesTimestampsAndStages() {
-        val zone = java.time.ZoneId.of("Europe/Brussels")
-        val values = HealthVariables.values(data)
-        val states = HaSensors.states(values, zone = zone)
-        assertEquals(82, states["sleep_score"])
-        assertEquals("2026-11-21T23:10+01:00", states["sleep_fell_asleep"])
-        assertEquals(432, states["sleep_total"])
-        val attrs = HaSensors.attributes(values)
-        assertEquals(2, (attrs.getValue("sleep_total")["stages"] as List<*>).size)
-        assertEquals(4, attrs.getValue("recharge_status")["level"])
-        assertEquals(310, attrs.getValue("cardio_load")["strain"])
-    }
-
-    @Test
-    fun sleepSensorsAreLeftOutWithoutValues() {
-        val states = HaSensors.states(HealthVariables.values(null))
-        assertFalse(states.keys.any { it.startsWith("sleep_") || it == "spo2" || it == "cardio_load" })
-    }
-
-    @Test
-    fun everyNewVariableIsInTheRegistry() {
-        val names = WatchVariables.registry(fakeEnv()).names
-        SleepVariables.DESCRIPTIONS.keys.forEach { assertTrue("$it missing", it in names) }
-        WatchSettingVariables.DEFS.forEach { assertTrue("${it.name} missing", it.name in names) }
-        // The push socket's values are the Home Assistant plugin's own.
-        HaSensors.ALL.filter { it.variable !in HaRuntime.PLUGIN_VALUES }.forEach { assertTrue("${it.variable} is not a variable", it.variable in names) }
-        HaSensors.ALL.forEach { s -> s.attributes.values.filter { it !in HaRuntime.PLUGIN_VALUES }.forEach { assertTrue("$it is not a variable", it in names) } }
-    }
-
     // decoded settings
 
     private val raw = mapOf(
@@ -180,14 +141,6 @@ class SleepAndSettingVariablesTest {
         WatchSettingVariables.DEFS.forEach { assertNull("${it.name}", it.value(frames)) }
     }
 
-    @Test
-    fun theDecodedSettingsAreOnTheSensorsToo() {
-        val values = mapOf<String, Any?>("watch.face_index" to 2, "watch.face_item.1" to "Steps", "watch.bedtime" to "23:15", "watch.wake_up_time" to "06:45")
-        assertEquals(2, HaSensors.states(values)["watch_face"])
-        assertEquals("Steps", HaSensors.attributes(values).getValue("watch_face")["slot_1"])
-        assertEquals("06:45", HaSensors.attributes(values).getValue("bedtime")["wake_up"])
-    }
-
     private fun fakeEnv(): WatchVariables.Env = WatchVariables.Env(
         api = io.mockk.mockk(relaxed = true),
         features = io.mockk.mockk(relaxed = true),
@@ -196,4 +149,11 @@ class SleepAndSettingVariablesTest {
         phoneBattery = { 50 },
         lastSync = { null },
     )
+
+    @Test
+    fun everyNewVariableIsInTheRegistry() {
+        val names = WatchVariables.registry(fakeEnv()).names
+        SleepVariables.DESCRIPTIONS.keys.forEach { assertTrue("$it missing", it in names) }
+        WatchSettingVariables.DEFS.forEach { assertTrue("${it.name} missing", it.name in names) }
+    }
 }

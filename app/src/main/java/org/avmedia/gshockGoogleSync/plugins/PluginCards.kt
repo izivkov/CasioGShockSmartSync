@@ -142,7 +142,11 @@ internal fun PluginActionCard(plugin: WatchPlugin, on: Boolean, onSwitch: (Boole
 
 /** One plugin in the Plugins screen: icon, name, version and status, its switch; a tap opens its details page. */
 @Composable
-internal fun PluginCard(plugin: WatchPlugin, status: String, on: Boolean, onSwitch: (Boolean) -> Unit, onOpen: (() -> Unit)?) {
+internal fun PluginCard(
+    plugin: WatchPlugin, status: String, on: Boolean, onSwitch: (Boolean) -> Unit, onOpen: (() -> Unit)?,
+    /** A tap on the status line: the permission request again while "Needs permission: ..." shows. */
+    onStatus: (() -> Unit)? = null,
+) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().let { m -> onOpen?.let { m.clickable(onClick = it) } ?: m }.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -152,7 +156,10 @@ internal fun PluginCard(plugin: WatchPlugin, status: String, on: Boolean, onSwit
             HorizontalSeparator(width = 8.dp)
             Column(modifier = Modifier.weight(1f)) {
                 AppTextLarge(text = plugin.name)
-                AppText(text = listOf(versionOf(plugin), status).filter { it.isNotBlank() }.joinToString("  ·  "), fontSize = 12.sp)
+                AppText(
+                    text = listOf(versionOf(plugin), status).filter { it.isNotBlank() }.joinToString("  ·  "), fontSize = 12.sp,
+                    modifier = onStatus?.let { Modifier.clickable(onClick = it) } ?: Modifier,
+                )
             }
             AppSwitch(checked = on, onCheckedChange = onSwitch)
         }

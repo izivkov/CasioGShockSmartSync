@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
-import org.avmedia.smartsync.homeassistant.*
 
 import org.avmedia.gshockGoogleSync.watchvalues.VariableContext
 import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
@@ -37,11 +36,6 @@ class WorkoutVariablesTest {
         assertTrue(WorkoutVariables.DESCRIPTIONS.getValue("workout.distance").contains("UNCONFIRMED"))
     }
 
-    @Test fun theWorkoutTriggerKeepsItsEventName() {
-        assertEquals("workout_downloaded", HaTrigger.WORKOUT.eventName)
-        assertNull(HaJobs.event(HaTrigger.WORKOUT, java.time.OffsetDateTime.parse("2026-11-23T10:00:00Z"), "W"))
-    }
-
     @Test fun registryResolvesTheVariablesFromTheLastWorkout() {
         val env = WatchVariables.Env(
             api = io.mockk.mockk(relaxed = true), features = io.mockk.mockk(relaxed = true), raw = io.mockk.mockk(relaxed = true),
@@ -54,4 +48,5 @@ class WorkoutVariablesTest {
         assertEquals("Running", values["workout.sport"])
         assertEquals(171, values["workout.hr_max"])
     }
+
 }

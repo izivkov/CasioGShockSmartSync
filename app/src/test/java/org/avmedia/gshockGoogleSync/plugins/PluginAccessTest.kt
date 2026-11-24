@@ -128,18 +128,15 @@ class PluginAccessTest {
         assertEquals("off after a restart", PluginState.Off, rt3.state("p"))
     }
 
-    @Test fun homeAssistantSetUpBeforeThePluginsStaysOn() = runBlocking {
-        val kv = Mem()
-        kv.m["ha.config"] = """{"baseUrl":"https://ha.example","token":"t"}"""
-        val legacy = { id: String -> PluginHub.legacyOn(id, kv) }
-        val rt = PluginRuntime(scope, hostFor = { mockk(relaxed = true) }, log = { _, _ -> })
-        rt.register(listOf(plugin("home_assistant", PluginAccess()), plugin("other", PluginAccess())))
-        PluginSwitchboard(PluginToggles(kv), rt, legacyOn = legacy).startAll()
-        assertEquals(PluginState.Active, rt.state("home_assistant"))
-        assertEquals(PluginState.Off, rt.state("other"))
-        // Its switch is the key Home Assistant always had.
-        kv.m["toggle.home_assistant"] = "off"
-        assertFalse(PluginSwitchboard(PluginToggles(kv), rt, legacyOn = legacy).isOn("home_assistant"))
+    // A plugin that maps everything shows one line, not every kind.
+    @Test fun everythingIsOneLine() {
+        val all = FakePluginWith(PluginAccess(reads = DataUse.ALL - DataUse.PHONE_LOCATION, controls = org.avmedia.smartsync.plugin.api.Control.ALL))
+        val s = PluginDetails.sections(all, emptyList()).associateBy { it.title }
+        assertTrue(s.getValue("Reads").line, s.getValue("Reads").line.startsWith(PluginDetails.EVERYTHING))
+        assertEquals(PluginDetails.ALL_CONTROLS, s.getValue("Controls").line)
+        assertEquals("the person can still see each kind", (DataUse.ALL - DataUse.PHONE_LOCATION).size, s.getValue("Reads").more.size)
+        val few = PluginDetails.reads(PluginAccess(reads = setOf(DataUse.STEPS)))
+        assertEquals("a plugin that reads little keeps its list", "steps, distance and energy", few.line)
     }
 
     @Test fun aMissingIconUsesTheFallback() {
@@ -155,17 +152,6 @@ class PluginAccessTest {
         assertEquals("your Home Assistant server", s.getValue("Sends to").line)
         assertEquals("Home Assistant address and token", s.getValue("Stores").line)
         assertEquals("GBX-H5600 (all features)", s.getValue("Works with").line)
-    }
-
-    // A plugin that maps everything shows one line, not every kind.
-    @Test fun everythingIsOneLine() {
-        val ha = org.avmedia.smartsync.homeassistant.HomeAssistantPlugin()
-        val s = PluginDetails.sections(ha, emptyList()).associateBy { it.title }
-        assertTrue(s.getValue("Reads").line, s.getValue("Reads").line.startsWith(PluginDetails.EVERYTHING))
-        assertEquals(PluginDetails.ALL_CONTROLS, s.getValue("Controls").line)
-        assertEquals("the person can still see each kind", (DataUse.ALL - DataUse.PHONE_LOCATION).size, s.getValue("Reads").more.size)
-        val few = PluginDetails.reads(PluginAccess(reads = setOf(DataUse.STEPS)))
-        assertEquals("a plugin that reads little keeps its list", "steps, distance and energy", few.line)
     }
 
     private class Mem : org.avmedia.gshockGoogleSync.watch.KeyValueStore {

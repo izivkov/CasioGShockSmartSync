@@ -18,8 +18,6 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Casio GShock Smart Sync"
 include ':app'
-// The app's own Home Assistant plugin (mobile_app integration), until the move to the MQTT plugin of smartsync-plugins.
-include ':plugins:homeassistant'
 
 // The plugin interface and the plugins come from ExcuseMi/smartsync-plugins through JitPack (gradle/libs.versions.toml).
 // For fast work on both: -PsmartsyncPluginsDir=../smartsync-plugins (or that line in ~/.gradle/gradle.properties)

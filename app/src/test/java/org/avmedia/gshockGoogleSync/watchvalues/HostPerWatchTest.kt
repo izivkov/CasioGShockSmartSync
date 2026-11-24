@@ -5,26 +5,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The host keeps what it reads and writes per watch: another watch never gets a setting or a value of this one. */
+/** The host keeps what it reads per watch: another watch never gets a value of this one. */
 class HostPerWatchTest {
     private val gbx = "gshock-aaaaaaaaaa01"
     private val ocw = "gshock-bbbbbbbbbb02"
-
-    @Test fun watchSettingsAskedForOneWatchAreNeverWrittenToAnother() = kotlinx.coroutines.runBlocking {
-        var connected = gbx
-        val written = ArrayList<String>()
-        val logs = ArrayList<String>()
-        val c = WatchSettingCommands(
-            write = { s, _ -> written += s.key; org.avmedia.gshockapi.io.SettingWriteResult.Done },
-            connected = { true }, log = { logs += it }, onQueued = {}, watch = { connected },
-        )
-        c.submit(mapOf("setting" to "watch_face", "value" to "steps"))
-        connected = ocw
-        c.onSetupDone()
-        c.flush()
-        assertTrue(written.toString(), written.isEmpty())
-        assertTrue(logs.toString(), logs.any { it.contains("dropped") })
-    }
 
     @Test fun rawSettingsAreTheConnectedWatchsOwn() = kotlinx.coroutines.runBlocking {
         var connected = gbx

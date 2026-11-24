@@ -9,8 +9,8 @@ import timber.log.Timber
 
 /** Who wrote a line. [label] is what the file and the screen show. */
 enum class LogSource(val label: String, private val aliases: Set<String> = emptySet()) {
-    // A plugin logs with its id as the Timber tag ("home_assistant"): the same source.
-    Watch("Watch"), HomeAssistant("Home Assistant", setOf("home_assistant")), Health("Health"), Workouts("Workouts"), App("App");
+    // A plugin logs with its id as the Timber tag ("home_assistant_mqtt"): the same source.
+    Watch("Watch"), HomeAssistant("Home Assistant", setOf("home_assistant_mqtt")), Health("Health"), Workouts("Workouts"), App("App");
 
     companion object {
         fun ofLabel(label: String): LogSource? = entries.firstOrNull { it.label == label || label in it.aliases }

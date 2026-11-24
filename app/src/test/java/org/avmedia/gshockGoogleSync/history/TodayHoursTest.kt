@@ -2,7 +2,6 @@ package org.avmedia.gshockGoogleSync.history
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import org.avmedia.smartsync.homeassistant.HaSensors
 import org.avmedia.gshockGoogleSync.watchvalues.HealthVariables
 import org.avmedia.gshockapi.model.H5600HealthData
 import org.avmedia.gshockapi.model.StepCounterData
@@ -63,18 +62,6 @@ class TodayHoursTest {
         assertEquals(HealthVariables.values(merged)["health.steps_by_hour"], screen.hourlySteps)
     }
 
-    /** A read with no new hourly slots must still send the whole stored day with steps_today. */
-    @Test fun aReadWithNoNewHoursStillSendsTheStoredDay() {
-        val first = TodayHours.merge(transfer(day.atTime(20, 15), 13 to 242, 14 to 518, 20 to 18), emptyList(), day.atTime(20, 15))
-        val now = day.atTime(21, 26)
-        val empty = TodayHours.merge(transfer(now), stored(first), now)
-        val values = HealthVariables.values(empty)
-        val states = HaSensors.states(values)
-        val attrs = HaSensors.attributes(values)
-        assertTrue("steps_today" in states)
-        assertEquals(first.hourlyByHour.subList(0, 21), (attrs.getValue("steps_today").getValue("steps_by_hour") as List<*>).subList(0, 21))
-    }
-
     @Test fun theStoredDayKeepsTheLastGoalAndTime() {
         val last = StoredHealth.LastRead(day.atTime(17, 53), 8000)
         val screen = StoredHealth.stepData(listOf(DayRow(day.toString(), steps = 2926)), last, now = day.atTime(18, 0)) { emptyList() }!!
@@ -89,5 +76,15 @@ class TodayHoursTest {
         assertEquals(123f, one[17])
         assertEquals(23, one.count { it == null })
         assertEquals(24, org.avmedia.gshockGoogleSync.ui.health.dwHourlySlots(listOf(5)).size)
+    }
+
+    /** A read with no new hourly slots still gives the whole stored day: steps today and steps by hour. */
+    @Test fun aReadWithNoNewHoursStillGivesTheStoredDay() {
+        val first = TodayHours.merge(transfer(day.atTime(20, 15), 13 to 242, 14 to 518, 20 to 18), emptyList(), day.atTime(20, 15))
+        val now = day.atTime(21, 26)
+        val empty = TodayHours.merge(transfer(now), stored(first), now)
+        val values = HealthVariables.values(empty)
+        assertTrue("health.steps_today" in values)
+        assertEquals(first.hourlyByHour.subList(0, 21), (values.getValue("health.steps_by_hour") as List<*>).subList(0, 21))
     }
 }

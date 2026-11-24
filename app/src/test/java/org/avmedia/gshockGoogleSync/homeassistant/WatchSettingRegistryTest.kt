@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
-import org.avmedia.smartsync.homeassistant.*
 
 import org.avmedia.gshockGoogleSync.watchvalues.RawSettings
 import org.avmedia.gshockGoogleSync.watchvalues.SettingCheck
@@ -17,14 +16,6 @@ import org.junit.Test
 
 /** Every registry entry goes through its real codec: a value written is the value read back, and nothing else changes. */
 class WatchSettingRegistryTest {
-    init {
-        // What the app gives the Home Assistant plugin when it starts: its raw codes and writable settings.
-        HaSensors.hostKeys = HaSensors.HostKeys(
-            org.avmedia.gshockGoogleSync.watchvalues.RawSettings.CODES.map(org.avmedia.gshockGoogleSync.watchvalues.RawSettings::name),
-            org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry.ALL.map { it.key },
-        )
-    }
-
     private fun frame(code: Int, vararg v: Int) = byteArrayOf(code.toByte()) + v.map { it.toByte() }.toByteArray()
 
     /** One plausible frame per code (the layouts of the codec tests). */
@@ -135,18 +126,4 @@ class WatchSettingRegistryTest {
         assertArrayEquals(byteArrayOf(0x51, 3, 0, 10, 12, 19, 0x77), s.change(samples.getValue(0x51), "steps"))
     }
 
-    @Test fun theSettingsSensorHoldsEveryRegistryValue() {
-        val values = WatchSettingVariables.DEFS.associate { it.name to it.value(frames) }
-        val sensors = HaSensors.ALL
-        val attrs = HaSensors.attributes(values, sensors).getValue("watch_writable_settings")
-        for (s in WatchSettingRegistry.ALL) assertEquals(s.key, s.valueIn(frames), attrs[s.key])
-        assertEquals(WatchSettingRegistry.ALL.size, attrs.size)
-        assertEquals(WatchSettingRegistry.ALL.size, HaSensors.states(values, sensors)["watch_writable_settings"])
-        assertEquals("custom", HaSensors.states(values, sensors)["watch_face_name"])
-        assertEquals("sleep_score_and_level", HaSensors.states(values, sensors)["custom_slot"])
-    }
-
-    @Test fun theWritableSettingsAreInTheSettingsGroup() {
-        assertEquals(HaGroup.SETTINGS, HaGroups.of(HaSensors.ALL.first { it.uniqueId == "watch_writable_settings" }))
-    }
 }

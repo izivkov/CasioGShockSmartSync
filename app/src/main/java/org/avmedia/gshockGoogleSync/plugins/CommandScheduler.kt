@@ -141,17 +141,21 @@ class CommandScheduler(
     private suspend fun run(item: Item): WriteResult {
         if (!connected(item.watch)) return park(item)
         if (transferRunning()) {
+            log(item.pluginId, "${item.what} waits: a transfer holds the watch")
             val free = withTimeoutOrNull(busyLimitMs) { while (transferRunning()) delay(pollMs); true }
             if (free == null) return PluginResult.Failed(FailReason.BUSY, "a transfer held the watch")
             if (!connected(item.watch)) return park(item)
         }
-        return try {
+        val result = try {
             withTimeoutOrNull(item.timeoutMs) { item.work() } ?: PluginResult.Failed(FailReason.TIMEOUT, "no answer within ${item.timeoutMs / 1000} s")
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Throwable) {
             PluginResult.Failed(FailReason.INTERNAL, e.javaClass.simpleName)
         }
+        // Connected but not ready (the watch's setup not done): a write for the next connection waits for it.
+        if (result is PluginResult.Failed && result.reason == FailReason.NOT_CONNECTED && item.delivery is Delivery.NextConnection) return park(item)
+        return result
     }
 
     private fun park(item: Item): WriteResult {

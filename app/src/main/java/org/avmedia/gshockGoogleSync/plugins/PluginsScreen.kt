@@ -71,7 +71,7 @@ fun PluginsScreen(onBack: () -> Unit, onOpenPlugin: (String) -> Unit, vm: Plugin
         )
     } else {
         BackHandler(onBack = onBack)
-        PluginsContent(rows, leftOver, onSwitch = switch, onOpen = { details = it }, onDeleteLeftOver = { vm.clearData(it); dataChanged++ })
+        PluginsContent(rows, leftOver, onSwitch = switch, onOpen = { details = it }, onDeleteLeftOver = { vm.clearData(it); dataChanged++ }, onGrant = vm::requestPermissions)
     }
     asking?.let { id ->
         vm.plugin(id)?.let { p -> FirstOnDialog(p, onTurnOn = { vm.markAccessShown(id); asking = null; vm.setEnabled(id, true) }, onCancel = { asking = null }) }
@@ -86,13 +86,19 @@ internal fun PluginsContent(
     onSwitch: (String, Boolean) -> Unit = { _, _ -> },
     onOpen: (String) -> Unit = {},
     onDeleteLeftOver: (String) -> Unit = {},
+    onGrant: (String) -> Unit = {},
 ) {
     GShockSmartSyncTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 ScreenTitle("Plugins", Modifier)
                 if (rows.isEmpty()) AppText(text = "No plugins in this app.", modifier = Modifier.padding(16.dp))
-                rows.forEach { r -> PluginCard(r.plugin, r.status, r.on, onSwitch = { onSwitch(r.id, it) }, onOpen = { onOpen(r.id) }) }
+                rows.forEach { r ->
+                    PluginCard(
+                        r.plugin, r.status, r.on, onSwitch = { onSwitch(r.id, it) }, onOpen = { onOpen(r.id) },
+                        onStatus = if (r.on && r.needsPermission) ({ onGrant(r.id) }) else null,
+                    )
+                }
                 leftOver.sorted().forEach { id ->
                     AppCard(modifier = Modifier.fillMaxWidth()) {
                         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {

@@ -12,20 +12,19 @@ import org.avmedia.gshockGoogleSync.plugins.PluginDetails
 import org.avmedia.gshockGoogleSync.plugins.PluginDetailsPage
 import org.avmedia.gshockGoogleSync.plugins.PluginRow
 import org.avmedia.gshockGoogleSync.plugins.PluginsContent
-import org.avmedia.smartsync.homeassistant.HomeAssistantPlugin
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Settings > Plugins: the Plugins screen (on, off, failed, data of a removed plugin) and a plugin's details page. */
 class PluginsScreenshotTest : ScreenshotTest() {
-    private val ha = HomeAssistantPlugin()
+    private val ha = FakePlugin(id = "home_assistant_mqtt", name = "Home Assistant")
     private val other = object : org.avmedia.smartsync.plugin.api.WatchPlugin by FakePlugin(id = "trmnl", name = "TRMNL") {
         override val icon: org.avmedia.smartsync.plugin.api.PluginIcon? = null
     }
 
     private val rows = listOf(
-        PluginRow("home_assistant", ha, "Connected", on = true),
+        PluginRow("home_assistant_mqtt", ha, "Connected", on = true),
         PluginRow("trmnl", other, "Off", on = false),
         PluginRow("hc", FakePlugin(id = "hc", name = "Health Connect"), "Turned off: turned off after 5 failures in a row\nLast error: onEvent failed (IllegalStateException), 14:05 (5 failures)", on = false),
     )
@@ -34,7 +33,7 @@ class PluginsScreenshotTest : ScreenshotTest() {
 
     private fun details(on: Boolean) = @androidx.compose.runtime.Composable {
         PluginDetailsPage(
-            PluginRow("home_assistant", ha, if (on) "Connected" else "Off", on), worksWith = listOf("GBX-H5600 (all features)", "OCW-S7000 (without health log, steps)"),
+            PluginRow("home_assistant_mqtt", ha, if (on) "Connected" else "Off", on), worksWith = listOf("GBX-H5600 (all features)", "OCW-S7000 (without health log, steps)"),
             onSwitch = {}, onOpenScreen = {}, onDeleteData = {}, onBack = {},
         )
     }
@@ -93,4 +92,5 @@ class PluginsScreenshotTest : ScreenshotTest() {
         val long = texts.filter { t -> t.lines().any { it.length > 80 || Regex("""[.!?] [A-Z]""").containsMatchIn(it) } }
         assertEquals("lines over the short-text rule", emptyList<String>(), long)
     }
+
 }

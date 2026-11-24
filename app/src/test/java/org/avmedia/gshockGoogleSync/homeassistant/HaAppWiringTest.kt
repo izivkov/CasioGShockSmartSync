@@ -26,4 +26,15 @@ class HaAppWiringTest {
         assertTrue("strings.xml still has a webhooks entry", !Regex("""name="[a-z_]*webhook""").containsMatchIn(strings))
         assertTrue(!File("src/main/res/drawable/ic_webhook.xml").exists())
     }
+
+    /** The old Home Assistant (mobile app) plugin is gone: no module, no build line, no class, no switch default. */
+    @Test fun nothingOfTheMobileAppPluginIsLeft() {
+        assertTrue(!File("../plugins/homeassistant").exists())
+        assertTrue(":plugins:homeassistant" !in File("../settings.gradle").readText())
+        assertTrue(":plugins:homeassistant" !in File("build.gradle").readText())
+        val gone = listOf("org.avmedia.smartsync.homeassistant", "WatchSettingCommands", "legacyOn", "HaPushChannel", "HaDashboardService")
+        val hits = File("src/main/java").walk().filter { it.extension == "kt" }
+            .flatMap { f -> f.readText().let { text -> gone.filter { it in text }.map { "${f.name}: $it" } } }.toList()
+        assertEquals(emptyList<String>(), hits)
+    }
 }

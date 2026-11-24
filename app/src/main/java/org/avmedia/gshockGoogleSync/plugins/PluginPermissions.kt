@@ -34,7 +34,7 @@ object PluginPermissions {
 
     /** "Needs permission: the phone's coarse location"; null when nothing is missing. */
     fun line(missing: List<AndroidPermission>): String? =
-        missing.takeIf { it.isNotEmpty() }?.let { m -> "Needs permission: " + m.joinToString { it.reason } }
+        missing.takeIf { it.isNotEmpty() }?.let { m -> "Needs permission: " + m.map { it.reason }.distinct().joinToString() }
 }
 
 /**
@@ -74,6 +74,23 @@ class PluginPermissionCache(
     }
 
     private fun keep(id: String, value: List<AndroidPermission>) = _missing.update { it + (id to value) }
+}
+
+/**
+ * Asks for what a plugin misses, at once (its switch turned on, or a tap on its "Needs permission" line): [check] gives
+ * the missing ones, [request] builds the request (the plugin's own screen or the runtime permissions), [emit] hands it
+ * to the screen that asks. Nothing missing: no request. Android-free.
+ */
+class PermissionAsker<R>(
+    private val scope: CoroutineScope,
+    private val check: suspend (String) -> List<AndroidPermission>,
+    private val request: (String, List<AndroidPermission>) -> R,
+    private val emit: (R) -> Unit,
+) {
+    fun ask(id: String): Job = scope.launch {
+        val missing = check(id)
+        if (missing.isNotEmpty()) emit(request(id, missing))
+    }
 }
 
 /**

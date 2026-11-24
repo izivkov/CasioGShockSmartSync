@@ -34,7 +34,6 @@ import org.avmedia.gshockGoogleSync.watch.WatchKeys
 import org.avmedia.gshockGoogleSync.watchvalues.RawSettings
 import org.avmedia.gshockGoogleSync.watchvalues.RawWatchRequest
 import org.avmedia.gshockGoogleSync.watchvalues.SettingType
-import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands
 import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry
 import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
 import org.avmedia.gshockapi.AppNotification
@@ -112,7 +111,6 @@ class PluginHub @Inject constructor(
         ownCheck = { id -> runtime.plugin(id)?.missingPermissions(context) },
     )
 
-    private val writers = java.util.concurrent.CopyOnWriteArrayList<WatchSettingCommands>()
     @Volatile private var backgroundActive = false
     /** How the connected watch connected (for the Connected event a plugin that starts later gets). */
     @Volatile private var lastKind: ConnectionKind = ConnectionKind.USER
@@ -142,7 +140,6 @@ class PluginHub @Inject constructor(
         started = true
         H5600Session.onDownloaded = { post { onHealthRead() } }
         WorkoutStore.onDownloaded = { post { onWorkoutStored() } }
-        org.avmedia.gshockapi.casio.ConnectionKeepAlive.onSetupDone = { writers.forEach { it.onSetupDone() } }
         runtime.register(load())
         scope.launch {
             try {
@@ -189,7 +186,6 @@ class PluginHub @Inject constructor(
     private val switches by lazy {
         PluginSwitchboard(
             toggles, runtime,
-            legacyOn = { id -> legacyOn(id, kv) },
             afterActivate = { id ->
                 // What the plugin missed while it was off: the background service, the watch connected now and its values.
                 if (backgroundActive) runtime.dispatchTo(id, WatchEvent.BackgroundStarted)
@@ -249,13 +245,18 @@ class PluginHub @Inject constructor(
 
     /** Asks for what plugin [id] misses, through the app's screen; nothing when it misses nothing. */
     fun requestPermissions(id: String) {
-        scope.launch {
-            val missing = permissions.check(id)
-            if (missing.isEmpty()) return@launch
-            val intent = runtime.plugin(id)?.let { p -> runCatching { p.permissionIntent(context) }.getOrNull() }
-            _permissionRequests.tryEmit(PermissionRequest(id, missing.map { it.name }, intent))
-        }
+        asker.ask(id)
     }
+
+    private val asker = PermissionAsker(
+        scope,
+        check = { id -> permissions.check(id) },
+        request = { id, missing ->
+            val intent = runtime.plugin(id)?.let { p -> runCatching { p.permissionIntent(context) }.getOrNull() }
+            PermissionRequest(id, missing.map { it.name }, intent)
+        },
+        emit = { _permissionRequests.tryEmit(it) },
+    )
 
     /** The person answered: the plugin learns what is still missing. */
     fun permissionsAnswered(id: String) {
@@ -300,7 +301,6 @@ class PluginHub @Inject constructor(
     }
 
     fun onSessionClosed(watchKey: String) {
-        writers.forEach { it.onDisconnected() }
         if (watchKey.isNotBlank()) post { runtime.dispatch(WatchEvent.Disconnected(WatchId(watchKey))) }
     }
 
@@ -455,22 +455,26 @@ class PluginHub @Inject constructor(
         return CommandScheduler.DONE
     }
 
-    suspend fun writeSettings(host: AppPluginHost, watch: WatchId, values: Map<String, Any?>): WriteResult {
+    /** [values] are checked ([WatchSettingRegistry.checkAll]); [who] names the plugin in the log lines. */
+    suspend fun writeSettings(who: String, watch: WatchId, values: Map<String, Any>): WriteResult {
         if (connectedWatch() != watch) return CommandScheduler.NOT_CONNECTED
-        return host.settingsWriter.apply(mapOf("settings" to values))
+        return settingsWriter.apply(who, values)
     }
 
-    fun newSettingsWriter(who: String): WatchSettingCommands = WatchSettingCommands(
+    /** One writer for every plugin; ready from the link's state, never from an event it could miss. */
+    private val settingsWriter = HostSettingsWriter(
         write = { s, v -> access.update(s.code, s.touched, { f -> s.change(f, v) }, s.expectedBack, s.matches) },
-        connected = { runCatching { api.isConnected() }.getOrDefault(false) },
-        afterWrites = { post { readValues(ValueCause.REQUEST) } },
-        log = { AppLog.log(LogSource.ofLabel(who) ?: LogSource.App, it) },
-        onQueued = {},
+        ready = {
+            HostSettingsWriter.linkReady(
+                connected = runCatching { api.isConnected() }.getOrDefault(false),
+                h5600Family = org.avmedia.gshockGoogleSync.ui.watchhealth.isH5600Watch(),
+                setupDone = org.avmedia.gshockapi.casio.ConnectionSetup.watchSetupDone,
+            )
+        },
         onWritten = { k, v -> CurrentWatch.key().takeIf { it.isNotBlank() }?.let { w -> post { runtime.dispatch(WatchEvent.SettingChanged(WatchId(w), k, v)) } } },
-        watch = { CurrentWatch.key() },
-        watchName = { WatchInfo.name },
-        who = who,
-    ).also { writers += it }
+        afterWrites = { post { readValues(ValueCause.REQUEST) } },
+        log = { who, line -> AppLog.log(LogSource.ofLabel(who) ?: LogSource.App, "$who $line") },
+    )
 
     /** The settings a plugin may write on [watch]: only those its capabilities have (all for a watch not seen yet). */
     fun settingCatalog(watch: WatchId): List<SettingInfo> = settingCatalog(capsOf(watch), watchName(watch).orEmpty())
@@ -478,8 +482,6 @@ class PluginHub @Inject constructor(
     /** Does the app know [watch] (paired now, or seen at a connection)? */
     fun knowsWatch(watch: WatchId): Boolean =
         watch == connectedWatch() || watches().any { it.id == watch } || watchStore.get(watch.key, KEY_CAPS) != null
-
-    fun removeSettingsWriter(w: WatchSettingCommands) { writers.remove(w) }
 
     /** Deletes every key of plugin [id] (Settings > Plugins, only while it is off); true when it was off. */
     fun clearData(id: String): Boolean {
@@ -525,13 +527,6 @@ class PluginHub @Inject constructor(
 
     companion object {
         const val KEY_CAPS = "plugins.caps"
-
-        /**
-         * A plugin's switch before the person set it: on only for the app's own Home Assistant plugin where it was set up
-         * before the plugin interface (its switch was on by default). Every other plugin found starts off.
-         */
-        fun legacyOn(id: String, kv: org.avmedia.gshockGoogleSync.watch.KeyValueStore): Boolean =
-            id == "home_assistant" && kv.get("ha.config") != null
 
         /** The watch a button press is for: the watch whose values were read, else the current one (the press is never lost). */
         fun pressTarget(read: WatchEvent.ValuesUpdated?, currentKey: String): WatchId? =

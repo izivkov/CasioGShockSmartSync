@@ -119,7 +119,6 @@ dependencies {
     implementation(libs.smartsync.plugin.api)
     // Plugins shipped with the app (found by ServiceLoader at start; off until the person turns one on, except the
     // app's own Home Assistant plugin where it was set up before).
-    implementation(project(':plugins:homeassistant'))
     implementation(libs.smartsync.plugin.homeassistant)
     implementation(libs.smartsync.plugin.healthconnect)
     implementation(libs.smartsync.plugin.trmnl)

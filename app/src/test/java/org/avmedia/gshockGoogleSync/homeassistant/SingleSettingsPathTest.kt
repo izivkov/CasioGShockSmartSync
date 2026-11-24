@@ -1,6 +1,5 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
-import org.avmedia.smartsync.homeassistant.*
 
 import org.avmedia.gshockGoogleSync.watchvalues.RawWatchRequest
 import java.io.File

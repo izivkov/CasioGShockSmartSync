@@ -26,8 +26,8 @@ jobs:
           java-version: '21'
 
       # The library tests run in its own repository (ExcuseMi/GShockAPI, branch smartsync).
-      - name: Unit tests (app and its own plugin; plugin-api and the other plugins are tested in smartsync-plugins)
-        run: ./gradlew --continue testGithubDebugUnitTest :plugins:homeassistant:testDebugUnitTest
+      - name: Unit tests (the app; plugin-api and the plugins are tested in smartsync-plugins)
+        run: ./gradlew --continue testGithubDebugUnitTest
 
       - name: The library comes from the gshockapi submodule, not JitPack
         run: |
@@ -53,7 +53,7 @@ jobs:
       # Records pictures of the screens (never compares, so a changed screen does not fail the run;
       # a screen that no longer compiles or renders does).
       - name: Record UI screenshots
-        run: ./gradlew recordRoborazziGithubDebug :plugins:homeassistant:recordRoborazziDebug
+        run: ./gradlew recordRoborazziGithubDebug
 
       - name: Upload UI screenshots
         if: always()
@@ -62,7 +62,6 @@ jobs:
           name: ui-screens
           path: |
             app/build/outputs/roborazzi/*.png
-            plugins/homeassistant/build/outputs/roborazzi/*.png
           if-no-files-found: warn
 
       - name: Build debug APK
