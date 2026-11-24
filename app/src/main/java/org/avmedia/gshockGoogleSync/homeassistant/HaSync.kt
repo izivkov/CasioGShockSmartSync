@@ -43,7 +43,10 @@ object HaJobs {
      * The registration body for the watch at [address], with the name the owner confirmed. Null for a watch that is
      * not registered yet and has no confirmed name: nothing may register before the owner confirmed it.
      */
-    fun registration(store: HaStore, address: String, watchName: String, cfg: HaConfig, appVersion: String, osVersion: String): String? {
+    fun registration(
+        store: HaStore, address: String, watchName: String, cfg: HaConfig, appVersion: String, osVersion: String,
+        carryOver: HaCarryOver? = null,
+    ): String? {
         val id = HaPayloads.deviceId(address)
         val confirmed = store.confirmedName(id)
         if (confirmed == null && store.loadRegistration(id) == null) return null

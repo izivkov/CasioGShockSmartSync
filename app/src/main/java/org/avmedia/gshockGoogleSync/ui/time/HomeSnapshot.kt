@@ -29,6 +29,12 @@ class HomeSnapshotStore(private val store: KeyValueStore) {
         if (address.isNotBlank()) store.put(KEY + address, gson.toJson(snapshot))
     }
 
+    /** A re-paired watch has a new address: its last values go with it. */
+    fun move(from: String, to: String) {
+        if (from.isBlank() || to.isBlank() || from == to) return
+        store.get(KEY + from)?.let { store.put(KEY + to, it); store.delete(KEY + from) }
+    }
+
     companion object {
         private const val KEY = "home.snapshot."
 

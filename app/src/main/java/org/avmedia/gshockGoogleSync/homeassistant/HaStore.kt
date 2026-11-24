@@ -74,6 +74,19 @@ class HaStore(private val store: KeyValueStore) {
     }
 
     /**
+     * The registration (webhook id, body, sensors hash) and the confirmed name of [from] go to [to]: a re-paired
+     * watch has a new address but is the same device in HA. [from] is forgotten.
+     */
+    fun moveRegistration(from: String, to: String) {
+        if (from == to) return
+        store.get(KEY_REG + from)?.let { store.put(KEY_REG + to, it) }
+        store.get(KEY_NAME + from)?.let { store.put(KEY_NAME + to, it) }
+        store.put(KEY_IDS, gson.toJson(registeredIds().filter { it != from && it != to } + to))
+        store.delete(KEY_REG + from)
+        store.delete(KEY_NAME + from)
+    }
+
+    /**
      * The name the owner confirmed for the watch [deviceId] before its first registration. It becomes the HA device
      * name, the sensor name prefix, the entity ids and the notify action, and is never changed after registering.
      */
