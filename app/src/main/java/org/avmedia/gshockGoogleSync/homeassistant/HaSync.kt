@@ -48,8 +48,13 @@ object HaJobs {
         carryOver: HaCarryOver? = null,
     ): String? {
         val id = HaPayloads.deviceId(address)
+        if (store.confirmedName(id) == null && store.loadRegistration(id) == null &&
+            carryOver?.moveTo(store, address, watchName, cfg) != true
+        ) {
+            carryOver?.skipped(id, "$watchName not synced: no registration for this watch; confirm its name on the Home Assistant screen")
+            return null
+        }
         val confirmed = store.confirmedName(id)
-        if (confirmed == null && store.loadRegistration(id) == null) return null
         return HaPayloads.registrationFor(address, watchName, cfg.copy(deviceName = confirmed ?: cfg.deviceName), appVersion, osVersion)
     }
 
@@ -101,6 +106,17 @@ class HaSync @Inject constructor(
         org.avmedia.gshockapi.casio.ConnectionKeepAlive.onSetupDone = { commands.onSetupDone() }
     }
 
+    // A re-paired watch has a new address: its registration and home screen values move to it.
+    private val carryOver = run {
+        val snapshots = org.avmedia.gshockGoogleSync.ui.time.HomeSnapshotStore(AppStores.LocalKeyValueStore(context))
+        HaCarryOver(
+            paired = { a -> LocalDataStorage.getDeviceAddresses(context).any { it.equals(a, ignoreCase = true) } },
+            watchNameAt = { a -> snapshots.load(a)?.watchName },
+            moveOthers = { from, to -> snapshots.move(from, to) },
+            log = { AppLog.log(LogSource.HomeAssistant, it) },
+        )
+    }
+
     val registry: VariableRegistry = WatchVariables.registry(WatchVariables.androidEnv(context, api, features, raw))
 
     /** Records "now" as the last connection, then pushes the sensors. */
@@ -136,6 +152,7 @@ class HaSync @Inject constructor(
         val values = registry.resolve(ctx, HaSensors.variablesOf(sensors))
         val registration = HaJobs.registration(
             store, address, watchName, cfg, org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME, android.os.Build.VERSION.RELEASE,
+            carryOver,
         ) ?: run {
             store.saveResult(HaClient.NAME_FIRST, false)
             return
