@@ -178,4 +178,30 @@ class HealthReadWorkoutsTest {
         assertTrue(workouts.single(), workouts.single().contains("fail reason 1"))
         assertTrue("the source exists for the App log filter", LogSource.ofLabel("Workouts") != null)
     }
+
+    /**
+     * The workout read button is gone: a Health read is how workouts are read, and with a workout waiting the watch does not
+     * answer the LifeLog START. So the 10 minute back-off after a failed read never skips the read before the LifeLog.
+     */
+    @Test fun aHealthReadReadsTheWaitingWorkoutsAlsoRightAfterAFailedRead() = runBlocking {
+        H5600WorkoutIO.sink = { true }
+        var refuse = true
+        val sessions = CopyOnWriteArrayList<String>()
+        H5600WorkoutIO.link = object : WorkoutLink {
+            override fun drsp(data: ByteArray) {
+                if (data.size == 10 && data[1].toInt() == 0x1C) sessions += "00 1C"
+            }
+
+            override fun bulk(data: ByteArray) {
+                if (data.size == 3 && data.all { it.toInt() == 0 } && refuse) H5600WorkoutIO.onDrsp("03 01")
+            }
+        }
+        H5600HealthIO.request(peek = true)
+        val afterFirst = sessions.size
+        refuse = false
+        H5600HealthIO.request(peek = true)
+        assertTrue("the first read tried: $sessions", afterFirst >= 1)
+        assertTrue("the second read tried again: $sessions", sessions.size > afterFirst)
+        assertTrue(AppLog.recentEvents().none { it.contains("next automatic try in") && it.contains("LifeLog") })
+    }
 }
