@@ -81,7 +81,7 @@ fun SmartAlarmCard(ui: SmartAlarmUi, events: SmartAlarmEvents) {
                     Spacer(Modifier.width(8.dp))
                     AppText(text = alarm?.let { "${it.windowMinutes} min" } ?: "-", fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
                 }
-                AppText(text = "Snooze", fontSize = 14.sp)
+                AppText(text = "Snooze", fontSize = 14.sp, modifier = Modifier.padding(end = 8.dp))
                 AppSwitch(checked = alarm?.snooze ?: false, onCheckedChange = events.onSnooze, enabled = can && alarm?.on == true)
             }
             val text = if (ui.working) "Talking to the watch..." else ui.message
