@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import org.avmedia.gshockapi.model.ActivityPeriod
 import org.avmedia.gshockapi.model.ActivitySeconds
+import org.avmedia.gshockapi.model.DailySummary
 import org.avmedia.gshockapi.model.H5600HealthData
 import org.avmedia.gshockapi.model.HeartRateSamples
 import org.avmedia.gshockapi.model.HeartRateSummary
@@ -46,6 +47,7 @@ object H5600HealthDecoder {
     private const val FRAME_HEADER_SIZE = 5
     private const val RECORD_SIZE = 4
     private const val SLOT_MINUTES = 5L
+    const val HR_SLOT_MINUTES = 2L
     private const val MAX_STEPS_PER_SLOT = 1_000
     private const val MAX_ENERGY_RAW_PER_SLOT = 5_000
     private const val MAX_DAY_STEPS = 100_000
@@ -59,6 +61,13 @@ object H5600HealthDecoder {
     private const val TAG_ENERGY = 0x51
     private const val TAG_HEART_RATE = 0x52
     private const val TAG_CURRENT_STATS = 0x65
+    private const val TAG_SLEEP_STAGES = 0x53
+    private const val TAG_STAIRS = 0x57
+    private const val TAG_BREATHING = 0x58
+    private const val TAG_SPO2 = 0x59
+    private const val TAG_NIGHT = 0x5A
+    private const val TAG_CARDIO = 0x5B
+    private const val TAG_DAILY_SUMMARY = 0x5C
 
     // Activity times in the current-stats frame: each is hour, minute, second bytes (layout from
     // parse_lifelog.py, matched on 2026-10-26 and 2026-11-16).
@@ -72,7 +81,7 @@ object H5600HealthDecoder {
     private const val WATCH_CONDITION_LIFELOG_BYTE = 9
     private const val WATCH_CONDITION_ACTIVITY_BYTE = 8
     private val HEADER_MAGIC = byteArrayOf(0x00, 0x0F, 0x00, 0x00, 0x00)
-    private val FRAME_ORDER = intArrayOf(0x65, 0x50, 0x51, 0x52, 0x53, 0x56, 0x58, 0x59, 0x5A, 0x5B, 0x63, 0x72)
+    private val FRAME_ORDER = intArrayOf(0x65, 0x50, 0x51, 0x52, 0x53, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x63, 0x72)
 
     /**
      * Decodes a transfer.
@@ -163,6 +172,20 @@ object H5600HealthDecoder {
                 heartRate = heartRate,
                 activity = activity,
                 recentHeartRate = recentHeartRate(stream, spans),
+                sleep =
+                    H5600SleepDecoder.decode(
+                        frameBody(stream, spans, TAG_SLEEP_STAGES),
+                        frameBody(stream, spans, TAG_NIGHT),
+                    ),
+                body =
+                    H5600BodyDecoder.decode(
+                        spo2 = frameBody(stream, spans, TAG_SPO2),
+                        breathing = frameBody(stream, spans, TAG_BREATHING),
+                        cardio = frameBody(stream, spans, TAG_CARDIO),
+                        stairs = frameBody(stream, spans, TAG_STAIRS),
+                    ).copy(cardioNow = H5600CurrentValues.cardio(currentStats, localTime.toLocalDate())),
+                heartRateSlots = heartRateSlots(stream, spans, utcTime, zone),
+                dailySummary = decodeDailySummary(frameBody(stream, spans, TAG_DAILY_SUMMARY)),
                 stepGoal = stepGoal,
                 lifeLogPending = watchFlags?.let { it[WATCH_CONDITION_LIFELOG_BYTE].toInt() != 0 },
                 activityLogPending = watchFlags?.let { it[WATCH_CONDITION_ACTIVITY_BYTE].toInt() != 0 },
@@ -291,6 +314,27 @@ object H5600HealthDecoder {
         )
     }
 
+    /**
+     * Section 0x52 as one value per [HR_SLOT_MINUTES]: newest record first, record i starts i slots before the header time
+     * rounded down to the slot. The 2 minutes are proven on real reads: each carried half
+     * as many heart rate records as minutes of the one-minute section 0x56 of the same read. Oldest first, valid bpm only.
+     */
+    private fun heartRateSlots(
+        stream: ByteArray,
+        spans: Map<Int, IntRange>,
+        utcTime: OffsetDateTime,
+        zone: ZoneId,
+    ): List<org.avmedia.gshockapi.model.HeartRateSlot> {
+        val body = frameBody(stream, spans, TAG_HEART_RATE) ?: return emptyList()
+        val first = utcTime.minusMinutes((utcTime.minute % HR_SLOT_MINUTES).toLong())
+        return (0 until body.size / RECORD_SIZE).mapNotNull { i ->
+            val bpm = body[i * RECORD_SIZE].toInt() and 0xFF
+            if (bpm !in MIN_BPM..MAX_BPM) return@mapNotNull null
+            val time = first.minusMinutes(HR_SLOT_MINUTES * i).atZoneSameInstant(zone).toLocalDateTime()
+            org.avmedia.gshockapi.model.HeartRateSlot(time, bpm)
+        }.reversed()
+    }
+
     private fun activityOf(body: ByteArray): ActivitySeconds? {
         if (body.size < ACTIVITY_ACTIVE_OFFSET + 3) return null
         return ActivitySeconds(
@@ -302,6 +346,14 @@ object H5600HealthDecoder {
             stillSeconds = hmsAt(body, ACTIVITY_STILL_OFFSET),
             activeSeconds = hmsAt(body, ACTIVITY_ACTIVE_OFFSET),
         )
+    }
+
+    /** 0x5C: u32 steps, u32 calories, u16 (likely resting calories). Null when the body is shorter than 8 bytes. */
+    internal fun decodeDailySummary(body: ByteArray?): DailySummary? {
+        if (body == null || body.size < 8) return null
+        val b = ByteBuffer.wrap(body).order(ByteOrder.LITTLE_ENDIAN)
+        val resting = if (body.size >= 10) b.getShort(8).toInt() and 0xFFFF else null
+        return DailySummary(b.getInt(0).toLong() and 0xFFFFFFFFL, b.getInt(4).toLong() and 0xFFFFFFFFL, resting)
     }
 
     private fun hmsAt(
