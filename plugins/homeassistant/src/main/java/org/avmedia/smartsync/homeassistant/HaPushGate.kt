@@ -15,7 +15,7 @@ class HaPushGate(
         val now = connected()
         if (id != null && id == now) return true
         val name = id?.let { store.nameInHa(it) } ?: "a watch that is not registered here"
-        val what = push.command ?: "Notification"
+        val what = push.command ?: "Notification ${push.message}" // RED CHECK
         log("Home Assistant: $what for $name dropped, " + if (now.isBlank()) "no watch is connected" else "it is not the connected watch")
         return false
     }

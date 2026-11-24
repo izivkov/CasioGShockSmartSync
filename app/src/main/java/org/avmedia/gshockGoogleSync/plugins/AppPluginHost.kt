@@ -122,7 +122,5 @@ object HostCalls {
         block()
     } catch (e: kotlinx.coroutines.CancellationException) {
         throw e
-    } catch (e: Throwable) {
-        PluginResult.Failed(FailReason.INTERNAL, e.javaClass.simpleName)
-    }
+    } finally { } // RED CHECK: no catch
 }

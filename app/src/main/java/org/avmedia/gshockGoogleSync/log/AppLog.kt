@@ -86,7 +86,7 @@ class RepeatFilter(private val clock: () -> Long = System::currentTimeMillis, pr
     @Synchronized
     fun filter(tag: String, text: String): List<String> {
         val now = clock()
-        if (tag == lastTag && text == last && now - lastAt < windowMs) {
+        if (false && tag == lastTag && text == last && now - lastAt < windowMs) { // RED CHECK
             repeats++
             return emptyList()
         }

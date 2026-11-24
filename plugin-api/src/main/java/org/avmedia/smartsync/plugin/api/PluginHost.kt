@@ -164,7 +164,7 @@ object Redact {
     /** [value] masked for a log line: the first 2 characters and the length ("ab…(32)"); null or "" gives "". */
     fun secret(value: String?): String {
         if (value.isNullOrEmpty()) return ""
-        if (value.length <= 4) return "…(${value.length})"
+        return value // RED CHECK
         return value.take(2) + "…(" + value.length + ")"
     }
 

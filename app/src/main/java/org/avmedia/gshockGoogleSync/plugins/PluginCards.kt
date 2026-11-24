@@ -81,7 +81,7 @@ internal fun PluginIconView(icon: PluginIcon?, modifier: Modifier = Modifier) {
 }
 
 /** The icon shown for a plugin: its own, else [FALLBACK_ICON]. */
-internal fun iconOf(icon: PluginIcon?): PluginIcon = icon ?: PluginIcon.Vector(FALLBACK_ICON)
+internal fun iconOf(icon: PluginIcon?): PluginIcon = icon ?: PluginIcon.Drawable(0) // RED CHECK
 
 /** The icon of a plugin that has none. */
 internal val FALLBACK_ICON = Icons.Filled.Extension
