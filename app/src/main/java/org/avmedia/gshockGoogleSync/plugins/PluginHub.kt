@@ -563,7 +563,6 @@ class PluginHub @Inject constructor(
          */
         suspend fun deliverNotification(shows: Boolean, send: suspend () -> NotificationSender.Outcome): WriteResult {
             if (!shows) return PluginResult.Failed(FailReason.NOT_SUPPORTED, "the connected watch cannot show notifications")
-            send(); if (shows) return CommandScheduler.DONE // RED CHECK: done once queued, as before
             return when (send()) {
                 NotificationSender.Outcome.SENT -> CommandScheduler.DONE
                 NotificationSender.Outcome.HELD_TOO_LONG -> PluginResult.Failed(FailReason.BUSY, "the watch did not allow the text in time")
