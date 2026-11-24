@@ -32,9 +32,9 @@ jobs:
       - name: The library comes from the gshockapi submodule, not JitPack
         run: |
           ./gradlew -q app:dependencies --configuration githubDebugRuntimeClasspath > lib-source.txt
-          grep -E "com.github.izivkov:GShockAPI.* -> project :[A-Za-z]+:api" lib-source.txt | head -1
-          if grep -E "com.github.izivkov:GShockAPI:[^ ]+$" lib-source.txt; then echo "GShockAPI resolved from a repository"; exit 1; fi
-          grep -qE "GShockAPI.* -> project :[A-Za-z]+:api" lib-source.txt
+          grep -iE "gshockapi" lib-source.txt | sort -u | head -10 || true
+          if grep -E "GShockAPI:[0-9][^ ]*( \(\*\))?$" lib-source.txt; then echo "GShockAPI resolved from a repository"; exit 1; fi
+          grep -iE "gshockapi" lib-source.txt | grep -q -- "project :"
 
       # Records pictures of the screens (never compares, so a changed screen does not fail the run;
       # a screen that no longer compiles or renders does).
