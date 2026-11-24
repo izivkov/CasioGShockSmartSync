@@ -12,6 +12,8 @@ sealed class Screens(val route: String) {
     data object WatchFace : Screens("WatchFace")
     data object Tide : Screens("Tide")
     data object AppLog : Screens("AppLog")
+    data object Plugins : Screens("Plugins")
+    data object About : Screens("About")
     data object WatchHealth : Screens("WatchHealth")
     data object NotificationSettings : Screens("NotificationSettings")
     data object WorkoutSettings : Screens("WorkoutSettings")

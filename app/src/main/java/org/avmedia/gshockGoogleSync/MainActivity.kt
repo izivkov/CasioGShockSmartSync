@@ -19,6 +19,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
@@ -36,6 +39,12 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var watchFeatureManager: IWatchFeatureManager
 
+    @Inject
+    lateinit var pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub
+
+    /** The plugin whose permission request is open (its answer goes back to it). */
+    private var askingPlugin: String? = null
+
     private val application: GShockApplication
         get() = applicationContext as GShockApplication
     private lateinit var bluetoothHelper: BluetoothHelper
@@ -51,6 +60,23 @@ class MainActivity : ComponentActivity() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 bluetoothHelper.handleBluetoothResult(result.resultCode)
             }
+
+        // Plugins' permissions: only the activity can ask (runtime permissions, or a plugin's own screen such as Health Connect's).
+        val pluginPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            askingPlugin?.let(pluginHub::permissionsAnswered); askingPlugin = null
+        }
+        val pluginPermissionScreen = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            askingPlugin?.let(pluginHub::permissionsAnswered); askingPlugin = null
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                pluginHub.permissionRequests.collect { r ->
+                    askingPlugin = r.pluginId
+                    runCatching { if (r.intent != null) pluginPermissionScreen.launch(r.intent) else pluginPermissions.launch(r.permissions.toTypedArray()) }
+                        .onFailure { askingPlugin = null; pluginHub.permissionsAnswered(r.pluginId) }
+                }
+            }
+        }
 
         bluetoothHelper =
             BluetoothHelper(

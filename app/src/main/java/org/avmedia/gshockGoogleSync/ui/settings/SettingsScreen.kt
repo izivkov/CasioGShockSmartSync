@@ -37,13 +37,13 @@ import org.avmedia.gshockGoogleSync.utils.Utils
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SettingsScreen(
-    onOpenPlugin: (String) -> Unit = {},
+    onOpenPlugins: () -> Unit = {},
+    onOpenAbout: () -> Unit = {},
     onOpenWatchFace: () -> Unit = {},
     onOpenWatchHealth: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
     onOpenWorkouts: () -> Unit = {},
     onOpenTide: () -> Unit = {},
-    onOpenAppLog: () -> Unit = {},
 ) {
     GShockSmartSyncTheme {
         Surface(
@@ -59,10 +59,9 @@ fun SettingsScreen(
                         .padding(0.dp)
                         .fillMaxWidth()
                 ) {
-                    // The plugins (Home Assistant, ...) have their one home here, first: switch and screen.
-                    org.avmedia.gshockGoogleSync.plugins.PluginSettingsEntries(onOpen = onOpenPlugin)
                     SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
-                    AboutSection(onOpenAppLog)
+                    // Last: one Plugins row (its own screen lists them), then About.
+                    SettingsBottomLinks(onOpenPlugins = onOpenPlugins, onOpenAbout = onOpenAbout)
                 }
                 BottomRow(modifier = Modifier.fillMaxWidth())
             }
@@ -157,18 +156,4 @@ fun BottomRow(modifier: Modifier, settingsViewModel: SettingsViewModel = hiltVie
 @Composable
 fun PreviewSettingsScreen() {
     SettingsScreen()
-}
-
-/** The bottom of Settings: the app's and the library's version, and the App log (its screen has Share). */
-@Composable
-fun AboutSection(onOpenAppLog: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-        androidx.compose.material3.Text(
-            "About", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-        )
-        org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "App version", value = org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME)
-        org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "Library version", value = org.avmedia.gshockGoogleSync.BuildConfig.LIBRARY_VERSION)
-        org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow(title = "App log", value = ">", onClick = onOpenAppLog)
-    }
 }

@@ -69,7 +69,7 @@ fun BottomNavigationBarWithPermissions(
     val currentDestination = navBackStackEntry?.destination
 
     TimeTabBack(currentDestination?.route, onOpenWatchList)
-    // Home Assistant opened from Settings (or the Actions link) comes back to Settings.
+    // A plugin's screen opened from Settings > Plugins comes back to Settings.
     val openPluginFromSettings = { id: String -> MainTabReturn.set(Screens.Settings.route); onOpenPlugin(id) }
     LaunchedEffect(navController) {
         MainTabReturn.take()?.let { route ->
@@ -226,12 +226,21 @@ fun BottomNavigationBarWithPermissions(
             }
             composable(Screens.Settings.route) {
                 SettingsScreen(
-                    onOpenPlugin = openPluginFromSettings,
+                    onOpenPlugins = { navController.navigate(Screens.Plugins.route) },
+                    onOpenAbout = { navController.navigate(Screens.About.route) },
                     onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
                     onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
                     onOpenNotifications = { navController.navigate(Screens.NotificationSettings.route) },
                     onOpenWorkouts = { navController.navigate(Screens.WorkoutSettings.route) },
                     onOpenTide = { navController.navigate(Screens.Tide.route) },
+                )
+            }
+            composable(Screens.Plugins.route) {
+                org.avmedia.gshockGoogleSync.plugins.PluginsScreen(onBack = { navController.popBackStack() }, onOpenPlugin = openPluginFromSettings)
+            }
+            composable(Screens.About.route) {
+                org.avmedia.gshockGoogleSync.ui.settings.AboutScreen(
+                    onBack = { navController.popBackStack() },
                     onOpenAppLog = { navController.navigate(Screens.AppLog.route) },
                 )
             }
