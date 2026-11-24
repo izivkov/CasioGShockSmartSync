@@ -1,6 +1,9 @@
 # One workout read of a DW-H5600 holding two workouts: session, group header (1D), both headers (1E) and the first
 # data read (1F, 4096 bytes) up to the sector end. Frames in order: TX = our write, RX = what the watch sent;
 # DRSP = data request characteristic, BULK = the bulk one. The read stalled here: we answered the sector end with `07 1F`.
+TX DRSP 001C0000000000000000
+TX BULK 000000
+RX BULK 000000
 RX DRSP 001C0000000000000000
 TX BULK 04000000000000000000
 RX BULK 04000000000000000000

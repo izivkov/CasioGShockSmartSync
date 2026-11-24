@@ -215,7 +215,7 @@ class WorkoutTransfer(
                 when (m.data.firstOrNull()?.toInt()) {
                     SECTOR_END ->
                         if (asm.endSector()) {
-                            drsp(step, echo(m.data, category))
+                            drsp(step, byteArrayOf(m.data[0], category.toByte()))
                         } else {
                             if (++bad >= 2) return null
                             asm.dropSector()
@@ -224,7 +224,7 @@ class WorkoutTransfer(
                         }
                     DROP_SECTOR -> asm.dropSector()
                     ALL_SENT -> {
-                        drsp(step, echo(m.data, category))
+                        drsp(step, byteArrayOf(m.data[0], category.toByte()))
                         drsp(step, byteArrayOf(0x04, category.toByte()))
                         val result = asm.result()
                         if (result != null) {
