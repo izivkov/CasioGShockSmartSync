@@ -151,6 +151,8 @@ constructor(
         _state.update { it.copy(settings = newSettings, settingsMap = newMap) }
     }
 
+    fun supportsAppNotifications(): Boolean = api.supportsAppNotifications()
+
     @Suppress("UNCHECKED_CAST")
     fun <T : Setting> getSetting(type: Class<T>): T {
         return state.value.settingsMap[type] as T
