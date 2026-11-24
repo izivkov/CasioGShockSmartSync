@@ -141,7 +141,11 @@ class NotificationMonitorService : NotificationListenerService() {
             shared ?: synchronized(this) {
                 shared ?: org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder(
                     AppStores.phoneNotifications(context.applicationContext),
-                    supported = { org.avmedia.gshockapi.ble.Connection.isServiceSupported(org.avmedia.gshockapi.ble.GetSetMode.NOTIFY) },
+                    supported = {
+                        org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder.watchShows(
+                            org.avmedia.gshockapi.ble.Connection.isServiceSupported(org.avmedia.gshockapi.ble.GetSetMode.NOTIFY),
+                        )
+                    },
                     watch = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },
                     log = { org.avmedia.gshockGoogleSync.log.AppLog.log(org.avmedia.gshockGoogleSync.log.LogSource.App, it) },
                 ).also { shared = it }
