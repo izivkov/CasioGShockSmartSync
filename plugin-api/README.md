@@ -3,7 +3,7 @@
 The interface between Smart Sync (the host) and its plugins (Home Assistant, Health Connect, a TRMNL webhook, ...).
 Pure Kotlin plus Android `Context` and Compose for a plugin's screens. No Casio, Home Assistant or app classes.
 
-Coordinates (JitPack): `com.github.ExcuseMi.CasioGShockSmartSync:plugin-api:plugin-api-v<version>`. Changes: `CHANGELOG.md`.
+Coordinates (JitPack): `com.github.ExcuseMi:CasioGShockSmartSync:plugin-api-v<version>` (JitPack names the one published module after the repository; a commit works too: `...:CasioGShockSmartSync:<commit>`). Changes: `CHANGELOG.md`.
 
 ## A plugin
 - Implements `WatchPlugin` (public no-argument constructor) and lists it in
