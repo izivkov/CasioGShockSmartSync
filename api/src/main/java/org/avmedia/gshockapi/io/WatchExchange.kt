@@ -20,6 +20,15 @@ object WatchExchange {
 
     @Volatile private var lastExchangeEndMs = 0L
 
+    /** When the last LifeLog or workout transfer ended (after its END echo); 0 before the first. */
+    @Volatile var lastTransferEndMs = 0L
+        private set
+
+    /** A transfer ended: the watch needs a moment before the next one starts (it refused a start 5 ms later with `03 01`). */
+    fun onTransferEnded(nowMs: Long = System.currentTimeMillis()) {
+        lastTransferEndMs = nowMs
+    }
+
     /** Marks [block] as a settings or time exchange: a transfer does not start while one runs. */
     suspend fun <T> settingsExchange(block: suspend () -> T): T {
         exchanges.incrementAndGet()

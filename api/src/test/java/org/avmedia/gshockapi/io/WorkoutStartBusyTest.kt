@@ -152,6 +152,35 @@ class WorkoutStartAfterExchangeTest {
         assertEquals("two session requests", 2, writes.count { it == "001c0000000000000000" })
     }
 
+    /**
+     * A workout read 5 ms after "LifeLog read done", no settings read running: the watch answered `03 01` at once; a read with
+     * a pause before it was accepted. The watch here refuses every start within 3 s of the end of the last transfer.
+     */
+    @Test fun aWorkoutReadRightAfterALifeLogWaitsAndIsNotRefused() = runBlocking {
+        install(refusals = 0)
+        H5600WorkoutIO.sink = { true }
+        val ended = System.currentTimeMillis()
+        val inner = H5600WorkoutIO.link
+        H5600WorkoutIO.link = object : WorkoutLink {
+            override fun drsp(data: ByteArray) = inner.drsp(data)
+
+            override fun bulk(data: ByteArray) {
+                if (data.size == 3 && data.all { it.toInt() == 0 } && System.currentTimeMillis() - ended < 3_000) {
+                    writes += "bulk 000000 refused"
+                    H5600WorkoutIO.onConvoy("03 01")
+                    return
+                }
+                inner.bulk(data)
+            }
+        }
+        WatchExchange.onTransferEnded(ended)
+        val result = withTimeoutOrNull(20_000) { H5600WorkoutIO.download() }
+        assertNotNull(result)
+        assertNull(result!!.error)
+        assertTrue("no start refused: $writes", writes.none { it.endsWith("refused") })
+        assertEquals(1, writes.count { it == "001c0000000000000000" })
+    }
+
     @Test fun twoFailReasonsEndTheRead() = runBlocking {
         install(refusals = 2)
         H5600WorkoutIO.sink = { true }
