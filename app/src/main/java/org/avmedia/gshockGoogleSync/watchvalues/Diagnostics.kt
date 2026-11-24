@@ -1,5 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
-
+package org.avmedia.gshockGoogleSync.watchvalues
 /** Turns a failure into a short line for the screens and the app log. Never includes URLs or headers. */
 object Diagnostics {
     /** "ClassName: message" */

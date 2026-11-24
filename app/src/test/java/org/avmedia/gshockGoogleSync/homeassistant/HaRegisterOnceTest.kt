@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
+import org.avmedia.gshockGoogleSync.watchvalues.Variable
+import org.avmedia.gshockGoogleSync.watchvalues.VariableContext
+import org.avmedia.gshockGoogleSync.watchvalues.VariableRegistry
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch

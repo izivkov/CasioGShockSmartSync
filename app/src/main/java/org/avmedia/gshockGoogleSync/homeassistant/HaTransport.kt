@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.Diagnostics
 import java.util.concurrent.TimeUnit
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient

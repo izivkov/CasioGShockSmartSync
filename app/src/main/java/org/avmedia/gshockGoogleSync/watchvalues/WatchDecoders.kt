@@ -1,5 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
-
+package org.avmedia.gshockGoogleSync.watchvalues
 /** Decoders for raw watch answers ("0x28 06 1D ..."): variables never carry raw hex. */
 object WatchDecoders {
     private val hexByte = Regex("^[0-9A-Fa-f][0-9A-Fa-f]$")

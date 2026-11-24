@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+
 /** The connection check: not run, running, good or failed ([detail] is for the "Details" expander). */
 sealed interface HaCheckUi {
     data object Idle : HaCheckUi

@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import AppSwitch
 import AppText
 import AppTextLarge

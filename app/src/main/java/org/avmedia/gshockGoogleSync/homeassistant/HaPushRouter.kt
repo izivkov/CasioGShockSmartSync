@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands
 import org.avmedia.gshockapi.AppNotification
 import timber.log.Timber
 

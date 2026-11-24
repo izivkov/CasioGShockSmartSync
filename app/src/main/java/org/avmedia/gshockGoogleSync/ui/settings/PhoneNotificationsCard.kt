@@ -38,7 +38,7 @@ import org.avmedia.gshockGoogleSync.notifications.AppIcons
 import org.avmedia.gshockGoogleSync.notifications.InstalledApps
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import org.avmedia.gshockGoogleSync.homeassistant.AppStores
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.RadioButton

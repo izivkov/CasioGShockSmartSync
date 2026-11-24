@@ -3,7 +3,7 @@ package org.avmedia.gshockGoogleSync.history
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.avmedia.gshockGoogleSync.homeassistant.HaSensors
-import org.avmedia.gshockGoogleSync.homeassistant.HealthVariables
+import org.avmedia.gshockGoogleSync.watchvalues.HealthVariables
 import org.avmedia.gshockapi.model.H5600HealthData
 import org.avmedia.gshockapi.model.StepCounterData
 import org.junit.Assert.assertEquals

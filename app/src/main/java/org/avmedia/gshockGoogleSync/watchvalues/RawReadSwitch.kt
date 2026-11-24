@@ -1,5 +1,6 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

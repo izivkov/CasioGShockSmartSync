@@ -1,7 +1,6 @@
 package org.avmedia.gshockGoogleSync.watch
 
 import org.avmedia.gshockGoogleSync.history.HistoryDb
-import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull

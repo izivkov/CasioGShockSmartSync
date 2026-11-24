@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import java.time.LocalDateTime
 import org.avmedia.gshockapi.model.ActivityPeriod

@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
 import java.io.File
-import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

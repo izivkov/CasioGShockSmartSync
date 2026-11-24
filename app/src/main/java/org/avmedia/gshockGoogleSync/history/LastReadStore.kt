@@ -2,7 +2,7 @@ package org.avmedia.gshockGoogleSync.history
 
 import android.content.Context
 import java.time.LocalDateTime
-import org.avmedia.gshockGoogleSync.homeassistant.AppStores
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import org.avmedia.gshockGoogleSync.watch.CurrentWatch
 import org.avmedia.gshockapi.model.StepCounterData
 

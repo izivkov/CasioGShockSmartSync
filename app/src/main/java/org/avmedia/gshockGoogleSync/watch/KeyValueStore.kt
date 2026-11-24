@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watch
 
 /** A string store: the app's LocalDataStorage on the phone, a map in unit tests. */
 interface KeyValueStore {

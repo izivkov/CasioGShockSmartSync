@@ -1,5 +1,11 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watch.AppStores
+import org.avmedia.gshockGoogleSync.watchvalues.RawWatchRequest
+import org.avmedia.gshockGoogleSync.watchvalues.VariableContext
+import org.avmedia.gshockGoogleSync.watchvalues.VariableRegistry
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands
+import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
 import org.avmedia.gshockGoogleSync.log.AppLog
 import org.avmedia.gshockGoogleSync.log.LogSource
 import android.content.Context

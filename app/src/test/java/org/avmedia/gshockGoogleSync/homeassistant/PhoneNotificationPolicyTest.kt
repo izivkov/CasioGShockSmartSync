@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationMode as M
 import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationPolicy as P
 import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationSettings

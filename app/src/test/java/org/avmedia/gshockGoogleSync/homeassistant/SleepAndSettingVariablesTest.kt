@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.HealthVariables
+import org.avmedia.gshockGoogleSync.watchvalues.SleepVariables
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingVariables
+import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.avmedia.gshockapi.model.BodyReadings

@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import java.time.format.DateTimeFormatter
 import org.avmedia.gshockGoogleSync.history.DayHeartRate

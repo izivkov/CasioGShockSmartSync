@@ -1,7 +1,6 @@
 package org.avmedia.gshockGoogleSync.watch
 
 import com.google.gson.Gson
-import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
 
 /**
  * Every value the app keeps about a watch, kept per watch ([WatchKeys]) with the time it was stored, as a

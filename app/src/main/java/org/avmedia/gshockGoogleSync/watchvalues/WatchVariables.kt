@@ -1,5 +1,7 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
+import org.avmedia.gshockGoogleSync.homeassistant.HaPushState
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import android.content.Context
 import android.os.BatteryManager
 import java.time.ZoneId

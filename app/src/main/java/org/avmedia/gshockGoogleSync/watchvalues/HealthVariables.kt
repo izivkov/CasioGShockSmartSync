@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import org.avmedia.gshockGoogleSync.ui.health.resolveDistanceKm
 import org.avmedia.gshockapi.model.ActivitySeconds

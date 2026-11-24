@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 /** The Home Assistant master switch on the Actions screen. On by default; the setup is kept while it is off. */
 class ServiceToggles(private val store: KeyValueStore) {
     enum class Service(val key: String) { HOME_ASSISTANT("toggle.home_assistant") }

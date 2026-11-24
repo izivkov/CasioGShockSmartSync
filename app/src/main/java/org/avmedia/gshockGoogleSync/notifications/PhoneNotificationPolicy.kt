@@ -1,6 +1,6 @@
 package org.avmedia.gshockGoogleSync.notifications
 
-import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import org.avmedia.gshockGoogleSync.watch.WatchStore
 
 /** What the policy needs to know about one posted phone notification. [importance] is -1000 when Android did not say. */

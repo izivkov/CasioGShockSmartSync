@@ -1,5 +1,11 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.RawSettings
+import org.avmedia.gshockGoogleSync.watchvalues.SettingCheck
+import org.avmedia.gshockGoogleSync.watchvalues.SettingType
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSetting
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingVariables
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

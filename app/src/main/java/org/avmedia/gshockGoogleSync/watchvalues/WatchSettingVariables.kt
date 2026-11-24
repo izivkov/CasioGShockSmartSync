@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import org.avmedia.gshockapi.io.BasicHealthFieldsCodec
 import org.avmedia.gshockapi.io.LengthUnit

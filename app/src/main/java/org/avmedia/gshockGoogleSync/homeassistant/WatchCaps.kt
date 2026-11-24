@@ -1,5 +1,8 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+
+import org.avmedia.gshockGoogleSync.watchvalues.HeartRateDayVariables
+import org.avmedia.gshockGoogleSync.watchvalues.SleepVariables
 /**
  * What a watch model has, for the Home Assistant sensors it registers: from the library's model table (WatchInfo) of
  * the connected watch. An OCW-S7000 (model OCW_S400) has no health, no workouts and no settings: it gets battery,

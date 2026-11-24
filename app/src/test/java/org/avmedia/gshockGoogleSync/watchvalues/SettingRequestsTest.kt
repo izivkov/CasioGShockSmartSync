@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import org.avmedia.gshockGoogleSync.ui.watchhealth.SettingRequests
 import org.junit.Assert.assertArrayEquals

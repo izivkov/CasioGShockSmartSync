@@ -12,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationPolicy
 import org.avmedia.gshockGoogleSync.notifications.PostedNotification
 import org.avmedia.gshockGoogleSync.session.SessionManager
-import org.avmedia.gshockGoogleSync.homeassistant.AppStores
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.NotificationType
 import org.avmedia.gshockapi.ProgressEvents

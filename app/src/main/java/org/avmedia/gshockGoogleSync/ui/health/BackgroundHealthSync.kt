@@ -15,7 +15,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.homeassistant.HaGroup
 import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
-import org.avmedia.gshockGoogleSync.homeassistant.AppStores
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.H5600HealthIO

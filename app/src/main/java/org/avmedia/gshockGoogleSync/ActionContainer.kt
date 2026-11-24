@@ -584,7 +584,7 @@ constructor(
         }
 
         private fun haReady(): Boolean = runCatching {
-            org.avmedia.gshockGoogleSync.homeassistant.AppStores.haStore(appContext).load() != null
+            org.avmedia.gshockGoogleSync.watch.AppStores.haStore(appContext).load() != null
         }.getOrDefault(false)
 
         override fun run(context: Context) {

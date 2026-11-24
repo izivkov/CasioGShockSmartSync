@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.notifications
 
 import android.content.Context
-import org.avmedia.gshockGoogleSync.homeassistant.AppStores
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import org.avmedia.gshockGoogleSync.log.AppLog
 import org.avmedia.gshockGoogleSync.log.LogSource
 import org.avmedia.gshockGoogleSync.services.NotificationMonitorService

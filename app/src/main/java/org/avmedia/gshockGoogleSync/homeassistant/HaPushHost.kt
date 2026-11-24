@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network

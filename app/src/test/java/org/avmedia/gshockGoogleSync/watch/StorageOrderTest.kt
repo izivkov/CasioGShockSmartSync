@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watch
 
 import java.io.File
 import org.junit.Assert.assertTrue

@@ -1,5 +1,8 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.VariableContext
+import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
+import org.avmedia.gshockGoogleSync.watchvalues.WorkoutVariables
 import org.avmedia.gshockGoogleSync.history.WorkoutTestData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

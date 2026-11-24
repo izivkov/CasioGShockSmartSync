@@ -1,5 +1,8 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watch
 
+import org.avmedia.gshockGoogleSync.homeassistant.HaStore
+import org.avmedia.gshockGoogleSync.homeassistant.ServiceToggles
+import org.avmedia.gshockGoogleSync.watchvalues.RawReadSwitch
 import android.content.Context
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 

@@ -1,5 +1,9 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.RawRequester
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
+import org.avmedia.gshockGoogleSync.watchvalues.RawSettingsReader
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

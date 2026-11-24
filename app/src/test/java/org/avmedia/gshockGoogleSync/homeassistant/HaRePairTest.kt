@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import org.avmedia.gshockGoogleSync.ui.time.HomeSnapshot
 import org.avmedia.gshockGoogleSync.ui.time.HomeSnapshotStore
 import org.junit.Assert.assertEquals

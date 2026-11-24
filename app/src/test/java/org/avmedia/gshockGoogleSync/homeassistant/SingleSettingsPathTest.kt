@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.RawWatchRequest
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchSettingsAccess

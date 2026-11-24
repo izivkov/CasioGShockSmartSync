@@ -3,7 +3,7 @@ package org.avmedia.gshockGoogleSync.notifications
 import java.util.concurrent.Executors
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
-import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import org.avmedia.gshockGoogleSync.watch.WatchStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

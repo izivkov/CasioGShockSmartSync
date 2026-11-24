@@ -23,8 +23,8 @@ import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockGoogleSync.homeassistant.HaPushHost
-import org.avmedia.gshockGoogleSync.homeassistant.WatchSettingCommands
-import org.avmedia.gshockGoogleSync.homeassistant.AppStores
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingCommands
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import timber.log.Timber
 
 /**

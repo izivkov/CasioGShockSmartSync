@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.ActivityListCodec

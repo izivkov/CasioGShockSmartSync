@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.RawSettings
+import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry
 import java.time.LocalDateTime
 import java.time.ZoneId
 

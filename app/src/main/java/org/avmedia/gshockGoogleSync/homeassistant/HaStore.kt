@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import androidx.annotation.Keep
 import com.google.gson.GsonBuilder
 import com.google.gson.ToNumberPolicy

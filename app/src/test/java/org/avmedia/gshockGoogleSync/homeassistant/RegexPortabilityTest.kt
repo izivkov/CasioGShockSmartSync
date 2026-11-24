@@ -33,9 +33,10 @@ class RegexPortabilityTest {
     }
 
     private fun haSources(): List<File> {
-        val dir = File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant")
-        val files = dir.listFiles { f -> f.extension == "kt" }?.toList().orEmpty()
-        assertTrue("Home Assistant sources not found from ${File(".").absolutePath}", files.isNotEmpty())
+        // The Home Assistant code and the watch values it reads (moved out of the Home Assistant package).
+        val dirs = listOf("homeassistant", "watchvalues").map { File("src/main/java/org/avmedia/gshockGoogleSync/$it") }
+        val files = dirs.flatMap { dir -> dir.listFiles { f -> f.extension == "kt" }?.toList().orEmpty() }
+        assertTrue("Home Assistant sources not found from ${File(".").absolutePath}", dirs.all { d -> files.any { it.parentFile == d } })
         return files
     }
 

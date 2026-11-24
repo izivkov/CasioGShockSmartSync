@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import org.avmedia.gshockGoogleSync.ui.health.H5600Session
 import org.avmedia.gshockapi.io.H5600HealthIO

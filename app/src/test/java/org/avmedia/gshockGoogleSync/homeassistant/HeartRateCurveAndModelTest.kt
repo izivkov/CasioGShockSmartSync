@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.HealthVariables
 import java.time.LocalDate
 import org.avmedia.gshockapi.model.BodyReadings
 import org.avmedia.gshockapi.model.CardioStatus

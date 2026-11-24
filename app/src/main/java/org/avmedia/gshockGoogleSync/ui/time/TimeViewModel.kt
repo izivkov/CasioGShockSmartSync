@@ -82,7 +82,7 @@ class TimeViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
-    private val snapshots = HomeSnapshotStore(org.avmedia.gshockGoogleSync.homeassistant.AppStores.LocalKeyValueStore(appContext))
+    private val snapshots = HomeSnapshotStore(org.avmedia.gshockGoogleSync.watch.AppStores.LocalKeyValueStore(appContext))
 
     // The first frame comes from the stored values; the watch is read in the background ([refreshState]).
     private val _state = MutableStateFlow(

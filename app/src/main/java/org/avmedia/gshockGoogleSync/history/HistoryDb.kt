@@ -114,7 +114,7 @@ abstract class HistoryDb : RoomDatabase() {
         /** The history of [watch], one database file per watch ([fileFor]). */
         fun forWatch(context: Context, watch: String): HistoryDb {
             val app = context.applicationContext
-            val name = fileFor(org.avmedia.gshockGoogleSync.homeassistant.AppStores.watchStore(app), watch, app.getDatabasePath(NAME).exists())
+            val name = fileFor(org.avmedia.gshockGoogleSync.watch.AppStores.watchStore(app), watch, app.getDatabasePath(NAME).exists())
             return instances[name] ?: synchronized(this) {
                 instances.getOrPut(name) {
                     Room.databaseBuilder(app, HistoryDb::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()

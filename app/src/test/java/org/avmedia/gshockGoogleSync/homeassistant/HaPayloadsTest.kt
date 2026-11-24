@@ -1,5 +1,8 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockGoogleSync.watchvalues.RawSettings
+import org.avmedia.gshockGoogleSync.watchvalues.WatchDecoders
+import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
 import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

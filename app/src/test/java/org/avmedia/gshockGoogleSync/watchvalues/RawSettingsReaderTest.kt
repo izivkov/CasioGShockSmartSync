@@ -1,4 +1,4 @@
-package org.avmedia.gshockGoogleSync.homeassistant
+package org.avmedia.gshockGoogleSync.watchvalues
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals

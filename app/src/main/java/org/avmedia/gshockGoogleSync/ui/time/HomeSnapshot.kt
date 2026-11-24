@@ -1,7 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.time
 
 import com.google.gson.Gson
-import org.avmedia.gshockGoogleSync.homeassistant.KeyValueStore
+import org.avmedia.gshockGoogleSync.watch.KeyValueStore
 import org.avmedia.gshockGoogleSync.scratchpad.TimeSettingsStorage
 
 /**

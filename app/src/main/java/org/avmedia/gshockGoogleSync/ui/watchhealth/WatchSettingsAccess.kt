@@ -4,8 +4,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.ui.health.H5600Session
-import org.avmedia.gshockGoogleSync.homeassistant.RawSettings
-import org.avmedia.gshockGoogleSync.homeassistant.WatchDecoders
+import org.avmedia.gshockGoogleSync.watchvalues.RawSettings
+import org.avmedia.gshockGoogleSync.watchvalues.WatchDecoders
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.casio.ConnectionKeepAlive
 import org.avmedia.gshockapi.io.ActivityItemCodec
