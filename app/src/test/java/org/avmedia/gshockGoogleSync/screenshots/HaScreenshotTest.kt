@@ -15,7 +15,7 @@ import org.avmedia.gshockGoogleSync.homeassistant.HaUi
 import org.avmedia.gshockGoogleSync.homeassistant.HaWatchUi
 import org.junit.Test
 
-/** Home Assistant screen: not set up, working, errors, loading and the picker. */
+/** Home Assistant screen: not set up, working, errors and loading (the button-action picker is the Actions tab's). */
 class HaScreenshotTest : ScreenshotTest() {
 
     private val configured = HaConfig("https://ha.example.com", "secret-token", "My G-Shock", "GBX-H5600")
@@ -59,7 +59,7 @@ class HaScreenshotTest : ScreenshotTest() {
         actions = HaActionsUi(loading = true),
     )
 
-    @Composable private fun Screen(ui: HaUi, picker: Boolean = false) = HaScreenContent(ui, pickerOpen = picker)
+    @Composable private fun Screen(ui: HaUi) = HaScreenContent(ui)
 
     @Test fun notSetUpLight() = snap("ha_not_set_up", false) { Screen(HaUi()) }
     @Test fun notSetUpDark() = snap("ha_not_set_up", true) { Screen(HaUi()) }
@@ -74,6 +74,4 @@ class HaScreenshotTest : ScreenshotTest() {
     @Test fun nameFirstLight() = snap("ha_name_first", false) { Screen(naming) }
     @Test fun loadingLight() = snap("ha_loading", false) { Screen(loading) }
     @Test fun loadingDark() = snap("ha_loading", true) { Screen(loading) }
-    @Test fun pickerOpenLight() = snap("ha_picker", false) { Screen(working.copy(actions = working.actions.copy(chosen = null)), picker = true) }
-    @Test fun pickerOpenDark() = snap("ha_picker", true) { Screen(working.copy(actions = working.actions.copy(chosen = null)), picker = true) }
 }

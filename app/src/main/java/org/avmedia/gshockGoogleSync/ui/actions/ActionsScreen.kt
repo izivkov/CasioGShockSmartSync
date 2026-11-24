@@ -73,7 +73,8 @@ private fun ActionsContent(
         modifier =
             modifier
                 .verticalScroll(rememberScrollState())
-                .padding(0.dp)
+                // Room under the last row: scrolled to the end, nothing sits against or behind the Save bar.
+                .padding(bottom = 16.dp)
                 .fillMaxWidth()
     ) { ItemList(items = createActionItems(actionsViewModel, haRow)) }
 }

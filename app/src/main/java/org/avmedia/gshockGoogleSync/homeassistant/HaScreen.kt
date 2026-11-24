@@ -31,8 +31,6 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
             onForget = viewModel::forget,
             onFind = viewModel::findOnNetwork,
             onGroup = viewModel::setGroup,
-            onChoose = viewModel::choose,
-            onRefreshActions = viewModel::refreshActions,
             onRawSwitch = viewModel::setRawSwitch,
             onCreateDashboard = viewModel::createDashboard,
             onCopyYaml = { viewModel.copyYaml(context) },
@@ -43,7 +41,7 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
 
 /** The stateless body of [HaScreen]: state in, events out (also used by the screenshot tests). */
 @Composable
-internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen: Boolean = false) {
+internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents()) {
     var url by remember { mutableStateOf(ui.form.baseUrl) }
     var token by remember { mutableStateOf(ui.form.token) }
     // Before the first registration the name field starts with the watch's own name (without "CASIO ").
@@ -68,7 +66,6 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen
                 onConfirm = { events.onConfirmName(deviceName, model) },
             )
             HaSentCard(ui.sent, ui.saved, events.onGroup)
-            HaButtonCard(ui.saved, ui.actions, events.onChoose, events.onRefreshActions, pickerOpen)
             HaDashboardCard(ui.saved, ui.watch.registered, ui.dash, events.onCreateDashboard, events.onCopyYaml)
         }
         ButtonsRow(

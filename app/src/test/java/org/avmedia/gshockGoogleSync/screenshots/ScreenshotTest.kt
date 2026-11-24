@@ -32,9 +32,10 @@ abstract class ScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    /** Shows [content] in the app theme, light or dark, full screen, and records `<name>_<theme>.png`. */
-    protected fun snap(name: String, dark: Boolean, content: @Composable () -> Unit) {
+    /** Shows [content] in the app theme, light or dark, full screen, runs [before] (e.g. a scroll), and records `<name>_<theme>.png`. */
+    protected fun snap(name: String, dark: Boolean, before: () -> Unit = {}, content: @Composable () -> Unit) {
         composeRule.setContent { ThemedFrame(dark, content) }
+        before()
         composeRule.onRoot().captureRoboImage("build/outputs/roborazzi/${name}_${if (dark) "dark" else "light"}.png")
     }
 }

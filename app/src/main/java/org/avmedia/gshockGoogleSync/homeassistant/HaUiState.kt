@@ -74,8 +74,6 @@ class HaEvents(
     val onForget: () -> Unit = {},
     val onFind: () -> Unit = {},
     val onGroup: (HaGroup, Boolean) -> Unit = { _, _ -> },
-    val onChoose: (HaAction?) -> Unit = {},
-    val onRefreshActions: () -> Unit = {},
     val onRawSwitch: (Boolean) -> Unit = {},
     val onCreateDashboard: () -> Unit = {},
     val onCopyYaml: () -> Unit = {},

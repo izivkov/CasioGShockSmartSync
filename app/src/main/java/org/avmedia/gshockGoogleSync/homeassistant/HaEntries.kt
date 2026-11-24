@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -91,9 +94,13 @@ fun HaButtonActionRow(onOpenSetup: () -> Unit, viewModel: HaViewModel = hiltView
     )
 }
 
-internal const val HA_NOT_SET_UP = "Not set up yet."
 internal const val HA_SET_UP_LINK = "Set up in Settings > Home Assistant"
 
+/**
+ * The Home Assistant row of the Actions tab, like its neighbours (icon, name, switch, same height and padding). When
+ * on, one second line in the same card: "Watch button: <friendly name>" with a chevron that opens the picker (search
+ * and Refresh inside it), or, before Home Assistant is set up, the way to Settings > Home Assistant.
+ */
 @Composable
 internal fun HaButtonActionContent(
     saved: Boolean,
@@ -103,22 +110,40 @@ internal fun HaButtonActionContent(
     onChoose: (HaAction?) -> Unit,
     onRefresh: () -> Unit,
     onOpenSetup: () -> Unit,
+    pickerOpen: Boolean = false,
 ) {
+    var picker by remember { mutableStateOf(pickerOpen) }
     AppCard(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 AppIconFromResource(resourceId = R.drawable.ic_home_assistant)
                 HorizontalSeparator(width = 4.dp)
                 AppTextLarge(text = stringResource(R.string.home_assistant), modifier = Modifier.weight(1f))
                 AppSwitch(checked = isOn, onCheckedChange = onToggle)
             }
-            if (saved) {
-                HaActionPicker(actions.items, actions.chosen, onChoose, onRefresh)
-                if (actions.error != null) HaNote(actions.error, error = true)
-            } else {
-                AppText(text = HA_NOT_SET_UP, fontSize = 14.sp)
-                TextButton(onClick = onOpenSetup) { Text(HA_SET_UP_LINK) }
+            if (isOn) {
+                val text = if (saved) "Watch button: ${buttonActionName(actions.chosen)}" else HA_SET_UP_LINK
+                val open: () -> Unit = if (saved) ({ picker = true }) else onOpenSetup
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable(onClick = open).padding(start = 40.dp, end = 12.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AppText(
+                        text = text, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        color = if (saved) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (saved && actions.error != null && !picker) {
+                    AppText(text = actions.error, fontSize = 12.sp, color = MaterialTheme.colorScheme.error, maxLines = 2,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 40.dp, end = 12.dp, bottom = 8.dp))
+                }
             }
         }
     }
+    if (picker) HaActionPickerDialog(actions, onChoose, onRefresh) { picker = false }
 }
