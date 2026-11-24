@@ -109,6 +109,7 @@ fun PreConnectionScreen(
     val sessionState by ptrConnectionViewModel.sessionState.collectAsState()
     val keepHolder by ptrConnectionViewModel.keepHolder.collectAsState()
     var optionsFor by remember { mutableStateOf<PreConnectionViewModel.DeviceItem?>(null) }
+    val pluginsVm: org.avmedia.gshockGoogleSync.plugins.PluginsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 
     val timeoutJob = remember { mutableStateOf<Job?>(null) }
 
@@ -226,8 +227,10 @@ fun PreConnectionScreen(
                 OpenOnConnect.sameAddress(keepHolder, it.address) && !OpenOnConnect.sameAddress(it.address, device.address)
             }?.name,
             onKeepConnected = { on -> ptrConnectionViewModel.setKeepConnected(device.address, on) },
+            plugins = { org.avmedia.gshockGoogleSync.plugins.PluginsForWatch(device.address) },
             onForget = {
                 optionsFor = null
+                pluginsVm.watchRemoved(device.address)
                 ptrConnectionViewModel.disassociate(context, Utils.sanitizeMacAddress(device.address))
                 scope.launch(Dispatchers.IO) { LocalDataStorage.removeDeviceAddress(context, device.address) }
             },

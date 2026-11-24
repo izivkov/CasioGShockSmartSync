@@ -20,7 +20,6 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.github.takahirom.roborazzi.captureRoboImage
-import androidx.compose.material3.MaterialTheme
 import org.junit.Assert.assertTrue
 import org.junit.Test
 

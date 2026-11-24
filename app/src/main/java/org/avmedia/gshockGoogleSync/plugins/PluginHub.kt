@@ -366,12 +366,10 @@ class PluginHub @Inject constructor(
 
     /** A line about plugin [id] (the host's own: start, failures), tagged with the plugin's id like the plugin's lines. */
     fun log(id: String, line: String) {
-        AppLog.ensureFileTree()
         timber.log.Timber.tag(id).i(line)
     }
 
     fun failure(id: String, line: String, error: Throwable) {
-        AppLog.ensureFileTree()
         timber.log.Timber.tag(id).w("$line (${error.javaClass.simpleName})")
     }
 

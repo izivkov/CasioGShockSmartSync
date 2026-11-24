@@ -169,9 +169,10 @@ fun WatchOptionsSheet(
     onKeepConnected: (Boolean) -> Unit,
     onForget: () -> Unit,
     onDismiss: () -> Unit,
+    plugins: @Composable () -> Unit = {},
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        WatchOptions(device, keepOn, otherHolderName, onKeepConnected, onForget)
+        WatchOptions(device, keepOn, otherHolderName, onKeepConnected, onForget, plugins)
     }
 }
 
@@ -186,6 +187,8 @@ fun WatchOptions(
     otherHolderName: String?,
     onKeepConnected: (Boolean) -> Unit,
     onForget: () -> Unit,
+    /** "Plugins for this watch" (the app's plugins and how far each works with this watch). */
+    plugins: @Composable () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 24.dp)) {
         Text(device.name, style = MaterialTheme.typography.titleLarge)
@@ -218,6 +221,7 @@ fun WatchOptions(
                 Switch(checked = keepOn, onCheckedChange = onKeepConnected, modifier = Modifier.padding(start = 12.dp))
             }
         }
+        plugins()
         TextButton(onClick = onForget, modifier = Modifier.padding(top = 16.dp)) {
             Text(stringResource(R.string.forget_watch), color = MaterialTheme.colorScheme.error)
         }

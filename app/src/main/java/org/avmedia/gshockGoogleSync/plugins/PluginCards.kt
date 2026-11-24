@@ -45,6 +45,18 @@ class PluginsViewModel @Inject constructor(private val hub: PluginHub) : ViewMod
     fun setEnabled(id: String, on: Boolean) = hub.setEnabled(id, on)
     fun accessShown(id: String) = hub.accessShown(id)
     fun markAccessShown(id: String) = hub.markAccessShown(id)
+    fun watchRemoved(address: String) = hub.watchRemoved(address)
+
+    /** "Home Assistant (all features)" for each plugin that is offered for the watch at [address]. */
+    fun pluginsFor(address: String): List<String> {
+        val id = org.avmedia.smartsync.plugin.api.WatchId(org.avmedia.gshockGoogleSync.watch.WatchKeys.of(address))
+        val caps = hub.capsOf(id)
+        return hub.runtime.plugins().mapNotNull { p ->
+            val s = org.avmedia.smartsync.plugin.api.WatchSupport.of(runCatching { p.access }.getOrDefault(org.avmedia.smartsync.plugin.api.PluginAccess()), caps)
+            if (s is org.avmedia.smartsync.plugin.api.WatchSupport.NotSupported) null else AccessGuard.worksWith(listOf(p.name to s)).single()
+        }
+    }
+
     fun worksWith(p: WatchPlugin): List<String> =
         AccessGuard.worksWith(hub.supportOf(p).map { (w, s) -> w.name.removePrefix("CASIO").trim().ifBlank { w.id.key } to s })
 }
@@ -242,4 +254,15 @@ internal fun shortTime(ms: Long): String {
     val t = java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneId.systemDefault())
     val pattern = if (t.toLocalDate() == java.time.LocalDate.now()) "HH:mm" else "d MMM HH:mm"
     return java.time.format.DateTimeFormatter.ofPattern(pattern, java.util.Locale.getDefault()).format(t)
+}
+
+/** The ⋮ sheet of a watch: the plugins offered for it and how far each works with it. */
+@Composable
+fun PluginsForWatch(address: String, vm: PluginsViewModel = hiltViewModel()) {
+    val lines = remember(address) { vm.pluginsFor(address) }
+    if (lines.isEmpty()) return
+    Column(modifier = Modifier.padding(top = 16.dp)) {
+        AppText(text = "Plugins for this watch", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        lines.forEach { AppText(text = it, fontSize = 14.sp) }
+    }
 }
