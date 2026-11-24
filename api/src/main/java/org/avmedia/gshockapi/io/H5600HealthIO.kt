@@ -70,9 +70,13 @@ object H5600HealthIO {
     @Volatile
     var afterRead: (ByteArray?) -> Unit = { H5600WorkoutIO.afterRead(it) }
 
-    /** The workout read [H5600WorkoutIO.beforeLifeLog] runs before START when `0x28` flags workouts; a test seam. */
+    /**
+     * The workout read [H5600WorkoutIO.beforeLifeLog] runs before START when `0x28` flags workouts; a test seam. Always read,
+     * like a button press, without the back-off: a Health read is how workouts are read, and with one waiting the watch does
+     * not answer the LifeLog START.
+     */
     @Volatile
-    var workoutsFirst: suspend () -> Unit = { H5600WorkoutIO.downloadHeld() }
+    var workoutsFirst: suspend () -> Unit = { H5600WorkoutIO.downloadHeld(userAsked = true) }
 
     private val lock = Any()
     private var active: Transfer? = null
