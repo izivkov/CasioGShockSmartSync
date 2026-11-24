@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.plugins
 
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -66,7 +67,7 @@ class AppPluginHostTest {
         every { h.capsOf(any()) } returns emptySet()
         every { h.connectedWatch() } returns if (connected) w else null
         every { h.watchName(any()) } returns "CASIO GBX-H5600"
-        every { h.showNotification(any(), any()) } returns CommandScheduler.DONE
+        coEvery { h.showNotification(any(), any()) } returns CommandScheduler.DONE
         every { h.kv } returns kv
         every { h.knowsWatch(any()) } returns true
     }
@@ -81,7 +82,7 @@ class AppPluginHostTest {
         val r = host.notify(w, note) as PluginResult.Failed
         assertEquals(FailReason.STOPPED, r.reason)
         assertEquals(FailReason.STOPPED, (host.command(w, WatchCommand.RefreshValues) as PluginResult.Failed).reason)
-        verify(exactly = 1) { h.showNotification(any(), any()) }
+        coVerify(exactly = 1) { h.showNotification(any(), any()) }
         assertEquals("reads give nothing", emptyList<Any>(), host.watches())
         assertEquals(null, host.connected())
         host.storage().put("token", "t")

@@ -143,7 +143,7 @@ class NotificationMonitorService : NotificationListenerService() {
                     AppStores.phoneNotifications(context.applicationContext),
                     supported = {
                         org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder.watchShows(
-                            org.avmedia.gshockapi.ble.Connection.isServiceSupported(org.avmedia.gshockapi.ble.GetSetMode.NOTIFY),
+                            org.avmedia.gshockapi.ble.Connection.serviceFound(org.avmedia.gshockapi.ble.GetSetMode.NOTIFY),
                         )
                     },
                     watch = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },

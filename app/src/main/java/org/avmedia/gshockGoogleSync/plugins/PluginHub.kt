@@ -37,16 +37,19 @@ import org.avmedia.gshockGoogleSync.watchvalues.SettingType
 import org.avmedia.gshockGoogleSync.watchvalues.WatchSettingRegistry
 import org.avmedia.gshockGoogleSync.watchvalues.WatchVariables
 import org.avmedia.gshockapi.AppNotification
+import org.avmedia.gshockapi.casio.NotificationSender
 import org.avmedia.gshockapi.NotificationIds
 import org.avmedia.gshockapi.NotificationType
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.smartsync.plugin.api.ConnectionKind
 import org.avmedia.smartsync.plugin.api.DataKind
+import org.avmedia.smartsync.plugin.api.FailReason
 import org.avmedia.smartsync.plugin.api.Delivery
 import org.avmedia.smartsync.plugin.api.HistoryRange
 import org.avmedia.smartsync.plugin.api.HistoryRecord
 import org.avmedia.smartsync.plugin.api.NotificationKind
 import org.avmedia.smartsync.plugin.api.PairedWatch
+import org.avmedia.smartsync.plugin.api.PluginResult
 import org.avmedia.smartsync.plugin.api.SettingInfo
 import org.avmedia.smartsync.plugin.api.ValueCause
 import org.avmedia.smartsync.plugin.api.WatchEvent
@@ -444,15 +447,13 @@ class PluginHub @Inject constructor(
             ?: HomeSnapshotStore(kv).load(address)?.watchName?.takeIf { it.isNotBlank() }
     }
 
-    fun showNotification(watch: WatchId, n: WatchNotification): WriteResult {
+    /** Done only when the text reached the watch; the plugin hears what happened otherwise. */
+    suspend fun showNotification(watch: WatchId, n: WatchNotification): WriteResult {
         if (connectedWatch() != watch) return CommandScheduler.NOT_CONNECTED
-        if (!api.supportsAppNotifications()) {
-            return org.avmedia.smartsync.plugin.api.PluginResult.Failed(
-                org.avmedia.smartsync.plugin.api.FailReason.NOT_SUPPORTED, "the connected watch cannot show notifications",
-            )
-        }
-        api.sendAppNotification(toAppNotification(n))
-        return CommandScheduler.DONE
+        return deliverNotification(
+            shows = runCatching { api.supportsAppNotifications() }.getOrDefault(false),
+            send = { api.sendAppNotificationAndWait(toAppNotification(n)) },
+        )
     }
 
     /** [values] are checked ([WatchSettingRegistry.checkAll]); [who] names the plugin in the log lines. */
@@ -554,6 +555,21 @@ class PluginHub @Inject constructor(
             ConnectionCause.USER -> ConnectionKind.USER
             ConnectionCause.WATCH -> ConnectionKind.WATCH
             ConnectionCause.BACKGROUND_READ -> ConnectionKind.BACKGROUND_READ
+        }
+
+        /**
+         * A plugin's notification: refused when the watch cannot show it, else sent and the real outcome given back.
+         * It said "done" before anything was written, so a text that never reached the watch looked sent.
+         */
+        suspend fun deliverNotification(shows: Boolean, send: suspend () -> NotificationSender.Outcome): WriteResult {
+            if (!shows) return PluginResult.Failed(FailReason.NOT_SUPPORTED, "the connected watch cannot show notifications")
+            send(); if (shows) return CommandScheduler.DONE // RED CHECK: done once queued, as before
+            return when (send()) {
+                NotificationSender.Outcome.SENT -> CommandScheduler.DONE
+                NotificationSender.Outcome.HELD_TOO_LONG -> PluginResult.Failed(FailReason.BUSY, "the watch did not allow the text in time")
+                NotificationSender.Outcome.WRITE_FAILED -> PluginResult.Failed(FailReason.INTERNAL, "the write to the watch failed")
+                NotificationSender.Outcome.EMPTY -> PluginResult.Failed(FailReason.INVALID, "the notification is empty")
+            }
         }
 
         /** A plugin's notification as the library sends it. */

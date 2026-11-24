@@ -53,9 +53,10 @@ class PhoneNotificationForwarder(
     companion object {
         /**
          * The connected watch shows phone notifications: its model has them and [serviceFound] (it lists the notification
-         * characteristic, which an OCW-S7000 does without showing any).
+         * characteristic, which an OCW-S7000 does without showing any). Null [serviceFound] (the link's characteristics
+         * not discovered yet, a reconnect) leaves it to the model: a GBX-H5600 was told "cannot show them" in that gap.
          */
-        fun watchShows(serviceFound: Boolean): Boolean = org.avmedia.gshockapi.WatchInfo.showsAppNotifications(serviceFound)
+        fun watchShows(serviceFound: Boolean?): Boolean = org.avmedia.gshockapi.WatchInfo.showsAppNotificationsNow(serviceFound)
     }
 }
 
