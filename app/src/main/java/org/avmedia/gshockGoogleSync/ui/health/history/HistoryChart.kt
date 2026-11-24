@@ -34,7 +34,8 @@ internal fun chartRange(series: List<ChartSeries>, kind: ChartKind): Pair<Float,
     if (all.isEmpty()) return null
     val hi = all.max()
     val lo = all.min()
-    return if (kind == ChartKind.BARS) 0f to (if (hi <= 0f) 1f else hi) else (lo - 3f) to (hi + 3f)
+    // Lines get a margin, but values that are never below zero never get an axis below zero.
+    return if (kind == ChartKind.BARS) 0f to (if (hi <= 0f) 1f else hi) else (if (lo >= 0f) maxOf(0f, lo - 3f) else lo - 3f) to (hi + 3f)
 }
 
 /**

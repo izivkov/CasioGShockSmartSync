@@ -10,7 +10,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkoutTextTest {
-    /** Owner 2026-11-24: one footnote instead of "(unconfirmed)" on every row. */
+    /** One note under the rows instead of "(unconfirmed)" on every row. */
     @Test fun noRowSaysUnconfirmedAndOneNoteSaysSomeUnitsAreNotConfirmed() {
         val w = WorkoutMapper.map(WorkoutTestData.session(), 1L).workout
         assertTrue(WorkoutText.lines(w).none { it.second.contains("unconfirmed") || it.second.contains("unknown") })
@@ -19,7 +19,7 @@ class WorkoutTextTest {
         assertEquals("Some units are not confirmed yet.", WorkoutText.unitsNote(w))
     }
 
-    /** The owner's 25 s walking test: no distance, so no distance, pace, speed, ascent, descent or cadence row and no note. */
+    /** A 25 s walk without GPS: no distance, so no distance, pace, speed, ascent, descent or cadence row and no note. */
     @Test fun aShortWorkoutWithoutDistanceShowsNoZeroRows() {
         val w = WorkoutRow(
             1, 9, "Walking", totalSec = 25, distance = 0.0, avgPace = 0, avgSpeed = 0.0, hrAvg = 125, hrMax = 131, hrMin = 123,

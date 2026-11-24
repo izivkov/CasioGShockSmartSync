@@ -30,21 +30,32 @@ class WorkoutEvents(
     val onExportJson: () -> Unit = {},
 )
 
-/** Pure text helpers of the workout views (units that are likely, not proven, carry "unconfirmed"). */
+/**
+ * Pure text helpers of the workout views. Units that are likely but not proven (distance, pace, speed, cadence) get no
+ * mark on each row: one note under the rows says so ([unitsNote]). Zero or missing values are left out, never "0".
+ */
 internal object WorkoutText {
+    const val UNITS_NOTE = "Some units are not confirmed yet."
+
     fun duration(sec: Int?): String =
         if (sec == null) "no data" else if (sec >= 3600) "%d:%02d:%02d".format(Locale.US, sec / 3600, sec / 60 % 60, sec % 60) else "%d:%02d".format(Locale.US, sec / 60, sec % 60)
 
-    fun pace(secPerKm: Int?): String = if (secPerKm == null) "no data" else "%d:%02d /km (unconfirmed)".format(Locale.US, secPerKm / 60, secPerKm % 60)
+    fun pace(secPerKm: Int?): String = if (secPerKm == null) "no data" else "%d:%02d /km".format(Locale.US, secPerKm / 60, secPerKm % 60)
 
-    fun distance(km: Double?): String = if (km == null) "no data" else "%.2f km (unconfirmed)".format(Locale.US, km)
+    fun distance(km: Double?): String = if (km == null) "no data" else "%.2f km".format(Locale.US, km)
+
+    /** The value when it is there and above zero: a 25 s walk without GPS has distance, pace and speed 0. */
+    private fun <T : Number> T?.shown(): T? = this?.takeIf { it.toDouble() > 0.0 }
+
+    /** Whether the workout has a distance: without one, pace and speed mean nothing. */
+    fun hasDistance(w: WorkoutRow): Boolean = w.distance.shown() != null
 
     fun start(ms: Long, zone: ZoneId): String =
         if (ms <= 0) "time unknown" else DateTimeFormatter.ofPattern("EEE d MMM HH:mm", Locale.getDefault()).format(Instant.ofEpochMilli(ms).atZone(zone))
 
     /** One line of the list: duration, distance, energy, average and highest heart rate. Gaps are left out, never shown as 0. */
     fun line(w: WorkoutRow): String = listOfNotNull(
-        w.totalSec?.let { duration(it) }, w.distance?.let { "%.2f km (unconfirmed)".format(Locale.US, it) }, w.kcal?.let { "$it kcal" },
+        w.totalSec?.let { duration(it) }, w.distance.shown()?.let { distance(it) }, w.kcal?.let { "$it kcal" },
         w.hrAvg?.let { "avg $it bpm" }, w.hrMax?.let { "max $it bpm" },
     ).joinToString(", ").ifEmpty { "no summary" }
 
@@ -53,23 +64,34 @@ internal object WorkoutText {
         w.totalSec?.let { duration(it) }, w.kcal?.let { "$it kcal" }, w.hrAvg?.let { "avg $it bpm" }, w.hrMax?.let { "max $it bpm" },
     ).joinToString(", ").ifEmpty { "no summary" }
 
-    /** The summary lines of the detail view. */
-    fun lines(w: WorkoutRow): List<Pair<String, String>> = listOfNotNull(
-        w.totalSec?.let { "Duration" to duration(it) }, w.distance?.let { "Distance" to distance(it) }, w.avgPace?.let { "Average pace" to pace(it) },
-        w.avgSpeed?.let { "Average speed" to "%.1f km/h (unconfirmed)".format(Locale.US, it) }, w.kcal?.let { "Energy" to "$it kcal" },
-        w.hrAvg?.let { "Average heart rate" to "$it bpm" }, w.hrMax?.let { "Highest heart rate" to "$it bpm" }, w.hrMin?.let { "Lowest heart rate" to "$it bpm" },
-        w.ascent?.let { "Ascent" to "$it m" }, w.descent?.let { "Descent" to "$it m" }, w.cadenceAvg?.let { "Cadence" to "$it (unit unknown, unconfirmed)" },
-    )
+    /**
+     * The summary lines of the detail view: the watch's summary values as they are. Distance, pace, speed, ascent,
+     * descent and cadence only when above zero; pace and speed only with a distance.
+     */
+    fun lines(w: WorkoutRow): List<Pair<String, String>> {
+        val moved = hasDistance(w)
+        return listOfNotNull(
+            w.totalSec?.let { "Duration" to duration(it) }, w.distance.shown()?.let { "Distance" to distance(it) },
+            w.avgPace.shown()?.takeIf { moved }?.let { "Average pace" to pace(it) },
+            w.avgSpeed.shown()?.takeIf { moved }?.let { "Average speed" to "%.1f km/h".format(Locale.US, it) }, w.kcal?.let { "Energy" to "$it kcal" },
+            w.hrAvg?.let { "Average heart rate" to "$it bpm" }, w.hrMax?.let { "Highest heart rate" to "$it bpm" }, w.hrMin?.let { "Lowest heart rate" to "$it bpm" },
+            w.ascent.shown()?.let { "Ascent" to "$it m" }, w.descent.shown()?.let { "Descent" to "$it m" }, w.cadenceAvg.shown()?.let { "Cadence" to "$it" },
+        )
+    }
+
+    /** [UNITS_NOTE] when a row with a unit not confirmed yet (distance, pace, speed, cadence) is shown, else null. */
+    fun unitsNote(w: WorkoutRow): String? =
+        UNITS_NOTE.takeIf { lines(w).any { it.first in UNCONFIRMED_ROWS } }
+
+    private val UNCONFIRMED_ROWS = setOf("Distance", "Average pace", "Average speed", "Cadence")
 
     fun lapLine(l: WorkoutLapRow): String = listOfNotNull(
-        l.lapSec?.let { duration(it) }, l.distance?.let { "%.2f km".format(Locale.US, it) }, l.pace?.let { pace(it) }, l.hrAvg?.let { "$it bpm" },
+        l.lapSec?.let { duration(it) }, l.distance.shown()?.let { distance(it) }, l.pace.shown()?.let { pace(it) }, l.hrAvg?.let { "$it bpm" },
     ).joinToString(", ").ifEmpty { "no data" }
 
-    /** The note under the rows when a unit shown is not confirmed yet. */
-    fun unitsNote(w: WorkoutRow): String? = null
-
-    /** The pace chart's values. */
-    fun paceSeries(d: WorkoutDetail): List<Float?> = series(d.samples) { it.pace }
+    /** The pace chart's values: none without a distance, and a pace of 0 (standing still, no GPS) is a gap. */
+    fun paceSeries(d: WorkoutDetail): List<Float?> =
+        if (!hasDistance(d.workout)) emptyList() else series(d.samples) { it.pace?.takeIf { p -> p > 0 } }
 
     /** At most [max] evenly spread values of [pick] over the samples (a chart has no use for thousands of points); gaps stay null. */
     fun series(samples: List<WorkoutSampleRow>, max: Int = 120, pick: (WorkoutSampleRow) -> Number?): List<Float?> {

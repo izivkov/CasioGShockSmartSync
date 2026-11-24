@@ -72,7 +72,7 @@ class ChartAxesTest {
         assertTrue(ChartLabels.elapsed(List(5) { null }).isEmpty())
     }
 
-    /** The owner's 25 s walking test said "0 min" four times: a short workout is labelled in seconds. */
+    /** A 25 s workout was labelled "0 min" four times: a short workout is labelled in seconds. */
     @Test fun aShortWorkoutIsLabelledInSeconds() {
         assertEquals(listOf("0 s", "10 s", "20 s", "25 s"), ChartLabels.elapsed(List(6) { minOf(it * 5, 25) }).filterNotNull())
         assertEquals(listOf("0:00", "1:20", "2:40", "4:00"), ChartLabels.elapsed(List(13) { it * 20 }).filterNotNull())

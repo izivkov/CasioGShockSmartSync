@@ -73,7 +73,7 @@ internal fun tickText(value: Float, step: Float): String =
     if (step >= 1f || abs(value - Math.round(value)) < 1e-4f) Math.round(value).toString() else String.format(Locale.US, "%.1f", value)
 
 /** A pace in seconds per km as m:ss. */
-internal fun paceText(seconds: Float): String = "%d:%02d".format(Math.round(seconds) / 60, Math.round(seconds) % 60)
+internal fun paceText(seconds: Float): String = Math.round(seconds).coerceAtLeast(0).let { "%d:%02d".format(it / 60, it % 60) }
 
 /** The x labels of the day charts. */
 object ChartLabels {
@@ -97,7 +97,10 @@ object ChartLabels {
         return List(slots) { if (perHour > 0 && it % (perHour * everyHours) == 0) "${it / perHour}h" else null }
     }
 
-    /** Four labels spread over a workout: minutes when it lasted less than an hour, else h:mm. Needs the elapsed seconds of each slot. */
+    /**
+     * Four labels spread over a workout: seconds under 2 minutes ("25 s"), m:ss under 10 minutes, minutes under an hour,
+     * else h:mm. Needs the elapsed seconds of each slot.
+     */
     fun elapsed(elapsedSec: List<Int?>): List<String?> {
         val total = elapsedSec.filterNotNull().maxOrNull() ?: return emptyList()
         val n = elapsedSec.size
@@ -105,7 +108,13 @@ object ChartLabels {
         val at = setOf(0, n / 3, 2 * n / 3, n - 1)
         return List(n) { i ->
             val s = elapsedSec[i]
-            if (i !in at || s == null) null else if (total < 3600) "${s / 60} min" else "%d:%02d".format(s / 3600, s % 3600 / 60)
+            when {
+                i !in at || s == null -> null
+                total < 120 -> "$s s"
+                total < 600 -> "%d:%02d".format(s / 60, s % 60)
+                total < 3600 -> "${s / 60} min"
+                else -> "%d:%02d".format(s / 3600, s % 3600 / 60)
+            }
         }
     }
 }
