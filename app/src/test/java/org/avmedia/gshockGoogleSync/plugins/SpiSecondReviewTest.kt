@@ -163,13 +163,13 @@ class SpiSecondReviewTest {
 
     // N2: the wake-up job waits until the plugin handled its Wake.
     @Test fun theWakeJobWaitsForThePlugin() = runBlocking {
-        @Volatile var done = false
+        val done = java.util.concurrent.atomic.AtomicBoolean(false)
         val rt = runtime()
-        rt.register(listOf(Fake("timer", handle = { if (it == WatchEvent.Wake) { delay(300); done = true } })))
+        rt.register(listOf(Fake("timer", handle = { if (it == WatchEvent.Wake) { delay(300); done.set(true) } })))
         rt.activate("timer")
         rt.declareNeeds("timer", PluginNeeds(wakeEveryMinutes = 15))
         assertEquals(listOf("timer"), rt.wakeAndWait(1_000_000_000L, timeoutMs = 5_000))
-        assertTrue("handled before the job ends", done)
+        assertTrue("handled before the job ends", done.get())
     }
 
     // N3: "every key" is every key of the declared kinds: no location for a plugin that did not declare it.
