@@ -30,7 +30,7 @@ object HistoryRecords {
     }
 
     /** Field names of a workout whose unit is likely but not proven. */
-    var unconfirmedWorkoutFields: Set<String> = setOf("distance", "kcal")
+    var unconfirmedWorkoutFields: Set<String> = setOf(WorkoutRecord.DISTANCE, WorkoutRecord.KCAL)
 
     @Suppress("UNCHECKED_CAST")
     fun <T : HistoryRecord> read(rows: Rows, kind: DataKind<T>, range: HistoryRange, zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): List<T> =

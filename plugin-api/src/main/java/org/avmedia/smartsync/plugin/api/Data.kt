@@ -57,9 +57,11 @@ data class DayRecord(
     val walkSec: Int? = null,
     val runSec: Int? = null,
     val stillSec: Int? = null,
+    /** Daily values: the watch gives no time for them. */
     val hrRest: Int? = null,
     val hrMin: Int? = null,
     val hrMax: Int? = null,
+    /** Daily blood oxygen, percent; no time of measurement. */
     val spo2: Int? = null,
     val stairsUp: Int? = null,
     val stairsDown: Int? = null,
@@ -87,7 +89,12 @@ data class NightRecord(
     val stagesConfirmed: Boolean = false,
 ) : HistoryRecord
 
-data class SleepStage(val start: LocalDateTime, val stage: String)
+/** One stage from [start] on. [stage] is the word as stored; [kind] the same as a value (null for a word outside the four). */
+data class SleepStage(val start: LocalDateTime, val stage: String) {
+    val kind: SleepStageKind? get() = SleepStageKind.entries.firstOrNull { it.name.equals(stage.trim(), ignoreCase = true) }
+}
+
+enum class SleepStageKind { AWAKE, LIGHT, DEEP, REM }
 
 /**
  * One workout. [id] is stable: the same workout read again has the same id. Fields named in [unconfirmed] have a unit
@@ -101,12 +108,22 @@ data class WorkoutRecord(
     val sport: Int,
     val sportName: String,
     val totalSec: Int? = null,
+    /** Distance as the watch gives it; its unit is not proven (likely km), so it is in [unconfirmed]. */
     val distance: Double? = null,
+    /** Distance in meters, only when the unit is proven; null otherwise. */
+    val distanceM: Double? = null,
+    /** Energy of the workout as the watch gives it (total, not only active), kcal; the scale is in [unconfirmed] while not proven. */
     val kcal: Long? = null,
     val hrAvg: Int? = null,
     val hrMax: Int? = null,
     val hrMin: Int? = null,
     val ascent: Long? = null,
     val descent: Long? = null,
+    /** Property names ([DISTANCE], [KCAL], ...) whose unit is likely but not proven. */
     val unconfirmed: Set<String> = emptySet(),
-) : HistoryRecord
+) : HistoryRecord {
+    companion object {
+        const val DISTANCE = "distance"
+        const val KCAL = "kcal"
+    }
+}

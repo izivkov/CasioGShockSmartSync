@@ -102,7 +102,11 @@ fun PluginSettingsEntries(onOpen: (String) -> Unit, vm: PluginsViewModel = hiltV
         )
     }
     plugins.firstOrNull { it.id == asking }?.let { p ->
-        FirstOnDialog(p, onTurnOn = { vm.markAccessShown(p.id); vm.setEnabled(p.id, true); asking = null }, onCancel = { asking = null })
+        FirstOnDialog(p, onTurnOn = {
+            vm.markAccessShown(p.id); vm.setEnabled(p.id, true); asking = null
+            // A plugin that asks for permissions when it is turned on gets its screen at once.
+            if (p.ui?.opensOnTurnOn == true) onOpen(p.id)
+        }, onCancel = { asking = null })
     }
 }
 

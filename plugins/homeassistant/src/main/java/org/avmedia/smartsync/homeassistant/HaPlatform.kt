@@ -88,7 +88,7 @@ class WatchStore(
 }
 
 /** Where a line comes from inside the plugin (all of them go out under the plugin's tag). */
-enum class LogSource { HomeAssistant, App }
+enum class LogSource(val label: String) { HomeAssistant("Home Assistant"), App("App") }
 
 /**
  * The plugin's App log lines: Timber with the plugin's id as tag ([TAG]); the app writes info and above to its App log.

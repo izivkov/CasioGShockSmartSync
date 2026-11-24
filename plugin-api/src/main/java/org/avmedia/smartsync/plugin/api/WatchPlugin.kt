@@ -57,6 +57,9 @@ interface PluginUi {
     @Composable
     fun SettingsScreen(onBack: () -> Unit)
 
+    /** True: the host opens [SettingsScreen] right after the person turns the plugin on (to ask for permissions). */
+    val opensOnTurnOn: Boolean get() = false
+
     /** True: the plugin has a card in the Actions tab. */
     val hasActionsRow: Boolean get() = false
 
