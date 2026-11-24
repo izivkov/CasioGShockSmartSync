@@ -9,6 +9,9 @@ import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dagger.hilt.android.AndroidEntryPoint
+import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationPolicy
+import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationSettings
+import org.avmedia.gshockGoogleSync.notifications.PostedNotification
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.NotificationType
@@ -49,6 +52,13 @@ class NotificationMonitorService : NotificationListenerService() {
         // moment of use, so a recreated service instance cannot miss a connection event.
         if (!sessionManager.isReady) return
 
+        val skipReason = PhoneNotificationSettings.from(applicationContext)
+            .skipReason(postedNotification(sbn), packageName)
+        if (skipReason != null) {
+            Timber.d("Notification from ${sbn.packageName} not sent: $skipReason")
+            return
+        }
+
         processNotification(sbn)
             .onSuccess { notificationInfo ->
                 Timber.i("Notification received: $notificationInfo")
@@ -60,6 +70,15 @@ class NotificationMonitorService : NotificationListenerService() {
             .onFailure { error ->
                 Timber.e(error, "Error processing notification")
             }
+    }
+
+    private fun postedNotification(sbn: StatusBarNotification): PostedNotification =
+        PostedNotification(sbn.packageName, sbn.notification.flags, importanceOf(sbn))
+
+    private fun importanceOf(sbn: StatusBarNotification): Int {
+        val ranking = Ranking()
+        val found = runCatching { currentRanking.getRanking(sbn.key, ranking) }.getOrDefault(false)
+        return if (found) ranking.importance else PhoneNotificationPolicy.IMPORTANCE_UNKNOWN
     }
 
     private fun processNotification(sbn: StatusBarNotification): Result<NotificationInfo> =
