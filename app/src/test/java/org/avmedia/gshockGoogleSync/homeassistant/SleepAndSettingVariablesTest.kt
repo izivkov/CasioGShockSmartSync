@@ -129,8 +129,9 @@ class SleepAndSettingVariablesTest {
         val names = WatchVariables.registry(fakeEnv()).names
         SleepVariables.DESCRIPTIONS.keys.forEach { assertTrue("$it missing", it in names) }
         WatchSettingVariables.DEFS.forEach { assertTrue("${it.name} missing", it.name in names) }
-        HaSensors.ALL.forEach { assertTrue("${it.variable} is not a variable", it.variable in names) }
-        HaSensors.ALL.forEach { s -> s.attributes.values.forEach { assertTrue("$it is not a variable", it in names) } }
+        // The push socket's values are the Home Assistant plugin's own.
+        HaSensors.ALL.filter { it.variable !in HaRuntime.PLUGIN_VALUES }.forEach { assertTrue("${it.variable} is not a variable", it.variable in names) }
+        HaSensors.ALL.forEach { s -> s.attributes.values.filter { it !in HaRuntime.PLUGIN_VALUES }.forEach { assertTrue("$it is not a variable", it in names) } }
     }
 
     // decoded settings

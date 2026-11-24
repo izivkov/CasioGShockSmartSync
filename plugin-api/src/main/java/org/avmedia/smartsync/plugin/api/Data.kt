@@ -7,7 +7,8 @@ import java.time.LocalDateTime
 /**
  * The values the host read of a watch, by dotted key ("watch.battery", "health.steps_today", "watch.settings.*",
  * "watch.setting.*", "phone.*", "app.*"). A value is a String, Boolean, Int, Long, Double, a List or a Map of those;
- * a key the watch does not have is absent. [readAtMillis] is when each value was read.
+ * a key the watch does not have is absent. [readAtMillis] has an entry for every key in [values]: when that value was
+ * read last (values keep their older reading when a later read did not give them).
  */
 data class WatchValues(
     val watch: WatchId,

@@ -13,7 +13,7 @@ import org.junit.Test
 class StorageOrderTest {
     @Test
     fun appStoreWaitsForEachWrite() {
-        val src = File("src/main/java/org/avmedia/gshockGoogleSync/homeassistant/AppStores.kt").readText()
+        val src = File("src/main/java/org/avmedia/gshockGoogleSync/watch/AppStores.kt").readText()
         val store = src.substringAfter("class LocalKeyValueStore").substringBefore("\n    }\n")
         assertTrue("LocalKeyValueStore must not use the fire-and-forget put/delete:\n$store",
             "LocalDataStorage.put(" !in store && "LocalDataStorage.delete(" !in store)

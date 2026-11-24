@@ -116,7 +116,7 @@ class MainScreensUiTest {
         val p = org.avmedia.gshockGoogleSync.plugins.FakePlugin(status = "Not set up")
         rule.setContent { org.avmedia.gshockGoogleSync.plugins.PluginCard(p, "Not set up", on = true, onSwitch = { switched = it }, onOpen = { opened++ }) }
         rule.onNodeWithText("Home Assistant").assertIsDisplayed()
-        rule.onNodeWithText("Not set up").assertIsDisplayed()
+        rule.onNodeWithText("Not set up", substring = true).assertIsDisplayed()
         rule.onNodeWithText("Home Assistant").performClick()
         assertEquals(1, opened)
         rule.onNode(androidx.compose.ui.test.isToggleable()).performClick()

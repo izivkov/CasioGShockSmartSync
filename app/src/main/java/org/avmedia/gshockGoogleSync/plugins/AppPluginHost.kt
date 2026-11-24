@@ -76,6 +76,9 @@ class AppPluginHost(private val hub: PluginHub, private val plugin: WatchPlugin)
 
     override fun valueKeys(): List<String> = quietly(emptyList()) { hub.values.keys().filter { AccessGuard.mayRead(access, it) } }
 
+    override fun valueCatalog(): Map<String, String> =
+        quietly(emptyMap()) { hub.values.catalog().filterKeys { AccessGuard.mayRead(access, it) } }
+
     override fun lastValues(watch: WatchId): WatchValues = quietly(WatchValues(watch)) {
         if (unsupported(watch) != null) WatchValues(watch) else AccessGuard.values(access, hub.values.kept(watch))
     }

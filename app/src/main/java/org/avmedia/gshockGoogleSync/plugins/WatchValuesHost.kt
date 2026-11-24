@@ -45,6 +45,9 @@ class WatchValuesHost(
     /** The keys the registry knows, in its order. */
     fun keys(): List<String> = registry().variables.map { it.name }
 
+    /** Key to description, in the registry's order. */
+    fun catalog(): Map<String, String> = registry().variables.associateTo(LinkedHashMap()) { it.name to it.description }
+
     companion object {
         const val KEY = "plugins.values"
     }

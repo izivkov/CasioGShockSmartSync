@@ -9,6 +9,9 @@ import android.content.Context
  * [history]) come from the host's stores and never touch the watch. Writes to the watch ([notify], [command]) go
  * through the host's single watch queue: one at a time, never during a health or workout transfer, fair between
  * plugins (round robin), each with a time limit.
+ *
+ * The host does not wake a plugin later: work that must survive the app being stopped (a send after a back-off, a
+ * daily job) is the plugin's own, with WorkManager through [context].
  */
 interface PluginHost {
     /** The application context (for the plugin's own Android work: network, WorkManager, its resources). */
@@ -40,6 +43,9 @@ interface PluginHost {
 
     /** Every value key the host can read ([WatchValues]), in a stable order. */
     fun valueKeys(): List<String>
+
+    /** The same keys with what each holds, in plain words (units, formats), in the same order. */
+    fun valueCatalog(): Map<String, String>
 
     /** The values read last for [watch] (kept across restarts); empty before the first read. */
     fun lastValues(watch: WatchId): WatchValues
