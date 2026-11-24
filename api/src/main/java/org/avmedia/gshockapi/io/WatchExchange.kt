@@ -13,6 +13,21 @@ object WatchExchange {
     /** True while a LifeLog, workout or tide transfer runs; a test seam. */
     @Volatile var transferRunning: () -> Boolean = { H5600HealthIO.isActive || H5600WorkoutIO.isActive || TideTransferIO.isActive }
 
+    private val exchanges = java.util.concurrent.atomic.AtomicInteger(0)
+
+    /** True while a settings read or the time exchange runs ([settingsExchange]). */
+    val settingsExchangeRunning: Boolean get() = exchanges.get() > 0
+
+    /** Marks [block] as a settings or time exchange: a transfer does not start while one runs. */
+    suspend fun <T> settingsExchange(block: suspend () -> T): T {
+        exchanges.incrementAndGet()
+        try {
+            return block()
+        } finally {
+            exchanges.decrementAndGet()
+        }
+    }
+
     /**
      * The library's settings reads ([CachedIO]) wait here: during a transfer their answers would reach the transfer, not
      * the read, and a caller with a limit asks again and again (`0x11` every 4 to 5 s).
