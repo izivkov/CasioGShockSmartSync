@@ -120,6 +120,9 @@ dependencies {
     // Plugins shipped with the app (found by ServiceLoader at start; off until the person turns one on, except the
     // app's own Home Assistant plugin where it was set up before).
     implementation(project(':plugins:homeassistant'))
+    implementation(libs.smartsync.plugin.homeassistant)
+    implementation(libs.smartsync.plugin.healthconnect)
+    implementation(libs.smartsync.plugin.trmnl)
     // The library comes from the gshockapi submodule (settings.gradle, includeBuild).
 
     implementation(libs.androidx.core.ktx)

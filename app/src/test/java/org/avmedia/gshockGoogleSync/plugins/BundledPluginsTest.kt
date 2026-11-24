@@ -26,6 +26,13 @@ class BundledPluginsTest {
         )
     }
 
+    /** Settings > Plugins tells them apart: two of them are Home Assistant plugins. */
+    @Test fun eachHasItsOwnNameAndId() {
+        val plugins = ServiceLoader.load(WatchPlugin::class.java, WatchPlugin::class.java.classLoader).toList()
+        assertEquals(plugins.map { it.name }.toString(), plugins.size, plugins.map { it.name }.toSet().size)
+        assertEquals(plugins.size, plugins.map { it.id }.toSet().size)
+    }
+
     @Test fun theThreeStartOffEvenWhereHomeAssistantWasSetUpBefore() {
         val kv = Mem().apply { m["ha.config"] = """{"baseUrl":"https://ha.example","token":"t"}""" }
         assertTrue("the app's own plugin keeps its switch", PluginHub.legacyOn("home_assistant", kv))
