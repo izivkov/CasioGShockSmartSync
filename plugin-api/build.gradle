@@ -1,0 +1,60 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    id 'maven-publish'
+}
+
+// The interface version: also PluginApi.VERSION (PluginApiVersionTest keeps both the same). Tag: plugin-api-v<version>.
+version = '0.1.0'
+group = 'com.github.ExcuseMi.CasioGShockSmartSync'
+
+android {
+    namespace = 'org.avmedia.smartsync.plugin.api'
+    compileSdk = 37
+
+    defaultConfig {
+        minSdk = 26
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    testOptions {
+        unitTests {
+            all { testLogging { exceptionFormat = 'full'; events 'failed' } }
+        }
+    }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
+}
+
+dependencies {
+    // Only what the interface names: Context (Android) and @Composable.
+    api(platform(libs.androidx.compose.bom))
+    api(libs.compose.runtime)
+    testImplementation(libs.junit)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = project.group
+                artifactId = 'plugin-api'
+                version = project.version
+            }
+        }
+    }
+}

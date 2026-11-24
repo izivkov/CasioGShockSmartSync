@@ -109,6 +109,8 @@ android {
 
 dependencies {
     implementation(libs.gshockapi)
+    // The plugin interface (its own version, published from this repository); plugins depend on it only.
+    implementation(project(':plugin-api'))
     // The library comes from the gshockapi submodule (settings.gradle, includeBuild).
 
     implementation(libs.androidx.core.ktx)

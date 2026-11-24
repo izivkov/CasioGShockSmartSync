@@ -17,15 +17,21 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Casio GShock Smart Sync"
-include ':app'
+// JitPack (tag plugin-api-v<version>) builds the plugin interface alone: no app, no library submodule.
+def jitpack = System.getenv("JITPACK") == "true"
+// The plugin interface, versioned on its own (plugin-api/build.gradle) and published through JitPack.
+include ':plugin-api'
+if (!jitpack) {
+    include ':app'
 
-// The GShockAPI library is the ExcuseMi/GShockAPI fork (branch smartsync), checked out as the
-// gshockapi submodule and built with the app, so a library change needs no JitPack release.
-if (!file('gshockapi/api/build.gradle').exists()) {
-    throw new GradleException("The gshockapi submodule is missing: run 'git submodule update --init'")
-}
-includeBuild('gshockapi') {
-    dependencySubstitution {
-        substitute module('com.github.izivkov:GShockAPI') using project(':api')
+    // The GShockAPI library is the ExcuseMi/GShockAPI fork (branch smartsync), checked out as the
+    // gshockapi submodule and built with the app, so a library change needs no JitPack release.
+    if (!file('gshockapi/api/build.gradle').exists()) {
+        throw new GradleException("The gshockapi submodule is missing: run 'git submodule update --init'")
+    }
+    includeBuild('gshockapi') {
+        dependencySubstitution {
+            substitute module('com.github.izivkov:GShockAPI') using project(':api')
+        }
     }
 }

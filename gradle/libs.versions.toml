@@ -78,6 +78,7 @@ gshockapi = { module = "com.github.izivkov:GShockAPI", version.ref = "gshockapi"
 adhan2 = { module = "com.batoulapps.adhan:adhan2", version.ref = "adhan2" }
 rrule = { module = "com.github.PhilJay:RRule", version.ref = "rrule" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -106,6 +107,7 @@ roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }

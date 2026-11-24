@@ -26,8 +26,8 @@ jobs:
           java-version: '21'
 
       # The library tests run in its own repository (ExcuseMi/GShockAPI, branch smartsync).
-      - name: Unit tests (app)
-        run: ./gradlew --continue testGithubDebugUnitTest
+      - name: Unit tests (app and plugin interface)
+        run: ./gradlew --continue testGithubDebugUnitTest :plugin-api:testDebugUnitTest
 
       - name: The library comes from the gshockapi submodule, not JitPack
         run: |
