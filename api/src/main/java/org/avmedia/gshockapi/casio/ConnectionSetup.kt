@@ -103,6 +103,9 @@ object ConnectionSetup {
 
     const val SETUP_WAIT_MS = 20_000L
 
+    /** How long a LifeLog read waits for `47 01` before it leaves this link alone; a test seam. */
+    @Volatile var watchSetupWaitMs: Long = SETUP_WAIT_MS
+
     /** True once the watch sent `47 01` on this link: its setup is done and a LifeLog read needs no setup replay. */
     @Volatile var watchSetupDone = false
         private set
