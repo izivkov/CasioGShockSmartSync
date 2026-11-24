@@ -2,7 +2,11 @@ package org.avmedia.smartsync.plugin.api
 
 import java.time.Instant
 
-/** What happened. Events of one watch come in the order they happened. */
+/**
+ * What happened. The host sends the events of all watches from one place, in the order it saw them. More event types
+ * may come in a compatible release, but never to a plugin built against an older [PluginApi.VERSION]: still, write
+ * `else ->` in a `when`.
+ */
 sealed interface WatchEvent {
     /** The watch the event is about; null for an event of the app. */
     val watch: WatchId?
@@ -14,7 +18,8 @@ sealed interface WatchEvent {
 
     /**
      * The host read values of [watch] ([PluginNeeds.values]). [values] is the whole last-known set after this read;
-     * [readNow] the keys this read returned a value for (a value the watch did not give now keeps its older one).
+     * [readNow] the keys this read returned a value for (a value the watch did not give now keeps its older one). A
+     * plugin that asked for no values still gets this event when another plugin asked, with the values it declared.
      */
     data class ValuesUpdated(
         override val watch: WatchId,
@@ -35,32 +40,47 @@ sealed interface WatchEvent {
     /** The watch's button asked the app to run its actions (only to plugins with [PluginNeeds.buttonPress]). */
     data class ButtonPressed(override val watch: WatchId, val at: Instant) : WatchEvent
 
-    /** A setting of [watch] changed (written by the app or a plugin, or read back different). */
+    /** A setting of [watch] changed (written by the app or a plugin); [key] is the [SettingInfo.key]. */
     data class SettingChanged(override val watch: WatchId, val key: String, val value: Any?) : WatchEvent
 
-    /** Battery and temperature as read now; null = not read. */
-    data class Condition(override val watch: WatchId, val batteryPercent: Int?, val temperatureC: Int?) : WatchEvent
-
-    /** The app's background link service started: plugins that keep a connection of their own may start it now. */
+    /** The app's background link service started. Likely to go once the in-repo Home Assistant plugin moves out. */
     data object BackgroundStarted : WatchEvent { override val watch: WatchId? get() = null }
 
-    /** The background link service ended (the app may be stopped soon). */
+    /** The background link service ended (the app may be stopped soon). Likely to go, as [BackgroundStarted]. */
     data object BackgroundStopped : WatchEvent { override val watch: WatchId? get() = null }
 
     /** [watch] was removed from the app; its [PluginHost.storage] (watch) is gone already. */
     data class WatchRemoved(override val watch: WatchId) : WatchEvent
+
+    /**
+     * The host found that [from] is the same watch as [watch], re-paired under a new id: every per-watch store (the
+     * host's and every plugin's) moved from [from] to [watch].
+     */
+    data class WatchRePaired(val from: WatchId, override val watch: WatchId) : WatchEvent
+
+    /**
+     * Events for this plugin were dropped (its queue was full): read the state again ([PluginHost.lastValues],
+     * [PluginHost.history]). Sent in place of the first dropped event, never dropped itself.
+     */
+    data object EventsLost : WatchEvent { override val watch: WatchId? get() = null }
+
+    /** The person answered a permission request ([PluginHost.requestPermissions]): [missing] is what is still not granted. */
+    data class PermissionsChanged(val missing: Set<String>) : WatchEvent { override val watch: WatchId? get() = null }
+
+    /** The periodic wake-up the plugin asked for ([PluginNeeds.wakeEveryMinutes]); also in a process started for it. */
+    data object Wake : WatchEvent { override val watch: WatchId? get() = null }
 }
 
-/** Why values were read. [wire] is a stable word for payloads ("sync", "health_data", ...). */
-enum class ValueCause(val wire: String) {
+/** Why values were read. */
+enum class ValueCause {
     /** After a connection. */
-    CONNECTION("sync"),
-    HEALTH_READ("health_data"),
-    WORKOUT("workout_downloaded"),
+    CONNECTION,
+    HEALTH_READ,
+    WORKOUT,
     /** With a watch button press. */
-    BUTTON("watch_action"),
+    BUTTON,
     /** A plugin asked ([WatchCommand.RefreshValues]) or a setting was written. */
-    REQUEST("sync"),
+    REQUEST,
     /** A full settings read. */
-    SNAPSHOT("snapshot"),
+    SNAPSHOT,
 }

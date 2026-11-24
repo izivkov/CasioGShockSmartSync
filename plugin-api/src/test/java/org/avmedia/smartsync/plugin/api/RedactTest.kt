@@ -19,4 +19,10 @@ class RedactTest {
         assertEquals("http://192.168.1.5:8123", Redact.url("http://192.168.1.5:8123"))
         assertEquals("", Redact.url(null))
     }
+
+    /** Review nit: the first '@' was taken as the end of the user part, so a password with '@' leaked, and a path '@' moved the host. */
+    @Test fun anAtInThePasswordOrThePathNeverLeaksOrMovesTheHost() {
+        assertEquals("https://host/…", Redact.url("https://user:p@ss@host/x"))
+        assertEquals("https://host/…", Redact.url("https://host/a/@b"))
+    }
 }

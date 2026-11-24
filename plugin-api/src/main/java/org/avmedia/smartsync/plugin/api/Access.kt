@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 /**
  * What a plugin uses, declared once ([WatchPlugin.access]). The person sees it before turning the plugin on, and the
  * host keeps to it: data of an undeclared kind is not served or delivered, an undeclared control is refused
- * ([FailReason.NOT_DECLARED]).
+ * ([FailReason.NOT_DECLARED]). A checked promise to the person, not a sandbox: plugins are compiled into the app.
  */
 data class PluginAccess(
     /** The watch and phone data the plugin reads. */
@@ -24,58 +24,49 @@ data class PluginAccess(
     val requires: Set<Capability> = emptySet(),
     /** What the plugin uses where a watch has it (Home Assistant: notifications, settings, health, ...). */
     val uses: Set<Capability> = emptySet(),
+    /**
+     * Android permissions the plugin itself needs, each with a one-line reason (Health Connect's write permissions,
+     * POST_NOTIFICATIONS for its own notifications). Phone data the host has ([DataUse.PHONE_LOCATION],
+     * [DataUse.PHONE_BATTERY]) is declared under [reads] instead: the host asks for it. The host shows these, asks for
+     * the runtime ones when the plugin is turned on ([PluginHost.requestPermissions]) and shows "Needs permission" while
+     * one is missing. List only what the plugin uses: its manifest permissions become the app's.
+     */
+    val androidPermissions: List<AndroidPermission> = emptyList(),
 )
 
-/** How far a plugin works with one watch ([PluginAccess.requires], [PluginAccess.uses]). */
-sealed interface WatchSupport {
-    /** Everything the plugin uses. */
-    data object Full : WatchSupport
+/** An Android permission a plugin needs ([PluginAccess.androidPermissions]): its name and why, in a few plain words. */
+data class AndroidPermission(val name: String, val reason: String)
 
-    /** It works, without [missing]. */
-    data class Partial(val missing: Set<Capability>) : WatchSupport
-
-    /** The watch lacks [missing], which the plugin requires: it gets nothing for this watch. */
-    data class NotSupported(val missing: Set<Capability>) : WatchSupport
-
-    companion object {
-        /** For a watch with [caps]; an empty set (a watch never connected) counts as not known yet: [Full]. */
-        fun of(access: PluginAccess, caps: Set<Capability>): WatchSupport {
-            if (caps.isEmpty()) return Full
-            val needed = access.requires - caps
-            if (needed.isNotEmpty()) return NotSupported(needed)
-            val missing = access.uses - caps
-            return if (missing.isEmpty()) Full else Partial(missing)
-        }
-    }
-}
-
-/** A kind of data a plugin may read. [words] is how the app names it. */
-enum class DataUse(val words: String) {
-    STEPS("steps, distance and energy"),
-    HEART_RATE("heart rate"),
-    SLEEP("sleep"),
-    BLOOD_OXYGEN("blood oxygen"),
-    WORKOUTS("workouts"),
-    BATTERY_AND_TEMPERATURE("watch battery and temperature"),
-    WATCH_SETTINGS("watch settings, alarms and cities"),
-    WATCH_INFO("watch name, model and firmware"),
-    PHONE("phone battery, time zone and app state");
+/**
+ * A kind of data a plugin may read. The host states the kind of every value ([ValueInfo.use]); a value without one is
+ * not served to any plugin.
+ */
+enum class DataUse {
+    /** Steps, distance, energy, activity time. */
+    STEPS,
+    HEART_RATE,
+    /** Sleep, nightly recharge, breathing. */
+    SLEEP,
+    BLOOD_OXYGEN,
+    WORKOUTS,
+    BATTERY_AND_TEMPERATURE,
+    /** Watch settings, alarms, cities, timer. */
+    WATCH_SETTINGS,
+    /** The body profile kept on the watch: height, weight, sex, heart rate limits, VO2max. */
+    BODY_PROFILE,
+    /** Watch name, model, firmware, connection. */
+    WATCH_INFO,
+    /** Phone time zone and app state. */
+    PHONE,
+    /** The phone's battery level. */
+    PHONE_BATTERY,
+    /**
+     * The phone's coarse location (last known, about 1 km), read by the host: the host asks the person for the location
+     * permission, a plugin never declares one for this.
+     */
+    PHONE_LOCATION;
 
     companion object {
-        /** The kind of data the value [key] ([WatchValues]) is. */
-        fun ofValueKey(key: String): DataUse = when {
-            key.startsWith("workout.") -> WORKOUTS
-            key.startsWith("health.spo2") -> BLOOD_OXYGEN
-            key.startsWith("health.sleep") || key.startsWith("health.recharge") || key.startsWith("health.breathing") -> SLEEP
-            key.startsWith("health.hr") || key.startsWith("health.cardio") -> HEART_RATE
-            key.startsWith("health.") -> STEPS
-            key == "watch.battery" || key.startsWith("watch.battery_") || key == "watch.temperature" -> BATTERY_AND_TEMPERATURE
-            key == "watch.name" || key == "watch.model" || key.startsWith("watch.firmware") || key == "watch.connected" ||
-                key == "watch.notifications_supported" -> WATCH_INFO
-            key.startsWith("watch.") || key.startsWith("alarms.") -> WATCH_SETTINGS
-            else -> PHONE
-        }
-
         /** What a stored record of [kind] needs. */
         fun of(kind: DataKind<*>): DataUse = when (kind) {
             DataKind.Days, DataKind.Hours -> STEPS
@@ -87,18 +78,13 @@ enum class DataUse(val words: String) {
 }
 
 /** What a plugin may make the watch or the app do. */
-enum class Control(val words: String) {
-    NOTIFICATIONS("show notifications on the watch"),
-    WATCH_SETTINGS("change watch settings"),
-    WATCH_FACE("change the watch face"),
-    BUTTON_PRESS("run on a press of the watch button");
-
-    companion object {
-        /** The settings that are the watch face ([WatchCommand.ChangeSettings] keys). */
-        val FACE_SETTINGS = setOf("watch_face", "custom_slot")
-
-        fun ofSetting(key: String): Control = if (key in FACE_SETTINGS) WATCH_FACE else WATCH_SETTINGS
-    }
+enum class Control {
+    NOTIFICATIONS,
+    WATCH_SETTINGS,
+    /** The watch face settings ([SettingInfo.control] says which rows). */
+    WATCH_FACE,
+    /** Run on a press of the watch button ([PluginNeeds.buttonPress]). */
+    BUTTON_PRESS,
 }
 
 /** A plugin's icon: a drawable of its own resources or a vector. The host has a fallback for none. */

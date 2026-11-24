@@ -19,18 +19,27 @@ enum class NotificationKind { MESSAGE, CALENDAR, EMAIL, CALL, GENERIC }
 /** Something a plugin asks the watch to do. */
 sealed interface WatchCommand {
     /**
-     * Changes settings, key to value ([PluginHost.settingCatalog]). Each value is checked first; a refused one is
-     * logged and the others are written. Values: a choice as its word, a number as Int, on/off as Boolean, a time as
-     * "HH:MM". After the writes the host reads the values again ([WatchEvent.ValuesUpdated], cause REQUEST).
+     * Changes settings: [values] maps a [SettingInfo.key] (the same key as in [SettingsSnapshot.values] and
+     * [WatchEvent.SettingChanged.key]) to its new value. Values: a choice as its word, a number as a whole number, on/off
+     * as Boolean, a time as "HH:MM".
+     *
+     * All or nothing: every key and value is checked first. An unknown key gives `Failed(NOT_SUPPORTED, "<key>: ...")`,
+     * a bad value `Failed(INVALID, "<key>: <reason>")`, and then nothing is written. A write that fails names its key in
+     * the message. After the writes the host reads the values again ([WatchEvent.ValuesUpdated], cause REQUEST).
      */
     data class ChangeSettings(val values: Map<String, Any?>) : WatchCommand
 
-    /** Read the values now ([PluginNeeds.values]); the host sends [WatchEvent.ValuesUpdated] (cause REQUEST). */
+    /**
+     * Read the values now ([PluginNeeds.values]); the host sends [WatchEvent.ValuesUpdated] (cause REQUEST). Needs at
+     * least one declared [DataUse]. A read already queued is joined, not repeated. With [Delivery.NextConnection] and
+     * no connection the result is `Ok(AT_NEXT_CONNECTION)`: every connection reads the values anyway.
+     */
     data object RefreshValues : WatchCommand
 }
 
 /** One setting [WatchCommand.ChangeSettings] accepts. */
 data class SettingInfo(
+    /** The one key of this setting: in [WatchCommand.ChangeSettings], [SettingsSnapshot.values] and [WatchEvent.SettingChanged]. */
     val key: String,
     val type: SettingType,
     /** For [SettingType.CHOICE]: the words allowed for this watch. */
@@ -38,9 +47,16 @@ data class SettingInfo(
     /** For [SettingType.WHOLE]: the range, and when set, the only values allowed in it. */
     val range: IntRange? = null,
     val only: Set<Int>? = null,
+    /** A short name for the person ("Step goal"). */
+    val label: String = key,
+    /** What writing it needs ([PluginAccess.controls]). */
+    val control: Control = Control.WATCH_SETTINGS,
 )
 
 enum class SettingType { CHOICE, WHOLE, BOOL, TIME }
 
-/** The decoded settings of a watch, key to value, as read at [readAtMillis] (null = never). */
+/**
+ * The decoded settings of a watch as read last, by [SettingInfo.key] (one entry per catalogue row that was read; the
+ * same key everywhere), read at [readAtMillis] (null = never).
+ */
 data class SettingsSnapshot(val watch: WatchId, val values: Map<String, Any?>, val readAtMillis: Long?)

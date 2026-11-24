@@ -5,10 +5,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 /**
- * The values the host read of a watch, by dotted key ("watch.battery", "health.steps_today", "watch.settings.*",
- * "watch.setting.*", "phone.*", "app.*"). A value is a String, Boolean, Int, Long, Double, a List or a Map of those;
- * a key the watch does not have is absent. [readAtMillis] has an entry for every key in [values]: when that value was
- * read last (values keep their older reading when a later read did not give them).
+ * The values the host read of a watch, by dotted key ([PluginHost.valueCatalog] lists every key with its kind, type and
+ * unit). A value is a String, Boolean, Long (every whole number), Double (every fraction), a List or a Map of those,
+ * the same after a restart as fresh; a key the watch does not have is absent. [readAtMillis] has an entry for every key
+ * in [values]: when that value was read last (values keep their older reading when a later read did not give them).
+ * The decoded watch settings are in [PluginHost.settings], by [SettingInfo.key].
  */
 data class WatchValues(
     val watch: WatchId,
@@ -18,15 +19,48 @@ data class WatchValues(
     operator fun get(key: String): Any? = values[key]
 }
 
-/** A span of phone local time, both ends included. */
+/** One value key the host can read ([PluginHost.valueCatalog]). */
+data class ValueInfo(
+    val key: String,
+    /** What it holds, in plain words (formats included). */
+    val description: String,
+    /** The kind of data it is: served only to a plugin that declared it ([PluginAccess.reads]). */
+    val use: DataUse,
+    val type: ValueType,
+    /** The unit ("%", "°C", "bpm", "kcal", "m", "s", "min", "steps"); null for none. */
+    val unit: String? = null,
+)
+
+/** The type of a value in [WatchValues]. */
+enum class ValueType {
+    TEXT,
+    BOOL,
+    /** A whole number (a Long). */
+    WHOLE,
+    /** A fraction (a Double). */
+    NUMBER,
+    /** A time stamp as ISO-8601 text; with an offset unless the description says "without offset". */
+    DATE_TIME,
+    /** A date as ISO-8601 text ("2026-11-24"). */
+    DATE,
+    /** A time of day, "HH:MM". */
+    TIME,
+    LIST,
+    MAP,
+}
+
+/**
+ * A span of phone local time: [from] included, [to] not ([to] exclusive), so adjoining ranges neither overlap nor leave
+ * a gap. [from] equal to [to] is empty.
+ */
 data class HistoryRange(val from: LocalDateTime, val to: LocalDateTime) {
     init { require(!to.isBefore(from)) { "to is before from" } }
 
-    fun contains(t: LocalDateTime): Boolean = !t.isBefore(from) && !t.isAfter(to)
+    fun contains(t: LocalDateTime): Boolean = !t.isBefore(from) && t.isBefore(to)
 
     companion object {
-        /** Whole days [first] to [last]. */
-        fun days(first: LocalDate, last: LocalDate): HistoryRange = HistoryRange(first.atStartOfDay(), last.atTime(23, 59, 59))
+        /** Whole days [first] to [last], both included: from the start of [first] to the start of the day after [last]. */
+        fun days(first: LocalDate, last: LocalDate): HistoryRange = HistoryRange(first.atStartOfDay(), last.plusDays(1).atStartOfDay())
     }
 }
 

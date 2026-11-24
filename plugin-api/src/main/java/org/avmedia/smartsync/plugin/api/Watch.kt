@@ -2,7 +2,7 @@ package org.avmedia.smartsync.plugin.api
 
 /**
  * A watch, by the key every store of the app uses for it ("gshock-aabbccddeeff", from its Bluetooth address). A
- * re-paired watch gets a new key ([PluginHost.moveWatchData]).
+ * re-paired watch gets a new key; the host moves its stores and says so ([WatchEvent.WatchRePaired]).
  */
 data class WatchId(val key: String) {
     override fun toString(): String = key
