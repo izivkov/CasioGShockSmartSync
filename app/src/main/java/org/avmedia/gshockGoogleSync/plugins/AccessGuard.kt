@@ -44,7 +44,7 @@ object AccessGuard {
         is WatchCommand.ChangeSettings -> command.values.keys.map(Control::ofSetting).toSet()
     }
 
-    fun mayRun(access: PluginAccess, command: WatchCommand): Boolean = true // RED CHECK
+    fun mayRun(access: PluginAccess, command: WatchCommand): Boolean = access.controls.containsAll(controlsOf(command))
 
     /** [event] as this plugin may see it, or null when it may not see it at all. */
     fun event(access: PluginAccess, event: WatchEvent): WatchEvent? = when (event) {
@@ -54,7 +54,7 @@ object AccessGuard {
             if (v.values.isEmpty() && now.isEmpty()) null else event.copy(values = v, readNow = now)
         }
         is WatchEvent.HealthRead -> event.kinds.filter { mayRead(access, it) }.toSet().takeIf { it.isNotEmpty() }?.let { event.copy(kinds = it) }
-        is WatchEvent.WorkoutStored -> event // RED CHECK
+        is WatchEvent.WorkoutStored -> event.takeIf { DataUse.WORKOUTS in access.reads }
         is WatchEvent.ButtonPressed -> event.takeIf { Control.BUTTON_PRESS in access.controls }
         is WatchEvent.SettingChanged -> event.takeIf { DataUse.WATCH_SETTINGS in access.reads }
         is WatchEvent.Condition -> event.takeIf { DataUse.BATTERY_AND_TEMPERATURE in access.reads }
@@ -65,7 +65,7 @@ object AccessGuard {
     fun lines(access: PluginAccess): List<Pair<String, String>> = listOf(
         "Reads" to access.reads.sortedBy { it.ordinal }.joinToString { it.words }.ifEmpty { "nothing" },
         "Controls" to access.controls.sortedBy { it.ordinal }.joinToString { it.words }.ifEmpty { "nothing" },
-        "Sends" to access.sendsTo.joinToString().ifEmpty { "nowhere" },
+        "Sends to" to access.sendsTo.joinToString().ifEmpty { "nowhere" },
         "Keeps" to access.stores.joinToString().ifEmpty { "nothing" },
     )
 

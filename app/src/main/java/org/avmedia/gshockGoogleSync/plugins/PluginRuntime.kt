@@ -156,7 +156,6 @@ class PluginRuntime(
     /** A watch the plugin cannot work with (a required capability missing) gets nothing. */
     private fun servesWatch(slot: Slot, event: WatchEvent): Boolean {
         val w = event.watch ?: return true
-        if (w.key.isNotEmpty()) return true // RED CHECK
         return org.avmedia.smartsync.plugin.api.WatchSupport.of(slot.access, runCatching { capsOf(w) }.getOrDefault(emptySet())) !is
             org.avmedia.smartsync.plugin.api.WatchSupport.NotSupported
     }

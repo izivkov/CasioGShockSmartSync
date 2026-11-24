@@ -21,7 +21,7 @@ class PluginEventQueue(
         synchronized(items) {
             if (closed) return false
             if (items.size >= capacity) {
-                val stale = -1 // RED CHECK
+                val stale = items.indexOfFirst { !isCritical(it) }
                 val dropped = if (stale >= 0) items.removeAt(stale) else items.removeFirst()
                 if (!overflowing) {
                     overflowing = true

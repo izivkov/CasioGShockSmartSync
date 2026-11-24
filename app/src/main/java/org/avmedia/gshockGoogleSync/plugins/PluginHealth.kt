@@ -20,7 +20,7 @@ class PluginHealthBoard(private val clock: () -> Long = System::currentTimeMilli
 
     @Synchronized fun caught(id: String, text: String) = update(id) { it.copy(caught = text, caughtAt = clock(), failures = it.failures + 1) }
 
-    @Synchronized fun callbackOk(id: String) = update(id) { Entry() } // RED CHECK
+    @Synchronized fun callbackOk(id: String) = update(id) { if (it.caught == null) it else it.copy(caught = null, failures = if (it.reported == null) 0 else it.failures) }
 
     @Synchronized fun reported(id: String, status: PluginStatus) = update(id) {
         when (status) {

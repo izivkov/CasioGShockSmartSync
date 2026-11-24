@@ -12,7 +12,7 @@ import java.util.zip.ZipOutputStream
 object Logcat {
     /** The `logcat` command: dump and exit, dates with the year, only our lines. */
     fun command(sdk: Int, uid: Int, pid: Int): List<String> =
-        listOf("logcat", "-d", "-v", "threadtime", "-v", "year") + listOf("--pid=$pid") // RED CHECK
+        listOf("logcat", "-d", "-v", "threadtime", "-v", "year") + if (sdk >= 28) listOf("--uid=$uid") else listOf("--pid=$pid")
 
     /** Our lines now, oldest first; empty when logcat cannot be run. */
     fun read(sdk: Int = android.os.Build.VERSION.SDK_INT, uid: Int = android.os.Process.myUid(), pid: Int = android.os.Process.myPid()): List<String> =
@@ -43,7 +43,7 @@ object Logcat {
         target.parentFile?.mkdirs()
         ZipOutputStream(target.outputStream().buffered()).use { zip ->
             zip.putNextEntry(ZipEntry("header.txt"))
-            // RED CHECK: no header
+            zip.write(header.entries.joinToString("\n", postfix = "\n") { "${it.key}: ${it.value}" }.toByteArray())
             zip.closeEntry()
             zip.putNextEntry(ZipEntry("logcat.txt"))
             zip.write(lines.joinToString("\n", postfix = "\n").toByteArray())
