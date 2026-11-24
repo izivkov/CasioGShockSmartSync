@@ -31,6 +31,12 @@ internal fun GShockRepository.currentConnectionButton(): ConnectionButton = when
 }
 
 /**
+ * Who started the connection now being initialized: a background window of the app, the watch by itself (the
+ * connection kind 13/14 the library read from the watch), else the person.
+ */
+internal fun currentConnectionCause(): ConnectionCause = ConnectionCause.USER // RED CHECK stub
+
+/**
  * Connection-scoped Session object managing a single active watch connection lifetime.
  * Owns its own [CoroutineScope], connection state, watch snapshot, and component pending save flags.
  *
@@ -83,19 +89,22 @@ class Session(
      *
      * @param button overrides the button read from the repository (for tests).
      * @param entryReason defaults to [EntryReason.forButton] of the button.
+     * @param cause overrides who started the connection (for tests); see [currentConnectionCause].
      */
     fun setReady(
         entryReason: EntryReason? = null,
-        button: ConnectionButton? = null
+        button: ConnectionButton? = null,
+        cause: ConnectionCause? = null
     ): Boolean {
         val resolvedButton = button ?: repository.currentConnectionButton()
         val resolvedReason = entryReason ?: EntryReason.forButton(resolvedButton)
+        val resolvedCause = cause ?: currentConnectionCause()
 
         var transitioned = false
         _state.update {
             if (it.phase is SessionPhase.Connecting) {
                 transitioned = true
-                it.copy(phase = SessionPhase.Ready(resolvedReason), button = resolvedButton)
+                it.copy(phase = SessionPhase.Ready(resolvedReason), button = resolvedButton, cause = resolvedCause)
             } else {
                 transitioned = false
                 it

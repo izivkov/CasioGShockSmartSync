@@ -306,9 +306,6 @@ fun PreConnectionScreen(
                                         }
                                     },
                                     waitingAddress = waitingAddress,
-                                    onOpenOnConnect = { device, on ->
-                                        ptrConnectionViewModel.setOpenOnConnect(device.address, on)
-                                    },
                                     onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
                                     onDisassociate = { device ->
                                         ptrConnectionViewModel.disassociate(
@@ -441,7 +438,6 @@ fun PairedDeviceList(
     onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
     modifier: Modifier = Modifier,
     waitingAddress: String? = null,
-    onOpenOnConnect: (PreConnectionViewModel.DeviceItem, Boolean) -> Unit = { _, _ -> },
     onCancelWaiting: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
@@ -508,8 +504,8 @@ fun PairedDeviceList(
                                     modifier = Modifier.weight(1f)
                                 )
                                 androidx.compose.material3.Switch(
-                                    checked = device.openOnConnect,
-                                    onCheckedChange = { onOpenOnConnect(device, it) },
+                                    checked = device.keepConnected,
+                                    onCheckedChange = { },
                                     modifier = Modifier.padding(end = 4.dp).graphicsLayer(scaleX = 0.75f, scaleY = 0.75f)
                                 )
                             }

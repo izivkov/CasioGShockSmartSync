@@ -56,7 +56,9 @@ data class SessionState(
     /** True while actions requested by an always-connected watch are running. */
     val isRunningActions: Boolean = false,
     val pendingSaves: Set<ComponentId> = emptySet(),
-    val link: LinkState = LinkState.UP
+    val link: LinkState = LinkState.UP,
+    /** Who started the connection; fixed when the session is Ready. */
+    val cause: ConnectionCause = ConnectionCause.USER
 ) {
     val isNormal: Boolean get() = button == ConnectionButton.NORMAL
     val isFromAction: Boolean get() = button == ConnectionButton.FROM_ACTION

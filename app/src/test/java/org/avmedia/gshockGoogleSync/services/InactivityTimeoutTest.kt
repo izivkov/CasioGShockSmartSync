@@ -1,6 +1,7 @@
 package org.avmedia.gshockGoogleSync.services
 
 import org.avmedia.gshockGoogleSync.session.ConnectionButton
+import org.avmedia.gshockGoogleSync.session.KeepConnected
 import org.avmedia.gshockGoogleSync.session.SessionState
 import org.avmedia.gshockGoogleSync.session.WatchSnapshot
 import org.junit.Assert.assertEquals
@@ -29,10 +30,19 @@ class InactivityTimeoutTest {
         assertTrue("tell" in calls)
     }
 
+    /** Owner 2026-11-24: the watch with "Keep connected in background" keeps its link, whatever button started it. */
     @Test
-    fun anH5600KeepsItsLinkWhateverButtonStartedIt() {
-        assertTrue(SessionState(button = ConnectionButton.NORMAL, watch = WatchSnapshot(name = "CASIO DW-H5600")).keepsLink)
-        assertTrue(SessionState(button = ConnectionButton.ALWAYS_CONNECTED).keepsLink)
-        assertFalse(SessionState(button = ConnectionButton.NORMAL, watch = WatchSnapshot(name = "GW-B5600")).keepsLink)
+    fun theWatchWithKeepConnectedKeepsItsLinkWhateverButtonStartedIt() {
+        val h5600 = WatchSnapshot(name = "CASIO DW-H5600", address = "AA:BB")
+        try {
+            KeepConnected.resetForTest("AA:BB")
+            assertTrue(SessionState(button = ConnectionButton.NORMAL, watch = h5600).keepsLink)
+            assertTrue(SessionState(button = ConnectionButton.ALWAYS_CONNECTED, watch = h5600).keepsLink)
+            assertFalse(SessionState(button = ConnectionButton.NORMAL, watch = WatchSnapshot(name = "GW-B5600", address = "CC:DD")).keepsLink)
+            KeepConnected.resetForTest(null)
+            assertFalse("off: let go as upstream does", SessionState(button = ConnectionButton.ALWAYS_CONNECTED, watch = h5600).keepsLink)
+        } finally {
+            KeepConnected.resetForTest()
+        }
     }
 }

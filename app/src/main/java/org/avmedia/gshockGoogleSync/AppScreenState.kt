@@ -81,11 +81,7 @@ class AppScreenState @Inject constructor(
                 sessionManager.sessionState, AppForeground.inFront, haScreenState.open, OpenOnConnect.waiting,
                 WatchList.open
             ) { session, inFront, haOpen, waiting, listOpen ->
-                val address = session.watch.address
-                OpenOnConnect.shouldOpen(
-                    session, inFront, !haOpen && !listOpen,
-                    OpenOnConnect.isOn(appContext, address), waiting
-                )
+                OpenOnConnect.shouldOpen(session, inFront, !haOpen && !listOpen, waiting)
             }.collect { latch ->
                 if (latch) sessionManager.activeSession?.let {
                     OpenOnConnect.consumed(it.state.value.watch.address)

@@ -12,7 +12,7 @@ import org.junit.Test
 /** First page watch list: the "Open when the watch connects" switch off, on, and waiting. */
 class PreConnectionScreenshotTest : ScreenshotTest() {
     private fun item(on: Boolean) = listOf(
-        DeviceItem("DW-H5600", "AA:BB:CC:DD:EE:01", isLastUsed = true, isAlwaysConnected = true, openOnConnect = on),
+        DeviceItem("DW-H5600", "AA:BB:CC:DD:EE:01", isLastUsed = true, isAlwaysConnected = true, keepConnected = on),
         DeviceItem("GW-B5600", "AA:BB:CC:DD:EE:02", isLastUsed = false)
     )
 
