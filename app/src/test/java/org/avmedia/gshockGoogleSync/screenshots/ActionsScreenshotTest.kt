@@ -2,8 +2,9 @@ package org.avmedia.gshockGoogleSync.screenshots
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,7 +59,7 @@ class ActionsScreenshotTest : ScreenshotTest() {
     @Test fun buttonActionDark() = snap("actions_ha_on", dark = true) { Screen(allOn = true) }
     @Test fun notSetUpLight() = snap("actions_ha_not_set_up", dark = false) { Screen(allOn = true, saved = false) }
 
-    private val toBottom = { composeRule.onNodeWithText("555-123-4567").performScrollTo(); Unit }
+    private val toBottom = { repeat(5) { composeRule.onNode(hasScrollAction()).performTouchInput { swipeUp() } } }
     @Config(qualifiers = "w360dp-h560dp-420dpi")
     @Test fun bottomLight() = snap("actions_bottom", dark = false, before = toBottom) { Screen(allOn = true) }
     @Config(qualifiers = "w360dp-h560dp-420dpi")
