@@ -210,10 +210,12 @@ class WorkoutTransfer(
                     if (m.data.size > 1 && m.data[0] == BULK_DATA) asm.feed(m.data.copyOfRange(1, m.data.size))
                     continue
                 }
+                // The watch's `07` and `09` frames carry more than the category (`07 1F 00 00 00 00 00`); like the LifeLog
+                // block confirm, the whole frame goes back. A short `07 1F` got no answer at all: the watch waited for the echo.
                 when (m.data.firstOrNull()?.toInt()) {
                     SECTOR_END ->
                         if (asm.endSector()) {
-                            drsp(step, byteArrayOf(SECTOR_END.toByte(), category.toByte()))
+                            drsp(step, echo(m.data, category))
                         } else {
                             if (++bad >= 2) return null
                             asm.dropSector()
@@ -222,7 +224,7 @@ class WorkoutTransfer(
                         }
                     DROP_SECTOR -> asm.dropSector()
                     ALL_SENT -> {
-                        drsp(step, byteArrayOf(ALL_SENT.toByte(), category.toByte()))
+                        drsp(step, echo(m.data, category))
                         drsp(step, byteArrayOf(0x04, category.toByte()))
                         val result = asm.result()
                         if (result != null) {
@@ -275,6 +277,10 @@ class WorkoutTransfer(
     }
 
     private fun hex(b: ByteArray) = b.joinToString(" ") { "%02X".format(it) }
+
+    /** The answer to a `07` or `09` frame of the watch: the frame itself; a bare one-byte frame gets its category added. */
+    private fun echo(frame: ByteArray, category: Int): ByteArray =
+        if (frame.size >= 2) frame.copyOf() else byteArrayOf(frame[0], category.toByte())
 
     private fun request(category: Int, address: Long, length: Int): ByteArray {
         val b = ByteArray(10)

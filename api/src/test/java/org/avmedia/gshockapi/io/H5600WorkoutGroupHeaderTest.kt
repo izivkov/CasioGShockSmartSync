@@ -22,7 +22,7 @@ import org.junit.Test
 /**
  * After step 3 the watch answers the group header
  * request with `00 1D` + address + length on the data request characteristic, two bulk chunks (247 and 13 bytes, data 256 +
- * CRC `22 33`), then `09 1D` (all sent). Our read never answered and stopped 10 s later. Every frame here goes through the real
+ * CRC `22 33`), then `09 1D 00 00 00 00 00` (all sent; the whole frame goes back). Our read never answered and stopped 10 s later. Every frame here goes through the real
  * routing (characteristic + [H5600Protocol] + [MessageDispatcher]), not straight into the transfer's inbox.
  */
 class H5600WorkoutGroupHeaderTest {
@@ -65,7 +65,8 @@ class H5600WorkoutGroupHeaderTest {
                         // A settings answer in the middle of the transfer (`11 00 00 00 06 ...`).
                         keysOfSettingsAnswers += WatchLink.withSource(allFeatures) { H5600Protocol.extractKey("0x11 00 00 00 06 00 00 00 00 00 00") }
                         bulkFrames().forEach { deliver(bulkChar, it) }
-                        deliver(drspChar, byteArrayOf(9) + data.copyOfRange(1, 10))
+                        // All sent, as the watch sends it: `09 1D 00 00 00 00 00`.
+                        deliver(drspChar, byteArrayOf(9, 0x1D, 0, 0, 0, 0, 0))
                     }
                 }
             }
@@ -107,7 +108,7 @@ class H5600WorkoutGroupHeaderTest {
         for (addr in listOf("00000000", "00010000", "00020000", "00030000")) {
             val at = drsp.indexOf("001d${addr}00010000")
             assertTrue("request at $addr: $why", at >= 0)
-            assertEquals("answer to the read at $addr: $why", listOf("091d", "041d"), drsp.subList(at + 1, at + 3))
+            assertEquals("answer to the read at $addr: $why", listOf("091d0000000000", "041d"), drsp.subList(at + 1, at + 3))
         }
         assertTrue("no abort of a read: $why", drsp.none { it == "031d" })
         assertTrue("0x11 keeps its key: $keysOfSettingsAnswers", keysOfSettingsAnswers.isNotEmpty() && keysOfSettingsAnswers.all { it == 0x11 })

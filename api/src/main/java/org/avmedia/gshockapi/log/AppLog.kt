@@ -8,7 +8,7 @@ import timber.log.Timber
 
 /** Who wrote a line. [label] is what the file and the screen show. */
 enum class LogSource(val label: String) {
-    Watch("Watch"), HomeAssistant("Home Assistant"), Health("Health"), App("App");
+    Watch("Watch"), HomeAssistant("Home Assistant"), Health("Health"), Workouts("Workouts"), App("App");
 
     companion object {
         fun ofLabel(label: String): LogSource? = entries.firstOrNull { it.label == label }

@@ -17,20 +17,19 @@ object WorkoutStore {
             .onFailure { Timber.w(it, "Reading the newest workout failed") }.getOrNull()
     }
 
-    /** Called after each stored workout (starts the Home Assistant push). */
+    /** Called after each workout stored for the first time (starts the Home Assistant push); a repeat does not call it. */
     @Volatile var onDownloaded: (() -> Unit)? = null
 
-    /** Stores [session]; true when it is in the database. */
+    /** Stores [session]; true when it is in the database (also when it was there already). */
     suspend fun save(context: Context, session: WorkoutSession): Boolean {
-        val ok = try {
-            HistoryDb.get(context).dao().upsert(WorkoutMapper.map(session))
-            true
+        val isNew = try {
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { HistoryDb.get(context).dao().upsert(WorkoutMapper.map(session)) }
         } catch (t: Throwable) {
             Timber.w(t, "Saving the workout failed")
-            AppLog.failure(LogSource.Health, "Saving the workout failed", t)
-            false
+            AppLog.failure(LogSource.Workouts, "Saving the workout failed", t)
+            return false
         }
-        if (ok) runCatching { onDownloaded?.invoke() }
-        return ok
+        if (isNew) runCatching { onDownloaded?.invoke() }
+        return true
     }
 }

@@ -212,7 +212,7 @@ object H5600HealthIO {
             val stepGoal = runSetup(transfer)
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
             Timber.i("H5600: setup finished, step goal=$stepGoal")
-            H5600WorkoutIO.beforeLifeLog(transfer.watchCondition, workoutsFirst)
+            val workoutsRead = H5600WorkoutIO.beforeLifeLog(transfer.watchCondition, workoutsFirst)
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
 
             // The official app and the Python script write START before the first poll. The watch
@@ -276,7 +276,8 @@ object H5600HealthIO {
             org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(
                 "LifeLog read done: steps ${decoded.currentDaySteps} in %.1f s".format((System.currentTimeMillis() - requestStartedMs) / 1000.0),
             )
-            runCatching { afterRead(transfer.watchCondition) }.onFailure { Timber.w(it, "H5600: the step after the read failed") }
+            // Workouts read before START are not read a second time after the LifeLog.
+            if (!workoutsRead) runCatching { afterRead(transfer.watchCondition) }.onFailure { Timber.w(it, "H5600: the step after the read failed") }
             return AttemptOutcome(decoded, restart = false)
         } finally {
             setupWaiting = false

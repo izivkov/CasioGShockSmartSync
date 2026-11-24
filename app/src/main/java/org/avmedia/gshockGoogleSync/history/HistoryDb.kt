@@ -53,15 +53,22 @@ abstract class HistoryDao {
     @Query("DELETE FROM workout_lap WHERE startMs = :startMs AND sport = :sport") abstract fun clearLaps(startMs: Long, sport: Int)
     @Query("DELETE FROM workout_sample WHERE startMs = :startMs AND sport = :sport") abstract fun clearSamples(startMs: Long, sport: Int)
 
-    /** One row per workout (start and sport) however often it is read: laps and samples are replaced as a set, never added to. */
+    @Query("SELECT COUNT(*) FROM workout WHERE startMs = :startMs AND sport = :sport") abstract fun workoutCount(startMs: Long, sport: Int): Int
+
+    /**
+     * One row per workout (start and sport) however often it is read: laps and samples are replaced as a set, never added to.
+     * True when the workout was not stored before.
+     */
     @Transaction
-    open fun upsert(batch: WorkoutBatch) {
+    open fun upsert(batch: WorkoutBatch): Boolean {
         val w = batch.workout
+        val isNew = workoutCount(w.startMs, w.sport) == 0
         clearLaps(w.startMs, w.sport)
         clearSamples(w.startMs, w.sport)
         putWorkout(w)
         putLaps(batch.laps)
         putSamples(batch.samples)
+        return isNew
     }
 
     @Query("SELECT * FROM workout ORDER BY startMs DESC") abstract fun allWorkouts(): List<WorkoutRow>

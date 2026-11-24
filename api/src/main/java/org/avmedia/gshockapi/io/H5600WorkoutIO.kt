@@ -180,10 +180,11 @@ object H5600WorkoutIO {
      * Inside a LifeLog read (exchange lock held), before its START: when its `0x28` answer flags workouts (index 6 is 1 or 2)
      * they are read first ([run], normally [downloadHeld]): workouts first, then the LifeLog.
      * With a workout waiting (`0x28` index 6 = 1) the watch does not answer a LifeLog START.
+     * True when the workouts were read (or tried): the read after the LifeLog is then left out.
      */
-    suspend fun beforeLifeLog(condition: ByteArray?, run: suspend () -> Unit) {
+    suspend fun beforeLifeLog(condition: ByteArray?, run: suspend () -> Unit): Boolean {
         val flag = WorkoutReadTrigger.flagOf(condition)
-        if (!WorkoutReadTrigger.waiting(flag)) return
+        if (!WorkoutReadTrigger.waiting(flag)) return false
         log("LifeLog: 0x28 index 6 is $flag, the waiting workouts are read first")
         try {
             run()
@@ -193,6 +194,7 @@ object H5600WorkoutIO {
             log("Workout read before the LifeLog failed: ${t.javaClass.simpleName} ${t.message.orEmpty()}")
         }
         log("LifeLog read goes on after the workouts")
+        return true
     }
 
     /**
@@ -232,15 +234,13 @@ object H5600WorkoutIO {
             lastError = result.error
             lastFailMs = if (result.error == null) null else clock()
             if (result.error == null) lastCheckMs = System.currentTimeMillis()
-            log(
-                if (result.error == null) "Workout read done: ${result.downloaded} new stored"
-                else "Workout read stopped: ${result.error}" + if (result.downloaded > 0) " (${result.downloaded} stored before)" else "",
-            )
+            if (result.error == null) log("Workout read done: ${result.downloaded} new stored")
+            else problem("Workout read stopped: ${result.error}" + if (result.downloaded > 0) " (${result.downloaded} stored before)" else "")
             keepDump(frames, stream.toByteArray(), result.error)
             return result
         } catch (t: Throwable) {
             lastFailMs = clock()
-            log("Workout read stopped: ${t.javaClass.simpleName} ${t.message.orEmpty()}")
+            if (t !is kotlinx.coroutines.CancellationException) problem("Workout read stopped: ${t.javaClass.simpleName} ${t.message.orEmpty()}")
             throw t
         } finally {
             inbox = null
@@ -253,6 +253,12 @@ object H5600WorkoutIO {
     private fun log(text: String) {
         Timber.i("H5600 workouts: $text")
         org.avmedia.gshockapi.casio.ConnectionKeepAlive.log(text)
+    }
+
+    /** Why a workout read stopped: one App log line with the source Workouts (the steps before it are Watch lines). */
+    private fun problem(text: String) {
+        Timber.w("H5600 workouts: $text")
+        org.avmedia.gshockapi.log.AppLog.log(org.avmedia.gshockapi.log.LogSource.Workouts, text)
     }
 
     /** The two characteristics; a test seam. */
