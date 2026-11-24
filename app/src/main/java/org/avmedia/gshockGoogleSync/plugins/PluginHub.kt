@@ -279,6 +279,7 @@ class PluginHub @Inject constructor(
         lastKind = kindOf(cause)
         val kind = lastKind
         post {
+            PairedWatchList.seen(kv, w.key)
             rePaired(w, name)
             runCatching { watchStore.put(w.key, KEY_CAPS, Capabilities.names(caps)) }
             scheduler.onConnected(w)
@@ -293,6 +294,7 @@ class PluginHub @Inject constructor(
         val paired = LocalDataStorage.getDeviceAddresses(context).map(WatchKeys::of).toSet()
         val from = RePair.find(w.key, name, known, paired) { watchName(WatchId(it)) } ?: return
         moveWatchData(WatchId(from), w)
+        PairedWatchList.moved(kv, from, w.key)
         AppLog.log(LogSource.App, "Plugins: $name re-paired, its data moved to the new address")
         runtime.dispatch(WatchEvent.WatchRePaired(WatchId(from), w))
     }
@@ -428,8 +430,9 @@ class PluginHub @Inject constructor(
 
     fun watches(): List<PairedWatch> {
         val connected = connectedWatch()
-        return LocalDataStorage.getDeviceAddresses(context).map { address ->
-            val id = WatchId(WatchKeys.of(address))
+        val keys = LocalDataStorage.getDeviceAddresses(context).map(WatchKeys::of)
+        return PairedWatchList.visible(keys, connected?.key, kv).map { key ->
+            val id = WatchId(key)
             PairedWatch(id, watchName(id).orEmpty(), Capabilities.parse(watchStore.get(id.key, KEY_CAPS)?.value), id == connected)
         }
     }

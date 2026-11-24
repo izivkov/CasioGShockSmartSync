@@ -187,6 +187,10 @@ class SpiHostRulesTest {
         assertFalse(PluginNamespaces.ownsKey("trmnl", "plugin.trmnl2.url"))
         assertFalse(PluginNamespaces.ownsKey("trmnl", "app.lastSync"))
         assertEquals(setOf("old"), PluginNamespaces.leftOver(setOf("plugin.old.token", "plugin.trmnl.url", "ha.config"), setOf("trmnl", "home_assistant")))
+        // The old Home Assistant (mobile app) plugin kept its own layout ("ha."): its data shows too once it is gone,
+        // so "Delete" removes it.
+        assertEquals(setOf("home_assistant"), PluginNamespaces.leftOver(setOf("ha.config", "ha.token", "plugin.trmnl.url"), setOf("trmnl", "home_assistant_mqtt")))
+        assertEquals(setOf("ha.config", "ha.token"), setOf("ha.config", "ha.token", "plugin.trmnl.url").filter { PluginNamespaces.ownsKey("home_assistant", it) }.toSet())
     }
 
     // S6: the screen opening on turn-on is in SpiSecondReviewTest (the switchboard, where both switches meet).
@@ -240,6 +244,9 @@ class SpiHostRulesTest {
     @Test fun aMissingPermissionIsAskedForAndShownInTheStatus() {
         val own = org.avmedia.smartsync.plugin.api.AndroidPermission("android.permission.health.WRITE_STEPS", "writing steps to Health Connect")
         val access = PluginAccess(reads = setOf(DataUse.PHONE_LOCATION), androidPermissions = listOf(own))
+        // Health Connect asks for seven write permissions with one reason: the status line names it once.
+        val hc = listOf("WRITE_STEPS", "WRITE_SLEEP").map { org.avmedia.smartsync.plugin.api.AndroidPermission("android.permission.health.$it", "writing to Health Connect") }
+        assertEquals("Needs permission: writing to Health Connect", PluginPermissions.line(hc))
         val required = PluginPermissions.required(access)
         assertEquals(listOf(own.name, PluginPermissions.COARSE_LOCATION), required.map { it.name })
         assertEquals("a plugin without location reads needs no location permission", emptyList<Any>(), PluginPermissions.required(PluginAccess(reads = setOf(DataUse.PHONE))))

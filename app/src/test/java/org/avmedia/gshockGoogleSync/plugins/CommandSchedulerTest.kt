@@ -132,4 +132,33 @@ class CommandSchedulerTest {
         s.drop("a")
         assertEquals(0, s.parkedCount("a"))
     }
+
+    /**
+     * The link is up but the watch is not ready for writes (its setup not done): a write for the next connection waits
+     * for it, never fails with "not connected".
+     */
+    @Test fun aWriteThatFindsTheWatchNotReadyWaitsForTheNextConnection() = runBlocking {
+        val s = scheduler()
+        var ready = false
+        val runs = AtomicInteger(0)
+        val work: suspend () -> WriteResult = { runs.incrementAndGet(); if (ready) DONE else NOT_CONNECTED }
+        assertEquals(QUEUED, s.submit("ha", w, Delivery.NextConnection(key = "face"), "settings watch_face", work = work))
+        assertEquals(1, s.parkedCount("ha"))
+        assertEquals("a write for now still says so", NOT_CONNECTED, s.submit("ha", w, Delivery.Now, "settings x", work = work))
+        ready = true
+        s.onConnected(w)
+        withTimeout(2_000) { while (runs.get() < 3) delay(5) }
+        assertEquals(0, s.parkedCount("ha"))
+    }
+
+    /** A command that waits behind a LifeLog transfer (40 s and more) says so in the log, once. */
+    @Test fun aWriteWaitingForATransferSaysSoOnce() = runBlocking {
+        var transfer = true
+        val s = scheduler(transfer = { transfer })
+        val r = async { s.submit("ha", w, Delivery.Now, "settings watch_face", work = { DONE }) }
+        withTimeout(2_000) { while (lines.none { it.contains("waits") }) delay(5) }
+        transfer = false
+        assertEquals(DONE, r.await())
+        assertEquals(lines.toString(), 1, lines.count { it.contains("settings watch_face waits: a transfer holds the watch") })
+    }
 }
