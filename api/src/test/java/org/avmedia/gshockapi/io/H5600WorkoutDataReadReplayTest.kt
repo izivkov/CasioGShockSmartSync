@@ -12,7 +12,7 @@ import org.junit.Test
  * both headers and the first data read, 4096 bytes in one sector. The watch sends the sector end `07 1F 00 00 00 00 00`
  * and goes on (`09 1F ...`, all sent) only when that whole frame comes back; a short `07 1F` gets no answer, as on the watch.
  */
-private class ReplayWatch(private val inbox: Channel<WorkoutMsg>) : WorkoutLink {
+private class DataReadReplayWatch(private val inbox: Channel<WorkoutMsg>) : WorkoutLink {
     private sealed class Step(val channel: H5600Channel, val data: ByteArray)
     private class Tx(channel: H5600Channel, data: ByteArray) : Step(channel, data)
     private class Rx(channel: H5600Channel, data: ByteArray) : Step(channel, data)
@@ -70,7 +70,7 @@ private class ReplayWatch(private val inbox: Channel<WorkoutMsg>) : WorkoutLink 
 class H5600WorkoutDataReadReplayTest {
     @Test fun theSectorEndOfADataReadIsEchoedWholeAndTheReadEnds() = runTest {
         val inbox = Channel<WorkoutMsg>(Channel.UNLIMITED)
-        val watch = ReplayWatch(inbox)
+        val watch = DataReadReplayWatch(inbox)
         val lines = mutableListOf<String>()
         val result = WorkoutTransfer(watch, inbox, sink = { true }, log = { lines += it }).run()
         val why = "error ${result.error}, mismatches ${watch.mismatches}, writes ${watch.writes.takeLast(8)}"
