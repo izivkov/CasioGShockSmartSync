@@ -5,7 +5,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
+import androidx.compose.ui.unit.dp
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,10 +54,12 @@ class ActionsBottomTest {
             }
         }
         val save = rule.onNodeWithText("Save").getBoundsInRoot()
-        for (text in listOf("Watch button: Lights", "555-123-4567")) {
-            rule.onNodeWithText(text).performScrollTo()
-            val line = rule.onNodeWithText(text).getBoundsInRoot()
-            assertTrue("$text ends at ${line.bottom}, Save starts at ${save.top}", line.bottom <= save.top)
-        }
+        rule.onNodeWithText("Watch button: Lights").performScrollTo()
+        val ha = rule.onNodeWithText("Watch button: Lights").getBoundsInRoot()
+        assertTrue("the Home Assistant line ends at ${ha.bottom}, Save starts at ${save.top}", ha.bottom <= save.top)
+        // Scrolled to the very end, the last row ends with room to spare above the Save bar.
+        repeat(5) { rule.onNode(hasScrollAction()).performTouchInput { swipeUp() } }
+        val last = rule.onNodeWithText("555-123-4567").getBoundsInRoot()
+        assertTrue("the last line ends at ${last.bottom}, Save starts at ${save.top}", last.bottom + 16.dp <= save.top)
     }
 }
