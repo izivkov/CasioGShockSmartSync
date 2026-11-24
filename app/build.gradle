@@ -98,6 +98,8 @@ android {
         unitTests {
             // Robolectric (the screenshot tests) needs the merged resources and assets.
             includeAndroidResources = true
+            // A failing test prints its assertion message in the CI log (the reports are not uploaded).
+            all { testLogging { exceptionFormat = 'full'; events 'failed' } }
         }
     }
     lint {

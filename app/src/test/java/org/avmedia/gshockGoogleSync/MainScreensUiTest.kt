@@ -35,9 +35,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 /** The way to the watch list, the link bar, Home Assistant's entries and the removed decoding aids. */
 @RunWith(RobolectricTestRunner::class)
+// Real text measuring (as in the screenshot tests): the layout checks need true text widths.
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "w412dp-h915dp-420dpi")
 class MainScreensUiTest {
     @get:Rule
