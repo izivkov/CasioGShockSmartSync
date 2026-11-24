@@ -9,6 +9,8 @@ field, the list and the detail view show the title field, so the title goes in b
 | `title`, `message`, `data: {app: HA}` | `data.app` | title | message |
 | `message` only | `HA` | empty | message |
 
+- A notification sent while the watch's link is away for a moment (the DW-H5600 drops it often) is shown when the
+  watch is back, up to 10 minutes later; a watch setting asked then is written at its next connection.
 - Keep titles to 32 characters (32 bytes in UTF-8; accents count 2): the app cuts the first line there, as Gadgetbridge's
   Casio support does. Measured on the GBX-H5600: the pop-up shows about 10 characters of the first
   field; the detail view shows the title line and then the text wrapped at about 14 characters per line, over several
@@ -33,7 +35,7 @@ data:
 
 Several at once: `data: {settings: {watch_face: steps, step_goal: 9000}}`.
 
-- An unknown key or a bad value is refused: one line in the App log (Settings > App log) with the reason, nothing is written.
+- An unknown key or a bad value is refused: one line in the App log (Settings > About > App log) with the reason, nothing is written.
 - Watch not connected: the latest value per key waits and is written after the next connection, once the watch's setup is done.
 - After a write the app reads the value back and logs `Home Assistant set watch_face to steps`.
 - Values are sent back after each connection: sensor `Watch settings (writable)` (state = how many were read, every value an attribute), plus `Watch face name` and `Custom face slot`.
