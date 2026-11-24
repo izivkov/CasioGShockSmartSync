@@ -20,7 +20,14 @@ class HaVersionTest {
     @Test fun theDeclarationCoversWhatThePluginUses() {
         val access = HomeAssistantPlugin().access
         assertEquals(DataUse.entries.toSet() - DataUse.PHONE_LOCATION, access.reads)
-        assertTrue(access.controls.containsAll(setOf(Control.NOTIFICATIONS, Control.WATCH_SETTINGS, Control.WATCH_FACE, Control.BUTTON_PRESS)))
+        assertEquals("it maps everything (owner 2026-11-24)", Control.ALL, access.controls)
         assertEquals(listOf("your Home Assistant server"), access.sendsTo)
+    }
+
+    @Test fun itTellsAboutItself() {
+        val p = HomeAssistantPlugin()
+        assertTrue(p.summary.length <= 60)
+        assertTrue(p.description.isNotBlank() && p.setupNeeds.isNotBlank() && p.author.isNotBlank() && p.license.isNotBlank())
+        assertTrue(p.infoUrl.startsWith("https://") && p.sourceUrl.startsWith("https://") && p.issuesUrl.startsWith("https://"))
     }
 }

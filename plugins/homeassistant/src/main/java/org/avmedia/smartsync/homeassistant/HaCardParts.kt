@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,14 +64,43 @@ internal fun HaLoading(text: String) {
     }
 }
 
-/** Plain text in the card: the empty state, or a good ([error] false) or bad result. */
+/**
+ * Plain text in the card: the empty state, or a good ([error] false) or bad result. One short line only: the first
+ * sentence shows, the rest of [text] and [more] sit behind an (i) tap ([HaText.split]).
+ */
 @Composable
-internal fun HaNote(text: String, error: Boolean = false) {
-    AppText(
-        text = text,
-        fontSize = 14.sp,
-        color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+internal fun HaNote(text: String, error: Boolean = false, more: String? = null) {
+    val (line, rest) = HaText.split(text)
+    val hidden = listOfNotNull(rest, more?.takeIf { it.isNotBlank() }).joinToString(" ").takeIf { it.isNotBlank() }
+    var open by remember(text) { mutableStateOf(false) }
+    val color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AppText(text = line, fontSize = 14.sp, color = color, modifier = Modifier.weight(1f, fill = false))
+            if (hidden != null) {
+                IconButton(onClick = { open = !open }, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Outlined.Info, contentDescription = if (open) "Less" else "More", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                }
+            }
+        }
+        if (open && hidden != null) AppText(text = hidden, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** The short-text rule of the screens: one short line shows, the rest goes behind an (i) tap. Pure. */
+object HaText {
+    /** Longest line a note shows before the (i). */
+    const val MAX_LINE = 80
+
+    /** [text] as its first sentence and the rest (null for none). */
+    fun split(text: String): Pair<String, String?> {
+        val m = Regex("""[.!?] (?=[A-Z])""").find(text) ?: return text to null
+        val head = text.substring(0, m.range.first + 1)
+        return head to text.substring(m.range.last + 1).trim().takeIf { it.isNotEmpty() }
+    }
+
+    /** True when [line] keeps the rule: one sentence of at most [MAX_LINE] characters. */
+    fun isShort(line: String): Boolean = line.length <= MAX_LINE && split(line).second == null
 }
 
 /** "Details": the technical text (codes, last answer), hidden until asked for. Nothing when [text] is blank. */

@@ -28,7 +28,7 @@ fun HaScreen(viewModel: HaViewModel, onBack: () -> Unit) {
             onSave = viewModel::save,
             onForget = viewModel::forget,
             onFind = viewModel::findOnNetwork,
-            onGroup = viewModel::setGroup,
+            onHealth = viewModel::setHealth,
             onRawSwitch = viewModel::setRawSwitch,
             onCreateDashboard = viewModel::createDashboard,
             onCopyYaml = { viewModel.copyYaml(context) },
@@ -63,7 +63,7 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents()) {
                 changed = model.trim() != ui.watch.model, onSave = save, onRaw = events.onRawSwitch,
                 onConfirm = { events.onConfirmName(deviceName, model) },
             )
-            HaSentCard(ui.sent, ui.saved, events.onGroup)
+            HaSentCard(ui.sent, ui.saved, events.onHealth)
             HaDashboardCard(ui.saved, ui.watch.registered, ui.dash, events.onCreateDashboard, events.onCopyYaml)
         }
         ButtonsRow(

@@ -80,7 +80,8 @@ object HaPayloads {
         )
     )
 
-    fun registerSensor(s: HaSensor, state: Any?, attributes: Map<String, Any?>? = null): String = gson.toJson(
+    /** [disabled] true disables the entity in Home Assistant, false enables it again; null leaves it as the person set it. */
+    fun registerSensor(s: HaSensor, state: Any?, attributes: Map<String, Any?>? = null, disabled: Boolean? = null): String = gson.toJson(
         linkedMapOf(
             "type" to "register_sensor",
             "data" to linkedMapOf<String, Any?>(
@@ -93,6 +94,7 @@ object HaPayloads {
                 "icon" to s.icon,
                 "entity_category" to s.entityCategory,
                 "attributes" to attributes?.takeIf { it.isNotEmpty() },
+                "disabled" to disabled,
             ).filterValues { it != null } + ("state" to state), // state is required, null when not known yet
         )
     )

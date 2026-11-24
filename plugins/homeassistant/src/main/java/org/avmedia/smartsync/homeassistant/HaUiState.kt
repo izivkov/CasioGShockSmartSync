@@ -74,7 +74,8 @@ class HaEvents(
     val onSave: (url: String, token: String, deviceName: String, model: String) -> Unit = { _, _, _, _ -> },
     val onForget: () -> Unit = {},
     val onFind: () -> Unit = {},
-    val onGroup: (HaGroup, Boolean) -> Unit = { _, _ -> },
+    /** "Share health data with Home Assistant". */
+    val onHealth: (Boolean) -> Unit = {},
     val onRawSwitch: (Boolean) -> Unit = {},
     val onCreateDashboard: () -> Unit = {},
     val onCopyYaml: () -> Unit = {},

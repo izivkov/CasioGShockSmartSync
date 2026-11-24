@@ -40,7 +40,7 @@ internal fun HaDashboardCard(
                 when {
                     ui.working -> HaLoading("Talking to Home Assistant...")
                     ui.status == DashStatus.Foreign ->
-                        HaNote("A dashboard with this address exists that this app did not make. It is never changed.", error = true)
+                        HaNote("This address has a dashboard this app did not make.", error = true, more = "It is never changed.")
                     ui.message.isNotBlank() -> HaNote(ui.message, error = ui.failed)
                     ui.status == DashStatus.Ours(outdated = true) -> HaNote("The watch has new sensors since the dashboard was made.")
                     ui.status == DashStatus.Ours(outdated = false) -> HaNote("The dashboard is up to date.")
@@ -49,7 +49,7 @@ internal fun HaDashboardCard(
                     AppButton("Open dashboard", { openInBrowser(context, ui.url) }, modifier = Modifier.fillMaxWidth())
                 }
                 AppButton("Copy YAML", onCopyYaml, enabled = !ui.working, modifier = Modifier.fillMaxWidth())
-                HaNote("Paste the YAML into a new dashboard: Edit, three dots, Raw configuration editor.")
+                HaNote("Paste the YAML into a new dashboard.", more = "In Home Assistant: Edit, three dots, Raw configuration editor.")
             }
         }
     }

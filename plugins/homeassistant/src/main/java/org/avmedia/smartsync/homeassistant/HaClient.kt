@@ -117,13 +117,19 @@ class HaClient(
     }
 
     private fun push(cfg: HaConfig, reg: HaRegistration, given: HaJob): Push {
-        val sensors = HaSensors.forCaps(this.sensors, WatchCaps.of(given))
+        val forWatch = HaSensors.forCaps(this.sensors, WatchCaps.of(given))
+        // Health switched off: its sensors are disabled in HA and none of their values goes out.
+        val healthOn = store.healthOn()
+        val sensors = if (healthOn) forWatch else forWatch.filter { HaGroups.of(it) != HaGroup.HEALTH }
+        val removed = forWatch - sensors.toSet()
         // Only the values of sensors this watch has: an OCW job never updates a health sensor.
         val ids = sensors.map { it.uniqueId }.toSet()
         val job = given.copy(states = given.states.filterKeys { it in ids }, attributes = given.attributes?.filterKeys { it in ids })
         val hook = "${cfg.baseUrl}/api/webhook/${reg.webhookId}"
-        val fingerprint = HaSensors.fingerprint(sensors)
+        val fingerprint = HaSensors.fingerprint(sensors) + if (removed.isNotEmpty()) HEALTH_OFF else ""
         if (reg.sensorsHash != fingerprint) {
+            // Back on after it was off: the health sensors are enabled again (only then, never one the person disabled).
+            val enable = healthOn && store.healthRemoved(job.deviceId)
             // register_sensor carries a state and HA shows it: a null would turn a known value to unknown.
             // So: the value of this job, else the last one sent (persisted), else null for a sensor never sent.
             // The attributes come with the value they belong to: HA replaces them too (steps_by_hour).
@@ -132,10 +138,17 @@ class HaClient(
                 val fresh = job.states[s.uniqueId]
                 val state = fresh ?: lastSent.states[s.uniqueId]
                 val attributes = if (fresh != null) job.attributes?.get(s.uniqueId) else lastSent.attributes?.get(s.uniqueId)
-                val r = transport.post(hook, HaPayloads.registerSensor(s, state, attributes), null)
+                val disabled = if (enable && HaGroups.of(s) == HaGroup.HEALTH) false else null
+                val r = transport.post(hook, HaPayloads.registerSensor(s, state, attributes, disabled), null)
                 if (gone(r, hook)) return Push.NeedsRegistration(true)
                 classify(r)?.let { return Push.Finished(it) }
             }
+            for (s in removed) {
+                val r = transport.post(hook, HaPayloads.registerSensor(s, lastSent.states[s.uniqueId], disabled = true), null)
+                if (gone(r, hook)) return Push.NeedsRegistration(true)
+                classify(r)?.let { return Push.Finished(it) }
+            }
+            store.setHealthRemoved(job.deviceId, removed.isNotEmpty())
             store.saveRegistration(job.deviceId, reg.copy(sensorsHash = fingerprint))
         }
         if (job.states.isNotEmpty()) {
@@ -191,6 +204,8 @@ class HaClient(
 
     companion object {
         /** Shown when a watch would register before its name was confirmed on the Home Assistant screen. */
+        /** Added to the sensors' fingerprint while health is off: switching it changes the registration. */
+        const val HEALTH_OFF = "-health-off"
         const val NAME_FIRST = "Confirm the watch name on the Home Assistant screen first; nothing was registered"
         // One lock per watch for the whole process: HaWorker makes a new HaClient per run, and a replaced
         // worker's blocking HTTP call goes on after WorkManager cancelled it. Without this, jobs that overlap

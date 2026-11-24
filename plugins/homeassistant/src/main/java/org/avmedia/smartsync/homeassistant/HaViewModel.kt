@@ -148,10 +148,12 @@ class HaViewModel(private val rt: HaRuntime) : ViewModel() {
         update { snapshot(it) }
     }
 
-    fun setGroup(group: HaGroup, on: Boolean) {
-        store.setGroupOn(group, on)
+    /** "Share health data with Home Assistant": off disables the health sensors in HA at the next send, which comes now. */
+    fun setHealth(on: Boolean) {
+        store.setHealthOn(on)
         rt.declareNeeds()
         update { snapshot(it) }
+        rt.pushSensorsNow()
     }
 
     fun save(baseUrl: String, token: String, deviceName: String, model: String) {

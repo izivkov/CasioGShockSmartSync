@@ -33,7 +33,7 @@ internal fun HaWatchCard(
                 label = { Text("Watch name in Home Assistant") },
                 supportingText = { Text("Use the full model, for example GBX-H5600KI-5ER") },
             )
-            HaNote("Sets the device, sensor and notify names in Home Assistant. It cannot be changed later.")
+            HaNote("Sets the names in Home Assistant for good.", more = "The device, sensor and notify names; they cannot be changed later.")
         } else OutlinedTextField(
             value = deviceName, onValueChange = {}, readOnly = true, singleLine = true, modifier = Modifier.fillMaxWidth(),
             label = { Text("Name in Home Assistant") },
@@ -59,7 +59,7 @@ internal fun HaWatchCard(
             HaNote("Firmware: " + (watch.firmware ?: "not known yet"))
         }
         if (!watch.notificationsSupported) HaNote("This watch cannot show notifications")
-        if (watch.others.isNotEmpty()) HaNote("Other watches in Home Assistant: " + watch.others.joinToString() + ". Each keeps its own device; its values are sent while it is connected.")
+        if (watch.others.isNotEmpty()) HaNote("Other watches: " + watch.others.joinToString(), more = "Each keeps its own device; its values are sent while it is connected.")
         watch.lastUpdate?.let { HaNote("Last update: $it") }
         if (watch.failed) HaNote("The last update did not go through. It is tried again at the next connection.", error = true)
         if (watch.lookingUpDevice) HaLoading("Looking for the device in Home Assistant...")
@@ -67,7 +67,7 @@ internal fun HaWatchCard(
         HaDetails(watch.lastText) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    HaNote("Read raw watch settings (for decoding)")
+                    HaNote("Read raw watch settings (decoding aid)")
                     HaNote(watch.rawUntil?.let { "on until $it" } ?: "off")
                 }
                 AppSwitch(checked = watch.rawUntil != null, onCheckedChange = onRaw)

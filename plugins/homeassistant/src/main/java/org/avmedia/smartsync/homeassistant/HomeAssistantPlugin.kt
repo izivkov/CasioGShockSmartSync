@@ -32,7 +32,15 @@ import org.avmedia.smartsync.plugin.api.WatchPlugin
 class HomeAssistantPlugin : WatchPlugin {
     override val id: String = ID
     override val name: String = "Home Assistant"
-    override val summary: String = "Each watch as a Home Assistant device: its sensors, the button event, and notifications and settings from Home Assistant."
+    override val summary: String = "Your watch as a Home Assistant device."
+    override val description: String = "Shows your watch in Home Assistant: battery, steps, heart rate, sleep and workouts as sensors. " +
+        "Lets automations send notifications to the watch and change its settings, and use the watch button as a trigger."
+    override val setupNeeds: String = "Your Home Assistant address and an access token"
+    override val infoUrl: String = "https://github.com/ExcuseMi/CasioGShockSmartSync/blob/home-assistant/docs/home-assistant.md"
+    override val sourceUrl: String = "https://github.com/ExcuseMi/CasioGShockSmartSync/tree/home-assistant/plugins/homeassistant"
+    override val issuesUrl: String = "https://github.com/ExcuseMi/CasioGShockSmartSync/issues"
+    override val author: String = "ExcuseMi"
+    override val license: String = "Apache-2.0"
     override val apiVersion: String = PluginApi.VERSION
     override val version: String = VERSION
 
@@ -41,9 +49,10 @@ class HomeAssistantPlugin : WatchPlugin {
     // Home Assistant gets every watch value as a sensor, shows its notifications, changes settings and the face, and
     // runs its chosen action on a button press.
     override val access: PluginAccess = PluginAccess(
-        // Everything but the phone's location: no Home Assistant sensor uses it.
-        reads = DataUse.entries.toSet() - DataUse.PHONE_LOCATION,
-        controls = setOf(Control.NOTIFICATIONS, Control.WATCH_SETTINGS, Control.WATCH_FACE, Control.BUTTON_PRESS),
+        // It maps everything to an entity (owner decision 2026-11-24: "everything"), so a kind added later is shared
+        // too; only the phone's location is left out: no Home Assistant sensor uses it.
+        reads = DataUse.ALL - DataUse.PHONE_LOCATION,
+        controls = Control.ALL,
         sendsTo = listOf("your Home Assistant server"),
         stores = listOf("Home Assistant address and token", "each watch's registration and the values sent last"),
         // Any watch: battery and connection at least. The rest where the watch has it.

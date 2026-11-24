@@ -242,10 +242,22 @@ class HaStore(private val store: KeyValueStore) {
 
     fun lastActionResult(): String? = store.get(KEY_ACTION_RESULT)
 
-    /** The groups of values that are sent; all on until switched off. */
-    fun groupsOn(): Set<HaGroup> = HaGroup.entries.filter { store.get(KEY_GROUP + it.name) != "off" }.toSet()
+    /**
+     * The groups of values that are sent: watch and settings always (the plugin maps everything it can), health while
+     * [healthOn]. The health switch keeps the key of the old health group switch, so its state stays.
+     */
+    fun groupsOn(): Set<HaGroup> = setOf(HaGroup.WATCH, HaGroup.SETTINGS) + if (healthOn()) setOf(HaGroup.HEALTH) else emptySet()
 
-    fun setGroupOn(group: HaGroup, on: Boolean) = store.put(KEY_GROUP + group.name, if (on) "on" else "off")
+    /** "Share health data with Home Assistant": on until switched off. */
+    fun healthOn(): Boolean = store.get(KEY_GROUP + HaGroup.HEALTH.name) != "off"
+
+    fun setHealthOn(on: Boolean) = store.put(KEY_GROUP + HaGroup.HEALTH.name, if (on) "on" else "off")
+
+    /** True while the health sensors of [deviceId] are disabled in Home Assistant (the switch was off at its last registration). */
+    fun healthRemoved(deviceId: String): Boolean = store.get(KEY_HEALTH_REMOVED + deviceId) == "yes"
+
+    fun setHealthRemoved(deviceId: String, removed: Boolean) =
+        if (removed) store.put(KEY_HEALTH_REMOVED + deviceId, "yes") else store.delete(KEY_HEALTH_REMOVED + deviceId)
 
     private companion object {
         // Kept by versions before the per-watch stores: read once by the legacy owner, then deleted.
@@ -270,6 +282,7 @@ class HaStore(private val store: KeyValueStore) {
         val PER_WATCH = listOf(W_PUSH_OK, W_SETTINGS_APPLIED, W_PENDING, W_RESULT, W_RESULT_OK, W_SENT, W_DEVICE, W_MODEL)
 
         const val KEY_GROUP = "group."
+        const val KEY_HEALTH_REMOVED = "health_removed."
         const val KEY_CONFIG = "config"
         const val KEY_REG = "reg."
         const val KEY_NAME = "name."
