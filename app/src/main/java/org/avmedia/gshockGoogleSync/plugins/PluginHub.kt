@@ -309,9 +309,7 @@ class PluginHub @Inject constructor(
                 org.avmedia.smartsync.plugin.api.FailReason.NOT_SUPPORTED, "the connected watch cannot show notifications",
             )
         }
-        api.sendAppNotification(
-            AppNotification.create(type = typeOf(n.kind), timestamp = NotificationIds.timestamp(n.time), app = n.app, title = n.title, text = n.text),
-        )
+        api.sendAppNotification(toAppNotification(n))
         return CommandScheduler.DONE
     }
 
@@ -382,6 +380,10 @@ class PluginHub @Inject constructor(
             ConnectionCause.WATCH -> ConnectionKind.WATCH
             ConnectionCause.BACKGROUND_READ -> ConnectionKind.BACKGROUND_READ
         }
+
+        /** A plugin's notification as the library sends it. */
+        fun toAppNotification(n: WatchNotification): AppNotification =
+            AppNotification.create(type = typeOf(n.kind), timestamp = NotificationIds.timestamp(n.time), app = n.app, title = n.title, text = n.text)
 
         fun typeOf(kind: NotificationKind): NotificationType = when (kind) {
             NotificationKind.MESSAGE -> NotificationType.MESSAGE

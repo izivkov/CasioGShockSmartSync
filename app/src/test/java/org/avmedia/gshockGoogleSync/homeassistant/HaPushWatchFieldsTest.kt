@@ -14,8 +14,10 @@ import org.junit.Test
  * The app name is the first line the H5600 shows; a fixed "Home Assistant" there left no room for the push.
  */
 class HaPushWatchFieldsTest {
+    private val AT = java.time.LocalDateTime.of(2026, 11, 23, 18, 0)
+
     private fun frame(push: HaPushEvent.Push) =
-        AppNotificationIO.encodeNotificationPacket(HaPush.toNotification(push, "20261123T180000"))
+        AppNotificationIO.encodeNotificationPacket(org.avmedia.gshockGoogleSync.plugins.PluginHub.toAppNotification(HaPush.toNotification(push, AT)))
 
     private fun decoded(push: HaPushEvent.Push) = AppNotificationIO.decodeNotificationPacket(frame(push))
 
@@ -54,7 +56,7 @@ class HaPushWatchFieldsTest {
             "call" to NotificationType.PHONE_CALL, "generic" to NotificationType.GENERIC, " Calendar " to NotificationType.CALENDAR,
         ).forEach { (word, type) -> assertEquals(word, type, decoded(push.copy(data = mapOf("type" to word))).type) }
         val logged = ArrayList<String>()
-        val n = HaPush.toNotification(push.copy(data = mapOf("type" to "fax")), "20261123T180000") { logged += it }
+        val n = org.avmedia.gshockGoogleSync.plugins.PluginHub.toAppNotification(HaPush.toNotification(push.copy(data = mapOf("type" to "fax")), AT) { logged += it })
         assertEquals(NotificationType.MESSAGE, AppNotificationIO.decodeNotificationPacket(AppNotificationIO.encodeNotificationPacket(n)).type)
         assertEquals(1, logged.size)
         assertTrue(logged.single(), logged.single().contains("fax"))

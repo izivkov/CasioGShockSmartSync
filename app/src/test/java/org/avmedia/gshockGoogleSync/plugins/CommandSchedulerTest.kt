@@ -55,9 +55,9 @@ class CommandSchedulerTest {
             running.decrementAndGet()
             DONE
         }
-        val first = async(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { s.submit("a", w, Delivery.Now, "a1", work("a1")) }
+        val first = async(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { s.submit("a", w, Delivery.Now, "a1", work = work("a1")) }
         delay(50) // a1 runs and holds the queue
-        val rest = listOf("a2", "a3", "b1", "b2", "b3").map { n -> async(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { s.submit(n.take(1), w, Delivery.Now, n, work(n)) } }
+        val rest = listOf("a2", "a3", "b1", "b2", "b3").map { n -> async(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) { s.submit(n.take(1), w, Delivery.Now, n, work = work(n)) } }
         delay(50)
         gate.complete(Unit)
         (rest + first).awaitAll().forEach { assertEquals(DONE, it) }
