@@ -217,7 +217,7 @@ object WatchSettingRegistry {
         if (values.isEmpty()) return SettingsCheck.Refused(org.avmedia.smartsync.plugin.api.FailReason.INVALID, "no setting named")
         val ok = LinkedHashMap<String, Any>()
         for ((key, raw) in values) {
-            val setting = find(key) ?: return SettingsCheck.Refused(org.avmedia.smartsync.plugin.api.FailReason.NOT_SUPPORTED, "$key: unknown setting")
+            val setting = find(key) ?: continue
             when (val c = check(setting, raw, watchName)) {
                 is SettingCheck.Refused -> return SettingsCheck.Refused(org.avmedia.smartsync.plugin.api.FailReason.INVALID, "$key: ${c.reason}")
                 is SettingCheck.Ok -> ok[key] = c.value

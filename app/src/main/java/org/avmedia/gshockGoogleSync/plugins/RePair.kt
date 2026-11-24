@@ -12,7 +12,7 @@ object RePair {
      */
     fun find(newKey: String, name: String, known: List<String>, paired: Set<String>, nameOf: (String) -> String?): String? {
         if (name.isBlank() || newKey.isBlank()) return null
-        val fits = known.distinct().filter { old -> old != newKey && old !in paired && nameOf(old) == name }
+        val fits = known.distinct().filter { old -> old != newKey && nameOf(old) == name }
         return fits.singleOrNull()
     }
 }

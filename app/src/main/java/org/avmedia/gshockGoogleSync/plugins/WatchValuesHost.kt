@@ -61,7 +61,7 @@ class WatchValuesHost(
 
         /** A value as the kept JSON gives it back: whole numbers as Long, fractions as Double, in lists and maps too. */
         fun normalise(v: Any?): Any? = when (v) {
-            is Byte, is Short, is Int, is Long -> (v as Number).toLong()
+            is Byte, is Short, is Int, is Long -> v
             is Float -> v.toString().toDouble()
             is Double -> v
             is List<*> -> v.map(::normalise)

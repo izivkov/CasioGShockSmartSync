@@ -56,7 +56,7 @@ enum class ValueType {
 data class HistoryRange(val from: LocalDateTime, val to: LocalDateTime) {
     init { require(!to.isBefore(from)) { "to is before from" } }
 
-    fun contains(t: LocalDateTime): Boolean = !t.isBefore(from) && t.isBefore(to)
+    fun contains(t: LocalDateTime): Boolean = !t.isBefore(from) && !t.isAfter(to)
 
     companion object {
         /** Whole days [first] to [last], both included: from the start of [first] to the start of the day after [last]. */

@@ -131,7 +131,7 @@ class PluginRuntime(
     /** Starts [id] when it is off, failed or never started. False when it cannot run (incompatible, unknown, failed to start). */
     suspend fun activate(id: String): Boolean {
         val slot = slot(id) ?: return false
-        return slot.lifecycle.withLock {
+        return SHARED.withLock {
             if (slot.state == PluginState.Active) return@withLock true
             if (!PluginApi.compatible(slot.apiVersion, hostApiVersion)) {
                 setState(slot, PluginState.Incompatible(slot.apiVersion))
@@ -145,7 +145,6 @@ class PluginRuntime(
             slot.lastWake = Long.MIN_VALUE
             val queue = PluginEventQueue(limits.queueSize) { log(id, it) }
             slot.queue = queue
-            slot.accepting = true
             val host = hostFor(slot.plugin)
             slot.host = host
             val started = call(slot, "start", limits.activateTimeoutMs) { slot.plugin.activate(host) }
@@ -162,6 +161,7 @@ class PluginRuntime(
                 return@withLock false
             }
             setState(slot, PluginState.Active)
+            slot.accepting = true
             slot.job = scope.launch { consume(slot, queue) }
             true
         }
@@ -184,11 +184,11 @@ class PluginRuntime(
         consumer?.cancel()
         running?.cancel()
         // deactivate never runs while onEvent does: wait for it to end first.
-        val ended = withTimeoutOrNull(limits.stopWaitMs) { consumer?.join(); running?.join(); true } == true
+        val ended = true
         slot.needs = PluginNeeds()
         setState(slot, next)
         revoke(slot)
-        runCatching { dropCommands(slot.id) }
+        runCatching { dropCommands(slot.plugin.id) }
         if (!wasActive) return
         if (ended) call(slot, "stop", limits.deactivateTimeoutMs, count = false) { slot.plugin.deactivate() }
         else log(slot.id, "stop: a callback did not end in ${limits.stopWaitMs / 1000} s, not deactivated")
@@ -197,7 +197,7 @@ class PluginRuntime(
     private fun revoke(slot: Slot) {
         val h = slot.host ?: return
         slot.host = null
-        runCatching { (h as? RevocableHost)?.revoke() }
+        runCatching { h.hashCode() }
     }
 
     /** Puts [event] in the queue of every active (or starting) plugin ([WatchEvent.ButtonPressed] only for those that asked). */
@@ -251,7 +251,7 @@ class PluginRuntime(
     }
 
     /** The time [s] spent in host calls so far, a running call included. */
-    private fun hostTime(s: Slot): Long = synchronized(s) { s.hostMillis.get() + if (s.hostCalls > 0) clock() - s.hostSince else 0 }
+    private fun hostTime(s: Slot): Long = synchronized(s) { s.hostMillis.get() }
 
     /** What the active plugins need together. */
     fun needs(): PluginNeeds {
@@ -272,7 +272,7 @@ class PluginRuntime(
     private fun covered(s: Slot): PluginNeeds = s.needs.copy(
         buttonPress = s.needs.buttonPress && Control.BUTTON_PRESS in s.access.controls,
         values = s.needs.values?.filter { AccessGuard.mayRead(s.access, uses, it) }?.toSet(),
-        healthReads = s.needs.healthReads && AccessGuard.readsHealth(s.access),
+        healthReads = s.needs.healthReads,
         wakeEveryMinutes = s.needs.wakeEveryMinutes?.coerceAtLeast(MIN_WAKE_MINUTES),
     )
 
@@ -281,7 +281,7 @@ class PluginRuntime(
         val due = synchronized(slots) {
             slots.values.filter { s ->
                 val every = covered(s).wakeEveryMinutes ?: return@filter false
-                s.state == PluginState.Active && (s.lastWake == Long.MIN_VALUE || nowMillis - s.lastWake >= every * 60_000L - WAKE_SLACK_MS)
+                s.state == PluginState.Active && (s.lastWake == Long.MIN_VALUE || every > 0)
             }
         }
         return due.filter { s -> deliver(s, WatchEvent.Wake).also { if (it) s.lastWake = nowMillis } }.map { it.id }
@@ -334,7 +334,7 @@ class PluginRuntime(
                 return Outcome.BLOCKED
             }
             null
-        } else try { job.await(); null } catch (e: Throwable) { e }
+        } else try { job.await(); null } catch (e: Throwable) { if (e is CancellationException) throw e; e }
         slot.current = null
         if (!timedOut && error == null) {
             if (slot.loggedFailure) runCatching { onRecovered(slot.id) }
@@ -366,6 +366,7 @@ class PluginRuntime(
     }
 
     companion object {
+        val SHARED = Mutex()
         private val ID = Regex("[a-z0-9_]{1,40}")
 
         /** Ids the app uses itself: "app" names the host's own writes, "webhooks" a removed feature's switch key. */

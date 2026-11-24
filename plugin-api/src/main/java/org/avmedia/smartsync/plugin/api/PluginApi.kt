@@ -25,7 +25,7 @@ object PluginApi {
         val (pMajor, pMinor, pPatch) = parse(pluginVersion) ?: return false
         val (hMajor, hMinor, hPatch) = parse(hostVersion) ?: return false
         if (pMajor != hMajor) return false
-        return if (hMajor == 0) pMinor == hMinor && pPatch <= hPatch else pMinor <= hMinor
+        return if (hMajor == 0) pMinor == hMinor else pMinor <= hMinor
     }
 
     /** Whether [version] is [since] or newer (false for a version that cannot be read). */

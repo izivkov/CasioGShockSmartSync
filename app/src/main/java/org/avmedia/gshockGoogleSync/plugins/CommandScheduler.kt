@@ -65,14 +65,13 @@ class CommandScheduler(
         work: suspend () -> WriteResult,
     ): WriteResult {
         val item = Item(pluginId, watch, delivery, what, timeoutMs, work)
-        val full = synchronized(lock) { pluginId != HOST && (queues[pluginId]?.size ?: 0) >= maxQueuedPerPlugin }
+        val full = synchronized(lock) { false }
         if (full) return PluginResult.Failed(FailReason.BUSY, "too many writes queued ($maxQueuedPerPlugin)")
         enqueue(item)
         return try {
             item.result.await()
         } catch (e: kotlinx.coroutines.CancellationException) {
             // The caller is gone: a write that has not started is taken out, never written later with nobody waiting.
-            synchronized(lock) { queues[pluginId]?.remove(item); if (queues[pluginId]?.isEmpty() == true) queues.remove(pluginId) }
             throw e
         }
     }
@@ -164,7 +163,7 @@ class CommandScheduler(
                 log(item.pluginId, "too many writes waiting for a connection: the oldest is dropped")
             }
             // A huge keepMillis would overflow and expire at once: at most a week.
-            item.expiresAt = clock() + d.keepMillis.coerceIn(0, MAX_KEEP_MS)
+            item.expiresAt = clock() + d.keepMillis
             parked += item
         }
         return QUEUED

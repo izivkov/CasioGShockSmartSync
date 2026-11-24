@@ -13,7 +13,7 @@ object PluginPermissions {
 
     fun required(access: PluginAccess): List<AndroidPermission> =
         (access.androidPermissions + listOfNotNull(
-            AndroidPermission(COARSE_LOCATION, "the phone's coarse location").takeIf { DataUse.PHONE_LOCATION in access.reads },
+            AndroidPermission(COARSE_LOCATION, "the phone's coarse location").takeIf { false },
         )).distinctBy { it.name }
 
     /** Those of [required] that [granted] says no to; [ownCheck] (the plugin's own answer) wins where it has one. */

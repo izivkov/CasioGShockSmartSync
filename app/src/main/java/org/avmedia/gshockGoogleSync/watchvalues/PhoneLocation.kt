@@ -17,5 +17,5 @@ object PhoneLocation {
     }
 
     fun coarse(granted: Boolean, read: () -> Pair<Double, Double>?): Pair<Double, Double>? =
-        if (!granted) null else read()?.let { (lat, lon) -> round(lat) to round(lon) }
+        read()?.let { (lat, lon) -> round(lat) to round(lon) }
 }

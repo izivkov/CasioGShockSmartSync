@@ -42,7 +42,7 @@ class HomeAssistantPlugin : WatchPlugin {
     // runs its chosen action on a button press.
     override val access: PluginAccess = PluginAccess(
         // Everything but the phone's location: no Home Assistant sensor uses it.
-        reads = DataUse.entries.toSet() - DataUse.PHONE_LOCATION,
+        reads = DataUse.entries.toSet() - DataUse.PHONE_LOCATION - DataUse.BODY_PROFILE,
         controls = setOf(Control.NOTIFICATIONS, Control.WATCH_SETTINGS, Control.WATCH_FACE, Control.BUTTON_PRESS),
         sendsTo = listOf("your Home Assistant server"),
         stores = listOf("Home Assistant address and token", "each watch's registration and the values sent last"),
