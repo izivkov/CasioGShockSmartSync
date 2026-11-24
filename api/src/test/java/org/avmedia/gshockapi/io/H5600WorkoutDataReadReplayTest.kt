@@ -10,7 +10,7 @@ import org.junit.Test
 /**
  * A watch that plays the frames of one real workout read (resource `h5600_workout_1f_read.txt`): session, group header,
  * both headers and the first data read, 4096 bytes in one sector. The watch sends the sector end `07 1F 00 00 00 00 00`
- * and then says nothing more, as the real one (log 2026-11-24 02:37): that sector end with every byte in is the end of the
+ * and then says nothing more, as the real one: that sector end with every byte in is the end of the
  * block read, no `09` follows. It answers only a next request (`00 1F` or `00 20`), here with an abort.
  */
 private class DataReadReplayWatch(private val inbox: Channel<WorkoutMsg>) : WorkoutLink {

@@ -224,6 +224,9 @@ class WorkoutTransfer(
                     SECTOR_END ->
                         if (asm.endSector()) {
                             drsp(step, echo(m.data, category))
+                            // The sector end with every asked byte in is the end of a block read (1F, 20): the watch then
+                            // waits for the next request and sends no `09`. 1D and 1E end with `09`.
+                            asm.result()?.let { capture(null, it); return it }
                         } else {
                             if (++bad >= 2) return null
                             asm.dropSector()

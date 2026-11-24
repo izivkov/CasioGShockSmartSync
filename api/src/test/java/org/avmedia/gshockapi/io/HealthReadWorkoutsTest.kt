@@ -210,7 +210,7 @@ class HealthReadWorkoutsTest {
         assertTrue(AppLog.recentEvents().none { it.contains("next automatic try in") && it.contains("LifeLog") })
     }
 
-    /** Log 2026-11-24 02:37: a second LifeLog attempt of the same Health read must not start the workout read again. */
+    /** A second LifeLog attempt of the same Health read must not start the workout read again. */
     @Test fun oneHealthReadTriesTheWorkoutsOnceAlsoWhenTheLifeLogRestarts() = runBlocking {
         H5600WorkoutIO.sink = { true }
         H5600HealthIO.readyWaitMs = 1_500L

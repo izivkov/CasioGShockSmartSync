@@ -8,7 +8,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** A re-paired watch (new Bluetooth address) keeps its HA registration; 2026-11-24 the sync stopped quietly. */
+/** A re-paired watch (new Bluetooth address) keeps its HA registration; before, the sync stopped quietly. */
 class HaRePairTest {
     private class Mem : KeyValueStore {
         val m = HashMap<String, String>()

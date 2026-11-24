@@ -81,6 +81,9 @@ object H5600HealthIO {
     private val lock = Any()
     private var active: Transfer? = null
 
+    /** The workouts were read (or tried) before START in this Health read. */
+    @Volatile private var workoutsTried = false
+
     private val _status = MutableStateFlow<String?>(null)
 
     /** What the transfer is doing when it is not simply running, for example a restart. */
@@ -167,6 +170,7 @@ object H5600HealthIO {
             return StepCounterData.unavailable()
         }
         lastError = null
+        workoutsTried = false
         requestStartedMs = System.currentTimeMillis()
         var locked = false
         try {
@@ -228,7 +232,13 @@ object H5600HealthIO {
             val stepGoal = runSetup(transfer)
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
             Timber.i("H5600: setup finished, step goal=$stepGoal")
-            val workoutsRead = H5600WorkoutIO.beforeLifeLog(transfer.watchCondition, workoutsFirst)
+            // One workout read per Health read: a restarted LifeLog attempt does not start it again.
+            val workoutsRead = if (workoutsTried) {
+                org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("LifeLog: the workouts were tried in this Health read, not again")
+                true
+            } else {
+                H5600WorkoutIO.beforeLifeLog(transfer.watchCondition, workoutsFirst).also { workoutsTried = it }
+            }
             if (transfer.lost) return AttemptOutcome(StepCounterData.unavailable(), restart = false, lost = true)
 
             // The official app and the Python script write START before the first poll. The watch
