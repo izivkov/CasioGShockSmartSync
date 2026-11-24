@@ -51,8 +51,11 @@ class PhoneNotificationForwarder(
     }
 
     companion object {
-        /** The connected watch shows phone notifications ([serviceFound]: it lists the notification characteristic). */
-        fun watchShows(serviceFound: Boolean): Boolean = serviceFound
+        /**
+         * The connected watch shows phone notifications: its model has them and [serviceFound] (it lists the notification
+         * characteristic, which an OCW-S7000 does without showing any).
+         */
+        fun watchShows(serviceFound: Boolean): Boolean = org.avmedia.gshockapi.WatchInfo.showsAppNotifications(serviceFound)
     }
 }
 
