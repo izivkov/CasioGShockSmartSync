@@ -23,6 +23,7 @@ import org.avmedia.gshockapi.io.WatchExchange
 import org.avmedia.gshockGoogleSync.ui.actions.WatchActions
 import timber.log.Timber
 import kotlin.time.Duration.Companion.minutes
+import org.avmedia.gshockGoogleSync.watch.CurrentWatch
 
 /**
  * Reads the DW-H5600 LifeLog by itself when the watch connects and then every period of the setting while it stays
@@ -37,13 +38,15 @@ class BackgroundHealthSync @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    // The last read and the failure back-off are the connected watch's own: another watch's failure never delays it.
+    private val watches by lazy { AppStores.watchStore(context) }
     private val store = object : HealthReadStore {
         override var lastSuccessMs: Long
-            get() = LocalDataStorage.get(context, KEY_OK)?.toLongOrNull() ?: 0L
-            set(v) = LocalDataStorage.put(context, KEY_OK, v.toString())
+            get() = watches.get(CurrentWatch.key(), KEY_OK, KEY_OK)?.value?.toLongOrNull() ?: 0L
+            set(v) = watches.put(CurrentWatch.key(), KEY_OK, v.toString())
         override var lastFailureMs: Long
-            get() = LocalDataStorage.get(context, KEY_FAIL)?.toLongOrNull() ?: 0L
-            set(v) = LocalDataStorage.put(context, KEY_FAIL, v.toString())
+            get() = watches.get(CurrentWatch.key(), KEY_FAIL, KEY_FAIL)?.value?.toLongOrNull() ?: 0L
+            set(v) = watches.put(CurrentWatch.key(), KEY_FAIL, v.toString())
     }
 
     private val scheduler = HealthReadScheduler(
@@ -72,7 +75,7 @@ class BackgroundHealthSync @Inject constructor(
         if (outcome == HealthReadScheduler.Outcome.NOT_DUE || outcome == HealthReadScheduler.Outcome.OFF) return
         Timber.i("Background health read: $outcome")
         if (outcome == HealthReadScheduler.Outcome.OK || outcome == HealthReadScheduler.Outcome.FAILED) {
-            LocalDataStorage.put(context, KEY_LINE, "${LocalTime.now().withNano(0)} $outcome")
+            watches.put(CurrentWatch.key(), KEY_LINE, "${LocalTime.now().withNano(0)} $outcome")
         }
     }
 
@@ -99,6 +102,10 @@ class BackgroundHealthSync @Inject constructor(
         const val KEY_LINE = "health_bg_last_line"
         const val KEY_INTERVAL_MIN = "health_bg_interval_min"
         private const val TICK_MS = 60_000L
+
+        /** The last background read of the connected (else the last) watch, for the Health screen. */
+        fun lastLine(context: Context): String? =
+            AppStores.watchStore(context).get(CurrentWatch.keyOrLast(context), KEY_LINE, KEY_LINE)?.value
 
         /** The background read period in minutes (Settings), 0 = off; 15 when never set. */
         fun intervalMinutes(context: Context): Int =

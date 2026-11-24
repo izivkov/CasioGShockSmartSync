@@ -26,11 +26,13 @@ class HaCarryOver(
     fun moveTo(store: HaStore, address: String, watchName: String, cfg: HaConfig): Boolean {
         val id = HaPayloads.deviceId(address)
         if (store.loadRegistration(id) != null) return false
-        val model = HaPayloads.resolveNames(watchName, cfg.deviceName, cfg.model).second
+        // The model of the watch's own name ("GBX-H5600"); a registered one may carry the full typed model
+        // ("GBX-H5600KI-5ER"). Never the typed model of the setup: that one may be another watch's.
+        val model = HaPayloads.defaultModel(watchName)
         val candidates = store.registeredIds().filter { it != id }.filter { old ->
             val reg = store.loadRegistration(old) ?: return@filter false
             val oldAddress = addressOf(old) ?: return@filter false
-            field(reg.registration, "model").equals(model, ignoreCase = true) &&
+            field(reg.registration, "model").startsWith(model, ignoreCase = true) &&
                 !paired(oldAddress) &&
                 watchNameAt(oldAddress).let { it.isNullOrBlank() || it == watchName }
         }

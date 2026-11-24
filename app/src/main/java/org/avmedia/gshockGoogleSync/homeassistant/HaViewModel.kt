@@ -75,11 +75,13 @@ class HaViewModel @Inject constructor(
 
     /** Rebuilds everything that comes from the store; keeps what only lives here (check, search, loading). */
     private fun snapshot(old: HaUi? = null): HaUi {
-        val sent = store.loadSent()
+        // Everything shown is the connected (else the last) watch's own; the others are only listed by name.
         val id = watchId()
+        val key = id.orEmpty()
+        val sent = store.loadSent(key)
         val reg = id?.let { store.loadRegistration(it) }
         val form = store.loadForm()
-        val failed = store.lastResultOk() == false
+        val failed = store.lastResultOk(key) == false
         val firmware = (sent.states["watch_firmware"] as? String)?.takeIf { it != "unknown" }
         return HaUi(
             form = form,
@@ -90,15 +92,18 @@ class HaViewModel @Inject constructor(
                 firmware = firmware,
                 lastUpdate = HaSentView.time(sent.at),
                 failed = failed,
-                lastText = store.lastResult().orEmpty(),
-                deviceUrl = HaDeviceLookup.deviceUrl(form.baseUrl, store.loadDeviceId()),
+                lastText = store.lastResult(key).orEmpty(),
+                deviceUrl = HaDeviceLookup.deviceUrl(form.baseUrl, store.loadDeviceId(key)),
                 lookingUpDevice = old?.watch?.lookingUpDevice ?: false,
-                notificationsSupported = store.notificationsSupported() != false,
+                notificationsSupported = store.notificationsSupported(key) != false,
                 rawUntil = rawSwitch.onUntilText(),
                 suggestedName = connectedId()?.let { HaPayloads.defaultModel(org.avmedia.gshockapi.WatchInfo.name) }.orEmpty(),
                 confirmedName = id?.let { store.confirmedName(it) },
+                name = if (reg != null) store.nameInHa(key).orEmpty() else "",
+                model = store.modelFor(key),
+                others = store.registeredIds().filter { it != key }.mapNotNull { store.nameInHa(it) },
             ),
-            sent = HaSentUi(HaSentView.groups(sent, store.groupsOn()), sending = store.getPending() != null, failed = failed),
+            sent = HaSentUi(HaSentView.groups(sent, store.groupsOn()), sending = store.getPending(key) != null, failed = failed),
             actions = (old?.actions ?: HaActionsUi()).copy(chosen = store.loadAction(), lastRun = store.lastActionResult().orEmpty()),
             dash = old?.dash ?: HaDashUi(),
         )
@@ -115,15 +120,16 @@ class HaViewModel @Inject constructor(
         val id = connectedId() ?: return
         if (store.loadRegistration(id) != null) return
         if (!store.confirmName(id, name)) return
-        store.load()?.let { store.save(it.copy(model = model.trim())) }
+        // The model belongs to this watch only: another watch registers with its own.
+        store.saveModel(id, model)
         update { snapshot(it) }
         HaPushRouter.updateSensorsHook?.invoke()
     }
 
-    private fun watchId(): String? {
-        val address = runCatching { org.avmedia.gshockapi.WatchInfo.getAddress() }.getOrDefault("")
-        return if (address.isNotBlank()) HaPayloads.deviceId(address) else store.registeredIds().firstOrNull()
-    }
+    /** The connected watch, else the last connected one when it is registered, else the first registered. */
+    private fun watchId(): String? = connectedId()
+        ?: org.avmedia.gshockGoogleSync.watch.CurrentWatch.keyOrLast(context).takeIf { it.isNotBlank() && store.loadRegistration(it) != null }
+        ?: store.registeredIds().firstOrNull()
 
     private fun update(change: (HaUi) -> HaUi) = _ui.update { change(it) }
 
@@ -154,24 +160,31 @@ class HaViewModel @Inject constructor(
 
     fun save(baseUrl: String, token: String, deviceName: String, model: String) {
         update { it.copy(check = HaCheckUi.Checking) }
+        val id = watchId()
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) { HaClient(HaOkHttpTransport, store).saveSettings(baseUrl, token, deviceName, model) }
+            val form = store.loadForm()
+            // URL and token are the setup's; the model typed here is this watch's ([HaStore.saveModel]).
+            val result = withContext(Dispatchers.IO) { HaClient(HaOkHttpTransport, store).saveSettings(baseUrl, token, form.deviceName.ifBlank { deviceName }, form.model) }
+            val changedModel = id != null && model.trim() != store.modelFor(id)
+            if (result is HaResult.Ok && id != null && changedModel) store.saveModel(id, model)
             val check = if (result is HaResult.Ok) HaCheckUi.Ok(result.message) else HaCheckUi.Error(result.message, result.detail)
             update { snapshot(it.copy(check = check)) }
             if (result is HaResult.Ok) { refreshActions(); lookUpDevice() }
+            if (result is HaResult.Ok && changedModel && store.loadRegistration(id.orEmpty()) != null) HaPushRouter.updateSensorsHook?.invoke()
         }
     }
 
     /** Finds the device page id of the registered watch, once. Quiet when it fails: the button then opens the device list. */
     private fun lookUpDevice() {
         val cfg = store.load() ?: return
-        val reg = watchId()?.let { store.loadRegistration(it) } ?: return
-        if (store.loadDeviceId() != null) return
+        val watch = watchId() ?: return
+        val reg = store.loadRegistration(watch) ?: return
+        if (store.loadDeviceId(watch) != null) return
         val name = runCatching { JsonParser.parseString(reg.registration).asJsonObject.get("device_name").asString }.getOrNull() ?: return
         update { it.copy(watch = it.watch.copy(lookingUpDevice = true)) }
         viewModelScope.launch {
             val id = withContext(Dispatchers.IO) { HaDeviceLookup.find(HaOkHttpTransport, cfg, name) }
-            id?.let { store.saveDeviceId(it) }
+            id?.let { store.saveDeviceId(watch, it) }
             update { snapshot(it.copy(watch = it.watch.copy(lookingUpDevice = false))) }
         }
     }

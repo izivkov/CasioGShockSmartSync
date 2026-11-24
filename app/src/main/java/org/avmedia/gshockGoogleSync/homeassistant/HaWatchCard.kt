@@ -62,6 +62,7 @@ internal fun HaWatchCard(
             HaNote("Firmware: " + (watch.firmware ?: "not known yet"))
         }
         if (!watch.notificationsSupported) HaNote("This watch cannot show notifications")
+        if (watch.others.isNotEmpty()) HaNote("Other watches in Home Assistant: " + watch.others.joinToString() + ". Each keeps its own device; its values are sent while it is connected.")
         watch.lastUpdate?.let { HaNote("Last update: $it") }
         if (watch.failed) HaNote("The last update did not go through. It is tried again at the next connection.", error = true)
         if (watch.lookingUpDevice) HaLoading("Looking for the device in Home Assistant...")

@@ -15,10 +15,12 @@ data class HomeSnapshot(
     val temperature: Int = 0,
     val watchName: String = "",
     val timeZoneOption: String = TimeSettingsStorage.TimeZoneOption.SYSTEM.name,
+    /** When it was saved, epoch millis; 0 in a snapshot of an older version. */
+    val savedAtMs: Long = 0L,
 )
 
 /** Keeps one [HomeSnapshot] per watch address. Android-free. */
-class HomeSnapshotStore(private val store: KeyValueStore) {
+class HomeSnapshotStore(private val store: KeyValueStore, private val clock: () -> Long = System::currentTimeMillis) {
     private val gson = Gson()
 
     fun load(address: String): HomeSnapshot? =
@@ -26,7 +28,7 @@ class HomeSnapshotStore(private val store: KeyValueStore) {
         else runCatching { gson.fromJson(store.get(KEY + address), HomeSnapshot::class.java) }.getOrNull()
 
     fun save(address: String, snapshot: HomeSnapshot) {
-        if (address.isNotBlank()) store.put(KEY + address, gson.toJson(snapshot))
+        if (address.isNotBlank()) store.put(KEY + address, gson.toJson(snapshot.copy(savedAtMs = clock())))
     }
 
     /** A re-paired watch has a new address: its last values go with it. */
@@ -45,9 +47,17 @@ class HomeSnapshotStore(private val store: KeyValueStore) {
                 ?: TimeSettingsStorage.TimeZoneOption.SYSTEM
             return base.copy(
                 timer = s.timer, homeTime = s.homeTime, batteryLevel = s.batteryLevel, temperature = s.temperature,
-                watchName = s.watchName, timeZoneOption = option, updating = true,
+                watchName = s.watchName, timeZoneOption = option, updating = true, fromStore = true, storedAtMs = s.savedAtMs,
             )
         }
+
+        /** The watch did not answer: the stored values stay marked as stored ([mark]), never silently fresh. */
+        fun afterFailedRead(state: TimeState): TimeState = state.copy(updating = false, fromStore = false)
+
+        /** The mark of the shown values ([org.avmedia.gshockGoogleSync.watch.StoredValue.mark]); null once the watch confirmed them. */
+        fun mark(state: TimeState, nowMs: Long): String? =
+            if (!state.fromStore && !state.updating) null
+            else org.avmedia.gshockGoogleSync.watch.StoredValue(Unit, "", state.storedAtMs, confirmed = !state.fromStore).mark(nowMs, state.updating)
 
         fun of(state: TimeState) = HomeSnapshot(
             state.timer, state.homeTime, state.batteryLevel, state.temperature, state.watchName, state.timeZoneOption.name,

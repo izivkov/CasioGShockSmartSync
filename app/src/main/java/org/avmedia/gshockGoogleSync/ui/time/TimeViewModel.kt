@@ -49,6 +49,10 @@ data class TimeState(
     val isSendingTime: Boolean = false,
     /** True while the values shown are the stored ones and the watch is being read. */
     val updating: Boolean = false,
+    /** True while the watch values shown are the stored ones, not yet confirmed by the watch on this link. */
+    val fromStore: Boolean = false,
+    /** When the stored values were saved, epoch millis; 0 = not known. */
+    val storedAtMs: Long = 0L,
 )
 
 sealed interface TimeAction {
@@ -266,6 +270,7 @@ class TimeViewModel @Inject constructor(
                     isVoiceCommandSupported = isVoiceCommandSupported,
                     isVoiceVerbose = isVoiceVerbose,
                     updating = false,
+                    fromStore = false,
                 )
             }
             val address = org.avmedia.gshockapi.WatchInfo.getAddress()
@@ -281,7 +286,8 @@ class TimeViewModel @Inject constructor(
             }
             Unit
         } }.onFailure {
-            _state.update { s -> s.copy(updating = false) }
+            // The watch did not answer: the stored values stay marked as stored, never passing for fresh.
+            _state.update { s -> HomeSnapshotStore.afterFailedRead(s) }
             if (silent) timber.log.Timber.w(it, "Time screen refresh failed") else AppSnackbar("Api Error")
         }
     }

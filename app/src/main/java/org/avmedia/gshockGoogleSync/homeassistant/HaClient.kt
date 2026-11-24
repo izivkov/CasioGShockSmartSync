@@ -116,15 +116,18 @@ class HaClient(
         return if (id.isNullOrBlank()) Reg.Refused(HaResult.Failed("Home Assistant gave no webhook id")) else Reg.Done(id)
     }
 
-    private fun push(cfg: HaConfig, reg: HaRegistration, job: HaJob): Push {
-        val sensors = HaSensors.forModel(this.sensors, job.h5600 ?: true)
+    private fun push(cfg: HaConfig, reg: HaRegistration, given: HaJob): Push {
+        val sensors = HaSensors.forCaps(this.sensors, WatchCaps.of(given))
+        // Only the values of sensors this watch has: an OCW job never updates a health sensor.
+        val ids = sensors.map { it.uniqueId }.toSet()
+        val job = given.copy(states = given.states.filterKeys { it in ids }, attributes = given.attributes?.filterKeys { it in ids })
         val hook = "${cfg.baseUrl}/api/webhook/${reg.webhookId}"
         val fingerprint = HaSensors.fingerprint(sensors)
         if (reg.sensorsHash != fingerprint) {
             // register_sensor carries a state and HA shows it: a null would turn a known value to unknown.
             // So: the value of this job, else the last one sent (persisted), else null for a sensor never sent.
             // The attributes come with the value they belong to: HA replaces them too (steps_by_hour).
-            val lastSent = store.loadSent()
+            val lastSent = store.loadSent(job.deviceId)
             for (s in sensors) {
                 val fresh = job.states[s.uniqueId]
                 val state = fresh ?: lastSent.states[s.uniqueId]

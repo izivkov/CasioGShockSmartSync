@@ -19,21 +19,30 @@ class HaWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
 
     override suspend fun doWork(): Result {
         val store = AppStores.haStore(applicationContext)
-        val job = store.getPending() ?: return Result.failure()
+        val ids = store.pendingIds()
+        if (ids.isEmpty()) return Result.failure()
         if (!AppStores.toggles(applicationContext).isOn(ServiceToggles.Service.HOME_ASSISTANT)) {
-            store.clearPending() // switched off after this was queued: send nothing
+            ids.forEach { store.clearPending(it) } // switched off after this was queued: send nothing
             return Result.success()
         }
         val attempt = runAttemptCount + 1
-        val result = withContext(Dispatchers.IO) { HaClient(RetryingHaTransport(HaOkHttpTransport), store, mayRegister = { store.confirmedName(it) != null }).send(job) }
-        val retry = result is HaResult.Retry && attempt < CallRetry.MAX_RUNS
-        // The message holds no URL and no token.
-        Timber.d("Home Assistant attempt $attempt: ${result.message}")
-        store.saveResult("${result.message} at ${java.time.OffsetDateTime.now().withNano(0)}" + if (retry) " (retrying)" else "", result is HaResult.Ok)
-        if (result is HaResult.Ok) store.saveSent(job, System.currentTimeMillis())
+        // Each watch's job goes to that watch's registration only; one failing watch does not hold back the others.
+        var retry = false
+        var ok = true
+        for (id in ids) {
+            val job = store.getPending(id)
+            if (job == null) { store.clearPending(id); continue }
+            val result = withContext(Dispatchers.IO) { HaClient(RetryingHaTransport(HaOkHttpTransport), store, mayRegister = { store.confirmedName(it) != null }).send(job) }
+            val again = result is HaResult.Retry && attempt < CallRetry.MAX_RUNS
+            // The message holds no URL and no token.
+            Timber.d("Home Assistant attempt $attempt: ${result.message}")
+            store.saveResult(id, "${result.message} at ${java.time.OffsetDateTime.now().withNano(0)}" + if (again) " (retrying)" else "", result is HaResult.Ok)
+            if (result is HaResult.Ok) store.saveSent(job, System.currentTimeMillis())
+            if (again) retry = true else store.clearPending(id)
+            if (result !is HaResult.Ok) ok = false
+        }
         if (retry) return Result.retry()
-        store.clearPending()
-        return if (result is HaResult.Ok) Result.success() else Result.failure()
+        return if (ok) Result.success() else Result.failure()
     }
 
     companion object {

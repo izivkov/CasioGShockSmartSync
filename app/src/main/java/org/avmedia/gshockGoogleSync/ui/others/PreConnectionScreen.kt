@@ -332,6 +332,13 @@ fun PreConnectionScreen(
                                 .padding(top = 24.dp, start = 16.dp)
                         )
 
+                        // Phone notifications cannot arrive while Android's notification access is off.
+                        org.avmedia.gshockGoogleSync.ui.settings.NotificationAccessBanner(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 80.dp, start = 16.dp, end = 16.dp)
+                        )
+
                         Box(
                             modifier =
                                 Modifier

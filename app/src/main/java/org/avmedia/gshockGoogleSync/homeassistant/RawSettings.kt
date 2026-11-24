@@ -25,7 +25,10 @@ object RawSettings {
     fun variable(code: Int): String = "watch.raw.${name(code)}"
 
     /** Never read while a LifeLog transfer runs: both use the same link. */
-    val shared = RawSettingsReader(busy = { H5600HealthIO.isActive || H5600Session.inFlight.get() })
+    val shared = RawSettingsReader(
+        busy = { H5600HealthIO.isActive || H5600Session.inFlight.get() },
+        watch = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },
+    )
 }
 
 /**
@@ -37,12 +40,29 @@ class RawSettingsReader(
     private val clock: () -> Long = System::currentTimeMillis,
     private val busy: () -> Boolean = { false },
     private val intervalMs: Long = 30 * 60 * 1000L,
+    /** The connected watch's key: the values and read times are that watch's; another watch starts empty. */
+    private val watch: () -> String = { "" },
 ) {
     private val attempted = java.util.concurrent.ConcurrentHashMap<Int, Long>()
     private val hex = LinkedHashMap<String, String>()
     private var lastRead: Long? = null
+    private var readFor: String = ""
+
+    /** Another watch is connected: nothing of the last one is kept or shown. */
+    private fun sameWatch() {
+        if (readFor.isEmpty()) return
+        val now = watch()
+        synchronized(hex) {
+            if (now == readFor) return
+            readFor = now
+            attempted.clear()
+            hex.clear()
+            lastRead = null
+        }
+    }
 
     suspend fun refresh(raw: RawRequester, codes: List<Int> = RawSettings.CODES) {
+        sameWatch()
         val start = clock()
         for (code in codes) {
             if (busy() || clock() - start > BUDGET_MS) return
@@ -77,10 +97,10 @@ class RawSettingsReader(
     }
 
     /** Code name ("0x41") to hex ("41 01 02"), for the codes that were read. */
-    fun values(): Map<String, String> = synchronized(hex) { LinkedHashMap(hex) }
+    fun values(): Map<String, String> { sameWatch(); return synchronized(hex) { LinkedHashMap(hex) } }
 
     /** Time of the last successful read of any code, epoch millis; null when none. */
-    fun lastReadMillis(): Long? = synchronized(hex) { lastRead }
+    fun lastReadMillis(): Long? { sameWatch(); return synchronized(hex) { lastRead } }
 
     private companion object {
         const val BUDGET_MS = 4_000L

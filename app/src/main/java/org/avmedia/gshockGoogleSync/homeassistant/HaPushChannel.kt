@@ -25,8 +25,15 @@ class HaPushChannel(
     private val enabled: () -> Boolean = { true },
     private val catchUp: (deviceId: String, downSince: Long?, upAt: Long) -> Unit = { _, _, _ -> },
     private val log: (String) -> Unit = { AppLog.log(LogSource.App, it) },
+    /** The connected watch's key ("" for none): a message for any other watch is dropped ([HaPushGate]). */
+    private val connected: () -> String = { "" },
 ) {
     private val router = HaPushRouter(deliver, now = ::now)
+    private val gate = HaPushGate(store, connected, log)
+
+    /** The watches whose channels the live socket subscribed, primary first; a change subscribes again. */
+    @Volatile private var subscribed: List<String> = emptyList()
+    @Volatile private var wanted: () -> List<String> = { emptyList() }
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder().pingInterval(30, TimeUnit.SECONDS).readTimeout(0, TimeUnit.SECONDS).build()
@@ -34,17 +41,29 @@ class HaPushChannel(
 
     @Volatile private var loop: HaPushLoop? = null
 
-    /** Cuts the wait before the next try; with [drop] a live connection is ended too (the network changed). */
-    fun wake(drop: Boolean) { loop?.wake(drop) }
+    /**
+     * Cuts the wait before the next try; with [drop] a live connection is ended too (the network changed). Another
+     * connected watch, or a new registration, also subscribes again: the socket then listens for the right watches.
+     */
+    fun wake(drop: Boolean) {
+        val changed = subscribed.isNotEmpty() && runCatching { wanted() }.getOrDefault(subscribed) != subscribed
+        loop?.wake(drop || changed)
+    }
 
-    suspend fun run(deviceId: () -> String) {
+    /** [deviceId] is the connected (else the last) watch; [others] are the other registered watches, also listened to. */
+    suspend fun run(others: () -> List<String> = { emptyList() }, deviceId: () -> String) {
         log("Home Assistant: push loop started")
+        wanted = { deviceId().let { id -> listOf(id) + pushable(id, others()) } }
         val l = HaPushLoop(
-            connect = { up -> if (enabled()) connectOnce(deviceId(), up).also(::noteReason) else "off".also(::noteReason) },
+            connect = { up -> if (enabled()) connectOnce(deviceId(), others(), up).also(::noteReason) else "off".also(::noteReason) },
             now = System::currentTimeMillis,
             log = log,
             onState = { HaPushState.set(it); HaPushRouter.updateSensorsHook?.invoke() },
-            onUp = { since, at -> runCatching { catchUp(deviceId(), since, at) }.onFailure { Timber.w("HA push: catch-up failed") } },
+            // Settings from HA's helper go to the connected watch only, never to the next watch that connects.
+            onUp = { since, at ->
+                val id = deviceId()
+                if (id.isNotBlank() && id == connected()) runCatching { catchUp(id, since, at) }.onFailure { Timber.w("HA push: catch-up failed") }
+            },
         )
         loop = l
         try { l.run() } finally {
@@ -54,6 +73,10 @@ class HaPushChannel(
             runCatching { HaPushRouter.updateSensorsHook?.invoke() }
         }
     }
+
+    /** The other watches whose registration has the push channel. */
+    private fun pushable(deviceId: String, others: List<String>): List<String> =
+        others.filter { it != deviceId }.distinct().filter { store.loadRegistration(it)?.registration?.contains("push_websocket_channel") == true }
 
     private var lastNote: String? = null
 
@@ -65,12 +88,15 @@ class HaPushChannel(
     }
 
     /** One connection until it ends; [up] is called when HA confirmed the subscription. Returns why it ended. */
-    private suspend fun connectOnce(deviceId: String, up: () -> Unit): String {
+    private suspend fun connectOnce(deviceId: String, others: List<String>, up: () -> Unit): String {
         val cfg = store.load() ?: return "not set up"
         val reg = store.loadRegistration(deviceId) ?: return "not registered"
         // The registration that carries the push flag is saved by the next sensor update; wait for it.
         if (!reg.registration.contains("push_websocket_channel")) return "push not registered yet"
         val url = HaPush.wsUrl(cfg.baseUrl) ?: return "bad URL"
+        val otherIds = pushable(deviceId, others)
+        val otherHooks = otherIds.mapNotNull { store.loadRegistration(it)?.webhookId }
+        subscribed = listOf(deviceId) + otherIds
         var reason = "closed"
         suspendCancellableCoroutine { cont: CancellableContinuation<Unit> ->
             var socket: WebSocket? = null
@@ -80,8 +106,10 @@ class HaPushChannel(
                 send = { socket?.send(it) ?: false },
                 up = up,
                 end = { why -> reason = why; socket?.close(1000, null) },
-                route = { runCatching { router.route(it) }.onFailure { Timber.w("HA push: not delivered") } },
+                route = { p -> if (gate.accept(reg.webhookId, p)) runCatching { router.route(p) }.onFailure { Timber.w("HA push: not delivered") } },
                 log = log,
+                others = otherHooks,
+                routeOther = { p, hook -> if (gate.accept(hook, p)) runCatching { router.route(p) }.onFailure { Timber.w("HA push: not delivered") } },
             )
             val ws = client.newWebSocket(Request.Builder().url(url).build(), object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) { socket = webSocket }
@@ -102,6 +130,7 @@ class HaPushChannel(
             })
             cont.invokeOnCancellation { ws.cancel() }
         }
+        subscribed = emptyList()
         return reason
     }
 

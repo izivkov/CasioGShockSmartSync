@@ -355,7 +355,7 @@ class HealthViewModel @Inject constructor(
 
     private fun showBackgroundLine() {
         _state.update {
-            it.copy(backgroundLine = org.avmedia.gshockGoogleSync.utils.LocalDataStorage.get(appContext, BackgroundHealthSync.KEY_LINE))
+            it.copy(backgroundLine = BackgroundHealthSync.lastLine(appContext))
         }
     }
 

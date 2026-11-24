@@ -62,6 +62,7 @@ class MainEventHandler(
 
     private suspend fun startNotificationServiceWhenReady(session: Session) {
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
+        if (state.phase is SessionPhase.Ready) NotificationMonitorService.forwarder(context).newSession()
         if (state.phase is SessionPhase.Ready && repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
         }
@@ -73,12 +74,16 @@ class MainEventHandler(
         if (state.phase !is SessionPhase.Ready) return
         val haStore = AppStores.haStore(context)
         val supported = repository.supportsAppNotifications()
-        haStore.saveNotificationsSupported(supported)
-        if (!supported) return
         val address = runCatching { WatchInfo.getAddress() }.getOrDefault("")
         if (address.isBlank()) return
-        // The socket belongs to the host (kept alive by the companion service), not to this session.
-        HaPushHost.deliver = { n -> scope.launch { repository.sendAppNotification(n) } }
+        haStore.saveNotificationsSupported(org.avmedia.gshockGoogleSync.watch.WatchKeys.of(address), supported)
+        // The socket belongs to the host (kept alive by the companion service), not to this session. It may still
+        // deliver while another watch is connected later: a watch without notifications never gets a write.
+        HaPushHost.deliver = { n ->
+            if (repository.supportsAppNotifications()) scope.launch { repository.sendAppNotification(n) }
+            else AppLog.log(LogSource.HomeAssistant, "Home Assistant notification not sent: the connected watch cannot show notifications")
+        }
+        if (!supported) return
         val host = HaPushHost.get(context)
         host.acquire(HaPushHost.SESSION)
         host.watchConnected()

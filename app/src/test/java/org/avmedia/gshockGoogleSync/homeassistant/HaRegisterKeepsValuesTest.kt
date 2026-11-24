@@ -33,7 +33,7 @@ class HaRegisterKeepsValuesTest {
         assertTrue(HaClient(t, store).saveSettings("https://ha.example", "tok") is HaResult.Ok)
         val first = HaJob(mapOf("battery" to 80), deviceId = "gshock-1", registration = reg)
         assertTrue(HaClient(t, store).send(first) is HaResult.Ok)
-        store.saveSent(first.states, 1L) // the worker does this after a good send
+        store.saveSent("gshock-1", first.states, 1L) // the worker does this after a good send
         // The sensor set changes (new build): the stored hash no longer matches. No fresh values this time.
         val old = store.loadRegistration("gshock-1")!!
         store.saveRegistration("gshock-1", old.copy(sensorsHash = "old"))

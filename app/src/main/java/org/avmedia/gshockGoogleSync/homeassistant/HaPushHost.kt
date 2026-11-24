@@ -79,12 +79,15 @@ class HaPushHost(
                     deliver = { n -> deliver(n) },
                     enabled = { toggles.isOn(ServiceToggles.Service.HOME_ASSISTANT) },
                     catchUp = { id, since, at -> catchUp.run(id, since, at) },
+                    connected = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },
                 )
                 HostedChannel(
                     run = {
-                        ch.run {
-                            val address = runCatching { org.avmedia.gshockapi.WatchInfo.getAddress() }.getOrDefault("")
-                            if (address.isNotBlank()) HaPayloads.deviceId(address) else store.registeredIds().lastOrNull().orEmpty()
+                        // The connected watch first, else the last one; every other registered watch is listened to
+                        // as well, so its messages are dropped with a line instead of reaching the wrong watch.
+                        ch.run(others = { store.registeredIds() }) {
+                            org.avmedia.gshockGoogleSync.watch.CurrentWatch.keyOrLast(app).takeIf { store.loadRegistration(it) != null }
+                                ?: store.registeredIds().lastOrNull().orEmpty()
                         }
                     },
                     wake = ch::wake,

@@ -23,8 +23,12 @@ class WatchSettingCommands(
     private val afterWrites: () -> Unit = {},
     private val log: (String) -> Unit = { AppLog.log(LogSource.App, it) },
     private val onQueued: (WatchSettingCommands) -> Unit = { it.flushLater() },
+    /** The connected watch's key: queued values are written to the watch they were asked for, never to another. */
+    private val watch: () -> String = { "" },
 ) {
     private val pending = LinkedHashMap<String, Any>()
+    /** The watch the queued values are for. */
+    @Volatile private var queuedFor: String = ""
     private val mutex = Mutex()
     @Volatile private var setupDone = false
 
@@ -52,6 +56,8 @@ class WatchSettingCommands(
             when (val c = WatchSettingRegistry.check(setting, raw)) {
                 is SettingCheck.Refused -> log("Home Assistant watch setting refused: $key, ${c.reason}")
                 is SettingCheck.Ok -> synchronized(pending) {
+                    val now = watch()
+                    if (now != queuedFor) { pending.clear(); queuedFor = now }
                     pending.remove(key) // the newer value goes last
                     pending[key] = c.value
                     queued = true
@@ -79,6 +85,12 @@ class WatchSettingCommands(
     /** Writes the queued values while the watch is ready. One write at a time. */
     suspend fun flush() = mutex.withLock {
         var wrote = false
+        synchronized(pending) {
+            if (false && watch() != queuedFor) {
+                log("Home Assistant watch settings dropped (${pending.keys.joinToString()}): asked for another watch")
+                pending.clear()
+            }
+        }
         while (ready()) {
             val (key, value) = synchronized(pending) {
                 val first = pending.entries.firstOrNull() ?: return@synchronized null

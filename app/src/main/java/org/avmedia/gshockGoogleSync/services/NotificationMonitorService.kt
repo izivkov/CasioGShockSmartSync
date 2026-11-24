@@ -51,9 +51,10 @@ class NotificationMonitorService : NotificationListenerService() {
         // Forward notifications only while a watch session is Ready. Read from the Session at the
         // moment of use, so a recreated service instance cannot miss a connection event.
         if (!sessionManager.isReady) return
-        // Off by default; when on, only the apps the person chose and only real, audible notifications.
+        // The connected watch's own choice: all apps (upstream's behaviour), only the chosen ones, or off. One App log
+        // line per notification (app, sent or skipped and why); a watch without notifications gets nothing.
         val posted = PostedNotification(sbn.packageName, sbn.notification.flags, importanceOf(sbn))
-        if (!AppStores.phoneNotifications(applicationContext).allows(posted, packageName)) return
+        if (!forwarder(applicationContext).decide(posted, getAppName(sbn.packageName), packageName)) return
 
         processNotification(sbn)
             .onSuccess { notificationInfo ->
@@ -133,7 +134,21 @@ class NotificationMonitorService : NotificationListenerService() {
     companion object {
         private var isBound = false
 
-        private fun isNotificationGranted(context: Context): Boolean {
+        @Volatile private var shared: org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder? = null
+
+        /** One forwarder for the process, so the once-per-session lines stay once. */
+        fun forwarder(context: Context): org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder =
+            shared ?: synchronized(this) {
+                shared ?: org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder(
+                    AppStores.phoneNotifications(context.applicationContext),
+                    supported = { org.avmedia.gshockapi.ble.Connection.isServiceSupported(org.avmedia.gshockapi.ble.GetSetMode.NOTIFY) },
+                    watch = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },
+                    log = { org.avmedia.gshockGoogleSync.log.AppLog.log(org.avmedia.gshockGoogleSync.log.LogSource.App, it) },
+                ).also { shared = it }
+            }
+
+        /** True when Android lets this app read notifications (Settings, notification access). */
+        fun isNotificationGranted(context: Context): Boolean {
             val packageName = context.packageName
             val flat = Settings.Secure.getString(
                 context.contentResolver,
@@ -155,7 +170,7 @@ class NotificationMonitorService : NotificationListenerService() {
             }
         }
 
-        private fun openNotificationListenerSettings(context: Context) {
+        fun openNotificationListenerSettings(context: Context) {
             val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)

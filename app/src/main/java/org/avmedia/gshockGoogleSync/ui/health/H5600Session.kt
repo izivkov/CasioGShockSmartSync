@@ -4,7 +4,8 @@ import org.avmedia.gshockapi.model.StepCounterData
 
 /**
  * The DW-H5600 LifeLog result, kept for the life of the app session so that opening the Health
- * screen does not start a new watch transfer. Cleared only by [clear].
+ * screen does not start a new watch transfer. Kept for the watch it came from: another watch never sees it.
+ * Cleared only by [clear].
  */
 internal object H5600Session {
     /** One LifeLog transfer at a time, shared by the background read and the Update button. */
@@ -28,11 +29,20 @@ internal object H5600Session {
     @Volatile
     var onStored: ((StepCounterData) -> Unit)? = null
 
+    /** The connected watch's key (a test seam): a transfer is kept for the watch it came from. */
     @Volatile
-    var data: StepCounterData? = null
+    var watch: () -> String = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() }
+
+    @Volatile
+    private var stored: org.avmedia.gshockGoogleSync.watch.StoredValue<StepCounterData>? = null
+
+    /** The last transfer of the connected watch; null for none or when another watch is connected now. */
+    var data: StepCounterData?
+        get() = stored?.value
         set(value) {
-            field = value
-            storedAtMs = if (value != null) System.currentTimeMillis() else 0L
+            val now = System.currentTimeMillis()
+            stored = value?.let { org.avmedia.gshockGoogleSync.watch.StoredValue(it, watch(), now, confirmed = true) }
+            storedAtMs = if (value != null) now else 0L
             if (value != null) {
                 onStored?.invoke(value)
                 onDownloaded?.invoke()

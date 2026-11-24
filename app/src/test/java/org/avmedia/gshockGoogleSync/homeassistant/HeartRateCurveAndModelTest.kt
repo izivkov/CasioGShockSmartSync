@@ -51,11 +51,11 @@ class HeartRateCurveAndModelTest {
     }
 
     @Test fun otherModelsGetNoneOfTheH5600Sensors() {
-        val other = HaSensors.forModel(HaSensors.ALL, h5600 = false).map { it.uniqueId }
+        val other = HaSensors.forCaps(HaSensors.ALL, WatchCaps.ALL - WatchCap.H5600).map { it.uniqueId }
         listOf("spo2", "cardio_load", "breathing_exercise", "sleep_score", "workout_sport", "stairs_up").forEach { assertFalse(it, it in other) }
         assertTrue("battery" in other)
         assertTrue("steps_today" in other)
-        assertEquals(HaSensors.ALL, HaSensors.forModel(HaSensors.ALL, h5600 = true))
+        assertEquals(HaSensors.ALL, HaSensors.forCaps(HaSensors.ALL, WatchCaps.ALL))
     }
 
     @Test fun aJobCarriesTheModelAndAnOlderJobMeansAllSensors() {

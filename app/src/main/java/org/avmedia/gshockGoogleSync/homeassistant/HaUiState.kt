@@ -33,6 +33,12 @@ data class HaWatchUi(
     val suggestedName: String = "",
     /** The name confirmed for this watch before its first registration, null while not confirmed. */
     val confirmedName: String? = null,
+    /** This watch's name in Home Assistant (its registration); empty before it registered. */
+    val name: String = "",
+    /** This watch's model as it registers (typed for it, else from its registration); empty = from the watch name. */
+    val model: String = "",
+    /** The other watches registered in Home Assistant, by their names there. */
+    val others: List<String> = emptyList(),
 )
 
 data class HaGroupUi(val group: HaGroup, val on: Boolean, val rows: List<Pair<String, String>>)

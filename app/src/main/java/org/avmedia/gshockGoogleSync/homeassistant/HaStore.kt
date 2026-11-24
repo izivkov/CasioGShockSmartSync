@@ -16,6 +16,8 @@ data class HaJob(
     val registration: String = "",
     /** True for the DW-H5600 family: only then are its own sensors (sleep, cardio, workouts, ...) registered. Null in an older job = all. */
     val h5600: Boolean? = null,
+    /** What the watch has ([WatchCaps.names]); its sensors only. Null in an older job: [h5600] decides. */
+    val caps: List<String>? = null,
 )
 
 /** The Home Assistant setup, entered once: where HA is, how to get in, and the optional name and model typed by the owner. */
@@ -49,10 +51,41 @@ data class HaSent(
     val attributes: Map<String, Map<String, Any?>>? = null,
 )
 
-/** The Home Assistant setup, one registration per watch and the newest unsent job, on a [KeyValueStore]. Android-free. */
+/**
+ * The Home Assistant setup, one registration per watch and, per watch ([WatchStore]), the newest unsent job, the values
+ * last sent, the last result and the rest. Values of older versions (one watch) go to the registered H5600 watch once.
+ * Android-free.
+ */
 class HaStore(private val store: KeyValueStore) {
     // Whole numbers stay Long (not 1234.0) when a pending job is read back.
     private val gson = GsonBuilder().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
+
+    /** The per-watch values of Home Assistant; the legacy owner is the registered H5600 watch. */
+    val watches = org.avmedia.gshockGoogleSync.watch.WatchStore(store, pickLegacyOwner = ::legacyOwnerCandidate)
+
+    /**
+     * The watch the values of a version without per-watch stores belong to: the registered watch of the H5600 family
+     * (the one that had health data), else the only registered watch; null when neither is known.
+     */
+    fun legacyOwnerCandidate(): String? {
+        val ids = registeredIds()
+        return ids.firstOrNull { id -> modelInRegistration(id)?.contains("H5600", ignoreCase = true) == true } ?: ids.singleOrNull()
+    }
+
+    /** The model in the stored registration body of [deviceId]; null when not registered. */
+    fun modelInRegistration(deviceId: String): String? = loadRegistration(deviceId)?.registration?.let { body ->
+        runCatching { com.google.gson.JsonParser.parseString(body).asJsonObject.get("model")?.asString }.getOrNull()
+    }
+
+    /** The model typed for [deviceId] on the Home Assistant screen; null = none typed. */
+    fun confirmedModel(deviceId: String): String? = watches.get(deviceId, W_MODEL)?.value?.takeIf { it.isNotBlank() }
+
+    fun saveModel(deviceId: String, model: String) {
+        if (model.isBlank()) watches.delete(deviceId, W_MODEL) else watches.put(deviceId, W_MODEL, model.trim())
+    }
+
+    /** The model [deviceId] registers with: typed for this watch, else the one it registered with, else "" (from its name). */
+    fun modelFor(deviceId: String): String = confirmedModel(deviceId) ?: modelInRegistration(deviceId).orEmpty()
 
     /** The saved setup, or null when URL or token is missing. */
     fun load(): HaConfig? = loadForm().takeIf { it.baseUrl.isNotBlank() && it.token.isNotBlank() }
@@ -84,6 +117,7 @@ class HaStore(private val store: KeyValueStore) {
         store.put(KEY_IDS, gson.toJson(registeredIds().filter { it != from && it != to } + to))
         store.delete(KEY_REG + from)
         store.delete(KEY_NAME + from)
+        watches.move(from, to)
     }
 
     /**
@@ -103,70 +137,96 @@ class HaStore(private val store: KeyValueStore) {
     fun registeredIds(): List<String> =
         runCatching { gson.fromJson(store.get(KEY_IDS), Array<String>::class.java)?.toList() }.getOrNull().orEmpty()
 
-    /** Forgets everything: the setup and every registration. The devices stay in HA until deleted there. */
+    /** Forgets everything: the setup, every registration and every watch's Home Assistant values. */
     fun forgetAll() {
-        registeredIds().forEach { store.delete(KEY_REG + it); store.delete(KEY_NAME + it) }
+        val ids = (registeredIds() + pendingIds()).toSet()
+        ids.forEach { id ->
+            store.delete(KEY_REG + id); store.delete(KEY_NAME + id)
+            PER_WATCH.forEach { watches.delete(id, it) }
+        }
         store.delete(KEY_IDS)
+        store.delete(KEY_PENDING_IDS)
         store.delete(KEY_CONFIG)
-        store.delete(KEY_PENDING)
         store.delete(KEY_ACTION)
         store.delete(KEY_ACTION_RESULT)
-        store.delete(KEY_RESULT_OK)
-        store.delete(KEY_SENT)
-        store.delete(KEY_DEVICE)
-        store.delete(KEY_PUSH_OK)
-        store.delete(KEY_SETTINGS_APPLIED)
+        LEGACY.forEach { store.delete(it) }
     }
 
-    /** The `input_text.gshock_settings` value last applied to the watch; null = never. */
-    fun loadAppliedSettings(): String? = store.get(KEY_SETTINGS_APPLIED)
+    /** The `input_text.gshock_settings` value last applied to [deviceId]; null = never. */
+    fun loadAppliedSettings(deviceId: String): String? = watches.get(deviceId, W_SETTINGS_APPLIED, KEY_SETTINGS_APPLIED)?.value
 
-    fun saveAppliedSettings(value: String) = store.put(KEY_SETTINGS_APPLIED, value)
+    fun saveAppliedSettings(deviceId: String, value: String) = watches.put(deviceId, W_SETTINGS_APPLIED, value)
 
-    /** The newest job replaces a waiting one; a waiting button event is kept until it is sent. */
+    /** The newest job of its watch replaces a waiting one of the same watch; a waiting button event is kept until it is sent. */
     fun putPending(job: HaJob) {
-        val old = getPending()
-        store.put(KEY_PENDING, gson.toJson(job.copy(event = job.event ?: old?.event)))
+        if (job.deviceId.isBlank()) return
+        val old = getPending(job.deviceId)
+        watches.put(job.deviceId, W_PENDING, gson.toJson(job.copy(event = job.event ?: old?.event)))
+        val ids = pendingIds()
+        if (job.deviceId !in ids) store.put(KEY_PENDING_IDS, gson.toJson(ids + job.deviceId))
     }
 
-    fun getPending(): HaJob? = runCatching { gson.fromJson(store.get(KEY_PENDING), HaJob::class.java) }.getOrNull()
+    fun getPending(deviceId: String): HaJob? =
+        watches.get(deviceId, W_PENDING)?.value?.let { runCatching { gson.fromJson(it, HaJob::class.java) }.getOrNull() }
 
-    fun clearPending() = store.delete(KEY_PENDING)
-
-    fun saveResult(text: String, ok: Boolean = true) {
-        store.put(KEY_RESULT, text)
-        store.put(KEY_RESULT_OK, if (ok) "yes" else "no")
+    /** The watches with a job waiting. A job an older version left (one for all) goes to its own watch first. */
+    fun pendingIds(): List<String> {
+        store.get(KEY_PENDING)?.let { raw ->
+            store.delete(KEY_PENDING)
+            runCatching { gson.fromJson(raw, HaJob::class.java) }.getOrNull()?.takeIf { it.deviceId.isNotBlank() }?.let { putPending(it) }
+        }
+        return runCatching { gson.fromJson(store.get(KEY_PENDING_IDS), Array<String>::class.java)?.toList() }.getOrNull().orEmpty()
     }
 
-    /** False when the last send failed; null before the first one. */
-    fun lastResultOk(): Boolean? = store.get(KEY_RESULT_OK)?.let { it == "yes" }
+    fun clearPending(deviceId: String) {
+        watches.delete(deviceId, W_PENDING)
+        store.put(KEY_PENDING_IDS, gson.toJson(pendingIds().filter { it != deviceId }))
+    }
 
-    /** The values of the last good send (merged over earlier ones) and when it was, for the screen. */
-    fun saveSent(states: Map<String, Any>, atMillis: Long, attributes: Map<String, Map<String, Any?>> = emptyMap()) {
-        val old = loadSent()
+    fun saveResult(deviceId: String, text: String, ok: Boolean = true) {
+        watches.put(deviceId, W_RESULT, text)
+        watches.put(deviceId, W_RESULT_OK, if (ok) "yes" else "no")
+    }
+
+    /** False when the last send for [deviceId] failed; null before the first one. */
+    fun lastResultOk(deviceId: String): Boolean? = watches.get(deviceId, W_RESULT_OK, KEY_RESULT_OK)?.value?.let { it == "yes" }
+
+    fun lastResult(deviceId: String): String? = watches.get(deviceId, W_RESULT, KEY_RESULT)?.value
+
+    /** The values of the last good send for [deviceId] (merged over earlier ones) and when it was. Never another watch's. */
+    fun saveSent(deviceId: String, states: Map<String, Any>, atMillis: Long, attributes: Map<String, Map<String, Any?>> = emptyMap()) {
+        if (deviceId.isBlank()) return
+        val old = loadSent(deviceId)
         // HA replaces a sensor's attributes with each update: a sensor sent without attributes has none there now.
         val sentAttributes = attributes.filterKeys { it in states }.filterValues { it.isNotEmpty() }
         val keptAttributes = old.attributes.orEmpty().filterKeys { it !in states } + sentAttributes
-        store.put(KEY_SENT, gson.toJson(HaSent(old.states + states, atMillis, keptAttributes)))
+        watches.put(deviceId, W_SENT, gson.toJson(HaSent(old.states + states, atMillis, keptAttributes)))
     }
 
     /** After a good send of [job]: its values and attributes, for a later register_sensor that has no fresh ones. */
-    fun saveSent(job: HaJob, atMillis: Long) = saveSent(job.states, atMillis, job.attributes.orEmpty())
+    fun saveSent(job: HaJob, atMillis: Long) = saveSent(job.deviceId, job.states, atMillis, job.attributes.orEmpty())
 
-    fun loadSent(): HaSent =
-        runCatching { gson.fromJson(store.get(KEY_SENT), HaSent::class.java) }.getOrNull() ?: HaSent()
+    fun loadSent(deviceId: String): HaSent =
+        watches.get(deviceId, W_SENT, KEY_SENT)?.value?.let { runCatching { gson.fromJson(it, HaSent::class.java) }.getOrNull() } ?: HaSent()
 
-    /** The HA device page id of the watch, once found. */
-    fun saveDeviceId(id: String) = store.put(KEY_DEVICE, id)
+    /** The HA device page id of the watch [deviceId], once found. */
+    fun saveDeviceId(deviceId: String, id: String) = watches.put(deviceId, W_DEVICE, id)
 
-    fun loadDeviceId(): String? = store.get(KEY_DEVICE)?.takeIf { it.isNotBlank() }
+    fun loadDeviceId(deviceId: String): String? = watches.get(deviceId, W_DEVICE, KEY_DEVICE)?.value?.takeIf { it.isNotBlank() }
 
-    fun lastResult(): String? = store.get(KEY_RESULT)
+    /** Whether the watch [deviceId] showed notifications at its last connection; null = not known yet. */
+    fun notificationsSupported(deviceId: String): Boolean? = watches.get(deviceId, W_PUSH_OK, KEY_PUSH_OK)?.value?.let { it == "yes" }
 
-    /** Whether the connected watch showed notifications at its last connection; null = not known yet. */
-    fun notificationsSupported(): Boolean? = store.get(KEY_PUSH_OK)?.let { it == "yes" }
+    fun saveNotificationsSupported(deviceId: String, ok: Boolean) = watches.put(deviceId, W_PUSH_OK, if (ok) "yes" else "no")
 
-    fun saveNotificationsSupported(ok: Boolean) = store.put(KEY_PUSH_OK, if (ok) "yes" else "no")
+    /** The registered watch whose webhook is [webhookId]; null for none. */
+    fun idOfWebhook(webhookId: String): String? = registeredIds().firstOrNull { loadRegistration(it)?.webhookId == webhookId }
+
+    /** The name [deviceId] has in Home Assistant (its registration), else the confirmed one; null for neither. */
+    fun nameInHa(deviceId: String): String? =
+        loadRegistration(deviceId)?.registration?.let { body ->
+            runCatching { com.google.gson.JsonParser.parseString(body).asJsonObject.get("device_name")?.asString }.getOrNull()
+        } ?: confirmedName(deviceId)
 
     /** The action a button press runs besides the event; null = nothing. */
     fun loadAction(): HaAction? =
@@ -185,18 +245,33 @@ class HaStore(private val store: KeyValueStore) {
     fun setGroupOn(group: HaGroup, on: Boolean) = store.put(KEY_GROUP + group.name, if (on) "on" else "off")
 
     private companion object {
+        // Kept by versions before the per-watch stores: read once by the legacy owner, then deleted.
         const val KEY_PUSH_OK = "ha.push.ok"
         const val KEY_SETTINGS_APPLIED = "ha.settings.applied"
-        const val KEY_GROUP = "ha.group."
-        const val KEY_CONFIG = "ha.config"
-        const val KEY_REG = "ha.reg."
-        const val KEY_NAME = "ha.name."
-        const val KEY_IDS = "ha.regs"
         const val KEY_PENDING = "ha.pending"
         const val KEY_RESULT = "ha.result"
         const val KEY_RESULT_OK = "ha.result.ok"
         const val KEY_SENT = "ha.sent"
         const val KEY_DEVICE = "ha.device"
+        val LEGACY = listOf(KEY_PUSH_OK, KEY_SETTINGS_APPLIED, KEY_PENDING, KEY_RESULT, KEY_RESULT_OK, KEY_SENT, KEY_DEVICE)
+
+        // Per watch ([WatchStore] names).
+        const val W_PUSH_OK = "ha.push.ok"
+        const val W_SETTINGS_APPLIED = "ha.settings.applied"
+        const val W_PENDING = "ha.pending"
+        const val W_RESULT = "ha.result"
+        const val W_RESULT_OK = "ha.result.ok"
+        const val W_SENT = "ha.sent"
+        const val W_DEVICE = "ha.device"
+        const val W_MODEL = "ha.model"
+        val PER_WATCH = listOf(W_PUSH_OK, W_SETTINGS_APPLIED, W_PENDING, W_RESULT, W_RESULT_OK, W_SENT, W_DEVICE, W_MODEL)
+
+        const val KEY_GROUP = "ha.group."
+        const val KEY_CONFIG = "ha.config"
+        const val KEY_REG = "ha.reg."
+        const val KEY_NAME = "ha.name."
+        const val KEY_IDS = "ha.regs"
+        const val KEY_PENDING_IDS = "ha.pending.ids"
         const val KEY_ACTION = "ha.action"
         const val KEY_ACTION_RESULT = "ha.action.result"
     }

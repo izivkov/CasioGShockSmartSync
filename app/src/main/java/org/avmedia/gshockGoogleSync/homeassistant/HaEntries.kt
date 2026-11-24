@@ -40,14 +40,15 @@ object HaStatus {
         else -> CONNECTED
     }
 
-    fun of(store: HaStore): String = text(store.load() != null, store.lastResultOk())
+    /** The status of [watch]'s last send (the connected or last watch). */
+    fun of(store: HaStore, watch: String): String = text(store.load() != null, store.lastResultOk(watch))
 }
 
 /** The first entry of the Settings tab: Home Assistant with its status, opening the Home Assistant screen. */
 @Composable
 fun HaSettingsEntry(onOpen: () -> Unit) {
     val context = LocalContext.current
-    val status = remember { HaStatus.of(AppStores.haStore(context)) }
+    val status = remember { HaStatus.of(AppStores.haStore(context), org.avmedia.gshockGoogleSync.watch.CurrentWatch.keyOrLast(context)) }
     HaSettingsEntryContent(status, onOpen)
 }
 

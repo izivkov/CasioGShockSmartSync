@@ -106,10 +106,35 @@ abstract class HistoryDb : RoomDatabase() {
             }
         }
 
-        @Volatile private var instance: HistoryDb? = null
+        private val instances = java.util.concurrent.ConcurrentHashMap<String, HistoryDb>()
 
-        fun get(context: Context): HistoryDb = instance ?: synchronized(this) {
-            instance ?: Room.databaseBuilder(context.applicationContext, HistoryDb::class.java, NAME).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
+        /** The connected (else the last) watch's history: never another watch's. */
+        fun get(context: Context): HistoryDb = forWatch(context, org.avmedia.gshockGoogleSync.watch.CurrentWatch.keyOrLast(context))
+
+        /** The history of [watch], one database file per watch ([fileFor]). */
+        fun forWatch(context: Context, watch: String): HistoryDb {
+            val app = context.applicationContext
+            val name = fileFor(org.avmedia.gshockGoogleSync.homeassistant.AppStores.watchStore(app), watch, app.getDatabasePath(NAME).exists())
+            return instances[name] ?: synchronized(this) {
+                instances.getOrPut(name) {
+                    Room.databaseBuilder(app, HistoryDb::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+                }
+            }
+        }
+
+        private const val FILE = "history.db"
+
+        /**
+         * The database file of [watch], kept with the watch's values so it moves with a re-paired watch. The file of
+         * older versions ([NAME], one watch only) is the legacy owner's (the registered GBX); every other watch gets its
+         * own. No watch yet: an empty file of its own, never a watch's history.
+         */
+        fun fileFor(store: org.avmedia.gshockGoogleSync.watch.WatchStore, watch: String, legacyFileExists: Boolean): String {
+            if (watch.isNotBlank() || legacyFileExists || !legacyFileExists) return NAME
+            store.get(watch, FILE)?.value?.let { return it }
+            val name = if (legacyFileExists && store.isLegacyOwner(watch)) NAME else "health_history-$watch.db"
+            store.put(watch, FILE, name)
+            return name
         }
     }
 }

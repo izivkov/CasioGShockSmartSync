@@ -47,10 +47,11 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen
     var url by remember { mutableStateOf(ui.form.baseUrl) }
     var token by remember { mutableStateOf(ui.form.token) }
     // Before the first registration the name field starts with the watch's own name (without "CASIO ").
+    // Name and model are this watch's own (one Home Assistant device per watch), never the setup's.
     var deviceName by remember {
-        mutableStateOf(if (ui.watch.registered) ui.form.deviceName else ui.watch.confirmedName ?: ui.form.deviceName.ifBlank { ui.watch.suggestedName })
+        mutableStateOf(if (ui.watch.registered) ui.watch.name.ifBlank { ui.form.deviceName } else ui.watch.confirmedName ?: ui.watch.suggestedName)
     }
-    var model by remember { mutableStateOf(ui.form.model) }
+    var model by remember { mutableStateOf(ui.watch.model) }
     val save = { events.onSave(url, token, deviceName, model) }
 
     // The app draws edge to edge: keep the title out of the status bar and the buttons out of the navigation bar.
@@ -63,7 +64,7 @@ internal fun HaScreenContent(ui: HaUi, events: HaEvents = HaEvents(), pickerOpen
             HaConnectionCard(ui.saved, url, token, { url = it }, { token = it }, ui.check, ui.find, events.onFind, save)
             HaWatchCard(
                 ui.saved, ui.watch, deviceName, model, { deviceName = it }, { model = it },
-                changed = deviceName != ui.form.deviceName || model != ui.form.model, onSave = save, onRaw = events.onRawSwitch,
+                changed = model.trim() != ui.watch.model, onSave = save, onRaw = events.onRawSwitch,
                 onConfirm = { events.onConfirmName(deviceName, model) },
             )
             HaSentCard(ui.sent, ui.saved, events.onGroup)

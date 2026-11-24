@@ -295,9 +295,9 @@ class HaClientTest {
     @Test
     fun pendingJobKeepsAWaitingEventAndWholeNumbers() {
         val store = HaStore(HaMemoryStore())
-        store.putPending(HaJob(mapOf("steps_today" to 1234), mapOf("trigger" to "watch_action")))
-        store.putPending(HaJob(mapOf("steps_today" to 1300)))
-        val p = store.getPending()!!
+        store.putPending(HaJob(mapOf("steps_today" to 1234), mapOf("trigger" to "watch_action"), deviceId = "gshock-1"))
+        store.putPending(HaJob(mapOf("steps_today" to 1300), deviceId = "gshock-1"))
+        val p = store.getPending("gshock-1")!!
         assertEquals("watch_action", p.event?.get("trigger"))
         assertEquals(1300L, p.states["steps_today"])
     }

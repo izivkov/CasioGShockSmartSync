@@ -55,7 +55,8 @@ object HaJobs {
             return null
         }
         val confirmed = store.confirmedName(id)
-        return HaPayloads.registrationFor(address, watchName, cfg.copy(deviceName = confirmed ?: cfg.deviceName), appVersion, osVersion)
+        // The model is this watch's own (typed for it, or the one it registered with), never another watch's.
+        return HaPayloads.registrationFor(address, watchName, cfg.copy(deviceName = confirmed ?: cfg.deviceName, model = cfg.model), appVersion, osVersion)
     }
 
     /** Null when there is nothing to send (no sensor values and no event). */
@@ -68,10 +69,11 @@ object HaJobs {
         deviceId: String,
         registration: String,
         h5600: Boolean? = null,
+        caps: Set<WatchCap>? = null,
     ): HaJob? {
         val event = event(trigger, now, watchName)
         if (states.isEmpty() && event == null) return null
-        return HaJob(states, event, attributes, deviceId, registration, h5600)
+        return HaJob(states, event, attributes, deviceId, registration, h5600, caps?.let(WatchCaps::names))
     }
 }
 
@@ -101,6 +103,7 @@ class HaSync @Inject constructor(
             write = { s, v -> access.update(s.code, s.touched, { f -> s.change(f, v) }, s.expectedBack, s.matches) },
             connected = { runCatching { api.isConnected() }.getOrDefault(false) },
             afterWrites = { pushSensorsNow() },
+            watch = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },
         )
         WatchSettingCommands.shared = commands
         org.avmedia.gshockapi.casio.ConnectionKeepAlive.onSetupDone = { commands.onSetupDone() }
@@ -147,19 +150,21 @@ class HaSync @Inject constructor(
         val watchName = org.avmedia.gshockapi.WatchInfo.name
         val now = OffsetDateTime.now().withNano(0)
         val ctx = VariableContext(trigger.eventName, now, runCatching { api.isConnected() }.getOrDefault(false))
-        val h5600 = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isH5600Family(watchName)
-        val sensors = HaSensors.forModel(HaGroups.sensors(store.groupsOn()), h5600)
+        val caps = WatchCaps.connected()
+        val h5600 = WatchCap.H5600 in caps
+        // Only what this model has: an OCW registers and sends no health, workout or settings sensor.
+        val sensors = HaSensors.forCaps(HaGroups.sensors(store.groupsOn()), caps)
         val values = registry.resolve(ctx, HaSensors.variablesOf(sensors))
         val registration = HaJobs.registration(
             store, address, watchName, cfg, org.avmedia.gshockGoogleSync.BuildConfig.VERSION_NAME, android.os.Build.VERSION.RELEASE,
             carryOver,
         ) ?: run {
-            store.saveResult(HaClient.NAME_FIRST, false)
+            store.saveResult(HaPayloads.deviceId(address), HaClient.NAME_FIRST, false)
             return
         }
         val job = HaJobs.job(
             trigger, now, watchName, HaSensors.states(values, sensors), HaSensors.attributes(values, sensors),
-            HaPayloads.deviceId(address), registration, h5600,
+            HaPayloads.deviceId(address), registration, h5600, caps,
         ) ?: return
         store.putPending(job)
         HaWorker.enqueue(context)

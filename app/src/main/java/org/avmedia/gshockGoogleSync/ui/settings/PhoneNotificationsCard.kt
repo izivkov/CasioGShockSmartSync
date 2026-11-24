@@ -38,65 +38,107 @@ import org.avmedia.gshockGoogleSync.notifications.AppIcons
 import org.avmedia.gshockGoogleSync.notifications.InstalledApps
 import org.avmedia.gshockGoogleSync.ui.common.AppButton
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
-import AppSwitch
 import org.avmedia.gshockGoogleSync.homeassistant.AppStores
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.RadioButton
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.semantics.Role
+import org.avmedia.gshockGoogleSync.notifications.InstalledAppsCache
+import org.avmedia.gshockGoogleSync.notifications.NotificationAccess
+import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationMode
+import org.avmedia.gshockGoogleSync.watch.CurrentWatch
 
-/** "Phone notifications on the watch": a switch (off by default) and the apps allowed to send. */
+/**
+ * "Phone notifications on the watch" for the connected watch: All apps (upstream's behaviour, the default), Only selected
+ * apps, or Off. Each watch has its own choice and app list. A watch that cannot show notifications has no such setting.
+ */
 @Composable
 fun PhoneNotificationsCard() {
     val context = LocalContext.current
+    val watch = remember { CurrentWatch.key() }
+    val supported = remember(watch) { AppStores.haStore(context).notificationsSupported(watch) != false }
+    if (watch.isBlank() || !supported) return
     val settings = remember { AppStores.phoneNotifications(context) }
-    var enabled by remember { mutableStateOf(settings.enabled) }
-    var allowed by remember { mutableStateOf(settings.allowed) }
+    var mode by remember(watch) { mutableStateOf(settings.mode(watch)) }
+    var allowed by remember(watch) { mutableStateOf(settings.allowed(watch)) }
     var picking by remember { mutableStateOf(false) }
-    val apps = remember(picking) { if (picking) InstalledApps.list(context) else emptyList() }
+    val warning = remember(mode) { NotificationAccess.warning(context, watch) }
 
-    PhoneNotificationsContent(enabled, allowed.size, { enabled = it; settings.enabled = it }, { picking = true })
+    PhoneNotificationsContent(
+        mode, allowed.size, { mode = it; settings.setMode(watch, it) }, { picking = true },
+        warning = warning, onOpenAccess = { NotificationAccess.openSettings(context) },
+    )
     if (picking) {
+        // The app list is read off the main thread, once per app session: the picker opens at once with a spinner.
+        val apps by produceState<List<AppEntry>?>(initialValue = null) { value = InstalledAppsCache.get(context) }
         Dialog(onDismissRequest = { picking = false }) {
             Surface(Modifier.fillMaxSize().padding(vertical = 24.dp), shape = MaterialTheme.shapes.large) {
-                AppPickerContent(apps, allowed, { pkg, on -> settings.setAllowed(pkg, on); allowed = settings.allowed }, { picking = false }, iconLoader = { AppIcons.load(context, it) })
+                AppPickerContent(apps, allowed, { pkg, on -> settings.setAllowed(watch, pkg, on); allowed = settings.allowed(watch) }, { picking = false }, iconLoader = { AppIcons.load(context, it) })
             }
         }
     }
 }
 
 @Composable
-fun PhoneNotificationsContent(enabled: Boolean, appCount: Int, onEnabled: (Boolean) -> Unit, onChoose: () -> Unit) {
+fun PhoneNotificationsContent(
+    mode: PhoneNotificationMode,
+    appCount: Int,
+    onMode: (PhoneNotificationMode) -> Unit,
+    onChoose: () -> Unit,
+    warning: String? = null,
+    onOpenAccess: () -> Unit = {},
+) {
     AppCard(Modifier.fillMaxWidth().padding(horizontal = 6.dp)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    AppText("Phone notifications on the watch", fontSize = 18.sp)
-                    AppText(
-                        if (enabled) "On. Only the apps you choose are sent." else "Off. No phone notification is sent to the watch.",
-                        fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+            AppText("Phone notifications on the watch", fontSize = 18.sp)
+            PhoneNotificationMode.entries.forEach { m ->
+                Row(
+                    Modifier.fillMaxWidth().selectable(selected = m == mode, onClick = { onMode(m) }, role = Role.RadioButton),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = m == mode, onClick = null)
+                    AppText(m.label, fontSize = 15.sp, modifier = Modifier.padding(start = 8.dp))
                 }
-                AppSwitch(checked = enabled, onCheckedChange = onEnabled)
             }
-            if (enabled) {
+            AppText(
+                when (mode) {
+                    PhoneNotificationMode.ALL -> "Every phone notification is sent while the watch is connected."
+                    PhoneNotificationMode.SELECTED -> "Only the apps you choose are sent. Ongoing, silent and group summary notifications never are."
+                    PhoneNotificationMode.OFF -> "No phone notification is sent to the watch."
+                },
+                fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (mode == PhoneNotificationMode.SELECTED) {
                 AppButton(
                     if (appCount == 0) "Choose apps" else "Choose apps ($appCount chosen)", onChoose, Modifier.fillMaxWidth(),
                 )
                 if (appCount == 0) AppText("No app is chosen, so nothing is sent yet.", fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
-                AppText(
-                    "Ongoing, silent and group summary notifications are never sent. Home Assistant messages are separate.",
-                    fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
+            warning?.let {
+                AppText(it, fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
+                AppButton("Open notification access", onOpenAccess, Modifier.fillMaxWidth())
+            }
+            AppText("Home Assistant messages are separate.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
-/** The installed apps with a checkbox each and a search field. */
+/** The installed apps with a checkbox each and a search field; a spinner while [apps] is still loading (null). */
 @Composable
-fun AppPickerContent(apps: List<AppEntry>, selected: Set<String>, onToggle: (String, Boolean) -> Unit, onDone: () -> Unit, initialQuery: String = "", iconLoader: (suspend (String) -> ImageBitmap?)? = null) {
+fun AppPickerContent(apps: List<AppEntry>?, selected: Set<String>, onToggle: (String, Boolean) -> Unit, onDone: () -> Unit, initialQuery: String = "", iconLoader: (suspend (String) -> ImageBitmap?)? = null) {
     var query by remember { mutableStateOf(initialQuery) }
     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         AppText("Apps that may send notifications", fontSize = 18.sp)
         OutlinedTextField(query, { query = it }, singleLine = true, label = { Text("Search apps") }, modifier = Modifier.fillMaxWidth())
-        LazyColumn(Modifier.weight(1f)) {
+        if (apps == null) {
+            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CircularProgressIndicator()
+                    AppText("Loading apps...", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        } else LazyColumn(Modifier.weight(1f)) {
             items(InstalledApps.filter(apps, query), key = { it.packageName }) { app ->
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(app.packageName in selected, { onToggle(app.packageName, it) })

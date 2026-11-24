@@ -133,12 +133,10 @@ object HaSensors {
         HaSensor("watch_settings", "Watch settings", "watch.settings.time_format", null, null, null, "mdi:cog", "diagnostic", attributes = SETTINGS_ATTRIBUTES),
     )
 
-    /** True for a sensor whose value only the DW-H5600 family has: sleep, blood oxygen, cardio, breathing, stairs, heart rate curve, workouts. */
-    fun h5600Only(s: HaSensor): Boolean =
-        s.variable.startsWith("workout.") || s.variable in SleepVariables.DESCRIPTIONS || s.variable in HeartRateDayVariables.DESCRIPTIONS
-
-    /** [sensors] for a watch of the H5600 family ([h5600]) or another model, which has none of the [h5600Only] values. */
-    fun forModel(sensors: List<HaSensor>, h5600: Boolean): List<HaSensor> = if (h5600) sensors else sensors.filterNot(::h5600Only)
+    /** Only the sensors a watch with [caps] has a value for ([WatchCaps.needs]): an OCW registers no health sensor. */
+    fun forCaps(sensors: List<HaSensor>, caps: Set<WatchCap>): List<HaSensor> =
+        if (WatchCap.H5600 in caps) sensors
+        else sensors.filterNot { it.variable.startsWith("workout.") || it.variable in SleepVariables.DESCRIPTIONS || it.variable in HeartRateDayVariables.DESCRIPTIONS }
 
     /** The variables to resolve for an update: the states and the attributes. */
     val VARIABLES: Set<String> = variablesOf(ALL)

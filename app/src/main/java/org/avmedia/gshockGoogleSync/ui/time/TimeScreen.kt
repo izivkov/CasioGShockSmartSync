@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,14 +37,17 @@ fun TimeScreen(
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TimeTitleRow(onOpenWatchList)
-                // The stored values are on screen; the watch's come in the background.
-                if (state.updating) {
+                // The stored values are on screen; the watch's come in the background. Until the watch confirmed
+                // them they stay marked (and dimmed): "updating" while it is asked, else their age.
+                val mark = HomeSnapshotStore.mark(state, System.currentTimeMillis())
+                if (mark != null) {
                     androidx.compose.material3.Text(
-                        text = stringResource(id = R.string.updating),
+                        text = if (state.updating) stringResource(id = R.string.updating) else mark.replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(start = 16.dp),
                     )
                 }
+                val dim = Modifier.alpha(if (state.fromStore) STORED_ALPHA else 1f)
 
                 LocalTimeView(
                     Modifier
@@ -54,21 +58,21 @@ fun TimeScreen(
                 WatchFeature(id = "time.timer") {
                     TimerView(
                         modifier =
-                            Modifier
+                            dim
                                 .fillMaxWidth()
                     )
                 }
 
                 WatchNameView(
                     modifier =
-                        Modifier
+                        dim
                             .fillMaxWidth()
                             .weight(1f)
                 )
 
                 WatchInfoView(
                     modifier =
-                        Modifier
+                        dim
                             .fillMaxWidth()
                 )
 
@@ -76,6 +80,9 @@ fun TimeScreen(
         }
     }
 }
+
+/** How stored values not yet confirmed by the watch are drawn. */
+private const val STORED_ALPHA = 0.55f
 
 /** The title row of the Time tab: the watch list button top left ("Watches"), the title in the middle. */
 @Composable
