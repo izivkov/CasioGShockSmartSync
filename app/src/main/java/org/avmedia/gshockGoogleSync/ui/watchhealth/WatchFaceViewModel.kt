@@ -9,20 +9,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.WatchFaceCodec
 
 data class WatchFaceUi(
     val working: Boolean = false,
     val face: WatchFaceCodec.Face? = null,
     val message: String? = null,
-    /** The faces the connected model has: 1 to [faceCount]. */
-    val faceCount: Int = 4,
+    /** The faces the connected model has: 1 to [faceCount] (WatchInfo.faceCountFor). */
+    val faceCount: Int = WatchFaceCodec.FACES.last,
 )
 
 /** The Watch face screen: read 0x51, change the face or one item, read it back. */
 @HiltViewModel
 class WatchFaceViewModel @Inject constructor(private val access: WatchSettingsAccess) : ViewModel() {
-    private val _ui = MutableStateFlow(WatchFaceUi())
+    private val faceCount: Int get() = WatchInfo.faceCountFor(WatchInfo.name)
+    private val _ui = MutableStateFlow(WatchFaceUi(faceCount = faceCount))
     val ui: StateFlow<WatchFaceUi> = _ui.asStateFlow()
 
     init {
@@ -36,6 +38,7 @@ class WatchFaceViewModel @Inject constructor(private val access: WatchSettingsAc
             val face = frame?.let { WatchFaceCodec.parse(it) }
             _ui.update {
                 it.copy(
+                    faceCount = faceCount,
                     working = false,
                     face = face,
                     message = if (face == null) "The watch did not answer, or the face setting is not in the layout the app knows." else it.message,
@@ -44,8 +47,8 @@ class WatchFaceViewModel @Inject constructor(private val access: WatchSettingsAc
         }
     }
 
-    /** Faces 1 to 4 only: [WatchFaceCodec.withFace] refuses anything else, so nothing is written for it. */
-    fun setFace(face: Int) = write(WatchFaceCodec.faceName(face), WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFace(it, face) }
+    /** Only a face the model has: [WatchFaceCodec.withFace] refuses anything else, so nothing is written for it. */
+    fun setFace(face: Int) = write(WatchFaceCodec.faceName(face), WatchFaceCodec.FACE_BYTES) { WatchFaceCodec.withFace(it, face, faceCount) }
 
     /** The top-right item of the custom face (slot 3). Slots 1, 2 and 4 are never written from the screen. */
     fun setTopRight(item: Int) =

@@ -84,7 +84,8 @@ internal fun WatchFaceContent(
     if (facePicker && face != null) {
         ChoiceDialog(
             title = "Face",
-            options = WatchFaceCodec.FACES.map { WatchFaceCodec.faceName(it) },
+            // Only the faces this model has (DW-H5600 1 to 3, GBX-H5600 1 to 4).
+            options = WatchFaceCodec.faces(ui.faceCount).map { WatchFaceCodec.faceName(it) },
             selected = face.face - WatchFaceCodec.FACES.first,
             onPick = { facePicker = false; onFace(it + WatchFaceCodec.FACES.first) },
             onDismiss = { facePicker = false },

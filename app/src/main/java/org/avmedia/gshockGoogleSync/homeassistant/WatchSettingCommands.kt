@@ -55,7 +55,7 @@ class WatchSettingCommands(
                 log("Home Assistant watch setting refused: unknown setting $key")
                 continue
             }
-            when (val c = WatchSettingRegistry.check(setting, raw)) {
+            when (val c = WatchSettingRegistry.check(setting, raw, watchName())) {
                 is SettingCheck.Refused -> log("Home Assistant watch setting refused: $key, ${c.reason}")
                 is SettingCheck.Ok -> synchronized(pending) {
                     val now = watch()

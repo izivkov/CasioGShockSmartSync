@@ -104,6 +104,7 @@ class HaSync @Inject constructor(
             connected = { runCatching { api.isConnected() }.getOrDefault(false) },
             afterWrites = { pushSensorsNow() },
             watch = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },
+            watchName = { org.avmedia.gshockapi.WatchInfo.name },
         )
         WatchSettingCommands.shared = commands
         org.avmedia.gshockapi.casio.ConnectionKeepAlive.onSetupDone = { commands.onSetupDone() }

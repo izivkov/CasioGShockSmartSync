@@ -1,5 +1,6 @@
 package org.avmedia.gshockGoogleSync.homeassistant
 
+import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.ActivityListCodec
 import org.avmedia.gshockapi.io.ActivityModels
 import org.avmedia.gshockapi.io.BasicHealthFieldsCodec
@@ -44,6 +45,8 @@ class WatchSetting(
     val expectedBack: (before: ByteArray, written: ByteArray) -> ByteArray = { _, written -> written },
     /** How the read-back is compared with [expectedBack] (the activity list ignores its tail). */
     val matches: (back: ByteArray, expected: ByteArray) -> Boolean = { back, expected -> back.contentEquals(expected) },
+    /** For a choice that depends on the model: the values the watch named here has (the watch face). Null: [type]'s. */
+    val valuesFor: ((watchName: String) -> List<String>)? = null,
 ) {
     /** The value in the raw cache [frames] (code name to frame), null when the code was not read or not understood. */
     fun valueIn(frames: Map<String, ByteArray>): Any? = frames[RawSettings.name(code)]?.let(read)
@@ -78,8 +81,10 @@ object WatchSettingRegistry {
     private fun clock(key: String, code: Int, touched: Set<Int>, read: (ByteArray) -> Pair<Int, Int>?, change: (ByteArray, Int, Int) -> ByteArray?) =
         WatchSetting(key, SettingType.Time, code, touched, { hhmm(read(it)) }, { f, v -> time(v).let { (h, m) -> change(f, h, m) } })
 
-    private fun pick(key: String, values: List<String>, code: Int, touched: Set<Int>, read: (ByteArray) -> String?, change: (ByteArray, String) -> ByteArray?) =
-        WatchSetting(key, SettingType.Choice(values), code, touched, read, { f, v -> change(f, v as String) })
+    private fun pick(
+        key: String, values: List<String>, code: Int, touched: Set<Int>, read: (ByteArray) -> String?, change: (ByteArray, String) -> ByteArray?,
+        valuesFor: ((String) -> List<String>)? = null,
+    ) = WatchSetting(key, SettingType.Choice(values), code, touched, read, { f, v -> change(f, v as String) }, valuesFor = valuesFor)
 
     /** One on/off key per activity the H5600 offers (`activity_running`, ...): a bool, because the list codec toggles one code at a time. */
     private fun activity(code: Int) = WatchSetting(
@@ -94,7 +99,8 @@ object WatchSettingRegistry {
     val ALL: List<WatchSetting> = listOf(
         pick("watch_face", FACES.values.toList(), WatchFaceCodec.CODE, WatchFaceCodec.FACE_BYTES,
             { f -> WatchFaceCodec.parse(f)?.face?.let(FACES::get) },
-            { f, v -> WatchFaceCodec.withFace(f, FACES.entries.first { it.value == v }.key) }),
+            { f, v -> WatchFaceCodec.withFace(f, FACES.entries.first { it.value == v }.key) },
+            valuesFor = { name -> WatchFaceCodec.faces(WatchInfo.faceCountFor(name)).mapNotNull(FACES::get) }),
         pick("custom_slot", WatchFaceCodec.OFFERED_ITEMS.map { ITEMS[it] }, WatchFaceCodec.CODE, WatchFaceCodec.TOP_RIGHT_BYTES,
             { f -> WatchFaceCodec.parse(f)?.items?.get(WatchFaceCodec.TOP_RIGHT_SLOT - 1)?.let { ITEMS.getOrNull(it) } },
             { f, v -> WatchFaceCodec.withTopRight(f, ITEMS.indexOf(v)) }),
@@ -184,9 +190,13 @@ object WatchSettingRegistry {
     /** The codes the entries read (they must be in [RawSettings.DECODED_CODES]). */
     val CODES: Set<Int> = ALL.map { it.code }.toSet()
 
-    /** Checks [raw] (as JSON gave it) against [setting]'s type; Ok holds the canonical value. */
-    fun check(setting: WatchSetting, raw: Any?): SettingCheck {
-        val t = setting.type
+    /**
+     * Checks [raw] (as JSON gave it) against [setting]'s type; Ok holds the canonical value. With [watchName], a choice
+     * that depends on the model accepts only that model's values (a DW-H5600 has no tide face).
+     */
+    fun check(setting: WatchSetting, raw: Any?, watchName: String? = null): SettingCheck {
+        val perModel = watchName?.takeIf { it.isNotBlank() }?.let { name -> setting.valuesFor?.invoke(name) }
+        val t = if (perModel != null) SettingType.Choice(perModel) else setting.type
         return when (t) {
             is SettingType.Choice -> {
                 val w = (raw as? String)?.let(::word)
