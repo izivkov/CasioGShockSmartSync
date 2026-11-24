@@ -34,7 +34,11 @@ internal fun GShockRepository.currentConnectionButton(): ConnectionButton = when
  * Who started the connection now being initialized: a background window of the app, the watch by itself (the
  * connection kind 13/14 the library read from the watch), else the person.
  */
-internal fun currentConnectionCause(): ConnectionCause = ConnectionCause.USER // RED CHECK stub
+internal fun currentConnectionCause(): ConnectionCause = when {
+    BackgroundConnection.active -> ConnectionCause.BACKGROUND_READ
+    org.avmedia.gshockapi.casio.ConnectionSetup.isAutomaticConnect() -> ConnectionCause.WATCH
+    else -> ConnectionCause.USER
+}
 
 /**
  * Connection-scoped Session object managing a single active watch connection lifetime.

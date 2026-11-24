@@ -30,7 +30,7 @@ class InactivityTimeoutTest {
         assertTrue("tell" in calls)
     }
 
-    /** Owner 2026-11-24: the watch with "Keep connected in background" keeps its link, whatever button started it. */
+    /** The watch with "Keep connected in background" keeps its link, whatever button started it. */
     @Test
     fun theWatchWithKeepConnectedKeepsItsLinkWhateverButtonStartedIt() {
         val h5600 = WatchSnapshot(name = "CASIO DW-H5600", address = "AA:BB")

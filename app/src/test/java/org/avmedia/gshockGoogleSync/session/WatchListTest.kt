@@ -35,6 +35,7 @@ class WatchListTest {
 
     @After fun tearDown() {
         WatchList.hide()
+        KeepConnected.resetForTest()
         Dispatchers.resetMain()
     }
 

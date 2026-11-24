@@ -173,8 +173,15 @@
     <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Ensure the official manufacturer app is not running.</string>
     <string name="bluetooth_is_not_enabled">Bluetooth is not enabled.</string>
     <string name="disconnected_due_to_inactivity">Disconnected due to inactivity.</string>
-    <string name="open_when_watch_connects" translatable="false">Open when the watch connects</string>
-    <string name="waiting_for_watch" translatable="false">Waiting for the watch...</string>
+    <string name="waiting_for_watch" translatable="false">Waiting for %1$s... press its connect button</string>
+    <string name="watch_options" translatable="false">Watch options</string>
+    <string name="watch_status_connected" translatable="false">Connected</string>
+    <string name="watch_status_waiting" translatable="false">Waiting</string>
+    <string name="watch_status_not_connected" translatable="false">Not connected</string>
+    <string name="keep_connected_in_background" translatable="false">Keep connected in background</string>
+    <string name="keep_connected_info" translatable="false">Accepts the watch\'s own reconnects, also after the app restarts, and never disconnects it for inactivity. One watch at a time.</string>
+    <string name="keep_connected_turns_off" translatable="false">Turns off Keep connected for %1$s</string>
+    <string name="forget_watch" translatable="false">Forget this watch</string>
     <string name="link_reconnecting" translatable="false">Reconnecting...</string>
     <string name="watches" translatable="false">Watches</string>
     <string name="back_to_watch" translatable="false">Back</string>

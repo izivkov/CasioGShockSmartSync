@@ -25,6 +25,8 @@ class KeepConnectedTest {
     private val b = "AA:BB:CC:DD:EE:02"
     private val h5600 = "CASIO GBX-H5600"
 
+    @org.junit.Before fun clean() = KeepConnected.resetForTest()
+
     @After fun reset() = runBlocking {
         KeepConnected.set(context, a, false)
         KeepConnected.set(context, b, false)

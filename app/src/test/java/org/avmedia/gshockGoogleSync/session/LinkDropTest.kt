@@ -27,7 +27,7 @@ class LinkDropTest {
     private val watch = mockk<BluetoothDevice> { every { address } returns "AA:BB" }
     private val other = mockk<BluetoothDevice> { every { address } returns "CC:DD" }
 
-    // The owner's watch has "Keep connected in background" on (the migration gives it to it).
+    // The watch has "Keep connected in background" on (the migration gives it to an always-connected watch).
     @Before fun setUp() {
         Dispatchers.setMain(dispatcher)
         KeepConnected.resetForTest("AA:BB")

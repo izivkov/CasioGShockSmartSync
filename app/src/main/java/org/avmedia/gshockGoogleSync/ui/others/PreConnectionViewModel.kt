@@ -27,6 +27,7 @@ import org.avmedia.gshockGoogleSync.session.KeepConnected
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.ICDPDelegate
 import timber.log.Timber
 
@@ -108,9 +109,32 @@ constructor(
 
     val waitingAddress: StateFlow<String?> = OpenOnConnect.waiting
 
+    private val firstPageSwitch = org.avmedia.gshockGoogleSync.session.WatchSwitch(
+        connectedAddress = sessionManager::connectedAddress,
+        disconnectCurrent = { sessionManager.letGo() },
+        connect = {},
+    )
 
-    /** Tap on an always-connected watch: open the main screen now if connected, else at its next connection. */
+    /** The session, for the live status on each watch card. */
+    val sessionState: StateFlow<org.avmedia.gshockGoogleSync.session.SessionState> = sessionManager.sessionState
+
+    /** The watch with "Keep connected in background", or null. */
+    val keepHolder: StateFlow<String?> = KeepConnected.holder
+
+    /** Turns it on for [address] (and off for the watch that had it) or off. */
+    fun setKeepConnected(address: String, on: Boolean) {
+        viewModelScope.launch {
+            val lost = KeepConnected.set(appContext, Utils.sanitizeMacAddress(address), on)
+            if (lost != null) Timber.i("Keep connected moved from $lost to $address")
+            loadPairedDevices()
+        }
+    }
+
+
+    /** Tap on a watch card: open its screens now if it is connected, else when it connects within two minutes. */
     fun openWhenConnected(address: String) {
+        // Another connected watch is let go; the watch with Keep connected waits while this one is chosen.
+        firstPageSwitch.tap(address)
         val state = sessionManager.sessionState.value
         val onMain = (state.phase as? org.avmedia.gshockGoogleSync.session.SessionPhase.Ready)?.entryReason !=
             org.avmedia.gshockGoogleSync.session.EntryReason.BACKGROUND && state.phase is org.avmedia.gshockGoogleSync.session.SessionPhase.Ready
@@ -118,6 +142,11 @@ constructor(
     }
 
     fun cancelWaiting() = OpenOnConnect.cancelWaiting()
+
+    /** A watch chosen in the list opened from the connected screens: shown as waited for, up to two minutes. */
+    fun showWaiting(address: String) {
+        if (!OpenOnConnect.sameAddress(sessionManager.connectedAddress(), address)) OpenOnConnect.waitFor(address, viewModelScope)
+    }
 
     fun hidePreparing() {
         _showPreparing.value = false
@@ -260,6 +289,8 @@ constructor(
                         // Monitor existing ACTION_BOND_STATE_CHANGED receiver for completion
                     }
                 }
+
+                KeepConnected.forget(context, address)
 
                 // 3. Clear last device if matching
                 val lastAddress = LocalDataStorage.get(context, KEY_LAST_DEVICE_ADDRESS, "")

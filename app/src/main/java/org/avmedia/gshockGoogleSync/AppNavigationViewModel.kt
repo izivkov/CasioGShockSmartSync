@@ -12,7 +12,6 @@ import org.avmedia.gshockGoogleSync.session.WatchList
 import org.avmedia.gshockGoogleSync.session.WatchSwitch
 import org.avmedia.gshockGoogleSync.homeassistant.HaScreenState
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import timber.log.Timber
 
 @HiltViewModel
 class AppNavigationViewModel @Inject constructor(
@@ -48,14 +47,8 @@ class AppNavigationViewModel @Inject constructor(
     }
 
     val watchSwitch = WatchSwitch(
-        connectedAddress = {
-            sessionManager.activeSession?.let { it.state.value.watch.address.ifBlank { it.device?.address.orEmpty() } }
-        },
-        disconnectCurrent = {
-            Timber.i("Watch list: letting the connected watch go")
-            sessionManager.activeSession?.close("Another watch chosen")
-            runCatching { repository.disconnect() }.onFailure { Timber.e(it, "Disconnect failed") }
-        },
+        connectedAddress = sessionManager::connectedAddress,
+        disconnectCurrent = { sessionManager.letGo() },
         connect = companionDeviceCoordinator::connectNow,
     )
 }

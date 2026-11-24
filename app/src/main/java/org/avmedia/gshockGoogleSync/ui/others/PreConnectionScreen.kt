@@ -22,10 +22,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,16 +33,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -60,18 +52,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -119,6 +109,9 @@ fun PreConnectionScreen(
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
     val waitingAddress by ptrConnectionViewModel.waitingAddress.collectAsState()
+    val sessionState by ptrConnectionViewModel.sessionState.collectAsState()
+    val keepHolder by ptrConnectionViewModel.keepHolder.collectAsState()
+    var optionsFor by remember { mutableStateOf<PreConnectionViewModel.DeviceItem?>(null) }
 
     val timeoutJob = remember { mutableStateOf<Job?>(null) }
 
@@ -228,6 +221,23 @@ fun PreConnectionScreen(
 
     PreparingPairingDialog(visible = showPreparing, ptrConnectionViewModel = ptrConnectionViewModel)
 
+    optionsFor?.let { device ->
+        WatchOptionsSheet(
+            device = device,
+            keepOn = OpenOnConnect.sameAddress(keepHolder, device.address),
+            otherHolderName = pairedDevices.firstOrNull {
+                OpenOnConnect.sameAddress(keepHolder, it.address) && !OpenOnConnect.sameAddress(it.address, device.address)
+            }?.name,
+            onKeepConnected = { on -> ptrConnectionViewModel.setKeepConnected(device.address, on) },
+            onForget = {
+                optionsFor = null
+                ptrConnectionViewModel.disassociate(context, Utils.sanitizeMacAddress(device.address))
+                scope.launch(Dispatchers.IO) { LocalDataStorage.removeDeviceAddress(context, device.address) }
+            },
+            onDismiss = { optionsFor = null },
+        )
+    }
+
     LaunchedEffect(triggerPairing) {
         if (triggerPairing) {
             ptrConnectionViewModel.associate(
@@ -259,26 +269,7 @@ fun PreConnectionScreen(
                         Box(modifier = Modifier.fillMaxSize()) {
                             WatchScreen(
                                 modifier = Modifier.fillMaxSize(),
-                                imageResId =
-                                    when {
-                                        // Before the GA/GW checks: "ABL-100WE" contains neither, but
-                                        // keep it first so the more specific model always wins.
-                                        "ABL" in watchName -> R.drawable.abl_100we
-
-                                        "GA" in watchName || "GMA" in watchName ->
-                                            R.drawable.ga_b2100
-
-                                        "GW" in watchName || "GMW" in watchName ->
-                                            R.drawable.gw_b5600
-
-                                        "H5600" in watchName -> R.drawable.dw_h5600
-                                        "DW" in watchName || "DMW" in watchName ->
-                                            R.drawable.dw_b5600
-
-                                        "ECB" in watchName -> R.drawable.ecb_30d
-                                        "OCW-S400" in watchName -> R.drawable.ocw_s400
-                                        else -> R.drawable.gw_b5600
-                                    },
+                                imageResId = watchImageResId(watchName),
                                 isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName),
                                 instructionResId = connectInstructionResId(watchName)
                             )
@@ -292,8 +283,11 @@ fun PreConnectionScreen(
                                         .fillMaxWidth(0.5f)
                                         .fillMaxHeight(1f - GUIDELINE_LIST_TOP)
                             ) {
-                                PairedDeviceList(
+                                WatchCards(
                                     devices = pairedDevices,
+                                    session = sessionState,
+                                    keepHolder = keepHolder,
+                                    waitingAddress = waitingAddress,
                                     onSelect = { device ->
                                         ptrConnectionViewModel.setDevice(
                                             Utils.sanitizeMacAddress(device.address),
@@ -301,24 +295,15 @@ fun PreConnectionScreen(
                                         )
                                         when {
                                             // From the connected screens: let the connected watch go, connect this one.
-                                            watchSwitch != null -> watchSwitch.choose(Utils.sanitizeMacAddress(device.address))
-                                            device.isAlwaysConnected -> ptrConnectionViewModel.openWhenConnected(device.address)
+                                            watchSwitch != null -> {
+                                                watchSwitch.choose(Utils.sanitizeMacAddress(device.address))
+                                                ptrConnectionViewModel.showWaiting(device.address)
+                                            }
+                                            else -> ptrConnectionViewModel.openWhenConnected(device.address)
                                         }
                                     },
-                                    waitingAddress = waitingAddress,
+                                    onOptions = { optionsFor = it },
                                     onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
-                                    onDisassociate = { device ->
-                                        ptrConnectionViewModel.disassociate(
-                                            context,
-                                            Utils.sanitizeMacAddress(device.address)
-                                        )
-                                        scope.launch(Dispatchers.IO) {
-                                            LocalDataStorage.removeDeviceAddress(
-                                                context,
-                                                device.address
-                                            )
-                                        }
-                                    },
                                     modifier = Modifier
                                         .padding(4.dp)
                                         .fillMaxWidth()
@@ -427,128 +412,6 @@ fun WatchListHeader(onBack: (() -> Unit)?, onOpenLog: () -> Unit, modifier: Modi
         androidx.compose.material3.TextButton(onClick = onOpenLog) {
             Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, modifier = Modifier.size(20.dp))
             Text("App log", modifier = Modifier.padding(start = 6.dp))
-        }
-    }
-}
-
-@Composable
-fun PairedDeviceList(
-    devices: List<PreConnectionViewModel.DeviceItem>,
-    onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
-    onDisassociate: (PreConnectionViewModel.DeviceItem) -> Unit,
-    modifier: Modifier = Modifier,
-    waitingAddress: String? = null,
-    onCancelWaiting: () -> Unit = {}
-) {
-    val scrollState = rememberScrollState()
-    Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .verticalScroll(scrollState)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            devices.forEach { device ->
-                AppCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    padding = 0.dp
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RemoveButton(onClick = { onDisassociate(device) })
-                            Spacer(modifier = Modifier.width(4.dp))
-
-
-                            Text(
-                                text = device.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Color.Unspecified,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                                softWrap = false,
-                                modifier = Modifier
-                                    .clickable { onSelect(device) }
-                                    .weight(1f)
-                            )
-
-
-                            if (device.isLastUsed) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = "Selected",
-                                    tint = Color.Red,
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .graphicsLayer(scaleX = -1f)
-                                )
-                            }
-                        }
-
-                        if (device.isAlwaysConnected) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(start = 52.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.open_when_watch_connects),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                androidx.compose.material3.Switch(
-                                    checked = device.keepConnected,
-                                    onCheckedChange = { },
-                                    modifier = Modifier.padding(end = 4.dp).graphicsLayer(scaleX = 0.75f, scaleY = 0.75f)
-                                )
-                            }
-                            if (OpenOnConnect.sameAddress(waitingAddress, device.address)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.waiting_for_watch),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    androidx.compose.material3.TextButton(onClick = onCancelWaiting) {
-                                        Text(stringResource(R.string.cancel))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RemoveButton(onClick: () -> Unit) {
-    Box(
-        modifier =
-            Modifier
-                .sizeIn(minWidth = 48.dp, minHeight = 24.dp)
-                .clickable(onClick = onClick, role = Role.Button),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(24.dp)
-                .border(0.5.dp, Color.White.copy(alpha = 0.5f), CircleShape)
-                .background(Color.Black, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Default.Remove, "Remove paired watch", modifier = Modifier.size(12.dp), tint = Color.White)
         }
     }
 }

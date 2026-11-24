@@ -201,6 +201,17 @@ class SessionManager @Inject constructor(
             ?: Timber.w("Ignoring run-actions request: no active session")
     }
 
+    /** The address of the watch of the active session (its reported one, else its link's), or null. */
+    fun connectedAddress(): String? =
+        activeSession?.let { it.state.value.watch.address.ifBlank { it.device?.address.orEmpty() } }?.takeIf { it.isNotBlank() }
+
+    /** The person chose another watch: the connected one is let go once, its session ends (no reconnect wait). */
+    fun letGo(reason: String = "Another watch chosen") {
+        Timber.i("Letting the connected watch go: $reason")
+        activeSession?.close(reason)
+        runCatching { repository.disconnect() }.onFailure { Timber.e(it, "Disconnect failed") }
+    }
+
     /** The button that started the current connection, or null before the first connection is Ready. */
     val connectionButton: ConnectionButton? get() = _currentSession.value?.button
 
@@ -221,11 +232,11 @@ class SessionManager @Inject constructor(
     private fun ensureActiveSession(device: BluetoothDevice?): Session =
         activeSession ?: createSession(device)
 
-    /** Ready session of an always-connected watch (the H5600 family and the ECB). */
+    /** Ready session of the watch with "Keep connected in background" (by its reported or its link's address). */
     private fun keepsAcrossDrops(session: Session): Boolean {
         val state = session.state.value
         if (state.phase !is SessionPhase.Ready) return false
-        return state.keepsLink
+        return state.keepsLink || KeepConnected.holds(session.device?.address)
     }
 
     private fun isForDifferentDevice(session: Session, device: BluetoothDevice?): Boolean {

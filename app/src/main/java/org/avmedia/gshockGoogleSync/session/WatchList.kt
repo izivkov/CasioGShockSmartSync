@@ -61,10 +61,21 @@ class WatchSwitch(
 ) {
     fun choose(address: String) {
         WatchList.choose(address)
+        KeepConnected.chosen(address)
         val current = connectedAddress()?.takeIf { it.isNotBlank() }
         if (current != null && OpenOnConnect.sameAddress(current, address)) return
         if (current != null) disconnectCurrent()
         connect(address)
+    }
+
+    /**
+     * A tap on a card of the first page: the same choice, but the list then waits for the watch (its connect button)
+     * instead of connecting it. Another connected watch is let go once.
+     */
+    fun tap(address: String) {
+        KeepConnected.chosen(address)
+        val current = connectedAddress()?.takeIf { it.isNotBlank() }
+        if (current != null && !OpenOnConnect.sameAddress(current, address)) disconnectCurrent()
     }
 
     /** A pairing starts: the connected watch is let go first, so it cannot take the link over the new one. */

@@ -76,6 +76,8 @@ class GShockApplication : Application() {
             { org.avmedia.gshockGoogleSync.history.HistoryStore.record(applicationContext, it) }
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.dayMerger =
             { org.avmedia.gshockGoogleSync.history.HistoryStore.mergeDay(applicationContext, it) }
+        // Before the first connection: which watch keeps connected in background (migrated once from the old behaviour).
+        org.avmedia.gshockGoogleSync.session.KeepConnected.load(applicationContext)
         ActivityProvider.initialize(this)
         eventHandler = MainEventHandler(
             context = this,
