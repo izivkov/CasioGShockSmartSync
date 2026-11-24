@@ -25,6 +25,9 @@ class AppNavigationViewModel @Inject constructor(
     val state = screenState.state
     val sessionState = sessionManager.sessionState
 
+    /** The connected watch keeps its link through the inactivity timeout ("Keep connected in background"). */
+    fun keepsLink(): Boolean = sessionManager.keepsLinkNow()
+
     /** The user left the entry screen (e.g. unlocked the cover). */
     fun showMainNavigation() {
         sessionManager.activeSession?.enterMainNavigation()

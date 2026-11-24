@@ -73,6 +73,33 @@ class KeepConnectedTest {
     }
 
     @Test
+    fun migrationPrefersTheRegisteredWatchConnectedMostRecentlyAndNeverAnOcw() {
+        val old = "AA:BB:CC:DD:EE:09" // the GBX before its re-pair: the registration moved to the new address
+        val names = mapOf(a to "CASIO GBX-H5600", old to "CASIO GBX-H5600", b to "CASIO DW-H5600", "OC" to "CASIO OCW-S400")
+        val nameOf = { x: String -> names[x].orEmpty() }
+        val registered = { x: String -> x == a }
+        // The OCW was connected last: it never gets it, the registered GBX does.
+        assertEquals(a, KeepConnected.migrationChoice("OC", listOf(old, b, a, "OC"), registered, nameOf))
+        // A newer unregistered H5600 loses against the registered one.
+        assertEquals(a, KeepConnected.migrationChoice(b, listOf(old, b, a), registered, nameOf))
+        assertNull(KeepConnected.migrationChoice("OC", listOf("OC"), { true }, nameOf))
+        assertFalse(WatchModelOverride.isAlwaysConnected("CASIO OCW-S400"))
+        assertFalse(WatchModelOverride.isAlwaysConnected("CASIO OCW-S7000"))
+    }
+
+    @Test
+    fun theKeptGbxIsNotDroppedByTheInactivityTimeoutBeforeItReportedItsAddress() = runBlocking {
+        val device = mockk<BluetoothDevice> { every { address } returns a }
+        val m = SessionManager(mockk<GShockRepository>(relaxed = true))
+        val s = m.onConnecting(device)
+        m.onDeviceName(h5600)
+        s.setReady(button = ConnectionButton.ALWAYS_CONNECTED, cause = ConnectionCause.WATCH)
+        KeepConnected.set(context, a, true)
+        assertTrue(m.keepsLinkNow())
+        assertFalse("disconnect" in inactivity(m.keepsLinkNow()))
+    }
+
+    @Test
     fun onMeansNoInactivityDisconnectOffMeansDisconnect() = runBlocking {
         val on = SessionState(watch = WatchSnapshot(name = h5600, address = a), button = ConnectionButton.ALWAYS_CONNECTED)
         assertFalse("off: the H5600 is let go as upstream does", on.keepsLink)

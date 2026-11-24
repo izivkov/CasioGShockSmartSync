@@ -71,7 +71,7 @@ private fun MainScreens(viewModel: AppNavigationViewModel) =
         repository = viewModel.repository,
         onOpenHa = viewModel::openHa,
         onOpenWatchList = viewModel::openWatchList,
-        keepsLink = { viewModel.sessionState.value.keepsLink },
+        keepsLink = viewModel::keepsLink,
     )
 
 /**

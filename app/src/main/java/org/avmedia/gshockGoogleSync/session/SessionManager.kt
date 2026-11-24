@@ -236,8 +236,14 @@ class SessionManager @Inject constructor(
     private fun keepsAcrossDrops(session: Session): Boolean {
         val state = session.state.value
         if (state.phase !is SessionPhase.Ready) return false
-        return state.keepsLink || KeepConnected.holds(session.device?.address)
+        return keepsLink(session)
     }
+
+    /** Whether the active session's watch keeps its link (inactivity, drops), by its reported or its link's address. */
+    fun keepsLinkNow(): Boolean = activeSession?.state?.value?.keepsLink ?: false // RED CHECK stub
+
+    private fun keepsLink(session: Session): Boolean =
+        session.state.value.keepsLink || KeepConnected.holds(session.device?.address)
 
     private fun isForDifferentDevice(session: Session, device: BluetoothDevice?): Boolean {
         val sessionDevice = session.device ?: return false

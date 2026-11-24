@@ -45,7 +45,12 @@ object KeepConnected {
     }
 
     /** First start: the most recently connected always-connected watch keeps it on, the others get off. */
-    fun migrationChoice(lastAddress: String, known: List<String>, nameOf: (String) -> String): String? {
+    fun migrationChoice(
+        lastAddress: String,
+        known: List<String>,
+        registered: (String) -> Boolean = { false },
+        nameOf: (String) -> String,
+    ): String? {
         val candidates = known.filter { WatchModelOverride.isAlwaysConnected(nameOf(it)) }
         return candidates.firstOrNull { it.equals(lastAddress, ignoreCase = true) } ?: candidates.firstOrNull()
     }
