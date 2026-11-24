@@ -30,7 +30,7 @@ import org.avmedia.gshockapi.io.H5600HealthIO
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private const val NO_VALUE = "\u2013"
+internal const val NO_VALUE = "\u2013"
 private val TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE d MMM HH:mm", Locale.getDefault())
 
 /**
@@ -98,6 +98,8 @@ fun DwH5600LifeLogCard(
             )
         }
 
+        DwH5600SleepAndBody(health)
+
         Section(title = stringResource(id = R.string.card_status)) {
             InfoRow(
                 label = stringResource(id = R.string.synced_at),
@@ -118,7 +120,7 @@ fun DwH5600LifeLogCard(
 }
 
 @Composable
-private fun Section(
+internal fun Section(
     title: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -194,7 +196,7 @@ private fun pendingText(pending: Boolean?): String =
     }
 
 @Composable
-private fun InfoRow(
+internal fun InfoRow(
     label: String,
     value: String,
 ) {
