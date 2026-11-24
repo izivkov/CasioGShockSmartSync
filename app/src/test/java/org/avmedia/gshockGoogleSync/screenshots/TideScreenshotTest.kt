@@ -7,11 +7,11 @@ import org.avmedia.gshockapi.io.TideSettingCodec
 import org.avmedia.gshockapi.io.TideUserPointCodec
 import org.junit.Test
 
-/** The Tide screen: a port sent by the app, an own point shown, and no answer (the point form is a dialog with text fields, which a screenshot cannot settle). */
+/** The Tide screen: a port sent by the app, own points (one never set), the height unit, the short credit line, and no answer (the point form is a dialog with text fields, which a screenshot cannot settle). */
 class TideScreenshotTest : ScreenshotTest() {
     private val points = listOf(
         TideUserPointCodec.Point(4, 20, 51.23, 2.93, 1f, false),
-        null,
+        TideUserPointCodec.FACTORY, // never set: "Not set", not the factory numbers
         TideUserPointCodec.Point(11, 5, 50.1, -5.5, 0f, true),
     )
 

@@ -36,6 +36,12 @@ import org.avmedia.gshockapi.io.TideStationParser
 import org.avmedia.gshockapi.io.TideStations
 import org.avmedia.gshockapi.io.TideUserPointCodec
 
+/** The height unit is a choice of two values, not an on/off switch: index 1 is feet. */
+private val HEIGHT_UNITS = listOf("Metres", "Feet")
+
+/** The short credit line under the Tide screen; it opens the full TICON-4 credit. */
+internal const val TIDE_CREDIT_LINE = "Tide data: TICON-4, CC BY 4.0"
+
 private const val CUSTOM_EXAMPLE = "name My port\\nlat 51.234\\nlon 2.927\\nutc 1\\nM2 182.0 4.25\\nS2 53.2 57.9\\nK1 5.6 -12.2\\nO1 9.4 167.3"
 
 /** Tide: what the watch shows, three own points, and a port from open data. */
@@ -64,6 +70,8 @@ internal fun TideContent(
     var stationPicker by remember { mutableStateOf(false) }
     var customDialog by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf<TideStation?>(null) }
+    var unitPicker by remember { mutableStateOf(false) }
+    var creditOpen by remember { mutableStateOf(false) }
     val setting = ui.setting
     val idle = setting != null && !ui.working
     GShockSmartSyncTheme {
@@ -73,16 +81,21 @@ internal fun TideContent(
                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
                     TideSection("On the watch")
                     ValueRow("Shows", setting?.let { TideSettingCodec.sourceName(it.source) } ?: "-", idle) { sourcePicker = true }
-                    SwitchRow("Heights in feet", setting?.feet ?: false, idle, note = "Off: metres") { onFeet(it) }
+                    ValueRow("Height unit", setting?.let { HEIGHT_UNITS[if (it.feet) 1 else 0] } ?: "-", idle) { unitPicker = true }
                     TideSection("Your own points")
                     (1..TideUserPointCodec.POINTS).forEach { n ->
                         val p = ui.points[n - 1]
                         val name = ui.names[n - 1].ifBlank { "Point $n" }
-                        ValueRow(name, p?.let { "%02d:%02d".format(it.hour, it.minute) } ?: "not set", idle, note = p?.let { pointNote(it) }) { editing = n }
+                        // A point nobody set holds the watch's factory values: those are not shown as if they were a place.
+                        val set = p?.takeUnless(TideUserPointCodec::isFactory)
+                        ValueRow(name, set?.let { "%02d:%02d".format(it.hour, it.minute) } ?: "Not set", idle, note = set?.let { pointNote(it) }) { editing = n }
                     }
                     TideSection("Port from open data")
                     ValueRow("Send a port", ">", idle, note = "Belgian and nearby gauges, or your own constants") { stationPicker = true }
-                    AppText(text = TideStations.ATTRIBUTION, fontSize = 11.sp, modifier = Modifier.padding(12.dp))
+                    // CC BY 4.0 needs the credit: one short line here, the full text one tap away.
+                    TextButton(onClick = { creditOpen = true }, modifier = Modifier.padding(horizontal = 4.dp)) {
+                        Text(TIDE_CREDIT_LINE, fontSize = 12.sp)
+                    }
                     val text = if (ui.working && ui.message == null) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
                 }
@@ -99,8 +112,25 @@ internal fun TideContent(
             onDismiss = { sourcePicker = false },
         )
     }
+    if (unitPicker && setting != null) {
+        ChoiceDialog(
+            title = "Height unit",
+            options = HEIGHT_UNITS,
+            selected = if (setting.feet) 1 else 0,
+            onPick = { unitPicker = false; onFeet(it == 1) },
+            onDismiss = { unitPicker = false },
+        )
+    }
+    if (creditOpen) {
+        AlertDialog(
+            onDismissRequest = { creditOpen = false },
+            title = { Text("Tide data") },
+            text = { Text(TideStations.ATTRIBUTION, fontSize = 13.sp) },
+            confirmButton = { TextButton(onClick = { creditOpen = false }) { Text("Close") } },
+        )
+    }
     editing?.let { n ->
-        PointDialog(n, ui.names[n - 1], ui.points[n - 1], { editing = null }) { name, p -> editing = null; onSavePoint(n, name, p) }
+        PointDialog(n, ui.names[n - 1], ui.points[n - 1]?.takeUnless(TideUserPointCodec::isFactory), { editing = null }) { name, p -> editing = null; onSavePoint(n, name, p) }
     }
     if (stationPicker) {
         val all = TideStations.ALL
