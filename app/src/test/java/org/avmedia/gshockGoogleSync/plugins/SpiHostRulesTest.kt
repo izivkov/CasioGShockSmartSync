@@ -189,21 +189,7 @@ class SpiHostRulesTest {
         assertEquals(setOf("old"), PluginNamespaces.leftOver(setOf("plugin.old.token", "plugin.trmnl.url", "ha.config"), setOf("trmnl", "home_assistant")))
     }
 
-    // S6 and S7: the screen opens once the plugin is active, on every turn-on; the status line is the plugin's Ok text.
-    @Test fun theScreenOpensWhenThePluginIsActive() {
-        val o = OpenOnTurnOn()
-        o.turnedOn("hc", opens = true)
-        assertNull("not while it starts", o.take(mapOf("hc" to PluginState.Off)))
-        assertEquals("hc", o.take(mapOf("hc" to PluginState.Active)))
-        assertNull("once", o.take(mapOf("hc" to PluginState.Active)))
-        o.turnedOn("hc", opens = true)
-        assertEquals("again at the next turn-on", "hc", o.take(mapOf("hc" to PluginState.Active)))
-        o.turnedOn("hc", opens = true)
-        assertNull(o.take(mapOf("hc" to PluginState.Failed("could not start"))))
-        assertNull(o.take(mapOf("hc" to PluginState.Active)))
-        o.turnedOn("ha", opens = false)
-        assertNull(o.take(mapOf("ha" to PluginState.Active)))
-    }
+    // S6: the screen opening on turn-on is in SpiSecondReviewTest (the switchboard, where both switches meet).
 
     @Test fun theStatusLineIsThePluginsOkText() {
         assertEquals("Connected", statusText(PluginState.Active, PluginHealth(okText = "Connected")))
@@ -260,8 +246,8 @@ class SpiHostRulesTest {
         val missing = PluginPermissions.missing(required, granted = { it == PluginPermissions.COARSE_LOCATION })
         assertEquals(listOf(own), missing)
         assertEquals("Connected\nNeeds permission: writing steps to Health Connect", statusText(PluginState.Active, PluginHealth(okText = "Connected"), missing))
-        assertEquals("the plugin's own check wins", emptyList<Any>(), PluginPermissions.missing(listOf(own), granted = { false }, ownCheck = emptySet()))
+        assertEquals("the plugin's own check wins for its own", emptyList<Any>(), PluginPermissions.missing(listOf(own), granted = { false }, ownCheck = emptySet(), own = setOf(own.name)))
         assertEquals("Connected", statusText(PluginState.Active, PluginHealth(okText = "Connected"), emptyList()))
-        assertTrue(AccessGuard.lines(access).toMap().getValue("Android permissions").contains("writing steps to Health Connect"))
+        assertTrue(PluginDetails.sections(FakePluginWith(access), emptyList()).first { it.title == "Permissions" }.more.any { it.contains("writing steps to Health Connect") })
     }
 }

@@ -226,8 +226,14 @@ private fun SendDialog(station: TideStation, onDismiss: () -> Unit, onForm: (Tid
         title = { Text("Send ${station.name}") },
         text = {
             Column {
-                Text("The constants go to the watch, which computes the tides itself. Tide times are in standard time (no summer time rule).", fontSize = 13.sp)
-                if (TideRecords.z0Approximate(station)) Text("Mean level: approximate (sum of the main amplitudes). Times are not affected, heights are.", fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
+                androidx.compose.foundation.layout.Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Text("The watch computes the tides itself.", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                    org.avmedia.gshockGoogleSync.ui.common.InfoButton("The constants go to the watch. Tide times are in standard time (no summer time rule).")
+                }
+                if (TideRecords.z0Approximate(station)) androidx.compose.foundation.layout.Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Text("Mean level: approximate.", fontSize = 13.sp, modifier = Modifier.weight(1f))
+                    org.avmedia.gshockGoogleSync.ui.common.InfoButton("The sum of the main amplitudes. Times are not affected, heights are.")
+                }
                 if (!TideRecords.can60(station)) Text("Too few constants for the 60 form.", fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
             }
         },

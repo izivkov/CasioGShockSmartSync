@@ -108,15 +108,6 @@ object AccessGuard {
         Control.BUTTON_PRESS -> "run on a press of the watch button"
     }
 
-    /** "Reads: steps, heart rate. Controls: notifications. Sends to: your server. Keeps: the token." in lines, for the details. */
-    fun lines(access: PluginAccess): List<Pair<String, String>> = listOfNotNull(
-        "Reads" to access.reads.sortedBy { it.ordinal }.joinToString { words(it) }.ifEmpty { "nothing" },
-        "Controls" to access.controls.sortedBy { it.ordinal }.joinToString { words(it) }.ifEmpty { "nothing" },
-        "Sends to" to access.sendsTo.joinToString().ifEmpty { "nowhere" },
-        "Keeps" to access.stores.joinToString().ifEmpty { "nothing" },
-        PluginPermissions.required(access).takeIf { it.isNotEmpty() }?.let { p -> "Android permissions" to p.joinToString("\n") { "${it.reason} (${it.name.substringAfterLast('.')})" } },
-    )
-
     /** "GBX-H5600 (all features)", "OCW-S7000 (without health log, steps)", "X (not supported: needs health log)". */
     fun worksWith(watches: List<Pair<String, WatchSupport>>): List<String> = watches.map { (name, s) ->
         fun words(c: Set<Capability>) = c.sortedBy { it.ordinal }.joinToString { it.name.lowercase().replace('_', ' ') }

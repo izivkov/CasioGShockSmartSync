@@ -71,6 +71,12 @@ fun BottomNavigationBarWithPermissions(
     TimeTabBack(currentDestination?.route, onOpenWatchList)
     // A plugin's screen opened from Settings > Plugins comes back to Settings.
     val openPluginFromSettings = { id: String -> MainTabReturn.set(Screens.Settings.route); onOpenPlugin(id) }
+    // A plugin turned on from any switch (Settings > Plugins, the Actions tab) that asks for its screen: it opens, and
+    // closing it comes back to the tab it was turned on from.
+    val pluginsVm: org.avmedia.gshockGoogleSync.plugins.PluginsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+    LaunchedEffect(pluginsVm) {
+        pluginsVm.toOpen.collect { id -> MainTabReturn.set(navController.currentDestination?.route); onOpenPlugin(id) }
+    }
     LaunchedEffect(navController) {
         MainTabReturn.take()?.let { route ->
             // The graph is set once the NavHost has composed: its first back stack entry says so.

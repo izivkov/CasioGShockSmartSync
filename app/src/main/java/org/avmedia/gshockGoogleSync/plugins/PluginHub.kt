@@ -100,6 +100,16 @@ class PluginHub @Inject constructor(
         onRecovered = { id -> health.callbackOk(id) },
         capsOf = ::capsOf,
         uses = { key -> values.useOf(key) },
+        allKeys = { values.keys() },
+        settingKeys = { WatchSettingRegistry.ALL.map { org.avmedia.gshockGoogleSync.watchvalues.WatchSettingVariables.valueKey(it.key) } },
+    )
+
+    /** What each plugin misses, kept as state: checked off the main thread ([PluginPermissionCache]). */
+    val permissions = PluginPermissionCache(
+        scope,
+        access = { id -> runtime.plugin(id)?.let { p -> runCatching { p.access }.getOrNull() } },
+        granted = { name -> context.checkSelfPermission(name) == android.content.pm.PackageManager.PERMISSION_GRANTED },
+        ownCheck = { id -> runtime.plugin(id)?.missingPermissions(context) },
     )
 
     private val writers = java.util.concurrent.CopyOnWriteArrayList<WatchSettingCommands>()
@@ -137,6 +147,7 @@ class PluginHub @Inject constructor(
         scope.launch {
             try {
                 switches.startAll()
+                refreshPermissions()
                 AppLog.log(LogSource.App, "Plugins: " + runtime.ids().joinToString { "${nameOf(it)} (${describe(runtime.state(it))})" }.ifEmpty { "none" })
                 leftOverPlugins().takeIf { it.isNotEmpty() }?.let { AppLog.log(LogSource.App, "Plugins: data of removed plugins: ${it.joinToString()}") }
                 scheduleWake()
@@ -191,8 +202,15 @@ class PluginHub @Inject constructor(
             },
             // Turned on by the person: what it needs and does not have yet is asked for now.
             afterTurnOn = { id -> requestPermissions(id) },
+            opensOnTurnOn = { id -> runtime.plugin(id)?.ui?.opensOnTurnOn == true },
+            open = { id -> _toOpen.tryEmit(id) },
         )
     }
+
+    private val _toOpen = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 4)
+
+    /** A plugin's screen to open now: it asked for it at turn-on ([PluginSwitchboard]), from whichever switch. */
+    val toOpen: kotlinx.coroutines.flow.SharedFlow<String> = _toOpen
 
     fun describe(state: PluginState): String = when (state) {
         PluginState.Active -> "on"
@@ -224,33 +242,33 @@ class PluginHub @Inject constructor(
     /** Collected by the app's activity, which asks the person and calls [permissionsAnswered]. */
     val permissionRequests: kotlinx.coroutines.flow.SharedFlow<PermissionRequest> = _permissionRequests
 
-    /** The permissions of plugin [id] not granted now. */
-    fun missingPermissions(id: String): List<org.avmedia.smartsync.plugin.api.AndroidPermission> {
-        val p = runtime.plugin(id) ?: return emptyList()
-        val access = runCatching { p.access }.getOrDefault(org.avmedia.smartsync.plugin.api.PluginAccess())
-        val own = runCatching { p.missingPermissions(context) }.getOrNull()
-        return PluginPermissions.missing(PluginPermissions.required(access), { name ->
-            context.checkSelfPermission(name) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        }, own)
-    }
+    /** The permissions of plugin [id] missing at the last check; never waits ([permissions]). */
+    fun missingPermissions(id: String): List<org.avmedia.smartsync.plugin.api.AndroidPermission> = permissions.of(id)
+
+    /** Checks every plugin's permissions again (start, the app back in front). */
+    fun refreshPermissions() { runtime.ids().forEach { permissions.refresh(it) } }
 
     /** Asks for what plugin [id] misses, through the app's screen; nothing when it misses nothing. */
     fun requestPermissions(id: String) {
-        val missing = missingPermissions(id)
-        if (missing.isEmpty()) return
-        val intent = runtime.plugin(id)?.let { p -> runCatching { p.permissionIntent(context) }.getOrNull() }
-        _permissionRequests.tryEmit(PermissionRequest(id, missing.map { it.name }, intent))
+        scope.launch {
+            val missing = permissions.check(id)
+            if (missing.isEmpty()) return@launch
+            val intent = runtime.plugin(id)?.let { p -> runCatching { p.permissionIntent(context) }.getOrNull() }
+            _permissionRequests.tryEmit(PermissionRequest(id, missing.map { it.name }, intent))
+        }
     }
 
     /** The person answered: the plugin learns what is still missing. */
     fun permissionsAnswered(id: String) {
-        val missing = missingPermissions(id).map { it.name }.toSet()
-        log(id, if (missing.isEmpty()) "permissions granted" else "permissions still missing: ${missing.joinToString { it.substringAfterLast('.') }}")
-        post { runtime.dispatchTo(id, WatchEvent.PermissionsChanged(missing)) }
+        scope.launch {
+            val missing = permissions.check(id).map { it.name }.toSet()
+            log(id, if (missing.isEmpty()) "permissions granted" else "permissions still missing: ${missing.joinToString { it.substringAfterLast('.') }}")
+            post { runtime.dispatchTo(id, WatchEvent.PermissionsChanged(missing)) }
+        }
     }
 
-    /** The periodic job ran: [WatchEvent.Wake] for the plugins whose interval passed. */
-    fun wake(): List<String> = runtime.wake(System.currentTimeMillis())
+    /** The periodic job ran: [WatchEvent.Wake] for the plugins whose interval passed, and they handled it (60 s at most). */
+    suspend fun wakeAndWait(): List<String> = runtime.wakeAndWait(System.currentTimeMillis())
 
     // --- Events from the app ---
 
@@ -272,7 +290,7 @@ class PluginHub @Inject constructor(
     /** A watch the app never saw: the same watch under its old id when one fits ([RePair]); its stores move. */
     private fun rePaired(w: WatchId, name: String) {
         if (watchStore.get(w.key, KEY_CAPS) != null) return
-        val known = kv.keys().filter { it.startsWith("$KEY_CAPS@") }.map { it.substringAfter('@') }
+        val known = PluginWatchData.known(kv)
         val paired = LocalDataStorage.getDeviceAddresses(context).map(WatchKeys::of).toSet()
         val from = RePair.find(w.key, name, known, paired) { watchName(WatchId(it)) } ?: return
         moveWatchData(WatchId(from), w)
@@ -307,11 +325,14 @@ class PluginHub @Inject constructor(
 
     fun backgroundStopped() { backgroundActive = false; post { runtime.dispatch(WatchEvent.BackgroundStopped) } }
 
-    /** [address] was removed from the app: the plugins' values of that watch go too. */
+    /**
+     * [address] was removed from the app: the plugins' values of that watch go too, and so do the host's own (its
+     * capabilities and kept values), so a removed watch is never taken for a re-paired one ([RePair]).
+     */
     fun watchRemoved(address: String) {
         val key = WatchKeys.of(address)
         if (key.isBlank()) return
-        runCatching { WatchStorage.deleteAll(kv, key) }
+        runCatching { PluginWatchData.remove(kv, key) }
         scheduler.forget(WatchId(key))
         post { runtime.dispatch(WatchEvent.WatchRemoved(WatchId(key))) }
     }

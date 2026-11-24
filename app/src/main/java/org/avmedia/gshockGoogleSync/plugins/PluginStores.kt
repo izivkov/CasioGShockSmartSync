@@ -109,6 +109,22 @@ class WatchStorage(
     }
 }
 
+/** What the host keeps per watch for the plugins, beyond their own stores. Android-free. */
+object PluginWatchData {
+    /** The host's own per-watch keys: capabilities at the last connection, the kept values. */
+    val HOST_NAMES = listOf(PluginHub.KEY_CAPS, WatchValuesHost.KEY)
+
+    /** The watches the host saw at a connection (and that were not removed since): the candidates of [RePair]. */
+    fun known(kv: KeyValueStore): List<String> = kv.keys().filter { it.startsWith("${PluginHub.KEY_CAPS}@") }.map { it.substringAfter('@') }
+
+    /** A removed watch: every plugin's values of it and the host's own, so it is never a re-pair candidate again. */
+    fun remove(kv: KeyValueStore, watch: String) {
+        if (watch.isBlank()) return
+        WatchStorage.deleteAll(kv, watch)
+        HOST_NAMES.forEach { kv.delete(WatchKeys.scoped(it, watch)) }
+    }
+}
+
 /**
  * Each plugin's on/off switch ("toggle.<id>": Home Assistant's switch already had that key), the reason the app turned
  * it off after failures (it stays off until switched on), and whether the person saw what it uses before turning it on.

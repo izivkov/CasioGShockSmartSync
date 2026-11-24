@@ -13,6 +13,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.avmedia.smartsync.plugin.api.Capability
 import org.avmedia.smartsync.plugin.api.Control
+import org.avmedia.smartsync.plugin.api.DataUse
 import org.avmedia.smartsync.plugin.api.PluginAccess
 import org.avmedia.smartsync.plugin.api.PluginApi
 import org.avmedia.smartsync.plugin.api.PluginHost
@@ -74,6 +75,10 @@ class PluginRuntime(
     private val capsOf: (WatchId) -> Set<Capability> = { emptySet() },
     /** The kind of data of each value key ([AccessGuard]); null: never served. */
     private val uses: ValueUses = { null },
+    /** Every value key the host can read, for a plugin that asks for all of its kinds ([PluginNeeds.values] null). */
+    private val allKeys: () -> Collection<String> = { emptyList() },
+    /** The value keys of the decoded watch settings, for [PluginNeeds.settings]. */
+    private val settingKeys: () -> Collection<String> = { emptyList() },
     private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
 ) {
     private class Slot(val id: String, val plugin: WatchPlugin) {
@@ -95,6 +100,8 @@ class PluginRuntime(
         var hostCalls = 0
         var hostSince = 0L
         @Volatile var lastWake = Long.MIN_VALUE
+        /** Waiting for this plugin's next [WatchEvent.Wake] to be handled ([wakeAndWait]). */
+        val wakeWaiters = java.util.concurrent.ConcurrentLinkedQueue<kotlinx.coroutines.CompletableDeferred<Unit>>()
         val connectedSeen: MutableSet<WatchId> = java.util.concurrent.ConcurrentHashMap.newKeySet()
     }
 
@@ -186,6 +193,7 @@ class PluginRuntime(
         // deactivate never runs while onEvent does: wait for it to end first.
         val ended = withTimeoutOrNull(limits.stopWaitMs) { consumer?.join(); running?.join(); true } == true
         slot.needs = PluginNeeds()
+        releaseWakeWaiters(slot)
         setState(slot, next)
         revoke(slot)
         runCatching { dropCommands(slot.id) }
@@ -253,12 +261,15 @@ class PluginRuntime(
     /** The time [s] spent in host calls so far, a running call included. */
     private fun hostTime(s: Slot): Long = synchronized(s) { s.hostMillis.get() + if (s.hostCalls > 0) clock() - s.hostSince else 0 }
 
-    /** What the active plugins need together. */
+    /**
+     * What the active plugins need together. [PluginNeeds.values] is never null here: "every key" of a plugin is every
+     * key of a kind it declared, and [PluginNeeds.settings] adds the setting keys its kinds cover.
+     */
     fun needs(): PluginNeeds {
         val active = synchronized(slots) { slots.values.filter { it.state == PluginState.Active }.map { covered(it) } }
-        val values: Set<String>? = if (active.any { it.values == null }) null else active.flatMap { it.values.orEmpty() }.toSet()
         return PluginNeeds(
-            values = values,
+            values = active.flatMap { it.values.orEmpty() }.toSet(),
+            settings = active.any { it.settings },
             buttonPress = active.any { it.buttonPress },
             healthReads = active.any { it.healthReads },
             wakeEveryMinutes = active.mapNotNull { it.wakeEveryMinutes }.minOrNull(),
@@ -271,26 +282,52 @@ class PluginRuntime(
     /** [slot]'s needs as far as its declaration covers them. */
     private fun covered(s: Slot): PluginNeeds = s.needs.copy(
         buttonPress = s.needs.buttonPress && Control.BUTTON_PRESS in s.access.controls,
-        values = s.needs.values?.filter { AccessGuard.mayRead(s.access, uses, it) }?.toSet(),
+        values = ((s.needs.values ?: allKeys().toSet()) + (if (s.needs.settings) settingKeys() else emptyList()))
+            .filter { AccessGuard.mayRead(s.access, uses, it) }.toSet(),
+        settings = s.needs.settings && (DataUse.WATCH_SETTINGS in s.access.reads || DataUse.BODY_PROFILE in s.access.reads),
         healthReads = s.needs.healthReads && AccessGuard.readsHealth(s.access),
         wakeEveryMinutes = s.needs.wakeEveryMinutes?.coerceAtLeast(MIN_WAKE_MINUTES),
     )
 
     /** The periodic job ran at [nowMillis]: [WatchEvent.Wake] for each active plugin whose interval passed. The ids woken. */
-    fun wake(nowMillis: Long): List<String> {
+    fun wake(nowMillis: Long): List<String> = wake(nowMillis, null)
+
+    private fun wake(nowMillis: Long, waits: MutableList<kotlinx.coroutines.CompletableDeferred<Unit>>?): List<String> {
         val due = synchronized(slots) {
             slots.values.filter { s ->
                 val every = covered(s).wakeEveryMinutes ?: return@filter false
                 s.state == PluginState.Active && (s.lastWake == Long.MIN_VALUE || nowMillis - s.lastWake >= every * 60_000L - WAKE_SLACK_MS)
             }
         }
-        return due.filter { s -> deliver(s, WatchEvent.Wake).also { if (it) s.lastWake = nowMillis } }.map { it.id }
+        return due.filter { s ->
+            // The waiter goes in before the event: the plugin may handle it at once.
+            val wait = waits?.let { kotlinx.coroutines.CompletableDeferred<Unit>().also { d -> s.wakeWaiters += d } }
+            deliver(s, WatchEvent.Wake).also { ok ->
+                if (ok) { s.lastWake = nowMillis; wait?.let { waits?.add(it) } } else wait?.let { s.wakeWaiters.remove(it); it.complete(Unit) }
+            }
+        }.map { it.id }
+    }
+
+    /**
+     * [wake], then waits until each woken plugin has handled its [WatchEvent.Wake] (or stopped), [timeoutMs] at most:
+     * the periodic job keeps the process and the network that long. The ids woken.
+     */
+    suspend fun wakeAndWait(nowMillis: Long, timeoutMs: Long = 60_000): List<String> {
+        val waits = ArrayList<kotlinx.coroutines.CompletableDeferred<Unit>>()
+        val woken = wake(nowMillis, waits)
+        withTimeoutOrNull(timeoutMs) { waits.forEach { it.await() } }
+        return woken
+    }
+
+    private fun releaseWakeWaiters(slot: Slot) {
+        while (true) (slot.wakeWaiters.poll() ?: return).complete(Unit)
     }
 
     private suspend fun consume(slot: Slot, queue: PluginEventQueue) {
         while (true) {
             val event = queue.take() ?: return
             val outcome = call(slot, event::class.simpleName ?: "event", limits.eventTimeoutMs) { slot.plugin.onEvent(event) }
+            if (event == WatchEvent.Wake) releaseWakeWaiters(slot)
             val reason = when {
                 outcome == Outcome.BLOCKED -> "turned off: blocked in ${event::class.simpleName}"
                 outcome == Outcome.FAILED && slot.failures >= limits.maxFailures -> "turned off after ${slot.failures} failures in a row"

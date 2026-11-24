@@ -148,11 +148,24 @@ class PluginAccessTest {
     }
 
     @Test fun theDetailsListTheDeclaration() {
-        val lines = AccessGuard.lines(FakePlugin().access).toMap()
-        assertEquals("steps, distance and energy, heart rate, sleep", lines["Reads"])
-        assertEquals("show notifications on the watch, change watch settings", lines["Controls"])
-        assertEquals("your Home Assistant server", lines["Sends to"])
-        assertEquals("Home Assistant address and token", lines["Keeps"])
+        val s = PluginDetails.sections(FakePlugin(), listOf("GBX-H5600 (all features)")).associateBy { it.title }
+        assertEquals("steps, distance and energy, heart rate and 1 more", s.getValue("Reads").line)
+        assertEquals(listOf("steps, distance and energy", "heart rate", "sleep"), s.getValue("Reads").more)
+        assertEquals("show notifications on the watch, change watch settings", s.getValue("Controls").line)
+        assertEquals("your Home Assistant server", s.getValue("Sends to").line)
+        assertEquals("Home Assistant address and token", s.getValue("Stores").line)
+        assertEquals("GBX-H5600 (all features)", s.getValue("Works with").line)
+    }
+
+    // Owner 2026-11-24: a plugin that maps everything shows one line, not every kind.
+    @Test fun everythingIsOneLine() {
+        val ha = org.avmedia.smartsync.homeassistant.HomeAssistantPlugin()
+        val s = PluginDetails.sections(ha, emptyList()).associateBy { it.title }
+        assertTrue(s.getValue("Reads").line, s.getValue("Reads").line.startsWith(PluginDetails.EVERYTHING))
+        assertEquals(PluginDetails.ALL_CONTROLS, s.getValue("Controls").line)
+        assertEquals("the person can still see each kind", (DataUse.ALL - DataUse.PHONE_LOCATION).size, s.getValue("Reads").more.size)
+        val few = PluginDetails.reads(PluginAccess(reads = setOf(DataUse.STEPS)))
+        assertEquals("a plugin that reads little keeps its list", "steps, distance and energy", few.line)
     }
 
     private class Mem : org.avmedia.gshockGoogleSync.watch.KeyValueStore {

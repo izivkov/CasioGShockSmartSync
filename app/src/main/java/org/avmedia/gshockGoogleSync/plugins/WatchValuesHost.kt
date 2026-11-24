@@ -49,6 +49,9 @@ class WatchValuesHost(
         v.meta?.let { m -> ValueInfo(v.name, v.description, m.use, m.type, m.unit) }
     }
 
+    /** Every key [catalog] lists. */
+    fun keys(): Set<String> = uses().keys
+
     /** The kind of data of [key]; null for a key the registry does not state one for (never served). */
     fun useOf(key: String): DataUse? = uses()[key]
 

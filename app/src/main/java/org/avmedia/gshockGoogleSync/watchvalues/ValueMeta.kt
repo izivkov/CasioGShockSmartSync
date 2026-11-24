@@ -13,6 +13,7 @@ import org.avmedia.smartsync.plugin.api.ValueType.BOOL
 import org.avmedia.smartsync.plugin.api.ValueType.DATE
 import org.avmedia.smartsync.plugin.api.ValueType.DATE_TIME
 import org.avmedia.smartsync.plugin.api.ValueType.LIST
+import org.avmedia.smartsync.plugin.api.ValueType.LOCAL_DATE_TIME
 import org.avmedia.smartsync.plugin.api.ValueType.NUMBER
 import org.avmedia.smartsync.plugin.api.ValueType.TEXT
 import org.avmedia.smartsync.plugin.api.ValueType.TIME
@@ -35,7 +36,7 @@ data class ValueMeta(val use: DataUse, val type: ValueType, val unit: String? = 
         /** The `health.*` variables ([HealthVariables], [HeartRateDayVariables], [SleepVariables]), one row each. */
         val HEALTH: Map<String, ValueMeta> = mapOf(
             "health.steps_today" to of(STEPS, WHOLE, "steps"),
-            "health.recorded_at" to of(STEPS, DATE_TIME),
+            "health.recorded_at" to of(STEPS, LOCAL_DATE_TIME),
             "health.kcal_today" to of(STEPS, WHOLE, "kcal"),
             "health.energy_total_kcal" to of(STEPS, WHOLE, "kcal"),
             "health.energy_resting_kcal" to of(STEPS, WHOLE, "kcal"),
@@ -60,16 +61,16 @@ data class ValueMeta(val use: DataUse, val type: ValueType, val unit: String? = 
             "health.slots" to of(STEPS, LIST, "steps"),
             "health.steps_by_hour" to of(STEPS, LIST, "steps"),
             "health.hr_by_slot" to of(HEART_RATE, LIST, "bpm"),
-            "health.hr_max_at" to of(HEART_RATE, DATE_TIME),
-            "health.hr_min_at" to of(HEART_RATE, DATE_TIME),
+            "health.hr_max_at" to of(HEART_RATE, LOCAL_DATE_TIME),
+            "health.hr_min_at" to of(HEART_RATE, LOCAL_DATE_TIME),
             "health.hr_curve_max" to of(HEART_RATE, WHOLE, "bpm"),
             "health.hr_curve_min" to of(HEART_RATE, WHOLE, "bpm"),
             "health.sleep_date" to of(SLEEP, DATE),
             "health.sleep_score" to of(SLEEP, WHOLE),
             "health.recharge_status" to of(SLEEP, WHOLE),
             "health.recharge_level" to of(SLEEP, WHOLE),
-            "health.sleep_fell_asleep" to of(SLEEP, DATE_TIME),
-            "health.sleep_woke_up" to of(SLEEP, DATE_TIME),
+            "health.sleep_fell_asleep" to of(SLEEP, LOCAL_DATE_TIME),
+            "health.sleep_woke_up" to of(SLEEP, LOCAL_DATE_TIME),
             "health.sleep_total_min" to of(SLEEP, WHOLE, "min"),
             "health.sleep_deep_min" to of(SLEEP, WHOLE, "min"),
             "health.sleep_light_min" to of(SLEEP, WHOLE, "min"),
@@ -79,8 +80,8 @@ data class ValueMeta(val use: DataUse, val type: ValueType, val unit: String? = 
             "health.sleep_breathing" to of(SLEEP, NUMBER, "breaths/min"),
             "health.sleep_stages" to of(SLEEP, LIST),
             "health.spo2" to of(BLOOD_OXYGEN, WHOLE, "%"),
-            "health.spo2_at" to of(BLOOD_OXYGEN, DATE_TIME),
-            "health.breathing_exercise_at" to of(SLEEP, DATE_TIME),
+            "health.spo2_at" to of(BLOOD_OXYGEN, LOCAL_DATE_TIME),
+            "health.breathing_exercise_at" to of(SLEEP, LOCAL_DATE_TIME),
             "health.cardio_load_ratio" to of(HEART_RATE, NUMBER),
             "health.cardio_date" to of(HEART_RATE, DATE),
             "health.cardio_feedback" to of(HEART_RATE, WHOLE),

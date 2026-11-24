@@ -35,3 +35,14 @@ class FakePlugin(
         @Composable override fun ActionsRow(onOpenSettings: () -> Unit) { Text(actionLine) }
     }
 }
+
+/** A plugin with nothing but [access] (and a name), for the details tests. */
+class FakePluginWith(override val access: org.avmedia.smartsync.plugin.api.PluginAccess) : WatchPlugin {
+    override val id: String = "with"
+    override val name: String = "With"
+    override val apiVersion: String = PluginApi.VERSION
+    override val version: String = "1"
+    override suspend fun activate(host: PluginHost) {}
+    override suspend fun deactivate() {}
+    override suspend fun onEvent(event: WatchEvent) {}
+}

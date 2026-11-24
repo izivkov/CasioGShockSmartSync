@@ -16,7 +16,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * The host's one periodic job for [org.avmedia.smartsync.plugin.api.PluginNeeds.wakeEveryMinutes]: it runs also when
  * the app was stopped (the Application starts the plugin hub first), waits until the plugins switched on have started
- * and sends [org.avmedia.smartsync.plugin.api.WatchEvent.Wake] to those whose interval passed. Set while a plugin asks,
+ * and sends [org.avmedia.smartsync.plugin.api.WatchEvent.Wake] to those whose interval passed, then waits until they
+ * handled it (60 s at most). Set while a plugin asks,
  * cancelled when none does.
  */
 class PluginWakeWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -30,7 +31,8 @@ class PluginWakeWorker(context: Context, params: WorkerParameters) : CoroutineWo
         val hub = EntryPointAccessors.fromApplication(applicationContext, HubEntryPoint::class.java).pluginHub()
         hub.start()
         withTimeoutOrNull(60_000) { hub.ready.await() }
-        val woken = hub.wake()
+        // Waits until the woken plugins handled the event: the job's hold on the process and the network ends here.
+        val woken = hub.wakeAndWait()
         if (woken.isNotEmpty()) hub.log(CommandScheduler.HOST, "wake-up sent to ${woken.joinToString()}")
         return Result.success()
     }

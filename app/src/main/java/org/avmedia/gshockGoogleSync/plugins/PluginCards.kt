@@ -47,6 +47,10 @@ class PluginsViewModel @Inject constructor(private val hub: PluginHub) : ViewMod
     fun clearData(id: String) = hub.clearData(id)
     fun leftOver(): Set<String> = hub.leftOverPlugins()
     fun missingPermissions(id: String) = hub.missingPermissions(id)
+    /** What each plugin misses, as state (checked off the main thread). */
+    val permissions = hub.permissions.missing
+    /** A plugin's screen to open after a turn-on, from any switch. */
+    val toOpen = hub.toOpen
     fun requestPermissions(id: String) = hub.requestPermissions(id)
 
     /** "Home Assistant (all features)" for each plugin that is offered for the watch at [address]. */
@@ -90,26 +94,6 @@ internal fun onSummary(states: Map<String, PluginState>, count: Int): String {
     if (count == 0) return "none found"
     val on = states.values.count { it == PluginState.Active }
     return "$on on"
-}
-
-/**
- * Opens a plugin's screen once it is active after the person turned it on (every turn-on, not only the first), for a
- * plugin that asks for that ([org.avmedia.smartsync.plugin.api.PluginUi.opensOnTurnOn]). Android-free.
- */
-class OpenOnTurnOn {
-    private var waiting: String? = null
-
-    fun turnedOn(id: String, opens: Boolean) { if (opens) waiting = id }
-
-    /** The id to open now, once: when [states] show it active. A plugin that failed to start opens nothing. */
-    fun take(states: Map<String, PluginState>): String? {
-        val id = waiting ?: return null
-        return when (states[id]) {
-            PluginState.Active -> { waiting = null; id }
-            is PluginState.Failed, is PluginState.Incompatible -> { waiting = null; null }
-            else -> null
-        }
-    }
 }
 
 /** A plugin's icon, 28 dp in the app's accent; the host's plugin icon when it gives none. */
@@ -177,16 +161,10 @@ internal fun PluginCard(plugin: WatchPlugin, status: String, on: Boolean, onSwit
 
 internal fun versionOf(p: WatchPlugin): String = runCatching { p.version }.getOrDefault("").let { if (it.isBlank()) "" else "v$it" }
 
-/** What a plugin reads, controls, sends where and keeps, in plain words. */
+/** What a plugin reads, controls, sends where and keeps: one short line each, a tap shows the rest (first turn-on). */
 @Composable
 internal fun AccessLines(plugin: WatchPlugin) {
-    val access = runCatching { plugin.access }.getOrNull() ?: PluginAccess()
-    for ((title, text) in AccessGuard.lines(access)) {
-        Column(modifier = Modifier.padding(vertical = 4.dp)) {
-            AppText(text = title, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            AppText(text = text, fontSize = 14.sp)
-        }
-    }
+    for (s in PluginDetails.sections(plugin, worksWith = emptyList()).filter { it.title != "About this plugin" }) FoldRow(s.title, s.line, s.more)
 }
 
 /** The open plugin's own screen. */
