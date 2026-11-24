@@ -15,6 +15,8 @@ data class WatchFaceUi(
     val working: Boolean = false,
     val face: WatchFaceCodec.Face? = null,
     val message: String? = null,
+    /** The faces the connected model has: 1 to [faceCount]. */
+    val faceCount: Int = 4,
 )
 
 /** The Watch face screen: read 0x51, change the face or one item, read it back. */

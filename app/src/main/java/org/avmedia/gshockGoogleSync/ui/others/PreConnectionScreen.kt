@@ -327,6 +327,7 @@ fun PreConnectionScreen(
 
                         WatchListHeader(
                             onBack = onBack,
+                            onOpenLog = {},
                             modifier = Modifier
                                 .align(Alignment.TopStart)
                                 .padding(top = 24.dp, start = 16.dp)
@@ -393,9 +394,18 @@ fun PreConnectionScreen(
 
 // --- Composable Components ---
 
+/** The watch list with the App log over it while [log] is open; [list] gets the way to open it. */
+@Composable
+fun WatchListWithLog(
+    log: @Composable (onBack: () -> Unit) -> Unit = { org.avmedia.gshockGoogleSync.ui.settings.AppLogScreen(onBack = it) },
+    list: @Composable (openLog: () -> Unit) -> Unit,
+) {
+    list {}
+}
+
 /** Top left of the watch list: Back when it was opened from the connected screens, else nothing. */
 @Composable
-fun WatchListHeader(onBack: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun WatchListHeader(onBack: (() -> Unit)?, onOpenLog: () -> Unit, modifier: Modifier = Modifier) {
     if (onBack == null) return
     Column(modifier = modifier) {
         androidx.compose.material3.TextButton(onClick = onBack) {

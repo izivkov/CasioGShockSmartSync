@@ -65,6 +65,12 @@ internal object WorkoutText {
         l.lapSec?.let { duration(it) }, l.distance?.let { "%.2f km".format(Locale.US, it) }, l.pace?.let { pace(it) }, l.hrAvg?.let { "$it bpm" },
     ).joinToString(", ").ifEmpty { "no data" }
 
+    /** The note under the rows when a unit shown is not confirmed yet. */
+    fun unitsNote(w: WorkoutRow): String? = null
+
+    /** The pace chart's values. */
+    fun paceSeries(d: WorkoutDetail): List<Float?> = series(d.samples) { it.pace }
+
     /** At most [max] evenly spread values of [pick] over the samples (a chart has no use for thousands of points); gaps stay null. */
     fun series(samples: List<WorkoutSampleRow>, max: Int = 120, pick: (WorkoutSampleRow) -> Number?): List<Float?> {
         if (samples.isEmpty()) return emptyList()

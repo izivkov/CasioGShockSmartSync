@@ -18,6 +18,9 @@ object WatchList {
 
     fun show() { _open.value = true }
 
+    /** Whether the list shows a Back button. */
+    fun showsBack(openedFromConnectedScreens: Boolean, watchConnected: Boolean): Boolean = openedFromConnectedScreens
+
     fun hide() {
         _open.value = false
         chosen = null

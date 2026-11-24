@@ -71,4 +71,18 @@ class ChartAxesTest {
         assertEquals("1:13", long.filterNotNull().last())
         assertTrue(ChartLabels.elapsed(List(5) { null }).isEmpty())
     }
+
+    /** The owner's 25 s walking test said "0 min" four times: a short workout is labelled in seconds. */
+    @Test fun aShortWorkoutIsLabelledInSeconds() {
+        assertEquals(listOf("0 s", "10 s", "20 s", "25 s"), ChartLabels.elapsed(List(6) { minOf(it * 5, 25) }).filterNotNull())
+        assertEquals(listOf("0:00", "1:20", "2:40", "4:00"), ChartLabels.elapsed(List(13) { it * 20 }).filterNotNull())
+    }
+
+    /** Values that are never below zero never get an axis below zero (the pace axis said "0:-2"). */
+    @Test fun aChartOfValuesFromZeroUpHasNoNegativeAxis() {
+        val zeros = listOf(ChartSeries(List(5) { 0f }, androidx.compose.ui.graphics.Color.Red))
+        val scale = chartScale(chartRange(zeros, ChartKind.LINES), ChartKind.LINES)!!
+        assertTrue("$scale", scale.low >= 0f)
+        assertEquals("0:00", paceText(-2f))
+    }
 }

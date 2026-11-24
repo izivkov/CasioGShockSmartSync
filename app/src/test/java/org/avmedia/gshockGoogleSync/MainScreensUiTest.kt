@@ -14,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
-import org.avmedia.gshockGoogleSync.homeassistant.HA_NOT_SET_UP
 import org.avmedia.gshockGoogleSync.homeassistant.HA_SET_UP_LINK
 import org.avmedia.gshockGoogleSync.homeassistant.HaAction
 import org.avmedia.gshockGoogleSync.homeassistant.HaActionsUi
@@ -129,7 +128,7 @@ class MainScreensUiTest {
 
     @Test fun theWatchListHasNoHomeAssistantLink() {
         var back = 0
-        rule.setContent { WatchListHeader(onBack = { back++ }) }
+        rule.setContent { WatchListHeader(onBack = { back++ }, onOpenLog = {}) }
         rule.onNodeWithText("Home Assistant", substring = true).assertDoesNotExist()
         rule.onNodeWithText("Back", substring = true).performClick()
         assertEquals(1, back)
@@ -138,7 +137,7 @@ class MainScreensUiTest {
     @Test fun theActionsRowOnlyChoosesTheButtonAction() {
         val actions = HaActionsUi(items = listOf(HaAction("script", "script.lights", "Lights")))
         rule.setContent { HaButtonActionContent(true, true, {}, actions, {}, {}, {}) }
-        rule.onNodeWithText("A press of the watch button runs").assertExists()
+        rule.onNodeWithText("Watch button:", substring = true).assertExists()
         listOf("Token", "Address", "Forget", "Dashboard", "Find").forEach {
             rule.onNodeWithText(it, substring = true).assertDoesNotExist()
         }
@@ -147,8 +146,7 @@ class MainScreensUiTest {
     @Test fun theActionsRowLinksToSettingsWhenNotSetUp() {
         var setup = 0
         rule.setContent { HaButtonActionContent(false, true, {}, HaActionsUi(), {}, {}, { setup++ }) }
-        rule.onNodeWithText(HA_NOT_SET_UP).assertIsDisplayed()
-        rule.onNodeWithText("A press of the watch button runs").assertDoesNotExist()
+        rule.onNodeWithText("Watch button:", substring = true).assertDoesNotExist()
         rule.onNodeWithText(HA_SET_UP_LINK).performClick()
         assertEquals(1, setup)
     }

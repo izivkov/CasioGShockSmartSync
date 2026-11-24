@@ -90,4 +90,20 @@ class WatchSettingCommandsTest {
         assertTrue(logged[0].contains("failed"))
         assertEquals(0, after)
     }
+
+    @Test fun theWatchFaceAcceptsOnlyTheFacesTheConnectedModelHas() = runBlocking {
+        var name = "CASIO DW-H5600"
+        val perModel = WatchSettingCommands(
+            write = { s, v -> written += s.key to v; result }, connected = { true }, log = { logged += it }, onQueued = {},
+            watchName = { name },
+        )
+        perModel.submit(one("watch_face", "tide"))
+        assertTrue(perModel.pendingKeys().isEmpty())
+        assertTrue(logged.single(), logged.single().startsWith("Home Assistant watch setting refused: watch_face"))
+        name = "CASIO GBX-H5600"
+        perModel.submit(one("watch_face", "tide"))
+        perModel.onSetupDone()
+        perModel.flush()
+        assertEquals(listOf("watch_face" to "tide"), written)
+    }
 }

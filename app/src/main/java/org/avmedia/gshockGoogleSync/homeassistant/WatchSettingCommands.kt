@@ -25,6 +25,8 @@ class WatchSettingCommands(
     private val onQueued: (WatchSettingCommands) -> Unit = { it.flushLater() },
     /** The connected watch's key: queued values are written to the watch they were asked for, never to another. */
     private val watch: () -> String = { "" },
+    /** The connected watch's name: a choice that depends on the model (the watch face) is checked against it. */
+    private val watchName: () -> String = { "" },
 ) {
     private val pending = LinkedHashMap<String, Any>()
     /** The watch the queued values are for. */
