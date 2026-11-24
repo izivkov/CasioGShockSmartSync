@@ -290,6 +290,7 @@ object H5600HealthIO {
             setupWaiting = false
             synchronized(lock) { active = null }
             org.avmedia.gshockapi.casio.ConnectionSetup.onTransferEnded()
+            WatchExchange.onTransferEnded()
             transfer.setupReplies.close()
             Timber.i("H5600: attempt end")
         }

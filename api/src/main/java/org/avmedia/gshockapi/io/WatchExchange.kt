@@ -29,6 +29,17 @@ object WatchExchange {
         lastTransferEndMs = nowMs
     }
 
+    /** The pause after a transfer before the next one starts. */
+    const val SETTLE_AFTER_TRANSFER_MS = 3_000L
+
+    /** Waits until [SETTLE_AFTER_TRANSFER_MS] passed since the last transfer ended. */
+    suspend fun awaitSettledAfterTransfer() {
+        val left = lastTransferEndMs + SETTLE_AFTER_TRANSFER_MS - System.currentTimeMillis()
+        if (left <= 0) return
+        org.avmedia.gshockapi.casio.ConnectionKeepAlive.log("transfer waits ${(left + 999) / 1000} s: the last transfer just ended")
+        delay(left)
+    }
+
     /** Marks [block] as a settings or time exchange: a transfer does not start while one runs. */
     suspend fun <T> settingsExchange(block: suspend () -> T): T {
         exchanges.incrementAndGet()

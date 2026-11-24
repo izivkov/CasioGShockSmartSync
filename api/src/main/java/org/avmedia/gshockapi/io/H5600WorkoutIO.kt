@@ -239,7 +239,7 @@ object H5600WorkoutIO {
     }
 
     /** Pause before the one repeat of a refused start. */
-    internal const val START_RETRY_MS = 2_000L
+    internal const val START_RETRY_MS = 3_000L
 
     /**
      * One transfer run. It starts only when no settings or time exchange runs (a start during one was refused or answered
@@ -247,6 +247,7 @@ object H5600WorkoutIO {
      */
     private suspend fun runOnce(store: suspend (WorkoutSession) -> Boolean): WorkoutRunResult {
         inbox = null
+        WatchExchange.awaitSettledAfterTransfer()
         WatchExchange.awaitNoSettingsExchange()
         val channel = Channel<WorkoutMsg>(Channel.UNLIMITED)
         inbox = channel
@@ -256,7 +257,7 @@ object H5600WorkoutIO {
             sink = { s -> store(s).also { ok -> if (ok) _workouts.emit(s) } },
             blockCache = blockCache,
             log = ::log,
-        ).run()
+        ).run().also { WatchExchange.onTransferEnded() }
     }
 
     private fun log(text: String) {
