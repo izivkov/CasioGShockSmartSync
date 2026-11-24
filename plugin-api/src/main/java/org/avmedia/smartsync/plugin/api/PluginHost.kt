@@ -56,7 +56,7 @@ interface PluginHost {
     /** The values read last for [watch] (kept across restarts); empty before the first read. */
     fun lastValues(watch: WatchId): WatchValues
 
-    /** The decoded settings of [watch] as read last, by [SettingInfo.key]. */
+    /** The decoded settings of [watch] as read last, by [SettingInfo.key]; read at each connection with [PluginNeeds.settings]. */
     fun settings(watch: WatchId): SettingsSnapshot
 
     /** The settings [WatchCommand.ChangeSettings] accepts for [watch] (only those its capabilities have), with their allowed values. */
@@ -79,7 +79,9 @@ interface PluginHost {
 
     /**
      * The Android permissions of [PluginAccess.androidPermissions] (and the location permission for
-     * [DataUse.PHONE_LOCATION]) that are not granted now; empty when all are.
+     * [DataUse.PHONE_LOCATION]) that were missing at the host's last check; empty when all are. Never blocks: the host
+     * checks at start, after a turn-on or an answer and when the app comes to the front. A permission revoked in the
+     * system settings shows here only, without a [WatchEvent.PermissionsChanged].
      */
     fun missingPermissions(): Set<String>
 

@@ -27,6 +27,22 @@ class ApiSurfaceTest {
 
     @Test fun theNeedsHaveNoFlagThatDoesNothing() {
         val fields = PluginNeeds::class.java.declaredFields.map { it.name }.filter { !it.contains('$') }.toSortedSet()
-        assertEquals(sortedSetOf("buttonPress", "healthReads", "values", "wakeEveryMinutes"), fields)
+        assertEquals(sortedSetOf("buttonPress", "healthReads", "settings", "values", "wakeEveryMinutes"), fields)
+    }
+
+    // M1: the plugin's own permission check may wait on a service (Health Connect), so it is a suspend call.
+    @Test fun theOwnPermissionCheckSuspends() {
+        val m = WatchPlugin::class.java.declaredMethods.single { it.name == "missingPermissions" }
+        assertEquals("kotlin.coroutines.Continuation", m.parameterTypes.last().name)
+    }
+
+    // M3: a local time without offset has its own type.
+    @Test fun aLocalTimeHasItsOwnType() {
+        org.junit.Assert.assertTrue(ValueType.entries.map { it.name }.containsAll(listOf("DATE_TIME", "LOCAL_DATE_TIME")))
+    }
+
+    @Test fun thePluginTellsAboutItself() {
+        val about = sortedSetOf("getAuthor", "getDescription", "getInfoUrl", "getIssuesUrl", "getLicense", "getSetupNeeds", "getSourceUrl", "getSummary")
+        org.junit.Assert.assertTrue(names(WatchPlugin::class.java).containsAll(about))
     }
 }

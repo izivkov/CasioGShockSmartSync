@@ -1,8 +1,10 @@
 package org.avmedia.smartsync.plugin.api
 
 /**
- * A watch, by the key every store of the app uses for it ("gshock-aabbccddeeff", from its Bluetooth address). A
- * re-paired watch gets a new key; the host moves its stores and says so ([WatchEvent.WatchRePaired]).
+ * A watch, by the key every store of the app uses for it. Opaque: compare and store it, never parse it. Today it comes
+ * from the Bluetooth address, so a re-paired watch gets a new key; the host moves its stores and says so
+ * ([WatchEvent.WatchRePaired]). A later host may give a stable id that never changes; [WatchEvent.WatchRePaired] then
+ * simply does not come.
  */
 data class WatchId(val key: String) {
     override fun toString(): String = key

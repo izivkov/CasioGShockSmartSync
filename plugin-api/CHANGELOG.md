@@ -27,3 +27,8 @@ newer than its own. What may be added: README "What may change in a compatible r
   `valueKeys()`, `keepConnected`, `undecodedSettings`, `WatchEvent.Condition`, `ValueCause.wire`, `WatchSupport`,
   `PluginUi.statusLine()`, `DataUse.words`, `Control.words`, `DataUse.ofValueKey`, `Control.ofSetting`,
   `PluginResult.failed`.
+- Changed by the second review (2026-11-24), before the tag: `WatchPlugin.missingPermissions` is `suspend` (the host
+  caches the answer); `PluginNeeds.settings`; `ValueType.LOCAL_DATE_TIME` (7 keys moved to it, `DATE_TIME` always has
+  an offset); `WatchPlugin.description`, `setupNeeds`, `infoUrl`, `sourceUrl`, `issuesUrl`, `author`, `license`;
+  `DataUse.ALL`, `DataUse.WATCH`, `Control.ALL`. KDoc: location may be old, `WATCH_SETTINGS` covers the profile rows,
+  `SLEEP` carries the night's heart rate, `PHONE` names its values, no constructor or `copy()` of host records.

@@ -39,8 +39,10 @@ enum class ValueType {
     WHOLE,
     /** A fraction (a Double). */
     NUMBER,
-    /** A time stamp as ISO-8601 text; with an offset unless the description says "without offset". */
+    /** A time stamp as ISO-8601 text, always with an offset ("2026-11-24T14:05:00+01:00", "...Z"). */
     DATE_TIME,
+    /** A local time as ISO-8601 text without an offset ("2026-11-24T07:12:00"): the watch's local time. */
+    LOCAL_DATE_TIME,
     /** A date as ISO-8601 text ("2026-11-24"). */
     DATE,
     /** A time of day, "HH:MM". */

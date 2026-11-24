@@ -25,8 +25,29 @@ interface WatchPlugin {
     /** The name the person sees (Settings, Actions). */
     val name: String
 
-    /** One line about what it does, for Settings > Plugins; "" for none. */
+    /** One short line about what it does, for its row in Settings > Plugins; "" for none. */
     val summary: String get() = ""
+
+    /** Two or three plain sentences of what it can do, first on its details page; "" for none (the [summary] shows). */
+    val description: String get() = ""
+
+    /** One short line of what the person must have, for "Needs: ..." ("Your Home Assistant URL and a token"); "" for none. */
+    val setupNeeds: String get() = ""
+
+    /** Its guide or documentation (https), the "Guide" link of its details page; null for none. */
+    val infoUrl: String? get() = null
+
+    /** Its source code (https); null for none. */
+    val sourceUrl: String? get() = null
+
+    /** Where to report a problem (https); null for none. */
+    val issuesUrl: String? get() = null
+
+    /** Who made it ("ExcuseMi"); "" for none. */
+    val author: String get() = ""
+
+    /** Its licence, an SPDX id ("MIT", "GPL-3.0-or-later"); "" for none. */
+    val license: String get() = ""
 
     /** The interface version this plugin was built against: write `override val apiVersion = PluginApi.VERSION`. */
     val apiVersion: String
@@ -65,10 +86,13 @@ interface WatchPlugin {
     fun permissionIntent(context: android.content.Context): android.content.Intent? = null
 
     /**
-     * Which of its [PluginAccess.androidPermissions] are missing, for permissions the host cannot check itself (Health
-     * Connect before Android 14). Null: the host checks each one with the system.
+     * Which of its own [PluginAccess.androidPermissions] are missing, for permissions the host cannot check itself
+     * (Health Connect before Android 14: `getGrantedPermissions()`). Null: the host checks each one with the system.
+     * The host calls it off the main thread with a limit of 5 s (at start, after a turn-on, after an answer, when the
+     * app comes to the front) and keeps the answer; a call over the limit keeps the answer before. It counts only for
+     * names in [PluginAccess.androidPermissions]: the host checks the location permission itself.
      */
-    fun missingPermissions(context: android.content.Context): Set<String>? = null
+    suspend fun missingPermissions(context: android.content.Context): Set<String>? = null
 }
 
 /**
@@ -99,21 +123,30 @@ interface PluginUi {
 
 /**
  * What a plugin needs from the host. The host keeps the union over the active plugins: a need of a plugin that is off
- * or failed counts for nothing, and so does a need its [PluginAccess] does not cover.
+ * or failed counts for nothing, and so does a need its [PluginAccess] does not cover. This type gets no new field in
+ * a compatible release (README): a new need comes as a new type and host call.
  */
 data class PluginNeeds(
     /**
-     * Value keys ([PluginHost.valueCatalog]) the host should read for this plugin; empty = none, null = every key it
-     * knows (the full read takes link time on every connection).
+     * Value keys ([PluginHost.valueCatalog]) the host should read for this plugin; empty = none, null = every key of a
+     * kind it declared ([PluginAccess.reads]; the full read takes link time on every connection). The union is read:
+     * a plugin with an empty set still gets [WatchEvent.ValuesUpdated] when another plugin asked for values.
      */
     val values: Set<String>? = emptySet(),
+    /**
+     * The host reads the watch settings of the catalogue ([PluginHost.settingCatalog]) at each connection, for
+     * [PluginHost.settings] (needs [DataUse.WATCH_SETTINGS] or [DataUse.BODY_PROFILE]; only the rows of the declared
+     * kind are served). False: [PluginHost.settings] holds only what another plugin happened to ask for.
+     */
+    val settings: Boolean = false,
     /** The plugin wants [WatchEvent.ButtonPressed] (needs [Control.BUTTON_PRESS]): it is listed among the actions a press runs. */
     val buttonPress: Boolean = false,
     /** The plugin uses health data (needs a health [DataUse]): the host reads the watch's health log in the background as well. */
     val healthReads: Boolean = false,
     /**
      * Send [WatchEvent.Wake] about every this many minutes (15 at least; null = never), also when the app was stopped:
-     * the host's one periodic job starts the plugins first. Not exact: Android may delay it (Doze).
+     * the host's one periodic job starts the plugins first. Not exact: Android may delay it (Doze). The host keeps the
+     * process (and the job's network) until [WatchPlugin.onEvent] of that [WatchEvent.Wake] returns, 60 s at most.
      */
     val wakeEveryMinutes: Int? = null,
 )

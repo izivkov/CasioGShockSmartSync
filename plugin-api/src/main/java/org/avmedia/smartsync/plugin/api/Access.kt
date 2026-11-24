@@ -9,9 +9,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
  * ([FailReason.NOT_DECLARED]). A checked promise to the person, not a sandbox: plugins are compiled into the app.
  */
 data class PluginAccess(
-    /** The watch and phone data the plugin reads. */
+    /**
+     * The watch and phone data the plugin reads. [DataUse.ALL] for a plugin that maps everything (the person then
+     * sees "everything your watch provides"); the host still serves only what is in this set.
+     */
     val reads: Set<DataUse> = emptySet(),
-    /** What it may make the watch do. */
+    /** What it may make the watch do; [Control.ALL] for all of it. */
     val controls: Set<Control> = emptySet(),
     /** Where its data goes, in a few plain words ("your Home Assistant server", "Health Connect on this phone"). */
     val sendsTo: List<String> = emptyList(),
@@ -45,28 +48,38 @@ enum class DataUse {
     /** Steps, distance, energy, activity time. */
     STEPS,
     HEART_RATE,
-    /** Sleep, nightly recharge, breathing. */
+    /** Sleep, nightly recharge, breathing: each night with its heart rate and breathing ([NightRecord.heartRate]). */
     SLEEP,
     BLOOD_OXYGEN,
     WORKOUTS,
     BATTERY_AND_TEMPERATURE,
     /** Watch settings, alarms, cities, timer. */
     WATCH_SETTINGS,
-    /** The body profile kept on the watch: height, weight, sex, heart rate limits, VO2max. */
+    /**
+     * Reading the body profile kept on the watch: height, weight, sex, heart rate limits, VO2max. Writing those rows
+     * needs [Control.WATCH_SETTINGS], for good: no separate control for the profile will come.
+     */
     BODY_PROFILE,
     /** Watch name, model, firmware, connection. */
     WATCH_INFO,
-    /** Phone time zone and app state. */
+    /** The phone's time zone, the app's version and state, the time of a read (`event`, `timestamp`, `app.*`). */
     PHONE,
     /** The phone's battery level. */
     PHONE_BATTERY,
     /**
-     * The phone's coarse location (last known, about 1 km), read by the host: the host asks the person for the location
-     * permission, a plugin never declares one for this.
+     * The phone's coarse location (about 1 km), read by the host: the host asks the person for the location
+     * permission, a plugin never declares one for this. Last known, so it may be old: the app has no background
+     * location, it is updated while the app is open. [WatchValues.readAtMillis] is the time of the read, not of the fix.
      */
     PHONE_LOCATION;
 
     companion object {
+        /** Every kind: for a plugin that maps everything the watch and phone give ([PluginAccess.reads]). */
+        val ALL: Set<DataUse> get() = entries.toSet()
+
+        /** The kinds that come from the watch (not the phone's). */
+        val WATCH: Set<DataUse> get() = entries.toSet() - setOf(PHONE, PHONE_BATTERY, PHONE_LOCATION)
+
         /** What a stored record of [kind] needs. */
         fun of(kind: DataKind<*>): DataUse = when (kind) {
             DataKind.Days, DataKind.Hours -> STEPS
@@ -84,7 +97,12 @@ enum class Control {
     /** The watch face settings ([SettingInfo.control] says which rows). */
     WATCH_FACE,
     /** Run on a press of the watch button ([PluginNeeds.buttonPress]). */
-    BUTTON_PRESS,
+    BUTTON_PRESS;
+
+    companion object {
+        /** Every control ([PluginAccess.controls]). */
+        val ALL: Set<Control> get() = entries.toSet()
+    }
 }
 
 /** A plugin's icon: a drawable of its own resources or a vector. The host has a fallback for none. */
