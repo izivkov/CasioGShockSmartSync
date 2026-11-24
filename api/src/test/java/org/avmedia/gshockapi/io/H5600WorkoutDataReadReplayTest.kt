@@ -10,7 +10,8 @@ import org.junit.Test
 /**
  * A watch that plays the frames of one real workout read (resource `h5600_workout_1f_read.txt`): session, group header,
  * both headers and the first data read, 4096 bytes in one sector. The watch sends the sector end `07 1F 00 00 00 00 00`
- * and goes on (`09 1F ...`, all sent) only when that whole frame comes back; a short `07 1F` gets no answer, as on the watch.
+ * and then says nothing more, as the real one (log 2026-11-24 02:37): that sector end with every byte in is the end of the
+ * block read, no `09` follows. It answers only a next request (`00 1F` or `00 20`), here with an abort.
  */
 private class DataReadReplayWatch(private val inbox: Channel<WorkoutMsg>) : WorkoutLink {
     private sealed class Step(val channel: H5600Channel, val data: ByteArray)
@@ -32,6 +33,7 @@ private class DataReadReplayWatch(private val inbox: Channel<WorkoutMsg>) : Work
     private var cursor = 0
     val writes = mutableListOf<String>()
     val mismatches = mutableListOf<String>()
+    val nextRequests = mutableListOf<String>()
 
     private fun hex(b: ByteArray) = b.joinToString("") { "%02x".format(it) }
 
@@ -43,8 +45,14 @@ private class DataReadReplayWatch(private val inbox: Channel<WorkoutMsg>) : Work
     private fun write(channel: H5600Channel, data: ByteArray) {
         writes += (if (channel == H5600Channel.CONVOY) "bulk " else "") + hex(data)
         if (data.size >= 2 && data[0].toInt() == 0x07 && data[1] == sectorEnd[1]) {
-            if (data.contentEquals(sectorEnd)) inbox.trySend(WorkoutMsg(H5600Channel.DRSP, byteArrayOf(0x09) + sectorEnd.copyOfRange(1, sectorEnd.size)))
-            cursor = script.size
+            cursor = script.size // silent from here on
+            return
+        }
+        if (cursor == script.size) {
+            if (data.size == 10 && data[0].toInt() == 0 && (data[1].toInt() == 0x1F || data[1].toInt() == 0x20)) {
+                nextRequests += hex(data)
+                inbox.trySend(WorkoutMsg(H5600Channel.DRSP, byteArrayOf(0x03, data[1])))
+            }
             return
         }
         val next = script.drop(cursor).indexOfFirst { it is Tx }
@@ -78,8 +86,10 @@ class H5600WorkoutDataReadReplayTest {
         assertTrue("the recorded writes match: $why", watch.mismatches.isEmpty())
         val at = watch.writes.indexOf("001f0040010000100000")
         assertTrue("the data read went out: $why", at >= 0)
-        assertEquals("whole sector end echo, then all sent and end: $why",
-            listOf("071f0000000000", "091f0000000000", "041f"), watch.writes.subList(at + 1, at + 4))
+        assertEquals("whole sector end echo: $why", "071f0000000000", watch.writes.getOrNull(at + 1))
+        assertEquals("then at once the next request (next block or the laps): $why", 1, watch.nextRequests.size)
+        assertEquals("no other write in between: $why", watch.nextRequests[0], watch.writes.getOrNull(at + 2))
+        assertTrue("no 09 or 04 for the data read: $why", watch.writes.none { it == "091f0000000000" || it == "041f" })
         assertTrue("the data block is read: $why", lines.any { it.contains("slot 0 1F 1 data blocks") })
         assertFalse("not stalled on the data read: $why", result.error.orEmpty().contains("data blocks could not be read"))
     }

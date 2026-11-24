@@ -72,8 +72,9 @@ internal class FakeWatch(
             inbox.trySend(WorkoutMsg(H5600Channel.CONVOY, byteArrayOf(5) + raw.copyOfRange(pos, pos + n)))
             pos += n
         }
-        send(H5600Channel.DRSP, 0x07)
-        send(H5600Channel.DRSP, 0x09)
+        // As the real watch (log 2026-11-24 02:37): a 256-byte read (1D, 1E) ends with `09`; a block read (1F, 20) ends
+        // with its sector end `07`, and then the watch waits for the next request (no `09`).
+        if (len == 256) send(H5600Channel.DRSP, 0x09) else send(H5600Channel.DRSP, 0x07)
     }
 }
 
