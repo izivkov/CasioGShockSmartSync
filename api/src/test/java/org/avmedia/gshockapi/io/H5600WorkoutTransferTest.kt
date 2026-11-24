@@ -12,7 +12,12 @@ import org.junit.Test
  * A scripted watch holding one running workout in slot 0 (header at 4096, one data block at 8192, one lap block at 12288).
  * It echoes the session request `00 1C` + 8 zero as the real watch does (`001c0000000000000000`).
  */
-internal class FakeWatch(private val inbox: Channel<WorkoutMsg>, private val corruptFirstHeader: Boolean = false) : WorkoutLink {
+internal class FakeWatch(
+    private val inbox: Channel<WorkoutMsg>,
+    private val corruptFirstHeader: Boolean = false,
+    /** Like the watch: a fetched mark sets the transferred bits of the group header (from byte 525), so the next read skips the slot. */
+    private val keepsMarks: Boolean = false,
+) : WorkoutLink {
     val events = mutableListOf<String>()
     val marks = mutableListOf<ByteArray>()
     private var corrupted = false
@@ -36,7 +41,16 @@ internal class FakeWatch(private val inbox: Channel<WorkoutMsg>, private val cor
             0 -> send(H5600Channel.CONVOY, 0, 0, 0)
             4 -> send(H5600Channel.CONVOY, 4, 0, 0)
             6 -> if (data.size == 14 && data[1].toInt() == 0) inbox.trySend(WorkoutMsg(H5600Channel.CONVOY, byteArrayOf(6, 0, 2, 0, 0x10, 0, 0, 0, 0, 0, 0, 0, 0, 0))) else send(H5600Channel.CONVOY, 6, 1)
-            7 -> { marks += data; events += "mark"; inbox.trySend(WorkoutMsg(H5600Channel.CONVOY, byteArrayOf(7, 0))) }
+            7 -> {
+                marks += data
+                events += "mark"
+                if (keepsMarks) {
+                    val part = store.getValue(0x1D to 512L).copyOf()
+                    for (i in 0 until 13) part[525 - 512 + i] = data[2 + i]
+                    store[0x1D to 512L] = part
+                }
+                inbox.trySend(WorkoutMsg(H5600Channel.CONVOY, byteArrayOf(7, 0)))
+            }
         }
     }
 
