@@ -55,7 +55,7 @@ object PhoneNotificationPolicy {
 class PhoneNotificationSettings(private val store: KeyValueStore, private val watches: WatchStore = WatchStore(store)) {
     fun mode(watch: String): PhoneNotificationMode {
         watches.get(watch, W_MODE)?.value?.let { v -> PhoneNotificationMode.entries.firstOrNull { it.name == v }?.let { return it } }
-        val old = watches.get(watch, W_MODE, KEY_ON)?.value ?: return PhoneNotificationMode.OFF
+        val old = watches.get(watch, W_MODE, KEY_ON)?.value ?: return PhoneNotificationMode.ALL
         val mode = if (old == "on") PhoneNotificationMode.SELECTED else PhoneNotificationMode.OFF
         watches.put(watch, W_MODE, mode.name)
         return mode

@@ -21,7 +21,7 @@ class PhoneNotificationForwarder(
     @Synchronized
     fun decide(n: PostedNotification, appName: String, ownPackage: String): Boolean {
         val w = watch()
-        if (w.isEmpty() && !supported()) {
+        if (!supported()) {
             if (toldUnsupported != w) {
                 toldUnsupported = w
                 log("Phone notifications: the connected watch cannot show them, none are sent to it")
