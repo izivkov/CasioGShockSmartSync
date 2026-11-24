@@ -92,9 +92,10 @@ class WatchSettingCommands(
             log("$who watch settings not written: the watch is not ready")
             return PluginResult.Failed(FailReason.NOT_CONNECTED, "the watch is not ready")
         }
-        val (_, failed) = flush()
-        return if (failed == 0) PluginResult.Ok(Delivered.NOW)
-        else PluginResult.Failed(FailReason.INTERNAL, "$failed write(s) failed")
+        val failures = ArrayList<String>()
+        flush(failures)
+        return if (failures.isEmpty()) PluginResult.Ok(Delivered.NOW)
+        else PluginResult.Failed(FailReason.INTERNAL, failures.joinToString("; "))
     }
 
     fun pendingKeys(): List<String> = synchronized(pending) { pending.keys.toList() }
@@ -113,7 +114,7 @@ class WatchSettingCommands(
     fun ready(): Boolean = setupDone && connected()
 
     /** Writes the queued values while the watch is ready. One write at a time. Returns (written, failed). */
-    suspend fun flush(): Pair<Int, Int> = mutex.withLock {
+    suspend fun flush(failures: MutableList<String>? = null): Pair<Int, Int> = mutex.withLock {
         var wrote = false
         var written = 0
         var failed = 0
@@ -140,6 +141,7 @@ class WatchSettingCommands(
                 }
                 is SettingWriteResult.Failed -> {
                     log("$who set $key to $value failed: ${result.message}")
+                    failures?.add("$key: ${result.message}")
                     failed++
                 }
             }

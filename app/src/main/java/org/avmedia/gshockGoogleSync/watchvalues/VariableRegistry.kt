@@ -24,14 +24,16 @@ class VariableContext(
 }
 
 /**
- * One variable: a dotted name, a description for the screen, and the code that reads it when
- * the values are read. Return null (or throw) when the value is not available.
+ * One variable: a dotted name, a description for the screen, what kind of data it is ([meta]), and the code that reads
+ * it when the values are read. Return null (or throw) when the value is not available.
  */
 class Variable(
     val name: String,
     val description: String,
     /** True when the value comes from the watch: skipped (null) while the watch is not connected. */
     val needsWatch: Boolean = false,
+    /** Its kind, type and unit. Null: no plugin is ever served it (fail closed). */
+    val meta: ValueMeta? = null,
     val provider: suspend (VariableContext) -> Any?,
 )
 

@@ -20,6 +20,13 @@ object RawSettings {
     /** What a sync may read: the whole table only while the raw switch is on. */
     fun codesFor(rawOn: Boolean): List<Int> = if (rawOn) CODES else DECODED_CODES
 
+    /**
+     * Whether the plugins' [wanted] value keys (null = every key) ask for a raw code beyond the decoded ones: then the
+     * whole table is read (a decoding aid, it costs link time on each read).
+     */
+    fun wantsAll(wanted: Set<String>?): Boolean =
+        wanted == null || CODES.any { it !in DECODED_CODES && variable(it) in wanted }
+
     fun name(code: Int): String = "0x%02X".format(code)
 
     fun variable(code: Int): String = "watch.raw.${name(code)}"

@@ -52,6 +52,12 @@ class WatchSetting(
     fun valueIn(frames: Map<String, ByteArray>): Any? = frames[RawSettings.name(code)]?.let(read)
 }
 
+/** The result of [WatchSettingRegistry.checkAll]. */
+sealed interface SettingsCheck {
+    class Ok(val values: Map<String, Any>) : SettingsCheck
+    class Refused(val reason: org.avmedia.smartsync.plugin.api.FailReason, val message: String) : SettingsCheck
+}
+
 sealed interface SettingCheck {
     class Ok(val value: Any) : SettingCheck
     class Refused(val reason: String) : SettingCheck
@@ -186,6 +192,39 @@ object WatchSettingRegistry {
     }
 
     fun find(key: String): WatchSetting? = BY_KEY[key]
+
+    /** The settings that are the watch face: writing them needs [org.avmedia.smartsync.plugin.api.Control.WATCH_FACE]. */
+    val FACE_KEYS = setOf("watch_face", "custom_slot")
+
+    /** What writing [key] needs. */
+    fun controlOf(key: String): org.avmedia.smartsync.plugin.api.Control =
+        if (key in FACE_KEYS) org.avmedia.smartsync.plugin.api.Control.WATCH_FACE else org.avmedia.smartsync.plugin.api.Control.WATCH_SETTINGS
+
+    private val LABELS = mapOf(
+        "hr_measurement" to "Heart rate measurement", "custom_slot" to "Custom face slot", "profile_height_cm" to "Height",
+        "profile_weight_kg" to "Weight", "profile_sex" to "Sex", "smart_alarm_window_min" to "Smart alarm window",
+        "vo2max" to "VO2max", "notification_off_at_night" to "Notifications off at night",
+    )
+
+    /** A short name for the person: "Step goal", "Activity running". */
+    fun label(key: String): String = LABELS[key] ?: key.replace('_', ' ').replaceFirstChar { it.uppercase() }
+
+    /**
+     * All or nothing: every key of [values] is known and every value passes [check] for [watchName]. Ok holds the
+     * canonical values; else the first refusal, naming its key.
+     */
+    fun checkAll(values: Map<String, Any?>, watchName: String? = null): SettingsCheck {
+        if (values.isEmpty()) return SettingsCheck.Refused(org.avmedia.smartsync.plugin.api.FailReason.INVALID, "no setting named")
+        val ok = LinkedHashMap<String, Any>()
+        for ((key, raw) in values) {
+            val setting = find(key) ?: return SettingsCheck.Refused(org.avmedia.smartsync.plugin.api.FailReason.NOT_SUPPORTED, "$key: unknown setting")
+            when (val c = check(setting, raw, watchName)) {
+                is SettingCheck.Refused -> return SettingsCheck.Refused(org.avmedia.smartsync.plugin.api.FailReason.INVALID, "$key: ${c.reason}")
+                is SettingCheck.Ok -> ok[key] = c.value
+            }
+        }
+        return SettingsCheck.Ok(ok)
+    }
 
     /** The codes the entries read (they must be in [RawSettings.DECODED_CODES]). */
     val CODES: Set<Int> = ALL.map { it.code }.toSet()

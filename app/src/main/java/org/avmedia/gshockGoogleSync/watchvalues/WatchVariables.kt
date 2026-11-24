@@ -17,6 +17,8 @@ import org.avmedia.gshockGoogleSync.ui.health.H5600Session
 import org.avmedia.gshockGoogleSync.ui.common.IWatchFeatureManager
 import org.avmedia.gshockapi.WatchInfo
 import org.avmedia.gshockapi.io.IO
+import org.avmedia.smartsync.plugin.api.DataUse.*
+import org.avmedia.smartsync.plugin.api.ValueType.*
 
 /**
  * THE list of watch values the plugins read (Home Assistant's sensors among them). To add one, add one [Variable] here.
@@ -40,6 +42,8 @@ object WatchVariables {
         val lastWorkout: suspend () -> WorkoutRow? = { null },
         /** The "Read raw watch settings" switch; off reads only the decoded codes. */
         val rawOn: () -> Boolean = { false },
+        /** The phone's coarse location (latitude, longitude), null without the location permission or a fix. */
+        val phoneLocation: () -> Pair<Double, Double>? = { null },
     )
 
     fun androidEnv(appContext: Context, api: GShockRepository, features: IWatchFeatureManager, raw: RawRequester, rawOn: () -> Boolean) = Env(
@@ -56,6 +60,7 @@ object WatchVariables {
         healthData = { H5600Session.data },
         lastWorkout = { WorkoutStore.newest(appContext) },
         rawOn = rawOn,
+        phoneLocation = { PhoneLocation.coarse(appContext) },
     )
 
     fun registry(env: Env): VariableRegistry {
@@ -93,134 +98,137 @@ object WatchVariables {
 
         val list = mutableListOf(
             // Event
-            Variable("event", "What triggered this call: watch_action, sync, health_data or test") { it.event },
-            Variable("timestamp", "Time of the call, ISO 8601 with offset") { it.now.withNano(0).toString() },
+            Variable("event", "What triggered this call: watch_action, sync, health_data or test", meta = ValueMeta.of(PHONE, TEXT)) { it.event },
+            Variable("timestamp", "Time of the call, ISO 8601 with offset", meta = ValueMeta.of(PHONE, DATE_TIME)) { it.now.withNano(0).toString() },
 
             // Phone and app
-            Variable("phone.battery", "Phone battery level, percent") {
+            Variable("phone.battery", "Phone battery level, percent", meta = ValueMeta.of(PHONE_BATTERY, WHOLE, "%")) {
                 env.phoneBattery()
             },
-            Variable("phone.timezone", "Phone time zone id, for example Europe/Brussels") {
+            Variable("phone.location", "The phone's coarse location, last known: latitude and longitude, 2 decimals (about 1 km)", meta = ValueMeta.of(PHONE_LOCATION, MAP)) {
+                env.phoneLocation()?.let { (lat, lon) -> mapOf("latitude" to lat, "longitude" to lon) }
+            },
+            Variable("phone.timezone", "Phone time zone id, for example Europe/Brussels", meta = ValueMeta.of(PHONE, TEXT)) {
                 ZoneId.systemDefault().id
             },
-            Variable("phone.dst", "True while the phone is on daylight saving time") {
+            Variable("phone.dst", "True while the phone is on daylight saving time", meta = ValueMeta.of(PHONE, BOOL)) {
                 TimeZone.getDefault().inDaylightTime(Date())
             },
-            Variable("app.version", "Smart Sync app version") { BuildConfig.VERSION_NAME },
-            Variable("app.last_sync", "When the app last connected to the watch, ISO 8601") {
+            Variable("app.version", "Smart Sync app version", meta = ValueMeta.of(PHONE, TEXT)) { BuildConfig.VERSION_NAME },
+            Variable("app.last_sync", "When the app last connected to the watch, ISO 8601 with offset", meta = ValueMeta.of(PHONE, DATE_TIME)) {
                 env.lastSync()
             },
 
             // Watch
-            Variable("watch.connected", "True when the watch is connected right now") { it.watchConnected },
-            Variable("watch.name", "Watch model name, for example GW-B5600") {
+            Variable("watch.connected", "True when the watch is connected right now", meta = ValueMeta.of(WATCH_INFO, BOOL)) { it.watchConnected },
+            Variable("watch.name", "Watch model name, for example GW-B5600", meta = ValueMeta.of(WATCH_INFO, TEXT)) {
                 WatchInfo.name.takeIf { n -> n.isNotBlank() }
             },
-            Variable("watch.model", "Watch model id used by the app", needsWatch = true) {
+            Variable("watch.model", "Watch model id used by the app", needsWatch = true, meta = ValueMeta.of(WATCH_INFO, TEXT)) {
                 WatchInfo.model.name
             },
-            Variable("watch.battery", "Watch battery level, percent (H5600: 7-step scale, 0 = charging/empty, from watch.battery_level)", needsWatch = true) {
+            Variable("watch.battery", "Watch battery level, percent (H5600: 7-step scale, 0 = charging/empty, from watch.battery_level)", needsWatch = true, meta = ValueMeta.of(BATTERY_AND_TEMPERATURE, WHOLE, "%")) {
                 if (h5600()) h5600Condition(it)?.batteryPercent
                 else if (supported("time.battery")) api.getBatteryLevel() else null
             },
-            Variable("watch.battery_level", "H5600 only: battery step 0..6 (H5600: 7-step scale, 0 = charging/empty)", needsWatch = true) {
+            Variable("watch.battery_level", "H5600 only: battery step 0..6 (H5600: 7-step scale, 0 = charging/empty)", needsWatch = true, meta = ValueMeta.of(BATTERY_AND_TEMPERATURE, WHOLE)) {
                 if (h5600()) h5600Condition(it)?.batteryLevel else null
             },
-            Variable("watch.battery_label", "H5600 only: battery indicator CHG, LOW, 1, 2, 3, 4 or HIGH (H5600: 7-step scale, 0 = charging/empty)", needsWatch = true) {
+            Variable("watch.battery_label", "H5600 only: battery indicator CHG, LOW, 1, 2, 3, 4 or HIGH (H5600: 7-step scale, 0 = charging/empty)", needsWatch = true, meta = ValueMeta.of(BATTERY_AND_TEMPERATURE, TEXT)) {
                 if (h5600()) h5600Condition(it)?.batteryLabel else null
             },
-            Variable("watch.temperature", "Temperature from the watch sensor, degrees Celsius", needsWatch = true) {
+            Variable("watch.temperature", "Temperature from the watch sensor, degrees Celsius", needsWatch = true, meta = ValueMeta.of(BATTERY_AND_TEMPERATURE, WHOLE, "°C")) {
                 if (h5600()) h5600Condition(it)?.temperature
                 else if (supported("time.temperature")) api.getWatchTemperature() else null
             },
-            Variable("watch.home_city", "Home time city set on the watch", needsWatch = true) {
+            Variable("watch.home_city", "Home time city set on the watch", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 if (supported("time.home_time")) api.getHomeTime().takeIf { c -> c.isNotBlank() && c != "N/A" } else null
             },
-            Variable("watch.dst.home", "True while daylight saving is on for the home time", needsWatch = true) {
+            Variable("watch.dst.home", "True while daylight saving is on for the home time", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 if (supported("time.home_time")) WatchDecoders.dstHomeOn(api.getDSTWatchState(IO.DstState.ZERO)) else null
             },
-            Variable("watch.firmware", "Firmware: unknown until the version bytes are decoded (see watch.firmware_raw)", needsWatch = true) {
+            Variable("watch.firmware", "Firmware: unknown until the version bytes are decoded (see watch.firmware_raw)", needsWatch = true, meta = ValueMeta.of(WATCH_INFO, TEXT)) {
                 if (h5600()) WatchDecoders.firmwareState(versionAnswer(it)) else null
             },
-            Variable("watch.firmware_raw", "H5600 only: the version answer (request 0x20) as hex bytes, not decoded", needsWatch = true) {
+            Variable("watch.firmware_raw", "H5600 only: the version answer (request 0x20) as hex bytes, not decoded", needsWatch = true, meta = ValueMeta.of(WATCH_INFO, TEXT)) {
                 if (h5600()) WatchDecoders.versionRaw(versionAnswer(it)) else null
             },
-            Variable("watch.face_raw", "H5600 only: request 0x51 (watch face) as hex bytes, not decoded", needsWatch = true) {
+            Variable("watch.face_raw", "H5600 only: request 0x51 (watch face) as hex bytes, not decoded", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 rawSettings(it)[RawSettings.name(0x51)]
             },
-            Variable("watch.face_items_raw", "H5600 only: request 0x52 (items of the custom face) as hex bytes, not decoded", needsWatch = true) {
+            Variable("watch.face_items_raw", "H5600 only: request 0x52 (items of the custom face) as hex bytes, not decoded", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 rawSettings(it)[RawSettings.name(0x52)]
             },
-            Variable("watch.raw_settings", "H5600 only: raw setting requests as an object, code to hex bytes, not decoded", needsWatch = true) {
+            Variable("watch.raw_settings", "H5600 only: raw setting requests as an object, code to hex bytes, not decoded", needsWatch = true, meta = ValueMeta.of(BODY_PROFILE, MAP)) {
                 rawSettings(it).takeIf { m -> m.isNotEmpty() }
             },
-            Variable("watch.raw_settings_read_at", "H5600 only: when a raw setting was last read, ISO 8601 with offset", needsWatch = true) {
+            Variable("watch.raw_settings_read_at", "H5600 only: when a raw setting was last read, ISO 8601 with offset", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, DATE_TIME)) {
                 rawSettings(it)
                 RawSettings.shared.lastReadMillis()?.let { ms ->
                     java.time.Instant.ofEpochMilli(ms).atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime().withNano(0).toString()
                 }
             },
-            Variable("watch.notifications_supported", "True when the watch accepts app notifications (read while connected)", needsWatch = true) {
+            Variable("watch.notifications_supported", "True when the watch accepts app notifications (read while connected)", needsWatch = true, meta = ValueMeta.of(WATCH_INFO, BOOL)) {
                 api.supportsAppNotifications()
             },
-            Variable("watch.timer_seconds", "Countdown timer set on the watch, seconds", needsWatch = true) {
+            Variable("watch.timer_seconds", "Countdown timer set on the watch, seconds", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, WHOLE, "s")) {
                 api.getTimer()
             },
-            Variable("health.steps_today", HealthVariables.DESCRIPTIONS.getValue("health.steps_today"), needsWatch = false) {
+            Variable("health.steps_today", HealthVariables.DESCRIPTIONS.getValue("health.steps_today"), needsWatch = false, meta = ValueMeta.of(STEPS, WHOLE, "steps")) {
                 // H5600: the LifeLog read takes 30 to 100 s, so only the last transfer is used, never a new read here.
                 if (h5600()) HealthVariables.values(env.healthData())["health.steps_today"]
                 else if (it.watchConnected && supported("time.step_counter")) api.getStepCount().currentDaySteps else null
             },
 
             // Watch settings
-            Variable("watch.settings.time_format", "12h or 24h", needsWatch = true) {
+            Variable("watch.settings.time_format", "12h or 24h", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 if (supported("locale.time_format")) settings(it).timeFormat.ifBlank { null } else null
             },
-            Variable("watch.settings.date_format", "DD:MM or MM:DD", needsWatch = true) {
+            Variable("watch.settings.date_format", "DD:MM or MM:DD", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 if (supported("locale.date_format")) settings(it).dateFormat.ifBlank { null } else null
             },
-            Variable("watch.settings.language", "Day-of-week language of the watch", needsWatch = true) {
+            Variable("watch.settings.language", "Day-of-week language of the watch", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 if (supported("locale.week_language")) settings(it).language.ifBlank { null } else null
             },
-            Variable("watch.settings.auto_light", "Auto light on or off", needsWatch = true) {
+            Variable("watch.settings.auto_light", "Auto light on or off", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 if (supported("light.auto_light")) settings(it).autoLight else null
             },
-            Variable("watch.settings.light_duration", "Light duration, for example 2s or 4s", needsWatch = true) {
+            Variable("watch.settings.light_duration", "Light duration, for example 2s or 4s", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 settings(it).lightDuration.ifBlank { null }
             },
-            Variable("watch.settings.power_saving", "Power saving mode on or off", needsWatch = true) {
+            Variable("watch.settings.power_saving", "Power saving mode on or off", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 if (supported("settings.power_saving")) settings(it).powerSavingMode else null
             },
-            Variable("watch.settings.button_tone", "Button tone on or off", needsWatch = true) {
+            Variable("watch.settings.button_tone", "Button tone on or off", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 settings(it).buttonTone
             },
-            Variable("watch.settings.key_vibration", "Key vibration on or off", needsWatch = true) {
+            Variable("watch.settings.key_vibration", "Key vibration on or off", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 if (supported("operation_tone.vibrate")) settings(it).keyVibration else null
             },
-            Variable("watch.settings.hourly_chime", "Hourly chime on or off", needsWatch = true) {
+            Variable("watch.settings.hourly_chime", "Hourly chime on or off", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 if (supported("alarms.chime")) settings(it).hourlyChime else null
             },
-            Variable("watch.settings.do_not_disturb", "Do not disturb (always-connected watches)", needsWatch = true) {
+            Variable("watch.settings.do_not_disturb", "Do not disturb (always-connected watches)", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 if (supported("time_adjustment.always_connected")) settings(it).DnD else null
             },
-            Variable("watch.settings.font", "Display font, Standard or Classic", needsWatch = true) {
+            Variable("watch.settings.font", "Display font, Standard or Classic", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 if (supported("settings.multiple_fonts")) settings(it).font else null
             },
-            Variable("watch.settings.time_adjustment", "Automatic time adjustment on or off", needsWatch = true) {
+            Variable("watch.settings.time_adjustment", "Automatic time adjustment on or off", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, BOOL)) {
                 if (supported("time_adjustment.supported")) settings(it).timeAdjustment else null
             },
-            Variable("watch.settings.adjustment_minutes", "Minutes between automatic time adjustments", needsWatch = true) {
+            Variable("watch.settings.adjustment_minutes", "Minutes between automatic time adjustments", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, WHOLE, "min")) {
                 if (supported("time_adjustment.supported")) settings(it).adjustmentTimeMinutes else null
             },
-            Variable("watch.settings.fine_adjustment", "Fine time adjustment", needsWatch = true) {
+            Variable("watch.settings.fine_adjustment", "Fine time adjustment", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, WHOLE)) {
                 if (supported("time_adjustment.supported")) settings(it).fineAdjustment else null
             },
 
             // Alarms
-            Variable("alarms.enabled_count", "Number of alarms that are switched on", needsWatch = true) {
+            Variable("alarms.enabled_count", "Number of alarms that are switched on", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, WHOLE)) {
                 alarms(it).count { a -> a.enabled }
             },
-            Variable("alarms.list", "All alarms: time, enabled, hourly_chime, one_time", needsWatch = true) {
+            Variable("alarms.list", "All alarms: time, enabled, hourly_chime, one_time", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, LIST)) {
                 alarms(it).map { a ->
                     mapOf(
                         "time" to "%02d:%02d".format(a.hour, a.minute),
@@ -234,33 +242,33 @@ object WatchVariables {
 
         // DW-H5600 LifeLog values, from the last transfer (health.steps_today is defined above).
         for (name in HealthVariables.NAMES.filter { it != "health.steps_today" }) {
-            list += Variable(name, HealthVariables.DESCRIPTIONS.getValue(name)) { HealthVariables.values(env.healthData())[name] }
+            list += Variable(name, HealthVariables.DESCRIPTIONS.getValue(name), meta = ValueMeta.HEALTH[name]) { HealthVariables.values(env.healthData())[name] }
         }
 
         // DW-H5600 workouts: the newest stored one (read once per call), never a new read here.
         for (name in WorkoutVariables.NAMES) {
-            list += Variable(name, WorkoutVariables.DESCRIPTIONS.getValue(name)) { ctx ->
+            list += Variable(name, WorkoutVariables.DESCRIPTIONS.getValue(name), meta = ValueMeta.WORKOUT[name]) { ctx ->
                 WorkoutVariables.values(ctx.cached("workout.newest") { env.lastWorkout() })[name]
             }
         }
 
         // One variable per raw code, from the table: adding a code is one entry in RawSettings.CODES.
         for (code in RawSettings.CODES) {
-            list += Variable(RawSettings.variable(code), "H5600 only: request ${RawSettings.name(code)} as hex bytes, not decoded", needsWatch = true) {
+            list += Variable(RawSettings.variable(code), "H5600 only: request ${RawSettings.name(code)} as hex bytes, not decoded", needsWatch = true, meta = ValueMeta.ofRawCode(code)) {
                 rawSettings(it)[RawSettings.name(code)]
             }
         }
 
         // Decoded health settings (face, heart-rate measurement, bedtime, night window, unit, profile, smart alarm).
         for (def in WatchSettingVariables.DEFS) {
-            list += Variable(def.name, def.description, needsWatch = true) {
+            list += Variable(def.name, def.description, needsWatch = true, meta = def.meta) {
                 if (h5600()) def.value(WatchSettingVariables.frames(rawSettings(it))) else null
             }
         }
 
         // World cities 1 to 5 (name only).
         for (i in 1..5) {
-            list += Variable("watch.world_city.$i", "Name of world city $i on the watch", needsWatch = true) {
+            list += Variable("watch.world_city.$i", "Name of world city $i on the watch", needsWatch = true, meta = ValueMeta.of(WATCH_SETTINGS, TEXT)) {
                 if (supported("time.world_cities")) WatchDecoders.worldCityName(api.getWorldCities(i), i) else null
             }
         }
