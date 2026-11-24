@@ -90,8 +90,6 @@ interface PluginHost {
      */
     fun requestPermissions()
 
-    fun moveWatchData(from: WatchId, to: WatchId) {}
-
     /** States or changes what the plugin needs ([PluginNeeds]). */
     fun declareNeeds(needs: PluginNeeds)
 
@@ -210,7 +208,7 @@ object Redact {
         val rest = if (scheme.isNotEmpty()) noQuery.substringAfter("://") else noQuery
         // The authority ends at the first '/': a user part ends at its last '@' (a password may hold one).
         val authority = rest.substringBefore('/')
-        val host = rest.substringAfter('@').substringBefore('/')
+        val host = authority.substringAfterLast('@')
         val path = rest.substringAfter('/', "")
         return (if (scheme.isNotEmpty()) "$scheme://" else "") + host + if (path.isNotEmpty()) "/…" else ""
     }

@@ -505,10 +505,11 @@ class PluginHub @Inject constructor(
 
         /** The watch a button press is for: the watch whose values were read, else the current one (the press is never lost). */
         fun pressTarget(read: WatchEvent.ValuesUpdated?, currentKey: String): WatchId? =
-            read?.watch
+            read?.watch ?: currentKey.takeIf { it.isNotBlank() }?.let(::WatchId)
 
         /** The catalogue for a watch with [caps] named [watchName]: the health settings rows only where it has them. */
         fun settingCatalog(caps: Set<org.avmedia.smartsync.plugin.api.Capability>, watchName: String): List<SettingInfo> {
+            if (caps.isNotEmpty() && org.avmedia.smartsync.plugin.api.Capability.HEALTH_SETTINGS !in caps) return emptyList()
             return WatchSettingRegistry.ALL.map { s -> settingInfo(s, watchName) }
         }
 

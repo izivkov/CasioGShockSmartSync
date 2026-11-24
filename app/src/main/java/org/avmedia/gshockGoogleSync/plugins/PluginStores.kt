@@ -37,7 +37,7 @@ object StorageRules {
     const val MAX_VALUE_CHARS = 64 * 1024
     private val KEY = Regex("[A-Za-z0-9._-]{1,200}")
 
-    fun keyOk(key: String): Boolean = key.isNotEmpty()
+    fun keyOk(key: String): Boolean = KEY.matches(key)
 }
 
 /**

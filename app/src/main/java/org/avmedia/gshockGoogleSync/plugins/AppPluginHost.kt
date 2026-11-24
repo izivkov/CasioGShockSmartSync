@@ -40,7 +40,7 @@ class AppPluginHost(private val hub: PluginHub, private val plugin: WatchPlugin,
     @Volatile private var revoked = false
 
     override fun revoke() {
-        revoked = false
+        revoked = true
         settingsWriterOrNull?.let(hub::removeSettingsWriter)
     }
 
@@ -84,8 +84,8 @@ class AppPluginHost(private val hub: PluginHub, private val plugin: WatchPlugin,
         when (command) {
             WatchCommand.RefreshValues -> {
                 if (access.reads.isEmpty()) return@call notDeclared("values (no data declared)")
-                if (hub.connectedWatch() == watch) CommandScheduler.DONE
-                else if (delivery is Delivery.NextConnection) CommandScheduler.NOT_CONNECTED // every connection reads the values
+                if (hub.connectedWatch() == watch) hub.refreshValues()
+                else if (delivery is Delivery.NextConnection) CommandScheduler.QUEUED // every connection reads the values
                 else CommandScheduler.NOT_CONNECTED
             }
             is WatchCommand.ChangeSettings -> when (val c = WatchSettingRegistry.checkAll(command.values, hub.watchName(watch))) {
@@ -156,7 +156,7 @@ class AppPluginHost(private val hub: PluginHub, private val plugin: WatchPlugin,
             val keys = values.values.keys.mapNotNull { k -> WatchSettingVariables.settingKeyOf(k)?.takeIf { WatchSettingRegistry.find(it) != null }?.let { k to it } }
             return SettingsSnapshot(
                 values.watch,
-                keys.associate { (valueKey, _) -> valueKey to values.values[valueKey] },
+                keys.associate { (valueKey, key) -> key to values.values[valueKey] },
                 keys.mapNotNull { values.readAtMillis[it.first] }.maxOrNull(),
             )
         }

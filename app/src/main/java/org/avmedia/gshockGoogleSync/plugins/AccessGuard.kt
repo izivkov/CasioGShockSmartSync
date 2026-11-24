@@ -21,7 +21,7 @@ typealias ValueUses = (key: String) -> DataUse?
  * kind the registry does not state is never served (fail closed). Android-free.
  */
 object AccessGuard {
-    fun mayRead(access: PluginAccess, uses: ValueUses, key: String): Boolean = uses(key)?.let { it in access.reads } ?: true
+    fun mayRead(access: PluginAccess, uses: ValueUses, key: String): Boolean = uses(key)?.let { it in access.reads } == true
 
     /** [values] with only the declared kinds. */
     fun values(access: PluginAccess, uses: ValueUses, values: WatchValues): WatchValues = WatchValues(
@@ -72,7 +72,7 @@ object AccessGuard {
         is WatchEvent.HealthRead -> event.kinds.filter { mayRead(access, it) }.toSet().takeIf { it.isNotEmpty() }?.let { event.copy(kinds = it) }
         is WatchEvent.WorkoutStored -> event.takeIf { DataUse.WORKOUTS in access.reads }
         is WatchEvent.ButtonPressed -> event.takeIf { Control.BUTTON_PRESS in access.controls }
-        is WatchEvent.SettingChanged -> event.takeIf { true } ?: event.takeIf { uses(org.avmedia.gshockGoogleSync.watchvalues.WatchSettingVariables.valueKey(event.key))?.let { u -> u in access.reads } == true }
+        is WatchEvent.SettingChanged -> event.takeIf { uses(org.avmedia.gshockGoogleSync.watchvalues.WatchSettingVariables.valueKey(event.key))?.let { u -> u in access.reads } == true }
         is WatchEvent.Connected, is WatchEvent.Disconnected, is WatchEvent.WatchRemoved, is WatchEvent.WatchRePaired -> event
         WatchEvent.BackgroundStarted, WatchEvent.BackgroundStopped, WatchEvent.EventsLost, WatchEvent.Wake, is WatchEvent.PermissionsChanged -> event
     }

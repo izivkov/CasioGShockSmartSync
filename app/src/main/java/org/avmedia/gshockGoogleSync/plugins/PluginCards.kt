@@ -80,7 +80,7 @@ internal fun statusText(
     time: (Long) -> String = ::shortTime,
 ): String {
     val base = offLine(state) ?: health?.okText?.takeIf { it.isNotBlank() } ?: "On"
-    val needs: String? = null
+    val needs = PluginPermissions.line(missing)?.takeIf { state == PluginState.Active }
     val error = health?.let { h -> PluginHealthBoard.line(h, time) }
     return listOfNotNull(base, needs, error).joinToString("\n")
 }
@@ -105,7 +105,7 @@ class OpenOnTurnOn {
     fun take(states: Map<String, PluginState>): String? {
         val id = waiting ?: return null
         return when (states[id]) {
-            PluginState.Active -> { waiting = ""; id }
+            PluginState.Active -> { waiting = null; id }
             is PluginState.Failed, is PluginState.Incompatible -> { waiting = null; null }
             else -> null
         }

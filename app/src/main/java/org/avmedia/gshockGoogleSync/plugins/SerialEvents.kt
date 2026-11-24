@@ -16,7 +16,7 @@ class SerialEvents(scope: CoroutineScope, private val onError: (Throwable) -> Un
     init {
         scope.launch {
             for (w in work) {
-                launch { try { w() } catch (e: Throwable) { onError(e) } }
+                try { w() } catch (e: CancellationException) { throw e } catch (e: Throwable) { onError(e) }
             }
         }
     }

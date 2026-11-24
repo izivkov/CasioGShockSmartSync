@@ -26,7 +26,7 @@ class PluginEventQueue(
                 val stale = items.indexOfFirst { !isCritical(it) }
                 val at = if (stale >= 0) stale else items.indexOfFirst { it != WatchEvent.EventsLost }
                 val dropped = items[at]
-                items.removeAt(at)
+                if (WatchEvent.EventsLost in items) items.removeAt(at) else items[at] = WatchEvent.EventsLost
                 if (!overflowing) {
                     overflowing = true
                     log("events queue full ($capacity): dropped ${dropped::class.simpleName} and newer stale events")
