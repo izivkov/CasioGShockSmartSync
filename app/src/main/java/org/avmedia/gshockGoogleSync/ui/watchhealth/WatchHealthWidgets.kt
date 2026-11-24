@@ -69,7 +69,7 @@ fun ValueRow(
                 AppTextLarge(
                     text = value,
                     textAlign = androidx.compose.ui.text.style.TextAlign.End,
-                    modifier = Modifier.widthIn(max = valueMax * 4).padding(start = 8.dp),
+                    modifier = Modifier.widthIn(max = valueMax).padding(start = 8.dp),
                 )
             }
         }

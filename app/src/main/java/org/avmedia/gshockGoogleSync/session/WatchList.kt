@@ -36,7 +36,7 @@ object WatchList {
 
     /** Whether a watch that appeared may connect now. Always true while the list is closed. */
     fun admits(address: String): Boolean {
-        if (address.isNotEmpty() || !_open.value) return true
+        if (!_open.value) return true
         if (pairing) return false
         val only = chosen ?: return true
         return OpenOnConnect.sameAddress(only, address)
@@ -56,11 +56,13 @@ class WatchSwitch(
         WatchList.choose(address)
         val current = connectedAddress()?.takeIf { it.isNotBlank() }
         if (current != null && OpenOnConnect.sameAddress(current, address)) return
+        if (current != null) disconnectCurrent()
         connect(address)
     }
 
     /** A pairing starts: the connected watch is let go first, so it cannot take the link over the new one. */
     fun startPairing() {
         WatchList.pairingStarted()
+        if (connectedAddress()?.isNotBlank() == true) disconnectCurrent()
     }
 }

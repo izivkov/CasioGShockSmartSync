@@ -71,7 +71,6 @@ internal fun WatchFaceContent(
                     }
                     val text = if (ui.working) "Talking to the watch..." else ui.message
                     if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
-                    androidx.compose.material3.TextButton(onClick = {}) { androidx.compose.material3.Text("Details") }
                 }
                 ButtonsRow(
                     buttons = listOf(

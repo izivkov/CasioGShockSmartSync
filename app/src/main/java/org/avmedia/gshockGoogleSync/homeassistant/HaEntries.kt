@@ -111,7 +111,7 @@ internal fun HaButtonActionContent(
                 AppTextLarge(text = stringResource(R.string.home_assistant), modifier = Modifier.weight(1f))
                 AppSwitch(checked = isOn, onCheckedChange = onToggle)
             }
-            if (saved || !saved) {
+            if (saved) {
                 HaActionPicker(actions.items, actions.chosen, onChoose, onRefresh)
                 if (actions.error != null) HaNote(actions.error, error = true)
             } else {

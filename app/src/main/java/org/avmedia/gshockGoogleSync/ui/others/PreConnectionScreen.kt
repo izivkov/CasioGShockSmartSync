@@ -387,9 +387,8 @@ fun PreConnectionScreen(
 /** Top left of the watch list: Back when it was opened from the connected screens, else nothing. */
 @Composable
 fun WatchListHeader(onBack: (() -> Unit)?, modifier: Modifier = Modifier) {
+    if (onBack == null) return
     Column(modifier = modifier) {
-        androidx.compose.material3.TextButton(onClick = {}) { Text(stringResource(R.string.home_assistant)) }
-        if (onBack == null) return@Column
         androidx.compose.material3.TextButton(onClick = onBack) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(20.dp))
             Text("  " + stringResource(R.string.back_to_watch))

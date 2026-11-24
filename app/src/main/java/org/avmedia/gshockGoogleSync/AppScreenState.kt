@@ -102,7 +102,8 @@ class AppScreenState @Inject constructor(
             appInForeground: Boolean = false,
             watchListOpen: Boolean = false
         ): AppNavigationState =
-            if (haOpen) AppNavigationState(AppScreen.HOME_ASSISTANT)
+            if (watchListOpen) AppNavigationState(AppScreen.WATCH_LIST)
+            else if (haOpen) AppNavigationState(AppScreen.HOME_ASSISTANT)
             else when (val phase = session.phase) {
                 SessionPhase.Disconnected -> AppNavigationState(AppScreen.INITIAL)
 

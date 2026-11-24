@@ -74,9 +74,14 @@ private fun MainScreens(viewModel: AppNavigationViewModel) =
  */
 @Composable
 internal fun LinkBarLayout(link: LinkState, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Box(modifier = modifier) {
-        content()
-        LinkBar(link, Modifier.align(Alignment.TopCenter))
+    Column(modifier = modifier) {
+        LinkBar(link, Modifier.align(Alignment.CenterHorizontally))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .then(if (link != LinkState.UP) Modifier.consumeWindowInsets(WindowInsets.statusBars) else Modifier)
+        ) { content() }
     }
 }
 

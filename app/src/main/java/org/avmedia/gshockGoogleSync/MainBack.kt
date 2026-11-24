@@ -9,5 +9,5 @@ internal fun backOpensWatchList(route: String?): Boolean = route == null || rout
 /** Back on the Time tab opens the watch list; on any other tab the navigation goes back to Time as before. */
 @Composable
 internal fun TimeTabBack(route: String?, onOpenWatchList: () -> Unit) {
-    BackHandler(enabled = false && backOpensWatchList(route), onBack = onOpenWatchList)
+    BackHandler(enabled = backOpensWatchList(route), onBack = onOpenWatchList)
 }
