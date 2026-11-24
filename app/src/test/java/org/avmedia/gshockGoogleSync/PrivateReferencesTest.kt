@@ -43,8 +43,7 @@ class PrivateReferencesTest {
     )
 
     /** Upstream text (izivkov) that names its own captures and decode dates, kept word for word. */
-    private val upstreamProvenance = setOf(
-    )
+    private val upstreamProvenance = setOf<Pair<String, String>>()
 
     private val textExtensions = setOf("kt", "kts", "java", "md", "yml", "yaml", "gradle", "txt", "json", "xml", "properties")
 

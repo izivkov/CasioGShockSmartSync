@@ -563,6 +563,7 @@ fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: B
 /** The connection instruction shown over the watch picture, for watches that need their own. */
 fun connectInstructionResId(watchName: String): Int? = when {
     "OCW-S400" in watchName -> R.string.ocw_s400_connect_instruction
+    "OCW-S7000" in watchName -> R.string.ocw_s7000_connect_instruction
     else -> null
 }
 

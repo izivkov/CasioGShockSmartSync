@@ -205,6 +205,7 @@
     <string name="cover_connected">Connected</string>
 
     <string name="ocw_s400_connect_instruction">To connect, hold (A) for 2.5 s</string>
+    <string name="ocw_s7000_connect_instruction">To connect, hold (B) for 2.5 s, until the second hand points to [C]</string>
     <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
     <string name="actions_saved">Actions Saved</string>
     <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button (usually BOTTOM-LEFT) on your watch for 3 seconds to pair.</string>
