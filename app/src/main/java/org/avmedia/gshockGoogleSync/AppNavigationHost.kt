@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.session.ConnectionButton
 import org.avmedia.gshockGoogleSync.session.LinkState
-import org.avmedia.gshockGoogleSync.session.WatchList
 import org.avmedia.gshockGoogleSync.ui.others.PreConnectionScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunActionsScreen
 import org.avmedia.gshockGoogleSync.ui.others.RunFindPhoneScreen
@@ -53,13 +52,9 @@ fun AppNavigationHost(
                 HaScreen(viewModel = hiltViewModel(), onBack = viewModel::closeHa)
             }
             AppScreen.WATCH_LIST -> {
+                // No Back button: the back gesture, or a tap on the connected watch's card, returns to its screens.
                 androidx.activity.compose.BackHandler(onBack = viewModel::closeWatchList)
-                // Back only while a watch is still connected; with none it is the first page (Back still closes it).
-                val connected = sessionState.phase is org.avmedia.gshockGoogleSync.session.SessionPhase.Ready
-                PreConnectionScreen(
-                    onBack = if (WatchList.showsBack(openedFromConnectedScreens = true, watchConnected = connected)) viewModel::closeWatchList else null,
-                    watchSwitch = viewModel.watchSwitch,
-                )
+                PreConnectionScreen(watchSwitch = viewModel.watchSwitch)
             }
         }
     }

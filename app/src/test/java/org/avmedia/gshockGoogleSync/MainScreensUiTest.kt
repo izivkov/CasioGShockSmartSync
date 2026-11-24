@@ -21,7 +21,6 @@ import org.avmedia.gshockGoogleSync.homeassistant.HaButtonActionContent
 import org.avmedia.gshockGoogleSync.homeassistant.HaSettingsEntryContent
 import org.avmedia.gshockGoogleSync.homeassistant.HaStatus
 import org.avmedia.gshockGoogleSync.session.LinkState
-import org.avmedia.gshockGoogleSync.ui.others.WatchListHeader
 import org.avmedia.gshockGoogleSync.ui.time.TimeTitleRow
 import org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow
 import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchFaceContent
@@ -124,14 +123,6 @@ class MainScreensUiTest {
         assertEquals(1, opened)
         assertEquals("Connected", HaStatus.text(saved = true, lastOk = null))
         assertEquals("Not set up", HaStatus.text(saved = false, lastOk = true))
-    }
-
-    @Test fun theWatchListHasNoHomeAssistantLink() {
-        var back = 0
-        rule.setContent { WatchListHeader(onBack = { back++ }, onOpenLog = {}) }
-        rule.onNodeWithText("Home Assistant", substring = true).assertDoesNotExist()
-        rule.onNodeWithText("Back", substring = true).performClick()
-        assertEquals(1, back)
     }
 
     @Test fun theActionsRowOnlyChoosesTheButtonAction() {

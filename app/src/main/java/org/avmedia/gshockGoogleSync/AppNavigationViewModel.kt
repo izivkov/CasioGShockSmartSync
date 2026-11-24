@@ -53,6 +53,10 @@ class AppNavigationViewModel @Inject constructor(
         connectedAddress = sessionManager::connectedAddress,
         disconnectCurrent = { sessionManager.letGo() },
         connect = companionDeviceCoordinator::connectNow,
+        // Its card is the way back to the connected watch's screens.
+        backToConnected = {
+            if (sessionManager.sessionState.value.phase is org.avmedia.gshockGoogleSync.session.SessionPhase.Ready) closeWatchList()
+        },
     )
 }
 

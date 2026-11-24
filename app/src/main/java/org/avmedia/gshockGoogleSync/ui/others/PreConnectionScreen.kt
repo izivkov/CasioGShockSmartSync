@@ -70,8 +70,6 @@ import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.session.WatchList
 import org.avmedia.gshockGoogleSync.session.WatchSwitch
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.runtime.setValue
 import org.avmedia.gshockGoogleSync.session.WatchModelOverride
 import org.avmedia.gshockGoogleSync.BuildConfig
@@ -98,8 +96,7 @@ private const val GUIDELINE_LIST_TOP = 0.82f
 @Composable
 fun PreConnectionScreen(
     ptrConnectionViewModel: PreConnectionViewModel = viewModel(),
-    /** Set when the list is opened from the connected screens: a back button, and [watchSwitch] for the choice. */
-    onBack: (() -> Unit)? = null,
+    /** Set when the list is opened from the connected screens: the choice (a tap on the connected watch goes back to it). */
     watchSwitch: WatchSwitch? = null,
 ) {
     val context = LocalContext.current
@@ -257,120 +254,110 @@ fun PreConnectionScreen(
         }
     }
 
-    WatchListWithLog { openLog ->
-        GShockSmartSyncTheme {
-            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                Column(modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()) {
-                    AppCard(modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            WatchScreen(
-                                modifier = Modifier.fillMaxSize(),
-                                imageResId = watchImageResId(watchName),
-                                isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName),
-                                instructionResId = connectInstructionResId(watchName)
-                            )
+    GShockSmartSyncTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding()) {
+                AppCard(modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        WatchScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            imageResId = watchImageResId(watchName),
+                            isAlwaysConnected = WatchModelOverride.isAlwaysConnected(watchName),
+                            instructionResId = connectInstructionResId(watchName)
+                        )
 
 
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(start = 0.dp, bottom = 16.dp)
-                                        .fillMaxWidth(0.5f)
-                                        .fillMaxHeight(1f - GUIDELINE_LIST_TOP)
-                            ) {
-                                WatchCards(
-                                    devices = pairedDevices,
-                                    session = sessionState,
-                                    keepHolder = keepHolder,
-                                    waitingAddress = waitingAddress,
-                                    onSelect = { device ->
-                                        ptrConnectionViewModel.setDevice(
-                                            Utils.sanitizeMacAddress(device.address),
-                                            device.name
-                                        )
-                                        when {
-                                            // From the connected screens: let the connected watch go, connect this one.
-                                            watchSwitch != null -> {
-                                                watchSwitch.choose(Utils.sanitizeMacAddress(device.address))
-                                                ptrConnectionViewModel.showWaiting(device.address)
-                                            }
-                                            else -> ptrConnectionViewModel.openWhenConnected(device.address)
-                                        }
-                                    },
-                                    onOptions = { optionsFor = it },
-                                    onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .fillMaxWidth()
-                                )
-                            }
-
-                            WatchListHeader(
-                                onBack = onBack,
-                                onOpenLog = openLog,
-                                modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(top = 24.dp, start = 16.dp)
-                            )
-
-                            // Phone notifications cannot arrive while Android's notification access is off.
-                            org.avmedia.gshockGoogleSync.ui.settings.NotificationAccessBanner(
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 80.dp, start = 16.dp, end = 16.dp)
-                            )
-
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(top = 30.dp, end = 30.dp)
-                            ) {
-                                InfoButton(
-                                    infoText =
-                                        stringResource(R.string.connection_screen_info) +
-                                                " v" +
-                                                BuildConfig.VERSION_NAME +
-                                                "\n\n" + org.avmedia.gshockapi.io.TideStations.ATTRIBUTION
-                                )
-                            }
-
-                            PairButton(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(bottom = 30.dp, end = 30.dp),
-                                isFlashing = pairedDevices.isEmpty(),
-                                onClick = {
-                                    watchSwitch?.startPairing()
-                                    ptrConnectionViewModel.associateWithUi(
-                                        context,
-                                        object : ICDPDelegate {
-                                            override fun onChooserReady(
-                                                chooserLauncher: IntentSender
-                                            ) {
-                                                launcher.launch(
-                                                    IntentSenderRequest.Builder(
-                                                        chooserLauncher
-                                                    )
-                                                        .build()
-                                                )
-                                            }
-
-                                            override fun onError(error: String) {
-                                                Timber.i(error)
-                                                WatchList.pairingEnded()
-                                            }
-                                        }
+                        Box(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(start = 0.dp, bottom = 16.dp)
+                                    .fillMaxWidth(0.5f)
+                                    .fillMaxHeight(1f - GUIDELINE_LIST_TOP)
+                        ) {
+                            WatchCards(
+                                devices = pairedDevices,
+                                session = sessionState,
+                                keepHolder = keepHolder,
+                                waitingAddress = waitingAddress,
+                                onSelect = { device ->
+                                    ptrConnectionViewModel.setDevice(
+                                        Utils.sanitizeMacAddress(device.address),
+                                        device.name
                                     )
-                                }
+                                    when {
+                                        // From the connected screens: let the connected watch go, connect this one.
+                                        watchSwitch != null -> {
+                                            watchSwitch.choose(Utils.sanitizeMacAddress(device.address))
+                                            ptrConnectionViewModel.showWaiting(device.address)
+                                        }
+                                        else -> ptrConnectionViewModel.openWhenConnected(device.address)
+                                    }
+                                },
+                                onOptions = { optionsFor = it },
+                                onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .fillMaxWidth()
                             )
                         }
+
+                        // Phone notifications cannot arrive while Android's notification access is off.
+                        org.avmedia.gshockGoogleSync.ui.settings.NotificationAccessBanner(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 80.dp, start = 16.dp, end = 16.dp)
+                        )
+
+                        Box(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(top = 30.dp, end = 30.dp)
+                        ) {
+                            InfoButton(
+                                infoText =
+                                    stringResource(R.string.connection_screen_info) +
+                                            " v" +
+                                            BuildConfig.VERSION_NAME +
+                                            "\n\n" + org.avmedia.gshockapi.io.TideStations.ATTRIBUTION
+                            )
+                        }
+
+                        PairButton(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(bottom = 30.dp, end = 30.dp),
+                            isFlashing = pairedDevices.isEmpty(),
+                            onClick = {
+                                watchSwitch?.startPairing()
+                                ptrConnectionViewModel.associateWithUi(
+                                    context,
+                                    object : ICDPDelegate {
+                                        override fun onChooserReady(
+                                            chooserLauncher: IntentSender
+                                        ) {
+                                            launcher.launch(
+                                                IntentSenderRequest.Builder(
+                                                    chooserLauncher
+                                                )
+                                                    .build()
+                                            )
+                                        }
+
+                                        override fun onError(error: String) {
+                                            Timber.i(error)
+                                            WatchList.pairingEnded()
+                                        }
+                                    }
+                                )
+                            }
+                        )
                     }
                 }
             }
@@ -379,42 +366,6 @@ fun PreConnectionScreen(
 }
 
 // --- Composable Components ---
-
-/** The watch list with the App log over it while [log] is open; [list] gets the way to open it. */
-@Composable
-fun WatchListWithLog(
-    log: @Composable (onBack: () -> Unit) -> Unit = { org.avmedia.gshockGoogleSync.ui.settings.AppLogScreen(onBack = it) },
-    list: @Composable (openLog: () -> Unit) -> Unit,
-) {
-    // Reachable with no watch connected (pairing problems): the same App log screen and Share as in Settings.
-    var logOpen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
-    if (logOpen) {
-        androidx.activity.compose.BackHandler { logOpen = false }
-        log { logOpen = false }
-    } else {
-        list { logOpen = true }
-    }
-}
-
-/**
- * Top left of the watch list: Back when it was opened from the connected screens and a watch is still connected
- * ([org.avmedia.gshockGoogleSync.session.WatchList.showsBack]), and always the App log.
- */
-@Composable
-fun WatchListHeader(onBack: (() -> Unit)?, onOpenLog: () -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        if (onBack != null) {
-            androidx.compose.material3.TextButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(20.dp))
-                Text("  " + stringResource(R.string.back_to_watch))
-            }
-        }
-        androidx.compose.material3.TextButton(onClick = onOpenLog) {
-            Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, modifier = Modifier.size(20.dp))
-            Text("App log", modifier = Modifier.padding(start = 6.dp))
-        }
-    }
-}
 
 @Composable
 fun PairButton(modifier: Modifier = Modifier, onClick: () -> Unit, isFlashing: Boolean = false) {

@@ -18,13 +18,6 @@ object WatchList {
 
     fun show() { _open.value = true }
 
-    /**
-     * Whether the list shows a Back button: only when it was opened from the connected screens (Watches button, back
-     * gesture) and a watch is still connected. The first page (app start, no connection) has none.
-     */
-    fun showsBack(openedFromConnectedScreens: Boolean, watchConnected: Boolean): Boolean =
-        openedFromConnectedScreens && watchConnected
-
     fun hide() {
         _open.value = false
         chosen = null
@@ -65,7 +58,10 @@ class WatchSwitch(
         WatchList.choose(address)
         KeepConnected.chosen(address)
         val current = connectedAddress()?.takeIf { it.isNotBlank() }
-        if (current != null && OpenOnConnect.sameAddress(current, address)) return
+        if (current != null && OpenOnConnect.sameAddress(current, address)) {
+            backToConnected()
+            return
+        }
         if (current != null) disconnectCurrent()
         connect(address)
     }
