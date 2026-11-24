@@ -46,11 +46,20 @@ class RawReadSwitchTest {
     }
 
 
+    /** The raw switch asks for every raw code by its value key (the host then reads them all); off asks for none. */
     @Test
-    fun whileOnThePluginAsksForUndecodedSettings() {
-        assertFalse(HaRuntime.needsFor(configured = true, groups = HaGroup.entries.toSet(), rawOn = false).undecodedSettings)
-        assertTrue(HaRuntime.needsFor(configured = true, groups = HaGroup.entries.toSet(), rawOn = true).undecodedSettings)
-        assertFalse("not set up: nothing", HaRuntime.needsFor(configured = false, groups = HaGroup.entries.toSet(), rawOn = true).undecodedSettings)
+    fun whileOnThePluginAsksForEveryRawCode() {
+        val before = HaSensors.hostKeys
+        HaSensors.hostKeys = HaSensors.HostKeys(rawCodes = listOf("0x51", "0x54"))
+        try {
+            val on = HaRuntime.needsFor(configured = true, groups = HaGroup.entries.toSet(), rawOn = true).values.orEmpty()
+            assertTrue(on.toString(), "watch.raw.0x54" in on && "watch.raw.0x51" in on)
+            val off = HaRuntime.needsFor(configured = true, groups = HaGroup.entries.toSet(), rawOn = false).values.orEmpty()
+            assertFalse(off.toString(), off.any { it.startsWith("watch.raw.") })
+            assertTrue("not set up: nothing", HaRuntime.needsFor(configured = false, groups = HaGroup.entries.toSet(), rawOn = true).values.orEmpty().isEmpty())
+        } finally {
+            HaSensors.hostKeys = before
+        }
     }
 
     /** Background health reads only while Home Assistant is set up with its Health group on (was HealthReadScheduler.hasConsumer). */

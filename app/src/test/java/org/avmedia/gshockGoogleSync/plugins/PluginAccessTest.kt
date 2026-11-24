@@ -24,7 +24,6 @@ import org.avmedia.smartsync.plugin.api.WatchCommand
 import org.avmedia.smartsync.plugin.api.WatchEvent
 import org.avmedia.smartsync.plugin.api.WatchId
 import org.avmedia.smartsync.plugin.api.WatchPlugin
-import org.avmedia.smartsync.plugin.api.WatchSupport
 import org.avmedia.smartsync.plugin.api.WatchValues
 import org.avmedia.smartsync.plugin.api.WorkoutRecord
 import org.junit.After
@@ -40,6 +39,10 @@ class PluginAccessTest {
     private val ocw = WatchId("gshock-bbbbbbbbbb02")
     private val stepsOnly = PluginAccess(reads = setOf(DataUse.STEPS), controls = setOf(Control.WATCH_SETTINGS))
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /** The kinds the registry states for these keys; any other key has none. */
+    private val uses: ValueUses = mapOf(
+        "health.steps_today" to DataUse.STEPS, "health.hr_rest" to DataUse.HEART_RATE, "watch.battery" to DataUse.BATTERY_AND_TEMPERATURE,
+    )::get
 
     @After fun tearDown() = scope.cancel()
 
@@ -50,7 +53,7 @@ class PluginAccessTest {
         assertTrue(AccessGuard.mayRun(stepsOnly, WatchCommand.ChangeSettings(mapOf("step_goal" to 9000))))
         assertFalse("the face is a control of its own", AccessGuard.mayRun(stepsOnly, WatchCommand.ChangeSettings(mapOf("watch_face" to "steps"))))
         val values = WatchValues(w, mapOf("health.steps_today" to 5000, "health.hr_rest" to 55, "watch.battery" to 80))
-        assertEquals(mapOf("health.steps_today" to 5000), AccessGuard.values(stepsOnly, values).values)
+        assertEquals(mapOf("health.steps_today" to 5000), AccessGuard.values(stepsOnly, uses, values).values)
         val day = AccessGuard.record(stepsOnly, DayRecord(java.time.LocalDate.of(2026, 11, 24), steps = 5000, hrRest = 55, spo2 = 97))
         assertEquals(5000, day.steps)
         assertNull("heart rate inside a day is not declared", day.hrRest)
@@ -59,15 +62,15 @@ class PluginAccessTest {
 
     @Test fun undeclaredEventsAreNotDelivered() {
         val workout = WorkoutRecord("1-2", java.time.Instant.EPOCH, sport = 2, sportName = "Run")
-        assertNull(AccessGuard.event(stepsOnly, WatchEvent.WorkoutStored(w, workout)))
-        assertNull(AccessGuard.event(stepsOnly, WatchEvent.ButtonPressed(w, java.time.Instant.EPOCH)))
-        assertNull(AccessGuard.event(stepsOnly, WatchEvent.Condition(w, 80, 20)))
+        assertNull(AccessGuard.event(stepsOnly, uses, WatchEvent.WorkoutStored(w, workout)))
+        assertNull(AccessGuard.event(stepsOnly, uses, WatchEvent.ButtonPressed(w, java.time.Instant.EPOCH)))
+        assertNull("a body profile setting is not a watch setting", AccessGuard.event(PluginAccess(reads = setOf(DataUse.WATCH_SETTINGS)), { k -> org.avmedia.gshockGoogleSync.watchvalues.ValueMeta.ofSetting("profile_weight_kg", org.avmedia.gshockGoogleSync.watchvalues.SettingType.Whole(20..300)).use.takeIf { k == "watch.setting.profile_weight_kg" } }, WatchEvent.SettingChanged(w, "profile_weight_kg", 80)))
         val values = WatchValues(w, mapOf("health.steps_today" to 5000, "watch.battery" to 80))
-        val seen = AccessGuard.event(stepsOnly, WatchEvent.ValuesUpdated(w, values, ValueCause.CONNECTION)) as WatchEvent.ValuesUpdated
+        val seen = AccessGuard.event(stepsOnly, uses, WatchEvent.ValuesUpdated(w, values, ValueCause.CONNECTION)) as WatchEvent.ValuesUpdated
         assertEquals(setOf("health.steps_today"), seen.readNow)
         val health = WatchEvent.HealthRead(w, HistoryRange.days(java.time.LocalDate.now(), java.time.LocalDate.now()), setOf(DataKind.Hours, DataKind.Nights))
-        assertEquals(setOf<DataKind<*>>(DataKind.Hours), (AccessGuard.event(stepsOnly, health) as WatchEvent.HealthRead).kinds)
-        assertEquals(WatchEvent.Disconnected(w), AccessGuard.event(stepsOnly, WatchEvent.Disconnected(w)))
+        assertEquals(setOf<DataKind<*>>(DataKind.Hours), (AccessGuard.event(stepsOnly, uses, health) as WatchEvent.HealthRead).kinds)
+        assertEquals(WatchEvent.Disconnected(w), AccessGuard.event(stepsOnly, uses, WatchEvent.Disconnected(w)))
     }
 
     @Test fun theRuntimeDeliversOnlyDeclaredEventsAndOnlyForWatchesThePluginWorksWith() = runBlocking {
@@ -77,12 +80,12 @@ class PluginAccessTest {
         val rt = PluginRuntime(scope, hostFor = { mockk(relaxed = true) }, log = { _, _ -> }, capsOf = { caps[it].orEmpty() })
         rt.register(listOf(p))
         rt.activate("health")
-        rt.dispatch(WatchEvent.Condition(w, 80, 20))
+        rt.dispatch(WatchEvent.WorkoutStored(w, WorkoutRecord("1-2", java.time.Instant.EPOCH, sport = 2, sportName = "Run")))
         rt.dispatch(WatchEvent.Disconnected(ocw))
         rt.dispatch(WatchEvent.Disconnected(w))
         withTimeout(2_000) { while (seen.isEmpty()) delay(10) }
         delay(100)
-        assertEquals("not the undeclared condition, nothing for the watch without a health log", listOf<WatchEvent>(WatchEvent.Disconnected(w)), seen.toList())
+        assertEquals("not the undeclared workout, nothing for the watch without a health log", listOf<WatchEvent>(WatchEvent.Disconnected(w)), seen.toList())
     }
 
     @Test fun requiresAndUsesAreResolvedPerWatch() {

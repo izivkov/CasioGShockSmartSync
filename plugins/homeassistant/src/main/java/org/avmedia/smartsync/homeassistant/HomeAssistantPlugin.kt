@@ -1,7 +1,6 @@
 package org.avmedia.smartsync.homeassistant
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +18,7 @@ import org.avmedia.smartsync.plugin.api.PluginApi
 import org.avmedia.smartsync.plugin.api.PluginHost
 import org.avmedia.smartsync.plugin.api.PluginNeeds
 import org.avmedia.smartsync.plugin.api.PluginResult
+import org.avmedia.smartsync.plugin.api.PluginStatus
 import org.avmedia.smartsync.plugin.api.PluginUi
 import org.avmedia.smartsync.plugin.api.WatchCommand
 import org.avmedia.smartsync.plugin.api.WatchEvent
@@ -32,6 +32,7 @@ import org.avmedia.smartsync.plugin.api.WatchPlugin
 class HomeAssistantPlugin : WatchPlugin {
     override val id: String = ID
     override val name: String = "Home Assistant"
+    override val summary: String = "Each watch as a Home Assistant device: its sensors, the button event, and notifications and settings from Home Assistant."
     override val apiVersion: String = PluginApi.VERSION
     override val version: String = VERSION
 
@@ -40,7 +41,8 @@ class HomeAssistantPlugin : WatchPlugin {
     // Home Assistant gets every watch value as a sensor, shows its notifications, changes settings and the face, and
     // runs its chosen action on a button press.
     override val access: PluginAccess = PluginAccess(
-        reads = DataUse.entries.toSet(),
+        // Everything but the phone's location: no Home Assistant sensor uses it.
+        reads = DataUse.entries.toSet() - DataUse.PHONE_LOCATION,
         controls = setOf(Control.NOTIFICATIONS, Control.WATCH_SETTINGS, Control.WATCH_FACE, Control.BUTTON_PRESS),
         sendsTo = listOf("your Home Assistant server"),
         stores = listOf("Home Assistant address and token", "each watch's registration and the values sent last"),
@@ -59,12 +61,6 @@ class HomeAssistantPlugin : WatchPlugin {
     override suspend fun onEvent(event: WatchEvent) = HaRuntime.onEvent(event)
 
     override val ui: PluginUi = object : PluginUi {
-        @Composable
-        override fun statusLine(): String {
-            val rt = HaRuntime.active ?: return HaStatus.NOT_SET_UP
-            return remember { HaStatus.of(rt.store, rt.host.current()?.key.orEmpty()) }
-        }
-
         @Composable
         override fun SettingsScreen(onBack: () -> Unit) {
             val rt = HaRuntime.active ?: return
@@ -102,8 +98,14 @@ class HaRuntime private constructor(val host: PluginHost) {
         "app.ha_push_changed_at" to HaPushState.changedAt.takeIf { it.isNotEmpty() },
     )
 
-    /** What the plugin asks of the host now: the values of the groups that are on, the button, health reads, raw reads. */
-    fun declareNeeds() = host.declareNeeds(needsFor(store.load() != null, store.groupsOn(), raw.isOn()))
+    /** What the plugin asks of the host now: the values of the groups that are on, the button, health reads, raw reads; and its status line. */
+    fun declareNeeds() {
+        host.declareNeeds(needsFor(store.load() != null, store.groupsOn(), raw.isOn()))
+        reportStatus()
+    }
+
+    /** The line under its name in Settings > Plugins: "Connected", "Not set up", "Last send failed". */
+    fun reportStatus() = host.status(PluginStatus.Ok(HaStatus.of(store, host.current()?.key.orEmpty())))
 
     /** HA's request for a sensor push: the host reads the values (no health read) and sends them here. */
     fun pushSensorsNow() {
@@ -169,13 +171,20 @@ class HaRuntime private constructor(val host: PluginHost) {
         @Volatile var lastStore: HaStore? = null
             private set
 
+        /**
+         * What the plugin asks for. The raw switch on: every raw code (the host then reads them all, a decoding aid);
+         * off: no raw code at all, the host reads only what its decoded settings need.
+         */
         fun needsFor(configured: Boolean, groups: Set<HaGroup>, rawOn: Boolean): PluginNeeds = PluginNeeds(
-            values = if (configured) HaSensors.variablesOf(HaGroups.sensors(groups)) - PLUGIN_VALUES else emptySet(),
+            values = if (!configured) emptySet() else (HaSensors.variablesOf(HaGroups.sensors(groups)) - PLUGIN_VALUES).let { v ->
+                if (rawOn) v + HaSensors.hostKeys.rawCodes.map { "$RAW$it" } else v.filterNot { it.startsWith(RAW) }.toSet()
+            },
             buttonPress = configured,
             // Background health reads only feed Home Assistant's Health group.
             healthReads = configured && HaGroup.HEALTH in groups,
-            undecodedSettings = configured && rawOn,
         )
+
+        private const val RAW = "watch.raw."
 
         /** The values this plugin adds itself. */
         val PLUGIN_VALUES = setOf("app.ha_push_connected", "app.ha_push_heartbeat", "app.ha_push_changed_at")
@@ -183,7 +192,7 @@ class HaRuntime private constructor(val host: PluginHost) {
         fun start(host: PluginHost) {
             // The sensors that list the host's raw codes and writable settings follow what this app has.
             HaSensors.hostKeys = HaSensors.HostKeys.from(
-                host.valueKeys(), host.settingCatalog(host.current() ?: org.avmedia.smartsync.plugin.api.WatchId("")).map { it.key },
+                host.valueCatalog().map { it.key }, host.settingCatalog(host.current() ?: org.avmedia.smartsync.plugin.api.WatchId("")).map { it.key },
             )
             val rt = HaRuntime(host)
             HaSentView.appContext = host.context

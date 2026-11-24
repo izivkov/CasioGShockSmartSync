@@ -50,9 +50,10 @@ class PluginRuntimeTest {
         override suspend fun onEvent(event: WatchEvent) { handle(event); seen += event }
     }
 
-    private fun runtime(limits: PluginLimits = PluginLimits(), failed: MutableList<String> = mutableListOf(), dropped: MutableList<String> = mutableListOf()) =
+    private fun runtime(limits: PluginLimits = PluginLimits(graceMs = 300), failed: MutableList<String> = mutableListOf(), dropped: MutableList<String> = mutableListOf()) =
         PluginRuntime(scope, hostFor = { mockk(relaxed = true) }, log = { n, l -> lines += "$n: $l" }, limits = limits,
-            onFailed = { id, _ -> failed += id }, dropCommands = { dropped += it })
+            onFailed = { id, _ -> failed += id }, dropCommands = { dropped += it },
+            uses = { if (it.startsWith("watch.")) org.avmedia.smartsync.plugin.api.DataUse.BATTERY_AND_TEMPERATURE else null })
 
     private suspend fun until(what: String, ms: Long = 5_000, ok: () -> Boolean) {
         runCatching { withTimeout(ms) { while (!ok()) delay(10) } }.onFailure { throw AssertionError("timed out: $what") }
@@ -86,7 +87,7 @@ class PluginRuntimeTest {
         val dropped = mutableListOf<String>()
         val bad = Fake("bad") { throw IllegalStateException("boom") }
         val good = Fake("good")
-        val rt = runtime(PluginLimits(maxFailures = 3), failed, dropped)
+        val rt = runtime(PluginLimits(maxFailures = 3, graceMs = 300), failed, dropped)
         rt.register(listOf(bad, good))
         rt.activate("bad"); rt.activate("good")
         repeat(5) { rt.dispatch(WatchEvent.Disconnected(w)) }
@@ -104,7 +105,7 @@ class PluginRuntimeTest {
 
     @Test fun aPluginThatTakesTooLongCountsAsAFailure() = runBlocking {
         val slow = Fake("slow") { delay(10_000) }
-        val rt = runtime(PluginLimits(eventTimeoutMs = 50, maxFailures = 2))
+        val rt = runtime(PluginLimits(eventTimeoutMs = 50, maxFailures = 2, graceMs = 300))
         rt.register(listOf(slow))
         rt.activate("slow")
         repeat(2) { rt.dispatch(WatchEvent.Disconnected(w)) }
@@ -122,7 +123,7 @@ class PluginRuntimeTest {
 
     @Test fun aStartThatHangsIsCutByTheTimeLimit() = runBlocking {
         val p = object : Fake("hang") { override suspend fun activate(host: PluginHost) = awaitCancellation() }
-        val rt = runtime(PluginLimits(activateTimeoutMs = 50))
+        val rt = runtime(PluginLimits(activateTimeoutMs = 50, graceMs = 300))
         rt.register(listOf(p))
         assertFalse(rt.activate("hang"))
     }
@@ -192,10 +193,11 @@ class PluginRuntimeTest {
         q.offer(values)
         q.offer(WatchEvent.Connected(w, org.avmedia.smartsync.plugin.api.ConnectionKind.USER))
         q.offer(WatchEvent.ButtonPressed(w, java.time.Instant.EPOCH))
-        assertEquals(3, q.size())
-        val left = runBlocking { List(3) { q.take()!! } }
-        // The values (a newer read replaces them) go; the older disconnect stays.
-        assertEquals(listOf(WatchEvent.Disconnected::class, WatchEvent.Connected::class, WatchEvent.ButtonPressed::class), left.map { it::class })
+        assertEquals("three events and the marker", 4, q.size())
+        val left = runBlocking { List(4) { q.take()!! } }
+        // The values (a newer read replaces them) go, EventsLost takes their place; the older disconnect stays.
+        assertEquals(listOf("Disconnected", "EventsLost", "Connected", "ButtonPressed"),
+            left.map { it.javaClass.simpleName })
         assertEquals(1, lines.size)
     }
 
@@ -203,7 +205,9 @@ class PluginRuntimeTest {
         val q = PluginEventQueue(2) { lines += it }
         repeat(5) { q.offer(WatchEvent.SettingChanged(w, "k$it", it)) }
         q.offer(WatchEvent.Disconnected(w))
-        assertEquals(2, q.size())
+        assertEquals("two events and one marker", 3, q.size())
+        assertEquals(WatchEvent.EventsLost, q.snapshot().first())
+        assertEquals(1, q.snapshot().count { it == WatchEvent.EventsLost })
         assertEquals(1, lines.size)
     }
 }

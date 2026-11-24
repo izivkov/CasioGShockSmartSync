@@ -83,11 +83,10 @@ class HaSync(
     private val appVersion: () -> String = { host.appVersion },
     private val osVersion: () -> String = { android.os.Build.VERSION.RELEASE.orEmpty() },
 ) {
-    // A re-paired watch has a new address: its registration and the host's per-watch values move to it.
+    // A re-paired watch has a new address: its registration moves to it (the host moves its own per-watch values).
     private val carryOver = HaCarryOver(
         paired = { a -> host.watches().any { it.id.key == HaPayloads.deviceId(a) } },
         watchNameAt = { a -> host.watchName(WatchId(HaPayloads.deviceId(a))) },
-        moveOthers = { from, to -> host.moveWatchData(WatchId(HaPayloads.deviceId(from)), WatchId(HaPayloads.deviceId(to))) },
         log = { AppLog.log(LogSource.HomeAssistant, it) },
     )
 

@@ -38,6 +38,7 @@ class HaWorker(context: Context, params: WorkerParameters) : CoroutineWorker(con
             if (again) retry = true else store.clearPending(id)
             if (result !is HaResult.Ok) ok = false
         }
+        HaRuntime.active?.let { rt -> runCatching { rt.reportStatus() } }
         if (retry) return Result.retry()
         return if (ok) Result.success() else Result.failure()
     }

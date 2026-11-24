@@ -13,10 +13,13 @@ class HaVersionTest {
         assertEquals(HomeAssistantPlugin.VERSION, declared)
     }
 
-    /** Every sensor reads a value of a kind the plugin declared, and every write it makes is declared. */
+    /**
+     * Every write it makes is declared; it reads every kind but the phone's location (the host states each value's kind:
+     * the app's HaDeclarationCoversItsSensorsTest checks every sensor against it).
+     */
     @Test fun theDeclarationCoversWhatThePluginUses() {
         val access = HomeAssistantPlugin().access
-        HaSensors.variablesOf(HaSensors.ALL).forEach { assertTrue(it, DataUse.ofValueKey(it) in access.reads) }
+        assertEquals(DataUse.entries.toSet() - DataUse.PHONE_LOCATION, access.reads)
         assertTrue(access.controls.containsAll(setOf(Control.NOTIFICATIONS, Control.WATCH_SETTINGS, Control.WATCH_FACE, Control.BUTTON_PRESS)))
         assertEquals(listOf("your Home Assistant server"), access.sendsTo)
     }

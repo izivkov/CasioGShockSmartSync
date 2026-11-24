@@ -13,7 +13,7 @@ class HaCarryOver(
     private val paired: (address: String) -> Boolean = { false },
     /** The watch name last seen at [address] (the home screen snapshot); null when not known. */
     private val watchNameAt: (address: String) -> String? = { null },
-    /** Moves the other per-address stores (the home screen snapshot) from one address to the other. */
+    /** Moves other per-address stores from one address to the other (the host moves its own: none needed in the app). */
     private val moveOthers: (from: String, to: String) -> Unit = { _, _ -> },
     private val log: (String) -> Unit = {},
 ) {
