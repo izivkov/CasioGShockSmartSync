@@ -87,6 +87,12 @@ class GShockApplication : Application() {
         eventHandler.setupEventSubscription()
         actionRunner.setupActionSubscriptions()
         sessionEventBridge.setupEventBridge()
+        // The same start with or without a screen (a reboot, a killed app: the companion device service starts us).
+        org.avmedia.gshockGoogleSync.log.AppLog.log(
+            org.avmedia.gshockGoogleSync.log.LogSource.App,
+            "App start: session events, Home Assistant, background reads and the watch coordinator ready; " +
+                "Keep connected in background: ${org.avmedia.gshockGoogleSync.session.KeepConnected.holder.value ?: "none"}",
+        )
     }
 
     override fun onTerminate() {
