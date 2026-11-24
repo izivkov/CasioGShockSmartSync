@@ -156,7 +156,7 @@ internal fun PluginDetailsPage(
                     // Only while off: a running plugin would write its data again at once.
                     OutlinedButton(onClick = { confirm = true }, enabled = !row.on) { Text("Delete its data") }
                 }
-                if (row.on) AppText(text = "Turn it off to delete its data.", fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
+                if (row.on) AppText(text = "Turn it off to delete its data. A running plugin would write its data again at once.", fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
                 TextButton(onClick = onBack, modifier = Modifier.padding(horizontal = 8.dp)) { Text("Back") }
             }
         }

@@ -76,7 +76,7 @@ internal fun HaNote(text: String, error: Boolean = false, more: String? = null) 
     val color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            AppText(text = line, fontSize = 14.sp, color = color, modifier = Modifier.weight(1f, fill = false))
+            AppText(text = text, fontSize = 14.sp, color = color, modifier = Modifier.weight(1f, fill = false))
             if (hidden != null) {
                 IconButton(onClick = { open = !open }, modifier = Modifier.size(32.dp)) {
                     Icon(Icons.Outlined.Info, contentDescription = if (open) "Less" else "More", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))

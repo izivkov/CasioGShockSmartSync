@@ -80,7 +80,7 @@ data class ValueMeta(val use: DataUse, val type: ValueType, val unit: String? = 
             "health.sleep_breathing" to of(SLEEP, NUMBER, "breaths/min"),
             "health.sleep_stages" to of(SLEEP, LIST),
             "health.spo2" to of(BLOOD_OXYGEN, WHOLE, "%"),
-            "health.spo2_at" to of(BLOOD_OXYGEN, LOCAL_DATE_TIME),
+            "health.spo2_at" to of(BLOOD_OXYGEN, DATE_TIME),
             "health.breathing_exercise_at" to of(SLEEP, LOCAL_DATE_TIME),
             "health.cardio_load_ratio" to of(HEART_RATE, NUMBER),
             "health.cardio_date" to of(HEART_RATE, DATE),

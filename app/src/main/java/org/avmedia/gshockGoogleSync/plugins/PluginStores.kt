@@ -121,7 +121,6 @@ object PluginWatchData {
     fun remove(kv: KeyValueStore, watch: String) {
         if (watch.isBlank()) return
         WatchStorage.deleteAll(kv, watch)
-        HOST_NAMES.forEach { kv.delete(WatchKeys.scoped(it, watch)) }
     }
 }
 

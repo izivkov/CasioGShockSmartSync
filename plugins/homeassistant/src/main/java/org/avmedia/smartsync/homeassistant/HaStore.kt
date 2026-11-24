@@ -246,7 +246,7 @@ class HaStore(private val store: KeyValueStore) {
      * The groups of values that are sent: watch and settings always (the plugin maps everything it can), health while
      * [healthOn]. The health switch keeps the key of the old health group switch, so its state stays.
      */
-    fun groupsOn(): Set<HaGroup> = setOf(HaGroup.WATCH, HaGroup.SETTINGS) + if (healthOn()) setOf(HaGroup.HEALTH) else emptySet()
+    fun groupsOn(): Set<HaGroup> = HaGroup.entries.filter { store.get(KEY_GROUP + it.name) != "off" }.toSet() + if (healthOn()) setOf(HaGroup.HEALTH) else emptySet()
 
     /** "Share health data with Home Assistant": on until switched off. */
     fun healthOn(): Boolean = store.get(KEY_GROUP + HaGroup.HEALTH.name) != "off"
