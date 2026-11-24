@@ -94,6 +94,7 @@ class H5600WorkoutReadGateTest {
         assertTrue(AppLog.recentEvents().any { it.contains("one is already running or waiting") })
         WatchExchange.mutex.unlock()
         assertNotNull(withTimeoutOrNull(15_000) { first.await() })
-        assertEquals(1, writes.count { it == "001c0000000000000000" })
+        // One read: its start and the one repeat after `03 01`; no second read behind it.
+        assertEquals(2, writes.count { it == "001c0000000000000000" })
     }
 }
