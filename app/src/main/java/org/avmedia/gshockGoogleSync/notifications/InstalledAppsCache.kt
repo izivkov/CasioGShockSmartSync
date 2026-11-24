@@ -14,7 +14,9 @@ class SessionListCache<T>(private val io: CoroutineDispatcher = Dispatchers.IO, 
     private val lock = Mutex()
     @Volatile private var cached: List<T>? = null
 
-    suspend fun get(): List<T> = load()
+    suspend fun get(): List<T> = cached ?: lock.withLock {
+        cached ?: withContext(io) { load() }.also { cached = it }
+    }
 }
 
 object InstalledAppsCache {
