@@ -27,31 +27,6 @@ data class H5600HealthData(
     val lifeLogPending: Boolean? = null,
     /** True when the watch reports workout (ActivityLog) data pending; null when unknown. */
     val activityLogPending: Boolean? = null,
-    /** Sleep and Nightly Recharge from sections 0x53 and 0x5A; null on a transfer without them. */
-    val sleep: SleepData? = null,
-    /** Blood oxygen, breathing exercises, cardio status and stairs; null on a transfer without them. */
-    val body: BodyReadings? = null,
-    val dailySummary: DailySummary? = null,
-    /**
-     * Heart rate per 2-minute slot from section 0x52, oldest first, watch local time; only slots with a valid value. A read
-     * carries only the slots since the last read; the app lays them over the stored day.
-     */
-    val heartRateSlots: List<HeartRateSlot> = emptyList(),
-)
-
-/** One heart rate value of section 0x52: the start of its 2-minute slot (watch local time) and the bpm. */
-@Keep
-data class HeartRateSlot(
-    val time: java.time.LocalDateTime,
-    val bpm: Int,
-)
-
-/** The daily summary section (0x5C): steps, calories and a u16 that is likely the resting calories (not confirmed). */
-@Keep
-data class DailySummary(
-    val steps: Long,
-    val calories: Long,
-    val restingCalories: Int?,
 )
 
 /** Daily heart-rate values in beats per minute. A field is null when the watch has no valid value. */
