@@ -2,7 +2,6 @@ package org.avmedia.gshockGoogleSync.ui.watchhealth
 
 import AppText
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -10,7 +9,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,10 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
-import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.common.AppSubScreen
 import org.avmedia.gshockapi.io.TidePointText
 import org.avmedia.gshockapi.io.TideRecords
 import org.avmedia.gshockapi.io.TideSettingCodec
@@ -74,34 +71,29 @@ internal fun TideContent(
     var creditOpen by remember { mutableStateOf(false) }
     val setting = ui.setting
     val idle = setting != null && !ui.working
-    GShockSmartSyncTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                ScreenTitle("Tide", Modifier)
-                Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
-                    TideSection("On the watch")
-                    ValueRow("Shows", setting?.let { TideSettingCodec.sourceName(it.source) } ?: "-", idle) { sourcePicker = true }
-                    ValueRow("Height unit", setting?.let { HEIGHT_UNITS[if (it.feet) 1 else 0] } ?: "-", idle) { unitPicker = true }
-                    TideSection("Your own points")
-                    (1..TideUserPointCodec.POINTS).forEach { n ->
-                        val p = ui.points[n - 1]
-                        val name = ui.names[n - 1].ifBlank { "Point $n" }
-                        // A point nobody set holds the watch's factory values: those are not shown as if they were a place.
-                        val set = p?.takeUnless(TideUserPointCodec::isFactory)
-                        ValueRow(name, set?.let { "%02d:%02d".format(it.hour, it.minute) } ?: "Not set", idle, note = set?.let { pointNote(it) }) { editing = n }
-                    }
-                    TideSection("Port from open data")
-                    ValueRow("Send a port", ">", idle, note = "Belgian and nearby gauges, or your own constants") { stationPicker = true }
-                    // CC BY 4.0 needs the credit: one short line here, the full text one tap away.
-                    TextButton(onClick = { creditOpen = true }, modifier = Modifier.padding(horizontal = 4.dp)) {
-                        Text(TIDE_CREDIT_LINE, fontSize = 12.sp)
-                    }
-                    val text = if (ui.working && ui.message == null) "Talking to the watch..." else ui.message
-                    if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
-                }
-                ButtonsRow(buttons = listOf(ButtonData("Read again", onRefresh, enabled = !ui.working), ButtonData("Back", onBack)))
+    AppSubScreen(title = "Tide", onBack = onBack) {
+        Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
+            TideSection("On the watch")
+            ValueRow("Shows", setting?.let { TideSettingCodec.sourceName(it.source) } ?: "-", idle) { sourcePicker = true }
+            ValueRow("Height unit", setting?.let { HEIGHT_UNITS[if (it.feet) 1 else 0] } ?: "-", idle) { unitPicker = true }
+            TideSection("Your own points")
+            (1..TideUserPointCodec.POINTS).forEach { n ->
+                val p = ui.points[n - 1]
+                val name = ui.names[n - 1].ifBlank { "Point $n" }
+                // A point nobody set holds the watch's factory values: those are not shown as if they were a place.
+                val set = p?.takeUnless(TideUserPointCodec::isFactory)
+                ValueRow(name, set?.let { "%02d:%02d".format(it.hour, it.minute) } ?: "Not set", idle, note = set?.let { pointNote(it) }) { editing = n }
             }
+            TideSection("Port from open data")
+            ValueRow("Send a port", ">", idle, note = "Belgian and nearby gauges, or your own constants") { stationPicker = true }
+            // CC BY 4.0 needs the credit: one short line here, the full text one tap away.
+            TextButton(onClick = { creditOpen = true }, modifier = Modifier.padding(horizontal = 4.dp)) {
+                Text(TIDE_CREDIT_LINE, fontSize = 12.sp)
+            }
+            val text = if (ui.working && ui.message == null) "Talking to the watch..." else ui.message
+            if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
         }
+        ButtonsRow(buttons = listOf(ButtonData("Read again", onRefresh, enabled = !ui.working)))
     }
     if (sourcePicker && setting != null) {
         ChoiceDialog(

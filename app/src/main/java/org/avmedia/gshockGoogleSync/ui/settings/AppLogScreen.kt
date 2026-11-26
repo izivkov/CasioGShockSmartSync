@@ -3,7 +3,6 @@ package org.avmedia.gshockGoogleSync.ui.settings
 import AppText
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,8 +11,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,10 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
-import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.common.AppSubScreen
 import org.avmedia.gshockGoogleSync.ui.health.HealthLogShare
 import org.avmedia.gshockGoogleSync.log.AppLog
 import org.avmedia.gshockGoogleSync.log.LogLine
@@ -95,31 +91,26 @@ internal fun AppLogContent(
     onClear: () -> Unit,
     onBack: () -> Unit,
 ) {
-    GShockSmartSyncTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                ScreenTitle("App log", Modifier)
-                AppText(text = LOG_LIMIT_NOTE, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp)) {
-                    FilterChip(selected = filter == null, onClick = { onFilter(null) }, label = { Text("All") }, modifier = Modifier.padding(end = 6.dp))
-                    LogSource.entries.forEach { s ->
-                        FilterChip(selected = filter == s, onClick = { onFilter(s) }, label = { Text(s.label) }, modifier = Modifier.padding(end = 6.dp))
-                    }
-                    FilterChip(selected = showRaw, onClick = { onShowRaw(!showRaw) }, label = { Text("Raw frames") }, modifier = Modifier.padding(end = 6.dp))
-                }
-                if (shown.isEmpty()) {
-                    AppText(text = "Nothing logged yet.", modifier = Modifier.weight(1f).padding(16.dp))
-                } else {
-                    val listState = rememberLazyListState()
-                    val nearEnd by remember { derivedStateOf { (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= listState.layoutInfo.totalItemsCount - 50 } }
-                    LaunchedEffect(nearEnd, shown.size) { if (nearEnd) onMore() }
-                    LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        items(shown, key = { it.id }) { s -> LogRow(s.line) }
-                    }
-                }
-                ButtonsRow(buttons = listOf(ButtonData("Share", onShare), ButtonData("Clear", onClear, enabled = shown.isNotEmpty()), ButtonData("Back", onBack)))
+    AppSubScreen(title = "App log", onBack = onBack) {
+        AppText(text = LOG_LIMIT_NOTE, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
+        Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp)) {
+            FilterChip(selected = filter == null, onClick = { onFilter(null) }, label = { Text("All") }, modifier = Modifier.padding(end = 6.dp))
+            LogSource.entries.forEach { s ->
+                FilterChip(selected = filter == s, onClick = { onFilter(s) }, label = { Text(s.label) }, modifier = Modifier.padding(end = 6.dp))
+            }
+            FilterChip(selected = showRaw, onClick = { onShowRaw(!showRaw) }, label = { Text("Raw frames") }, modifier = Modifier.padding(end = 6.dp))
+        }
+        if (shown.isEmpty()) {
+            AppText(text = "Nothing logged yet.", modifier = Modifier.weight(1f).padding(16.dp))
+        } else {
+            val listState = rememberLazyListState()
+            val nearEnd by remember { derivedStateOf { (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= listState.layoutInfo.totalItemsCount - 50 } }
+            LaunchedEffect(nearEnd, shown.size) { if (nearEnd) onMore() }
+            LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                items(shown, key = { it.id }) { s -> LogRow(s.line) }
             }
         }
+        ButtonsRow(buttons = listOf(ButtonData("Share", onShare), ButtonData("Clear", onClear, enabled = shown.isNotEmpty())))
     }
 }
 

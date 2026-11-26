@@ -2,11 +2,9 @@ package org.avmedia.gshockGoogleSync.ui.settings
 
 import AppText
 import AppTextLarge
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,10 +26,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.avmedia.gshockGoogleSync.BuildConfig
 import org.avmedia.gshockGoogleSync.plugins.PluginsViewModel
-import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.HorizontalSeparator
-import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.common.AppSubScreen
 import org.avmedia.gshockGoogleSync.ui.watchhealth.ValueRow
 import org.avmedia.gshockapi.io.TideStations
 import org.avmedia.smartsync.plugin.api.PluginApi
@@ -81,31 +77,33 @@ internal val CREDITS: List<Pair<String, String>> = listOf(
 /** Settings > About: the versions, the licences and credits, and the App log (its screen has Share). */
 @Composable
 fun AboutScreen(onBack: () -> Unit, onOpenAppLog: () -> Unit) {
-    BackHandler(onBack = onBack)
-    AboutContent(BuildConfig.VERSION_NAME, BuildConfig.LIBRARY_VERSION, PluginApi.VERSION, onOpenAppLog)
+    AboutContent(BuildConfig.VERSION_NAME, BuildConfig.LIBRARY_VERSION, PluginApi.VERSION, onOpenAppLog, onBack)
 }
 
 @Composable
-internal fun AboutContent(appVersion: String, libraryVersion: String, pluginApiVersion: String, onOpenAppLog: () -> Unit) {
-    GShockSmartSyncTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                ScreenTitle("About", Modifier)
-                ValueRow(title = "App version", value = appVersion)
-                ValueRow(title = "Library version", value = libraryVersion)
-                ValueRow(title = "Plugin interface", value = pluginApiVersion)
-                ValueRow(title = "App log", value = ">", onClick = onOpenAppLog)
-                Text(
-                    "Licences and credits", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-                )
-                AppCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        CREDITS.forEach { (title, text) ->
-                            Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                                AppText(text = title, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                AppText(text = text, fontSize = 13.sp)
-                            }
+internal fun AboutContent(
+    appVersion: String,
+    libraryVersion: String,
+    pluginApiVersion: String,
+    onOpenAppLog: () -> Unit,
+    onBack: () -> Unit = {},
+) {
+    AppSubScreen(title = "About", onBack = onBack) {
+        Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
+            ValueRow(title = "App version", value = appVersion)
+            ValueRow(title = "Library version", value = libraryVersion)
+            ValueRow(title = "Plugin interface", value = pluginApiVersion)
+            ValueRow(title = "App log", value = ">", onClick = onOpenAppLog)
+            Text(
+                "Licences and credits", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+            )
+            AppCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                    CREDITS.forEach { (title, text) ->
+                        Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                            AppText(text = title, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            AppText(text = text, fontSize = 13.sp)
                         }
                     }
                 }

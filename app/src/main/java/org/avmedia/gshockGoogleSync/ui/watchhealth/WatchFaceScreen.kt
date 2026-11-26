@@ -2,13 +2,10 @@ package org.avmedia.gshockGoogleSync.ui.watchhealth
 
 import AppText
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,10 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
-import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.common.AppSubScreen
 import org.avmedia.gshockapi.io.WatchFaceCodec
 
 /** Pick the watch face and, on the custom face, what the top-right place shows. */
@@ -49,37 +45,31 @@ internal fun WatchFaceContent(
     var topRightPicker by remember { mutableStateOf(false) }
     val face = ui.face
     val idle = face != null && !ui.working
-    GShockSmartSyncTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                ScreenTitle("Watch face", Modifier)
-                Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
-                    ValueRow(
-                        title = "Face",
-                        value = face?.let { WatchFaceCodec.faceName(it.face) } ?: "-",
-                        enabled = idle,
-                        onClick = { facePicker = true },
-                    )
-                    if (face?.face == WatchFaceCodec.CUSTOM_FACE) {
-                        ValueRow(
-                            title = "Top right shows",
-                            value = WatchFaceCodec.itemName(face.items[WatchFaceCodec.TOP_RIGHT_SLOT - 1]),
-                            enabled = idle,
-                            note = "The other places of the custom face cannot be changed.",
-                            onClick = { topRightPicker = true },
-                        )
-                    }
-                    val text = if (ui.working) "Talking to the watch..." else ui.message
-                    if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
-                }
-                ButtonsRow(
-                    buttons = listOf(
-                        ButtonData("Read again", onRefresh, enabled = !ui.working),
-                        ButtonData("Back", onBack),
-                    ),
+    AppSubScreen(title = "Watch face", onBack = onBack) {
+        Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
+            ValueRow(
+                title = "Face",
+                value = face?.let { WatchFaceCodec.faceName(it.face) } ?: "-",
+                enabled = idle,
+                onClick = { facePicker = true },
+            )
+            if (face?.face == WatchFaceCodec.CUSTOM_FACE) {
+                ValueRow(
+                    title = "Top right shows",
+                    value = WatchFaceCodec.itemName(face.items[WatchFaceCodec.TOP_RIGHT_SLOT - 1]),
+                    enabled = idle,
+                    note = "The other places of the custom face cannot be changed.",
+                    onClick = { topRightPicker = true },
                 )
             }
+            val text = if (ui.working) "Talking to the watch..." else ui.message
+            if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
         }
+        ButtonsRow(
+            buttons = listOf(
+                ButtonData("Read again", onRefresh, enabled = !ui.working),
+            ),
+        )
     }
     if (facePicker && face != null) {
         ChoiceDialog(

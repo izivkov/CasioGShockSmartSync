@@ -3,18 +3,14 @@ package org.avmedia.gshockGoogleSync.plugins
 import AppSwitch
 import AppText
 import AppTextLarge
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,10 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.AppCard
 import org.avmedia.gshockGoogleSync.ui.common.HorizontalSeparator
-import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.common.AppSubScreen
 import org.avmedia.smartsync.plugin.api.WatchPlugin
 
 /** One row of the Plugins screen. */
@@ -60,7 +55,6 @@ fun PluginsScreen(onBack: () -> Unit, onOpenPlugin: (String) -> Unit, vm: Plugin
 
     val open = details?.let { id -> rows.firstOrNull { it.id == id } }
     if (open != null) {
-        BackHandler { details = null }
         PluginDetailsPage(
             row = open, worksWith = vm.worksWith(open.plugin),
             onSwitch = { switch(open.id, it) },
@@ -70,8 +64,7 @@ fun PluginsScreen(onBack: () -> Unit, onOpenPlugin: (String) -> Unit, vm: Plugin
             onGrant = { vm.requestPermissions(open.id) },
         )
     } else {
-        BackHandler(onBack = onBack)
-        PluginsContent(rows, leftOver, onSwitch = switch, onOpen = { details = it }, onDeleteLeftOver = { vm.clearData(it); dataChanged++ }, onGrant = vm::requestPermissions)
+        PluginsContent(rows, leftOver, onSwitch = switch, onOpen = { details = it }, onDeleteLeftOver = { vm.clearData(it); dataChanged++ }, onGrant = vm::requestPermissions, onBack = onBack)
     }
     asking?.let { id ->
         vm.plugin(id)?.let { p -> FirstOnDialog(p, onTurnOn = { vm.markAccessShown(id); asking = null; vm.setEnabled(id, true) }, onCancel = { asking = null }) }
@@ -87,24 +80,22 @@ internal fun PluginsContent(
     onOpen: (String) -> Unit = {},
     onDeleteLeftOver: (String) -> Unit = {},
     onGrant: (String) -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
-    GShockSmartSyncTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                ScreenTitle("Plugins", Modifier)
-                if (rows.isEmpty()) AppText(text = "No plugins in this app.", modifier = Modifier.padding(16.dp))
-                rows.forEach { r ->
-                    PluginCard(
-                        r.plugin, r.status, r.on, onSwitch = { onSwitch(r.id, it) }, onOpen = { onOpen(r.id) },
-                        onStatus = if (r.on && r.needsPermission) ({ onGrant(r.id) }) else null,
-                    )
-                }
-                leftOver.sorted().forEach { id ->
-                    AppCard(modifier = Modifier.fillMaxWidth()) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            AppText(text = "Data of $id, a plugin no longer in this app", fontSize = 14.sp, modifier = Modifier.weight(1f))
-                            TextButton(onClick = { onDeleteLeftOver(id) }) { Text("Delete") }
-                        }
+    AppSubScreen(title = "Plugins", onBack = onBack) {
+        Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
+            if (rows.isEmpty()) AppText(text = "No plugins in this app.", modifier = Modifier.padding(16.dp))
+            rows.forEach { r ->
+                PluginCard(
+                    r.plugin, r.status, r.on, onSwitch = { onSwitch(r.id, it) }, onOpen = { onOpen(r.id) },
+                    onStatus = if (r.on && r.needsPermission) ({ onGrant(r.id) }) else null,
+                )
+            }
+            leftOver.sorted().forEach { id ->
+                AppCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        AppText(text = "Data of $id, a plugin no longer in this app", fontSize = 14.sp, modifier = Modifier.weight(1f))
+                        TextButton(onClick = { onDeleteLeftOver(id) }) { Text("Delete") }
                     }
                 }
             }
@@ -128,43 +119,39 @@ internal fun PluginDetailsPage(
 ) {
     var confirm by remember { mutableStateOf(false) }
     val uri = androidx.compose.ui.platform.LocalUriHandler.current
-    GShockSmartSyncTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                ScreenTitle(row.plugin.name, Modifier)
-                AppCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            PluginIconView(row.plugin.icon)
-                            HorizontalSeparator(width = 8.dp)
-                            AppTextLarge(text = row.plugin.name, modifier = Modifier.weight(1f))
-                            AppText(text = versionOf(row.plugin), fontSize = 12.sp)
-                        }
-                        PluginDetails.description(row.plugin).takeIf { it.isNotBlank() }?.let {
-                            AppText(text = it, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
-                        }
-                        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            AppText(text = row.status, fontSize = 14.sp, modifier = Modifier.weight(1f))
-                            AppSwitch(checked = row.on, onCheckedChange = onSwitch)
-                        }
-                        PluginDetails.needs(row.plugin)?.let { AppText(text = it, fontSize = 14.sp) }
-                        PluginDetails.guide(row.plugin)?.let { url ->
-                            TextButton(onClick = { runCatching { uri.openUri(url) } }) { Text("Guide") }
-                        }
+    AppSubScreen(title = row.plugin.name, onBack = onBack) {
+        Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
+            AppCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        PluginIconView(row.plugin.icon)
+                        HorizontalSeparator(width = 8.dp)
+                        AppTextLarge(text = row.plugin.name, modifier = Modifier.weight(1f))
+                        AppText(text = versionOf(row.plugin), fontSize = 12.sp)
+                    }
+                    PluginDetails.description(row.plugin).takeIf { it.isNotBlank() }?.let {
+                        AppText(text = it, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+                    }
+                    Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        AppText(text = row.status, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                        AppSwitch(checked = row.on, onCheckedChange = onSwitch)
+                    }
+                    PluginDetails.needs(row.plugin)?.let { AppText(text = it, fontSize = 14.sp) }
+                    PluginDetails.guide(row.plugin)?.let { url ->
+                        TextButton(onClick = { runCatching { uri.openUri(url) } }) { Text("Guide") }
                     }
                 }
-                if (row.on && row.needsPermission) {
-                    OutlinedButton(onClick = onGrant, modifier = Modifier.padding(horizontal = 16.dp)) { Text("Grant permissions") }
-                }
-                AppCard(modifier = Modifier.fillMaxWidth()) { PluginDetailSections(PluginDetails.sections(row.plugin, worksWith)) }
-                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    if (onOpenScreen != null) OutlinedButton(onClick = onOpenScreen, modifier = Modifier.padding(end = 8.dp)) { Text("Open") }
-                    // Only while off: a running plugin would write its data again at once.
-                    OutlinedButton(onClick = { confirm = true }, enabled = !row.on) { Text("Delete its data") }
-                }
-                if (row.on) AppText(text = "Turn it off to delete its data.", fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
-                TextButton(onClick = onBack, modifier = Modifier.padding(horizontal = 8.dp)) { Text("Back") }
             }
+            if (row.on && row.needsPermission) {
+                OutlinedButton(onClick = onGrant, modifier = Modifier.padding(horizontal = 16.dp)) { Text("Grant permissions") }
+            }
+            AppCard(modifier = Modifier.fillMaxWidth()) { PluginDetailSections(PluginDetails.sections(row.plugin, worksWith)) }
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                if (onOpenScreen != null) OutlinedButton(onClick = onOpenScreen, modifier = Modifier.padding(end = 8.dp)) { Text("Open") }
+                // Only while off: a running plugin would write its data again at once.
+                OutlinedButton(onClick = { confirm = true }, enabled = !row.on) { Text("Delete its data") }
+            }
+            if (row.on) AppText(text = "Turn it off to delete its data.", fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
         }
     }
     if (confirm) {

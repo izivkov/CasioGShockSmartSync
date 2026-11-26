@@ -2,13 +2,10 @@ package org.avmedia.gshockGoogleSync.ui.watchhealth
 
 import AppText
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,10 +15,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.avmedia.gshockGoogleSync.theme.GShockSmartSyncTheme
 import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
-import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
+import org.avmedia.gshockGoogleSync.ui.common.AppSubScreen
 import org.avmedia.gshockapi.io.StepGoalCodec
 import org.avmedia.gshockapi.io.LengthUnit
 import org.avmedia.gshockapi.io.PhysicalSettingsCodec
@@ -65,38 +61,32 @@ internal fun WatchHealthSettingsContent(
 ) {
     var editing by remember { mutableStateOf<Editing?>(null) }
     val can = !ui.working
-    GShockSmartSyncTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                ScreenTitle("Watch health settings", Modifier)
-                Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
-                    ProfileSection(ui) { editing = it }
-                    val hr = ui.heartRate
-                    ValueRow("Heart rate measurement", hr?.let { HEART_RATE_MODES[it.mode] } ?: "-", can && hr != null) { editing = Editing.HeartRate }
-                    val sleep = ui.sleep
-                    ValueRow("Bedtime", sleep?.let { hhmm(it.bedtime) } ?: "-", can && sleep != null) { editing = Editing.Bedtime }
-                    ValueRow("Wake-up time", sleep?.let { hhmm(it.wakeUp) } ?: "-", can && sleep != null) { editing = Editing.WakeUp }
-                    val basic = ui.basic
-                    ValueRow("Night window starts", basic?.let { hhmm(it.nightStart) } ?: "-", can && basic != null) { editing = Editing.NightStart }
-                    ValueRow("Night window ends", basic?.let { hhmm(it.nightEnd) } ?: "-", can && basic != null) { editing = Editing.NightEnd }
-                    SwitchRow("Step reminder", basic?.stepReminder ?: false, can && basic != null) { viewModel.setStepReminder(it) }
-                    ValueRow(
-                        title = "Length unit",
-                        value = basic?.unit?.label ?: "-",
-                        enabled = can && basic != null,
-                    ) { editing = Editing.LengthUnit }
-                    ValueRow("Step goal", ui.stepGoal?.toString() ?: "-", can && ui.stepGoal != null) { editing = Editing.StepGoal }
-                    val text = if (ui.working) "Talking to the watch..." else ui.message
-                    if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
-                }
-                ButtonsRow(
-                    buttons = listOf(
-                        ButtonData("Read again", viewModel::refresh, enabled = can),
-                        ButtonData("Back", onBack),
-                    ),
-                )
-            }
+    AppSubScreen(title = "Watch health settings", onBack = onBack) {
+        Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).fillMaxWidth()) {
+            ProfileSection(ui) { editing = it }
+            val hr = ui.heartRate
+            ValueRow("Heart rate measurement", hr?.let { HEART_RATE_MODES[it.mode] } ?: "-", can && hr != null) { editing = Editing.HeartRate }
+            val sleep = ui.sleep
+            ValueRow("Bedtime", sleep?.let { hhmm(it.bedtime) } ?: "-", can && sleep != null) { editing = Editing.Bedtime }
+            ValueRow("Wake-up time", sleep?.let { hhmm(it.wakeUp) } ?: "-", can && sleep != null) { editing = Editing.WakeUp }
+            val basic = ui.basic
+            ValueRow("Night window starts", basic?.let { hhmm(it.nightStart) } ?: "-", can && basic != null) { editing = Editing.NightStart }
+            ValueRow("Night window ends", basic?.let { hhmm(it.nightEnd) } ?: "-", can && basic != null) { editing = Editing.NightEnd }
+            SwitchRow("Step reminder", basic?.stepReminder ?: false, can && basic != null) { viewModel.setStepReminder(it) }
+            ValueRow(
+                title = "Length unit",
+                value = basic?.unit?.label ?: "-",
+                enabled = can && basic != null,
+            ) { editing = Editing.LengthUnit }
+            ValueRow("Step goal", ui.stepGoal?.toString() ?: "-", can && ui.stepGoal != null) { editing = Editing.StepGoal }
+            val text = if (ui.working) "Talking to the watch..." else ui.message
+            if (text != null) AppText(text = text, modifier = Modifier.padding(12.dp))
         }
+        ButtonsRow(
+            buttons = listOf(
+                ButtonData("Read again", viewModel::refresh, enabled = can),
+            ),
+        )
     }
     EditDialogs(ui, editing, { editing = null }, viewModel)
 }
