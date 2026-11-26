@@ -1,3 +1,27 @@
+# Release Notes - Casio G-Shock Smart Sync v43.0.0 — November 25, 2026
+
+## Highlights
+
+### 🔌 Modular Plugin Architecture & Extensions
+* **Plugin Host Runtime**: Introduced an extensible plugin runtime (`smartsync-plugins`) supporting isolated event queues, bounded callbacks, and individual plugin lifecycle management.
+* **First-Class Plugins**: Added integrated support for **Home Assistant (MQTT)**, **Health Connect**, and **TRMNL** plugins, manageable directly from the Settings screen.
+
+### 🏠 Advanced Home Assistant & Push Integration
+* **Real-Time Push & WebSocket**: Enhanced Home Assistant companion app integration with real-time push notification and sensor state synchronization.
+* **Remote Commands & Automation**: Full support for remote watch settings configuration (`command_watch_setting`) and executing watch button triggers for automations, scripts, and scenes.
+* **Dynamic Sensor Mapping**: Automatic generation of per-watch Home Assistant devices exposing health metrics (steps, heart rate curves, battery percentage) and custom YAML dashboard generation.
+
+### 👣 Health Database & History Persistence
+* **Room Database Integration**: Migrated health history tracking to local Room databases supporting daily, hourly, and night records with 7-day rolling trends.
+* **Rich Visual Charts & Export**: Added week/month trend charts, calendar views, and complete CSV and JSON data export.
+* **Cardio & Workout Downloads**: Detailed workout data downloading, day heart rate curves, and cardio load tracking.
+
+### 🛠 Diagnostics & App Log Screen
+* **Background App Log**: Re-engineered the App Log screen to parse and display log entries off the main thread (newest 500 first with infinite scroll, source filters, and raw Rx/Tx frame toggles).
+* **Diagnostic Bundles**: One-tap diagnostic zip sharing (`connection.log`) from the Settings and Health screens.
+
+---
+
 # Release Notes - Casio G-Shock Smart Sync v42.9.30 — November 23, 2026
 
 ## Highlights
