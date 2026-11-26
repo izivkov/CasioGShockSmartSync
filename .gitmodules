@@ -1,4 +1,0 @@
-[submodule "gshockapi"]
-	path = gshockapi
-	url = https://github.com/ExcuseMi/GShockAPI
-	branch = smartsync

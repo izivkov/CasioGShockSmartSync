@@ -22,7 +22,7 @@ rrule = "1.0.3"
 timber = "5.0.1"
 sunrisesunset = "1.2"
 hiltNavigationCompose = "1.4.0"
-gshockapi = "1.9.0"
+gshockapi = "2.0.0"
 # ExcuseMi/smartsync-plugins through JitPack, by commit: ee85cc3c6d is homeassistant 0.1.2 (healthconnect 0.1.1,
 # plugin-api and trmnl unchanged since their tags). JitPack keeps a failed first build of a tag name until it
 # is rebuilt from jitpack.io, so the commit stands for the tags (the same files).

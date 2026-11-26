@@ -27,12 +27,7 @@ android {
         targetSdk = 37
         versionCode = 42930
         versionName = "42.9.30"
-        // Settings > About: the library is the gshockapi submodule (its commit).
-        def libRev = providers.exec {
-            commandLine 'git', '-C', rootProject.file('gshockapi').path, 'rev-parse', '--short', 'HEAD'
-            ignoreExitValue = true
-        }.standardOutput.asText.map { it.trim() }.getOrElse("")
-        buildConfigField "String", "LIBRARY_VERSION", "\"GShockAPI ${libs.versions.gshockapi.get()}${libRev ? ' (' + libRev + ')' : ''}\""
+        buildConfigField "String", "LIBRARY_VERSION", "\"GShockAPI ${libs.versions.gshockapi.get()}\""
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -115,6 +110,8 @@ android {
 
 dependencies {
     implementation(libs.gshockapi)
+    // implementation project(':api')
+
     // The plugin interface (ExcuseMi/smartsync-plugins, JitPack); plugins depend on it only.
     implementation(libs.smartsync.plugin.api)
     // Plugins shipped with the app (found by ServiceLoader at start; off until the person turns one on, except the
@@ -122,8 +119,6 @@ dependencies {
     implementation(libs.smartsync.plugin.homeassistant)
     implementation(libs.smartsync.plugin.healthconnect)
     implementation(libs.smartsync.plugin.trmnl)
-    // The library comes from the gshockapi submodule (settings.gradle, includeBuild).
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(platform(libs.androidx.compose.bom))

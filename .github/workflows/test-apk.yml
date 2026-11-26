@@ -29,12 +29,11 @@ jobs:
       - name: Unit tests (the app; plugin-api and the plugins are tested in smartsync-plugins)
         run: ./gradlew --continue testGithubDebugUnitTest
 
-      - name: The library comes from the gshockapi submodule, not JitPack
+      - name: Verify GShockAPI dependency
         run: |
           ./gradlew -q app:dependencies --configuration githubDebugRuntimeClasspath > lib-source.txt
           grep -iE "gshockapi" lib-source.txt | sort -u | head -10 || true
-          if grep -E "GShockAPI:[0-9][^ ]*( \(\*\))?$" lib-source.txt; then echo "GShockAPI resolved from a repository"; exit 1; fi
-          grep -iE "gshockapi" lib-source.txt | grep -q -- "project ':"
+          grep -qE "GShockAPI" lib-source.txt || { echo "GShockAPI missing"; exit 1; }
 
       - name: The plugins come from JitPack, or from a smartsync-plugins checkout with -PsmartsyncPluginsDir
         run: |
