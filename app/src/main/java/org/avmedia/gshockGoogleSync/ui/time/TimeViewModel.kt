@@ -31,6 +31,7 @@ import org.avmedia.gshockGoogleSync.voice.VoiceSpeechFeedback
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val FEATURE_HOME_TIME = "time.home_time"
 private const val FEATURE_TIMER = "time.timer"
@@ -244,7 +245,7 @@ class TimeViewModel @Inject constructor(
     private suspend fun readState(silent: Boolean = false) {
         _state.update { it.copy(updating = true) }
         // A read that waits for a link that is away gives up after a while: "Updating..." never stays.
-        runCatching { kotlinx.coroutines.withTimeout(READ_LIMIT_MS) {
+        runCatching { kotlinx.coroutines.withTimeout(READ_LIMIT_MS.milliseconds) {
             timeSettingsStorage.load()
             val option = timeSettingsStorage.getTimeZoneOption()
             val offset = calculateOffset(option)

@@ -179,7 +179,6 @@ fun TimeDialog(
                 onDismiss = onDismiss,
                 initialHour = initialHour,
                 initialMinute = initialMinute,
-                is24Hour = true,
             )
         }
     }
