@@ -1,7 +1,5 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
-import org.avmedia.gshockGoogleSync.ui.common.ButtonsRow
-import org.avmedia.gshockGoogleSync.ui.common.ButtonData
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -47,10 +45,9 @@ fun HealthScreen() {
     val waitingForLifeLog = WatchInfo.model == WatchInfo.WatchModel.DW_H5600 &&
             state.stepCounterData.h5600 == null && state.lifeLogLoading
 
-    // Refresh every time the screen opens, so a LifeLog read that finished while the screen
-    // was closed (or before the watch connected) reaches the cards.
+    // Every open shows the stored day at once and starts one read by itself (none within a minute of the last).
     LaunchedEffect(Unit) {
-        healthViewModel.onAction(HealthAction.RefreshState)
+        healthViewModel.onAction(HealthAction.ScreenOpened)
     }
 
     GShockSmartSyncTheme {
@@ -101,6 +98,12 @@ fun HealthScreen() {
                             healthViewModel = healthViewModel
                         )
 
+                        // Week and month charts, calendar and export of what the watch has delivered so far
+                        if (WatchInfo.model == WatchInfo.WatchModel.DW_H5600) {
+                            org.avmedia.gshockGoogleSync.ui.health.history.HistorySection(Modifier.fillMaxWidth())
+                            org.avmedia.gshockGoogleSync.ui.health.history.WorkoutsSection(Modifier.fillMaxWidth())
+                        }
+
                         // Profile button: the ABL-100 profile does not apply to the DW-H5600
                         if (WatchInfo.model != WatchInfo.WatchModel.DW_H5600) {
                             AppButton(
@@ -116,16 +119,20 @@ fun HealthScreen() {
                     }
                 }
 
-                ButtonsRow(
-                    buttons = listOf(
-                        ButtonData(
-                            text = stringResource(id = R.string.update_latest),
-                            onClick = { healthViewModel.onAction(HealthAction.UpdateLatest) },
-                            enabled = !state.updating
-                        )
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (state.updating) {
+                    Text(
+                        text = stringResource(id = R.string.updating),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                state.backgroundLine?.let {
+                    Text(
+                        text = "Last background read: $it",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
             }
         }
     }

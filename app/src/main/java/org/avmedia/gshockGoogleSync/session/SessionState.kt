@@ -30,6 +30,13 @@ sealed interface SessionPhase {
     data class Closed(val reason: String = "", val isError: Boolean = false) : SessionPhase
 }
 
+/**
+ * The Bluetooth link of an always-connected watch while the session is Ready. The watch drops it by design (about
+ * every 45 s): [RECONNECTING] keeps the screen and the session data and waits; [LOST] is the normal disconnected
+ * state after the wait ran out, still on the same screen.
+ */
+enum class LinkState { UP, RECONNECTING, LOST }
+
 data class WatchSnapshot(
     val name: String = "",
     val address: String = "",
@@ -48,13 +55,18 @@ data class SessionState(
     val isSetupComplete: Boolean = false,
     /** True while actions requested by an always-connected watch are running. */
     val isRunningActions: Boolean = false,
-    val pendingSaves: Set<ComponentId> = emptySet()
+    val pendingSaves: Set<ComponentId> = emptySet(),
+    val link: LinkState = LinkState.UP,
+    /** Who started the connection; fixed when the session is Ready. */
+    val cause: ConnectionCause = ConnectionCause.USER
 ) {
     val isNormal: Boolean get() = button == ConnectionButton.NORMAL
     val isFromAction: Boolean get() = button == ConnectionButton.FROM_ACTION
     val isAutomaticSync: Boolean get() = button == ConnectionButton.AUTOMATIC_SYNC
     val isFind: Boolean get() = button == ConnectionButton.FIND
     val isAlwaysConnected: Boolean get() = button == ConnectionButton.ALWAYS_CONNECTED
+    /** The watch with "Keep connected in background" ([KeepConnected]): its link stays up across drops and inactivity. */
+    val keepsLink: Boolean get() = KeepConnected.holds(watch.address)
 
     fun isPendingSave(component: ComponentId): Boolean = component in pendingSaves
     fun hasPendingSaves(): Boolean = pendingSaves.isNotEmpty()

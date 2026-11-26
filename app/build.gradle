@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
@@ -26,6 +27,12 @@ android {
         targetSdk = 37
         versionCode = 42930
         versionName = "42.9.30"
+        // Settings > About: the library is the gshockapi submodule (its commit).
+        def libRev = providers.exec {
+            commandLine 'git', '-C', rootProject.file('gshockapi').path, 'rev-parse', '--short', 'HEAD'
+            ignoreExitValue = true
+        }.standardOutput.asText.map { it.trim() }.getOrElse("")
+        buildConfigField "String", "LIBRARY_VERSION", "\"GShockAPI ${libs.versions.gshockapi.get()}${libRev ? ' (' + libRev + ')' : ''}\""
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,6 +42,15 @@ android {
     }
 
     signingConfigs {
+        // One fixed throwaway key for the test builds, so each test APK installs over the
+        // previous one (a fresh key per CI run makes the phone refuse the update). Not used for release.
+        // The file name and the ".webhook" id suffix below stay: a new id or key would not update the installed app.
+        testApk {
+            storeFile file("webhook-test-debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
         release {
             // These environment variables will be set in GitHub Actions
             def ksPath = System.getenv("KEYSTORE_PATH") ?: "release.keystore"
@@ -49,6 +65,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.testApk
+            // Installs beside the release build; the label is set in src/debug/res/values/strings.xml.
+            applicationIdSuffix ".webhook"
+            // The test APK build passes -PminifyTest: R8 and resource shrinking, same applicationId and key.
+            // Unit tests and screenshots run without it. Remove the property from test-apk.yml to switch it off.
+            if (project.hasProperty('minifyTest')) {
+                optimization {
+                    enable = true
+                }
+                shrinkResources = true
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'proguard-test-rules.pro'
+            }
+        }
         release {
             if (signingConfigs.release.storeFile != null) {
                 signingConfig signingConfigs.release
@@ -70,6 +100,14 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    testOptions {
+        unitTests {
+            // Robolectric (the screenshot tests) needs the merged resources and assets.
+            includeAndroidResources = true
+            // A failing test prints its assertion message in the CI log (the reports are not uploaded).
+            all { testLogging { exceptionFormat = 'full'; events 'failed' } }
+        }
+    }
     lint {
         disable 'TypographyFractions', 'TypographyQuotes', 'MissingTranslation'
     }
@@ -77,7 +115,14 @@ android {
 
 dependencies {
     implementation(libs.gshockapi)
-    // implementation project(':api')
+    // The plugin interface (ExcuseMi/smartsync-plugins, JitPack); plugins depend on it only.
+    implementation(libs.smartsync.plugin.api)
+    // Plugins shipped with the app (found by ServiceLoader at start; off until the person turns one on, except the
+    // app's own Home Assistant plugin where it was set up before).
+    implementation(libs.smartsync.plugin.homeassistant)
+    implementation(libs.smartsync.plugin.healthconnect)
+    implementation(libs.smartsync.plugin.trmnl)
+    // The library comes from the gshockapi submodule (settings.gradle, includeBuild).
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -91,6 +136,11 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.hilt.android)
@@ -115,6 +165,11 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.compose.ui.tooling.preview)
 
+    implementation(libs.okhttp)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
 

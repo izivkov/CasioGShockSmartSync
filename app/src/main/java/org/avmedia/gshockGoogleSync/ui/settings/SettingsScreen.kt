@@ -30,11 +30,21 @@ import org.avmedia.gshockGoogleSync.ui.common.InfoButton
 import org.avmedia.gshockGoogleSync.ui.common.LocalWatchFeatureManager
 import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 import org.avmedia.gshockGoogleSync.ui.common.WatchFeature
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthLinks
+import org.avmedia.gshockGoogleSync.ui.watchhealth.isH5600Watch
 import org.avmedia.gshockGoogleSync.utils.Utils
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onOpenPlugins: () -> Unit = {},
+    onOpenAbout: () -> Unit = {},
+    onOpenWatchFace: () -> Unit = {},
+    onOpenWatchHealth: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {},
+    onOpenWorkouts: () -> Unit = {},
+    onOpenTide: () -> Unit = {},
+) {
     GShockSmartSyncTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -49,7 +59,9 @@ fun SettingsScreen() {
                         .padding(0.dp)
                         .fillMaxWidth()
                 ) {
-                    SettingsList()
+                    SettingsList(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
+                    // Last: one Plugins row (its own screen lists them), then About.
+                    SettingsBottomLinks(onOpenPlugins = onOpenPlugins, onOpenAbout = onOpenAbout)
                 }
                 BottomRow(modifier = Modifier.fillMaxWidth())
             }
@@ -58,10 +70,18 @@ fun SettingsScreen() {
 }
 
 @Composable
-fun SettingsList() {
+fun SettingsList(
+    onOpenWatchFace: () -> Unit = {},
+    onOpenWatchHealth: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {},
+    onOpenWorkouts: () -> Unit = {},
+    onOpenTide: () -> Unit = {},
+) {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     Column {
+        // The watch face and the health settings of the DW-H5600 family open from the top of Settings.
+        if (isH5600Watch()) WatchHealthLinks(onOpenWatchFace, onOpenWatchHealth, onOpenNotifications, onOpenWorkouts, onOpenTide)
         WatchFeature(id = "locale_card") {
             Locale(settingsViewModel::onSettingUpdated)
         }
@@ -80,9 +100,8 @@ fun SettingsList() {
         WatchFeature(id = "time_adjustment_card") {
             TimeAdjustment(settingsViewModel::onSettingUpdated)
         }
-        if (org.avmedia.gshockapi.WatchInfo.protocol is org.avmedia.gshockapi.protocols.H5600Protocol) {
-            WatchFace(settingsViewModel::onSettingUpdated)
-        }
+        PhoneNotificationsCard()
+        if (isH5600Watch()) BackgroundReadCard()
     }
 }
 

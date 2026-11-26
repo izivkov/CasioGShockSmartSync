@@ -173,6 +173,18 @@
     <string name="apierror_ensure_the_official_g_shock_app_is_not_running">ApiError! Ensure the official manufacturer app is not running.</string>
     <string name="bluetooth_is_not_enabled">Bluetooth is not enabled.</string>
     <string name="disconnected_due_to_inactivity">Disconnected due to inactivity.</string>
+    <string name="waiting_for_watch" translatable="false">Waiting for %1$s... press its connect button</string>
+    <string name="watch_options" translatable="false">Watch options</string>
+    <string name="watch_status_connected" translatable="false">Connected</string>
+    <string name="watch_status_waiting" translatable="false">Waiting</string>
+    <string name="watch_status_not_connected" translatable="false">Not connected</string>
+    <string name="keep_connected_in_background" translatable="false">Keep connected in background</string>
+    <string name="keep_connected_info" translatable="false">Accepts the watch\'s own reconnects, also after the app restarts, and never disconnects it for inactivity. One watch at a time.</string>
+    <string name="keep_connected_turns_off" translatable="false">Turns off Keep connected for %1$s</string>
+    <string name="forget_watch" translatable="false">Forget this watch</string>
+    <string name="link_reconnecting" translatable="false">Reconnecting...</string>
+    <string name="watches" translatable="false">Watches</string>
+    <string name="link_lost" translatable="false">Watch disconnected</string>
     <string name="when_found_lift_phone_to_stop_ringing">When found, lift phone to stop ringing</string>
     <string name="voice_assistant_not_available_on_this_device">Voice Assistant not available on this device!</string>
     <string name="cannot_go_to_next_track">Cannot go to Next Track!</string>
@@ -199,7 +211,7 @@
     <string name="cover_connected">Connected</string>
 
     <string name="ocw_s400_connect_instruction">To connect, hold (A) for 2.5 s</string>
-    <string name="ocw_s7000_connect_instruction">To connect, hold (B) for 2.5 s</string>
+    <string name="ocw_s7000_connect_instruction">To connect, hold (B) for 2.5 s, until the second hand points to [C]</string>
     <string name="find_phone_instruction">To run actions, start the \"Find Phone\" function on the watch</string>
     <string name="actions_saved">Actions Saved</string>
     <string name="press_and_hold_connection_button_to_continue">Press and hold the CONNECTION button (usually BOTTOM-LEFT) on your watch for 3 seconds to pair.</string>
@@ -238,15 +250,12 @@
     <string name="active_time">Active time</string>
     <string name="loading_lifelog">Loading LifeLog from the watch…</string>
     <string name="set_up_watch">Allow connection</string>
-    <string name="allow_connection_info">Turn this on to allow the watch to connect. The switch turns off again after one connection, because this watch tries to connect all the time. To connect, choose Connect from the watch menu. Some watches connect automatically once the switch is on, and that can take a while.</string>
     <string name="card_steps">Steps</string>
     <string name="card_activity">Energy and activity</string>
     <string name="card_heart_rate">Heart rate</string>
     <string name="card_status">Watch status</string>
     <string name="activity_summary">Walk / cycle / active</string>
+    <string name="health_log_none">No logs yet.</string>
     <string name="loading_lifelog_short">Loading LifeLog</string>
-    <string name="update_latest">Update</string>
-    <string name="watch_face">Watch face</string>
-    <string name="watch_face_item">Display item (face 2)</string>
-    <string name="done">Done</string>
+    <string name="updating">Updating...</string>
 </resources>

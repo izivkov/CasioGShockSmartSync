@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <permission
-        android:name="com.your.package.RECEIVE_BOOT_COMPLETED"
+        android:name="${applicationId}.RECEIVE_BOOT_COMPLETED"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -80,6 +80,13 @@
         android:name="android.hardware.sensor.proximity"
         android:required="true" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".GShockApplication"
         android:allowBackup="true"
@@ -123,7 +130,7 @@
             android:name=".services.BootReceiver"
             android:enabled="true"
             android:exported="true"
-            android:permission="org.avmedia.gshockGoogleSync.RECEIVE_BOOT_COMPLETED">
+            android:permission="${applicationId}.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -147,6 +154,16 @@
             </intent-filter>
 
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.healthlog"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/health_log_paths" />
+        </provider>
     </application>
 
 </manifest>

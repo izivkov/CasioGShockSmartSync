@@ -27,7 +27,9 @@ import org.avmedia.gshockGoogleSync.ui.common.ScreenTitle
 @Composable
 fun ActionsScreen(
     modifier: Modifier = Modifier,
+    onOpenPluginSetup: (String) -> Unit = {},
     actionsViewModel: ActionsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    pluginRows: @Composable () -> Unit = { org.avmedia.gshockGoogleSync.plugins.PluginActionRows(onOpenPluginSetup) },
 ) {
     val isModified by actionsViewModel.isModified.collectAsState()
 
@@ -41,7 +43,8 @@ fun ActionsScreen(
 
                 ActionsContent(
                     modifier = Modifier.weight(1f),
-                    actionsViewModel = actionsViewModel
+                    actionsViewModel = actionsViewModel,
+                    pluginRows = pluginRows,
                 )
 
                 ButtonsRow(
@@ -60,18 +63,26 @@ fun ActionsScreen(
 }
 
 @Composable
-private fun ActionsContent(modifier: Modifier = Modifier, actionsViewModel: ActionsViewModel) {
+private fun ActionsContent(
+    modifier: Modifier = Modifier,
+    actionsViewModel: ActionsViewModel,
+    pluginRows: @Composable () -> Unit,
+) {
     Column(
         modifier =
             modifier
                 .verticalScroll(rememberScrollState())
-                .padding(0.dp)
+                // Room under the last row: scrolled to the end, nothing sits against or behind the Save bar.
+                .padding(bottom = 16.dp)
                 .fillMaxWidth()
-    ) { ItemList(items = createActionItems(actionsViewModel)) }
+    ) { ItemList(items = createActionItems(actionsViewModel, pluginRows)) }
 }
 
 @Composable
-private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
+private fun createActionItems(
+    actionsViewModel: ActionsViewModel,
+    pluginRows: @Composable () -> Unit,
+): List<Any> {
     val watchFeatureManager = LocalWatchFeatureManager.current
 
     return listOfNotNull(
@@ -115,6 +126,7 @@ private fun createActionItems(actionsViewModel: ActionsViewModel): List<Any> {
             R.string.set_prayer_alarms, R.drawable.prayer_times, actionsViewModel,
             infoRes = R.string.prayer_times_info
         ),
+        pluginRows(),
         SeparatorView(),
         PhoneView(actionsViewModel)
     )

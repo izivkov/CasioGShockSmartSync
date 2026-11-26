@@ -47,6 +47,12 @@ data class TimeState(
     val isVoiceCommandSupported: Boolean = false,
     val isVoiceVerbose: Boolean = true,
     val isSendingTime: Boolean = false,
+    /** True while the values shown are the stored ones and the watch is being read. */
+    val updating: Boolean = false,
+    /** True while the watch values shown are the stored ones, not yet confirmed by the watch on this link. */
+    val fromStore: Boolean = false,
+    /** When the stored values were saved, epoch millis; 0 = not known. */
+    val storedAtMs: Long = 0L,
 )
 
 sealed interface TimeAction {
@@ -58,6 +64,9 @@ sealed interface TimeAction {
     data class SetVoiceVerbose(val enabled: Boolean) : TimeAction
     data object StartVoiceCommand : TimeAction
 }
+
+/** The longest the Time screen waits for the watch values before it stops showing "Updating...". */
+internal const val READ_LIMIT_MS = 30_000L
 
 @HiltViewModel
 class TimeViewModel @Inject constructor(
@@ -73,8 +82,18 @@ class TimeViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TimeState())
+    private val snapshots = HomeSnapshotStore(org.avmedia.gshockGoogleSync.watch.AppStores.LocalKeyValueStore(appContext))
+
+    // The first frame comes from the stored values; the watch is read in the background ([refreshState]).
+    private val _state = MutableStateFlow(
+        HomeSnapshotStore.firstState(
+            runCatching { snapshots.load(org.avmedia.gshockapi.WatchInfo.getAddress()) }.getOrNull(),
+            TimeState(isVoiceVerbose = runCatching { LocalDataStorage.getVoiceVerbose(appContext) }.getOrDefault(true)),
+        )
+    )
     val state = _state.asStateFlow()
+    private val openedAt = System.currentTimeMillis()
+    private var firstReadLogged = false
 
     // Compares the timer with the value last read from, or sent to, the watch.
     private val timerChanges = ChangeTracker<Int>(ComponentId.TIMER, sessionManager)
@@ -216,11 +235,16 @@ class TimeViewModel @Inject constructor(
     }
 
     private fun refreshState() {
-        viewModelScope.launch { readState() }
+        // Automatic refresh (screen opened, event): a failed read keeps the old values and is only logged.
+        // The Home Assistant push reads the watch at the same moment as this screen, and a read that
+        // loses that race is not an error the owner can act on. The Send button still reports its own errors.
+        viewModelScope.launch { readState(silent = true) }
     }
 
-    private suspend fun readState() {
-        runCatching {
+    private suspend fun readState(silent: Boolean = false) {
+        _state.update { it.copy(updating = true) }
+        // A read that waits for a link that is away gives up after a while: "Updating..." never stays.
+        runCatching { kotlinx.coroutines.withTimeout(READ_LIMIT_MS) {
             timeSettingsStorage.load()
             val option = timeSettingsStorage.getTimeZoneOption()
             val offset = calculateOffset(option)
@@ -244,11 +268,27 @@ class TimeViewModel @Inject constructor(
                     timeZoneOption = option,
                     timeOffset = offset,
                     isVoiceCommandSupported = isVoiceCommandSupported,
-                    isVoiceVerbose = isVoiceVerbose
+                    isVoiceVerbose = isVoiceVerbose,
+                    updating = false,
+                    fromStore = false,
                 )
             }
-        }.onFailure {
-            AppSnackbar("Api Error")
+            val address = org.avmedia.gshockapi.WatchInfo.getAddress()
+            val snapshot = HomeSnapshotStore.of(_state.value)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { runCatching { snapshots.save(address, snapshot) } }
+            if (!firstReadLogged) {
+                firstReadLogged = true
+                // The time the stored values were on screen before the watch's came in (the first frame waits for none).
+                org.avmedia.gshockGoogleSync.log.AppLog.log(
+                    org.avmedia.gshockGoogleSync.log.LogSource.App,
+                    "Home screen: watch values after ${System.currentTimeMillis() - openedAt} ms, stored values shown at once",
+                )
+            }
+            Unit
+        } }.onFailure {
+            // The watch did not answer: the stored values stay marked as stored, never passing for fresh.
+            _state.update { s -> HomeSnapshotStore.afterFailedRead(s) }
+            if (silent) timber.log.Timber.w(it, "Time screen refresh failed") else AppSnackbar("Api Error")
         }
     }
 }

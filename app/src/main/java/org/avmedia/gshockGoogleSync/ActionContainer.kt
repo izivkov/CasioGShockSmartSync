@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync
 
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -94,7 +96,8 @@ constructor(
     private val watchFeatureManager: IWatchFeatureManager,
     private val eventStorage: EventStorage,
     private val alarmNameStorage: AlarmNameStorage,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub
 ) {
     /** Manually-created scope, since this class has no ViewModel/Activity lifecycle to tie one to. Lives as long as the process. */
     private val containerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -225,6 +228,7 @@ constructor(
                 )
             )
             add(PrayerAlarmsAction("Set Prayer Alarms", false, prayerAlarmsHelper))
+            add(PluginButtonAction("Plugins", true))
             add(Separator(appContext.getString(R.string.emergency_actions), false))
             add(PhoneDialAction(appContext.getString(R.string.make_phonecall), false, ""))
         }
@@ -563,6 +567,26 @@ constructor(
         }
     }
 
+    /**
+     * Gives the button press to the plugins that asked for it (Home Assistant runs the action chosen on its screen).
+     * Each plugin's switch decides; no row of its own.
+     */
+    inner class PluginButtonAction(override var title: String, override var enabled: Boolean) :
+        Action(title, enabled) {
+
+        // Button press, or the Phone Finder request of always-connected watches (they arrive here too).
+        // Listed (and run) only when a plugin that is on wants the press, so the run screen never names an unused one.
+        override fun shouldRun(runEnvironment: RunEnvironment): Boolean = when (runEnvironment) {
+            RunEnvironment.ACTION_BUTTON_PRESSED -> runCatching { pluginHub.buttonPluginNames() }.getOrDefault(emptyList())
+                .also { names -> if (names.isNotEmpty()) title = names.joinToString() }.isNotEmpty()
+            else -> false
+        }
+
+        override fun run(context: Context) {
+            pluginHub.buttonPressed()
+        }
+    }
+
     inner class Separator(override var title: String, override var enabled: Boolean) :
         Action(title, enabled) {
         override fun run(context: Context) {
@@ -837,6 +861,7 @@ constructor(
                 sendSettings(context, toSend)
             }.onFailure {
                 Timber.e(it, "Failed to send settings to watch")
+                AppLog.failure(LogSource.Watch, "Writing settings to the watch failed", it)
             }
         }
 
@@ -852,6 +877,7 @@ constructor(
                 true
             }.onFailure {
                 Timber.e(it, "Failed to send settings to watch")
+                AppLog.failure(LogSource.Watch, "Writing settings to the watch failed", it)
             }.getOrDefault(false)
         }
 
@@ -932,6 +958,7 @@ constructor(
 
             }.onFailure {
                 Timber.e(it, "Failed to set settings to default")
+                AppLog.failure(LogSource.Watch, "Writing the default settings failed", it)
                 AppSnackbar("Failed to set defaults")
             }
         }
@@ -1082,7 +1109,7 @@ constructor(
             isDataLoaded.await()
             val actions = _actions.value.filter { it.shouldRun(environment) }
             if (announce) ProgressEvents.onNext("ActionNames", actions.map { it.title })
-            runFilteredActions(context, actions)
+            org.avmedia.gshockGoogleSync.ui.actions.WatchActions.running { runFilteredActions(context, actions) }
             afterRun()
         }
     }

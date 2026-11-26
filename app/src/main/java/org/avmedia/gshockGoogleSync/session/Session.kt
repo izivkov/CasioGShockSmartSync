@@ -4,7 +4,10 @@ import android.bluetooth.BluetoothDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +26,18 @@ internal fun GShockRepository.currentConnectionButton(): ConnectionButton = when
     isActionButtonPressed() -> ConnectionButton.FROM_ACTION
     isAutoTimeStarted() -> ConnectionButton.AUTOMATIC_SYNC
     isFindPhoneButtonPressed() -> ConnectionButton.FIND
-    isAlwaysConnectedConnectionPressed() && !SetupWindow.consume(org.avmedia.gshockapi.WatchInfo.getAddress()) -> ConnectionButton.ALWAYS_CONNECTED
+    isAlwaysConnectedConnectionPressed() -> ConnectionButton.ALWAYS_CONNECTED
     else -> ConnectionButton.NORMAL
+}
+
+/**
+ * Who started the connection now being initialized: a background window of the app, the watch by itself (the
+ * connection kind 13/14 the library read from the watch), else the person.
+ */
+internal fun currentConnectionCause(): ConnectionCause = when {
+    BackgroundConnection.active -> ConnectionCause.BACKGROUND_READ
+    org.avmedia.gshockapi.casio.ConnectionSetup.isAutomaticConnect() -> ConnectionCause.WATCH
+    else -> ConnectionCause.USER
 }
 
 /**
@@ -39,14 +52,21 @@ class Session(
     val id: String,
     private val repository: GShockRepository,
     device: BluetoothDevice? = null,
-    initialWatch: WatchSnapshot = WatchSnapshot()
+    initialWatch: WatchSnapshot = WatchSnapshot(),
+    scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+    private val reconnectWindowMs: Long = RECONNECT_WINDOW_MS
 ) {
+    companion object {
+        /** How long an always-connected watch may stay away before the session shows "disconnected". */
+        const val RECONNECT_WINDOW_MS = 3 * 60 * 1000L
+    }
+
     /** The connected device. May be attached after creation, once the library reports it. */
     @Volatile
     var device: BluetoothDevice? = device
         private set
 
-    val sessionScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    val sessionScope = scope
 
     private val _state = MutableStateFlow(
         SessionState(
@@ -73,19 +93,22 @@ class Session(
      *
      * @param button overrides the button read from the repository (for tests).
      * @param entryReason defaults to [EntryReason.forButton] of the button.
+     * @param cause overrides who started the connection (for tests); see [currentConnectionCause].
      */
     fun setReady(
         entryReason: EntryReason? = null,
-        button: ConnectionButton? = null
+        button: ConnectionButton? = null,
+        cause: ConnectionCause? = null
     ): Boolean {
         val resolvedButton = button ?: repository.currentConnectionButton()
         val resolvedReason = entryReason ?: EntryReason.forButton(resolvedButton)
+        val resolvedCause = cause ?: currentConnectionCause()
 
         var transitioned = false
         _state.update {
             if (it.phase is SessionPhase.Connecting) {
                 transitioned = true
-                it.copy(phase = SessionPhase.Ready(resolvedReason), button = resolvedButton)
+                it.copy(phase = SessionPhase.Ready(resolvedReason), button = resolvedButton, cause = resolvedCause)
             } else {
                 transitioned = false
                 it
@@ -121,6 +144,32 @@ class Session(
     fun endRunActions() {
         updateIfActive { it.copy(isRunningActions = false) }
     }
+
+    /**
+     * The link of an always-connected watch dropped while the session is Ready: the session stays, shows
+     * [LinkState.RECONNECTING] and, after [reconnectWindowMs] without the watch, [LinkState.LOST].
+     * Returns false (nothing changed) when the session is not Ready.
+     */
+    fun onLinkDropped(): Boolean {
+        val applied = updateIfActive {
+            if (it.phase is SessionPhase.Ready && it.link == LinkState.UP) it.copy(link = LinkState.RECONNECTING) else it
+        }
+        if (!applied || _state.value.link != LinkState.RECONNECTING) return false
+        linkTimer?.cancel()
+        linkTimer = sessionScope.launch {
+            delay(reconnectWindowMs)
+            updateIfActive { if (it.link == LinkState.RECONNECTING) it.copy(link = LinkState.LOST) else it }
+        }
+        return true
+    }
+
+    /** The same watch is back: the screen and the data are exactly as they were. */
+    fun onLinkRestored() {
+        linkTimer?.cancel()
+        updateIfActive { if (it.link == LinkState.UP) it else it.copy(link = LinkState.UP) }
+    }
+
+    @Volatile private var linkTimer: Job? = null
 
     fun markSetupComplete() {
         updateIfActive { it.copy(isSetupComplete = true) }

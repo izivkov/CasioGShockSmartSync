@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -86,7 +88,9 @@ data class HealthState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
     /** True while the DW-H5600 LifeLog is being read from the watch. */
     val lifeLogLoading: Boolean = false,
-    /** True while the latest data is being read; the Update button is disabled meanwhile. */
+    /** Last background read, one line (time and outcome); null if none yet. */
+    val backgroundLine: String? = null,
+    /** True while the latest data is being read; the screen shows a small "Updating..." line. */
     val updating: Boolean = false,
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
     val stepGoal: Int = 10000,
@@ -105,7 +109,9 @@ sealed interface HealthAction {
     data class SetHeightInches(val inches: Double) : HealthAction
     data object ClearStepHistory : HealthAction
     data object RefreshState : HealthAction
-    data object UpdateLatest : HealthAction
+
+    /** The screen was opened: shows the stored day and starts a read by itself ([HealthOpenRead]). */
+    data object ScreenOpened : HealthAction
 }
 
 internal fun applyExerciseProfileState(
@@ -142,7 +148,8 @@ class HealthViewModel @Inject constructor(
     private var stepFetchPending = false
 
     init {
-        refreshState()
+        showStoredHistory()
+        showBackgroundLine()
         setupEventSubscription()
 
     }
@@ -156,6 +163,21 @@ class HealthViewModel @Inject constructor(
     fun onScreenHidden() {
         stepPollJob?.cancel()
         stepPollJob = null
+    }
+
+    /** DW-H5600: show the last stored day at once; a running or later read replaces it. Nothing stored: the screen stays as it was. */
+    private fun showStoredHistory() {
+        if (!isDwH5600()) return
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val stored = runCatching {
+                val dao = org.avmedia.gshockGoogleSync.history.HistoryDb.get(appContext).dao()
+                org.avmedia.gshockGoogleSync.history.StoredHealth.stepData(dao.allDays(), org.avmedia.gshockGoogleSync.history.LastReadStore.load(appContext), hrOfDay = { dao.hrSlotsOf(it) }) { dao.hoursOf(it) }
+            }.onFailure { Timber.w(it, "Health: reading the stored history failed"); AppLog.failure(LogSource.Health, "Reading the stored history failed", it) }.getOrNull() ?: return@launch
+            _state.update { current ->
+                if (current.stepCounterData.h5600 != null) current
+                else current.copy(stepCounterData = stored, lifeLogLoading = false).withStepMetrics(stored).withWatchGoal(stored)
+            }
+        }
     }
 
     private fun setupEventSubscription() {
@@ -201,7 +223,7 @@ class HealthViewModel @Inject constructor(
 
     fun onAction(action: HealthAction) {
         when (action) {
-            HealthAction.UpdateLatest -> startUpdate()
+            HealthAction.ScreenOpened -> onOpened()
 
             is HealthAction.SetStepDataOption -> _state.update {
                 it.copy(selectedStepDataOption = action.option)
@@ -244,21 +266,31 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchStepCounter(): StepCounterData {
+    private suspend fun fetchStepCounter(force: Boolean): StepCounterData {
         if (WatchInfo.hasStepCounterMock) return generateMockStepData()
         if (!isDwH5600()) return api.getStepCount()
-        // DW-H5600: the LifeLog is read once per session and then served from the session cache.
-        H5600Session.data?.let { return it }
-        return api.getStepCount().also { if (it.h5600 != null) H5600Session.data = it }
+        // DW-H5600: a result younger than 30 minutes (often from the background read) is shown as is, except on open.
+        if (!force && H5600Session.isFresh()) H5600Session.data?.let { return it }
+        // One transfer at a time, shared with the background read.
+        if (!H5600Session.inFlight.compareAndSet(false, true)) {
+            return H5600Session.data ?: StepCounterData.unavailable()
+        }
+        try {
+            return api.getStepCount().let { if (it.h5600 != null) H5600Session.store(it) else it }
+        } finally {
+            H5600Session.inFlight.set(false)
+        }
     }
 
-    /** The Update button: read the latest data again (the LifeLog for the DW-H5600, the steps for the ABL-100). */
-    private fun startUpdate() {
-        if (isDwH5600()) H5600Session.clear()
-        requestStepRefresh()
+    /** The screen opened: one read of the latest data (the LifeLog for the DW-H5600, the steps for the ABL-100). */
+    private fun onOpened() {
+        showBackgroundLine()
+        val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
+        if (!supported) return
+        if (HealthOpenRead.shared.tryStart()) requestStepRefresh(force = true) else refreshState()
     }
 
-    private fun requestStepRefresh() {
+    private fun requestStepRefresh(force: Boolean = false) {
         Timber.i("Health: step refresh requested (running=${stepFetchJob?.isActive == true}, dwH5600=${isDwH5600()})")
         if (stepFetchJob?.isActive == true) {
             stepFetchPending = true
@@ -270,12 +302,13 @@ class HealthViewModel @Inject constructor(
                 stepFetchPending = false
                 runCatching {
                     val timeout = if (isDwH5600()) LIFELOG_FETCH_TIMEOUT else STEP_FETCH_TIMEOUT
-                    val needsWatch = isDwH5600() && H5600Session.data == null
+                    val needsWatch = isDwH5600() && (force || H5600Session.data == null)
                     if (needsWatch) _state.update { it.copy(lifeLogLoading = true) }
                     Timber.i("Health: fetching step data (timeout=$timeout, fromWatch=$needsWatch)")
-                    val stepData = withTimeoutOrNull(timeout) { fetchStepCounter() }
+                    val stepData = withTimeoutOrNull(timeout) { fetchStepCounter(force) }
                     if (stepData == null) {
                         Timber.w("Health: step fetch returned nothing (timed out or cancelled)")
+                        AppLog.failure(LogSource.Health, "LifeLog step fetch returned nothing (timed out or cancelled)")
                         _state.update { it.copy(lifeLogLoading = false) }
                         return@runCatching
                     }
@@ -298,6 +331,7 @@ class HealthViewModel @Inject constructor(
                     }
                 }.onFailure {
                     Timber.w(it, "Health: step refresh failed")
+                    AppLog.failure(LogSource.Health, "LifeLog step refresh failed", it)
                     _state.update { current -> current.copy(lifeLogLoading = false) }
                 }
             } while (stepFetchPending)
@@ -319,7 +353,15 @@ class HealthViewModel @Inject constructor(
         }
     }
 
+    private fun showBackgroundLine() {
+        _state.update {
+            it.copy(backgroundLine = BackgroundHealthSync.lastLine(appContext))
+        }
+    }
+
+    /** Shows what is known: the session's data when fresh, a read only when there is none. */
     private fun refreshState() {
+        showBackgroundLine()
         viewModelScope.launch {
             val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
             Timber.i("Health: refreshState (hasStepCounter=${WatchInfo.hasStepCounter}, feature supported=$supported)")

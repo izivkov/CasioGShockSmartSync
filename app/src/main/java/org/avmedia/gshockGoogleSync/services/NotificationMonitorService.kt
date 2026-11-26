@@ -9,7 +9,10 @@ import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dagger.hilt.android.AndroidEntryPoint
+import org.avmedia.gshockGoogleSync.notifications.PhoneNotificationPolicy
+import org.avmedia.gshockGoogleSync.notifications.PostedNotification
 import org.avmedia.gshockGoogleSync.session.SessionManager
+import org.avmedia.gshockGoogleSync.watch.AppStores
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.NotificationType
 import org.avmedia.gshockapi.ProgressEvents
@@ -48,6 +51,10 @@ class NotificationMonitorService : NotificationListenerService() {
         // Forward notifications only while a watch session is Ready. Read from the Session at the
         // moment of use, so a recreated service instance cannot miss a connection event.
         if (!sessionManager.isReady) return
+        // The connected watch's own choice: all apps (upstream's behaviour), only the chosen ones, or off. One App log
+        // line per notification (app, sent or skipped and why); a watch without notifications gets nothing.
+        val posted = PostedNotification(sbn.packageName, sbn.notification.flags, importanceOf(sbn))
+        if (!forwarder(applicationContext).decide(posted, getAppName(sbn.packageName), packageName)) return
 
         processNotification(sbn)
             .onSuccess { notificationInfo ->
@@ -60,6 +67,12 @@ class NotificationMonitorService : NotificationListenerService() {
             .onFailure { error ->
                 Timber.e(error, "Error processing notification")
             }
+    }
+
+    private fun importanceOf(sbn: StatusBarNotification): Int = try {
+        Ranking().let { r -> if (currentRanking.getRanking(sbn.key, r)) r.importance else PhoneNotificationPolicy.IMPORTANCE_UNKNOWN }
+    } catch (t: Throwable) {
+        PhoneNotificationPolicy.IMPORTANCE_UNKNOWN
     }
 
     private fun processNotification(sbn: StatusBarNotification): Result<NotificationInfo> =
@@ -121,7 +134,25 @@ class NotificationMonitorService : NotificationListenerService() {
     companion object {
         private var isBound = false
 
-        private fun isNotificationGranted(context: Context): Boolean {
+        @Volatile private var shared: org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder? = null
+
+        /** One forwarder for the process, so the once-per-session lines stay once. */
+        fun forwarder(context: Context): org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder =
+            shared ?: synchronized(this) {
+                shared ?: org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder(
+                    AppStores.phoneNotifications(context.applicationContext),
+                    supported = {
+                        org.avmedia.gshockGoogleSync.notifications.PhoneNotificationForwarder.watchShows(
+                            org.avmedia.gshockapi.ble.Connection.serviceFound(org.avmedia.gshockapi.ble.GetSetMode.NOTIFY),
+                        )
+                    },
+                    watch = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() },
+                    log = { org.avmedia.gshockGoogleSync.log.AppLog.log(org.avmedia.gshockGoogleSync.log.LogSource.App, it) },
+                ).also { shared = it }
+            }
+
+        /** True when Android lets this app read notifications (Settings, notification access). */
+        fun isNotificationGranted(context: Context): Boolean {
             val packageName = context.packageName
             val flat = Settings.Secure.getString(
                 context.contentResolver,
@@ -143,37 +174,23 @@ class NotificationMonitorService : NotificationListenerService() {
             }
         }
 
-        private fun openNotificationListenerSettings(context: Context) {
+        fun openNotificationListenerSettings(context: Context) {
             val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
 
         fun createAppNotification(info: NotificationInfo): AppNotification {
-            fun Long.toFormattedDateTime(): String {
-                val calendar = java.util.Calendar.getInstance().apply {
-                    timeInMillis = this@toFormattedDateTime
-                }
-
-                return String.format(
-                    java.util.Locale.US,
-                    "%04d%02d%02dT%02d%02d%2d",
-                    calendar.get(java.util.Calendar.YEAR),
-                    calendar.get(java.util.Calendar.MONTH) + 1,
-                    calendar.get(java.util.Calendar.DAY_OF_MONTH),
-                    calendar.get(java.util.Calendar.HOUR_OF_DAY),
-                    calendar.get(java.util.Calendar.MINUTE),
-                    calendar.get(java.util.Calendar.SECOND)
-                )
-            }
-
             return AppNotification(
                 title = info.title,
                 text = info.text,
                 shortText = info.shortText,
                 app = info.appName,
                 type = info.type,
-                timestamp = info.timestamp.toFormattedDateTime()
+                // The time zero padded: "%2d" put a space in the seconds below 10 (a broken frame time).
+                timestamp = org.avmedia.gshockapi.NotificationIds.timestamp(
+                    java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(info.timestamp), java.time.ZoneId.systemDefault())
+                )
             )
         }
     }

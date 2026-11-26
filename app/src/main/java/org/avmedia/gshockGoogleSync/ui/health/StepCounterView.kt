@@ -151,18 +151,26 @@ fun StepCounterView(
     }
 }
 
-/** DW-H5600: the hours from the first to the last hour with steps, as bars. */
+/** DW-H5600: the 24 bars of the day, null = no data (an empty slot, not a 0 bar). Always 24 slots, so one hour is one narrow bar. */
+internal fun dwHourlySlots(hourlySteps: List<Int?>): List<Float?> = List(24) { h -> hourlySteps.getOrNull(h)?.toFloat() }
+
+/**
+ * DW-H5600: the shared history chart over the fixed 24 hours, x labels every 6 h, a y axis, no value label per bar. Before, the
+ * bars ran from the first to the last hour with steps, each labelled, and 24 of them in half the width were 1 px lines with
+ * overlapping labels; one hour alone filled the whole width.
+ */
 @Composable
 private fun DwHourlyBars(data: StepCounterData) {
-    val active = data.hourlySteps.withIndex().filter { (it.value ?: 0) > 0 }.map { it.index }
-    if (active.isEmpty()) {
+    if (data.hourlySteps.none { (it ?: 0) > 0 }) {
         EmptyHistory()
         return
     }
-    val hours = (active.first()..active.last()).toList()
-    StepsBarChart(
-        values = hours.map { data.hourlySteps.getOrNull(it) ?: 0 },
-        labels = hours.map { String.format(Locale.US, "%02d", it) }
+    org.avmedia.gshockGoogleSync.ui.health.history.HistoryChart(
+        series = listOf(org.avmedia.gshockGoogleSync.ui.health.history.ChartSeries(dwHourlySlots(data.hourlySteps), MaterialTheme.colorScheme.primary)),
+        kind = org.avmedia.gshockGoogleSync.ui.health.history.ChartKind.BARS,
+        axes = org.avmedia.gshockGoogleSync.ui.health.history.ChartAxes("steps", org.avmedia.gshockGoogleSync.ui.health.history.ChartLabels.hours()),
+        grid = MaterialTheme.colorScheme.outlineVariant,
+        gapColor = MaterialTheme.colorScheme.outlineVariant,
     )
 }
 

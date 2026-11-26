@@ -1,5 +1,7 @@
 package org.avmedia.gshockGoogleSync
 
+import org.avmedia.gshockGoogleSync.log.AppLog
+import org.avmedia.gshockGoogleSync.log.LogSource
 import android.app.AlertDialog
 import android.content.Intent
 import android.provider.Settings
@@ -19,6 +21,7 @@ import org.avmedia.gshockGoogleSync.utils.ActivityProvider
 import org.avmedia.gshockapi.AppNotification
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockapi.ProgressEvents
+import org.avmedia.gshockapi.WatchInfo
 import timber.log.Timber
 
 /**
@@ -28,7 +31,8 @@ import timber.log.Timber
 class MainEventHandler(
     private val context: GShockApplication,
     private val repository: GShockRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -49,14 +53,29 @@ class MainEventHandler(
             sessionManager.currentSession.filterNotNull().collect { session ->
                 launch { startNotificationServiceWhenReady(session) }
                 launch { reportErrorWhenClosed(session) }
+                launch { pluginEvents(session) }
             }
         }
     }
 
     private suspend fun startNotificationServiceWhenReady(session: Session) {
         val state = session.state.first { it.phase !is SessionPhase.Connecting }
+        if (state.phase is SessionPhase.Ready) NotificationMonitorService.forwarder(context).newSession()
         if (state.phase is SessionPhase.Ready && repository.supportsAppNotifications()) {
             NotificationMonitorService.startService(context)
+        }
+    }
+
+    /** The plugins hear when a watch is ready and when its session ends (they send to it only in between). */
+    private suspend fun pluginEvents(session: Session) {
+        val state = session.state.first { it.phase !is SessionPhase.Connecting }
+        if (state.phase !is SessionPhase.Ready) return
+        val key = runCatching { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() }.getOrDefault("")
+        pluginHub.onSessionReady(state.cause)
+        try {
+            session.state.first { it.phase is SessionPhase.Closed }
+        } finally {
+            pluginHub.onSessionClosed(key)
         }
     }
 
@@ -69,6 +88,7 @@ class MainEventHandler(
             context.getString(R.string.apierror_ensure_the_official_g_shock_app_is_not_running)
         }
         Timber.e("Session closed with an error: $message")
+        AppLog.failure(LogSource.App, "Session closed with an error")
         AppSnackbar(message)
     }
 

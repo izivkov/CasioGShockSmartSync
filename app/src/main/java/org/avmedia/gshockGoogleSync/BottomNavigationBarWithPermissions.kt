@@ -37,6 +37,7 @@ import dagger.hilt.android.EntryPointAccessors
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.di.ApplicationContextEntryPoint
 import org.avmedia.gshockGoogleSync.services.InactivityHandler
+import org.avmedia.gshockGoogleSync.services.InactivityTimeout
 import org.avmedia.gshockGoogleSync.ui.actions.ActionsScreen
 import org.avmedia.gshockGoogleSync.ui.alarms.AlarmsScreen
 import org.avmedia.gshockGoogleSync.ui.common.AppSnackbar
@@ -44,18 +45,48 @@ import org.avmedia.gshockGoogleSync.ui.events.EventsScreen
 import org.avmedia.gshockGoogleSync.ui.health.HealthScreen
 import org.avmedia.gshockGoogleSync.ui.settings.SettingsScreen
 import org.avmedia.gshockGoogleSync.ui.time.TimeScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.NotificationSettingsScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.TideScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchFaceScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WorkoutActivityScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WorkoutSettingsListScreen
+import org.avmedia.gshockGoogleSync.ui.watchhealth.WatchHealthSettingsScreen
 import org.avmedia.gshockapi.ProgressEvents
 import org.avmedia.gshockapi.EventAction
 import org.avmedia.gshockGoogleSync.voice.VoiceNavigation
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun BottomNavigationBarWithPermissions(
     repository: GShockRepository,
+    onOpenPlugin: (String) -> Unit = {},
+    onOpenWatchList: () -> Unit = {},
+    keepsLink: () -> Boolean = { false },
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    TimeTabBack(currentDestination?.route, onOpenWatchList)
+    // A plugin's screen opened from Settings > Plugins comes back to Settings.
+    val openPluginFromSettings = { id: String -> MainTabReturn.set(Screens.Settings.route); onOpenPlugin(id) }
+    // A plugin turned on from any switch (Settings > Plugins, the Actions tab) that asks for its screen: it opens, and
+    // closing it comes back to the tab it was turned on from.
+    val pluginsVm: org.avmedia.gshockGoogleSync.plugins.PluginsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+    LaunchedEffect(pluginsVm) {
+        pluginsVm.toOpen.collect { id -> MainTabReturn.set(navController.currentDestination?.route); onOpenPlugin(id) }
+    }
+    LaunchedEffect(navController) {
+        MainTabReturn.take()?.let { route ->
+            // The graph is set once the NavHost has composed: its first back stack entry says so.
+            navController.currentBackStackEntryFlow.first()
+            navController.navigate(route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+            }
+        }
+    }
 
     val localContext = LocalContext.current.applicationContext
     val appContext = remember {
@@ -67,8 +98,17 @@ fun BottomNavigationBarWithPermissions(
 
     val inactivityHandler = remember {
         InactivityHandler(timeout = (3 * 60).seconds) {
-            repository.disconnect()
-            AppSnackbar(appContext.getString(R.string.disconnected_due_to_inactivity))
+            InactivityTimeout.run(
+                keepsLink = keepsLink(),
+                goHome = {
+                    navController.navigate(Screens.Time.route) {
+                        popUpTo(navController.graph.findStartDestination().id)
+                        launchSingleTop = true
+                    }
+                },
+                disconnect = { repository.disconnect() },
+                tellDisconnected = { AppSnackbar(appContext.getString(R.string.disconnected_due_to_inactivity)) },
+            )
         }
     }
 
@@ -148,7 +188,7 @@ fun BottomNavigationBarWithPermissions(
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Time.route) {
-                TimeScreen()
+                TimeScreen(onOpenWatchList = onOpenWatchList)
             }
             composable(Screens.Health.route) {
                 HealthScreen()
@@ -180,14 +220,65 @@ fun BottomNavigationBarWithPermissions(
                 NavigateWithPermissions(
                     permissions,
                     navController,
-                    destinationScreen = { ActionsScreen() },
+                    destinationScreen = {
+                        ActionsScreen(
+                            onOpenPluginSetup = openPluginFromSettings,
+                        )
+                    },
                     stringResource(
                         R.string.required_permissions_denied_cannot_access_actions
                     ),
                 )
             }
             composable(Screens.Settings.route) {
-                SettingsScreen()
+                SettingsScreen(
+                    onOpenPlugins = { navController.navigate(Screens.Plugins.route) },
+                    onOpenAbout = { navController.navigate(Screens.About.route) },
+                    onOpenWatchFace = { navController.navigate(Screens.WatchFace.route) },
+                    onOpenWatchHealth = { navController.navigate(Screens.WatchHealth.route) },
+                    onOpenNotifications = { navController.navigate(Screens.NotificationSettings.route) },
+                    onOpenWorkouts = { navController.navigate(Screens.WorkoutSettings.route) },
+                    onOpenTide = { navController.navigate(Screens.Tide.route) },
+                )
+            }
+            composable(Screens.Plugins.route) {
+                org.avmedia.gshockGoogleSync.plugins.PluginsScreen(onBack = { navController.popBackStack() }, onOpenPlugin = openPluginFromSettings)
+            }
+            composable(Screens.About.route) {
+                org.avmedia.gshockGoogleSync.ui.settings.AboutScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenAppLog = { navController.navigate(Screens.AppLog.route) },
+                )
+            }
+            composable(Screens.WatchFace.route) {
+                WatchFaceScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.AppLog.route) {
+                org.avmedia.gshockGoogleSync.ui.settings.AppLogScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.Tide.route) {
+                TideScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.WatchHealth.route) {
+                WatchHealthSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.NotificationSettings.route) {
+                NotificationSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screens.WorkoutSettings.route) {
+                WorkoutSettingsListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpen = { navController.navigate(Screens.WorkoutActivity.route(it)) },
+                )
+            }
+            composable(
+                Screens.WorkoutActivity.route,
+                arguments = listOf(androidx.navigation.navArgument("activity") { type = androidx.navigation.NavType.IntType }),
+            ) { entry ->
+                WorkoutActivityScreen(
+                    activity = entry.arguments?.getInt("activity") ?: 0,
+                    onBack = { navController.popBackStack() },
+                )
             }
         }
     }

@@ -1,0 +1,72 @@
+package org.avmedia.gshockGoogleSync.ui.watchhealth
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.avmedia.gshockapi.io.NotificationSoundCodec
+
+data class NotificationSettingsUi(
+    val working: Boolean = false,
+    val message: String? = null,
+    val sounds: NotificationSoundCodec.Setting? = null,
+)
+
+/**
+ * The Notification settings screen. Reads 0x42; every write is read, changed in its decoded fields only, written
+ * and read back by [WatchSettingsAccess].
+ */
+@HiltViewModel
+class NotificationSettingsViewModel @Inject constructor(private val access: WatchSettingsAccess) : ViewModel() {
+    private val _ui = MutableStateFlow(NotificationSettingsUi())
+    val ui: StateFlow<NotificationSettingsUi> = _ui.asStateFlow()
+
+    init {
+        refresh()
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _ui.update { it.copy(working = true) }
+            readAll()
+            _ui.update { it.copy(working = false) }
+        }
+    }
+
+    private suspend fun readAll() {
+        val sounds = access.read(NotificationSoundCodec.CODE)?.let { NotificationSoundCodec.parse(it) }
+        _ui.update {
+            it.copy(
+                sounds = sounds,
+                message = if (sounds == null) (access.explain(NotificationSoundCodec.CODE) ?: "The watch did not answer. Connect the watch and try again.") else it.message,
+            )
+        }
+    }
+
+    fun setSoundMode(mode: Int) = sound("Sound mode", NotificationSoundCodec.MODE_BYTES) { NotificationSoundCodec.withSoundMode(it, mode) }
+
+    fun setVibrationMode(mode: Int) = sound("Vibration mode", NotificationSoundCodec.MODE_BYTES) { NotificationSoundCodec.withVibrationMode(it, mode) }
+
+    fun setSoundEvent(event: Int, on: Boolean) =
+        sound(NotificationSoundCodec.EVENTS[event] + " sound", NotificationSoundCodec.SOUND_MASK_BYTES) { NotificationSoundCodec.withSoundEvent(it, event, on) }
+
+    fun setVibrationEvent(event: Int, on: Boolean) =
+        sound(NotificationSoundCodec.EVENTS[event] + " vibration", NotificationSoundCodec.VIBRATION_MASK_BYTES) { NotificationSoundCodec.withVibrationEvent(it, event, on) }
+
+    fun setPattern(pattern: Int) = sound("Sound pattern", NotificationSoundCodec.PATTERN_BYTES) { NotificationSoundCodec.withPattern(it, pattern) }
+
+    private fun sound(what: String, touched: Set<Int>, change: (ByteArray) -> ByteArray?) {
+        if (_ui.value.working) return
+        viewModelScope.launch {
+            _ui.update { it.copy(working = true, message = null) }
+            val result = access.update(NotificationSoundCodec.CODE, touched, change)
+            readAll()
+            _ui.update { it.copy(working = false, message = result.text(what)) }
+        }
+    }
+}

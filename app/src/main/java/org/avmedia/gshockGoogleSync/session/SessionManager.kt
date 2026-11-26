@@ -121,7 +121,14 @@ class SessionManager @Inject constructor(
             Timber.w("Ignoring setup complete: no active session")
             return
         }
+        if (session.state.value.link != LinkState.UP && isForDifferentDevice(session, device)) {
+            // Another watch connected while the first was away: that visit is over.
+            session.close("Another watch connected")
+            onConnecting(device).markSetupComplete()
+            return
+        }
         device?.let(session::attachDevice)
+        session.onLinkRestored()
         session.markSetupComplete()
     }
 
@@ -167,6 +174,14 @@ class SessionManager @Inject constructor(
                 Timber.w("Ignoring '$reason' for ${device?.address}: current session is for ${current.device?.address}")
                 return
             }
+            if (!isError && keepsAcrossDrops(current)) {
+                // An always-connected watch drops by design: stay on the screen, keep the data, wait for it.
+                if (current.state.value.link == LinkState.UP) {
+                    Timber.i("Link dropped ('$reason'): session ${current.id} waits for the watch")
+                    current.onLinkDropped()
+                }
+                return
+            }
             current.close(reason, device, isError)
         }
     }
@@ -184,6 +199,17 @@ class SessionManager @Inject constructor(
     fun onRunActionsRequested() {
         activeSession?.beginRunActions()
             ?: Timber.w("Ignoring run-actions request: no active session")
+    }
+
+    /** The address of the watch of the active session (its reported one, else its link's), or null. */
+    fun connectedAddress(): String? =
+        activeSession?.let { it.state.value.watch.address.ifBlank { it.device?.address.orEmpty() } }?.takeIf { it.isNotBlank() }
+
+    /** The person chose another watch: the connected one is let go once, its session ends (no reconnect wait). */
+    fun letGo(reason: String = "Another watch chosen") {
+        Timber.i("Letting the connected watch go: $reason")
+        activeSession?.close(reason)
+        runCatching { repository.disconnect() }.onFailure { Timber.e(it, "Disconnect failed") }
     }
 
     /** The button that started the current connection, or null before the first connection is Ready. */
@@ -205,6 +231,19 @@ class SessionManager @Inject constructor(
 
     private fun ensureActiveSession(device: BluetoothDevice?): Session =
         activeSession ?: createSession(device)
+
+    /** Ready session of the watch with "Keep connected in background" (by its reported or its link's address). */
+    private fun keepsAcrossDrops(session: Session): Boolean {
+        val state = session.state.value
+        if (state.phase !is SessionPhase.Ready) return false
+        return keepsLink(session)
+    }
+
+    /** Whether the active session's watch keeps its link (inactivity, drops), by its reported or its link's address. */
+    fun keepsLinkNow(): Boolean = activeSession?.let(::keepsLink) ?: false
+
+    private fun keepsLink(session: Session): Boolean =
+        session.state.value.keepsLink || KeepConnected.holds(session.device?.address)
 
     private fun isForDifferentDevice(session: Session, device: BluetoothDevice?): Boolean {
         val sessionDevice = session.device ?: return false

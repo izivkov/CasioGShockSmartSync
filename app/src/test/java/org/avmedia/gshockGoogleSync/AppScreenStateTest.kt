@@ -112,5 +112,39 @@ class AppScreenStateTest {
     @Test
     fun alwaysConnectedConnectionStaysOnTheInitialScreen() {
         assertEquals(AppScreen.INITIAL, screenFor(ready(EntryReason.BACKGROUND)).screen)
+        assertEquals(
+            AppScreen.INITIAL,
+            AppScreenState.navigationFor(ready(EntryReason.BACKGROUND), appInForeground = false).screen
+        )
+    }
+
+    @Test
+    fun alwaysConnectedConnectionWithTheAppInFrontStaysOnTheFirstPageUntilOpenOnConnectLatches() {
+        val state = ready(EntryReason.BACKGROUND, ConnectionButton.ALWAYS_CONNECTED)
+        assertEquals(AppScreen.INITIAL, AppScreenState.navigationFor(state, appInForeground = true).screen)
+    }
+
+    @Test
+    fun foregroundDoesNotChangeOtherScreens() {
+        assertEquals(AppScreen.RUN_ACTIONS, AppScreenState.navigationFor(ready(EntryReason.RUN_ACTIONS), appInForeground = true).screen)
+        assertEquals(AppScreen.INITIAL, AppScreenState.navigationFor(SessionState(), appInForeground = true).screen)
+        val running = ready(EntryReason.BACKGROUND, ConnectionButton.ALWAYS_CONNECTED, runningActions = true)
+        assertEquals(AppScreen.RUN_ACTIONS, AppScreenState.navigationFor(running, appInForeground = true).screen)
+    }
+}
+
+class HaScreenStateTest {
+    private val ready = SessionState(
+        phase = SessionPhase.Ready(EntryReason.NORMAL),
+        button = ConnectionButton.ALWAYS_CONNECTED
+    )
+
+    @Test
+    fun homeAssistantScreenStaysWhateverTheWatchDoes() {
+        val closed = ready.copy(phase = SessionPhase.Closed("Watch disconnected"))
+        assertEquals(AppScreen.PLUGIN, AppScreenState.navigationFor(ready, pluginOpen = true).screen)
+        assertEquals(AppScreen.PLUGIN, AppScreenState.navigationFor(closed, pluginOpen = true).screen)
+        assertEquals(AppScreen.PLUGIN, AppScreenState.navigationFor(SessionState(), pluginOpen = true).screen)
+        assertEquals(AppScreen.MAIN_NAVIGATION, AppScreenState.navigationFor(ready, pluginOpen = false).screen)
     }
 }

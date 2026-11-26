@@ -96,6 +96,14 @@ fun DwH5600LifeLogCard(
                     "${it.averageBpm} bpm avg (${it.minBpm}\u2013${it.maxBpm})"
                 } ?: NO_VALUE,
             )
+            HeartRateDayChart(health.heartRateSlots, Modifier.fillMaxWidth())
+        }
+
+        val bodyLines = BodyLines.lines(health.body)
+        if (bodyLines.isNotEmpty()) {
+            Section(title = "Blood oxygen, cardio and breathing") {
+                bodyLines.forEach { (label, value) -> InfoRow(label = label, value = value) }
+            }
         }
 
         Section(title = stringResource(id = R.string.card_status)) {

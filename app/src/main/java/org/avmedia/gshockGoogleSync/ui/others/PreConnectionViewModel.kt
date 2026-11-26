@@ -1,8 +1,6 @@
 package org.avmedia.gshockGoogleSync.ui.others
 
-import org.avmedia.gshockGoogleSync.pairing.AlwaysConnectedPermission
 import kotlinx.coroutines.delay
-import org.avmedia.gshockGoogleSync.session.SetupWindow
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -25,8 +23,11 @@ import org.avmedia.gshockGoogleSync.GShockApplication
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
+import org.avmedia.gshockGoogleSync.session.KeepConnected
+import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
+import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.ICDPDelegate
 import timber.log.Timber
 
@@ -57,7 +58,8 @@ constructor(
         val name: String,
         val address: String,
         val isLastUsed: Boolean,
-        val isAlwaysConnected: Boolean = false
+        val isAlwaysConnected: Boolean = false,
+        val keepConnected: Boolean = false
     )
 
     @Inject lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
@@ -105,6 +107,47 @@ constructor(
         }
     }
 
+    val waitingAddress: StateFlow<String?> = OpenOnConnect.waiting
+
+    private val firstPageSwitch = org.avmedia.gshockGoogleSync.session.WatchSwitch(
+        connectedAddress = sessionManager::connectedAddress,
+        disconnectCurrent = { sessionManager.letGo() },
+        connect = {},
+    )
+
+    /** The session, for the live status on each watch card. */
+    val sessionState: StateFlow<org.avmedia.gshockGoogleSync.session.SessionState> = sessionManager.sessionState
+
+    /** The watch with "Keep connected in background", or null. */
+    val keepHolder: StateFlow<String?> = KeepConnected.holder
+
+    /** Turns it on for [address] (and off for the watch that had it) or off. */
+    fun setKeepConnected(address: String, on: Boolean) {
+        viewModelScope.launch {
+            val lost = KeepConnected.set(appContext, Utils.sanitizeMacAddress(address), on)
+            if (lost != null) Timber.i("Keep connected moved from $lost to $address")
+            loadPairedDevices()
+        }
+    }
+
+
+    /** Tap on a watch card: open its screens now if it is connected, else when it connects within two minutes. */
+    fun openWhenConnected(address: String) {
+        // Another connected watch is let go; the watch with Keep connected waits while this one is chosen.
+        firstPageSwitch.tap(address)
+        val state = sessionManager.sessionState.value
+        val onMain = (state.phase as? org.avmedia.gshockGoogleSync.session.SessionPhase.Ready)?.entryReason !=
+            org.avmedia.gshockGoogleSync.session.EntryReason.BACKGROUND && state.phase is org.avmedia.gshockGoogleSync.session.SessionPhase.Ready
+        if (!(onMain && OpenOnConnect.sameAddress(state.watch.address, address))) OpenOnConnect.waitFor(address, viewModelScope)
+    }
+
+    fun cancelWaiting() = OpenOnConnect.cancelWaiting()
+
+    /** A watch chosen in the list opened from the connected screens: shown as waited for, up to two minutes. */
+    fun showWaiting(address: String) {
+        if (!OpenOnConnect.sameAddress(sessionManager.connectedAddress(), address)) OpenOnConnect.waitFor(address, viewModelScope)
+    }
+
     fun hidePreparing() {
         _showPreparing.value = false
     }
@@ -145,32 +188,6 @@ constructor(
         }
     }
 
-    /** "Set up watch": the next connection opens the main navigation. */
-    private val _waitingForWatch = MutableStateFlow(false)
-    val waitingForWatch: StateFlow<Boolean> = _waitingForWatch
-
-    /** The switch on an always-connected watch: on allows one connection; off withdraws it. */
-    val grantedAddresses: StateFlow<Set<String>> = AlwaysConnectedPermission.granted
-
-    fun setAllowConnection(address: String, allow: Boolean) {
-        if (allow) {
-            startWatchSetUp(address)
-        } else {
-            AlwaysConnectedPermission.use(address)
-            SetupWindow.cancel(address)
-        }
-    }
-
-    fun startWatchSetUp(address: String) {
-        SetupWindow.open(address)
-        AlwaysConnectedPermission.grant(address)
-        viewModelScope.launch {
-            _waitingForWatch.value = true
-            delay(2 * 60_000L)
-            _waitingForWatch.value = false
-        }
-    }
-
     fun loadPairedDevices() {
         val associations = api.getAssociationsWithNames(appContext)
         val lastAddress = LocalDataStorage.get(appContext, KEY_LAST_DEVICE_ADDRESS, "")
@@ -185,8 +202,11 @@ constructor(
             val name = association?.name?.takeIf { it.isNotBlank() }
                 ?: LocalDataStorage.getDeviceName(appContext, address)
                 ?: noWatchString
-            val isAlwaysConnected = org.avmedia.gshockapi.WatchInfo.isAlwaysConnected(name)
-            DeviceItem(name, address, isLastUsed, isAlwaysConnected)
+            val isAlwaysConnected = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)
+            DeviceItem(
+                name, address, isLastUsed, isAlwaysConnected,
+                isAlwaysConnected && KeepConnected.holds(address)
+            )
         }
 
         _pairedDevices.value = formatDeviceNames(items)
@@ -269,6 +289,8 @@ constructor(
                         // Monitor existing ACTION_BOND_STATE_CHANGED receiver for completion
                     }
                 }
+
+                KeepConnected.forget(context, address)
 
                 // 3. Clear last device if matching
                 val lastAddress = LocalDataStorage.get(context, KEY_LAST_DEVICE_ADDRESS, "")

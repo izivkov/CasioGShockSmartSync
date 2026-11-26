@@ -19,6 +19,19 @@ import timber.log.Timber
 @AndroidEntryPoint
 class GShockCompanionDeviceService : CompanionDeviceService() {
 
+    @javax.inject.Inject lateinit var pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub
+
+    // The plugins' own links (the Home Assistant push socket) live as long as this foreground service does.
+    override fun onCreate() {
+        super.onCreate()
+        pluginHub.backgroundStarted()
+    }
+
+    override fun onDestroy() {
+        pluginHub.backgroundStopped()
+        super.onDestroy()
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onDeviceAppeared(address: String) {
         handleDeviceEvent("DeviceAppeared", address, "Device appeared (Legacy API 31-32): $address")

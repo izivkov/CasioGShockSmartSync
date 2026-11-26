@@ -1,0 +1,128 @@
+name: Test APK
+
+on:
+  push:
+    branches: [home-assistant]
+  workflow_dispatch:
+
+concurrency:
+  group: test-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # The library tests run in its own repository (ExcuseMi/GShockAPI, branch smartsync).
+      - name: Unit tests (the app; plugin-api and the plugins are tested in smartsync-plugins)
+        run: ./gradlew --continue testGithubDebugUnitTest
+
+      - name: The library comes from the gshockapi submodule, not JitPack
+        run: |
+          ./gradlew -q app:dependencies --configuration githubDebugRuntimeClasspath > lib-source.txt
+          grep -iE "gshockapi" lib-source.txt | sort -u | head -10 || true
+          if grep -E "GShockAPI:[0-9][^ ]*( \(\*\))?$" lib-source.txt; then echo "GShockAPI resolved from a repository"; exit 1; fi
+          grep -iE "gshockapi" lib-source.txt | grep -q -- "project ':"
+
+      - name: The plugins come from JitPack, or from a smartsync-plugins checkout with -PsmartsyncPluginsDir
+        run: |
+          set -o pipefail
+          ./gradlew -q app:dependencies --configuration githubDebugRuntimeClasspath > plugins-jitpack.txt
+          for m in plugin-api homeassistant healthconnect trmnl; do
+            grep -qE "com.github.ExcuseMi.smartsync-plugins:$m:[0-9a-zA-Z.-]+( \(\*\))?$" plugins-jitpack.txt || { echo "$m not from JitPack"; exit 1; }
+          done
+          git clone -q --depth 1 https://github.com/ExcuseMi/smartsync-plugins.git "$RUNNER_TEMP/smartsync-plugins"
+          ./gradlew -q -PsmartsyncPluginsDir="$RUNNER_TEMP/smartsync-plugins" app:dependencies --configuration githubDebugRuntimeClasspath > plugins-local.txt
+          grep -E "smartsync-plugins:" plugins-local.txt | sort -u | head -8
+          for m in plugin-api homeassistant healthconnect trmnl; do
+            grep -qE "com.github.ExcuseMi.smartsync-plugins:$m:[^ ]+ -> project " plugins-local.txt || { echo "$m not from the checkout"; exit 1; }
+          done
+
+      # Records pictures of the screens (never compares, so a changed screen does not fail the run;
+      # a screen that no longer compiles or renders does).
+      - name: Record UI screenshots
+        run: ./gradlew recordRoborazziGithubDebug
+
+      - name: Upload UI screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screens
+          path: |
+            app/build/outputs/roborazzi/*.png
+          if-no-files-found: warn
+
+      - name: Build debug APK
+        run: ./gradlew assembleGithubDebug -PminifyTest
+
+      - name: Keep the shrunk APK (the full build below writes to the same folder)
+        run: |
+          mkdir -p shrunk full
+          cp app/build/outputs/apk/github/debug/*.apk shrunk/smartsync-test.apk
+
+      - name: APK size
+        run: |
+          ls -l app/build/outputs/apk/github/debug/*.apk
+          echo "APK size: $(du -h app/build/outputs/apk/github/debug/*.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check the APK signing certificate (updates need the same key every time)
+        env:
+          EXPECTED_SHA256: "DE:AD:72:F3:C8:FF:93:92:A4:8A:D9:40:E6:3E:AE:7D:49:DA:9B:03:ED:E3:08:15:76:E9:81:4B:6B:55:AB:3D"
+        run: |
+          APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
+          APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
+          $APKSIGNER verify --print-certs "$APK" | tee signer.txt
+          GOT=$(grep -i "certificate SHA-256 digest" signer.txt | head -1 | sed 's/.*: *//' | tr -d ': ' | tr 'A-F' 'a-f')
+          echo "APK certificate SHA-256: $GOT"
+          WANT=$(echo "$EXPECTED_SHA256" | tr -d ':' | tr 'A-F' 'a-f')
+          if [ "$GOT" != "$WANT" ]; then echo "Signing certificate differs from the expected one ($WANT)"; exit 1; fi
+
+      - name: Diagnose runtime classpath and dex (classes missing on the device)
+        if: always()
+        run: |
+          ./gradlew app:dependencies --configuration githubDebugRuntimeClasspath > runtime-classpath.txt || true
+          grep -E "okhttp|okio|gson|work-runtime|GShockAPI|kotlinx-coroutines|kotlin-stdlib" runtime-classpath.txt | sort -u | head -40 || true
+          DEXDUMP=$(ls $ANDROID_HOME/build-tools/*/dexdump | tail -1)
+          APK=$(ls app/build/outputs/apk/github/debug/*.apk | head -1)
+          API=$(ls $ANDROID_HOME/platforms/*/data/api-versions.xml | tail -1)
+          python3 .github/scripts/dex_missing_refs.py "$APK" "$DEXDUMP" "$API" | tee dex-missing.txt || true
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartsync-${{ github.ref_name }}-test
+          path: app/build/outputs/apk/github/debug/*.apk
+          if-no-files-found: error
+
+      - name: Upload shrunk APK under a fixed name
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartsync-test.apk
+          path: shrunk/smartsync-test.apk
+          if-no-files-found: error
+
+      - name: Build the full-size debug APK (no R8), the fallback if the shrunk one does not start
+        run: |
+          ./gradlew assembleGithubDebug
+          cp app/build/outputs/apk/github/debug/*.apk full/smartsync-test-full.apk
+          ls -l shrunk full
+          echo "Shrunk: $(du -h shrunk/smartsync-test.apk | cut -f1), full: $(du -h full/smartsync-test-full.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload full-size APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartsync-test-full.apk
+          path: full/smartsync-test-full.apk
+          if-no-files-found: error
