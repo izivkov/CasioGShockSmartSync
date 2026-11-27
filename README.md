@@ -357,19 +357,17 @@ Or download the installer from [wireshark.org](https://www.wireshark.org/downloa
 ## Credits
 
 ### ExcuseMi
+[**ExcuseMi**](https://github.com/ExcuseMi/CasioGShockSmartSync) contributed a major pull request that added:
+- **Full support for the DW-H5600**, including the health data features described above
+- **Significant user interface improvements** across the app
+- **The plugin architecture**, enabling external plugins to connect to and extend the app
 
-[**ExcuseMi**](https://github.com/ExcuseMi/CasioGShockSmartSync) contributed a large pull request to this project with:
-
-- **full support for the DW-H5600**, including the health data described above,
-- **many improvements to the user interface**, and
-- **the plugin system**, which lets the app load plugins.
-
-ExcuseMi also created a collection of plugins that can be used in this app: [**smartsync-plugins**](https://github.com/ExcuseMi/smartsync-plugins): Home Assistant, Health Connect, TRMNL and Tasker. Thank you!
+ExcuseMi also created [**smartsync-plugins**](https://github.com/ExcuseMi/smartsync-plugins), a collection of ready-to-use plugins for **Home Assistant**, **Health Connect**, **TRMNL**, and **Tasker**. Thank you!
 
 ### gatman45
+[**gatman45**](https://github.com/gatman45/gshock) maintains a comprehensive technical report ([rapport_detaille_preuves_lifelog_gatt.md](https://github.com/gatman45/gshock/blob/main/rapport_detaille_preuves_lifelog_gatt.md)) documenting the Casio DW-H5600 BLE/GATT protocol—covering real GATT behavior, emulator parity, LifeLog framing, CRC calculations, frame types, and semantic decoding. This documentation was invaluable for understanding and implementing the DW-H5600 health data protocol. Thank you!
 
-[**gatman45**](https://github.com/gatman45/gshock) maintains a detailed report consolidates all the evidence collected on the BLE/GATT protocol of the Casio DW-H5600: real GATT, parity with emulator, framing LifeLog, CRC, frame types, semantic decoding, Health Data protocol ([rapport_detaille_preuves_lifelog_gatt.md](https://github.com/gatman45/gshock/blob/main/rapport_detaille_preuves_lifelog_gatt.md)) was very useful for understanding and decoding the DW-H5600 health protocol. Thank you!
-
+*For further technical details, documentation, and source code, please refer to the linked repositories above.*
 ---
 
 ## License
