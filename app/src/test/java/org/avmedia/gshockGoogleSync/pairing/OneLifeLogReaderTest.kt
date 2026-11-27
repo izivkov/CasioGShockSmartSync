@@ -20,9 +20,9 @@ class OneLifeLogReaderTest {
 
     @Test fun onlyTheKnownPlacesStartALifeLogRead() {
         assertTrue("sources not found from ${File(".").absolutePath}", sources.isNotEmpty())
-        val allowed = setOf("BackgroundHealthSync.kt", "HealthViewModel.kt", "WatchVariables.kt", "ActionContainer.kt")
+        val allowed = setOf("HealthViewModel.kt", "WatchVariables.kt", "ActionContainer.kt")
         val found = offenders("getStepCount(", allowed)
-        assertTrue("start LifeLog reads through BackgroundHealthSync: $found", found.isEmpty())
+        assertTrue("start LifeLog reads through known places: $found", found.isEmpty())
     }
 
     @Test fun theCoordinatorNeverReleasesAConnectedWatch() {

@@ -109,8 +109,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.gshockapi)
-    // implementation project(':api')
+    // implementation(libs.gshockapi)
+    implementation project(':api')
 
     // The plugin interface (ExcuseMi/smartsync-plugins, JitPack); plugins depend on it only.
     implementation(libs.smartsync.plugin.api)

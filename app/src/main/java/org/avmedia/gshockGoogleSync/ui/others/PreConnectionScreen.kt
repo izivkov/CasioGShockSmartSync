@@ -303,6 +303,7 @@ fun PreConnectionScreen(
                                 },
                                 onOptions = { optionsFor = it },
                                 onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
+                                onToggleKeepConnected = { device, on -> ptrConnectionViewModel.setKeepConnected(device.address, on) },
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .fillMaxWidth()

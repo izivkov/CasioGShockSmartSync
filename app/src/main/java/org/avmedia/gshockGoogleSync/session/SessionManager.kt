@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.stateIn
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import timber.log.Timber
 import java.util.UUID
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,6 +33,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class SessionManager @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val repository: GShockRepository
 ) {
     private val lock = Any()
@@ -183,6 +186,7 @@ class SessionManager @Inject constructor(
                 return
             }
             current.close(reason, device, isError)
+            KeepConnected.turnOff(context, current.device?.address ?: device?.address)
         }
     }
 
@@ -208,7 +212,9 @@ class SessionManager @Inject constructor(
     /** The person chose another watch: the connected one is let go once, its session ends (no reconnect wait). */
     fun letGo(reason: String = "Another watch chosen") {
         Timber.i("Letting the connected watch go: $reason")
+        val addr = activeSession?.device?.address
         activeSession?.close(reason)
+        KeepConnected.turnOff(context, addr)
         runCatching { repository.disconnect() }.onFailure { Timber.e(it, "Disconnect failed") }
     }
 

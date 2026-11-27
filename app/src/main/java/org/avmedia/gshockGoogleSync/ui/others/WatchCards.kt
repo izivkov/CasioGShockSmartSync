@@ -70,6 +70,7 @@ fun WatchCards(
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onOptions: (PreConnectionViewModel.DeviceItem) -> Unit,
     onCancelWaiting: () -> Unit,
+    onToggleKeepConnected: ((PreConnectionViewModel.DeviceItem, Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState())) {
@@ -82,6 +83,7 @@ fun WatchCards(
                     onSelect = { onSelect(device) },
                     onOptions = { onOptions(device) },
                     onCancelWaiting = onCancelWaiting,
+                    onToggleKeepConnected = onToggleKeepConnected?.let { cb -> { on -> cb(device, on) } },
                 )
             }
         }
@@ -96,6 +98,7 @@ private fun WatchCard(
     onSelect: () -> Unit,
     onOptions: () -> Unit,
     onCancelWaiting: () -> Unit,
+    onToggleKeepConnected: ((Boolean) -> Unit)? = null,
 ) {
     AppCard(modifier = Modifier.fillMaxWidth(), padding = 0.dp) {
         Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onSelect).padding(start = 8.dp)) {
@@ -116,6 +119,13 @@ private fun WatchCard(
                         softWrap = false,
                     )
                     WatchStatusLine(status)
+                }
+                if (device.isAlwaysConnected && onToggleKeepConnected != null) {
+                    Switch(
+                        checked = device.keepConnected,
+                        onCheckedChange = onToggleKeepConnected,
+                        modifier = Modifier.padding(end = 4.dp),
+                    )
                 }
                 IconButton(onClick = onOptions) {
                     Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.watch_options))

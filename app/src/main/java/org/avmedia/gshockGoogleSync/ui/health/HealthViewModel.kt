@@ -88,8 +88,6 @@ data class HealthState(
     val stepCounterData: StepCounterData = StepCounterData.unavailable(),
     /** True while the DW-H5600 LifeLog is being read from the watch. */
     val lifeLogLoading: Boolean = false,
-    /** Last background read, one line (time and outcome); null if none yet. */
-    val backgroundLine: String? = null,
     /** True while the latest data is being read; the screen shows a small "Updating..." line. */
     val updating: Boolean = false,
     val selectedStepDataOption: StepDataOption = StepDataOption.TODAY,
@@ -149,7 +147,6 @@ class HealthViewModel @Inject constructor(
 
     init {
         showStoredHistory()
-        showBackgroundLine()
         setupEventSubscription()
 
     }
@@ -284,7 +281,6 @@ class HealthViewModel @Inject constructor(
 
     /** The screen opened: one read of the latest data (the LifeLog for the DW-H5600, the steps for the ABL-100). */
     private fun onOpened() {
-        showBackgroundLine()
         val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
         if (!supported) return
         if (HealthOpenRead.shared.tryStart()) requestStepRefresh(force = true) else refreshState()
@@ -353,15 +349,8 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    private fun showBackgroundLine() {
-        _state.update {
-            it.copy(backgroundLine = BackgroundHealthSync.lastLine(appContext))
-        }
-    }
-
     /** Shows what is known: the session's data when fresh, a read only when there is none. */
     private fun refreshState() {
-        showBackgroundLine()
         viewModelScope.launch {
             val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
             Timber.i("Health: refreshState (hasStepCounter=${WatchInfo.hasStepCounter}, feature supported=$supported)")

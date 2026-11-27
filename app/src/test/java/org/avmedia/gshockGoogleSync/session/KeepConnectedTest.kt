@@ -77,33 +77,25 @@ class KeepConnectedTest {
     }
 
     @Test
-    fun migrationGivesItToTheMostRecentlyConnectedAlwaysConnectedWatch() {
-        val names = mapOf(a to "CASIO GBX-H5600", b to "CASIO DW-H5600", "CC" to "CASIO GW-B5600")
-        val known = listOf(a, b, "CC")
-        assertEquals(b, KeepConnected.migrationChoice(b, known) { names[it].orEmpty() })
-        assertEquals(a, KeepConnected.migrationChoice("CC", known) { names[it].orEmpty() })
-        assertNull(KeepConnected.migrationChoice("CC", listOf("CC")) { names[it].orEmpty() })
+    fun freshLoadDefaultsToOff() = runBlocking {
+        KeepConnected.load(context)
+        assertNull(KeepConnected.holder.value)
+        assertFalse(KeepConnected.admits(h5600, a, background = false, waitingFor = null))
     }
 
     @Test
-    fun migrationPrefersTheRegisteredWatchConnectedMostRecentlyAndNeverAnOcw() {
-        val old = "AA:BB:CC:DD:EE:09" // the GBX before its re-pair: the registration moved to the new address
-        val names = mapOf(a to "CASIO GBX-H5600", old to "CASIO GBX-H5600", b to "CASIO DW-H5600", "OC" to "CASIO OCW-S400")
-        val nameOf = { x: String -> names[x].orEmpty() }
-        val registered = { x: String -> x == a }
-        // The OCW was connected last: it never gets it, the registered GBX does.
-        assertEquals(a, KeepConnected.migrationChoice("OC", listOf(old, b, a, "OC"), registered, nameOf))
-        // A newer unregistered H5600 loses against the registered one.
-        assertEquals(a, KeepConnected.migrationChoice(b, listOf(old, b, a), registered, nameOf))
-        assertNull(KeepConnected.migrationChoice("OC", listOf("OC"), { true }, nameOf))
-        assertFalse(WatchModelOverride.isAlwaysConnected("CASIO OCW-S400"))
-        assertFalse(WatchModelOverride.isAlwaysConnected("CASIO OCW-S7000"))
+    fun turnOffResetsHolderToNull() = runBlocking {
+        KeepConnected.set(context, a, true)
+        assertTrue(KeepConnected.holds(a))
+        KeepConnected.turnOff(context, a)
+        assertFalse(KeepConnected.holds(a))
+        assertNull(KeepConnected.holder.value)
     }
 
     @Test
     fun theKeptGbxIsNotDroppedByTheInactivityTimeoutBeforeItReportedItsAddress() = runBlocking {
         val device = mockk<BluetoothDevice> { every { address } returns a }
-        val m = SessionManager(mockk<GShockRepository>(relaxed = true))
+        val m = SessionManager(context, mockk<GShockRepository>(relaxed = true))
         val s = m.onConnecting(device)
         m.onDeviceName(h5600)
         s.setReady(button = ConnectionButton.ALWAYS_CONNECTED, cause = ConnectionCause.WATCH)

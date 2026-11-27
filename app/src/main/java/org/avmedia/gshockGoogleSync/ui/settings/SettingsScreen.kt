@@ -101,7 +101,6 @@ fun SettingsList(
             TimeAdjustment(settingsViewModel::onSettingUpdated)
         }
         PhoneNotificationsCard()
-        if (isH5600Watch()) BackgroundReadCard()
     }
 }
 

@@ -137,8 +137,7 @@ class CompanionDeviceCoordinator @Inject constructor(
                 repository.waitForConnection(normalizedAddress)
                 // The watch that just connected is the one the screen shows after it disconnects.
                 LocalDataStorage.put(context, "LastDeviceName", org.avmedia.gshockapi.WatchInfo.name)
-                // No read and no release here: BackgroundHealthSync reads the LifeLog of every connection
-                // and the keep-alive holds the watch (a second reader plus a release cuts the link).
+                // The keep-alive holds the watch; LifeLog is read on-demand on the Health Screen.
                 BackgroundConnection.active = false
                 return
             } catch (cancelled: CancellationException) {

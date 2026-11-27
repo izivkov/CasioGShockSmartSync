@@ -28,7 +28,6 @@ class NoScreenStartTest {
         }
         val runner = File(main, "ui/actions/ActionRunner.kt").readText()
         assertTrue("ActionRunner brings the plugins (Home Assistant)", "private val pluginHub: org.avmedia.gshockGoogleSync.plugins.PluginHub" in runner)
-        assertTrue("ActionRunner brings BackgroundHealthSync", "BackgroundHealthSync" in runner)
         assertTrue("the service tells the plugins (the HA push)", "pluginHub.backgroundStarted()" in File(main, "pairing/GShockCompanionDeviceService.kt").readText())
     }
 

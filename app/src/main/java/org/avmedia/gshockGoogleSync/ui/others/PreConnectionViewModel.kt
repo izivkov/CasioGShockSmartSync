@@ -76,6 +76,11 @@ constructor(
             _watchName.value = savedName
             loadPairedDevices()
         }
+        viewModelScope.launch {
+            KeepConnected.holder.collect {
+                loadPairedDevices()
+            }
+        }
         observeConnectedWatch()
     }
 
@@ -118,14 +123,18 @@ constructor(
     /** The session, for the live status on each watch card. */
     val sessionState: StateFlow<org.avmedia.gshockGoogleSync.session.SessionState> = sessionManager.sessionState
 
-    /** The watch with "Keep connected in background", or null. */
+    /** The watch with connection enabled, or null. */
     val keepHolder: StateFlow<String?> = KeepConnected.holder
 
-    /** Turns it on for [address] (and off for the watch that had it) or off. */
+    /** Turns connection permission on for [address] (and off for the watch that had it) or off. */
     fun setKeepConnected(address: String, on: Boolean) {
         viewModelScope.launch {
-            val lost = KeepConnected.set(appContext, Utils.sanitizeMacAddress(address), on)
-            if (lost != null) Timber.i("Keep connected moved from $lost to $address")
+            val sanitized = Utils.sanitizeMacAddress(address)
+            val lost = KeepConnected.set(appContext, sanitized, on)
+            if (lost != null) Timber.i("Keep connected moved from $lost to $sanitized")
+            if (on) {
+                companionDeviceCoordinator.connectNow(sanitized)
+            }
             loadPairedDevices()
         }
     }

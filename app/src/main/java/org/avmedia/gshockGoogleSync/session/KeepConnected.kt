@@ -37,43 +37,13 @@ object KeepConnected {
     }
 
     /**
-     * Reads the holder (app start). Before the first choice was stored, the most recently connected always-connected
-     * watch gets it ([migrationChoice]); with no such watch known yet nothing is stored and the next start asks again.
+     * Reads the holder (app start). Defaults to OFF (null) so always-connected watches do not auto-connect
+     * unless explicitly enabled by the user.
      */
     fun load(context: Context) {
         loaded = true
         val stored = LocalDataStorage.get(context, KEY)
-        if (stored != null) {
-            _holder.value = stored.ifBlank { null }
-            return
-        }
-        val last = LocalDataStorage.get(context, KEY_LAST_ADDRESS, "").orEmpty()
-        val registeredIds = runCatching {
-            org.avmedia.gshockGoogleSync.watch.LegacyHaKeys.registeredIds(org.avmedia.gshockGoogleSync.watch.AppStores.LocalKeyValueStore(context.applicationContext)).toSet()
-        }.getOrDefault(emptySet())
-        val registered = { address: String -> org.avmedia.gshockGoogleSync.watch.WatchKeys.of(address) in registeredIds }
-        val choice = migrationChoice(last, LocalDataStorage.getDeviceAddresses(context), registered) { address ->
-            LocalDataStorage.getDeviceName(context, address)?.takeIf { it.isNotBlank() }
-                ?: if (address.equals(last, ignoreCase = true)) LocalDataStorage.get(context, KEY_LAST_NAME, "").orEmpty() else ""
-        } ?: return
-        _holder.value = choice.uppercase()
-        LocalDataStorage.put(context, KEY, choice.uppercase())
-    }
-
-    /**
-     * First start: among the always-connected watches (never an OCW) the one with a Home Assistant registration, the
-     * most recently connected first; else the most recently connected one. The others get off.
-     */
-    fun migrationChoice(
-        lastAddress: String,
-        known: List<String>,
-        registered: (String) -> Boolean = { false },
-        nameOf: (String) -> String,
-    ): String? {
-        val candidates = known.filter { WatchModelOverride.isAlwaysConnected(nameOf(it)) }
-        val inHa = candidates.filter(registered)
-        val last = { list: List<String> -> list.firstOrNull { it.equals(lastAddress, ignoreCase = true) } }
-        return last(inHa) ?: inHa.lastOrNull() ?: last(candidates) ?: candidates.firstOrNull()
+        _holder.value = stored?.ifBlank { null }
     }
 
     /** On for [address] (off for the watch that had it) or off. Returns the other watch that lost it, if any. */
@@ -89,15 +59,24 @@ object KeepConnected {
         return previous?.takeIf { on && !OpenOnConnect.sameAddress(it, address) }
     }
 
+    /** Resets the connection switch to OFF when a watch disconnects or is forgotten. */
+    fun turnOff(context: Context, address: String? = null) {
+        val current = _holder.value
+        if (address == null || OpenOnConnect.sameAddress(current, address)) {
+            _holder.value = null
+            LocalDataStorage.put(context, KEY, "")
+        }
+    }
+
     /** The watch is forgotten: it no longer has it. */
     suspend fun forget(context: Context, address: String) {
         if (holds(address)) set(context, address, false)
     }
 
     /**
-     * Whether a watch that appeared may connect. Watches that connect on their button press always may (upstream);
-     * an always-connected watch only with Keep connected, in a background window, or while the person waits for it
-     * after tapping its card.
+     * Whether a watch that appeared may connect. Watches that connect on their button press always may;
+     * an always-connected watch only when its connection switch is ON, in a background window, or while
+     * the user waits for it after tapping its card.
      */
     fun admits(name: String, address: String, background: Boolean, waitingFor: String?): Boolean {
         if (OpenOnConnect.sameAddress(waitingFor, address)) return true

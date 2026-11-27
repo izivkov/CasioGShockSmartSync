@@ -126,13 +126,6 @@ fun HealthScreen() {
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
-                state.backgroundLine?.let {
-                    Text(
-                        text = "Last background read: $it",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
             }
         }
     }
