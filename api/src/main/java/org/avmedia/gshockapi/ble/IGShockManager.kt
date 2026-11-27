@@ -156,6 +156,8 @@ private class GShockManagerImpl(
                         org.avmedia.gshockapi.casio.NotificationSubscriptions.logNotification(char.uuid, hexData)
                         org.avmedia.gshockapi.casio.WatchLink.onNotification(char.uuid, hexData)
                         org.avmedia.gshockapi.casio.WatchLink.withSource(char.uuid) { dataReceivedCallback?.dataReceived(hexData) }
+
+                        // dataReceivedCallback?.dataReceived(hexData)
                     }
                     enableNotifications(char)
                         .fail { _, status ->

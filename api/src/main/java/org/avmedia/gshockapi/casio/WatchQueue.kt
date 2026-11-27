@@ -1,5 +1,6 @@
 package org.avmedia.gshockapi.casio
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -139,6 +140,7 @@ class WatchQueue(
             val ok = transport.write(channel, verdict.frame)
             return if (ok) Outcome(true) else Outcome.failed("The write to the watch failed.")
         }
+
         val w = Waiting(verdict.frame)
         synchronized(lock) { waiting = w }
         try {
