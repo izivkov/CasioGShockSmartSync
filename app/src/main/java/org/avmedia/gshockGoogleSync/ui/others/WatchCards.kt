@@ -64,13 +64,10 @@ fun watchImageResId(watchName: String): Int = when {
 @Composable
 fun WatchCards(
     devices: List<PreConnectionViewModel.DeviceItem>,
-    session: SessionState,
-    keepHolder: String?,
     waitingAddress: String?,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
     onOptions: (PreConnectionViewModel.DeviceItem) -> Unit,
     onCancelWaiting: () -> Unit,
-    onToggleKeepConnected: ((PreConnectionViewModel.DeviceItem, Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState())) {
@@ -78,12 +75,10 @@ fun WatchCards(
             devices.forEach { device ->
                 WatchCard(
                     device = device,
-                    status = WatchStatus.of(device.address, session, keepHolder),
                     waiting = OpenOnConnect.sameAddress(waitingAddress, device.address),
                     onSelect = { onSelect(device) },
                     onOptions = { onOptions(device) },
                     onCancelWaiting = onCancelWaiting,
-                    onToggleKeepConnected = onToggleKeepConnected?.let { cb -> { on -> cb(device, on) } },
                 )
             }
         }
@@ -93,12 +88,10 @@ fun WatchCards(
 @Composable
 private fun WatchCard(
     device: PreConnectionViewModel.DeviceItem,
-    status: WatchStatus,
     waiting: Boolean,
     onSelect: () -> Unit,
     onOptions: () -> Unit,
     onCancelWaiting: () -> Unit,
-    onToggleKeepConnected: ((Boolean) -> Unit)? = null,
 ) {
     AppCard(modifier = Modifier.fillMaxWidth(), padding = 0.dp) {
         Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onSelect).padding(start = 8.dp)) {
@@ -106,27 +99,17 @@ private fun WatchCard(
                 Image(
                     painter = painterResource(watchImageResId(device.name)),
                     contentDescription = null,
-                    modifier = Modifier.size(36.dp).clip(CircleShape)
-                        .alpha(if (status == WatchStatus.NOT_CONNECTED) 0.6f else 1f),
+                    modifier = Modifier.size(36.dp).clip(CircleShape),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f).padding(vertical = 6.dp)) {
-                    Text(
-                        text = device.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        softWrap = false,
-                    )
-                    WatchStatusLine(status)
-                }
-                if (device.isAlwaysConnected && onToggleKeepConnected != null) {
-                    Switch(
-                        checked = device.keepConnected,
-                        onCheckedChange = onToggleKeepConnected,
-                        modifier = Modifier.padding(end = 4.dp),
-                    )
-                }
+                Text(
+                    text = device.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                    modifier = Modifier.weight(1f).padding(vertical = 12.dp)
+                )
                 IconButton(onClick = onOptions) {
                     Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.watch_options))
                 }
@@ -145,59 +128,24 @@ private fun WatchCard(
     }
 }
 
-/** Status icon and short text: connected (accent), waiting (outline), not connected (dimmed). */
-@Composable
-fun WatchStatusLine(status: WatchStatus) {
-    val (icon: ImageVector, text: Int) = when (status) {
-        WatchStatus.CONNECTED -> Icons.Filled.BluetoothConnected to R.string.watch_status_connected
-        WatchStatus.WAITING -> Icons.Outlined.Bluetooth to R.string.watch_status_waiting
-        WatchStatus.NOT_CONNECTED -> Icons.Filled.BluetoothDisabled to R.string.watch_status_not_connected
-    }
-    val color = when (status) {
-        WatchStatus.CONNECTED -> MaterialTheme.colorScheme.primary
-        WatchStatus.WAITING -> MaterialTheme.colorScheme.onSurface
-        WatchStatus.NOT_CONNECTED -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
-        Text(
-            text = stringResource(text),
-            style = MaterialTheme.typography.labelSmall,
-            color = color,
-            modifier = Modifier.padding(start = 4.dp),
-        )
-    }
-}
-
 /** The ⋮ sheet of one watch. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchOptionsSheet(
     device: PreConnectionViewModel.DeviceItem,
-    keepOn: Boolean,
-    otherHolderName: String?,
-    onKeepConnected: (Boolean) -> Unit,
     onForget: () -> Unit,
     onDismiss: () -> Unit,
     plugins: @Composable () -> Unit = {},
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        WatchOptions(device, keepOn, otherHolderName, onKeepConnected, onForget, plugins)
+        WatchOptions(device, onForget, plugins)
     }
 }
 
-/**
- * "Keep connected in background" (only for watches that can stay connected; one watch at a time, with a line naming
- * the watch it is turned off for) and Forget.
- */
 @Composable
 fun WatchOptions(
     device: PreConnectionViewModel.DeviceItem,
-    keepOn: Boolean,
-    otherHolderName: String?,
-    onKeepConnected: (Boolean) -> Unit,
     onForget: () -> Unit,
-    /** "Plugins for this watch" (the app's plugins and how far each works with this watch). */
     plugins: @Composable () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 24.dp)) {
@@ -207,30 +155,6 @@ fun WatchOptions(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        if (device.isAlwaysConnected) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.keep_connected_in_background), style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        stringResource(R.string.keep_connected_info),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (!keepOn && otherHolderName != null) {
-                        Text(
-                            stringResource(R.string.keep_connected_turns_off, otherHolderName),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 4.dp),
-                        )
-                    }
-                }
-                Switch(checked = keepOn, onCheckedChange = onKeepConnected, modifier = Modifier.padding(start = 12.dp))
-            }
-        }
         plugins()
         TextButton(onClick = onForget, modifier = Modifier.padding(top = 16.dp)) {
             Text(stringResource(R.string.forget_watch), color = MaterialTheme.colorScheme.error)

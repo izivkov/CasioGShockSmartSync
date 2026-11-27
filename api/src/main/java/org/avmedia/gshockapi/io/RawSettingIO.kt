@@ -50,7 +50,7 @@ internal object AndroidSettingLink : SettingLink {
  * are the same exchange; [modifySafe] serializes read-modify-write per code, so two quick changes cannot undo each other.
  */
 object RawSettingIO {
-    private const val TRIES = 3
+    private const val TRIES = 1
 
     /** The watch answers a settings read within 10 s. */
     const val READ_TIMEOUT_MS = 10_000L
@@ -58,8 +58,8 @@ object RawSettingIO {
     // Seams for unit tests (a fake watch); production values below.
     @Volatile var link: SettingLink = AndroidSettingLink
     var tryTimeoutMs = 3_000L
-    var retryBaseDelayMs = 400L
-    var settleMs = 1_000L
+    var retryBaseDelayMs = 0L
+    var settleMs = 0L
 
     /** The result of [read]: the [frame] (code first), or the plain-words [failure]. */
     class Reply(val frame: ByteArray?, val failure: String?)

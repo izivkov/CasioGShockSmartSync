@@ -41,7 +41,8 @@ class WatchListTest {
     }
 
     private fun connected(): Pair<SessionManager, Session> {
-        val m = SessionManager(repository)
+        val context = mockk<android.content.Context>(relaxed = true)
+        val m = SessionManager(context, repository)
         val s = m.onConnecting(watch)
         m.onDeviceName("GBX-H5600")
         m.onDeviceAddress("AA:BB:CC:DD:EE:01")

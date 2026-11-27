@@ -19,7 +19,6 @@ import org.avmedia.gshockGoogleSync.session.SessionState
 import org.avmedia.gshockGoogleSync.plugins.PluginScreenState
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.avmedia.gshockGoogleSync.session.KeepConnected
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.session.WatchList
 import javax.inject.Inject
@@ -93,8 +92,6 @@ class AppScreenState @Inject constructor(
     }
 
     init {
-        // The watch with Keep connected may reconnect by itself again once the chosen other watch's session ended and
-        // nobody waits for it. A waited watch that opened its screens by itself (a button connection) is no longer waited for.
         scope.launch {
             combine(sessionManager.sessionState, OpenOnConnect.waiting) { session, waiting -> session to waiting }
                 .collect { (session, waiting) ->
@@ -102,7 +99,6 @@ class AppScreenState @Inject constructor(
                     if (phase is SessionPhase.Ready && phase.entryReason != EntryReason.BACKGROUND &&
                         OpenOnConnect.sameAddress(waiting, session.watch.address)
                     ) OpenOnConnect.consumed(session.watch.address)
-                    KeepConnected.updatePause(session, OpenOnConnect.waiting.value)
                 }
         }
     }

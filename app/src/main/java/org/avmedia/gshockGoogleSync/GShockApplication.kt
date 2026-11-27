@@ -79,8 +79,6 @@ class GShockApplication : Application() {
             { org.avmedia.gshockGoogleSync.history.HistoryStore.record(applicationContext, it) }
         org.avmedia.gshockGoogleSync.ui.health.H5600Session.dayMerger =
             { org.avmedia.gshockGoogleSync.history.HistoryStore.mergeDay(applicationContext, it) }
-        // Before the first connection: which watch keeps connected in background (migrated once from the old behaviour).
-        org.avmedia.gshockGoogleSync.session.KeepConnected.load(applicationContext)
         ActivityProvider.initialize(this)
         // The plugins (Home Assistant, ...) start before the session wiring, so they hear the first connection.
         pluginHub.start()
@@ -96,8 +94,7 @@ class GShockApplication : Application() {
         // The same start with or without a screen (a reboot, a killed app: the companion device service starts us).
         org.avmedia.gshockGoogleSync.log.AppLog.log(
             org.avmedia.gshockGoogleSync.log.LogSource.App,
-            "App start: session events, plugins, background reads and the watch coordinator ready; " +
-                "Keep connected in background: ${org.avmedia.gshockGoogleSync.session.KeepConnected.holder.value ?: "none"}",
+            "App start: session events, plugins, and the watch coordinator ready",
         )
     }
 

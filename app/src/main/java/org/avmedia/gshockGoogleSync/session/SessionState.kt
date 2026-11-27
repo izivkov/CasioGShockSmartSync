@@ -65,8 +65,7 @@ data class SessionState(
     val isAutomaticSync: Boolean get() = button == ConnectionButton.AUTOMATIC_SYNC
     val isFind: Boolean get() = button == ConnectionButton.FIND
     val isAlwaysConnected: Boolean get() = button == ConnectionButton.ALWAYS_CONNECTED
-    /** The watch with "Keep connected in background" ([KeepConnected]): its link stays up across drops and inactivity. */
-    val keepsLink: Boolean get() = KeepConnected.holds(watch.address)
+    val keepsLink: Boolean get() = false
 
     fun isPendingSave(component: ComponentId): Boolean = component in pendingSaves
     fun hasPendingSaves(): Boolean = pendingSaves.isNotEmpty()

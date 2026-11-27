@@ -16,7 +16,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
-import org.avmedia.gshockGoogleSync.session.KeepConnected
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
 import org.avmedia.gshockapi.EventAction
@@ -66,16 +65,13 @@ class CompanionDeviceCoordinator @Inject constructor(
                     } else {
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
-                        // No screen may have run in this process (reboot, killed app): the stored setting decides.
-                        KeepConnected.ensureLoaded(context)
-                        val name = LocalDataStorage.getDeviceName(context, normalizedAddress).orEmpty()
                         val background = BackgroundReadPermission.consume(normalizedAddress)
                         if (!org.avmedia.gshockGoogleSync.session.WatchList.admits(normalizedAddress)) {
                             // The watch list is open for a pairing or another watch: this one waits.
                             Timber.i("Watch list open: $normalizedAddress does not connect now")
-                        } else if (!KeepConnected.admits(name, normalizedAddress, background, OpenOnConnect.waiting.value)) {
-                            // Without Keep connected (as upstream), or while another watch is chosen: a tap on its card first.
-                            Timber.i("Ignoring DeviceAppeared for $normalizedAddress ($name): Keep connected is off or another watch is chosen; a tap on its card connects it")
+                        } else if (!OpenOnConnect.sameAddress(OpenOnConnect.waiting.value, normalizedAddress) && !background) {
+                            // A tap on its card connects it
+                            Timber.i("Ignoring DeviceAppeared for $normalizedAddress: a tap on its card connects it")
                         } else {
                             coordinatorScope.launch { connectWithRetries(normalizedAddress, background) }
                         }
@@ -155,8 +151,6 @@ class CompanionDeviceCoordinator @Inject constructor(
     suspend fun init() {
         cleanupLocalStorage()
         syncAssociations()
-        // The names are known now: a first start that found no always-connected watch before tries again.
-        KeepConnected.load(context)
     }
 
     private suspend fun cleanupLocalStorage() {

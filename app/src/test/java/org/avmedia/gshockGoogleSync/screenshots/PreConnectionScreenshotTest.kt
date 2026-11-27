@@ -32,7 +32,7 @@ class PreConnectionScreenshotTest : ScreenshotTest() {
     @Composable
     private fun Cards(session: SessionState, holder: String?, waiting: String? = null) =
         WatchCards(listOf(h5600, dw, gw), session, holder, waiting, onSelect = {}, onOptions = {}, onCancelWaiting = {},
-            modifier = Modifier.width(206.dp).padding(4.dp))
+            onToggleKeepConnected = { _, _ -> }, modifier = Modifier.width(206.dp).padding(4.dp))
 
     @Test fun connectedLight() = snap("watch_list_cards_connected", false) { Cards(connected(h5600.address), h5600.address) }
     @Test fun connectedDark() = snap("watch_list_cards_connected", true) { Cards(connected(h5600.address), h5600.address) }

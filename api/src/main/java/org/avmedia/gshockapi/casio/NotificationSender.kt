@@ -75,10 +75,6 @@ object NotificationSender {
     /** One write on the notification characteristic; true when its write result came. */
     @Volatile var writer: suspend (ByteArray) -> Boolean = { WatchLink.writeChecked(GetSetMode.NOTIFY, it) }
 
-    @Volatile var holdLimitMs = 10 * 60_000L
-
-    @Volatile var holdPollMs = 500L
-
     private val mutex = Mutex()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -88,39 +84,24 @@ object NotificationSender {
     ): List<ByteArray> = if (size <= 0) emptyList() else buffer.toList().chunked(size).map { it.toByteArray() }
 
     /**
-     * Queues [buffer] (already inverted). The result comes when the text is sent, dropped or held back too long; each
-     * outcome is one line in the watch log (a text that never reached the watch was silent before).
+     * Queues [buffer] (already inverted). Writes notification chunks directly.
      */
     fun send(buffer: ByteArray): Deferred<Outcome> =
         scope.async {
             val outcome =
                 mutex.withLock {
-                    if (!awaitAllowed()) Outcome.HELD_TOO_LONG else writePieces(buffer)
+                    if (!NotificationGate.allowed()) Outcome.HELD_TOO_LONG else writePieces(buffer)
                 }
             ConnectionKeepAlive.log(
                 when (outcome) {
                     Outcome.SENT -> "notification text sent (${buffer.size} bytes)"
-                    Outcome.HELD_TOO_LONG -> "notification text dropped: the watch did not allow it for ${holdLimitMs / 1000} s"
+                    Outcome.HELD_TOO_LONG -> "notification text dropped: the watch did not allow it"
                     Outcome.WRITE_FAILED -> "notification text dropped: a chunk write failed"
                     Outcome.EMPTY -> "notification text dropped: empty"
                 },
             )
             outcome
         }
-
-    /** False when the watch did not allow a text within [holdLimitMs]: the text is dropped. */
-    private suspend fun awaitAllowed(): Boolean {
-        var held = 0L
-        while (!NotificationGate.allowed() || busy()) {
-            if (held >= holdLimitMs) {
-                Timber.w("Notification text dropped: the watch did not allow it for ${holdLimitMs / 1000} s")
-                return false
-            }
-            delay(holdPollMs)
-            held += holdPollMs
-        }
-        return true
-    }
 
     /** The text in chunks, [spacingMs] apart; a failed chunk drops the rest. */
     private suspend fun writePieces(buffer: ByteArray): Outcome {

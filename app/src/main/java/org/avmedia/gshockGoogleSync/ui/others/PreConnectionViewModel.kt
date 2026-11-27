@@ -19,15 +19,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.avmedia.gshockGoogleSync.GShockApplication
 import org.avmedia.gshockGoogleSync.R
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import org.avmedia.gshockGoogleSync.pairing.CompanionDeviceCoordinator
-import org.avmedia.gshockGoogleSync.session.KeepConnected
 import org.avmedia.gshockGoogleSync.session.OpenOnConnect
 import org.avmedia.gshockGoogleSync.session.SessionManager
 import org.avmedia.gshockGoogleSync.utils.LocalDataStorage
-import org.avmedia.gshockGoogleSync.utils.Utils
 import org.avmedia.gshockapi.ICDPDelegate
 import timber.log.Timber
 
@@ -58,8 +55,7 @@ constructor(
         val name: String,
         val address: String,
         val isLastUsed: Boolean,
-        val isAlwaysConnected: Boolean = false,
-        val keepConnected: Boolean = false
+        val isAlwaysConnected: Boolean = false
     )
 
     @Inject lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
@@ -75,11 +71,6 @@ constructor(
             val savedName = LocalDataStorage.get(appContext, KEY_LAST_DEVICE_NAME, noWatchString) ?: noWatchString
             _watchName.value = savedName
             loadPairedDevices()
-        }
-        viewModelScope.launch {
-            KeepConnected.holder.collect {
-                loadPairedDevices()
-            }
         }
         observeConnectedWatch()
     }
@@ -122,22 +113,6 @@ constructor(
 
     /** The session, for the live status on each watch card. */
     val sessionState: StateFlow<org.avmedia.gshockGoogleSync.session.SessionState> = sessionManager.sessionState
-
-    /** The watch with connection enabled, or null. */
-    val keepHolder: StateFlow<String?> = KeepConnected.holder
-
-    /** Turns connection permission on for [address] (and off for the watch that had it) or off. */
-    fun setKeepConnected(address: String, on: Boolean) {
-        viewModelScope.launch {
-            val sanitized = Utils.sanitizeMacAddress(address)
-            val lost = KeepConnected.set(appContext, sanitized, on)
-            if (lost != null) Timber.i("Keep connected moved from $lost to $sanitized")
-            if (on) {
-                companionDeviceCoordinator.connectNow(sanitized)
-            }
-            loadPairedDevices()
-        }
-    }
 
 
     /** Tap on a watch card: open its screens now if it is connected, else when it connects within two minutes. */
@@ -213,8 +188,7 @@ constructor(
                 ?: noWatchString
             val isAlwaysConnected = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)
             DeviceItem(
-                name, address, isLastUsed, isAlwaysConnected,
-                isAlwaysConnected && KeepConnected.holds(address)
+                name, address, isLastUsed, isAlwaysConnected
             )
         }
 
@@ -298,8 +272,6 @@ constructor(
                         // Monitor existing ACTION_BOND_STATE_CHANGED receiver for completion
                     }
                 }
-
-                KeepConnected.forget(context, address)
 
                 // 3. Clear last device if matching
                 val lastAddress = LocalDataStorage.get(context, KEY_LAST_DEVICE_ADDRESS, "")

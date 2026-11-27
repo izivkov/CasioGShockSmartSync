@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.stateIn
 import org.avmedia.gshockGoogleSync.data.repository.GShockRepository
 import timber.log.Timber
 import java.util.UUID
-import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,7 +32,6 @@ import javax.inject.Singleton
  */
 @Singleton
 class SessionManager @Inject constructor(
-    @param:ApplicationContext private val context: Context,
     private val repository: GShockRepository
 ) {
     private val lock = Any()
@@ -177,16 +175,7 @@ class SessionManager @Inject constructor(
                 Timber.w("Ignoring '$reason' for ${device?.address}: current session is for ${current.device?.address}")
                 return
             }
-            if (!isError && keepsAcrossDrops(current)) {
-                // An always-connected watch drops by design: stay on the screen, keep the data, wait for it.
-                if (current.state.value.link == LinkState.UP) {
-                    Timber.i("Link dropped ('$reason'): session ${current.id} waits for the watch")
-                    current.onLinkDropped()
-                }
-                return
-            }
             current.close(reason, device, isError)
-            KeepConnected.turnOff(context, current.device?.address ?: device?.address)
         }
     }
 
@@ -212,9 +201,7 @@ class SessionManager @Inject constructor(
     /** The person chose another watch: the connected one is let go once, its session ends (no reconnect wait). */
     fun letGo(reason: String = "Another watch chosen") {
         Timber.i("Letting the connected watch go: $reason")
-        val addr = activeSession?.device?.address
         activeSession?.close(reason)
-        KeepConnected.turnOff(context, addr)
         runCatching { repository.disconnect() }.onFailure { Timber.e(it, "Disconnect failed") }
     }
 
@@ -238,18 +225,8 @@ class SessionManager @Inject constructor(
     private fun ensureActiveSession(device: BluetoothDevice?): Session =
         activeSession ?: createSession(device)
 
-    /** Ready session of the watch with "Keep connected in background" (by its reported or its link's address). */
-    private fun keepsAcrossDrops(session: Session): Boolean {
-        val state = session.state.value
-        if (state.phase !is SessionPhase.Ready) return false
-        return keepsLink(session)
-    }
-
-    /** Whether the active session's watch keeps its link (inactivity, drops), by its reported or its link's address. */
-    fun keepsLinkNow(): Boolean = activeSession?.let(::keepsLink) ?: false
-
-    private fun keepsLink(session: Session): Boolean =
-        session.state.value.keepsLink || KeepConnected.holds(session.device?.address)
+    /** Whether the active session's watch keeps its link (inactivity, drops). */
+    fun keepsLinkNow(): Boolean = false
 
     private fun isForDifferentDevice(session: Session, device: BluetoothDevice?): Boolean {
         val sessionDevice = session.device ?: return false

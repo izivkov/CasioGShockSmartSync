@@ -106,8 +106,6 @@ fun PreConnectionScreen(
     val pairedDevices by ptrConnectionViewModel.pairedDevices.collectAsState()
     val showPreparing by ptrConnectionViewModel.showPreparing.collectAsState()
     val waitingAddress by ptrConnectionViewModel.waitingAddress.collectAsState()
-    val sessionState by ptrConnectionViewModel.sessionState.collectAsState()
-    val keepHolder by ptrConnectionViewModel.keepHolder.collectAsState()
     var optionsFor by remember { mutableStateOf<PreConnectionViewModel.DeviceItem?>(null) }
     val pluginsVm: org.avmedia.gshockGoogleSync.plugins.PluginsViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
 
@@ -222,11 +220,6 @@ fun PreConnectionScreen(
     optionsFor?.let { device ->
         WatchOptionsSheet(
             device = device,
-            keepOn = OpenOnConnect.sameAddress(keepHolder, device.address),
-            otherHolderName = pairedDevices.firstOrNull {
-                OpenOnConnect.sameAddress(keepHolder, it.address) && !OpenOnConnect.sameAddress(it.address, device.address)
-            }?.name,
-            onKeepConnected = { on -> ptrConnectionViewModel.setKeepConnected(device.address, on) },
             plugins = { org.avmedia.gshockGoogleSync.plugins.PluginsForWatch(device.address) },
             onForget = {
                 optionsFor = null
@@ -284,8 +277,6 @@ fun PreConnectionScreen(
                         ) {
                             WatchCards(
                                 devices = pairedDevices,
-                                session = sessionState,
-                                keepHolder = keepHolder,
                                 waitingAddress = waitingAddress,
                                 onSelect = { device ->
                                     ptrConnectionViewModel.setDevice(
@@ -303,7 +294,6 @@ fun PreConnectionScreen(
                                 },
                                 onOptions = { optionsFor = it },
                                 onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
-                                onToggleKeepConnected = { device, on -> ptrConnectionViewModel.setKeepConnected(device.address, on) },
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .fillMaxWidth()

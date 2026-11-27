@@ -56,7 +56,6 @@ class WatchSwitch(
 ) {
     fun choose(address: String) {
         WatchList.choose(address)
-        KeepConnected.chosen(address)
         val current = connectedAddress()?.takeIf { it.isNotBlank() }
         if (current != null && OpenOnConnect.sameAddress(current, address)) {
             backToConnected()
@@ -71,7 +70,6 @@ class WatchSwitch(
      * instead of connecting it. Another connected watch is let go once.
      */
     fun tap(address: String) {
-        KeepConnected.chosen(address)
         val current = connectedAddress()?.takeIf { it.isNotBlank() }
         if (current != null && !OpenOnConnect.sameAddress(current, address)) disconnectCurrent()
     }
