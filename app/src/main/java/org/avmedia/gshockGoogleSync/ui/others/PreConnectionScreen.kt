@@ -325,9 +325,11 @@ fun PreConnectionScreen(
                             InfoButton(
                                 infoText =
                                     stringResource(R.string.connection_screen_info) +
-                                            " v" +
+                                            "<p>" + org.avmedia.gshockapi.io.TideStations.ATTRIBUTION + "</p>" +
+                                            "<p>" + "v" +
                                             BuildConfig.VERSION_NAME +
-                                            "\n\n" + org.avmedia.gshockapi.io.TideStations.ATTRIBUTION
+                                            "</p>"
+
                             )
                         }
 

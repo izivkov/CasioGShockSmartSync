@@ -14,6 +14,29 @@ It offers a faster, privacy-focused, and more powerful alternative to the offici
 
 ---
 
+## What's New
+
+### DW-H5600 (G-SQUAD): full support and a complete health picture
+
+- **Health screen** with today's steps, energy, activity time, heart rate, blood oxygen, cardio load and breathing exercises.
+- **History on your phone**: week and month charts of steps, heart rate and sleep, a detail view for each day, and CSV or JSON export.
+- **Sleep** for each night: sleep score, Nightly Recharge status, time asleep, deep, light, REM and awake time.
+- **Workouts** with laps and samples (heart rate, altitude, cadence, and GPS when the watch recorded it), also exportable.
+- **Background health read** on a schedule you choose (5, 15, 30 or 60 minutes, or off) while the watch stays connected.
+- **Watch settings** for the DW-H5600 family: watch face, health settings (units, heart rate measurement, bedtime, night window, step goal), activity list, notification sounds and tide data.
+
+Details: [DW-H5600 Health Data](#dw-h5600-health-data).
+
+### Plugins: connect the watch to your phone and your home
+
+- **Home Assistant**, **Health Connect** and **TRMNL** ship with the app. Every plugin stays **off until you turn it on**.
+- Each plugin states what it reads, what it may control and where it sends data. You see that before you turn it on, and the app keeps the plugin to it.
+- The plugin interface is open, with more plugins (such as Tasker) in the plugin repository.
+
+Details: [Plugins](#plugins) and [How plugins work](docs/plugin-architecture.md).
+
+---
+
 ## Key Features
 
 - **No Account Required**: Skip the Casio ID login entirely.
@@ -23,7 +46,8 @@ It offers a faster, privacy-focused, and more powerful alternative to the offici
 - **Remote Control**: Use your watch buttons to take photos, control music, or launch voice assistants.
 - **Alarm & Timer Sync**: Configure watch alarms and timers easily from your phone.
 - **Phone Finder**: Trigger a loud alarm on your phone to find it.
-- **Health & LifeLog Integration**: View step counts, energy expenditure, heart rate, and activity metrics for supported models (DW-H5600, GBD, ABL series).
+- **Health & LifeLog Integration**: View step counts, energy expenditure, heart rate, and activity metrics for supported models (DW-H5600, GBD, ABL series). The DW-H5600 adds blood oxygen, sleep, history and workouts: see [DW-H5600 Health Data](#dw-h5600-health-data).
+- **Plugins**: Connect the watch to Home Assistant, Android Health Connect, TRMNL and more. See [Plugins](#plugins).
 
 ---
 
@@ -47,6 +71,93 @@ The app works with many Bluetooth-enabled G-Shock, Edifice, Oceanus, and Pro Tre
 | **MT-G / MR-G** | MTG-B1000/B3000/B3100, MRG-B5000/B2100 | Premium metal and carbon models |
 | **Oceanus** | OCW-S400 | Manta S400 series |
 | **Others** | ABL-100WE, GBD-100/200, GBD-H1000/H2000, GPR-B1000 | Step trackers, GPS, and sensors |
+
+---
+
+## DW-H5600 Health Data
+
+The DW-H5600 (and the GBX-H5600 family) records steps, heart rate, blood oxygen, sleep and workouts on the watch. The app reads that record, the watch's **LifeLog**, over Bluetooth **without a Casio ID**, and keeps it on your phone.
+
+### Today
+
+The Health screen shows, from the latest read:
+
+| Data | What you see |
+|:---|:---|
+| Steps and activity | Steps and the step goal, energy (an estimate) and the time walking, cycling and active |
+| Heart rate | The day's highest and lowest, the resting rate, the most recent reading and the heart rate through the day |
+| Blood oxygen | The latest reading and when it was taken |
+| Cardio load | The load ratio and status, strain and tolerance |
+| Breathing exercises | When the latest one was done and how many came with this read |
+| Watch status | When the data was last read, and whether new data is waiting on the watch |
+
+### History
+
+Every read is stored in a database **on your phone**, so the history grows with each read.
+
+- **Week and Month charts** for steps, heart rate (resting and highest) and sleep.
+- **Tap a day** for its detail: steps per hour, distance, energy, active minutes, time walking, running and still, resting, lowest and highest heart rate, blood oxygen, and floors climbed and descended.
+- **Sleep** for each night: sleep score, Nightly Recharge status, when you fell asleep and woke up, total, deep, light, REM and awake time, heart rate and breathing rate.
+- **Export** the whole history as CSV or JSON from the share sheet. A gap in the data is an empty cell (CSV) or `null` (JSON), never a 0.
+
+### Workouts
+
+Workouts are read from the watch and stored with their laps and samples: heart rate, altitude, cadence and, when the watch recorded a route, GPS position. They can be exported as CSV or JSON.
+
+Some workout values (distance, pace, speed and cadence) are not fully decoded yet. They are marked **unconfirmed** in the app and in the export, and should not be trusted as exact.
+
+### Reading the data
+
+- **From the Health screen**, when you open it.
+- **In the background**, at the interval set in Settings under **Background health read**: 5, 15, 30 or 60 minutes, or **Off**. It only runs while the watch stays connected. The default is 15 minutes.
+- **Through plugins** such as Home Assistant and Health Connect, which receive each read (see [Plugins](#plugins)).
+
+### Watch settings for the DW-H5600 family
+
+At the top of Settings:
+
+- **Watch face**, and what the top-right place shows on the custom face.
+- **Watch health settings**: length unit, heart rate measurement, bedtime and wake-up time, night window, step reminder and step goal.
+- **Activity settings**: which activities the watch shows and in what order, and the settings of each.
+- **Notifications**: sound and vibration mode, per-event switches, the sound pattern, language, and off at night.
+- **Tide**: what the watch shows, three points of your own, and a port from open data.
+
+### Privacy
+
+Health data stays on your phone. It leaves only when you export it, or when you turn on a plugin that sends it, and the plugin tells you where. The technical background of the LifeLog frames is in [docs/sleep-research.md](docs/sleep-research.md).
+
+---
+
+## Plugins
+
+Plugins connect Smart Sync to other apps and services, so the watch's data and controls can be used outside the app. The plugin system is built to keep your data under your control:
+
+- **Off until you turn them on.** Plugins ship with the app but do nothing until you switch one on in **Settings > Plugins**.
+- **They say what they do.** Before you turn a plugin on you see what it reads (steps, heart rate, sleep, ...), what it may control on the watch, and where it sends data.
+- **The app keeps them to it.** What a plugin did not declare, it does not get.
+- **Your phone, your choice.** You can turn a plugin off at any time and delete the data it stored.
+
+### Plugins in this version
+
+The plugins are developed in [**smartsync-plugins**](https://github.com/ExcuseMi/smartsync-plugins), a separate project that also holds the plugin interface.
+
+| Plugin | What it does |
+|:---|:---|
+| [**Home Assistant**](https://github.com/ExcuseMi/smartsync-plugins/tree/main/plugins/homeassistant) | The watch in Home Assistant through MQTT: battery, steps, heart rate, sleep and workouts as sensors; the watch face, auto light, heart rate mode, alarms and bedtime as controls; notifications to the watch; the watch button as a trigger; and history in Home Assistant's long-term statistics. The same MQTT topics work with openHAB, Node-RED and ioBroker. |
+| [**Health Connect**](https://github.com/ExcuseMi/smartsync-plugins/tree/main/plugins/healthconnect) | Writes steps, heart rate, resting heart rate, oxygen saturation, sleep sessions and exercise sessions to Android Health Connect, so apps such as Google Fit can show them. It only writes and never reads Health Connect. |
+| [**TRMNL**](https://github.com/ExcuseMi/smartsync-plugins/tree/main/plugins/trmnl) | Sends the watch's values to a TRMNL e-ink display through a private plugin webhook, within TRMNL's rate limits. |
+| [**Tasker**](https://github.com/ExcuseMi/smartsync-plugins/tree/main/plugins/tasker) | Watch events and states for Tasker, MacroDroid and Automate profiles, and watch actions for their tasks. In the plugin repository; not part of this build. |
+
+### Using a plugin
+
+1. Open **Settings > Plugins**.
+2. Tap a plugin to read what it does, what it needs and what it reads, controls and sends.
+3. Switch it on. The app asks for any Android permission it needs, and the plugin may open its own settings screen.
+4. The plugin's card shows its status. Switch it off, or delete its data, from the same place.
+
+### Writing your own plugin
+
+A plugin is an Android library that implements one interface. The plugin repository has the interface, the rules and four working examples. How the app loads, limits and serves plugins is described in [**How plugins work**](docs/plugin-architecture.md).
 
 ---
 
@@ -169,6 +280,7 @@ We welcome contributions!
 | Project                                                                              | Description |
 |:-------------------------------------------------------------------------------------|:---|
 | [**GShockAPI**](https://github.com/izivkov/GShockAPI)                                | The core Android library that **this app is built on**. It encapsulates all low-level Bluetooth communication and watch protocol logic into a clean Kotlin API. |
+| [**smartsync-plugins**](https://github.com/ExcuseMi/smartsync-plugins)               | The plugin interface and the plugins for this app: Home Assistant, Health Connect, TRMNL and Tasker. |
 | [**G-Shock Time Server**](https://github.com/izivkov/GShockTimeServer)               | A Python script that acts as a headless time server for Raspberry Pi or other always-on Linux devices. |
 | [**G-Shock API for ESP32**](https://github.com/izivkov/gshock-api-esp32)             | Standalone G-Shock time server for ESP32 microcontrollers — no phone or PC required. |
 | [**G-Shock Smart Sync Webapp**](https://github.com/izivkov/gshock-smart-sync-webapp) | Experimental web-based app for watch synchronization from a browser via Web Bluetooth. |
@@ -226,6 +338,24 @@ Or download the installer from [wireshark.org](https://www.wireshark.org/downloa
 | ATT notifications | `btatt.opcode == 0x1b` |
 
 4. Right-click a packet → **Follow → Bluetooth ATT Stream** to trace a full conversation.
+
+---
+
+## Credits
+
+### ExcuseMi
+
+[**ExcuseMi**](https://github.com/ExcuseMi/CasioGShockSmartSync) contributed a large pull request to this project with:
+
+- **full support for the DW-H5600**, including the health data described above,
+- **many improvements to the user interface**, and
+- **the plugin system**, which lets the app load plugins.
+
+ExcuseMi also created the plugins that make use of it, in [**smartsync-plugins**](https://github.com/ExcuseMi/smartsync-plugins): Home Assistant, Health Connect, TRMNL and Tasker. Thank you!
+
+### gatman45
+
+[**gatman45**](https://github.com/gatman45/gshock) wrote a detailed report, with the evidence behind it, on how the DW-H5600 sends its LifeLog over Bluetooth GATT: [rapport_detaille_preuves_lifelog_gatt.md](https://github.com/gatman45/gshock/blob/main/rapport_detaille_preuves_lifelog_gatt.md). Its detailed data helped in understanding and decoding the DW-H5600's health data. Thank you!
 
 ---
 
