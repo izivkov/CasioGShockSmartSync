@@ -27,13 +27,26 @@ It offers a faster, privacy-focused, and more powerful alternative to the offici
 
 Details: [DW-H5600 Health Data](#dw-h5600-health-data).
 
-### Plugins: connect the watch to your phone and your home
+### Plugins: Build & Ship New Features Independently
 
-- **Home Assistant**, **Health Connect** and **TRMNL** ship with the app. Every plugin stays **off until you turn it on**.
-- Each plugin states what it reads, what it may control and where it sends data. You see that before you turn it on, and the app keeps the plugin to it.
-- The plugin interface is open, with more plugins (such as Tasker) in the plugin repository.
+G-Shock Smart Sync now features an open **plugin architecture** that lets developers add new functionality to the app without touching the core codebase.
 
-Details: [Plugins](#plugins) and [How plugins work](docs/plugin-architecture.md).
+#### Why Build a Plugin?
+* **Develop independently:** You do not need to clone, build, or understand the entire G-Shock Smart Sync app to add a feature. Build, test, and maintain your extension as a standalone project on your own schedule.
+* **Plug straight into the app:** Use the open plugin interface to react to watch events, read supported data, or trigger actions—without waiting on core app releases or managing complex pull requests against the main repository.
+* **Explicit permission boundaries:** Each plugin declares exactly what data it reads, what it may control, and where data is sent, making integrations transparent and safe for users to adopt.
+
+#### Existing Plugins
+A growing collection of third-party plugins is already available in **[smartsync-plugins](https://github.com/ExcuseMi/smartsync-plugins)**, including:
+* **Home Assistant**
+* **Health Connect**
+* **TRMNL**
+* **Tasker** (and more)
+
+#### Create Your Own Extension
+Have an idea for an integration, automation, or external display? Build your own plugin using the open plugin interface and connect it directly to the app—no changes to the core codebase required.
+
+* **More details:** [Plugins](#plugins) | [How plugins work](docs/plugin-architecture.md)
 
 ---
 
@@ -132,7 +145,7 @@ Health data stays on your phone. It leaves only when you export it, or when you 
 
 Plugins connect Smart Sync to other apps and services, so the watch's data and controls can be used outside the app. The plugin system is built to keep your data under your control:
 
-- **Off until you turn them on.** Plugins ship with the app but do nothing until you switch one on in **Settings > Plugins**.
+- **Off until you turn them on.** Plugins are enabled through the app's plugin architecture but do nothing until you switch one on in **Settings > Plugins**.
 - **They say what they do.** Before you turn a plugin on you see what it reads (steps, heart rate, sleep, ...), what it may control on the watch, and where it sends data.
 - **The app keeps them to it.** What a plugin did not declare, it does not get.
 - **Your phone, your choice.** You can turn a plugin off at any time and delete the data it stored.
@@ -351,11 +364,11 @@ Or download the installer from [wireshark.org](https://www.wireshark.org/downloa
 - **many improvements to the user interface**, and
 - **the plugin system**, which lets the app load plugins.
 
-ExcuseMi also created the plugins that make use of it, in [**smartsync-plugins**](https://github.com/ExcuseMi/smartsync-plugins): Home Assistant, Health Connect, TRMNL and Tasker. Thank you!
+ExcuseMi also created a collection of plugins that can be used in this app: [**smartsync-plugins**](https://github.com/ExcuseMi/smartsync-plugins): Home Assistant, Health Connect, TRMNL and Tasker. Thank you!
 
 ### gatman45
 
-[**gatman45**](https://github.com/gatman45/gshock) wrote a detailed report, with the evidence behind it, on how the DW-H5600 sends its LifeLog over Bluetooth GATT: [rapport_detaille_preuves_lifelog_gatt.md](https://github.com/gatman45/gshock/blob/main/rapport_detaille_preuves_lifelog_gatt.md). Its detailed data helped in understanding and decoding the DW-H5600's health data. Thank you!
+[**gatman45**](https://github.com/gatman45/gshock) maintains a detailed report consolidates all the evidence collected on the BLE/GATT protocol of the Casio DW-H5600: real GATT, parity with emulator, framing LifeLog, CRC, frame types, semantic decoding, Health Data protocol ([rapport_detaille_preuves_lifelog_gatt.md](https://github.com/gatman45/gshock/blob/main/rapport_detaille_preuves_lifelog_gatt.md)) was very useful for understanding and decoding the DW-H5600 health protocol. Thank you!
 
 ---
 
