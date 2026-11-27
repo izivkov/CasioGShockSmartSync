@@ -37,3 +37,4 @@ if (smartsyncPluginsDir != null) {
 }
 
 
+include ':api'
