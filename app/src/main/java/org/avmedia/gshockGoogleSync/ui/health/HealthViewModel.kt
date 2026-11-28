@@ -265,10 +265,10 @@ class HealthViewModel @Inject constructor(
 
     private suspend fun fetchStepCounter(force: Boolean): StepCounterData {
         if (WatchInfo.hasStepCounterMock) return generateMockStepData()
-        if (!isDwH5600()) return api.getStepCount()
-        // DW-H5600: a result younger than 30 minutes (often from the background read) is shown as is, except on open.
-        if (!force && H5600Session.isFresh()) H5600Session.data?.let { return it }
-        // One transfer at a time, shared with the background read.
+        if (!isDwH5600()) return readSteps(force)
+        // DW-H5600: what this connection has read is shown as it is; only a forced read (the first open) goes to the watch.
+        if (!force) H5600Session.data?.let { return it }
+        // One transfer at a time, shared with the plugins' reads.
         if (!H5600Session.inFlight.compareAndSet(false, true)) {
             return H5600Session.data ?: StepCounterData.unavailable()
         }
@@ -279,11 +279,54 @@ class HealthViewModel @Inject constructor(
         }
     }
 
-    /** The screen opened: one read of the latest data (the LifeLog for the DW-H5600, the steps for the ABL-100). */
+    /**
+     * The ABL-100: the steps of this connection are kept in [StepSession]. Only a forced read (the open, the polling) asks the
+     * watch; a read that comes back empty is logged and the last good steps stay, so a failed read never blanks the screen.
+     */
+    private suspend fun readSteps(force: Boolean): StepCounterData {
+        if (!force) StepSession.data?.let { return it }
+        val read = api.getStepCount()
+        if (hasNoStepData(read)) {
+            Timber.w("Health: the step read returned no data")
+            AppLog.failure(LogSource.Health, "The step read returned no data${if (StepSession.data != null) " (showing the last read)" else ""}")
+            return StepSession.data ?: read
+        }
+        StepSession.store(read)
+        return read
+    }
+
+    /**
+     * The screen opened: the DW-H5600 shows what this connection has read already, with no loading and no watch transfer;
+     * the first open of a connection, and the other watches, read the latest data (the LifeLog, the steps of the ABL-100).
+     */
     private fun onOpened() {
         val supported = WatchInfo.hasStepCounter && watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)
         if (!supported) return
+        if (isDwH5600()) {
+            H5600Session.data?.let {
+                showSessionData(it)
+                return
+            }
+        } else {
+            // The steps of this connection are shown at once; the read below (not within a minute of the last) refreshes them.
+            StepSession.data?.let { cached ->
+                _state.update { current -> current.copy(stepCounterData = cached).withStepMetrics(cached).withWatchGoal(cached) }
+            }
+        }
         if (HealthOpenRead.shared.tryStart()) requestStepRefresh(force = true) else refreshState()
+    }
+
+    /** Shows data that is in hand. The DW-H5600 has a fixed exercise profile, so nothing here waits for the watch. */
+    private fun showSessionData(stepData: StepCounterData) {
+        Timber.i("Health: showing the data of this connection (steps=${stepData.currentDaySteps})")
+        _state.update { current ->
+            current.copy(stepCounterData = stepData, lifeLogLoading = false).withStepMetrics(stepData).withWatchGoal(stepData)
+        }
+        viewModelScope.launch {
+            readExerciseProfile()?.let { profile ->
+                _state.update { current -> applyExerciseProfileState(current, profile, stepData = stepData).withWatchGoal(stepData) }
+            }
+        }
     }
 
     private fun requestStepRefresh(force: Boolean = false) {
@@ -343,7 +386,7 @@ class HealthViewModel @Inject constructor(
             while (isActive) {
                 delay(if (isDwH5600()) LIFELOG_POLL_INTERVAL else STEP_POLL_INTERVAL)
                 if (watchFeatureManager.isFeatureSupported(FEATURE_STEP_COUNTER)) {
-                    requestStepRefresh()
+                    requestStepRefresh(force = !isDwH5600())
                 }
             }
         }

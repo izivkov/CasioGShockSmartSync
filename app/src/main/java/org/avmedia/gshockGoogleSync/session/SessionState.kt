@@ -13,8 +13,7 @@ enum class EntryReason {
          * for connections started to run actions, and the content selector for the rest.
          */
         fun forButton(button: ConnectionButton): EntryReason = when (button) {
-            ConnectionButton.NORMAL -> NORMAL
-            ConnectionButton.ALWAYS_CONNECTED -> BACKGROUND
+            ConnectionButton.NORMAL, ConnectionButton.ALWAYS_CONNECTED -> NORMAL
             ConnectionButton.FROM_ACTION, ConnectionButton.AUTOMATIC_SYNC -> RUN_ACTIONS
             ConnectionButton.FIND -> CONTENT_SELECTOR
         }

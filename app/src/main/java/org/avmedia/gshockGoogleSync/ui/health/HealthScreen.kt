@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,12 @@ fun HealthScreen() {
     // Every open shows the stored day at once and starts one read by itself (none within a minute of the last).
     LaunchedEffect(Unit) {
         healthViewModel.onAction(HealthAction.ScreenOpened)
+    }
+
+    // The screen polls while it is on screen (the ABL-100's steps change all day) and stops when it is left.
+    DisposableEffect(Unit) {
+        healthViewModel.onScreenShown()
+        onDispose { healthViewModel.onScreenHidden() }
     }
 
     GShockSmartSyncTheme {

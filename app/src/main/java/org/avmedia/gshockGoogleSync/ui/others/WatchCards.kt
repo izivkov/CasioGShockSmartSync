@@ -66,8 +66,8 @@ fun WatchCards(
     devices: List<PreConnectionViewModel.DeviceItem>,
     waitingAddress: String?,
     onSelect: (PreConnectionViewModel.DeviceItem) -> Unit,
-    onOptions: (PreConnectionViewModel.DeviceItem) -> Unit,
     onCancelWaiting: () -> Unit,
+    onToggleAllowConnection: ((PreConnectionViewModel.DeviceItem, Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState())) {
@@ -77,8 +77,8 @@ fun WatchCards(
                     device = device,
                     waiting = OpenOnConnect.sameAddress(waitingAddress, device.address),
                     onSelect = { onSelect(device) },
-                    onOptions = { onOptions(device) },
                     onCancelWaiting = onCancelWaiting,
+                    onToggleAllowConnection = onToggleAllowConnection?.let { cb -> { on -> cb(device, on) } },
                 )
             }
         }
@@ -90,11 +90,11 @@ private fun WatchCard(
     device: PreConnectionViewModel.DeviceItem,
     waiting: Boolean,
     onSelect: () -> Unit,
-    onOptions: () -> Unit,
     onCancelWaiting: () -> Unit,
+    onToggleAllowConnection: ((Boolean) -> Unit)? = null,
 ) {
     AppCard(modifier = Modifier.fillMaxWidth(), padding = 0.dp) {
-        Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onSelect).padding(start = 8.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onSelect).padding(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(watchImageResId(device.name)),
@@ -102,16 +102,31 @@ private fun WatchCard(
                     modifier = Modifier.size(36.dp).clip(CircleShape),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = device.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    softWrap = false,
-                    modifier = Modifier.weight(1f).padding(vertical = 12.dp)
-                )
-                IconButton(onClick = onOptions) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.watch_options))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = device.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false,
+                    )
+                    if (device.isAlwaysConnected && onToggleAllowConnection != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 4.dp),
+                        ) {
+                            Text(
+                                text = if (device.allowConnection) "Allow Connection: ON" else "Allow Connection: OFF",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Switch(
+                                checked = device.allowConnection,
+                                onCheckedChange = onToggleAllowConnection,
+                            )
+                        }
+                    }
                 }
             }
             if (waiting) {
@@ -124,40 +139,6 @@ private fun WatchCard(
                     TextButton(onClick = onCancelWaiting) { Text(stringResource(R.string.cancel)) }
                 }
             }
-        }
-    }
-}
-
-/** The ⋮ sheet of one watch. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun WatchOptionsSheet(
-    device: PreConnectionViewModel.DeviceItem,
-    onForget: () -> Unit,
-    onDismiss: () -> Unit,
-    plugins: @Composable () -> Unit = {},
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        WatchOptions(device, onForget, plugins)
-    }
-}
-
-@Composable
-fun WatchOptions(
-    device: PreConnectionViewModel.DeviceItem,
-    onForget: () -> Unit,
-    plugins: @Composable () -> Unit = {},
-) {
-    Column(modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 24.dp)) {
-        Text(device.name, style = MaterialTheme.typography.titleLarge)
-        Text(
-            stringResource(R.string.watch_options),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        plugins()
-        TextButton(onClick = onForget, modifier = Modifier.padding(top = 16.dp)) {
-            Text(stringResource(R.string.forget_watch), color = MaterialTheme.colorScheme.error)
         }
     }
 }

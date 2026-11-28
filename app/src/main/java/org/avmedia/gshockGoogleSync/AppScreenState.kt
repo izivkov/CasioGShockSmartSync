@@ -124,29 +124,18 @@ class AppScreenState @Inject constructor(
                     when {
                         session.isRunningActions -> AppScreen.RUN_ACTIONS
                         else -> when (phase.entryReason) {
-                            EntryReason.NORMAL -> AppScreen.MAIN_NAVIGATION
+                            EntryReason.NORMAL, EntryReason.BACKGROUND -> AppScreen.MAIN_NAVIGATION
                             EntryReason.CONTENT_SELECTOR -> AppScreen.CONTENT_SELECTOR
                             EntryReason.RUN_ACTIONS -> AppScreen.RUN_ACTIONS
-                            // Stays on the first page; see OpenOnConnect for when it moves on.
-                            EntryReason.BACKGROUND -> AppScreen.INITIAL
                         }
                     }
                 )
 
-                // A connection that ended normally returns to the start screen, which re-checks for
-                // paired watches. A failed attempt or an error stays on the pre-connection screen.
-                is SessionPhase.Closed -> when {
-                    // A background connection never changes the screen, and its refusals are not errors
-                    BackgroundConnection.active -> AppNavigationState(AppScreen.INITIAL)
-                    else -> AppNavigationState(
-                        screen = if (!phase.isError && session.button != null) {
-                            AppScreen.INITIAL
-                        } else {
-                            AppScreen.PRE_CONNECTION
-                        },
-                        errorMessage = phase.reason.takeIf { phase.isError && it.isNotBlank() }
-                    )
-                }
+                // A connection that ended returns to the pre-connection screen.
+                is SessionPhase.Closed -> AppNavigationState(
+                    screen = AppScreen.PRE_CONNECTION,
+                    errorMessage = phase.reason.takeIf { phase.isError && it.isNotBlank() }
+                )
             }
     }
 }

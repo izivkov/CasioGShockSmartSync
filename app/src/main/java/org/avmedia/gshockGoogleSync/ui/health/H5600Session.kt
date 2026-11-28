@@ -1,25 +1,20 @@
 package org.avmedia.gshockGoogleSync.ui.health
 
+import CachedIO
 import org.avmedia.gshockapi.model.StepCounterData
 
 /**
- * The DW-H5600 LifeLog result, kept for the life of the app session so that opening the Health
- * screen does not start a new watch transfer. Kept for the watch it came from: another watch never sees it.
- * Cleared only by [clear].
+ * The DW-H5600 LifeLog of the current connection. It is kept in [CachedIO] like every other value the library reads from
+ * the watch, so it lives exactly as long as the connection: the library clears the cache when a connection is set up
+ * ([org.avmedia.gshockapi.ble.IGShockManager]), and the first open of the Health screen in the next connection reads the
+ * watch once. This object keeps no cache of its own; it is the one place that stores a transfer and says what happens
+ * with it (the day merge, the history, the plugins).
  */
 internal object H5600Session {
-    /** One LifeLog transfer at a time, shared by the background read and the Update button. */
+    private const val KEY = "H5600_LIFELOG"
+
+    /** One LifeLog transfer at a time, shared by the Health screen and the plugins' reads. */
     val inFlight = java.util.concurrent.atomic.AtomicBoolean(false)
-
-    /** When [data] was stored (ms), 0 when empty. */
-    @Volatile
-    var storedAtMs: Long = 0L
-
-    /** Opening the Health screen reads again only after this (the background read keeps it newer). */
-    private const val FRESH_MS = 2 * 60 * 60_000L
-
-    fun isFresh(now: Long = System.currentTimeMillis()): Boolean =
-        data != null && now - storedAtMs < FRESH_MS
 
     /** Called when a LifeLog read has just been stored (starts the Home Assistant push). */
     @Volatile
@@ -29,26 +24,6 @@ internal object H5600Session {
     @Volatile
     var onStored: ((StepCounterData) -> Unit)? = null
 
-    /** The connected watch's key (a test seam): a transfer is kept for the watch it came from. */
-    @Volatile
-    var watch: () -> String = { org.avmedia.gshockGoogleSync.watch.CurrentWatch.key() }
-
-    @Volatile
-    private var stored: org.avmedia.gshockGoogleSync.watch.StoredValue<StepCounterData>? = null
-
-    /** The last transfer of the connected watch; null for none or when another watch is connected now. */
-    var data: StepCounterData?
-        get() = org.avmedia.gshockGoogleSync.watch.StoredValue.valueFor(stored, watch())
-        set(value) {
-            val now = System.currentTimeMillis()
-            stored = value?.let { org.avmedia.gshockGoogleSync.watch.StoredValue(it, watch(), now, confirmed = true) }
-            storedAtMs = if (value != null) now else 0L
-            if (value != null) {
-                onStored?.invoke(value)
-                onDownloaded?.invoke()
-            }
-        }
-
     /**
      * Lays a new transfer over the stored day (set by the app: [org.avmedia.gshockGoogleSync.history.TodayHours] with the
      * stored hours). Runs off the main thread in [store]; a failure keeps the transfer as it came.
@@ -56,16 +31,22 @@ internal object H5600Session {
     @Volatile
     var dayMerger: (StepCounterData) -> StepCounterData = { it }
 
+    /** The last transfer of this connection; null when the connection has not read one yet. */
+    val data: StepCounterData?
+        get() = CachedIO.getOrNull(KEY)
+
     /** Stores a new transfer merged with the stored day, so the screen and Home Assistant get one full day. */
     suspend fun store(fresh: StepCounterData): StepCounterData {
         val merged = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             runCatching { dayMerger(fresh) }.getOrDefault(fresh)
         }
-        data = merged
+        CachedIO.put(KEY, merged)
+        onStored?.invoke(merged)
+        onDownloaded?.invoke()
         return merged
     }
 
     fun clear() {
-        data = null
+        CachedIO.remove(KEY)
     }
 }

@@ -37,13 +37,11 @@ object OpenOnConnect {
     }
 
     /**
-     * True when the watch list must give way to the watch screens: a connection on the list ([EntryReason.BACKGROUND])
-     * while the app is in front, caused by the person or of the watch they wait for.
+     * True when a ready connection should move the app from the pre-connection screen to the watch screens.
      */
     fun shouldOpen(session: SessionState, inFront: Boolean, onFirstPage: Boolean, waitingFor: String?): Boolean {
-        val ready = (session.phase as? SessionPhase.Ready)?.entryReason == EntryReason.BACKGROUND
-        if (!inFront || !onFirstPage || !ready) return false
-        return session.cause == ConnectionCause.USER || sameAddress(waitingFor, session.watch.address)
+        val ready = session.phase is SessionPhase.Ready
+        return inFront && onFirstPage && ready
     }
 
     fun sameAddress(a: String?, b: String?): Boolean =

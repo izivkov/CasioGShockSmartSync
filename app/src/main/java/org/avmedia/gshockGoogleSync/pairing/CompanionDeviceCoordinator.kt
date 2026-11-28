@@ -24,9 +24,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val BACKGROUND_INTERVAL_MS = 5 * 60_000L
-private const val BACKGROUND_WINDOW_MS = 60_000L
-
 @Singleton
 class CompanionDeviceCoordinator @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -38,24 +35,7 @@ class CompanionDeviceCoordinator @Inject constructor(
     /** Addresses with an attempt loop running: a second request for the same watch joins the first. */
     private val connecting = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
 
-    /** Every interval, opens a short background window for each always-connected watch. */
-    private fun startBackgroundArming() {
-        coordinatorScope.launch {
-            while (isActive) {
-                delay(BACKGROUND_INTERVAL_MS)
-                activeScanAddresses.orEmpty().forEach { address ->
-                    val name = LocalDataStorage.getDeviceName(context, address)?.takeIf { it.isNotBlank() }
-                        ?: return@forEach
-                    if (org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)) {
-                        BackgroundReadPermission.arm(address, BACKGROUND_WINDOW_MS)
-                    }
-                }
-            }
-        }
-    }
-
     init {
-        startBackgroundArming()
         ProgressEvents.subscribe(
             arrayOf(
                 EventAction("DeviceAppeared") {
@@ -65,15 +45,17 @@ class CompanionDeviceCoordinator @Inject constructor(
                     } else {
                         val normalizedAddress = address.uppercase()
                         Timber.i("Device appeared: $normalizedAddress")
-                        val background = BackgroundReadPermission.consume(normalizedAddress)
+                        val name = LocalDataStorage.getDeviceName(context, normalizedAddress).orEmpty()
+                        val isAlwaysConnected = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)
                         if (!org.avmedia.gshockGoogleSync.session.WatchList.admits(normalizedAddress)) {
                             // The watch list is open for a pairing or another watch: this one waits.
                             Timber.i("Watch list open: $normalizedAddress does not connect now")
-                        } else if (!OpenOnConnect.sameAddress(OpenOnConnect.waiting.value, normalizedAddress) && !background) {
-                            // A tap on its card connects it
-                            Timber.i("Ignoring DeviceAppeared for $normalizedAddress: a tap on its card connects it")
+                        } else if (isAlwaysConnected && !org.avmedia.gshockGoogleSync.session.AlwaysConnectedAllow.isEnabled(normalizedAddress) &&
+                            !OpenOnConnect.sameAddress(OpenOnConnect.waiting.value, normalizedAddress)) {
+                            // Always-connected watch requires switch ON or manual tap
+                            Timber.i("Ignoring DeviceAppeared for always-connected watch $normalizedAddress ($name): connection switch is OFF")
                         } else {
-                            coordinatorScope.launch { connectWithRetries(normalizedAddress, background) }
+                            coordinatorScope.launch { connectWithRetries(normalizedAddress, background = false) }
                         }
                     }
                 },

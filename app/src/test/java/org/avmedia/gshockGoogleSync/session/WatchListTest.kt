@@ -31,18 +31,15 @@ class WatchListTest {
     @Before fun setUp() {
         Dispatchers.setMain(dispatcher)
         WatchList.hide()
-        KeepConnected.resetForTest("AA:BB:CC:DD:EE:01") // the GBX has "Keep connected in background" (migration)
     }
 
     @After fun tearDown() {
         WatchList.hide()
-        KeepConnected.resetForTest()
         Dispatchers.resetMain()
     }
 
     private fun connected(): Pair<SessionManager, Session> {
-        val context = mockk<android.content.Context>(relaxed = true)
-        val m = SessionManager(context, repository)
+        val m = SessionManager(repository)
         val s = m.onConnecting(watch)
         m.onDeviceName("GBX-H5600")
         m.onDeviceAddress("AA:BB:CC:DD:EE:01")
@@ -72,7 +69,6 @@ class WatchListTest {
         val (m, _) = connected()
         WatchList.show()
         m.onDisconnected(watch, "Watch Disconnected") // the drop
-        assertEquals(LinkState.RECONNECTING, m.sessionState.value.link)
         assertEquals(AppScreen.WATCH_LIST, screen(m))
         m.onConnecting(watch) // kind 14: the watch connects itself again
         assertEquals(AppScreen.WATCH_LIST, screen(m))

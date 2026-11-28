@@ -28,28 +28,16 @@ class OpenOnConnectTest {
     @After fun reset() = OpenOnConnect.cancelWaiting()
 
     @Test
-    fun aConnectionThePersonCausedOpensTheScreens() {
+    fun aConnectionWhenInFrontAndOnFirstPageOpensTheScreens() {
         assertTrue(OpenOnConnect.shouldOpen(connected(a, ConnectionCause.USER), inFront = true, onFirstPage = true, waitingFor = null))
+        assertTrue(OpenOnConnect.shouldOpen(connected(a, ConnectionCause.WATCH), inFront = true, onFirstPage = true, waitingFor = null))
     }
 
     @Test
-    fun theWatchsOwnReconnectAndABackgroundReadDoNotLeaveTheWatchList() {
-        assertFalse(OpenOnConnect.shouldOpen(connected(a, ConnectionCause.WATCH), inFront = true, onFirstPage = true, waitingFor = null))
-        assertFalse(OpenOnConnect.shouldOpen(connected(a, ConnectionCause.BACKGROUND_READ), true, true, waitingFor = null))
-    }
-
-    @Test
-    fun aTapOnTheCardOpensWhenThatWatchConnectsHoweverItConnects() {
-        assertTrue(OpenOnConnect.shouldOpen(connected(a, ConnectionCause.WATCH), true, true, waitingFor = a.lowercase()))
-        assertFalse(OpenOnConnect.shouldOpen(connected(a, ConnectionCause.WATCH), true, true, waitingFor = b))
-    }
-
-    @Test
-    fun aConnectionNeverMovesAwayFromAnotherScreenOrTheBackground() {
+    fun aConnectionNeverMovesAwayFromAnotherScreenOrWhenNotInFront() {
         val user = connected(a, ConnectionCause.USER)
         assertFalse(OpenOnConnect.shouldOpen(user, true, onFirstPage = false, waitingFor = a))
         assertFalse(OpenOnConnect.shouldOpen(user, inFront = false, onFirstPage = true, waitingFor = a))
-        assertFalse(OpenOnConnect.shouldOpen(connected(a, ConnectionCause.USER, EntryReason.NORMAL), true, true, waitingFor = a))
         assertFalse(OpenOnConnect.shouldOpen(SessionState(), true, true, waitingFor = a))
     }
 

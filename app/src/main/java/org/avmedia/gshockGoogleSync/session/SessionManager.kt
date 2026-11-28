@@ -176,6 +176,7 @@ class SessionManager @Inject constructor(
                 return
             }
             current.close(reason, device, isError)
+            AlwaysConnectedAllow.turnOff(current.device?.address ?: device?.address)
         }
     }
 
@@ -201,7 +202,9 @@ class SessionManager @Inject constructor(
     /** The person chose another watch: the connected one is let go once, its session ends (no reconnect wait). */
     fun letGo(reason: String = "Another watch chosen") {
         Timber.i("Letting the connected watch go: $reason")
+        val addr = activeSession?.device?.address
         activeSession?.close(reason)
+        AlwaysConnectedAllow.turnOff(addr)
         runCatching { repository.disconnect() }.onFailure { Timber.e(it, "Disconnect failed") }
     }
 

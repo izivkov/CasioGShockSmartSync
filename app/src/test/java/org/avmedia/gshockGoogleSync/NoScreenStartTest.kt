@@ -23,7 +23,7 @@ class NoScreenStartTest {
             assertTrue("GShockApplication injects $field", field in app)
         }
         for (step in listOf("MainEventHandler(", "setupEventSubscription()", "actionRunner.setupActionSubscriptions()",
-            "sessionEventBridge.setupEventBridge()", "KeepConnected.load(", "AppLog.log(", "pluginHub.start()")) {
+            "sessionEventBridge.setupEventBridge()", "AppLog.log(", "pluginHub.start()")) {
             assertTrue("onCreate runs $step", step in onCreate)
         }
         val runner = File(main, "ui/actions/ActionRunner.kt").readText()
@@ -34,7 +34,7 @@ class NoScreenStartTest {
     @Test
     fun noneOfItWaitsForTheActivity() {
         val activity = File(main, "MainActivity.kt").readText()
-        for (late in listOf("MainEventHandler(", "setupEventSubscription", "setupActionSubscriptions", "setupEventBridge", "KeepConnected")) {
+        for (late in listOf("MainEventHandler(", "setupEventSubscription", "setupActionSubscriptions", "setupEventBridge")) {
             assertFalse("MainActivity must not be the one to start $late", late in activity)
         }
     }

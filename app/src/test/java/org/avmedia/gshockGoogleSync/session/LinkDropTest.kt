@@ -28,20 +28,16 @@ class LinkDropTest {
     private val watch = mockk<BluetoothDevice> { every { address } returns "AA:BB" }
     private val other = mockk<BluetoothDevice> { every { address } returns "CC:DD" }
 
-    // The watch has "Keep connected in background" on (the migration gives it to an always-connected watch).
     @Before fun setUp() {
         Dispatchers.setMain(dispatcher)
-        KeepConnected.resetForTest("AA:BB")
     }
 
     @After fun tearDown() {
         Dispatchers.resetMain()
-        KeepConnected.resetForTest()
     }
 
     private fun manager(name: String = "GBX-H5600", button: ConnectionButton = ConnectionButton.ALWAYS_CONNECTED): Pair<SessionManager, Session> {
-        val context = mockk<android.content.Context>(relaxed = true)
-        val m = SessionManager(context, mockk<GShockRepository>(relaxed = true))
+        val m = SessionManager(mockk<GShockRepository>(relaxed = true))
         val s = m.onConnecting(watch)
         m.onDeviceName(name)
         s.setReady(button = button)
@@ -60,10 +56,9 @@ class LinkDropTest {
     }
 
     @Test fun aWatchWithButtonConnectStillEndsTheVisit() = runTest(dispatcher) {
-        KeepConnected.resetForTest(null) // a watch without "Keep connected in background"
         val (m, _) = manager(name = "GW-B5600", button = ConnectionButton.NORMAL)
         m.onDisconnected(watch, "Watch Disconnected")
-        assertEquals(AppScreen.INITIAL, screen(m))
+        assertEquals(AppScreen.PRE_CONNECTION, screen(m))
     }
 
     @Test fun anotherWatchComingBackDoesNotResumeTheVisit() = runTest(dispatcher) {

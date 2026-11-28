@@ -55,7 +55,8 @@ constructor(
         val name: String,
         val address: String,
         val isLastUsed: Boolean,
-        val isAlwaysConnected: Boolean = false
+        val isAlwaysConnected: Boolean = false,
+        val allowConnection: Boolean = false,
     )
 
     @Inject lateinit var companionDeviceCoordinator: CompanionDeviceCoordinator
@@ -71,6 +72,11 @@ constructor(
             val savedName = LocalDataStorage.get(appContext, KEY_LAST_DEVICE_NAME, noWatchString) ?: noWatchString
             _watchName.value = savedName
             loadPairedDevices()
+        }
+        viewModelScope.launch {
+            org.avmedia.gshockGoogleSync.session.AlwaysConnectedAllow.enabledAddresses.collect {
+                loadPairedDevices()
+            }
         }
         observeConnectedWatch()
     }
@@ -113,6 +119,17 @@ constructor(
 
     /** The session, for the live status on each watch card. */
     val sessionState: StateFlow<org.avmedia.gshockGoogleSync.session.SessionState> = sessionManager.sessionState
+
+    fun toggleAllowConnection(address: String, enabled: Boolean) {
+        viewModelScope.launch {
+            val sanitized = org.avmedia.gshockGoogleSync.utils.Utils.sanitizeMacAddress(address)
+            org.avmedia.gshockGoogleSync.session.AlwaysConnectedAllow.setEnabled(sanitized, enabled)
+            if (enabled) {
+                companionDeviceCoordinator.connectNow(sanitized)
+            }
+            loadPairedDevices()
+        }
+    }
 
 
     /** Tap on a watch card: open its screens now if it is connected, else when it connects within two minutes. */
@@ -188,7 +205,8 @@ constructor(
                 ?: noWatchString
             val isAlwaysConnected = org.avmedia.gshockGoogleSync.session.WatchModelOverride.isAlwaysConnected(name)
             DeviceItem(
-                name, address, isLastUsed, isAlwaysConnected
+                name, address, isLastUsed, isAlwaysConnected,
+                isAlwaysConnected && org.avmedia.gshockGoogleSync.session.AlwaysConnectedAllow.isEnabled(address)
             )
         }
 

@@ -14,6 +14,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 import org.avmedia.gshockapi.ProgressEvents
+import CachedIO
 import org.avmedia.gshockapi.casio.CasioConstants
 import org.avmedia.gshockapi.casio.CommandTable
 import org.avmedia.gshockapi.casio.WatchChannel
@@ -276,6 +277,9 @@ private class GShockManagerImpl(
             connectionState = ConnectionState.CONNECTED
             ProgressEvents.onNext("DeviceName", name)
             ProgressEvents.onNext("DeviceAddress", device.address)
+            // Everything read from the watch before belongs to the connection before: the cache lives as long as a connection,
+            // and is cleared here, for every connection, before anyone is told it is ready.
+            CachedIO.clearCache()
             ProgressEvents.onNext("ConnectionSetupComplete", device)
 
             Timber.i("onDeviceReady: complete")

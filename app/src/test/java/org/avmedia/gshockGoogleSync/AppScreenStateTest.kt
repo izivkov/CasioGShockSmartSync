@@ -53,12 +53,12 @@ class AppScreenStateTest {
     }
 
     @Test
-    fun connectionEndingNormallyReturnsToInitialScreen() {
+    fun connectionEndingNormallyReturnsToPreConnectionScreen() {
         val state = SessionState(
             phase = SessionPhase.Closed("Watch Disconnected"),
             button = ConnectionButton.NORMAL
         )
-        assertEquals(AppScreen.INITIAL, screenFor(state).screen)
+        assertEquals(AppScreen.PRE_CONNECTION, screenFor(state).screen)
     }
 
     @Test
@@ -91,7 +91,7 @@ class AppScreenStateTest {
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.FROM_ACTION))
         assertEquals(EntryReason.RUN_ACTIONS, EntryReason.forButton(ConnectionButton.AUTOMATIC_SYNC))
         assertEquals(EntryReason.CONTENT_SELECTOR, EntryReason.forButton(ConnectionButton.FIND))
-        assertEquals(EntryReason.BACKGROUND, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
+        assertEquals(EntryReason.NORMAL, EntryReason.forButton(ConnectionButton.ALWAYS_CONNECTED))
     }
 
     @Test
@@ -110,18 +110,8 @@ class AppScreenStateTest {
     }
 
     @Test
-    fun alwaysConnectedConnectionStaysOnTheInitialScreen() {
-        assertEquals(AppScreen.INITIAL, screenFor(ready(EntryReason.BACKGROUND)).screen)
-        assertEquals(
-            AppScreen.INITIAL,
-            AppScreenState.navigationFor(ready(EntryReason.BACKGROUND), appInForeground = false).screen
-        )
-    }
-
-    @Test
-    fun alwaysConnectedConnectionWithTheAppInFrontStaysOnTheFirstPageUntilOpenOnConnectLatches() {
-        val state = ready(EntryReason.BACKGROUND, ConnectionButton.ALWAYS_CONNECTED)
-        assertEquals(AppScreen.INITIAL, AppScreenState.navigationFor(state, appInForeground = true).screen)
+    fun alwaysConnectedConnectionNavigatesToMainNavigation() {
+        assertEquals(AppScreen.MAIN_NAVIGATION, screenFor(ready(EntryReason.NORMAL)).screen)
     }
 
     @Test

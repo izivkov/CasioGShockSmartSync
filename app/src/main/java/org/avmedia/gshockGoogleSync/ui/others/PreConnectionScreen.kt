@@ -217,20 +217,6 @@ fun PreConnectionScreen(
 
     PreparingPairingDialog(visible = showPreparing, ptrConnectionViewModel = ptrConnectionViewModel)
 
-    optionsFor?.let { device ->
-        WatchOptionsSheet(
-            device = device,
-            plugins = { org.avmedia.gshockGoogleSync.plugins.PluginsForWatch(device.address) },
-            onForget = {
-                optionsFor = null
-                pluginsVm.watchRemoved(device.address)
-                ptrConnectionViewModel.disassociate(context, Utils.sanitizeMacAddress(device.address))
-                scope.launch(Dispatchers.IO) { LocalDataStorage.removeDeviceAddress(context, device.address) }
-            },
-            onDismiss = { optionsFor = null },
-        )
-    }
-
     LaunchedEffect(triggerPairing) {
         if (triggerPairing) {
             ptrConnectionViewModel.associate(
@@ -292,8 +278,8 @@ fun PreConnectionScreen(
                                         else -> ptrConnectionViewModel.openWhenConnected(device.address)
                                     }
                                 },
-                                onOptions = { optionsFor = it },
                                 onCancelWaiting = { ptrConnectionViewModel.cancelWaiting() },
+                                onToggleAllowConnection = { device, enabled -> ptrConnectionViewModel.toggleAllowConnection(device.address, enabled) },
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .fillMaxWidth()

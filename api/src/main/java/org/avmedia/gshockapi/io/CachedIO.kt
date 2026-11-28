@@ -37,14 +37,23 @@ object CachedIO {
         val cacheOff: Boolean = false,
     )
 
+    @Volatile
     private var state = State()
 
+    /**
+     * Every change of the cache goes through here: it is written from several coroutines at once (settings reads, a
+     * LifeLog result, a connection that clears it), and a plain read-copy-write of [state] loses entries.
+     */
+    private fun update(transform: (State) -> State) {
+        synchronized(this) { state = transform(state) }
+    }
+
     fun clearCache() {
-        state = state.copy(cache = emptyMap())
+        update { it.copy(cache = emptyMap()) }
     }
 
     fun remove(key: String) {
-        state = state.copy(cache = state.cache - key.uppercase())
+        update { it.copy(cache = it.cache - key.uppercase()) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -54,14 +63,10 @@ object CachedIO {
     ): T =
         when {
             state.cacheOff ->
-                gatedCompute(key, compute).also { value ->
-                    state = state.copy(cache = state.cache + (key.uppercase() to value))
-                }
+                gatedCompute(key, compute).also { value -> put(key, value) }
 
             else ->
-                state.cache[key.uppercase()]?.let { it as T } ?: gatedCompute(key, compute).also { value ->
-                    state = state.copy(cache = state.cache + (key.uppercase() to value))
-                }
+                state.cache[key.uppercase()]?.let { it as T } ?: gatedCompute(key, compute).also { value -> put(key, value) }
         }
 
     /** A read from the watch never goes out while a transfer runs (else `0x11` goes out every 4 to 5 s during a workout read). */
@@ -85,8 +90,12 @@ object CachedIO {
         key: String,
         value: Any,
     ) {
-        state = state.copy(cache = state.cache + (key.uppercase() to value))
+        update { it.copy(cache = it.cache + (key.uppercase() to value)) }
     }
+
+    /** The cached value, or null when there is none (a new connection clears the cache). */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Any> getOrNull(key: String): T? = state.cache[key.uppercase()] as T?
 
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> get(key: String): T =
